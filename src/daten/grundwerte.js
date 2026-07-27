@@ -46,6 +46,35 @@ function rangNameVon(mann){
 function rangName(n){ return rangNameVon({rang:n, zweig:S?S.zweig:null}); }
 function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
 
+/* Rangabzeichen, so wie man es am Ärmel oder auf der Schulter trägt.
+   Der Fusilier trägt nichts — das ist der Witz an ihm. Die Elitekompanien
+   erkennt man an der Epaulette (Grenadier rot, Voltigeur grüngelb), die
+   Unteroffiziere an den Streifen am Unterarm: Caporal zwei aus Wolle,
+   Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse. */
+function rangabzeichen(mann){
+  const r = mann.rang, hoehe = 23;
+  const rahmen = i => `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>${i}</svg>`;
+
+  if(r===2){                                   // Epaulette auf der Schulter
+    const f = mann.zweig==='voltigeur' ? '#9aa85c' : '#c2483a';
+    const fransen = [10,14,18,22,26].map(x=>`<rect x="${x}" y="13" width="2" height="7" rx="1"/>`).join('');
+    return rahmen(`<rect x="7" y="5" width="22" height="7" rx="3.5" fill="${f}"/>
+      <g fill="${f}" opacity=".8">${fransen}</g>`);
+  }
+  if(r>=3){                                    // Streifen am Unterarm
+    const tresse = r>=5;
+    const f = tresse ? '#d0a75e' : '#c98a3a';  // Tresse in Metallfarbe, Wolle in Aurore
+    const streifen = tresse
+      ? `<polygon points="11,19 22,5 29,5 18,19" fill="${f}"/>`
+      : `<polygon points="7,19 16,5 21,5 12,19" fill="${f}"/>
+         <polygon points="16,19 25,5 30,5 21,19" fill="${f}"/>`;
+    const quer = r===4 ? `<rect x="6" y="2.5" width="24" height="2.6" rx="1.3" fill="${f}" opacity=".85"/>` : '';
+    return rahmen(streifen + quer);
+  }
+  return '';                                   // Fusilier: der Ärmel ist leer
+}
+
 const HERKUENFTE = [
   {id:'bauer',name:'Bauernsohn',
    text:'Konstitution +20 · Fouragieren +25 · Bajonett +15 · Bildung −10',

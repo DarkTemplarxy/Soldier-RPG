@@ -109,7 +109,8 @@ function seitenleiste(){
     <div class="ch"><span>${K?'Dein Zustand':'Charakterbogen'}</span></div>
     <div class="cb">
       <p class="who">${esc(S.name)}</p>
-      <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p>
+      <div class="rangzeile">${rangabzeichen(S)}
+        <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p></div>
       <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
         ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
         ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>

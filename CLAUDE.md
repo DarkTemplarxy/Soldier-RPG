@@ -368,6 +368,31 @@ Zwei Dinge werden gespeichert, und sie haben nichts miteinander zu tun:
 
 ---
 
+## Das Sichtfeld im Gefecht (`sichtfeld()` in `src/kampf.js`)
+
+Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die eigene Linie in Blau (zwei Glieder, dicht geschlossen), drüben der Feind in Rot (zwei Glieder, kleiner, weil weiter weg), dazwischen Pulverdampf, der mit jeder Runde dichter wird.
+
+**Du stehst immer dort, wo du hingehörst** — und das ist der Sinn der ganzen Zeichnung:
+
+| Lage | Wo die Messingfigur steht |
+|---|---|
+| Fusilier, Grenadier | im zweiten Glied der Linie |
+| Voltigeur | vor der Linie, zwischen fünf locker verteilten Plänklern |
+| kniend oder liegend (`K.deckung`) | am selben Platz, aber flach |
+| nach gelungenem Bajonettangriff (`K.vorn`) | zehn Schritt vor der Linie |
+
+**Beide Seiten verlieren sichtbar Männer.** Die Zahl der stehenden Figuren folgt `feindMoral` beim Feind und `K.eigen` bei der eigenen Linie; wer fällt, verschwindet nicht, sondern liegt als Strich am Boden. Die Waage unter dem Bild zeigt, wohin es kippt: blau links, rot rechts, ein Strich in der Mitte als Gleichstand.
+
+> **`K.eigen` ist reine Anzeige.** An dieser Zahl hängt keine Probe, keine Gefahr und keine Wertung — sie macht nur sichtbar, was die Texte ohnehin sagen: Drüben wird auch geschossen. Sie sinkt je Runde um 2–5, mal dem verbliebenen Widerstand des Feindes, sodass ein gebrochener Gegner kaum noch Verluste kostet. **Wer daran eine Mechanik hängt, ändert die Balance** und muss neu messen.
+
+**Wenige große Figuren statt vieler kleiner.** Je Glied acht Mann (Feind sieben), mit Tschako und geschultertem Gewehr — ohne das Gewehr sind es Stäbchen. Dahinter liegt je Glied ein schwacher Streifen: Acht gezeichnete Männer sind eine Andeutung, keine Kompanie, und der Streifen macht daraus wieder eine geschlossene Linie, ohne sechzig Figuren zeichnen zu müssen. Die erste Fassung hatte 56 Figuren und sah aus wie eine Punktwolke.
+
+**Nichts in dieser Funktion darf gewürfelt werden.** Das Bild wird bei jedem Zug neu gezeichnet; ein `Math.random()` darin ließe die Aufstellung bei jedem Klick springen. Deshalb liefert `streu(i, a)` einen festen Wert je Platz — dieselbe Aufstellung, solange sich die Zahlen nicht ändern.
+
+**Rangabzeichen** (`rangabzeichen()` in `grundwerte.js`) zeigen den Rang als Bild statt als Wort: Der Fusilier trägt nichts — das ist der Witz an ihm —, die Elitekompanien eine Epaulette (Grenadier rot, Voltigeur grüngelb), die Unteroffiziere Streifen am Unterarm (Caporal zwei aus Wolle in Aurore, Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse in Metallfarbe). Sie stehen in der Seitenleiste und dort, wo man sie bekommt: bei der Elitewahl und bei der Beförderung.
+
+---
+
 ## Lesbarkeit
 
 Die Oberfläche ist dunkelbraun, und genau deshalb sind Beschriftungen die Schwachstelle. Die erste Fassung hatte `--faint: #5c554b` auf `#211e1b` — **2,2 : 1**, also unter jeder brauchbaren Schwelle. Attributnamen, Kartenköpfe, Probenzeilen und Kostenhinweise waren kaum zu sehen.

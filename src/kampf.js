@@ -47,6 +47,7 @@ function starteKampf(n){
   }
   S.anmarschGesehen = null;
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
+              eigen:100, vorn:false,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -96,35 +97,131 @@ function zeigeAnmarsch(n){
   kopfzeile();
 }
 
+/* ── Sichtfeld ──
+   Das Gefecht als Aufstellung, aus deiner Augenhöhe: unten deine Linie in
+   Blau, drüben der Feind in Rot, dazwischen Rauch. Beide Seiten verlieren
+   sichtbar Männer — die Zahl der Figuren folgt `feindMoral` und `eigen`, und
+   die Waage unten sagt, wohin es gerade kippt.
+
+   Zwei Regeln, die den Ton halten: Du stehst immer dort, wo du hingehörst
+   (in der Linie, vor der Linie als Voltigeur, tiefer wenn du kniest oder
+   liegst, vorne wenn du mit dem Bajonett vorgegangen bist), und Gefallene
+   verschwinden nicht, sie liegen da.
+
+   Alles wird bei jedem Zug neu gezeichnet, deshalb darf hier nichts gewürfelt
+   werden: `streu()` ist ein fester Wert je Platz, kein Zufall. */
+
 function sichtfeld(){
+  const n = KAPITEL[LAUF.node], zw = S.zweig;
   const rauch = Math.min(1, K.runde/6);
-  return `<svg viewBox="0 0 640 200" role="img" aria-label="Sichtfeld im Gefecht">
+  const feindTeil = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
+  const eigenTeil = Math.max(0, Math.min(1, (K.eigen==null?100:K.eigen) / 100));
+
+  const streu = (i,a)=>{ const x = Math.sin(i*127.1 + a*311.7)*43758.5453; return x - Math.floor(x); };
+  const gefallene = (anz,steht,a)=> new Set(
+    Array.from({length:anz},(_,i)=>i).sort((p,q)=>streu(p,a)-streu(q,a)).slice(0, anz-steht));
+
+  /* Wenige, dafür große Figuren: Die Linie soll als Linie zu erkennen sein,
+     nicht als Punktwolke. Je Glied acht Mann, das Glied darüber versetzt —
+     so schließt sich die Lücke des Vordermanns, wie es sich gehört. */
+  const FEIND_JE = 7, EIGEN_JE = 8, PLAENKLER = 5;
+  const FEIND = FEIND_JE*2, EIGEN = EIGEN_JE*2;
+  const feindWeg = gefallene(FEIND, Math.round(FEIND*feindTeil), 7);
+  const eigenWeg = gefallene(EIGEN, Math.round(EIGEN*eigenTeil), 13);
+
+  const ROT = '#c2483a', ROT_TOT = '#5e2a24', BLAU = '#7d93ad', BLAU_TOT = '#3a4655';
+
+  /* Ein Mann: Rumpf, Kopf, Tschako, geschultertes Gewehr. Das Gewehr macht aus
+     der Figur einen Soldaten — ohne es sind es Stäbchen. */
+  const mann = (x,y,h,f,o,gewehr)=>{
+    const b = h/22;                               // alles skaliert mit der Höhe
+    return `<g opacity="${o}" fill="${f}">`+
+      (gewehr!==false ? `<rect x="${(x+3*b).toFixed(1)}" y="${(y-11*b).toFixed(1)}" width="${(1.3*b).toFixed(1)}" height="${(h+9*b).toFixed(1)}" rx="${(0.6*b).toFixed(1)}" opacity=".42" transform="rotate(-24 ${(x+3*b).toFixed(1)} ${y.toFixed(1)})"/>` : '')+
+      `<rect x="${(x-3.4*b).toFixed(1)}" y="${y.toFixed(1)}" width="${(6.8*b).toFixed(1)}" height="${h}" rx="${(2.6*b).toFixed(1)}"/>`+
+      `<circle cx="${x.toFixed(1)}" cy="${(y-3.6*b).toFixed(1)}" r="${(3.2*b).toFixed(1)}"/>`+
+      `<rect x="${(x-3.8*b).toFixed(1)}" y="${(y-10.4*b).toFixed(1)}" width="${(7.6*b).toFixed(1)}" height="${(5.6*b).toFixed(1)}" rx="${(1.2*b).toFixed(1)}"/>`+
+      `</g>`;
+  };
+  const toter = (x,y,f)=>`<rect x="${(x-7).toFixed(1)}" y="${y.toFixed(1)}" width="14" height="2.6" rx="1.3" fill="${f}" opacity=".55"/>`;
+
+  /* Hinter jedem Glied ein schwacher Streifen. Acht gezeichnete Männer sind
+     eine Andeutung, keine Kompanie — der Streifen macht daraus wieder eine
+     geschlossene Linie, ohne sechzig Figuren zeichnen zu müssen. */
+  const masse = (y,h,f,o)=>`<rect x="24" y="${(y+h*0.35).toFixed(0)}" width="592" height="${(h*0.65).toFixed(0)}" rx="4" fill="${f}" opacity="${o}"/>`;
+
+  // Feind: zwei Glieder, weiter weg und deshalb kleiner
+  let feind = masse(50, 16, '#c2483a', .07) + masse(59, 16, '#c2483a', .05);
+  for(let g=0;g<2;g++) for(let i=0;i<FEIND_JE;i++){
+    const idx = g*FEIND_JE+i;
+    const x = 52 + i*(536/(FEIND_JE-1)) + g*38, y = 50 + g*9;
+    if(x > 620) continue;
+    feind += feindWeg.has(idx) ? toter(x, y+16, ROT_TOT) : mann(x, y, 16, ROT, g ? 0.55 : 0.92);
+  }
+
+  // Eigene Linie: erstes Glied weiter vorn und deshalb höher, deins darunter
+  const meinX = 320, meinGlied = 1;
+  let eigen = masse(132, 22, '#7d93ad', .06) + masse(148, 26, '#7d93ad', .09);
+  for(let g=0;g<2;g++) for(let i=0;i<EIGEN_JE;i++){
+    const idx = g*EIGEN_JE+i;
+    const x = 42 + i*(556/(EIGEN_JE-1)) + (g?0:36), y = g ? 148 : 132, h = g ? 26 : 22;
+    if(x > 624) continue;
+    if(zw!=='voltigeur' && g===meinGlied && Math.abs(x-meinX)<26) continue;   // dein Platz bleibt frei
+    eigen += eigenWeg.has(idx) ? toter(x, y+h, BLAU_TOT) : mann(x, y, h, BLAU, g ? 1 : 0.62);
+  }
+
+  // Voltigeure schwärmen aus: wenige, weit auseinander, ohne Ordnung
+  let plaenkler = '';
+  if(zw==='voltigeur') for(let i=0;i<PLAENKLER;i++){
+    const x = 90 + i*(460/(PLAENKLER-1)) + (streu(i,5)-0.5)*48;
+    if(Math.abs(x-meinX)<34) continue;
+    plaenkler += mann(x, 96 + streu(i,9)*16, 19, BLAU, 0.85);
+  }
+
+  // Du, dort wo du hingehörst
+  let meinY = zw==='voltigeur' ? 104 : 148, meinH = zw==='voltigeur' ? 19 : 26;
+  if(K.vorn){ meinY = 88; meinH = 18; }             // mit dem Bajonett vorgegangen
+  if(K.deckung){ meinY += meinH-10; meinH = 10; }   // kniend oder liegend
+
+  /* Pulverdampf steht zwischen den Linien und wird mit jeder Runde dichter —
+     feste Plätze, nur die Zahl wächst. */
+  let qualm = '';
+  for(let i=0;i<Math.round(3+9*rauch);i++){
+    const x = 40 + streu(i,17)*560, y = 88 + streu(i,23)*34;
+    const r = 16 + streu(i,29)*28;
+    qualm += `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${r.toFixed(0)}" ry="${(r*0.42).toFixed(0)}"`+
+             ` fill="#3a352e" opacity="${(0.10+0.12*streu(i,31)).toFixed(2)}"/>`;
+  }
+
+  const uebergewicht = eigenTeil + feindTeil > 0 ? eigenTeil/(eigenTeil+feindTeil) : 0.5;
+
+  return `<svg viewBox="0 0 640 200" role="img"
+    aria-label="Aufstellung: ${Math.round(EIGEN*eigenTeil)} eigene Männer gegen ${Math.round(FEIND*feindTeil)} feindliche">
     <defs>
       <linearGradient id="sm" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#2b2723" stop-opacity="${0.6+0.4*rauch}"/>
-        <stop offset="60%" stop-color="#221f1c" stop-opacity="${0.5*rauch}"/>
+        <stop offset="0%" stop-color="#1a1816" stop-opacity="0"/>
+        <stop offset="45%" stop-color="#2b2723" stop-opacity="${(0.35+0.4*rauch).toFixed(2)}"/>
         <stop offset="100%" stop-color="#1a1816" stop-opacity="0"/></linearGradient>
       <radialGradient id="vg" cx="50%" cy="88%" r="62%">
         <stop offset="0%" stop-color="#000" stop-opacity="0"/>
         <stop offset="100%" stop-color="#000" stop-opacity=".7"/></radialGradient>
     </defs>
     <rect width="640" height="200" fill="#191715"/>
-    <rect width="640" height="126" fill="url(#sm)"/>
-    <g opacity="${0.30-0.16*rauch}" fill="#cfc7b8">
-      <rect x="120" y="58" width="9" height="26" rx="3"/><rect x="146" y="55" width="9" height="29" rx="3"/>
-      <rect x="172" y="59" width="9" height="25" rx="3"/><rect x="404" y="56" width="9" height="28" rx="3"/>
-      <rect x="430" y="60" width="9" height="24" rx="3"/><rect x="456" y="57" width="9" height="27" rx="3"/></g>
-    <text x="320" y="34" text-anchor="middle" fill="#5c554b" font-family="Georgia,serif" font-size="12"
-      font-style="italic">${K.deckung?(S.zweig==='voltigeur'?'Du liegst. Über dir geht es hinweg.':'Du kniest. Über dir geht es hinweg.'):'Rauch. Du siehst keine dreißig Schritt weit.'}</text>
-    <g>
-      <rect x="196" y="110" width="20" height="60" rx="6" fill="#3a352e"/><circle cx="206" cy="104" r="9" fill="#3a352e"/>
-      <rect x="252" y="106" width="22" height="64" rx="6" fill="#4a443a"/><circle cx="263" cy="99" r="10" fill="#4a443a"/>
-      <rect x="306" y="${K.deckung?140:100}" width="26" height="${K.deckung?32:72}" rx="6" fill="#7d7264"/>
-      <circle cx="319" cy="${K.deckung?134:92}" r="11.5" fill="#7d7264"/>
-      <rect x="366" y="106" width="22" height="64" rx="6" fill="#4a443a"/><circle cx="377" cy="99" r="10" fill="#4a443a"/>
-    </g>
-    <text x="319" y="192" text-anchor="middle" fill="#b8924f" font-size="10.5"
+    <rect x="0" y="84" width="640" height="1" fill="#2a2621"/>
+    ${feind}
+    <rect x="0" y="66" width="640" height="74" fill="url(#sm)"/>
+    ${qualm}
+    <text x="320" y="26" text-anchor="middle" fill="#8d8371" font-family="Georgia,serif" font-size="11.5"
+      font-style="italic">${K.deckung
+        ? (zw==='voltigeur'?'Du liegst. Über dir geht es hinweg.':'Du kniest. Über dir geht es hinweg.')
+        : (K.vorn?'Du bist zehn Schritt vor der Linie.':'Rauch. Du siehst keine dreißig Schritt weit.')}</text>
+    ${plaenkler}${eigen}
+    ${mann(meinX, meinY, meinH, '#d0a75e', 1, !K.deckung)}
+    <text x="${meinX}" y="${meinY < 130 ? (meinY-13).toFixed(0) : (meinY+meinH+11).toFixed(0)}"
+      text-anchor="middle" fill="#d0a75e" font-size="9.5"
       font-family="ui-monospace,monospace" letter-spacing="1">DU</text>
+    <rect x="0" y="192" width="640" height="4" fill="${ROT_TOT}"/>
+    <rect x="0" y="192" width="${(640*uebergewicht).toFixed(0)}" height="4" fill="#56718f"/>
+    <rect x="319" y="189" width="2" height="10" fill="#948a79"/>
     <rect width="640" height="200" fill="url(#vg)"/></svg>`;
 }
 
@@ -137,7 +234,9 @@ function zeigeKampf(text){
       <div class="cb">${sichtfeld()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
         ${ausserAtem()?`<p class="warnung">Du bekommst keine Luft mehr. ${S.atem<30?'Jeder Handgriff dauert zu lange, und du bist ein leichteres Ziel.':'Noch geht es — aber nicht mehr lange.'} <b>Atem ${S.atem}</b> · ${S.zweig==='voltigeur'?'Flach hinlegen':'Hinknien'} bringt +10.</p>`:''}
-        <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden} · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}</div>
+        <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden}
+          · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
+          · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}</div>
         ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
       </div></div>
@@ -190,6 +289,7 @@ function kampfAktion(id){
   else if(id==='bajonett'){
     const p = probe('bajonett', zw==='grenadier'?30:45);
     K.deckung=false; S.atem=Math.max(0,S.atem-18); gefahrMod = +26;
+    K.vorn = p.erfolg;
     if(p.erfolg){ schaden = 30+Math.random()*14;
       text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'; S.ruf+=2; }
     else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.'; S.belastung+=7; }
@@ -212,9 +312,17 @@ function kampfAktion(id){
     return;
   }
 
+  if(id!=='bajonett') K.vorn = false;
+
   // Die Linie kämpft auch ohne dich
   const linie = 2 + Math.random()*4;
   K.feindMoral -= schaden + linie;
+
+  /* Und sie verliert dabei Männer. Das ist reine Anzeige — an `eigen` hängt
+     keine Probe und keine Gefahr, es macht nur sichtbar, was der Text sagt:
+     Drüben wird auch geschossen. Je mehr Widerstand noch steht, desto teurer. */
+  K.eigen = Math.max(0, K.eigen - (2 + Math.random()*3) * Math.max(0, K.feindMoral/n.feindMoral));
+
   K.protokoll.push(text);
 
   // Feindliche Wirkung
@@ -314,7 +422,8 @@ function waehleZweig(z){
   app.innerHTML = `<div class="stage">${verlauf()}<div>
     <div class="card"><div class="ch"><span>Mailand</span><span>Mai 1796</span></div>
       <div class="cb"><div class="ergebnis ${z?'gut':''}">${text}</div>
-      ${z?`<div class="probe" style="margin-top:10px">NEUER RANG · ${rangName(2).toUpperCase()} · RUF +4</div>`:''}</div></div>
+      ${z?`<div class="rangzeile" style="margin-top:12px">${rangabzeichen(S)}
+        <span class="probe" style="margin:0">NEUER RANG · ${rangName(2).toUpperCase()} · RUF +4</span></div>`:''}</div></div>
     <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
@@ -352,7 +461,8 @@ function zeigeBefoerderung(n){
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
-      <div class="probe" style="margin-top:10px">VAKANZ VORHANDEN · RUF ${ruf}/${CAPORAL_RUF} · FÜRSPRACHE ${gunst}/${CAPORAL_GUNST} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</div>
+      <div class="rangzeile" style="margin-top:12px">${bekommt?rangabzeichen(S):''}
+        <span class="probe" style="margin:0">VAKANZ VORHANDEN · RUF ${ruf}/${CAPORAL_RUF} · FÜRSPRACHE ${gunst}/${CAPORAL_GUNST} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</span></div>
       </div></div>
     <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;

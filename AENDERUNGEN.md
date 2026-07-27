@@ -5,6 +5,21 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-27 — Das Gefecht wird sichtbar, Rangabzeichen
+
+**Sichtfeld neu gezeichnet.** Vorher standen vier namenlose Klötze im Rauch. Jetzt ist es eine Aufstellung aus Augenhöhe: unten die eigene Linie in Blau, zwei Glieder mit Tschako und geschultertem Gewehr, versetzt wie es sich gehört; drüben der Feind in Rot, kleiner, weil weiter weg; dazwischen Pulverdampf, der mit jeder Runde dichter wird.
+
+- **Du stehst dort, wo du hingehörst** — im zweiten Glied als Füsilier oder Grenadier, vor der Linie als Voltigeur, flach am Boden wenn du kniest oder liegst, zehn Schritt vor der Linie nach einem gelungenen Bajonettangriff (`K.vorn`).
+- **Beide Seiten verlieren sichtbar Männer.** Gefallene verschwinden nicht, sie liegen als Strich am Boden. Die Waage unter dem Bild zeigt, wohin es kippt.
+- **Neu: `K.eigen`**, der Zustand der eigenen Linie. **Reine Anzeige** — daran hängt keine Probe, keine Gefahr, keine Wertung. Sie sinkt je Runde um 2–5, mal dem verbliebenen Widerstand des Feindes, sodass ein gebrochener Gegner kaum noch Verluste kostet. Wer daran eine Mechanik hängt, ändert die Balance und muss neu messen.
+- Erste Fassung hatte 56 Figuren und sah aus wie eine Punktwolke; jetzt sind es je Glied acht (Feind sieben) und fünf Plänkler, dafür größer. Ein schwacher Streifen hinter jedem Glied macht aus den acht Andeutungen wieder eine geschlossene Linie.
+
+**Rangabzeichen** (`rangabzeichen()` in `grundwerte.js`) zeigen den Rang als Bild statt als Wort: Der Fusilier trägt nichts — das ist der Witz an ihm —, die Elitekompanien eine Epaulette (Grenadier rot, Voltigeur grüngelb), die Unteroffiziere Streifen am Unterarm (Caporal zwei aus Wolle in Aurore, Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse). Sie stehen in der Seitenleiste und dort, wo man sie bekommt: bei der Elitewahl und bei der Beförderung.
+
+Gemessen über 40 Läufe: überstanden 43 %, Caporal 25 % — im Rahmen der Streuung um die gültigen 44 % / 30 %. Es hat sich auch nichts Mechanisches geändert.
+
+---
+
 ## 2026-07-27 — Der Voltigeur darf sich hinlegen
 
 **Fehlende Handlung ergänzt.** Der Voltigeur hatte „Hinwerfen" nicht — als einziger Zweig. Das ist doppelt falsch: Der Plänkler ist gerade der, der sich hinlegt, weil er in keiner Linie steht, die jemand halten müsste; und die Atem-Warnung im Gefecht verweist ausdrücklich auf „Hinwerfen bringt +10", was für ihn ins Leere lief. Damit war er der einzige Zweig, der im Gefecht nicht verschnaufen konnte.
