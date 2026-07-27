@@ -26,9 +26,15 @@ const ziel = path.resolve(__dirname, '../index.html');
       const ok = await p.evaluate(() => {
         const btn = [...document.querySelectorAll('.ord:not([disabled])')];
         const f = re => btn.find(e => re.test(e.textContent));
+        const txt = document.body.innerText;
         let z = null;
-        if (document.body.innerText.includes('RUNDE '))
+        if (txt.includes('RUNDE '))
           z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinwerfen/);
+        // Im Lager erst Fürsprache besorgen, solange sie zur Beförderung nicht reicht.
+        // Ohne das säße der Bot nie am Feuer und würde nie befördert — gemessen würde
+        // dann nicht die Schwelle, sondern die Blindheit des Bots.
+        if (!z && txt.includes('VERBLEIBENDE ABENDE') && +(txt.match(/Gunst Martel\s+(\d+)/) || [, 0])[1] < 4)
+          z = f(/Am Feuer/);
         if (!z) z = btn.find(e => !/Zurückweichen|Mitmachen/.test(e.textContent)) || btn[0];
         if (z) { z.click(); return true; } return false;
       });

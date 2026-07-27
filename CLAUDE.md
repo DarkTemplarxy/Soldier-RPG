@@ -203,7 +203,13 @@ Abnehmender Ertrag ist Absicht: von 12 auf 40 geht schnell, von 80 auf 90 dauert
 ### Aufstieg (`src/kampf.js`)
 
 - **Elitekompanie (Rang 2):** Grenadier ab Konstitution 55, Voltigeur ab Geschick 55. Keine Beförderung, sondern eine Auswahl — der Voltigeur bekommt ein anderes Kampf-Minispiel (zielen, Deckung wechseln), nicht bessere Werte.
-- **Caporal (Rang 3):** Ruf ≥ 25 **und** Gunst ≥ 3 **und** eine Vakanz. Alle drei, sonst nichts.
+- **Caporal (Rang 3):** Ruf ≥ **30** und Gunst ≥ **4** und eine Vakanz. Alle drei, sonst nichts. Die Schwelle steht als `CAPORAL_RUF` / `CAPORAL_GUNST` in `src/kampf.js` und wird von den Texten mitbenutzt — nur dort ändern.
+
+> **Warum 30 und 4, und warum die Gunst-Quellen kleiner wurden.** Gemessen an 60 Läufen kamen **alle 42 Überlebenden mit exakt Gunst 3** bei Verona an — keine Verteilung, sondern eine Konstante. Grund: Eine einzige Szenenwahl (Mondovì melden, damals +3) erfüllte die Anforderung allein. Damit war die Schwelle 3 geschenkt und 4 unerreichbar; Fürsprache wurde gekauft, nicht erarbeitet, was Invariante 5 aushöhlt.
+>
+> Deshalb zwei Änderungen zusammen: **Schwelle auf 4** und **keine einzelne Tat trägt sie mehr allein** — Mondovì „melden" 3 → **2**, Mantua „dem Fourier auf die Finger sehen" 4 → **3**. Wer Caporal werden will, braucht jetzt zwei Handlungen: eine sichtbare Tat *und* Abende am Feuer (Lager +1, Winterwoche +2, Savona zuhören +2, Dego Tornister +1).
+>
+> Der Ruf war beim Bot zweigipflig — 19–25 oder 36–41, dazwischen niemand. Zwischen 26 und 35 liegt also keine Trennlinie; **30** ist die lesbare Zahl in dieser Lücke und schneidet die untere Gruppe sauber ab.
 
 ### Wertung Kapitel 1 (`src/abschluss.js`)
 
@@ -218,18 +224,21 @@ Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP, alles zusammen 166.
 
 ### Zielwerte
 
-| Größe | Soll | Gemessen |
+| Größe | Soll | Gemessen (80 Läufe) |
 |---|---|---|
-| Kapitel 1 überstanden (Testskript) | 45–55 % | **47 %** (120 Läufe: 57 % / 43 % in zwei Durchgängen) |
+| Kapitel 1 überstanden (Testskript) | 45–55 % | **48 %** |
 | Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 41 % |
-| Caporal im ersten Kapitel | ~30 % | 44 % |
+| Erster Lauf ohne jede Beförderung | ~40 % | 53 % |
+| Elitekompanie erreicht (Rang 2) | — | 20 % |
+| Caporal im ersten Kapitel | ~30 % | **28 %** |
 
-Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang von 43 % oder 57 % sagt für sich genommen nichts. Bei Zweifeln 80 Läufe messen.
+Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang von 43 % oder 57 % sagt für sich genommen nichts. **Bei Zweifeln 80 Läufe messen**, wie hier geschehen.
 
-**Offener Punkt:** Der Caporal-Anteil liegt mit 44 % über dem Sollwert von 30 % (vor den Lagern waren es 37 %). Der Zusammenhang ist direkt — wer bis September lebt, steht bei der Vakanz mit in der Reihe. Wenn das gesenkt werden soll, dann an der Schwelle (Ruf 25 / Gunst 3), nicht an der Tödlichkeit.
+**Offener Punkt:** Der Anteil ohne jede Beförderung liegt mit 53 % über dem Sollwert von 40 %. Das ist die direkte Kehrseite der neuen Caporal-Schwelle — wer nicht Caporal wird, bleibt Fusilier. Zu ändern wäre das nicht an der Schwelle, sondern am Zwischenschritt: Die Elitekompanie verlangt Konstitution oder Geschick 55, und daran scheitern die meisten schon bei der Erschaffung.
 
 `node test/balance.js 40` misst das. **Weicht der Wert nach einer Änderung um mehr als zehn Punkte ab, ist die Änderung zu prüfen.**
+
+**Was der Testbot kann und was nicht.** Er nimmt in Szenen immer die erste Wahl, im Gefecht die sinnvolle Aktion und im Lager seit der Gunst-Änderung „Am Feuer sitzen bleiben", solange seine Fürsprache unter 4 liegt. Ohne diese eine Ausnahme bemühte er sich nie um einen Fürsprecher und würde nie befördert — gemessen würde dann nicht die Schwelle, sondern die Blindheit des Bots. Wer eine Schwelle einführt, die mehrere Handlungen verlangt, muss dem Bot beibringen, sie zu verfolgen, sonst misst das Skript etwas anderes als das Spiel.
 
 ---
 
@@ -248,6 +257,25 @@ Regeln für Szenentexte:
 - Das Spiel wertet nicht. Es zeigt, was passiert, und schweigt darüber, ob es richtig war.
 - Keine Rückmeldung darüber, ob eine moralische Entscheidung die richtige war. Nie.
 - Nebenfiguren wiederkehren lassen — Sergent Martel, Guérin. Wenn Guérin stirbt, wird seine Stelle frei, und genau die bekommst du.
+
+---
+
+## Lesbarkeit
+
+Die Oberfläche ist dunkelbraun, und genau deshalb sind Beschriftungen die Schwachstelle. Die erste Fassung hatte `--faint: #5c554b` auf `#211e1b` — **2,2 : 1**, also unter jeder brauchbaren Schwelle. Attributnamen, Kartenköpfe, Probenzeilen und Kostenhinweise waren kaum zu sehen.
+
+Gültige Werte in `src/stil.css`:
+
+| Rolle | Farbe | Kontrast auf der Karte |
+|---|---|---|
+| `--text` Fließtext | `#ded5c4` | ~11 : 1 |
+| `--dim` Beschriftungen, Tabellen, Seitenleiste | `#aca192` | ~6,6 : 1 |
+| `--faint` Probenzeilen, Kosten, Fußzeile | `#948a79` | ~4,7 : 1 |
+| `--brass` Abschnittsüberschriften | `#d0a75e` | ~8 : 1 |
+
+**Regeln:** Nichts unter 4,5 : 1. Kleiner als 11 px wird nichts. Abschnittsüberschriften in der Seitenleiste und über dem Lagebild stehen in Messing, nicht in Grau — sie gliedern, also müssen sie sichtbar sein. Zahlen in der Seitenleiste (`.kv b`) sind heller als ihre Beschriftung, weil man im Spiel die Zahl sucht, nicht das Wort.
+
+Wer die Palette abdunkelt, macht die Hälfte der Oberfläche wieder unlesbar. Der nüchterne Ton entsteht aus den Texten, nicht aus schwachem Kontrast.
 
 ---
 

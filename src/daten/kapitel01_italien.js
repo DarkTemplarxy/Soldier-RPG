@@ -106,7 +106,7 @@ const KAPITEL = [
   optionen:[
     {label:'Sie melden',hint:'Der Befehl ist der Befehl',kosten:'Ruf ++ · Kameradschaft −−',
      erfolg:{text:'Zwei werden erschossen, zwei ausgepeitscht. Der Bataillonschef merkt sich deinen Namen. Deine Kompanie auch, auf andere Weise.',
-       ruf:8,gunst:3,kameradschaft:-22,belastung:8}},
+       ruf:8,gunst:2,kameradschaft:-22,belastung:8}},
     {label:'Sie wegschicken, bevor jemand kommt',hint:'Menschenkenntnis · schnell und leise',
      probe:{wert:'menschenkenntnis',schw:45},
      erfolg:{text:'Du redest schnell und leise, und sie sind weg, bevor die Patrouille um die Ecke biegt. Vier Männer schulden dir etwas. Martel hat es gesehen und sagt nichts.',
@@ -173,7 +173,7 @@ const KAPITEL = [
     {label:'Dem Fourier auf die Finger sehen',hint:'Bildung · die Listen lesen können',
      probe:{wert:'bildung',schw:40},kosten:'Braucht Bildung',
      erfolg:{text:'Du kannst gerade genug lesen, um zu sehen, dass in der Liste hundertzwölf Mann stehen und in der Kompanie sechsundneunzig. Du sagst es Martel, nicht dem Fourier. Zwei Tage später stimmen die Rationen.',
-       gunst:4,ruf:4,fert:{verwaltung:8},kameradschaft:6},
+       gunst:3,ruf:4,fert:{verwaltung:8},kameradschaft:6},
      misserfolg:{text:'Die Zahlen tanzen dir vor den Augen. Du hast nie richtig lesen gelernt, und hier merkst du es zum ersten Mal, dass dir das etwas kostet.',
        belastung:4,fert:{verwaltung:3}}},
     {label:'Im Sumpf fouragieren',hint:'Fouragieren · Fisch, Frösche, gestohlene Hühner',

@@ -308,10 +308,14 @@ function waehleZweig(z){
 
 /* ══════════════════ BEFÖRDERUNG ══════════════════ */
 
+/* Schwelle zum Caporal. Beides zusammen, und dazu die Vakanz — siehe CLAUDE.md.
+   Wer diese Zahlen ändert, trägt sie dort nach. */
+const CAPORAL_RUF = 30, CAPORAL_GUNST = 4;
+
 function zeigeBefoerderung(n){
   if(S.befoerderungGeprueft===undefined){ S.befoerderungRuf=S.ruf; S.befoerderungGunst=S.gunst; S.befoerderungGeprueft=true; }
   const ruf = S.befoerderungRuf, gunst = S.befoerderungGunst;
-  const reichtRuf = ruf>=25, reichtGunst = gunst>=3;
+  const reichtRuf = ruf>=CAPORAL_RUF, reichtGunst = gunst>=CAPORAL_GUNST;
   const bekommt = reichtRuf && reichtGunst;
   let text, klasse;
   if(bekommt){
@@ -322,18 +326,18 @@ function zeigeBefoerderung(n){
     klasse='gut';
   } else if(!reichtRuf){
     text = `Zwei Stellen werden besetzt. Keine mit dir. Der Capitaine kennt deinen Namen nicht, und das ist die ganze Erklärung.
-    <br><br><em>Für den Caporal braucht es Ruf 25 — du hast ${ruf}.</em>`;
+    <br><br><em>Für den Caporal braucht es Ruf ${CAPORAL_RUF} — du hast ${ruf}.</em>`;
     klasse='schlecht';
   } else {
     text = `Dein Name fällt. Er fällt sogar zweimal. Aber niemand am Tisch legt die Hand für dich auf den Tisch, und ohne das geht es nicht.
-    <br><br><em>Für den Caporal braucht es einen Fürsprecher — Gunst 3, du hast ${gunst}.</em>`;
+    <br><br><em>Für den Caporal braucht es einen Fürsprecher — Gunst ${CAPORAL_GUNST}, du hast ${gunst}. Fürsprache sammelt sich in Abenden am Feuer, nicht in einer einzigen Tat.</em>`;
     klasse='schlecht';
   }
   app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
-      <div class="probe" style="margin-top:10px">VAKANZ VORHANDEN · RUF ${ruf}/25 · FÜRSPRACHE ${gunst}/3 · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</div>
+      <div class="probe" style="margin-top:10px">VAKANZ VORHANDEN · RUF ${ruf}/${CAPORAL_RUF} · FÜRSPRACHE ${gunst}/${CAPORAL_GUNST} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</div>
       </div></div>
     <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;

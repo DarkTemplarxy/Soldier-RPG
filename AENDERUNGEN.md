@@ -5,6 +5,22 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-27 — Beförderungsschwelle und Lesbarkeit
+
+**Gunst war keine Hürde, sondern eine Konstante.** Über 60 gemessene Läufe kamen *alle* 42 Überlebenden mit exakt Gunst 3 bei Verona an, weil eine einzige Szenenwahl (Mondovì melden, +3) die Anforderung allein erfüllte. Damit war die Schwelle 3 geschenkt und jede höhere unerreichbar.
+
+| Änderung | Warum | Gemessen |
+|---|---|---|
+| Caporal-Schwelle Ruf 25 → **30**, Gunst 3 → **4** (`CAPORAL_RUF` / `CAPORAL_GUNST` in `src/kampf.js`) | Caporal-Anteil lag bei 44 % gegen einen Sollwert von 30 % | **28 %** über 80 Läufe |
+| Mondovì „melden" Gunst 3 → **2**, Mantua „Fourier" 4 → **3** | Keine einzelne Tat soll die Fürsprache mehr allein tragen — sonst höhlt sie Invariante 5 aus | Überleben **48 %**, im Band 45–55 % |
+| Testbot sitzt im Lager am Feuer, solange seine Gunst unter 4 liegt | Ohne das bemüht er sich nie um Fürsprache, und das Skript misst seine Blindheit statt der Schwelle | — |
+
+Der Ruf war beim Bot zweigipflig (19–25 oder 36–41, dazwischen niemand); 30 liegt in dieser Lücke. Nebenbefund: Der Anteil ohne jede Beförderung steigt von 41 % auf 53 % — die Kehrseite derselben Schwelle.
+
+**Kontrast der Oberfläche angehoben.** `--dim` und `--faint` standen auf `#877e71` und `#5c554b`, was auf dem Braun der Karten **2,2 : 1** ergab — Attributnamen, Kartenköpfe und Kostenzeilen waren kaum lesbar. Jetzt `#aca192` (6,6 : 1) und `#948a79` (4,7 : 1), dazu Zahlen in der Seitenleiste fast weiß, Abschnittsüberschriften in Messing statt Grau, Kostenzeilen von 10,5 auf 11,5 px und deutlichere Knopfränder. Die Regeln stehen als eigener Abschnitt „Lesbarkeit" in `CLAUDE.md`.
+
+---
+
 ## 2026-07-27 — Lager, Anmarsch, Ortswechsel
 
 **Drei Lager eingebaut** (`typ:'lager'`): Depot Savona vor dem Feldzug (3 Abende), Kantonierung Corsico nach Mailand (2), Feldlager an der Etsch vor Arcole (2). Dazu dreizehn Lagerhandlungen für Ausbildung und Instandhaltung, drei davon nur für Rang 3, Grenadier oder Voltigeur. Grund: Zwischen Erschaffung und erstem Gefecht gab es keine einzige eigene Entscheidung, und Instandhaltung war bis zum Dezember nicht möglich. Stationen damit 13 → 16.
