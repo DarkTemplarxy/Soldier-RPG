@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Der Marschallstab — Progression, Fertigkeiten, Schwierigkeit</title>
+<style>
+  :root{
+    --bg:#121110; --panel:#1a1816; --panel2:#211e1b; --line:#2f2a24;
+    --text:#cfc7b8; --dim:#877e71; --faint:#5c554b;
+    --blood:#9b2f24; --brass:#b8924f; --steel:#6f7d84; --green:#6d7a52;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.65;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1160px;margin:0 auto;padding:28px 20px 70px}
+  header.top{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:24px}
+  h1{font-size:21px;font-weight:normal;letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13.5px;font-style:italic;margin:0}
+
+  .card{background:var(--panel);border:1px solid var(--line);margin-bottom:22px}
+  .ch{padding:9px 16px;border-bottom:1px solid var(--line);background:var(--panel2);
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+    display:flex;justify-content:space-between}
+  .cb{padding:18px}
+  svg{display:block;width:100%;height:auto}
+
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  th{text-align:left;font-weight:normal;color:var(--faint);font-size:10.5px;
+    letter-spacing:.13em;text-transform:uppercase;padding:0 10px 8px 0;
+    border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,Consolas,monospace}
+  th.n,td.n{text-align:right;white-space:nowrap}
+  td{padding:8px 10px 8px 0;border-bottom:1px solid #232019;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.k{color:var(--brass);white-space:nowrap}
+  td.n{font-family:ui-monospace,Menlo,Consolas,monospace;color:#e6ddcb;font-size:13.5px}
+  td.d{color:var(--dim);font-size:14px}
+  tr.hi td{background:#201d17}
+  .warn{color:var(--blood)}
+  .ok{color:#8b9a68}
+
+  p{margin:0 0 11px}
+  p:last-child{margin-bottom:0}
+  b{font-weight:normal;color:#e6ddcb}
+  .note{border-left:2px solid var(--brass);background:#171512;padding:14px 18px;
+    color:var(--dim);font-size:14.5px}
+  .note.red{border-left-color:var(--blood)}
+  .note.green{border-left-color:var(--green)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  footer{margin-top:28px;padding-top:15px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:12px;font-style:italic}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--brass)}
+  .legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--dim)}
+  .legend i{display:inline-block;width:22px;height:2.5px;vertical-align:middle;margin-right:7px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>Progression, Fertigkeiten, Schwierigkeit</h1>
+  <p class="sub">Rebalance v3.3 — Machtdecke angehoben: an der Decke wird jeder zweite Lauf ein General</p>
+</header>
+
+<div class="card">
+  <div class="ch"><span>Fertigkeiten 0–100 · Können gegen Anforderung</span><span>Hauptfertigkeit über 11 Kapitel</span></div>
+  <div class="cb">
+    <svg viewBox="0 0 1020 340" role="img" aria-label="Liniendiagramm: Fertigkeitswachstum gegen Kapitelanforderung">
+      <rect width="1020" height="340" fill="#171513"/>
+      <g stroke="#242018" stroke-width="1">
+        <line x1="70" y1="300" x2="950" y2="300"/><line x1="70" y1="235" x2="950" y2="235"/>
+        <line x1="70" y1="170" x2="950" y2="170"/><line x1="70" y1="105" x2="950" y2="105"/>
+        <line x1="70" y1="40"  x2="950" y2="40"/>
+      </g>
+      <g font-family="ui-monospace,monospace" font-size="9.5" fill="#5c554b" text-anchor="end">
+        <text x="62" y="303">0</text><text x="62" y="238">25</text>
+        <text x="62" y="173">50</text><text x="62" y="108">75</text><text x="62" y="43">100</text>
+      </g>
+
+      <polyline fill="none" stroke="#9b2f24" stroke-width="2" stroke-dasharray="7 5"
+        points="70,242.8 158,211.6 246,274.0 334,175.2 422,149.2 510,128.4 598,118.0 686,81.6 774,102.4 862,92.0 950,81.6"/>
+      <polyline fill="none" stroke="#6f7d84" stroke-width="2"
+        points="70,268.8 158,232.4 246,203.8 334,190.8 422,164.8 510,146.6 598,128.4 686,112.8 774,105.0 862,94.6 950,86.8"/>
+      <polyline fill="none" stroke="#8f7a4a" stroke-width="2"
+        points="70,203.8 158,177.8 246,157.0 334,146.6 422,131.0 510,118.0 598,102.4 686,92.0 774,86.8 862,79.0 950,73.8"/>
+      <polyline fill="none" stroke="#b8924f" stroke-width="2.4"
+        points="70,138.8 158,123.2 246,112.8 334,105.0 422,94.6 510,86.8 598,79.0 686,71.2 774,68.6 862,63.4 950,60.8"/>
+
+      <line x1="686" y1="42" x2="686" y2="300" stroke="#9b2f24" stroke-width="1" opacity=".45" stroke-dasharray="3 5"/>
+      <text x="686" y="34" text-anchor="middle" fill="#9b2f24" font-size="10"
+            font-family="ui-monospace,monospace" letter-spacing="1">RUSSLAND — DIE WAND</text>
+
+      <g font-family="ui-monospace,monospace" font-size="8.5" fill="#7d7466" text-anchor="middle">
+        <text x="70"  y="320">1 ITAL</text><text x="158" y="320">2 ÄGY</text><text x="246" y="320">3 GARN</text>
+        <text x="334" y="320">4 AUST</text><text x="422" y="320">5 JENA</text><text x="510" y="320">6 EYLAU</text>
+        <text x="598" y="320">7 SPAN</text><text x="686" y="320">8 RUSS</text><text x="774" y="320">9 DTL</text>
+        <text x="862" y="320">10 FRA</text><text x="950" y="320">11 WAT</text>
+      </g>
+    </svg>
+    <div class="legend">
+      <span><i style="background:#9b2f24"></i>Was das Kapitel verlangt</span>
+      <span><i style="background:#6f7d84"></i>Erster Lauf, 0 VP</span>
+      <span><i style="background:#8f7a4a"></i>Mittlerer Lauf, 140 VP</span>
+      <span><i style="background:#b8924f"></i>Später Lauf, 400 VP</span>
+    </div>
+    <div class="note" style="margin-top:16px">
+      <p><b>Das ganze Spiel steht in diesem Bild.</b> Beim ersten Lauf liegt deine Linie die halbe Kampagne lang <em>unter</em> der roten. Du bist nicht schlecht, du bist unfertig — und stirbst folgerichtig früh. Mit jedem Veteranenlauf startest du höher, die Linie klettert eher über die Anforderung, und die späten Kapitel werden überhaupt erst dadurch spielbar.</p>
+      <p style="margin-top:9px">Der rote Ausschlag bei Kapitel 8 ist kein Versehen: <b>Russland verlangt mehr, als fast jeder Charakter je erreicht.</b> Dort enden die meisten guten Läufe.</p>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="ch"><span>Kompetenzstufen</span></div>
+    <div class="cb">
+      <table>
+        <tr><th>Wert</th><th>Stufe</th><th>Woran man es merkt</th></tr>
+        <tr><td class="n">0–19</td><td class="k">Untauglich</td><td class="d">Du verlierst Patronen, der Ladestock fällt, du zuckst beim Schuss.</td></tr>
+        <tr><td class="n">20–39</td><td class="k">Rekrut</td><td class="d">Es klappt, wenn niemand zurückschießt.</td></tr>
+        <tr><td class="n">40–59</td><td class="k">Gedient</td><td class="d">Verlässlich im Drill, wacklig im Gefecht.</td></tr>
+        <tr><td class="n">60–79</td><td class="k">Erfahren</td><td class="d">Verlässlich auch unter Feuer.</td></tr>
+        <tr><td class="n">80–94</td><td class="k">Veteran</td><td class="d">Du machst es, während du an etwas anderes denkst.</td></tr>
+        <tr class="hi"><td class="n">95–100</td><td class="k">Meister</td><td class="d">Ein, höchstens zwei Fertigkeiten pro Leben. Meist gar keine.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span>Was der Wert konkret tut</span><span>Beispiel Muskete</span></div>
+    <div class="cb">
+      <table>
+        <tr><th>Muskete</th><th class="n">Ladezeit</th><th>Im Gefecht</th></tr>
+        <tr><td class="n">12</td><td class="n">~34 s</td><td class="d">Jeder vierte Ladevorgang misslingt.</td></tr>
+        <tr><td class="n">30</td><td class="n">~28 s</td><td class="d">Zwei Schuss in der Minute wären Glück.</td></tr>
+        <tr><td class="n">50</td><td class="n">~23 s</td><td class="d">Du hältst mit der Linie mit.</td></tr>
+        <tr><td class="n">70</td><td class="n">~19 s</td><td class="d">Drei Schuss pro Minute, auch mit Rauch in den Augen.</td></tr>
+        <tr><td class="n">90</td><td class="n">~15 s</td><td class="d">Vier Schuss pro Minute — der historische Bestwert.</td></tr>
+      </table>
+      <p style="margin-top:13px;font-size:13.5px;color:var(--faint)">
+        Zuwachs pro Kapitel <code>≈ 16 × Nutzung × (100 − Wert)/100</code>. Von 12 auf 40 geht schnell,
+        von 80 auf 90 dauert Jahre. Nach einer vollen Kampagne hast du typischerweise <b>eine</b>
+        Fertigkeit um 85 und den Rest zwischen 40 und 65 — nie alles.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><span>Wie ein Lauf endet</span><span>30.000 Simulationen je Zeile</span></div>
+  <div class="cb">
+    <table>
+      <tr><th>Stufe</th><th class="n">Vorrat</th><th class="n">Tod</th><th class="n">Ruh. Russland</th><th class="n">Ruh. 1814</th><th class="n">Waterloo</th><th class="n">General 12+</th></tr>
+      <tr><td class="k">Erster Lauf</td><td class="n">0</td><td class="n warn">97 %</td><td class="n">2,1 %</td><td class="n">0,4 %</td><td class="n">0,6 %</td><td class="n">0,3 %</td></tr>
+      <tr><td class="k">Nach 3 Läufen</td><td class="n">214</td><td class="n">70 %</td><td class="n">10,5 %</td><td class="n">4,5 %</td><td class="n">14,9 %</td><td class="n">10,0 %</td></tr>
+      <tr><td class="k">Nach 8 Läufen</td><td class="n">692</td><td class="n">33 %</td><td class="n">4,8 %</td><td class="n">4,3 %</td><td class="n ok">58,1 %</td><td class="n ok">47,3 %</td></tr>
+      <tr class="hi"><td class="k">An der Decke</td><td class="n">774</td><td class="n">30 %</td><td class="n">4,2 %</td><td class="n">3,8 %</td><td class="n ok">61,5 %</td><td class="n ok">50,0 %</td></tr>
+    </table>
+
+    <div class="note green" style="margin-top:16px">
+      <p><b>An der Decke wird der Generalsrang zuverlässig.</b> 50 % je Lauf heißt <b>75 % in zwei Läufen, 88 % in drei, 97 % in fünf</b>. Die Generalskampagnen sind damit garantiertes Ziel, kein Lotteriegewinn — man muss nur so weit kommen.</p>
+      <p style="margin-top:9px">Und der Weg dorthin bleibt steil: Waterloo erreicht man im ersten Lauf zu 0,6 %, nach drei Läufen zu 15 %, nach acht zu 58 %. <b>Jeder Lauf kommt spürbar weiter als der davor</b> — genau bis zur Decke, und die liegt hoch.</p>
+    </div>
+
+    <table style="margin-top:18px">
+      <tr><th>Wie oft die Schranken greifen</th><th class="n">Russland-Überlebende mit Rang 7+</th><th class="n">1814-Überlebende mit Rang 10+</th></tr>
+      <tr><td class="d">0 VP</td><td class="n warn">28 %</td><td class="n warn">33 %</td></tr>
+      <tr><td class="d">214 VP</td><td class="n">55 %</td><td class="n">62 %</td></tr>
+      <tr><td class="d">774 VP</td><td class="n ok">93 %</td><td class="n ok">96 %</td></tr>
+    </table>
+    <p style="margin-top:13px;font-size:13.5px;color:var(--faint)">
+      Die Schranken beißen vor allem am Anfang. <b>Sie sind eine Hürde für Anfänger, kein Deckel für Könner.</b>
+      Der erste Lauf bleibt brutal: 62 % erreichen keine einzige Beförderung.
+    </p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><span>Freiwillig aufhören</span><span>Überlebensbonus, rückwärts gestaffelt</span></div>
+  <div class="cb">
+    <p style="color:var(--dim);font-size:14.5px">An beiden Schranken darfst du gehen, auch wenn du bleiben dürftest. Wer 1814 für Waterloo zurückgeholt würde, kann ablehnen und seine Pension nehmen.</p>
+    <table style="margin-top:14px">
+      <tr><th>Ende</th><th class="n">Bonus</th><th>Warum</th></tr>
+      <tr><td class="d">Tod</td><td class="n">0</td><td class="d">—</td></tr>
+      <tr><td class="k">Ruhestand nach Russland</td><td class="n ok">+180</td><td class="d">ersetzt die drei Kapitel, auf die du verzichtest</td></tr>
+      <tr><td class="k">Ruhestand 1814</td><td class="n ok">+120</td><td class="d">ersetzt das letzte Kapitel</td></tr>
+      <tr class="hi"><td class="k">Waterloo überlebt</td><td class="n">+70</td><td class="d">es gibt nichts mehr zu ersetzen</td></tr>
+    </table>
+    <table style="margin-top:18px">
+      <tr><th>Vorrat</th><th class="n">Weitermachen nach Russland bringt</th><th class="n">Weitermachen vor Waterloo bringt</th></tr>
+      <tr><td class="d">0 VP</td><td class="n">+19</td><td class="n warn">+3</td></tr>
+      <tr><td class="d">300 VP</td><td class="n">+66</td><td class="n warn">+19</td></tr>
+      <tr><td class="d">650 VP</td><td class="n">+101</td><td class="n warn">+30</td></tr>
+    </table>
+    <div class="note green" style="margin-top:16px">
+      <p><b>Je früher du gehst, desto größer der Bonus.</b> Das klingt verkehrt, ist aber die Regel, die den Ausstieg überhaupt zu einer Entscheidung macht — sonst wäre Weiterspielen ausnahmslos richtig und die Option totes Beiwerk.</p>
+      <p style="margin-top:9px"><b>Vor Waterloo ist es fast ein Münzwurf.</b> Die vernünftige Wahl 1814 ist, die Pension zu nehmen und nach Hause zu gehen. Nach Waterloo zu reiten ist die loyale, romantische, mathematisch kaum begründbare Wahl. Man geht trotzdem.</p>
+      <p style="margin-top:9px">Das Maximum bleibt bei <b>918</b> und gehört weiterhin Waterloo: Ruhestand nach Russland kommt bestenfalls auf ~560, Ruhestand 1814 auf ~750.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><span>Überlebenschance je Kapitel</span><span>nach Punktevorrat</span></div>
+  <div class="cb">
+    <table>
+      <tr><th>Kapitel</th><th class="n">0 VP</th><th class="n">200 VP</th><th class="n">420 VP</th><th class="n">690 VP</th><th class="n">880 VP</th></tr>
+      <tr><td class="d">1 · Italien 1796/97</td><td class="n warn">60 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">2 · Ägypten 1798/99</td><td class="n warn">63 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">3 · Garnison 1800–04</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">4 · Austerlitz 1805</td><td class="n warn">67 %</td><td class="n">94 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">5 · Jena 1806</td><td class="n warn">66 %</td><td class="n">88 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">6 · Eylau 1807</td><td class="n warn">65 %</td><td class="n">84 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">7 · Spanien 1808–12</td><td class="n">70 %</td><td class="n">86 %</td><td class="n">98 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr class="hi"><td class="d"><b>8 · Russland 1812</b></td><td class="n warn">57 %</td><td class="n warn">70 %</td><td class="n warn">81 %</td><td class="n warn">89 %</td><td class="n warn">94 %</td></tr>
+      <tr><td class="d">9 · Deutschland 1813</td><td class="n">75 %</td><td class="n">87 %</td><td class="n">96 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">10 · Frankreich 1814</td><td class="n">75 %</td><td class="n">85 %</td><td class="n">92 %</td><td class="n">98 %</td><td class="n">98 %</td></tr>
+      <tr><td class="d">11 · Waterloo 1815</td><td class="n">73 %</td><td class="n">82 %</td><td class="n">88 %</td><td class="n">94 %</td><td class="n">96 %</td></tr>
+    </table>
+    <p style="margin-top:13px;font-size:13.5px;color:var(--faint)">
+      <b>98 % ist die Obergrenze.</b> In jedem Feldzug bleibt eine Kugel übrig, die niemanden fragt — aber ein voll ausgebauter Veteran ist sehr schwer zu töten. <b>Russland bleibt die Ausnahme:</b> dort greift keine Obergrenze, nur das eigene Können.
+    </p>
+  </div>
+</div>
+
+<div>
+  <div class="card">
+    <div class="ch"><span>Punktewertung</span><span>gezählt wird der Aufstieg</span></div>
+    <div class="cb">
+      <div class="note red" style="margin-bottom:15px">
+        <p><b>Rangpunkte = Wert des Endrangs − Wert des Startrangs.</b> Punkte für den <em>Weg</em>, nicht für den Standort.</p>
+      </div>
+      <table>
+        <tr><th>Rang</th><th class="n">Wert</th><th>Rang</th><th class="n">Wert</th></tr>
+        <tr><td class="d">1 Fusilier</td><td class="n">0</td><td class="d">8 Lieutenant</td><td class="n">158</td></tr>
+        <tr><td class="d">2 Grenadier / Voltigeur</td><td class="n">12</td><td class="d">9 Capitaine</td><td class="n">205</td></tr>
+        <tr><td class="d">3 Caporal</td><td class="n">26</td><td class="d">10 Chef de bataillon</td><td class="n">262</td></tr>
+        <tr><td class="d">4 Caporal-fourrier</td><td class="n">42</td><td class="d">11 Colonel</td><td class="n">330</td></tr>
+        <tr><td class="d">5 Sergent</td><td class="n">62</td><td class="d">12 Gén. de brigade</td><td class="n">408</td></tr>
+        <tr><td class="d">6 Sergent-major</td><td class="n">88</td><td class="d">13 Gén. de division</td><td class="n">490</td></tr>
+        <tr><td class="d">7 Sous-Lieutenant</td><td class="n">120</td><td class="d">14 Maréchal</td><td class="n">580</td></tr>
+      </table>
+      <p style="margin-top:13px;font-size:13.5px;color:var(--faint)">
+        Zuschläge: +8 je überlebtem Kapitel · +5 je volle 10 Ruf · Überlebensbonus +70 bis +180 ·
+        +20 für nie gekniffen · Auszeichnungen bis +110 (eigenes Blatt).<br>
+        <b>Maximum als Rekrut: 918. Als gekaufter Leutnant: 760.</b>
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span>Der Kaufladen</span><span>Kauf in 1er-Schritten, Preis steigt je Zehner</span></div>
+    <div class="cb">
+      <table>
+        <tr><th>Bereich</th><th class="n">VP je Punkt</th><th class="n">der ganze Zehner</th><th class="n">ab 0 kumuliert</th></tr>
+        <tr><td class="d">0 – 9</td><td class="n">1</td><td class="n">10</td><td class="n">10</td></tr>
+        <tr><td class="d">10 – 19</td><td class="n">1</td><td class="n">10</td><td class="n">20</td></tr>
+        <tr><td class="d">20 – 29</td><td class="n">2</td><td class="n">20</td><td class="n">40</td></tr>
+        <tr><td class="d">30 – 39</td><td class="n">2</td><td class="n">20</td><td class="n">60</td></tr>
+        <tr><td class="d">40 – 49</td><td class="n">3</td><td class="n">30</td><td class="n">90</td></tr>
+        <tr><td class="d">50 – 59</td><td class="n">4</td><td class="n">40</td><td class="n">130</td></tr>
+        <tr><td class="d">60 – 69</td><td class="n">6</td><td class="n">60</td><td class="n">190</td></tr>
+        <tr><td class="d">70 – 79</td><td class="n">8</td><td class="n">80</td><td class="n">270</td></tr>
+        <tr><td class="d">80 – 89</td><td class="n">11</td><td class="n">110</td><td class="n">380</td></tr>
+        <tr class="hi"><td class="d">90 – 99</td><td class="n">15</td><td class="n">150</td><td class="n">530</td></tr>
+      </table>
+      <p style="margin-top:13px;font-size:13.5px;color:var(--faint)">
+        <b>Gekauft wird Punkt für Punkt.</b> Nur der <em>Preis</em> springt an jeder Zehnergrenze.
+        Ein Punkt auf Stufe 25 kostet 2 VP, derselbe Punkt auf Stufe 65 kostet 6, auf Stufe 95 kostet er 15.
+        Dieselbe Tabelle gilt für Attribute und Fertigkeiten.
+      </p>
+      <table style="margin-top:16px">
+        <tr><th>Beispiel</th><th class="n">VP</th><th>Sonstiges</th><th class="n">VP</th></tr>
+        <tr><td class="d">Fertigkeit 10 → 40</td><td class="n">50</td><td class="d">Gute eigene Muskete</td><td class="n">25</td></tr>
+        <tr><td class="d">Attribut 40 → 60</td><td class="n">70</td><td class="d">Pferd und volle Ausrüstung</td><td class="n">35</td></tr>
+        <tr><td class="d">Attribut 40 → 70</td><td class="n">130</td><td class="d">200 Francs Startgeld</td><td class="n">20</td></tr>
+        <tr><td class="d">Fertigkeit 10 → 60</td><td class="n">120</td><td class="d">Empfehlungsschreiben</td><td class="n">65</td></tr>
+        <tr><td class="d">Bildung 45 → 50 (Offiziersschwelle)</td><td class="n">15</td><td class="k">Patent Sous-Lieutenant</td><td class="n">110</td></tr>
+        <tr class="hi"><td class="d warn">Fertigkeit 10 → 100</td><td class="n warn">520</td><td class="k">Patent Lieutenant</td><td class="n">145</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><span>Charaktererschaffung</span><span>Was ein Rekrut mitbringt</span></div>
+  <div class="cb">
+    <div class="grid" style="gap:22px">
+      <div>
+        <table>
+          <tr><th>Bei der Erschaffung</th><th class="n">Wert</th></tr>
+          <tr><td class="d">Sockel auf allen sechs Attributen</td><td class="n">20</td></tr>
+          <tr class="hi"><td class="d"><b>Verteilungspool, frei in 1er-Schritten</b></td><td class="n"><b>120</b></td></tr>
+          <tr><td class="d">Höchstwert je Attribut bei der Erschaffung</td><td class="n">70</td></tr>
+          <tr><td class="d">Bildung — vom Pool ausgenommen</td><td class="n">20</td></tr>
+          <tr><td class="d">Alle neun Fertigkeiten</td><td class="n">10</td></tr>
+          <tr><td class="d">Summe der Attribute · Durchschnitt</td><td class="n">240 · 40</td></tr>
+        </table>
+        <p style="margin-top:13px;font-size:13.5px;color:var(--faint)">
+          <b>120 Punkte, Maximum 70.</b> Damit lassen sich höchstens <b>zwei</b> Attribute auf 70 bringen —
+          der Rest bleibt beim Sockel. Würfeln oder selbst verteilen, drei Neuwürfe frei.
+        </p>
+      </div>
+      <div>
+        <table>
+          <tr><th>Beispielbauart</th><th>Verteilung</th><th class="n">wert in VP</th></tr>
+          <tr><td class="k">Spezialist</td><td class="d">70 · 70 · 40 · 20 · 20 · 20</td><td class="n">380</td></tr>
+          <tr><td class="k">Zwei Säulen</td><td class="d">70 · 60 · 40 · 30 · 20 · 20</td><td class="n">340</td></tr>
+          <tr><td class="k">Ausgewogen</td><td class="d">50 · 50 · 40 · 40 · 40 · 20</td><td class="n">260</td></tr>
+          <tr><td class="k">Breit</td><td class="d">40 · 40 · 40 · 40 · 40 · 40</td><td class="n">240</td></tr>
+        </table>
+        <div class="note" style="margin-top:14px">
+          <p><b>Warum Spezialisierung sich lohnt.</b> Zehn freie Punkte auf Stufe 20 wären 20 VP wert, dieselben zehn Punkte auf Stufe 60 aber 60 VP. Wer streut, verschenkt Budget: Der Pool ist konzentriert <b>380 VP</b> wert, breit verteilt nur 240 — bei einem Maximum von 918.</p>
+        </div>
+      </div>
+    </div>
+    <div class="note green" style="margin-top:16px">
+      <p><b>Ein Rekrut ist ein normaler Mann, der nichts kann.</b> Attribute im Schnitt 40 — er ist gesund, wach, nicht dumm. Fertigkeiten bei 10 — er hat nie eine Muskete geladen. Genau diese Lücke schließt sich über die Kampagne, und genau sie macht den ersten Lauf so tödlich.</p>
+      <p style="margin-top:9px"><b>Herkunft</b> gibt zusätzlich einen Zuschnitt — <b>jede verteilt exakt 50 Punkte</b>, nur anders gewichtet und teils mit Abzügen:</p>
+    </div>
+    <table style="margin-top:16px">
+      <tr><th>Herkunft</th><th>Verteilung</th><th class="n">Summe</th></tr>
+      <tr><td class="k">Bauernsohn</td><td class="d">Konstitution +20 · Fouragieren +25 · Bajonett +15 · <span class="warn">Bildung −10</span></td><td class="n">50</td></tr>
+      <tr><td class="k">Schmiedsgeselle</td><td class="d">Geschick +20 · Muskete +25 · Bajonett +15 · <span class="warn">Menschenkenntnis −10</span></td><td class="n">50</td></tr>
+      <tr><td class="k">Wilderer</td><td class="d">Muskete +30 · Fouragieren +20 · Geschick +15 · <span class="warn">Autorität −15</span></td><td class="n">50</td></tr>
+      <tr><td class="k">Fuhrmannssohn</td><td class="d">Reiten +30 · Verwaltung +20 · Konstitution +10 · <span class="warn">Kaltblütigkeit −10</span></td><td class="n">50</td></tr>
+      <tr class="hi"><td class="k">Schreibergehilfe</td><td class="d">Bildung +25 · Verwaltung +25 · Kartenkunde +20 · <span class="warn">Konstitution −20</span></td><td class="n">50</td></tr>
+      <tr><td class="k">Straßenjunge aus Paris</td><td class="d">Menschenkenntnis +25 · Kaltblütigkeit +20 · Fouragieren +20 · <span class="warn">Bildung −15</span></td><td class="n">50</td></tr>
+    </table>
+    <div class="note" style="margin-top:14px">
+      <p>Keine Herkunft ist stärker als eine andere — sie unterscheiden sich nur darin, <em>wohin</em> die fünfzig Punkte gehen. Der <b>Schreibergehilfe</b> landet bei Bildung 45 und damit fünf Punkte unter der Offiziersschwelle: der billigste Weg nach oben, bezahlt mit einem schwachen Körper.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><span>Das Endspiel</span><span>Wofür 915 der 918 Punkte draufgehen</span></div>
+  <div class="cb">
+    <table>
+      <tr><th>Der voll ausgestattete Leutnant</th><th class="n">VP</th></tr>
+      <tr><td class="d">Patent Lieutenant — Rang 8 ab Mai 1796, Bildung 50</td><td class="n">145</td></tr>
+      <tr><td class="d">Drei Attribute von 40 auf 70 (Konstitution, Kaltblütigkeit, Autorität)</td><td class="n">390</td></tr>
+      <tr><td class="d">Vier Fertigkeiten von 10 auf 40 — Muskete, Bajonett, Drill, Taktik</td><td class="n">200</td></tr>
+      <tr><td class="d">Manufakturmuskete, Offiziersdegen, Reitstiefel, Capote, Landpferd</td><td class="n">180</td></tr>
+      <tr class="hi"><td class="d"><b>Summe</b> — von 918 möglichen</td><td class="n"><b>915</b></td></tr>
+    </table>
+    <div class="note green" style="margin-top:16px">
+      <p><b>Das ist die Belohnung fürs Dranbleiben.</b> 915 Punkte hat man im Median nach etwa <b>zwölf bis zwanzig Durchläufen</b> — dann tritt der Charakter als Leutnant in die Armee ein: beritten, ausgerüstet, ausgebildet, mit einem Empfehlungsschreiben in der Tasche und Fertigkeiten auf dem Stand eines Mannes, der schon gedient hat. Das ist ein völlig anderes Spiel als der barfüßige Konskribierte aus Lauf 1, und genau das soll es sein.</p>
+    </div>
+    <div class="note red" style="margin-top:14px">
+      <p><b>Und trotzdem nie alles.</b> Alle sechs Attribute und alle neun Fertigkeiten auf 100 kosten <b>7.500 VP</b> — bei einem Maximum von 918. Eine <em>einzige</em> Fertigkeit von 10 auf 100 kostet 520 — weit über die Hälfte des Budgets für eine Zahl. Und die volle Wunschliste eines Leutnants samt Fernrohr, Uhr, Schreibzeug und Empfehlungsschreiben kostet <b>1.010 VP</b>: 92 mehr, als es je gibt. Jeder Neustart bleibt eine Entscheidung darüber, <em>was für ein Mann</em> das diesmal wird.</p>
+      <p style="margin-top:9px">Dazu bleibt gesperrt: Ruf über 10, Gunst, Orden, Ränge über Lieutenant — und die Geschichte selbst. Der Kaiser wartet nicht, und Russland wird auch für den Leutnant kalt.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Konzeptgrafik zu „Der Marschallstab" v3.3 · Alle Zahlen sind gerechnete Startwerte zum Nachjustieren, kein fertiges Balancing.
+</footer>
+
+</div>
+</body>
+</html>

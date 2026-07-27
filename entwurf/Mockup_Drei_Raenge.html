@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Der Marschallstab — Interface-Mockup</title>
+<style>
+  :root{
+    --bg:#121110; --panel:#1a1816; --panel2:#211e1b; --line:#2f2a24;
+    --text:#cfc7b8; --dim:#877e71; --faint:#5c554b;
+    --blood:#9b2f24; --brass:#b8924f; --steel:#6f7d84;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:Georgia,'Iowan Old Style',serif;
+    font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+
+  header.top{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
+  h1{font-size:22px;font-weight:normal;letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13.5px;font-style:italic;margin:0}
+
+  /* rank switcher */
+  .switch{display:flex;gap:0;margin:22px 0 26px;border:1px solid var(--line);background:var(--panel)}
+  .switch button{
+    flex:1;background:none;border:none;border-right:1px solid var(--line);
+    color:var(--faint);font-family:inherit;font-size:13px;letter-spacing:.06em;
+    padding:13px 10px;cursor:pointer;text-align:left;transition:.15s;
+  }
+  .switch button:last-child{border-right:none}
+  .switch button:hover{color:var(--dim);background:var(--panel2)}
+  .switch button.on{color:var(--text);background:var(--panel2);box-shadow:inset 0 2px 0 var(--brass)}
+  .switch .yr{display:block;font-size:11px;color:var(--faint);letter-spacing:.14em;margin-bottom:3px}
+  .switch button.on .yr{color:var(--brass)}
+
+  /* layout */
+  .stage{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+  @media(max-width:840px){.stage{grid-template-columns:1fr}}
+
+  .view{background:var(--panel);border:1px solid var(--line);padding:0;overflow:hidden}
+  .viewhead{
+    padding:9px 16px;border-bottom:1px solid var(--line);background:var(--panel2);
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+    display:flex;justify-content:space-between;
+  }
+  .viewbody{padding:18px}
+  svg{display:block;width:100%;height:auto}
+
+  .prose p{margin:0 0 13px}
+  .prose p:last-child{margin-bottom:0}
+  .prose em{color:#e0d8c8;font-style:italic}
+  .said{color:var(--dim)}
+
+  /* state panel */
+  aside{background:var(--panel);border:1px solid var(--line)}
+  .ahead{padding:9px 14px;border-bottom:1px solid var(--line);background:var(--panel2);
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .abody{padding:14px}
+  .who{font-size:17px;margin:0 0 2px}
+  .whorank{color:var(--brass);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 14px}
+
+  .stat{margin-bottom:11px}
+  .statlab{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);
+    letter-spacing:.04em;margin-bottom:4px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .bar{height:5px;background:#0c0b0a;border:1px solid #2a2621}
+  .bar i{display:block;height:100%}
+  .b-red i{background:var(--blood)} .b-brass i{background:var(--brass)}
+  .b-steel i{background:var(--steel)} .b-dim i{background:#5c554b}
+
+  .rule{height:1px;background:var(--line);margin:16px 0}
+  .kv{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;
+    font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--dim)}
+  .kv b{font-weight:normal;color:var(--text)}
+  .lost b{color:var(--blood)}
+
+  /* dispatches */
+  .disp{border-left:2px solid var(--line);padding:0 0 0 11px;margin-bottom:13px}
+  .disp .meta{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+    font-family:ui-monospace,Menlo,Consolas,monospace;margin-bottom:3px}
+  .disp .msg{font-size:13.5px;line-height:1.5}
+  .disp.unconf{border-left-color:var(--blood)}
+  .disp.unconf .meta{color:var(--blood)}
+
+  /* orders */
+  .orders{margin-top:22px;border:1px solid var(--line);background:var(--panel)}
+  .ordhead{padding:9px 16px;border-bottom:1px solid var(--line);background:var(--panel2);
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .ordbody{display:flex;flex-wrap:wrap;gap:9px;padding:14px 16px}
+  .ord{
+    background:#0e0d0c;border:1px solid #342f28;color:var(--text);
+    font-family:inherit;font-size:14px;padding:9px 15px;cursor:default;transition:.15s;
+  }
+  .ord:hover{border-color:var(--brass);color:#efe6d4}
+  .ord .cost{display:block;font-size:10.5px;color:var(--faint);letter-spacing:.08em;
+    font-family:ui-monospace,Menlo,Consolas,monospace;margin-top:3px}
+  .ord.risk:hover{border-color:var(--blood)}
+  .ord.off{opacity:.35}
+  .ord.off:hover{border-color:#342f28;color:var(--text)}
+
+  /* design note */
+  .note{margin-top:26px;border:1px solid var(--line);border-left:2px solid var(--brass);
+    background:#171512;padding:15px 18px}
+  .note h3{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--brass);font-weight:normal}
+  .note p{margin:0 0 9px;font-size:14px;color:var(--dim);line-height:1.65}
+  .note p:last-child{margin-bottom:0}
+  .note b{color:var(--text);font-weight:normal}
+
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:12px;font-style:italic}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>Der Marschallstab</h1>
+  <p class="sub">Interface-Mockup · dieselbe Art von Gefecht, dreimal — aus drei Rängen gesehen</p>
+</header>
+
+<div class="switch">
+  <button class="on" data-v="a"><span class="yr">1796 · Rang 1</span>Fusilier</button>
+  <button data-v="b"><span class="yr">1807 · Rang 7</span>Capitaine</button>
+  <button data-v="c"><span class="yr">1813 · Rang 11</span>Général de division</button>
+</div>
+
+<!-- ══════════ A · FUSILIER ══════════ -->
+<section id="a">
+  <div class="stage">
+    <div class="view">
+      <div class="viewhead"><span>Sichtfeld</span><span>Brücke von Lodi · 10. Mai 1796 · 18:40</span></div>
+      <div class="viewbody">
+        <svg viewBox="0 0 640 210" role="img" aria-label="Sichtfeld eines Soldaten in der Linie, dichter Pulverdampf">
+          <defs>
+            <linearGradient id="smoke" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2b2723" stop-opacity="1"/>
+              <stop offset="55%" stop-color="#221f1c" stop-opacity=".85"/>
+              <stop offset="100%" stop-color="#1a1816" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="vig" cx="50%" cy="88%" r="62%">
+              <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#000" stop-opacity=".72"/>
+            </radialGradient>
+          </defs>
+          <rect width="640" height="210" fill="#191715"/>
+          <rect y="0" width="640" height="130" fill="url(#smoke)"/>
+          <!-- vague enemy shapes in smoke -->
+          <g opacity=".16" fill="#cfc7b8">
+            <rect x="120" y="60" width="9" height="26" rx="3"/><rect x="146" y="57" width="9" height="29" rx="3"/>
+            <rect x="172" y="61" width="9" height="25" rx="3"/><rect x="404" y="58" width="9" height="28" rx="3"/>
+            <rect x="430" y="62" width="9" height="24" rx="3"/><rect x="456" y="59" width="9" height="27" rx="3"/>
+          </g>
+          <text x="320" y="40" text-anchor="middle" fill="#5c554b" font-family="Georgia,serif"
+                font-size="12" font-style="italic">Rauch. Du siehst keine dreißig Schritt weit.</text>
+          <!-- your rank of men -->
+          <g>
+            <rect x="196" y="112" width="20" height="62" rx="6" fill="#3a352e"/>
+            <circle cx="206" cy="106" r="9" fill="#3a352e"/>
+            <rect x="252" y="108" width="22" height="66" rx="6" fill="#4a443a"/>
+            <circle cx="263" cy="101" r="10" fill="#4a443a"/>
+            <!-- you -->
+            <rect x="306" y="102" width="26" height="74" rx="6" fill="#7d7264"/>
+            <circle cx="319" cy="94" r="11.5" fill="#7d7264"/>
+            <rect x="332" y="66" width="3.5" height="82" fill="#9b8f7d" transform="rotate(9 332 66)"/>
+            <rect x="366" y="108" width="22" height="66" rx="6" fill="#4a443a"/>
+            <circle cx="377" cy="101" r="10" fill="#4a443a"/>
+            <!-- fallen man -->
+            <g opacity=".8">
+              <rect x="412" y="160" width="58" height="15" rx="7" fill="#2c2823"/>
+              <circle cx="478" cy="167" r="8" fill="#2c2823"/>
+              <path d="M470 175 q14 5 26 2 q-10 6 -26 2 z" fill="#6b241c"/>
+            </g>
+          </g>
+          <text x="206" y="196" text-anchor="middle" fill="#5c554b" font-size="10.5"
+                font-family="ui-monospace,monospace" letter-spacing="1">MARTEL</text>
+          <text x="319" y="196" text-anchor="middle" fill="#b8924f" font-size="10.5"
+                font-family="ui-monospace,monospace" letter-spacing="1">DU</text>
+          <text x="377" y="196" text-anchor="middle" fill="#5c554b" font-size="10.5"
+                font-family="ui-monospace,monospace" letter-spacing="1">BRISSAC</text>
+          <text x="450" y="196" text-anchor="middle" fill="#6b241c" font-size="10.5"
+                font-family="ui-monospace,monospace" letter-spacing="1">GUÉRIN †</text>
+          <rect width="640" height="210" fill="url(#vig)"/>
+        </svg>
+
+        <div class="prose" style="margin-top:16px">
+          <p>Die Kolonne steht auf der Brücke und kommt nicht vor und nicht zurück. Vor dir ist nur Rauch und in dem Rauch ist Geschützfeuer, das im Holz einschlägt und Splitter wirft, so lang wie dein Unterarm.</p>
+          <p>Guérin, der links neben dir stand, liegt seit einer Minute an den Brückenbalken und macht ein Geräusch, das aufhören wird.</p>
+          <p>Deine Hände zittern so stark, dass du beim letzten Laden die Patrone verloren hast. Du hast noch <em>eine</em> im Beutel.</p>
+          <p class="said">Irgendwo hinter dir brüllt jemand, man solle vorgehen. Er brüllt es zum vierten Mal, und niemand geht vor.</p>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="ahead">Dein Zustand</div>
+      <div class="abody">
+        <p class="who">Étienne Duval</p>
+        <p class="whorank">Fusilier · 32. Halbbrigade</p>
+
+        <div class="stat"><div class="statlab"><span>Atem</span><span>31 / 100</span></div>
+          <div class="bar b-steel"><i style="width:31%"></i></div></div>
+        <div class="stat"><div class="statlab"><span>Nerven</span><span>18 / 100</span></div>
+          <div class="bar b-red"><i style="width:18%"></i></div></div>
+        <div class="stat"><div class="statlab"><span>Muskete</span><span>ungeladen</span></div>
+          <div class="bar b-dim"><i style="width:0%"></i></div></div>
+
+        <div class="rule"></div>
+        <div class="kv"><span>Patronen</span><b>1</b></div>
+        <div class="kv"><span>Wunden</span><b>Streifschuss, li. Arm</b></div>
+        <div class="kv"><span>Ruf</span><b>4</b></div>
+        <div class="kv"><span>Sold</span><b>1 F / Tag</b></div>
+
+        <div class="rule"></div>
+        <div class="kv"><span>Kommando</span><b style="color:#5c554b">—</b></div>
+        <div class="kv"><span>Karte</span><b style="color:#5c554b">keine</b></div>
+        <div class="kv"><span>Feindstärke</span><b style="color:#5c554b">unbekannt</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="orders">
+    <div class="ordhead">Was tust du?</div>
+    <div class="ordbody">
+      <button class="ord">Hinwerfen und laden<span class="cost">Geschick · 2 Runden</span></button>
+      <button class="ord">Stehenbleiben und laden<span class="cost">Kaltblütigkeit-Probe</span></button>
+      <button class="ord risk">Vorlaufen, ohne zu laden<span class="cost">Ruf +++ · sehr gefährlich</span></button>
+      <button class="ord risk">Guérin nach hinten schleifen<span class="cost">Kameradschaft ++ · Konstitution</span></button>
+      <button class="ord">Zurückweichen<span class="cost">Ruf −− · Zeugen: 2</span></button>
+      <button class="ord off">Kompanie formieren lassen<span class="cost">gesperrt · ab Rang 7</span></button>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>Designnotiz · Rang 1</h3>
+    <p>Du steuerst <b>einen Körper</b>. Der Bildschirm zeigt vier Männer und Rauch — mehr weiß dein Charakter nicht. Keine Karte, keine Feindstärke, kein Überblick über die Schlacht. Ob Lodi gewonnen wird, erfährst du am nächsten Morgen von jemand anderem.</p>
+    <p>Die Zustandsleisten sind <b>körperlich</b>: Atem, Nerven, Ladezustand. Der letzte gesperrte Knopf steht absichtlich da — er zeigt dir, dass es eine Ebene über dir gibt.</p>
+  </div>
+</section>
+
+<!-- ══════════ B · CAPITAINE ══════════ -->
+<section id="b" class="hidden">
+  <div class="stage">
+    <div class="view">
+      <div class="viewhead"><span>Gefechtsskizze · Kompanie</span><span>Eylau · 8. Februar 1807 · 11:15</span></div>
+      <div class="viewbody">
+        <svg viewBox="0 0 640 300" role="img" aria-label="Handgezeichnete Gefechtsskizze der eigenen Kompanie">
+          <defs>
+            <pattern id="hatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="7" stroke="#302b25" stroke-width="2.4"/>
+            </pattern>
+            <radialGradient id="fog" cx="50%" cy="12%" r="58%">
+              <stop offset="0%" stop-color="#1a1816" stop-opacity=".95"/>
+              <stop offset="100%" stop-color="#1a1816" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="640" height="300" fill="#171513"/>
+          <!-- terrain: snow field lines, sketchy -->
+          <g stroke="#2b2722" fill="none" stroke-width="1.2">
+            <path d="M0 214 q90 -12 180 3 t180 -5 t180 6 t100 -4" stroke-dasharray="5 6"/>
+            <path d="M0 250 q120 8 240 -4 t240 6 t160 -3" stroke-dasharray="5 6"/>
+          </g>
+          <!-- wood -->
+          <path d="M18 46 q40 -22 84 -6 q42 -16 74 8 q20 34 -8 50 q-70 16 -136 2 q-26 -24 -14 -54 z"
+                fill="url(#hatch)" stroke="#3a342c" stroke-width="1.3"/>
+          <text x="96" y="80" text-anchor="middle" fill="#6b6255" font-size="11"
+                font-family="Georgia,serif" font-style="italic">Gehölz</text>
+          <!-- road -->
+          <path d="M-6 300 q160 -70 300 -108 q140 -38 352 -60" stroke="#332e27" stroke-width="9" fill="none"/>
+          <path d="M-6 300 q160 -70 300 -108 q140 -38 352 -60" stroke="#221f1b" stroke-width="3"
+                fill="none" stroke-dasharray="9 11"/>
+          <text x="470" y="120" fill="#6b6255" font-size="11" font-family="Georgia,serif"
+                font-style="italic">Straße nach Eylau</text>
+          <!-- enemy: uncertain -->
+          <g stroke="#9b2f24" fill="none" stroke-width="1.6" stroke-dasharray="7 5">
+            <rect x="238" y="42" width="132" height="26" rx="2"/>
+            <rect x="402" y="52" width="96" height="24" rx="2"/>
+          </g>
+          <text x="304" y="34" text-anchor="middle" fill="#9b2f24" font-size="11"
+                font-family="ui-monospace,monospace" letter-spacing="1">RUSS. INF. — STÄRKE ?</text>
+          <text x="450" y="44" text-anchor="middle" fill="#9b2f24" font-size="11"
+                font-family="ui-monospace,monospace" letter-spacing="1">? BATTERIE ?</text>
+          <!-- friendly companies -->
+          <g>
+            <rect x="150" y="168" width="94" height="21" fill="#3a352e" stroke="#544c40"/>
+            <text x="197" y="183" text-anchor="middle" fill="#948a7b" font-size="10.5"
+                  font-family="ui-monospace,monospace">2. KOMP.</text>
+            <!-- your company -->
+            <rect x="262" y="164" width="108" height="26" fill="#5f5646" stroke="#b8924f" stroke-width="1.7"/>
+            <text x="316" y="182" text-anchor="middle" fill="#efe6d4" font-size="11.5"
+                  font-family="ui-monospace,monospace" letter-spacing="1">DEINE 4. KOMP.</text>
+            <rect x="388" y="170" width="90" height="21" fill="#3a352e" stroke="#544c40"/>
+            <text x="433" y="185" text-anchor="middle" fill="#948a7b" font-size="10.5"
+                  font-family="ui-monospace,monospace">5. KOMP.</text>
+            <!-- battalion behind -->
+            <rect x="230" y="240" width="180" height="17" fill="#2a2620" stroke="#463f35"/>
+            <text x="320" y="253" text-anchor="middle" fill="#6b6255" font-size="10"
+                  font-family="ui-monospace,monospace">II. BATAILLON — RESERVE</text>
+          </g>
+          <!-- gap marker -->
+          <path d="M248 178 L258 178 M244 172 L244 186 M262 172 L262 186" stroke="#9b2f24" stroke-width="1.4"/>
+          <text x="196" y="212" text-anchor="middle" fill="#9b2f24" font-size="10"
+                font-family="ui-monospace,monospace">LÜCKE 40 SCHRITT</text>
+          <rect width="640" height="140" fill="url(#fog)"/>
+          <text x="320" y="20" text-anchor="middle" fill="#5c554b" font-size="11"
+                font-family="Georgia,serif" font-style="italic">Schneetreiben — Sicht unter 200 Schritt</text>
+        </svg>
+
+        <div class="prose" style="margin-top:16px">
+          <p>Der Schnee kommt seitlich und nimmt dir die Sicht auf alles jenseits von zweihundert Schritt. Was du vor dir hast, weißt du aus zwei Meldungen und einem Geräusch, und die Meldungen widersprechen sich.</p>
+          <p>Links ist eine Lücke von vierzig Schritt zur 2. Kompanie. Sergent Martel hat sie dir gemeldet, bevor er zurückging, um die Verwundeten zu zählen. Er kam mit einer Zahl zurück, die du nicht laut wiederholt hast.</p>
+          <p class="said">„Mon capitaine" — Brissac, dein Fourier, seit Lodi bei dir — „wenn die Batterie da drüben steht, wo Sie glauben, stehen wir in der Achse."</p>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="ahead">Deine Kompanie</div>
+      <div class="abody">
+        <p class="who">Étienne Duval</p>
+        <p class="whorank">Capitaine · 4. Komp., 32. Linie</p>
+
+        <div class="stat"><div class="statlab"><span>Mannstärke</span><span>78 / 120</span></div>
+          <div class="bar b-brass"><i style="width:65%"></i></div></div>
+        <div class="stat"><div class="statlab"><span>Moral d. Komp.</span><span>44 / 100</span></div>
+          <div class="bar b-red"><i style="width:44%"></i></div></div>
+        <div class="stat"><div class="statlab"><span>Munition</span><span>31 Schuss/Mann</span></div>
+          <div class="bar b-steel"><i style="width:62%"></i></div></div>
+        <div class="stat"><div class="statlab"><span>Deine Nerven</span><span>66 / 100</span></div>
+          <div class="bar b-steel"><i style="width:66%"></i></div></div>
+
+        <div class="rule"></div>
+        <div class="kv"><span>Formation</span><b>Linie, 3 Glieder</b></div>
+        <div class="kv lost"><span>Heute gefallen</span><b>19</b></div>
+        <div class="kv"><span>Ruf</span><b>61</b></div>
+        <div class="kv"><span>Belastung</span><b>52</b></div>
+
+        <div class="rule"></div>
+        <div class="kv"><span>Fürsprecher</span><b>Chef d. b. Reynaud</b></div>
+        <div class="kv"><span>Nächste Vakanz</span><b style="color:#9b2f24">keine</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="orders">
+    <div class="ordhead">Dein Befehl</div>
+    <div class="ordbody">
+      <button class="ord">Lücke schließen, links anschließen<span class="cost">Drill · 2 Runden ungedeckt</span></button>
+      <button class="ord">Karree formieren<span class="cost">Autorität-Probe · Moral 44</span></button>
+      <button class="ord">Salve auf 80 Schritt<span class="cost">Munition −4/Mann</span></button>
+      <button class="ord risk">Bajonett, vorgehen<span class="cost">Ruf +++ · Verluste hoch</span></button>
+      <button class="ord">Brissac vorschicken, aufklären<span class="cost">1 Runde · Gunst-Risiko</span></button>
+      <button class="ord risk">Befehl Reynauds ignorieren<span class="cost">Gunst −− · Fürsprecher</span></button>
+      <button class="ord off">Regiment schwenken<span class="cost">gesperrt · ab Rang 9</span></button>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>Designnotiz · Rang 7</h3>
+    <p>Der Maßstab ist gewandert: Du steuerst <b>120 Männer</b>, nicht mehr deinen Körper. „Atem" und „Ladezustand" sind verschwunden, dafür gibt es Mannstärke, Kompaniemoral und Munition. Deine eigenen Nerven sind auf eine Leiste geschrumpft.</p>
+    <p>Du hast jetzt eine Karte — aber eine <b>schlechte</b>. Der Feind ist gestrichelt und mit Fragezeichen eingetragen, weil du ihn nicht siehst, sondern erschließt. Mehr Rang heißt mehr Übersicht <em>und</em> mehr Unsicherheit, weil du nun über Dinge entscheidest, die du nicht mit eigenen Augen prüfen kannst.</p>
+    <p>Neu im Panel: <b>Fürsprecher</b> und <b>Vakanz</b>. Ab hier ist Karriere ein sichtbares System — und „keine Vakanz" heißt: Solange Reynaud lebt, wirst du nicht Chef de bataillon.</p>
+  </div>
+</section>
+
+<!-- ══════════ C · GÉNÉRAL ══════════ -->
+<section id="c" class="hidden">
+  <div class="stage">
+    <div class="view">
+      <div class="viewhead"><span>Operationskarte · Division</span><span>Leipzig · 16. Oktober 1813 · 14:20</span></div>
+      <div class="viewbody">
+        <svg viewBox="0 0 640 320" role="img" aria-label="Operationskarte mit Divisionssymbolen">
+          <rect width="640" height="320" fill="#171513"/>
+          <g stroke="#221f1b" stroke-width="1">
+            <path d="M80 0V320M160 0V320M240 0V320M320 0V320M400 0V320M480 0V320M560 0V320"/>
+            <path d="M0 64H640M0 128H640M0 192H640M0 256H640"/>
+          </g>
+          <!-- river -->
+          <path d="M78 -6 q26 92 -8 168 q-30 68 6 164" stroke="#3d4a50" stroke-width="7" fill="none"/>
+          <text x="34" y="150" fill="#5f7078" font-size="11" font-family="Georgia,serif"
+                font-style="italic" transform="rotate(-88 34 150)">Elster</text>
+          <!-- villages -->
+          <g fill="#453e34" stroke="#5e5648">
+            <rect x="300" y="118" width="15" height="12"/><rect x="452" y="196" width="15" height="12"/>
+            <rect x="196" y="248" width="15" height="12"/>
+          </g>
+          <text x="308" y="112" text-anchor="middle" fill="#7d7466" font-size="10.5" font-family="Georgia,serif">Wachau</text>
+          <text x="474" y="222" text-anchor="start" fill="#7d7466" font-size="10.5" font-family="Georgia,serif">Liebertwolkwitz</text>
+          <text x="204" y="242" text-anchor="middle" fill="#7d7466" font-size="10.5" font-family="Georgia,serif">Connewitz</text>
+          <!-- enemy formations -->
+          <g stroke="#9b2f24" fill="#2a1c19" stroke-width="1.5">
+            <rect x="264" y="44" width="52" height="24"/><rect x="352" y="38" width="52" height="24"/>
+            <rect x="442" y="56" width="52" height="24"/>
+          </g>
+          <g fill="#c4574a" font-size="10" font-family="ui-monospace,monospace" text-anchor="middle">
+            <text x="290" y="60">XX ?</text><text x="378" y="54">XX</text><text x="468" y="72">XX ?</text>
+          </g>
+          <text x="378" y="26" text-anchor="middle" fill="#9b2f24" font-size="10.5"
+                font-family="ui-monospace,monospace" letter-spacing="1.4">KOALITION — SCHÄTZUNG 3 KORPS</text>
+          <!-- arrows of enemy advance -->
+          <g stroke="#9b2f24" stroke-width="1.6" fill="none" opacity=".55" stroke-dasharray="6 5">
+            <path d="M290 72 L296 108" marker-end="url(#ah)"/><path d="M378 66 L392 104"/>
+          </g>
+          <!-- your division -->
+          <g>
+            <rect x="272" y="150" width="66" height="28" fill="#5f5646" stroke="#b8924f" stroke-width="2"/>
+            <text x="305" y="169" text-anchor="middle" fill="#efe6d4" font-size="11"
+                  font-family="ui-monospace,monospace">XX DUVAL</text>
+            <rect x="368" y="164" width="58" height="24" fill="#332f28" stroke="#5b533f"/>
+            <text x="397" y="180" text-anchor="middle" fill="#948a7b" font-size="10"
+                  font-family="ui-monospace,monospace">XX LAURIN</text>
+            <rect x="186" y="182" width="58" height="24" fill="#332f28" stroke="#5b533f"/>
+            <text x="215" y="198" text-anchor="middle" fill="#948a7b" font-size="10"
+                  font-family="ui-monospace,monospace">XX BERGE</text>
+            <rect x="286" y="252" width="76" height="22" fill="#26231e" stroke="#4a4337" stroke-dasharray="4 3"/>
+            <text x="324" y="267" text-anchor="middle" fill="#6b6255" font-size="10"
+                  font-family="ui-monospace,monospace">GARDE — RESERVE</text>
+          </g>
+          <text x="632" y="308" text-anchor="end" fill="#4e473d" font-size="10"
+                font-family="ui-monospace,monospace" letter-spacing="1">STAND 13:40 · BEFEHLSLAUFZEIT ~25 MIN</text>
+        </svg>
+
+        <div class="prose" style="margin-top:16px">
+          <p>Du siehst die Schlacht nicht. Du siehst einen Tisch, eine Karte und drei Männer, die dir Zettel bringen, und alles darauf ist vierzig Minuten alt.</p>
+          <p>Deine Division hat heute Morgen elftausend Mann gehabt. Was sie jetzt hat, weiß niemand, der zwischen hier und Wachau steht, und die, die es wüssten, kommen nicht zurück.</p>
+          <p class="said">Der Adjutant des Kaisers ist vor zehn Minuten geritten und hat nichts gefragt, sondern etwas gesagt: dass Wachau bis vier Uhr zu halten sei.</p>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="ahead">Meldungen</div>
+      <div class="abody">
+        <div class="disp">
+          <div class="meta">13:40 · Oberst Berge · bestätigt</div>
+          <div class="msg">Linker Flügel hält. Munition reicht bis etwa vier Uhr, nicht länger.</div>
+        </div>
+        <div class="disp unconf">
+          <div class="meta">13:15 · Reiterpatrouille · unbestätigt</div>
+          <div class="msg">Preußische Kolonne im Anmarsch auf Liebertwolkwitz. Stärke nicht feststellbar.</div>
+        </div>
+        <div class="disp unconf">
+          <div class="meta">12:50 · zivile Quelle · zweifelhaft</div>
+          <div class="msg">Österreichische Kavallerie südlich der Elster gesichtet.</div>
+        </div>
+        <div class="disp">
+          <div class="meta">14:05 · Kaiserl. Hauptquartier · Befehl</div>
+          <div class="msg">Wachau ist bis 16:00 Uhr zu halten. Keine Verstärkung verfügbar.</div>
+        </div>
+
+        <div class="rule"></div>
+        <div class="kv"><span>Sollstärke</span><b>11.000</b></div>
+        <div class="kv lost"><span>Verluste heute</span><b>≈ 2.400</b></div>
+        <div class="kv"><span>Befehlslaufzeit</span><b>~25 Min</b></div>
+        <div class="kv"><span>Reserven</span><b style="color:#9b2f24">keine</b></div>
+        <div class="rule"></div>
+        <div class="kv"><span>Ruf</span><b>88</b></div>
+        <div class="kv"><span>Belastung</span><b style="color:#9b2f24">81</b></div>
+        <div class="kv"><span>Gunst d. Kaisers</span><b>+2</b></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="orders">
+    <div class="ordhead">Deine Anweisung <span style="color:#5c554b;text-transform:none;letter-spacing:0;font-size:11px">— wirkt erst in ~25 Minuten</span></div>
+    <div class="ordbody">
+      <button class="ord">Wachau halten, Berge verstärken<span class="cost">Befehl · Verluste steigen</span></button>
+      <button class="ord">Zurücknehmen auf Connewitz<span class="cost">Befehl missachtet · Gunst −−</span></button>
+      <button class="ord risk">Garde-Reserve anfordern<span class="cost">Kaiserl. Gunst einsetzen</span></button>
+      <button class="ord">Laurin schwenken lassen<span class="cost">40 Min · Flanke offen</span></button>
+      <button class="ord risk">Selbst nach vorn reiten<span class="cost">Moral ++ · du kannst fallen</span></button>
+      <button class="ord">Nichts tun, Lage klären lassen<span class="cost">1 Stunde · Meldungen sammeln</span></button>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>Designnotiz · Rang 11</h3>
+    <p>Das Sichtfeld ist jetzt eine <b>Operationskarte</b>, und trotzdem siehst du weniger als der Fusilier — er sah wenigstens die Wahrheit. Du siehst Symbole, die vor vierzig Minuten gestimmt haben, und drei davon sind mit Fragezeichen versehen.</p>
+    <p>Die entscheidende Umkehrung: <b>Deine Befehle wirken erst in 25 Minuten.</b> Als Fusilier war zwischen Entscheidung und Folge nichts. Als General entscheidest du über eine Lage, die es nicht mehr gibt.</p>
+    <p>Der Preis steht rechts unten: Belastung 81. Der Aufstieg ist gelungen, und das Spiel führt Buch darüber, was er gekostet hat.</p>
+  </div>
+</section>
+
+<footer>
+  Mockup, keine Spiellogik — Werte und Texte sind Platzhalter, um die drei Darstellungsebenen vergleichbar zu machen.
+</footer>
+
+</div>
+
+<script>
+  const btns = document.querySelectorAll('.switch button');
+  const secs = { a: document.getElementById('a'), b: document.getElementById('b'), c: document.getElementById('c') };
+  btns.forEach(b => b.addEventListener('click', () => {
+    btns.forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    Object.keys(secs).forEach(k => secs[k].classList.toggle('hidden', k !== b.dataset.v));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+</script>
+</body>
+</html>

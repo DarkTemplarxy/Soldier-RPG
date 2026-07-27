@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Der Marschallstab — Italien 1796/97</title>
+<style>
+:root{
+    --bg:#121110; --panel:#1a1816; --panel2:#211e1b; --line:#2f2a24;
+    --text:#cfc7b8; --dim:#877e71; --faint:#5c554b;
+    --blood:#9b2f24; --brass:#b8924f; --steel:#6f7d84; --green:#6d7a52;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);
+    font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.65;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 70px}
+
+  header.top{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:20px;
+    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  h1{font-size:19px;font-weight:normal;letter-spacing:.14em;text-transform:uppercase;margin:0}
+  .sub{color:var(--faint);font-size:12px;font-style:italic;margin:3px 0 0}
+  .hdrright{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+    color:var(--faint);letter-spacing:.1em;text-align:right}
+
+  .card{background:var(--panel);border:1px solid var(--line);margin-bottom:18px}
+  .ch{padding:8px 15px;border-bottom:1px solid var(--line);background:var(--panel2);
+    font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+    display:flex;justify-content:space-between;gap:12px}
+  .cb{padding:17px}
+
+  .stage{display:grid;grid-template-columns:1fr 292px;gap:18px;align-items:start}
+  @media(max-width:900px){.stage{grid-template-columns:1fr}}
+
+  .prose p{margin:0 0 12px}
+  .prose p:last-child{margin-bottom:0}
+  .prose em{color:#e0d8c8}
+  .said{color:var(--dim)}
+  .ergebnis{border-left:2px solid var(--brass);background:#171512;padding:12px 15px;margin:14px 0 0;font-size:15px}
+  .ergebnis.gut{border-left-color:var(--green)}
+  .ergebnis.schlecht{border-left-color:var(--blood)}
+  .probe{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
+    color:var(--faint);letter-spacing:.06em;margin-top:8px}
+
+  .who{font-size:17px;margin:0 0 2px}
+  .whorank{color:var(--brass);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 13px}
+  .stat{margin-bottom:9px}
+  .statlab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);
+    margin-bottom:3px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .bar{height:5px;background:#0c0b0a;border:1px solid #2a2621}
+  .bar i{display:block;height:100%;transition:width .3s}
+  .b-red i{background:var(--blood)} .b-brass i{background:var(--brass)}
+  .b-steel i{background:var(--steel)} .b-green i{background:var(--green)}
+  .b-dim i{background:#5c554b}
+  .rule{height:1px;background:var(--line);margin:14px 0}
+  .kv{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;gap:10px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--dim)}
+  .kv b{font-weight:normal;color:var(--text)}
+  .kv .warn{color:var(--blood)} .kv .ok{color:#8b9a68}
+  .mini{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 7px}
+
+  .orders{margin-top:18px;border:1px solid var(--line);background:var(--panel)}
+  .ordbody{display:flex;flex-direction:column;gap:8px;padding:14px 15px}
+  .ord{background:#0e0d0c;border:1px solid #342f28;color:var(--text);
+    font-family:inherit;font-size:15px;padding:10px 14px;cursor:pointer;text-align:left;
+    transition:border-color .15s,color .15s;line-height:1.45}
+  .ord:hover:not(:disabled){border-color:var(--brass);color:#efe6d4}
+  .ord.risk:hover:not(:disabled){border-color:var(--blood)}
+  .ord:disabled{opacity:.32;cursor:not-allowed}
+  .ord .cost{display:block;font-size:10.5px;color:var(--faint);letter-spacing:.07em;
+    font-family:ui-monospace,Menlo,Consolas,monospace;margin-top:4px}
+  .ord.weiter{border-color:var(--brass);color:#efe6d4}
+
+  button.plain{background:#0e0d0c;border:1px solid #342f28;color:var(--text);
+    font-family:inherit;font-size:14px;padding:8px 16px;cursor:pointer}
+  button.plain:hover{border-color:var(--brass);color:#efe6d4}
+  button.plain:disabled{opacity:.3;cursor:not-allowed}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;font-weight:normal;color:var(--faint);font-size:10px;
+    letter-spacing:.13em;text-transform:uppercase;padding:0 9px 7px 0;
+    border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,Consolas,monospace}
+  th.n,td.n{text-align:right;white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace}
+  td{padding:6px 9px 6px 0;border-bottom:1px solid #232019;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.k{color:var(--brass);white-space:nowrap}
+  td.d{color:var(--dim)}
+  tr.hi td{background:#201d17}
+
+  .note{border-left:2px solid var(--brass);background:#171512;padding:13px 16px;
+    color:var(--dim);font-size:14.5px}
+  .note.red{border-left-color:var(--blood)}
+  .note.green{border-left-color:var(--green)}
+  .note b{color:#e6ddcb;font-weight:normal}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+  .hidden{display:none !important}
+  svg{display:block;width:100%;height:auto}
+
+  /* Charaktererschaffung */
+  .attrrow{display:grid;grid-template-columns:118px 1fr 46px 78px;gap:10px;align-items:center;
+    margin-bottom:9px}
+  .attrname{font-size:14px}
+  .attrval{font-family:ui-monospace,monospace;font-size:14px;text-align:right;color:#e6ddcb}
+  .pmbtn{background:#0e0d0c;border:1px solid #342f28;color:var(--text);width:32px;height:26px;
+    cursor:pointer;font-family:ui-monospace,monospace;font-size:14px;line-height:1}
+  .pmbtn:hover:not(:disabled){border-color:var(--brass)}
+  .pmbtn:disabled{opacity:.25;cursor:not-allowed}
+  input[type=text]{background:#0e0d0c;border:1px solid #342f28;color:var(--text);
+    font-family:inherit;font-size:15px;padding:8px 11px;width:100%}
+  input[type=text]:focus{outline:none;border-color:var(--brass)}
+  .herkwahl{display:flex;flex-direction:column;gap:7px}
+  .herk{background:#0e0d0c;border:1px solid #342f28;padding:10px 13px;cursor:pointer;
+    font-size:14px;transition:border-color .15s}
+  .herk:hover{border-color:#5b4f3a}
+  .herk.on{border-color:var(--brass);background:#1c1913}
+  .herk .hn{color:var(--brass);font-size:14.5px}
+  .herk .hd{color:var(--dim);font-size:12.5px;margin-top:3px;
+    font-family:ui-monospace,monospace;letter-spacing:.02em}
+
+  .log{max-height:200px;overflow-y:auto;font-size:13.5px;color:var(--dim)}
+  .log div{padding:3px 0;border-bottom:1px solid #221f1a}
+  .log div:last-child{border-bottom:none}
+  .tot{color:var(--blood)}
+  .zit{font-style:italic;color:var(--dim);border-left:2px solid var(--line);padding-left:14px;margin:14px 0}
+  footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:11.5px;font-style:italic;display:flex;
+    justify-content:space-between;gap:14px;flex-wrap:wrap}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>Der Marschallstab</h1>
+    <p class="sub" id="untertitel">Erstes Kapitel · Italien 1796/97</p>
+  </div>
+  <div class="hdrright" id="kopfrechts"></div>
+</header>
+
+<div id="app"></div>
+
+<footer>
+  <span>Prototyp · Meilenstein 1 · Ränge 1–3</span>
+  <span id="fusszeile"></span>
+</footer>
+</div>
+
+<script>
+'use strict';
+/* Grundwerte: Attribute, Fertigkeiten, Ränge, Herkünfte, Ausrüstung, Kaufladen.
+   Reine Daten. Wer hier Zahlen ändert, trägt sie in CLAUDE.md nach. */
+
+/* ══════════════════ DATEN ══════════════════ */
+
+const ATTRIBUTE = [
+  ['konstitution','Konstitution'],['geschick','Geschick'],['kaltbluetigkeit','Kaltblütigkeit'],
+  ['autoritaet','Autorität'],['bildung','Bildung'],['menschenkenntnis','Menschenkenntnis']
+];
+const FERTIGKEITEN = [
+  ['muskete','Muskete'],['bajonett','Bajonett'],['reiten','Reiten'],['drill','Drill'],
+  ['taktik','Taktik'],['kartenkunde','Kartenkunde'],['verwaltung','Verwaltung'],
+  ['fouragieren','Fouragieren'],['feldchirurgie','Feldchirurgie']
+];
+const NAMEN = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,n])=>(o[k]=n,o),{});
+
+const RANG = [
+  {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
+  {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62}
+];
+function rangName(n){
+  if(n===2) return S.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
+  const r=RANG.find(r=>r.n===n); return r?r.name:'Fusilier';
+}
+function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
+
+const HERKUENFTE = [
+  {id:'bauer',name:'Bauernsohn',
+   text:'Konstitution +20 · Fouragieren +25 · Bajonett +15 · Bildung −10',
+   attr:{konstitution:20,bildung:-10}, fert:{fouragieren:25,bajonett:15}},
+  {id:'schmied',name:'Schmiedsgeselle',
+   text:'Geschick +20 · Muskete +25 · Bajonett +15 · Menschenkenntnis −10',
+   attr:{geschick:20,menschenkenntnis:-10}, fert:{muskete:25,bajonett:15}},
+  {id:'wilderer',name:'Wilderer',
+   text:'Muskete +30 · Fouragieren +20 · Geschick +15 · Autorität −15',
+   attr:{geschick:15,autoritaet:-15}, fert:{muskete:30,fouragieren:20}},
+  {id:'fuhrmann',name:'Fuhrmannssohn',
+   text:'Reiten +30 · Verwaltung +20 · Konstitution +10 · Kaltblütigkeit −10',
+   attr:{konstitution:10,kaltbluetigkeit:-10}, fert:{reiten:30,verwaltung:20}},
+  {id:'schreiber',name:'Schreibergehilfe',
+   text:'Bildung +25 · Verwaltung +25 · Kartenkunde +20 · Konstitution −20',
+   attr:{bildung:25,konstitution:-20}, fert:{verwaltung:25,kartenkunde:20}},
+  {id:'strasse',name:'Straßenjunge aus Paris',
+   text:'Menschenkenntnis +25 · Kaltblütigkeit +20 · Fouragieren +20 · Bildung −15',
+   attr:{menschenkenntnis:25,kaltbluetigkeit:20,bildung:-15}, fert:{fouragieren:20}}
+];
+
+const AUSRUESTUNG_START = () => ({
+  muskete:{name:'Charleville Modell 1777',zustand:70,verschleiss:15},
+  seitenwaffe:{name:'Ausgabebajonett',zustand:80,verschleiss:8},
+  schuhe:{name:'Ausgabeschuhe',zustand:55,verschleiss:25},
+  mantel:{name:'Kein Mantel',zustand:0,verschleiss:0},
+  tornister:{name:'Ausgabetornister',zustand:65,verschleiss:10}
+});
+
+// Kaufkosten: Preis je Punkt nach Zehnerbereich
+const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];
+function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,Math.floor(x/10))]; return t; }
+
+const LADEN = [
+  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:40},
+  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},
+  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant',vp:24},
+  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:20},
+  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
+  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:15},
+  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12}
+];
+
+
+'use strict';
+/* Kapitel 1 — Italien 1796/97. Reine Daten: Szenen, Gefechte, Ergebnisse.
+   Neue Kapitel als eigene Datei danebenlegen und in index.html einhängen. */
+
+/* ══════════════════ KAPITEL ITALIEN 1796/97 ══════════════════ */
+
+const KAPITEL = [
+/* 1 */ {typ:'szene',id:'savona',datum:'12. April 1796 · Savona',ort:'Lager der Italienarmee',
+  text:[
+    'Du bist seit elf Tagen bei der Armee und hast in dieser Zeit zweimal etwas gegessen, das man Brot nennen konnte.',
+    'Die Italienarmee ist keine Armee, sondern ein Haufen von dreißigtausend Männern, die zu wenig Schuhe und zu viele Läuse haben. Der neue Oberbefehlshaber ist seit zwölf Tagen da, sechsundzwanzig Jahre alt, klein, und niemand weiß, was man von ihm halten soll.',
+    'Heute Abend wird verlesen, dass es morgen nach Norden geht. In die Berge. Über die Pässe, wo noch Schnee liegt.',
+    'Deine Schuhe haben es bis hierher geschafft. Weiter vermutlich nicht.'
+  ],
+  optionen:[
+    {label:'Einem Toten die Schuhe ausziehen',hint:'Es liegt einer hinter dem Lazarettzelt',
+     probe:{wert:'menschenkenntnis',schw:35},kosten:'Menschenkenntnis · niemand darf es sehen',
+     erfolg:{text:'Du wartest, bis der Posten sich umdreht. Die Schuhe sind zu groß, aber sie haben Sohlen. Du stopfst Lumpen hinein und sagst nichts.',
+       ausr:{schuhe:30},belastung:4},
+     misserfolg:{text:'Ein Sergent sieht dich und schlägt dir mit dem Stock über den Rücken. Du behältst die Schuhe — aber jetzt wissen es zwanzig Männer.',
+       ausr:{schuhe:25},ruf:-3,belastung:6}},
+    {label:'Die eigenen Schuhe flicken',hint:'Mit Draht und Lumpen, den halben Abend lang',
+     probe:{wert:'geschick',schw:30},kosten:'Geschick · kostet Schlaf',
+     erfolg:{text:'Du nähst die Sohle mit Draht an das Oberleder. Es hält. Es wird nicht ewig halten, aber es hält.',ausr:{schuhe:22},atem:-5},
+     misserfolg:{text:'Der Draht reißt zweimal, du stichst dir in den Daumen, und am Ende ist es kaum besser als vorher.',ausr:{schuhe:8},belastung:3}},
+    {label:'Nichts tun und schlafen',hint:'Morgen ist auch ein Tag',
+     erfolg:{text:'Du schläfst sieben Stunden am Stück, was seit Wochen nicht vorgekommen ist. Die Schuhe sind am Morgen genauso kaputt wie am Abend, aber du bist ausgeruht.',
+       belastung:-6,atem:8}},
+    {label:'Den anderen zuhören',hint:'Wer redet, verrät etwas',
+     probe:{wert:'menschenkenntnis',schw:40},kosten:'Menschenkenntnis',
+     erfolg:{text:'Am Feuer sitzt ein Sergent namens Martel, der schon 1793 an der Rheinfront war. Er redet über den Neuen, ohne zu spotten, was hier selten ist. Du merkst dir den Namen.',
+       gunst:2,kameradschaft:5,fert:{taktik:4}},
+     misserfolg:{text:'Sie reden über Weiber und über Brot. Du lernst nichts, außer dass es hier keiner besser hat als du.',kameradschaft:2}}
+  ]},
+
+/* 2 */ {typ:'kampf',id:'montenotte',datum:'12. April 1796 · Montenotte',ort:'Höhenzug über Savona',
+  intro:'Es ist noch dunkel, als die Kolonne den Hang hinaufgeht. Oben stehen Österreicher, die nicht damit gerechnet haben, dass jemand bei diesem Wetter angreift. Du auch nicht.',
+  runden:6,feindMoral:45,gefahr:10,
+  sieg:{text:'Die Österreicher gehen zurück, erst geordnet, dann nicht mehr. Du stehst zwischen umgeworfenen Zelten und begreifst, dass ihr gewonnen habt, ohne dass es dir jemand gesagt hätte.',ruf:5,fert:{muskete:0}},
+  niederlage:{text:'Die Linie hält nicht. Ihr geht den Hang hinunter, schneller als hinauf, und niemand sieht dabei zu.',ruf:-4,belastung:8}},
+
+/* 3 */ {typ:'szene',id:'dego',datum:'15. April 1796 · Marsch auf Dego',ort:'Ligurische Alpen',
+  text:[
+    'Dreißig Stunden Marsch mit vier Stunden Schlaf. Die Vorräte sind eine Vorstellung, die es in Papieren gibt und sonst nirgends.',
+    'Am Nachmittag kommt ihr an einem Gehöft vorbei. Es ist nicht verlassen — hinter dem Fenster bewegt sich etwas. Der Sergent geht vorne und sieht es nicht.',
+    'Hinter dir keucht ein Junge namens Guérin, achtzehn, seit drei Wochen dabei. Er hat seit gestern früh nichts gegessen und geht wie einer, der gleich nicht mehr geht.'
+  ],
+  optionen:[
+    {label:'In das Gehöft gehen und nehmen, was da ist',hint:'Schnell, bevor die Kolonne weiterzieht',
+     probe:{wert:'fouragieren',schw:40},kosten:'Fouragieren · Plünderung ist verboten',
+     erfolg:{text:'Speck, Brot, ein halber Käse. Die Bäuerin schreit dich an in einer Sprache, die du nicht verstehst. Du legst zwei Sous auf den Tisch, was ungefähr nichts ist, und gehst.',
+       ausr:{tornister:10},atem:12,belastung:5,geld:4},
+     misserfolg:{text:'Das Haus ist schon geplündert. Du findest eine Handvoll Bohnen und den Geruch von Leuten, die vor dir da waren.',atem:3,belastung:4}},
+    {label:'Guérin dein letztes Brot geben',hint:'Er schafft es sonst nicht bis Dego',
+     kosten:'Kameradschaft ++ · du bleibst hungrig',
+     erfolg:{text:'Er sagt nichts, isst und geht weiter. Zwei Stunden später hält er dich fest, als du auf dem Geröll wegrutschst. So funktioniert das hier.',
+       kameradschaft:14,atem:-10,ruf:2}},
+    {label:'Guérins Tornister mittragen',hint:'Konstitution · zwanzig Kilo mehr',
+     probe:{wert:'konstitution',schw:50},kosten:'Konstitution',
+     erfolg:{text:'Du nimmst ihm den Tornister ab und trägst zwei Tornister über einen Pass. Am Abend kannst du die Arme nicht heben. Der Sergent hat es gesehen.',
+       kameradschaft:10,ruf:4,gunst:1,atem:-18},
+     misserfolg:{text:'Nach einer Meile gibst du auf und wirfst ihm den Tornister vor die Füße. Er sagt nichts. Das ist schlimmer, als wenn er etwas gesagt hätte.',
+       kameradschaft:-4,atem:-14,belastung:5}},
+    {label:'Weitermarschieren und nichts sehen',hint:'Es geht dich nichts an',
+     erfolg:{text:'Du gehst und siehst auf die Fersen des Vordermanns. Abends fehlt Guérin bei der Zählung. Am nächsten Morgen ist er wieder da, ohne Tornister und ohne Erklärung.',
+       belastung:3,kameradschaft:-3}}
+  ]},
+
+/* 4 */ {typ:'szene',id:'mondovi',datum:'22. April 1796 · Mondovì',ort:'Piemont',
+  text:[
+    'Sardinien hat um Waffenstillstand gebeten. Für euch heißt das: eine Stadt, die man nicht stürmen muss, und Quartier in Häusern statt auf Stein.',
+    'Am zweiten Abend brennt in der Vorstadt ein Haus. Es sind Franzosen, die es angezündet haben — vier Mann aus der dritten Kompanie, betrunken, mit Sachen unter dem Arm, die ihnen nicht gehören.',
+    'Der Befehl von oben ist unmissverständlich. Plünderung wird erschossen. Der Befehl von unten ist genauso deutlich: Man verrät keine Kameraden.',
+    'Sergent Martel steht zehn Schritt weiter und sieht dich an, statt sie.'
+  ],
+  optionen:[
+    {label:'Sie melden',hint:'Der Befehl ist der Befehl',kosten:'Ruf ++ · Kameradschaft −−',
+     erfolg:{text:'Zwei werden erschossen, zwei ausgepeitscht. Der Bataillonschef merkt sich deinen Namen. Deine Kompanie auch, auf andere Weise.',
+       ruf:8,gunst:3,kameradschaft:-22,belastung:8}},
+    {label:'Sie wegschicken, bevor jemand kommt',hint:'Menschenkenntnis · schnell und leise',
+     probe:{wert:'menschenkenntnis',schw:45},
+     erfolg:{text:'Du redest schnell und leise, und sie sind weg, bevor die Patrouille um die Ecke biegt. Vier Männer schulden dir etwas. Martel hat es gesehen und sagt nichts.',
+       kameradschaft:16,gunst:1,geld:6},
+     misserfolg:{text:'Sie lachen dich aus. Die Patrouille kommt, es gibt ein Handgemenge, und du stehst mittendrin, als der Offizier eintrifft.',
+       ruf:-5,kameradschaft:4,belastung:7}},
+    {label:'Mitmachen',hint:'Es gibt Wein, Silber und Schuhe',kosten:'Geld ++ · sehr gefährlich',risk:true,
+     probe:{wert:'kaltbluetigkeit',schw:55},
+     erfolg:{text:'Du nimmst ein Paar Stiefel, einen Beutel Münzen und bist zurück im Quartier, bevor jemand zählt. Niemand fragt.',
+       geld:40,ausr:{schuhe:35},belastung:10,ruf:-2},
+     misserfolg:{text:'Die Patrouille greift dich am Arm. Man peitscht dich vor der Kompanie aus. Du kannst drei Tage nicht auf dem Rücken liegen und sechs Wochen niemandem in die Augen sehen.',
+       ruf:-14,belastung:18,wunde:'Peitschenstriemen'}},
+    {label:'Umdrehen und ins Quartier gehen',hint:'Nichts gesehen',
+     erfolg:{text:'Du gehst. Am nächsten Morgen sind zwei Männer der dritten Kompanie tot und niemand redet darüber. Martel sagt beim Appell nur: „Sie waren gestern nicht da." Es ist keine Frage.',
+       belastung:5}}
+  ]},
+
+/* 5 */ {typ:'kampf',id:'lodi',datum:'10. Mai 1796 · Brücke von Lodi',ort:'Über der Adda',
+  intro:'Die Brücke ist zweihundert Schritt lang, aus Holz, und am anderen Ende stehen dreißig österreichische Geschütze. Die Kolonne steht darauf und kommt nicht vor und nicht zurück. Vor dir ist Rauch, und in dem Rauch schlägt Geschützfeuer ins Holz und wirft Splitter, so lang wie dein Unterarm.',
+  runden:9,feindMoral:78,gefahr:15,ruhm:true,
+  sieg:{text:'Ihr kommt hinüber. Wie, weiß hinterher niemand genau zu sagen. Auf der Brücke liegen mehr Männer, als darauf gestanden haben, so kommt es dir vor. Am Abend nennt jemand den Oberbefehlshaber zum ersten Mal beim Spitznamen: le petit caporal.',
+    ruf:16,belastung:14,nennung:true},
+  niederlage:{text:'Die Kolonne weicht von der Brücke zurück. Es dauert eine Stunde, bis sie es noch einmal versuchen — ohne dich.',ruf:-6,belastung:16}},
+
+/* 6 */ {typ:'elite',id:'mailand',datum:'15. Mai 1796 · Mailand',ort:'Einzug in die Lombardei'},
+
+/* 7 */ {typ:'szene',id:'mantua',datum:'Juli 1796 · vor Mantua',ort:'Belagerung in den Sümpfen',
+  text:[
+    'Mantua liegt in einem Sumpf, und der Sumpf hat im Juli Fieber. Es sterben mehr Männer an der Luft als am Feind.',
+    'Ihr grabt Laufgräben, die am nächsten Tag voll Wasser stehen, und wartet darauf, dass eine Festung aufgibt, die nicht aufgibt.',
+    'Deine Muskete rostet in der Feuchtigkeit schneller, als du putzen kannst. Und der Fourier verteilt seit drei Wochen Rationen, die nicht stimmen.'
+  ],
+  optionen:[
+    {label:'Die Muskete putzen, jeden Abend',hint:'Geschick · kostet jeden freien Abend',
+     probe:{wert:'geschick',schw:35},
+     erfolg:{text:'Du zerlegst das Schloss, ölst es mit Speck, wenn nichts anderes da ist, und hältst die Waffe trocken. Als es soweit ist, wird sie zünden. Das ist mehr, als die halbe Kompanie sagen kann.',
+       ausr:{muskete:25},fert:{muskete:5}},
+     misserfolg:{text:'Du putzt, und der Rost kommt wieder. Der Sumpf gewinnt.',ausr:{muskete:6}}},
+    {label:'Dem Fourier auf die Finger sehen',hint:'Bildung · die Listen lesen können',
+     probe:{wert:'bildung',schw:40},kosten:'Braucht Bildung',
+     erfolg:{text:'Du kannst gerade genug lesen, um zu sehen, dass in der Liste hundertzwölf Mann stehen und in der Kompanie sechsundneunzig. Du sagst es Martel, nicht dem Fourier. Zwei Tage später stimmen die Rationen.',
+       gunst:4,ruf:4,fert:{verwaltung:8},kameradschaft:6},
+     misserfolg:{text:'Die Zahlen tanzen dir vor den Augen. Du hast nie richtig lesen gelernt, und hier merkst du es zum ersten Mal, dass dir das etwas kostet.',
+       belastung:4,fert:{verwaltung:3}}},
+    {label:'Im Sumpf fouragieren',hint:'Fouragieren · Fisch, Frösche, gestohlene Hühner',
+     probe:{wert:'fouragieren',schw:45},
+     erfolg:{text:'Aale aus den Gräben, ein Sack Mais aus einer Mühle. Die Korporalschaft isst drei Tage besser als das halbe Bataillon.',
+       kameradschaft:12,atem:10,geld:5},
+     misserfolg:{text:'Du stehst vier Stunden bis zu den Knien im Wasser und bringst nichts mit außer dem Fieber, das in diesem Wasser wohnt.',
+       wunde:'Sumpffieber',atem:-15,belastung:6}},
+    {label:'Schreiben lernen',hint:'Bildung · ein Sergent bringt es dir bei, gegen Schnaps',
+     kosten:'Kostet Geld und jeden Abend',
+     erfolg:{text:'Es ist mühsamer als Grabenschaufeln. Nach sechs Wochen kannst du deinen Namen schreiben und eine Liste lesen. In dieser Armee ist das mehr wert, als es klingt.',
+       attr:{bildung:9},fert:{verwaltung:5},geld:-8,belastung:3}}
+  ]},
+
+/* 8 */ {typ:'kampf',id:'castiglione',datum:'5. August 1796 · Castiglione',ort:'Hügel bei Solferino',
+  intro:'Wurmser ist mit einer Entsatzarmee aus Tirol gekommen und hat euch von Mantua weggetrieben. Jetzt steht ihr wieder, auf einem Hügel, und es geht darum, ob die letzten vier Monate umsonst waren.',
+  runden:7,feindMoral:58,gefahr:12,
+  sieg:{text:'Die Österreicher gehen nach Norden zurück. Mantua ist wieder eingeschlossen, und ihr habt eine Armee geschlagen, die größer war als eure.',ruf:8},
+  niederlage:{text:'Der Hügel geht verloren und mit ihm der halbe Tag. Ihr sammelt euch zwei Meilen weiter hinten.',ruf:-4,belastung:9}},
+
+/* 9 */ {typ:'befoerderung',id:'verona',datum:'September 1796 · Verona',ort:'Neuaufstellung der Kompanien',
+  text:[
+    'Nach Castiglione zählt das Bataillon nach. Von den vierhundert Mann, die im April über die Pässe gegangen sind, stehen zweihunderteinundvierzig in der Reihe.',
+    'Die Lücken werden aufgefüllt — mit Rekruten aus Frankreich, die aussehen wie du im April. Und die Stellen der Unteroffiziere werden neu besetzt, weil sie neu besetzt werden müssen.',
+    'Der Capitaine sitzt an einem Tisch im Hof und geht eine Liste durch. Sergent Martel steht neben ihm.'
+  ]},
+
+/* 10 */ {typ:'kampf',id:'arcole',datum:'15.–17. November 1796 · Arcole',ort:'Damm im Sumpf von Alpone',
+  intro:'Der Damm ist so schmal, dass drei Mann nebeneinander gehen. Rechts und links Sumpf. Am anderen Ende Kroaten, die seit zwei Tagen wissen, dass ihr kommt. Es ist der dritte Versuch.',
+  runden:9,feindMoral:74,gefahr:14,ruhm:true,
+  sieg:{text:'Am dritten Tag geht es. Nicht, weil jemand tapferer geworden wäre, sondern weil jemand endlich auf die Idee kam, dass man den Sumpf auch umgehen kann. Auf dem Damm liegen die Männer der ersten beiden Tage.',
+    ruf:14,belastung:16,nennung:true},
+  niederlage:{text:'Der Damm bleibt österreichisch, und du liegst im Schilf, bis es dunkel wird.',ruf:-5,belastung:14}},
+
+/* 11 */ {typ:'winter',id:'winter',datum:'Dezember 1796 · Verona',ort:'Winterquartier'},
+
+/* 12 */ {typ:'kampf',id:'rivoli',datum:'14. Januar 1797 · Rivoli',ort:'Hochebene über der Etsch',
+  intro:'Alvinczi kommt in fünf Kolonnen von den Bergen herunter, und einen halben Tag lang sieht es so aus, als würde das hier zu Ende gehen. Dann sieht es plötzlich anders aus.',
+  runden:8,feindMoral:66,gefahr:13,ruhm:true,
+  sieg:{text:'Die Kolonne, die euch in die Flanke fallen sollte, läuft in ihr eigenes Verderben. Am Nachmittag ist die österreichische Armee in Italien keine Armee mehr. Mantua wird in zwei Wochen fallen.',
+    ruf:15,nennung:true},
+  niederlage:{text:'Ihr weicht von der Hochebene. Andere gewinnen die Schlacht ohne dich.',ruf:-5,belastung:12}},
+
+/* 13 */ {typ:'ende',id:'leoben',datum:'18. April 1797 · Leoben',ort:'Vorfrieden mit Österreich'}
+];
+
+
+'use strict';
+/* Mechanik: Spielzustand, Proben, Fertigkeitswachstum, Verschleiß, Wunden. */
+
+/* ══════════════════ SPIELZUSTAND ══════════════════ */
+
+let META = { vp:0, chronik:[], bestKapitel:{} };
+let S = null;
+let K = null;      // Kampfzustand
+let NODE = 0;
+
+function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe){
+  const h = HERKUENFTE.find(x=>x.id===herkunftId);
+  const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
+  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
+  for(const k in h.attr) attr[k] = Math.max(0, Math.min(100, attr[k] + h.attr[k]));
+  for(const k in h.fert) fert[k] = Math.max(0, Math.min(100, fert[k] + h.fert[k]));
+  const ausr = AUSRUESTUNG_START();
+  let geld = 4;
+  (kaeufe||[]).forEach(id=>{
+    if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; fert.muskete+=8; }
+    if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; fert.bajonett+=5; }
+    if(id==='schuhe_gut'){ ausr.schuhe={name:'Doppelt besohlte Schuhe',zustand:100,verschleiss:12}; }
+    if(id==='tornister_gut'){ ausr.tornister={name:'Verstärkter Tornister',zustand:100,verschleiss:8}; }
+    if(id==='geld'){ geld += 50; }
+  });
+  return {
+    name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
+    rang:1, zweig:null, ruf:0, gunst:0, kameradschaft:20, belastung:0,
+    atem:100, wunden:[], nennungen:0, kaeufe:kaeufe||[],
+    kapitel:0, lebt:true, ende:null, log:[]
+  };
+}
+
+/* ══════════════════ MECHANIK ══════════════════ */
+
+function wert(k){
+  let v = (S.attr[k] !== undefined) ? S.attr[k] : S.fert[k];
+  if(k==='kaltbluetigkeit' && S.kaeufe.includes('amulett')) v += 5;
+  // Wunden schlagen auf den Körper, nicht auf den Kopf
+  const koerperlich = ['konstitution','geschick','muskete','bajonett','reiten'];
+  if(koerperlich.includes(k)) S.wunden.forEach(w=>{ v -= w.abzug || 0; });
+  else S.wunden.forEach(w=>{ v -= Math.round((w.abzug||0)/3); });
+  v -= Math.floor(S.belastung/12);
+  if(k==='muskete' && S.ausr.muskete.zustand < 35) v -= 15;
+  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) v -= 18;
+  return Math.max(1, Math.round(v));
+}
+
+function probe(k, schwierigkeit){
+  const w = wert(k);
+  const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
+  const wurf = 1 + Math.floor(Math.random()*100);
+  nutzen(k, 1);
+  return {wurf, ziel, wertRoh:w, erfolg: wurf <= ziel};
+}
+
+function nutzen(k, intens){
+  const ist = (S.attr[k] !== undefined) ? S.attr[k] : S.fert[k];
+  if(ist >= 100) return;
+  const zuwachs = (1.7 * intens * (100-ist)/100) * (0.5 + Math.random());
+  if(Math.random() < 0.75){
+    const neu = Math.min(100, ist + Math.max(1, Math.round(zuwachs)));
+    if(S.attr[k] !== undefined) S.attr[k] = neu; else S.fert[k] = neu;
+  }
+}
+
+function anwenden(e){
+  if(!e) return;
+  if(e.ruf) S.ruf = Math.max(0, S.ruf + e.ruf);
+  if(e.gunst) S.gunst = Math.max(0, S.gunst + e.gunst);
+  if(e.kameradschaft) S.kameradschaft = Math.max(0, Math.min(100, S.kameradschaft + e.kameradschaft));
+  if(e.belastung) S.belastung = Math.max(0, Math.min(100, S.belastung + e.belastung));
+  if(e.atem) S.atem = Math.max(0, Math.min(100, S.atem + e.atem));
+  if(e.geld) S.geld = Math.max(0, S.geld + e.geld);
+  if(e.nennung){ S.nennungen++; }
+  if(e.attr) for(const k in e.attr) S.attr[k] = Math.max(0, Math.min(100, S.attr[k] + e.attr[k]));
+  if(e.fert) for(const k in e.fert) S.fert[k] = Math.max(0, Math.min(100, S.fert[k] + e.fert[k]));
+  if(e.ausr) for(const k in e.ausr) S.ausr[k].zustand = Math.max(0, Math.min(100, S.ausr[k].zustand + e.ausr[k]));
+  if(e.wunde) wundeGeben(e.wunde, 8);
+}
+
+function wundeGeben(name, abzug){
+  S.wunden.push({name, abzug});
+  S.belastung = Math.min(100, S.belastung + 6);
+}
+
+function verschleiss(faktor){
+  for(const k in S.ausr){
+    const a = S.ausr[k];
+    if(a.verschleiss>0) a.zustand = Math.max(0, a.zustand - Math.round(a.verschleiss*faktor));
+  }
+}
+
+function toetlich(grund){
+  S.lebt = false; S.ende = 'tot'; S.todesart = grund;
+}
+
+
+'use strict';
+/* Oberfläche: Titel, Kaufladen, Charaktererschaffung, Ablaufsteuerung, Szenen. */
+
+/* ══════════════════ DARSTELLUNG ══════════════════ */
+
+const app = document.getElementById('app');
+const kopf = document.getElementById('kopfrechts');
+const fuss = document.getElementById('fusszeile');
+const untertitel = document.getElementById('untertitel');
+
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function balken(klasse, v, max){ return `<div class="bar ${klasse}"><i style="width:${Math.max(0,Math.min(100,100*v/max))}%"></i></div>`; }
+
+function kopfzeile(){
+  fuss.textContent = `Veteranenpunkte: ${META.vp}`;
+  if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.chronik.length}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
+  kopf.innerHTML = `${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}`;
+  const n = KAPITEL[Math.min(NODE,KAPITEL.length-1)];
+  untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
+}
+
+function seitenleiste(){
+  const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
+  const w = S.wunden.length ? S.wunden.map(x=>esc(x.name)).join(', ') : 'keine';
+  const zust = k => { const a=S.ausr[k]; const c = a.zustand<20?'warn':(a.zustand<40?'':'ok');
+    return `<div class="kv"><span>${esc(a.name)}</span><b class="${a.zustand<20?'warn':''}">${a.zustand}</b></div>`; };
+  return `<aside class="card">
+    <div class="ch"><span>${K?'Dein Zustand':'Charakterbogen'}</span></div>
+    <div class="cb">
+      <p class="who">${esc(S.name)}</p>
+      <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p>
+      <div class="stat"><div class="statlab"><span>Atem</span><span>${S.atem}</span></div>${balken('b-steel',S.atem,100)}</div>
+      <div class="stat"><div class="statlab"><span>Belastung</span><span>${S.belastung}</span></div>${balken('b-red',S.belastung,100)}</div>
+      <div class="stat"><div class="statlab"><span>Ruf</span><span>${S.ruf}</span></div>${balken('b-brass',S.ruf,100)}</div>
+      <div class="stat"><div class="statlab"><span>Kameradschaft</span><span>${S.kameradschaft}</span></div>${balken('b-green',S.kameradschaft,100)}</div>
+      ${K?`<div class="rule"></div><div class="kv"><span>Muskete</span><b>${geladen}</b></div>
+           <div class="kv"><span>Deckung</span><b>${K.deckung?'ja':'nein'}</b></div>`:''}
+      <div class="rule"></div>
+      <p class="mini">Attribute</p>
+      ${ATTRIBUTE.map(([k,n])=>`<div class="kv"><span>${n}</span><b>${S.attr[k]}</b></div>`).join('')}
+      <div class="rule"></div>
+      <p class="mini">Fertigkeiten</p>
+      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>`<div class="kv"><span>${n}</span><b>${S.fert[k]}</b></div>`).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
+      <div class="rule"></div>
+      <p class="mini">Ausrüstung · Zustand</p>
+      ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
+      <div class="rule"></div>
+      <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
+      <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
+      <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
+      <div class="kv"><span>Gunst Martel</span><b>${S.gunst}</b></div>
+    </div>
+  </aside>`;
+}
+
+/* ── Titelbildschirm ── */
+function zeigeTitel(){
+  S=null; K=null; kopfzeile();
+  const chron = META.chronik.length ? META.chronik.slice().reverse().map(c=>
+    `<tr${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?' class="hi"':''}>
+      <td class="d">${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?'★ ':''}${esc(c.name)}</td>
+      <td class="d">${esc(c.rang)}</td><td class="d">${esc(c.ende)}</td><td class="n">${c.punkte}</td></tr>`).join('')
+    : '<tr><td class="d" colspan="4">Noch kein Eintrag. Der erste Mann wartet.</td></tr>';
+
+  const best = KAPITEL.filter(n=>n.datum).map((n,i)=>{
+    const b = META.bestKapitel[n.id];
+    return `<tr><td class="d">${esc(n.datum.split(' · ')[1]||n.id)}</td>
+      <td class="n">${b?b.mal+'×':'—'}</td><td class="d">${b?esc(b.rang):'nie erreicht'}</td></tr>`;
+  }).join('');
+
+  app.innerHTML = `
+  <div class="card"><div class="ch"><span>Der Marschallstab</span><span>Prototyp · Italien 1796/97</span></div>
+   <div class="cb">
+    <div class="zit">Du beginnst 1796 als Rekrut mit einer Muskete, die dir nicht gehört.<br>
+    Wenn du dieses Kapitel überlebst, bist du vielleicht Caporal.<br>
+    Wahrscheinlicher liegst du im April in einem Graben bei Montenotte.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      <button class="plain" onclick="zeigeLaden()">Neuen Mann aufstellen</button>
+      <button class="plain" onclick="speichern()">Spielstand sichern</button>
+      <button class="plain" onclick="document.getElementById('ladefeld').click()">Spielstand laden</button>
+      <input type="file" id="ladefeld" accept=".json" class="hidden" onchange="laden(event)">
+    </div>
+   </div></div>
+
+  <div class="grid2">
+    <div class="card"><div class="ch"><span>Chronik</span><span>${META.chronik.length} Läufe</span></div>
+      <div class="cb"><table><tr><th>Name</th><th>Endrang</th><th>Ende</th><th class="n">VP</th></tr>${chron}</table></div></div>
+    <div class="card"><div class="ch"><span>Wie weit ich schon war</span></div>
+      <div class="cb"><table><tr><th>Station</th><th class="n">erreicht</th><th>bester Rang dort</th></tr>${best}</table></div></div>
+  </div>`;
+  fuss.textContent = `Veteranenpunkte: ${META.vp}`;
+}
+
+/* ── Veteranenpunkte ausgeben ── */
+let AUSWAHL = [];
+function zeigeLaden(){
+  AUSWAHL = [];
+  const zeilen = LADEN.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
+    <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
+    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
+  app.innerHTML = `
+  <div class="card"><div class="ch"><span>Veteranenpunkte ausgeben</span><span id="vpanz">${META.vp} verfügbar</span></div>
+   <div class="cb">
+    <div class="note">Der Vorrat ist die Punktzahl deines besten Laufs. Er wird nicht verbraucht — bei jedem Neustart verteilst du ihn neu.
+    ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu.':''}</div>
+    <table style="margin-top:16px"><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+    <div style="margin-top:16px;display:flex;gap:10px"><button class="plain" onclick="zeigeErschaffung()">Weiter zur Erschaffung</button>
+    <button class="plain" onclick="zeigeTitel()">Zurück</button></div>
+   </div></div>`;
+  aktualisiereLaden();
+}
+function waehle(id){
+  const i = AUSWAHL.indexOf(id);
+  if(i>=0) AUSWAHL.splice(i,1); else AUSWAHL.push(id);
+  aktualisiereLaden();
+}
+function aktualisiereLaden(){
+  const aus = AUSWAHL.reduce((s,id)=>s+LADEN.find(p=>p.id===id).vp,0);
+  const rest = META.vp - aus;
+  document.getElementById('vpanz').textContent = `${rest} von ${META.vp} übrig`;
+  LADEN.forEach(p=>{
+    const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
+    const drin = AUSWAHL.includes(p.id);
+    b.textContent = drin?'gewählt':'wählen';
+    b.disabled = !drin && p.vp>rest;
+    z.className = drin?'hi':'';
+  });
+}
+
+/* ── Charaktererschaffung ── */
+const POOL = 120, SOCKEL = 20, MAXE = 70;
+let ERSCH = null;
+function zeigeErschaffung(){
+  ERSCH = {name:'', herkunft:null, attr:{}};
+  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+  const zeilen = ATTRIBUTE.map(([k,n])=>`
+    <div class="attrrow">
+      <span class="attrname">${n}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
+      ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
+      <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
+      <span><button class="pmbtn" onclick="stelle('${k}',-10)" id="am_${k}">−</button>
+      <button class="pmbtn" onclick="stelle('${k}',10)" id="ap_${k}">+</button></span>
+    </div>`).join('');
+  app.innerHTML = `
+  <div class="stage">
+    <div>
+      <div class="card"><div class="ch"><span>Wer bist du</span></div><div class="cb">
+        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${zufallsName()}" oninput="ERSCH.name=this.value">
+      </div></div>
+      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
+        <div class="cb">${zeilen}
+        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel 20 · höchstens 70 bei der Erschaffung · Bildung ist vom Pool ausgenommen.
+        Alle neun Fertigkeiten beginnen bei 10.</p>
+        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
+      </div></div>
+    </div>
+    <div class="card"><div class="ch"><span>Herkunft</span><span>je genau 50 Punkte</span></div><div class="cb">
+      <div class="herkwahl">${HERKUENFTE.map(h=>`<div class="herk" id="h_${h.id}" onclick="waehleHerkunft('${h.id}')">
+        <div class="hn">${h.name}</div><div class="hd">${h.text}</div></div>`).join('')}</div>
+      <div style="margin-top:16px"><button class="plain" id="startbtn" onclick="starte()" disabled>Einrücken</button></div>
+    </div></div>
+  </div>`;
+  ERSCH.name = document.getElementById('namefeld').value;
+  aktualisiereErschaffung();
+}
+function zufallsName(){
+  const v=['Étienne','Jean-Baptiste','Pierre','Antoine','Louis','Nicolas','Claude','Michel','François','Gilbert'];
+  const n=['Duval','Rey','Vasseur','Marchand','Ferrand','Bonnet','Lemoine','Charpentier','Roussel','Barbier'];
+  return v[Math.floor(Math.random()*v.length)]+' '+n[Math.floor(Math.random()*n.length)];
+}
+function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-SOCKEL),0); }
+function stelle(k,d){
+  if(k==='bildung') return;
+  const neu = ERSCH.attr[k]+d;
+  if(neu<SOCKEL || neu>MAXE) return;
+  if(d>0 && verteilt()+d>POOL) return;
+  ERSCH.attr[k]=neu; aktualisiereErschaffung();
+}
+function wuerfeln(){
+  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+  const frei = ATTRIBUTE.map(([k])=>k).filter(k=>k!=='bildung');
+  let rest = POOL;
+  const gew = frei.map(()=>Math.random()+0.35);
+  while(rest>0){
+    const i = gew.map((g,i)=>[g*Math.random(),i]).sort((a,b)=>b[0]-a[0])[0][1];
+    const k = frei[i];
+    if(ERSCH.attr[k]+10<=MAXE){ ERSCH.attr[k]+=10; rest-=10; }
+    else { gew[i]=0; if(gew.every(g=>g===0)) break; }
+  }
+  aktualisiereErschaffung();
+}
+function waehleHerkunft(id){
+  ERSCH.herkunft=id;
+  HERKUENFTE.forEach(h=> document.getElementById('h_'+h.id).className = 'herk'+(h.id===id?' on':''));
+  aktualisiereErschaffung();
+}
+function aktualisiereErschaffung(){
+  const v = verteilt();
+  document.getElementById('poolanz').textContent = `${POOL-v} von ${POOL} übrig`;
+  ATTRIBUTE.forEach(([k])=>{
+    document.getElementById('av_'+k).textContent = ERSCH.attr[k];
+    const b = document.getElementById('ab_'+k); if(b) b.querySelector('i').style.width = ERSCH.attr[k]+'%';
+    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=SOCKEL;
+    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+10>POOL;
+  });
+  const b = document.getElementById('startbtn');
+  if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
+}
+function starte(){
+  S = neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL);
+  NODE = 0; K = null; WOCHEN = 3; naechster();
+}
+
+/* ══════════════════ ABLAUF ══════════════════ */
+
+function naechster(){
+  if(!S.lebt){ zeigeTod(); return; }
+  if(NODE >= KAPITEL.length){ zeigeKapitelende(); return; }
+  const n = KAPITEL[NODE];
+  if(n.datum && n.id){
+    const b = META.bestKapitel[n.id] || {mal:0,rang:''};
+    b.mal++; if(!b.rang || S.rang>=RANG.findIndex(r=>r.name===b.rang)+1) b.rang = rangName(S.rang);
+    META.bestKapitel[n.id]=b;
+  }
+  kopfzeile();
+  if(n.typ==='szene') zeigeSzene(n);
+  else if(n.typ==='kampf') starteKampf(n);
+  else if(n.typ==='befoerderung') zeigeBefoerderung(n);
+  else if(n.typ==='elite') zeigeElite(n);
+  else if(n.typ==='winter') zeigeWinter(n);
+  else if(n.typ==='ende') zeigeKapitelende();
+}
+function weiter(){ NODE++; naechster(); }
+
+/* ── Szene ── */
+function zeigeSzene(n){
+  const opt = n.optionen.map((o,i)=>{
+    const gesperrt = o.probe && wert(o.probe.wert)<5;
+    return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
+      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`;
+  }).join('');
+  app.innerHTML = `<div class="stage">
+    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
+      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    </div>${seitenleiste()}</div>`;
+  window.AKT = n;
+}
+function waehleOption(i){
+  const n = window.AKT, o = n.optionen[i];
+  let erg, klasse='', probeText='';
+  if(o.probe){
+    const p = probe(o.probe.wert, o.probe.schw);
+    erg = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
+    klasse = p.erfolg ? 'gut' : 'schlecht';
+    probeText = `<div class="probe">${NAMEN[o.probe.wert].toUpperCase()} ${p.wertRoh} gegen ${o.probe.schw} → Zielwert ${p.ziel} · gewürfelt ${p.wurf} · ${p.erfolg?'GELUNGEN':'MISSLUNGEN'}</div>`;
+  } else { erg = o.erfolg; klasse='gut'; }
+  anwenden(erg);
+  verschleiss(0.35);
+  S.log.push(n.id+': '+o.label);
+  app.innerHTML = `<div class="stage">
+    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose"><p class="said">${esc(o.label)}</p></div>
+        <div class="ergebnis ${klasse}">${erg.text}${probeText}</div>
+        ${wirkungen(erg)}</div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+function wirkungen(e){
+  const t=[];
+  const m = {ruf:'Ruf',gunst:'Gunst',kameradschaft:'Kameradschaft',belastung:'Belastung',atem:'Atem',geld:'Francs'};
+  for(const k in m) if(e[k]) t.push(`${m[k]} ${e[k]>0?'+':''}${e[k]}`);
+  if(e.attr) for(const k in e.attr) t.push(`${NAMEN[k]} ${e.attr[k]>0?'+':''}${e.attr[k]}`);
+  if(e.fert) for(const k in e.fert) if(e.fert[k]) t.push(`${NAMEN[k]} ${e.fert[k]>0?'+':''}${e.fert[k]}`);
+  if(e.ausr) for(const k in e.ausr) t.push(`${S.ausr[k].name} ${e.ausr[k]>0?'+':''}${e.ausr[k]}`);
+  if(e.wunde) t.push('Wunde: '+e.wunde);
+  if(e.nennung) t.push('Im Tagesbefehl genannt');
+  return t.length ? `<div class="probe" style="margin-top:12px">${t.join(' · ')}</div>` : '';
+}
+
+
+'use strict';
+/* Gefecht, Elitekompanie und Beförderung. */
+
+/* ══════════════════ KAMPF ══════════════════ */
+
+function aktionen(){
+  const a = [];
+  const zw = S.zweig;
+  a.push({id:'laden',label:'Laden',cost:'Geschick · Atem −8',aus:()=>K.geladen});
+  if(zw==='voltigeur'){
+    a.push({id:'zielen',label:'Sorgfältig zielen und feuern',cost:'Muskete +15 · kostet zwei Atemzüge',aus:()=>!K.geladen});
+    a.push({id:'feuern',label:'Schnell feuern',cost:'Muskete',aus:()=>!K.geladen});
+    a.push({id:'deckung',label:'Deckung wechseln',cost:'Geschick · du bist schwer zu treffen'});
+  } else {
+    a.push({id:'feuern',label:'Anlegen und feuern',cost:'Muskete',aus:()=>!K.geladen});
+    a.push({id:'ducken',label:'Hinwerfen',cost:'Atem +10 · Belastung −2 · du schießt nicht, aber sie treffen dich auch nicht'});
+    a.push({id:'halten',label:'Stehenbleiben und die Linie halten',cost:'Kaltblütigkeit'});
+  }
+  a.push({id:'bajonett',label:zw==='grenadier'?'Bajonett fällen und vorgehen':'Mit dem Bajonett vor',
+    cost:(zw==='grenadier'?'Bajonett +10 · ':'Bajonett · ')+'sehr gefährlich',risk:true});
+  if(S.rang>=3){
+    a.push({id:'salve',label:'Der Korporalschaft Salve befehlen',cost:'Autorität · acht Mann feuern zugleich'});
+    a.push({id:'luecke',label:'Die Lücke links schließen lassen',cost:'Drill · schützt deine Männer'});
+  }
+  a.push({id:'zurueck',label:'Zurückweichen',cost:'Ruf −− · der Kampf ist für dich vorbei',risk:true});
+  return a;
+}
+
+function starteKampf(n){
+  K = {n, runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
+       protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0};
+  zeigeKampf(n.intro);
+}
+
+function sichtfeld(){
+  const rauch = Math.min(1, K.runde/6);
+  return `<svg viewBox="0 0 640 200" role="img" aria-label="Sichtfeld im Gefecht">
+    <defs>
+      <linearGradient id="sm" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2b2723" stop-opacity="${0.6+0.4*rauch}"/>
+        <stop offset="60%" stop-color="#221f1c" stop-opacity="${0.5*rauch}"/>
+        <stop offset="100%" stop-color="#1a1816" stop-opacity="0"/></linearGradient>
+      <radialGradient id="vg" cx="50%" cy="88%" r="62%">
+        <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000" stop-opacity=".7"/></radialGradient>
+    </defs>
+    <rect width="640" height="200" fill="#191715"/>
+    <rect width="640" height="126" fill="url(#sm)"/>
+    <g opacity="${0.30-0.16*rauch}" fill="#cfc7b8">
+      <rect x="120" y="58" width="9" height="26" rx="3"/><rect x="146" y="55" width="9" height="29" rx="3"/>
+      <rect x="172" y="59" width="9" height="25" rx="3"/><rect x="404" y="56" width="9" height="28" rx="3"/>
+      <rect x="430" y="60" width="9" height="24" rx="3"/><rect x="456" y="57" width="9" height="27" rx="3"/></g>
+    <text x="320" y="34" text-anchor="middle" fill="#5c554b" font-family="Georgia,serif" font-size="12"
+      font-style="italic">${K.deckung?'Du liegst. Über dir geht es hinweg.':'Rauch. Du siehst keine dreißig Schritt weit.'}</text>
+    <g>
+      <rect x="196" y="110" width="20" height="60" rx="6" fill="#3a352e"/><circle cx="206" cy="104" r="9" fill="#3a352e"/>
+      <rect x="252" y="106" width="22" height="64" rx="6" fill="#4a443a"/><circle cx="263" cy="99" r="10" fill="#4a443a"/>
+      <rect x="306" y="${K.deckung?140:100}" width="26" height="${K.deckung?32:72}" rx="6" fill="#7d7264"/>
+      <circle cx="319" cy="${K.deckung?134:92}" r="11.5" fill="#7d7264"/>
+      <rect x="366" y="106" width="22" height="64" rx="6" fill="#4a443a"/><circle cx="377" cy="99" r="10" fill="#4a443a"/>
+    </g>
+    <text x="319" y="192" text-anchor="middle" fill="#b8924f" font-size="10.5"
+      font-family="ui-monospace,monospace" letter-spacing="1">DU</text>
+    <rect width="640" height="200" fill="url(#vg)"/></svg>`;
+}
+
+function zeigeKampf(text){
+  const n = K.n;
+  const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
+      ${a.aus&&a.aus()?'disabled':''}>${a.label}<span class="cost">${a.cost}</span></button>`).join('');
+  app.innerHTML = `<div class="stage">
+    <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
+      <div class="cb">${sichtfeld()}
+        <div class="prose" style="margin-top:15px"><p>${text}</p></div>
+        <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden} · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}</div>
+        ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
+        <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
+      </div></div>
+      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    </div>${seitenleiste()}</div>`;
+}
+
+function kampfAktion(id){
+  const n = K.n; let text = '', schaden = 0, gefahrMod = 0;
+  const zw = S.zweig;
+
+  if(id==='laden'){
+    const p = probe('geschick', 30);
+    S.atem = Math.max(0,S.atem-8);
+    if(p.erfolg){ K.geladen=true; text='Patrone auf, Pulver, Kugel, Ladestock. Die Muskete ist geladen.'; }
+    else { text='Die Patrone rutscht dir durch die Finger. Du musst eine neue nehmen.'; S.atem=Math.max(0,S.atem-4); }
+  }
+  else if(id==='feuern' || id==='zielen'){
+    const sorgfalt = (id==='zielen');
+    const p = probe('muskete', sorgfalt? 20 : 35);
+    K.geladen = false;
+    S.atem = Math.max(0, S.atem - (sorgfalt?10:5));
+    if(p.erfolg){ schaden = sorgfalt? 22+Math.random()*10 : 12+Math.random()*8;
+      text = sorgfalt? 'Du liegst still, atmest aus und drückst ab. Drüben fällt einer, und du weißt, dass er dir gehört.'
+                     : 'Du feuerst in den Rauch. Irgendetwas drüben gerät in Unordnung.'; }
+    else { text = S.ausr.muskete.zustand<35 ? 'Das Schloss klickt und nichts geschieht. Die Waffe ist verrostet.'
+                                            : 'Der Schuss geht zu hoch. In diesem Rauch trifft man mehr durch Zufall als durch Können.'; }
+    if(S.ausr.muskete.verschleiss) S.ausr.muskete.zustand = Math.max(0,S.ausr.muskete.zustand-2);
+  }
+  else if(id==='ducken'){
+    K.deckung=true; S.atem=Math.min(100,S.atem+10); S.belastung=Math.max(0,S.belastung-2);
+    text='Du wirfst dich hin. Über dir geht es hinweg. Man kann nicht ewig liegen bleiben, aber jetzt gerade schon.';
+    gefahrMod = -22;
+  }
+  else if(id==='deckung'){
+    const p = probe('geschick', 35);
+    if(p.erfolg){ K.deckung=true; gefahrMod=-20; text='Drei Sprünge nach links, hinter einen Weidenstumpf. Wer dort hinschießt, wo du warst, trifft nichts.'; }
+    else { text='Du bleibst auf halbem Weg im Freien hängen und musst dich flach machen, wo keine Deckung ist.'; gefahrMod=+10; }
+  }
+  else if(id==='halten'){
+    const p = probe('kaltbluetigkeit', 40);
+    K.deckung=false;
+    if(p.erfolg){ schaden = 6; S.belastung=Math.max(0,S.belastung-3);
+      text='Du bleibst stehen. Links und rechts bleiben sie auch stehen, weil du stehst. Die Linie hält.'; nutzen('drill',1); }
+    else { S.belastung=Math.min(100,S.belastung+6);
+      text='Du stehst, aber deine Hände zittern so, dass du nichts damit anfangen kannst.'; }
+  }
+  else if(id==='bajonett'){
+    const p = probe('bajonett', zw==='grenadier'?30:45);
+    K.deckung=false; S.atem=Math.max(0,S.atem-18); gefahrMod = +26;
+    if(p.erfolg){ schaden = 30+Math.random()*14;
+      text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'; S.ruf+=2; }
+    else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.'; S.belastung+=7; }
+  }
+  else if(id==='salve'){
+    const p = probe('autoritaet', 40);
+    if(p.erfolg){ schaden = 26+Math.random()*10; nutzen('drill',1);
+      text='„Anlegen — Feuer!" Acht Musketen gehen fast gleichzeitig los. Fast. Aber es reicht.'; }
+    else { text='Du rufst den Befehl, und drei von acht hören ihn. Das Ergebnis ist ein trauriges Geknatter.'; schaden=6; }
+  }
+  else if(id==='luecke'){
+    const p = probe('drill', 35);
+    if(p.erfolg){ gefahrMod=-14; S.kameradschaft=Math.min(100,S.kameradschaft+4);
+      text='Du schiebst die Männer zusammen, bis kein Loch mehr in der Linie ist. Deine acht wissen jetzt, wozu du gut bist.'; }
+    else { text='Sie rücken auf, aber zu langsam, und die Lücke bleibt.'; }
+  }
+  else if(id==='zurueck'){
+    S.ruf = Math.max(0, S.ruf-8); S.belastung=Math.min(100,S.belastung+10); S.gekniffen=true;
+    kampfEnde(false, 'Du gehst zurück. Niemand hält dich auf, und das ist das Schlimmste daran.');
+    return;
+  }
+
+  // Die Linie kämpft auch ohne dich
+  const linie = 2 + Math.random()*4;
+  K.feindMoral -= schaden + linie;
+  K.protokoll.push(text);
+
+  // Feindliche Wirkung
+  let gefahr = n.gefahr + gefahrMod;
+  if(K.deckung && id!=='ducken' && id!=='deckung') K.deckung=false;
+  if(S.belastung>60) gefahr += 6;
+  if(S.atem<30) gefahr += 5;
+  gefahr = Math.max(4, gefahr);
+  let treffer = '';
+  if(Math.random()*100 < gefahr){
+    const schwere = Math.random()*100 - (wert('konstitution')-40)/3;
+    if(schwere > 94){
+      kampfEnde(false, text + ' — Dann trifft dich etwas in die Brust, und du siehst noch, wie der Himmel kippt.');
+      toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
+      zeigeTod(); return;
+    } else if(schwere > 72){
+      wundeGeben('Schwere Wunde ('+n.datum.split(' · ')[1]+')', 14);
+      treffer = ' Ein Schlag gegen die Schulter, dann Nässe im Ärmel. Du kannst den Arm noch bewegen, aber es tut sehr weh.';
+      S.atem = Math.max(0,S.atem-20);
+    } else {
+      wundeGeben('Streifschuss', 5);
+      treffer = ' Etwas reißt dir den Ärmel auf und brennt. Nicht schlimm. Noch nicht.';
+      S.atem = Math.max(0,S.atem-8);
+    }
+    K.protokoll.push('Du wirst getroffen.');
+  }
+  if(S.wunden.length>=5){
+    kampfEnde(false, text+treffer);
+    toetlich('Verblutet bei '+n.datum.split(' · ')[1]); zeigeTod(); return;
+  }
+
+  if(K.feindMoral <= 0){ kampfEnde(true, text+treffer); return; }
+  K.runde++;
+  if(K.runde > n.runden){
+    const knapp = K.feindMoral < n.feindMoral*0.35;
+    kampfEnde(knapp, text+treffer+(knapp?' Und dann ist es plötzlich vorbei.':' Es wird dunkel, und nichts ist entschieden.'));
+    return;
+  }
+  zeigeKampf(text + treffer);
+}
+
+function kampfEnde(sieg, letzterText){
+  const n = K.n;
+  const erg = sieg ? n.sieg : n.niederlage;
+  anwenden(erg);
+  verschleiss(0.9);
+  // Der Feldscher flickt nach dem Gefecht die leichteste Wunde
+  const leicht = S.wunden.findIndex(w=>w.abzug<=5);
+  if(leicht>=0) S.wunden.splice(leicht,1);
+  if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
+  const kk = K; K = null;
+  app.innerHTML = `<div class="stage">
+    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose"><p>${letzterText}</p></div>
+        <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
+        <div class="probe" style="margin-top:10px">${sieg?'GEFECHT BESTANDEN':'GEFECHT VERLOREN'} · ${kk.runde} RUNDEN</div>
+      </div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+/* ══════════════════ ELITEKOMPANIE ══════════════════ */
+
+function zeigeElite(n){
+  const kon = wert('konstitution'), ges = wert('geschick');
+  const gr = kon>=55, vo = ges>=55;
+  app.innerHTML = `<div class="stage">
+    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">
+        <p>Mailand hat der Armee Sold gegeben und Schuhe, und jetzt werden die Bataillone neu geordnet. Jedes bekommt eine Grenadier- und eine Voltigeurkompanie, und die Chefs suchen sich die Männer aus.</p>
+        <p>Die Grenadiere nehmen die Großen und die, die stehen bleiben. Die Voltigeure nehmen die Kleinen und die, die schnell sind und allein zurechtkommen.</p>
+        <p class="said">Der Adjutant geht die Reihe ab und bleibt vor dir stehen. Er sieht dich an, wie man ein Pferd ansieht.</p>
+      </div></div></div>
+      <div class="orders"><div class="ch"><span>Wohin</span></div><div class="ordbody">
+        <button class="ord" onclick="waehleZweig('grenadier')" ${gr?'':'disabled'}>Zu den Grenadieren
+          <span class="cost">Konstitution ${kon} · verlangt 55 · Bärenfellmütze, höherer Sold, die härteste Stelle der Linie</span></button>
+        <button class="ord" onclick="waehleZweig('voltigeur')" ${vo?'':'disabled'}>Zu den Voltigeuren
+          <span class="cost">Geschick ${ges} · verlangt 55 · Plänkler: zielen, Deckung, allein vor der Linie</span></button>
+        <button class="ord" onclick="waehleZweig(null)">In der Füsilierkompanie bleiben
+          <span class="cost">Kein Aufstieg, kein Umweg</span></button>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+}
+function waehleZweig(z){
+  let text;
+  if(z){ S.zweig=z; S.rang=Math.max(S.rang,2); S.ruf+=4;
+    text = z==='grenadier'
+      ? 'Man misst dich an einem Stab, nickt und schreibt deinen Namen auf die andere Liste. Ab morgen trägst du die Bärenfellmütze, bekommst zwei Sous mehr am Tag und stehst dort, wo es am dicksten kommt.'
+      : 'Der Adjutant lässt dich dreißig Schritt laufen und wieder zurück, dann nickt er. Ab morgen gehst du vor der Linie, allein oder zu zweit, und schießt auf das, was du siehst — nicht auf das, wohin alle schießen.';
+  } else {
+    text = 'Er geht weiter, ohne etwas zu sagen. Du bleibst in der Mitte des Bataillons, wo die meisten bleiben. Es ist keine Schande, nur eben nichts.';
+  }
+  app.innerHTML = `<div class="stage"><div>
+    <div class="card"><div class="ch"><span>Mailand</span><span>Mai 1796</span></div>
+      <div class="cb"><div class="ergebnis ${z?'gut':''}">${text}</div>
+      ${z?`<div class="probe" style="margin-top:10px">NEUER RANG · ${rangName(2).toUpperCase()} · RUF +4</div>`:''}</div></div>
+    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+/* ══════════════════ BEFÖRDERUNG ══════════════════ */
+
+function zeigeBefoerderung(n){
+  if(S.befoerderungGeprueft===undefined){ S.befoerderungRuf=S.ruf; S.befoerderungGunst=S.gunst; S.befoerderungGeprueft=true; }
+  const ruf = S.befoerderungRuf, gunst = S.befoerderungGunst;
+  const reichtRuf = ruf>=25, reichtGunst = gunst>=3;
+  const bekommt = reichtRuf && reichtGunst;
+  let text, klasse;
+  if(bekommt){
+    S.rang = Math.max(S.rang,3);
+    S.ruf += 5;
+    text = `Martel — inzwischen Sergent-major — nennt deinen Namen, und der Capitaine schreibt ihn auf. Es gibt keine Zeremonie. Du bekommst zwei Wollstreifen an den Ärmel, acht Mann und die Verantwortung dafür, dass diese acht Mann morgens da sind, Schuhe haben und ihre Musketen zünden.
+    <br><br>Der Mann, dessen Stelle du bekommst, heißt Guérin. Er ist bei Castiglione geblieben.`;
+    klasse='gut';
+  } else if(!reichtRuf){
+    text = `Zwei Stellen werden besetzt. Keine mit dir. Der Capitaine kennt deinen Namen nicht, und das ist die ganze Erklärung.
+    <br><br><em>Für den Caporal braucht es Ruf 25 — du hast ${ruf}.</em>`;
+    klasse='schlecht';
+  } else {
+    text = `Dein Name fällt. Er fällt sogar zweimal. Aber niemand am Tisch legt die Hand für dich auf den Tisch, und ohne das geht es nicht.
+    <br><br><em>Für den Caporal braucht es einen Fürsprecher — Gunst 3, du hast ${gunst}.</em>`;
+    klasse='schlecht';
+  }
+  app.innerHTML = `<div class="stage"><div>
+    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
+      <div class="ergebnis ${klasse}">${text}</div>
+      <div class="probe" style="margin-top:10px">VAKANZ VORHANDEN · RUF ${ruf}/25 · FÜRSPRACHE ${gunst}/3 · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</div>
+      </div></div>
+    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+
+'use strict';
+/* Winterquartier, Punktwertung, Tod, Kapitelende, Spielstand. */
+
+/* ══════════════════ WINTERQUARTIER ══════════════════ */
+
+let WOCHEN = 3, WLOG = [];
+function zeigeWinter(n){
+  if(WOCHEN===3) WLOG=[];
+  const tun = [
+    {id:'ausr',label:'Ausrüstung instand setzen',cost:'Schuhe, Muskete und Tornister flicken'},
+    {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
+    {id:'lesen',label:'Lesen und Schreiben üben',cost:'Bildung und Verwaltung · kostet 6 Francs'},
+    {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
+    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt, Atem steigt, Wunden heilen'}
+  ];
+  const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${WOCHEN<=0?'disabled':''}>
+    ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
+  app.innerHTML = `<div class="stage"><div>
+    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">
+        <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
+        <p>Es ist die einzige Zeit im Jahr, in der du entscheidest, was du tust. Drei Wochen, mehr nicht — im Januar geht es weiter.</p>
+      </div>
+      ${WLOG.length?`<div class="ergebnis">${WLOG.join('<br><br>')}</div>`:''}
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${WOCHEN}</div>
+      </div></div>
+    <div class="orders"><div class="ch"><span>Womit verbringst du die Woche?</span></div><div class="ordbody">
+      ${opt}${WOCHEN<=0?'<button class="ord weiter" onclick="WOCHEN=3;weiter()">Ins Feld zurück</button>':''}
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+}
+function winterTun(id){
+  if(WOCHEN<=0) return;
+  WOCHEN--;
+  if(id==='ausr'){
+    for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+30);
+    WLOG.push('Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>');
+  }
+  if(id==='drill'){
+    nutzen('muskete',3); nutzen('drill',3); nutzen('bajonett',2);
+    WLOG.push('Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>');
+  }
+  if(id==='lesen'){
+    if(S.geld>=6){ S.geld-=6; S.attr.bildung=Math.min(100,S.attr.bildung+7); nutzen('verwaltung',2);
+      WLOG.push('Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'); }
+    else WLOG.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
+  }
+  if(id==='leute'){
+    S.gunst+=2; S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
+    nutzen('menschenkenntnis',2);
+    WLOG.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
+  }
+  if(id==='ruhe'){
+    S.belastung=Math.max(0,S.belastung-16); S.atem=Math.min(100,S.atem+25);
+    if(S.wunden.length){ const w=S.wunden.shift(); WLOG.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Atem +25 · Wunde geheilt</span>`); }
+    else WLOG.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16 · Atem +25</span>');
+  }
+  if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
+  zeigeWinter(KAPITEL[NODE]);
+}
+
+/* ══════════════════ WERTUNG UND ENDE ══════════════════ */
+
+function stationen(){ return Math.min(KAPITEL.length, NODE+1); }
+
+function wertung(){
+  const p = {};
+  p.rang = rangWert(S.rang);
+  p.stationen = 4 * stationen();
+  p.ruf = 5 * Math.floor(S.ruf/10);
+  p.nennungen = 3 * Math.min(10, S.nennungen);
+  p.ueberleben = S.lebt ? 25 : 0;
+  p.sauber = (!S.gekniffen && S.lebt) ? 10 : 0;
+  p.summe = p.rang+p.stationen+p.ruf+p.nennungen+p.ueberleben+p.sauber;
+  return p;
+}
+
+function eintragen(endeText){
+  const p = wertung();
+  META.chronik.push({name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe});
+  META.vp = Math.max(META.vp, p.summe);
+  return p;
+}
+
+function wertungsTabelle(p){
+  return `<table>
+    <tr><th>Wofür</th><th class="n">VP</th></tr>
+    <tr><td class="d">Erreichter Rang — ${rangName(S.rang)}</td><td class="n">${p.rang}</td></tr>
+    <tr><td class="d">Erreichte Stationen (${stationen()} × 4)</td><td class="n">${p.stationen}</td></tr>
+    <tr><td class="d">Ruf ${S.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
+    <tr><td class="d">Im Tagesbefehl genannt (${S.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
+    <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
+    <tr><td class="d">Nie vor Zeugen gekniffen</td><td class="n">${p.sauber}</td></tr>
+    <tr class="hi"><td class="d"><b>Summe</b></td><td class="n"><b>${p.summe}</b></td></tr>
+  </table>`;
+}
+
+function zeigeTod(){
+  const grund = S.todesart || 'Gefallen';
+  const p = eintragen(grund);
+  const neu = p.summe >= META.vp;
+  app.innerHTML = `<div class="card"><div class="ch"><span class="tot">Ende</span><span>${esc(grund)}</span></div>
+    <div class="cb">
+      <div class="prose">
+        <p><b>${esc(S.name)}</b>, ${rangName(S.rang)} der 32. Halbbrigade, ${esc(grund.toLowerCase())}.</p>
+        <p>${todesText()}</p>
+      </div>
+      <div class="grid2" style="margin-top:18px">
+        <div>${wertungsTabelle(p)}</div>
+        <div class="note ${neu?'green':'red'}">
+          ${neu?`<b>Neuer Rekord.</b> Dein Vorrat steigt auf <b>${META.vp} Veteranenpunkte</b>. Der nächste Mann rückt besser ausgerüstet ein.`
+                :`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>. Dieser hier war nicht besser — er kostet dich aber auch nichts.`}
+          <p style="margin-top:10px">Gezählt wird nur der beste Lauf. Es gibt nichts zu grinden, nur zu übertreffen.</p>
+        </div>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="plain" onclick="zeigeLaden()">Nächster Mann</button>
+        <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+        <button class="plain" onclick="speichern()">Spielstand sichern</button>
+      </div>
+    </div></div>`;
+  S=null; kopfzeile();
+}
+function todesText(){
+  const t = [
+    'Man nimmt ihm die Patronen ab und die Schuhe, wenn sie noch etwas taugen, und zieht weiter. Am Abend fehlt sein Name beim Appell, und am übernächsten Tag erinnert sich niemand mehr, wann genau er gefehlt hat.',
+    'Zwei Männer tragen ihn an den Rand und legen ihn zu den anderen. Ein Brief nach Hause wird nicht geschrieben, weil in seiner Kompanie niemand schreiben kann.',
+    'Er wird in eine Grube gelegt, die vierzig andere teilen. Die Halbbrigade marschiert am Morgen weiter, und seine Muskete bekommt ein Rekrut, der noch nicht weiß, wem sie gehört hat.'
+  ];
+  return t[Math.floor(Math.random()*t.length)];
+}
+
+function zeigeKapitelende(){
+  const p = eintragen('Kapitel überstanden · '+rangName(S.rang));
+  const neu = p.summe >= META.vp;
+  app.innerHTML = `<div class="card"><div class="ch"><span>18. April 1797 · Leoben</span><span>Vorfrieden mit Österreich</span></div>
+    <div class="cb"><div class="prose">
+      <p>In Leoben wird ein Vorfrieden unterschrieben. Für dich heißt das: Der Feldzug ist vorbei, und du lebst noch.</p>
+      <p>Vor einem Jahr bist du mit zerfallenen Schuhen in Savona angekommen und hast nicht gewusst, ob du bis Dego durchhältst. Seitdem warst du auf der Brücke von Lodi, im Sumpf von Arcole und auf der Hochebene von Rivoli. Von den Männern, die im April neben dir standen, ist ungefähr die Hälfte noch da.</p>
+      <p>Du bist <b>${rangName(S.rang)}</b>. ${S.rang>=3?'Acht Mann sehen dich morgens an und warten, was du sagst.':(S.rang===2?'Du stehst nicht mehr in der Mitte des Bataillons, sondern dort, wo sie die Leute hinstellen, auf die es ankommt.':'Du stehst noch in der Reihe wie im April — aber du stehst.')}</p>
+      <p class="said">Es heißt, als Nächstes geht es nach Ägypten. Niemand weiß, wo das genau liegt.</p>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div>${wertungsTabelle(p)}</div>
+      <div class="note ${neu?'green':''}">
+        ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
+        <p style="margin-top:10px"><b>Hier endet der Prototyp.</b> Die Kapitel 2 bis 11 — Ägypten, Austerlitz, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo — stehen im Konzept, aber noch nicht im Code.</p>
+        <p style="margin-top:10px">Was hier funktioniert, funktioniert dort genauso: Proben gegen Attribute, Ausrüstung, die verschleißt, Ruf und Fürsprache, die über Beförderung entscheiden — und ein Tod, der endgültig ist.</p>
+      </div>
+    </div>
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="plain" onclick="zeigeLaden()">Noch einmal, besser</button>
+      <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+      <button class="plain" onclick="speichern()">Spielstand sichern</button>
+    </div>
+  </div></div>`;
+  S=null; kopfzeile();
+}
+
+/* ══════════════════ SPIELSTAND ══════════════════ */
+
+function speichern(){
+  const blob = new Blob([JSON.stringify(META,null,1)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'marschallstab-spielstand.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+function laden(ev){
+  const f = ev.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      if(typeof d.vp === 'number'){ META = {vp:d.vp, chronik:d.chronik||[], bestKapitel:d.bestKapitel||{}}; zeigeTitel(); }
+      else alert('Diese Datei ist kein Spielstand.');
+    }catch(e){ alert('Diese Datei ließ sich nicht lesen.'); }
+  };
+  r.readAsText(f);
+}
+
+
+'use strict';
+/* Einstiegspunkt. Muss zuletzt geladen werden. */
+
+/* ══════════════════ START ══════════════════ */
+zeigeTitel();
+
+</script>
+</body>
+</html>
