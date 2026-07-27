@@ -115,7 +115,7 @@ function zeigeLager(n){
     return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
       ${t.label}<span class="cost">${t.cost}</span></button>`;
   }).join('');
-  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
@@ -143,23 +143,31 @@ function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(
 
 function zeigeWinter(n){
   const W = LAUF.winter;
-  if(W.wochen===3 && !W.log.length){ W.log=[]; W.gesichert = Ablage.dauerhaft; laufSichern(); }
+  if(W.wochen===3 && !W.log.length){
+    W.log=[]; W.gesichert = Ablage.dauerhaft;
+    /* Drei Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem
+       ist danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung
+       und Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
+    W.atemVoll = S.atem < 100; S.atem = 100;
+    laufSichern();
+  }
   const tun = [
     {id:'ausr',label:'Ausrüstung instand setzen',cost:'Schuhe, Muskete und Tornister flicken'},
     {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
     {id:'lesen',label:'Lesen und Schreiben üben',cost:'Bildung und Verwaltung · kostet 6 Francs'},
     {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
-    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt, Atem steigt, Wunden heilen'}
+    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt stark, Wunden heilen'}
   ];
   const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
-  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
         <p>Es ist die einzige Zeit im Jahr, in der du entscheidest, was du tust. Drei Wochen, mehr nicht — im Januar geht es weiter.</p>
       </div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
+      ${W.atemVoll?'<div class="wirkung"><span>Wieder bei Atem</span>Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag. Du bist ausgeruht, wie du es seit April nicht warst. <b>Atem 100</b></div>':''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen}</div>
       </div></div>
@@ -191,9 +199,9 @@ function winterTun(id){
     W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
   }
   if(id==='ruhe'){
-    S.belastung=Math.max(0,S.belastung-16); S.atem=Math.min(100,S.atem+25);
-    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Atem +25 · Wunde geheilt</span>`); }
-    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16 · Atem +25</span>');
+    S.belastung=Math.max(0,S.belastung-16); S.atem=100;
+    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Wunde geheilt</span>`); }
+    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
   laufSichern();

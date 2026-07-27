@@ -42,13 +42,15 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, jede Station
 
 Entworfen, aber noch nicht gebaut: die Kapitel 2 bis 11 (Ägypten, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
 
-Gemessen über 120 automatisierte Durchläufe: **gut ein Drittel übersteht das erste Kapitel.** Etwa die Hälfte stirbt ohne eine einzige Beförderung.
+Gemessen über 80 automatisierte Durchläufe: **knapp die Hälfte übersteht das erste Kapitel**, rund 30 % werden Caporal. Etwa die Hälfte stirbt ohne eine einzige Beförderung.
 
 ---
 
 ## Spielen
 
 `index.html` im Browser öffnen. Doppelklick genügt — kein Server, kein Build, keine Abhängigkeiten. Zum Weitergeben liegt dieselbe Fassung als einzelne Datei unter `dist/marschallstab.html`.
+
+Links steht der Weg: alle elf Feldzüge, auf- und zuklappbar. Innerhalb eines Feldzugs siehst du nur die Stationen, die du mindestens einmal betreten hast — was danach kommt, weißt du nicht. Was du einmal gesehen hast, bleibt über den Tod hinaus sichtbar.
 
 Der angefangene Feldzug wird selbsttätig gesichert — beim Betreten eines Lagers wird es angesagt, danach still nach jedem Schritt. Wer aufhört, kommt genau dorthin zurück, wo er war. **Wer fällt, verliert den Spielstand im selben Augenblick:** Der Aussetz-Spielstand ist zum Aufhören da, nicht zum Wiederholen.
 

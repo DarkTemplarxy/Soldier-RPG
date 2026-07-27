@@ -74,7 +74,7 @@ function zeigeAnmarsch(n){
   const l = n.lage || {};
   const zeilen = [['Gegner',l.gegner],['Auftrag',l.auftrag],['Gelände',l.gelaende],['Dein Platz',l.stellung]]
     .filter(([,v])=>v).map(([k,v])=>`<tr><td class="k">${k}</td><td class="d">${esc(v)}</td></tr>`).join('');
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}
       <div class="card"><div class="ch"><span>Anmarsch · ${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
         <div class="cb">
@@ -128,7 +128,7 @@ function zeigeKampf(text){
   const n = KAPITEL[LAUF.node];
   const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
       ${a.aus&&a.aus()?'disabled':''}>${a.label}<span class="cost">${a.cost}</span></button>`).join('');
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
@@ -262,7 +262,7 @@ function kampfEnde(sieg, letzterText){
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);
   stationErledigt();
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
@@ -278,7 +278,7 @@ function kampfEnde(sieg, letzterText){
 function zeigeElite(n){
   const kon = wert('konstitution'), ges = wert('geschick');
   const gr = kon>=55, vo = ges>=55;
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Mailand hat der Armee Sold gegeben und Schuhe, und jetzt werden die Bataillone neu geordnet. Jedes bekommt eine Grenadier- und eine Voltigeurkompanie, und die Chefs suchen sich die Männer aus.</p>
@@ -305,7 +305,7 @@ function waehleZweig(z){
     text = 'Er geht weiter, ohne etwas zu sagen. Du bleibst in der Mitte des Bataillons, wo die meisten bleiben. Es ist keine Schande, nur eben nichts.';
   }
   stationErledigt();
-  app.innerHTML = `<div class="stage"><div>
+  app.innerHTML = `<div class="stage">${verlauf()}<div>
     <div class="card"><div class="ch"><span>Mailand</span><span>Mai 1796</span></div>
       <div class="cb"><div class="ergebnis ${z?'gut':''}">${text}</div>
       ${z?`<div class="probe" style="margin-top:10px">NEUER RANG · ${rangName(2).toUpperCase()} · RUF +4</div>`:''}</div></div>
@@ -342,7 +342,7 @@ function zeigeBefoerderung(n){
     klasse='schlecht';
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
-  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>

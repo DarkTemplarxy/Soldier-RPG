@@ -5,6 +5,25 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-27 — Kampagnenverlauf, volles Winterquartier, Ausbildung kaufen
+
+**Kampagnenverlauf links.** Alle elf Feldzüge aus `KONZEPT.md` stehen jetzt in einer dritten Spalte, auf- und zuklappbar. **Innerhalb einer Kampagne sieht man nur die Stationen, die man mindestens einmal betreten hat**; danach steht „Was danach kommt, weißt du nicht." Der Nebel liegt in `META.bestKapitel` und überlebt deshalb den Tod — wer oft spielt, kennt den Weg. Die alte Tabelle „Wie weit ich schon war" auf dem Titelbildschirm ist ersetzt: Sie verriet alle Stationsnamen auf einmal.
+
+**Das Winterquartier füllt den Atem ganz auf**, beim Betreten und ohne eine Woche dafür zu opfern. Belastung und Wunden bleiben Sache der Wochenverteilung.
+
+| Stand | Läufe | überstanden | Caporal | Punkte-Median |
+|---|---|---|---|---|
+| ohne jede Erholung, nur Warnung | 120 | 38 % | 23 % | 60 |
+| **Warnung + volles Winterquartier** | **80** | **44 %** | **30 %** | **86** |
+
+Beide Sollwerte getroffen (45–55 % und ~30 %), ohne dass Atem außerhalb von Lager und Winterquartier geschenkt wird. **Ein einziger Erholungspunkt an der richtigen Stelle schlägt eine Erholung an jeder Station** — das war die Antwort auf die Frage nach einer wirkungsvollen, aber nicht frustrierenden Maßnahme.
+
+**Veteranenpunkte lassen sich in einzelne Werte umsetzen.** `PRO_PUNKT` und `kostenVon()` lagen seit dem ersten Meilenstein ungenutzt in `grundwerte.js` und tun jetzt, wofür sie gedacht waren: Fünferschritte, gerechnet vom Sockel (Attribute 20, Fertigkeiten 10), mit steigendem Preis je Zehnerbereich — Fertigkeit 10 → 20 kostet 10 VP, Attribut 20 → 60 kostet 110. Obergrenzen 60 und 50. Invariante 3 bleibt gewahrt: gekauft wird der Ausgangspunkt, nie der Aufstieg. Der Testbot kauft nichts, die Messwerte gelten also weiterhin für den Lauf ohne Punkte.
+
+**Probenergebnis verkleinert** — das Feld „KONSTITUTION — GELUNGEN" stand zu groß im Fließtext und steht jetzt kleiner und in eigener Zeile.
+
+---
+
 ## 2026-07-27 — Spielstand, Atem-Erholung, Erklärungen
 
 **Aussetz-Spielstand.** Neu: `src/spielstand.js` mit Fassungen, Wandlern, Ablage und Prüfsumme. Der Laufzustand lag in acht verstreuten Globalen (`S`, `K`, `NODE`, `WOCHEN`, `WLOG`, `ABENDE`, `LAGER_ID`, `LLOG`) plus `window.AKT`, das ein Verweis mitten in die Kapiteldaten war — deshalb ließ sich ein laufender Feldzug gar nicht speichern. Jetzt ein `LAUF`-Objekt aus reinen Daten; `S` und `K` sind nur noch Kurznamen darauf.

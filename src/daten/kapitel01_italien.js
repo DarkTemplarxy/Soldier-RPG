@@ -269,3 +269,5 @@ const KAPITEL = [
 /* 16 */ {typ:'ende',id:'leoben',datum:'18. April 1797 · Leoben',ort:'Vorfrieden mit Österreich',
   marsch:{von:'Rivoli',nach:'Leoben in der Steiermark',weg:'400 km nach Nordosten über die Alpen · zehn Wochen, drei Pässe, kein Gefecht mehr'}}
 ];
+
+STATIONEN.italien = KAPITEL;   // meldet die Stationen beim Verlauf an

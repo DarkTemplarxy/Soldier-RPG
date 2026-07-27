@@ -11,7 +11,7 @@
   body{background:var(--bg);color:var(--text);
     font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.65;
     -webkit-font-smoothing:antialiased}
-  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 70px}
+  .wrap{max-width:1460px;margin:0 auto;padding:24px 20px 70px}
 
   header.top{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:20px;
     display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
@@ -26,7 +26,9 @@
     display:flex;justify-content:space-between;gap:12px}
   .cb{padding:17px}
 
-  .stage{display:grid;grid-template-columns:1fr 292px;gap:18px;align-items:start}
+  .stage{display:grid;grid-template-columns:246px 1fr 292px;gap:18px;align-items:start}
+  @media(max-width:1180px){.stage{grid-template-columns:1fr 292px}
+    .stage>.verlauf{grid-column:1/-1;order:2}}
   @media(max-width:900px){.stage{grid-template-columns:1fr}}
 
   .prose p{margin:0 0 12px}
@@ -116,6 +118,43 @@
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Ausbildung vorwegnehmen — Veteranenpunkte in Werte umsetzen */
+  .punktzeile{display:grid;grid-template-columns:1fr 34px 46px 62px;gap:8px;align-items:center;
+    padding:4px 0;border-bottom:1px solid #232019;font-size:13.5px}
+  .punktzeile:last-child{border-bottom:none}
+  .punktplus{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;
+    text-align:right;color:#f0e7d5}
+  .punktplus.aus{color:var(--faint)}
+  .punktvp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+    text-align:right;color:var(--brass)}
+  .punktvp.aus{color:var(--faint)}
+
+  /* Kampagnenverlauf links — was man gesehen hat, sieht man; sonst nichts */
+  .verlauf .cb{padding:8px 9px}
+  .kmp{border-bottom:1px solid #262219}
+  .kmp:last-child{border-bottom:none}
+  .kmpkopf{display:grid;grid-template-columns:14px 18px 1fr auto;gap:6px;align-items:baseline;
+    width:100%;background:none;border:none;padding:8px 6px;cursor:pointer;text-align:left;
+    font-family:inherit;color:var(--dim);font-size:14px}
+  .kmpkopf:hover{color:#f0e7d5}
+  .kmppfeil{color:var(--brass);font-size:10px;line-height:1}
+  .kmpnr{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--faint)}
+  .kmpname{color:inherit}
+  .kmpname i{color:var(--brass);font-style:normal;font-size:11.5px;letter-spacing:.06em}
+  .kmpjahr{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;color:var(--faint)}
+  .kmp.ungebaut .kmpkopf{color:var(--faint)}
+  .kmp.ungebaut .kmppfeil{color:var(--faint)}
+  .kmpliste{display:none;padding:0 6px 9px 26px}
+  .kmp.auf .kmpliste{display:block}
+  .kmpst{padding:4px 0 4px 10px;border-left:1px solid #3a342c;font-size:13px;color:var(--dim)}
+  .kmpst.gefecht{border-left-color:var(--blood)}
+  .kmpst.jetzt{border-left-color:var(--brass);background:#221e18}
+  .kmpst.jetzt .kmpst-ort{color:#f0e7d5}
+  .kmpst-ort{display:block}
+  .kmpst-art{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .kmpleer{padding:5px 0 5px 11px;font-size:12.5px;font-style:italic;color:var(--faint)}
+
   /* Warnung — nur da, wo es wirklich gleich etwas kostet */
   .warnung{margin:7px 0 0;padding:8px 11px;background:#2a1815;
     border-left:2px solid var(--blood);color:#eab5ab;font-size:13px;line-height:1.5}
@@ -152,9 +191,9 @@
   .fein{color:var(--faint);font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
 
   /* Ergebnis einer Probe — nur gelungen oder misslungen, nicht die Rechnung */
-  .pruefung{display:inline-block;margin-top:11px;padding:4px 12px;
-    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
-    letter-spacing:.09em;text-transform:uppercase;
+  .pruefung{display:block;width:fit-content;margin-top:12px;padding:2px 8px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
+    letter-spacing:.1em;text-transform:uppercase;
     border:1px solid var(--line);background:#100f0d;color:var(--dim)}
   .pruefung.gut{border-color:var(--green);color:#b6c48d}
   .pruefung.schlecht{border-color:var(--blood);color:#e08a7e}

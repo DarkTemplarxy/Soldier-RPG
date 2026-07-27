@@ -27,12 +27,17 @@ function neuerLauf(mann){
    die Entscheidung nicht rückgängig macht. */
 function stationErledigt(){ if(LAUF){ LAUF.node++; LAUF.szene = null; laufSichern(); } }
 
-function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe){
+function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
   const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
   for(const k in h.attr) attr[k] = Math.max(0, Math.min(100, attr[k] + h.attr[k]));
   for(const k in h.fert) fert[k] = Math.max(0, Math.min(100, fert[k] + h.fert[k]));
+  // Mit Veteranenpunkten vorweggenommene Ausbildung, oben auf Herkunft und Pool
+  for(const k in (punkte||{})){
+    if(attr[k] !== undefined) attr[k] = Math.min(100, attr[k] + punkte[k]);
+    else if(fert[k] !== undefined) fert[k] = Math.min(100, fert[k] + punkte[k]);
+  }
   const ausr = AUSRUESTUNG_START();
   let geld = 4;
   (kaeufe||[]).forEach(id=>{
@@ -45,7 +50,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe){
   return {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, gunst:0, kameradschaft:20, belastung:0,
-    atem:100, wunden:[], nennungen:0, kaeufe:kaeufe||[],
+    atem:100, wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
 }

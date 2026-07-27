@@ -18,7 +18,7 @@
   body{background:var(--bg);color:var(--text);
     font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.65;
     -webkit-font-smoothing:antialiased}
-  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 70px}
+  .wrap{max-width:1460px;margin:0 auto;padding:24px 20px 70px}
 
   header.top{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:20px;
     display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
@@ -33,7 +33,9 @@
     display:flex;justify-content:space-between;gap:12px}
   .cb{padding:17px}
 
-  .stage{display:grid;grid-template-columns:1fr 292px;gap:18px;align-items:start}
+  .stage{display:grid;grid-template-columns:246px 1fr 292px;gap:18px;align-items:start}
+  @media(max-width:1180px){.stage{grid-template-columns:1fr 292px}
+    .stage>.verlauf{grid-column:1/-1;order:2}}
   @media(max-width:900px){.stage{grid-template-columns:1fr}}
 
   .prose p{margin:0 0 12px}
@@ -123,6 +125,43 @@
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Ausbildung vorwegnehmen — Veteranenpunkte in Werte umsetzen */
+  .punktzeile{display:grid;grid-template-columns:1fr 34px 46px 62px;gap:8px;align-items:center;
+    padding:4px 0;border-bottom:1px solid #232019;font-size:13.5px}
+  .punktzeile:last-child{border-bottom:none}
+  .punktplus{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;
+    text-align:right;color:#f0e7d5}
+  .punktplus.aus{color:var(--faint)}
+  .punktvp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+    text-align:right;color:var(--brass)}
+  .punktvp.aus{color:var(--faint)}
+
+  /* Kampagnenverlauf links — was man gesehen hat, sieht man; sonst nichts */
+  .verlauf .cb{padding:8px 9px}
+  .kmp{border-bottom:1px solid #262219}
+  .kmp:last-child{border-bottom:none}
+  .kmpkopf{display:grid;grid-template-columns:14px 18px 1fr auto;gap:6px;align-items:baseline;
+    width:100%;background:none;border:none;padding:8px 6px;cursor:pointer;text-align:left;
+    font-family:inherit;color:var(--dim);font-size:14px}
+  .kmpkopf:hover{color:#f0e7d5}
+  .kmppfeil{color:var(--brass);font-size:10px;line-height:1}
+  .kmpnr{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--faint)}
+  .kmpname{color:inherit}
+  .kmpname i{color:var(--brass);font-style:normal;font-size:11.5px;letter-spacing:.06em}
+  .kmpjahr{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;color:var(--faint)}
+  .kmp.ungebaut .kmpkopf{color:var(--faint)}
+  .kmp.ungebaut .kmppfeil{color:var(--faint)}
+  .kmpliste{display:none;padding:0 6px 9px 26px}
+  .kmp.auf .kmpliste{display:block}
+  .kmpst{padding:4px 0 4px 10px;border-left:1px solid #3a342c;font-size:13px;color:var(--dim)}
+  .kmpst.gefecht{border-left-color:var(--blood)}
+  .kmpst.jetzt{border-left-color:var(--brass);background:#221e18}
+  .kmpst.jetzt .kmpst-ort{color:#f0e7d5}
+  .kmpst-ort{display:block}
+  .kmpst-art{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .kmpleer{padding:5px 0 5px 11px;font-size:12.5px;font-style:italic;color:var(--faint)}
+
   /* Warnung — nur da, wo es wirklich gleich etwas kostet */
   .warnung{margin:7px 0 0;padding:8px 11px;background:#2a1815;
     border-left:2px solid var(--blood);color:#eab5ab;font-size:13px;line-height:1.5}
@@ -159,9 +198,9 @@
   .fein{color:var(--faint);font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
 
   /* Ergebnis einer Probe — nur gelungen oder misslungen, nicht die Rechnung */
-  .pruefung{display:inline-block;margin-top:11px;padding:4px 12px;
-    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
-    letter-spacing:.09em;text-transform:uppercase;
+  .pruefung{display:block;width:fit-content;margin-top:12px;padding:2px 8px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
+    letter-spacing:.1em;text-transform:uppercase;
     border:1px solid var(--line);background:#100f0d;color:var(--dim)}
   .pruefung.gut{border-color:var(--green);color:#b6c48d}
   .pruefung.schlecht{border-color:var(--blood);color:#e08a7e}
@@ -272,6 +311,24 @@ const HERKUENFTE = [
    text:'Menschenkenntnis +25 · Kaltblütigkeit +20 · Fouragieren +20 · Bildung −15',
    attr:{menschenkenntnis:25,kaltbluetigkeit:20,bildung:-15}, fert:{fouragieren:20}}
 ];
+
+/* Die elf Kampagnen. Nur die erste ist gebaut; die übrigen stehen so im
+   KONZEPT.md und werden im Verlauf links angezeigt, damit man sieht, wie lang
+   der Weg ist. Jede Kapiteldatei trägt ihre Stationen selbst in STATIONEN ein. */
+const KAMPAGNEN = [
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1800–04', kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    kurz:'Die perfekte Schlacht.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    kurz:'Waterloo. Epilog je nach Rang.'}
+];
+const STATIONEN = {};
 
 const AUSRUESTUNG_START = () => ({
   muskete:{name:'Charleville Modell 1777',zustand:70,verschleiss:15},
@@ -568,6 +625,8 @@ const KAPITEL = [
   marsch:{von:'Rivoli',nach:'Leoben in der Steiermark',weg:'400 km nach Nordosten über die Alpen · zehn Wochen, drei Pässe, kein Gefecht mehr'}}
 ];
 
+STATIONEN.italien = KAPITEL;   // meldet die Stationen beim Verlauf an
+
 
 'use strict';
 /* Spielstand: Fassungen, Wandler, Ablage, Aussetz-Spielstand.
@@ -769,12 +828,17 @@ function neuerLauf(mann){
    die Entscheidung nicht rückgängig macht. */
 function stationErledigt(){ if(LAUF){ LAUF.node++; LAUF.szene = null; laufSichern(); } }
 
-function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe){
+function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
   const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
   for(const k in h.attr) attr[k] = Math.max(0, Math.min(100, attr[k] + h.attr[k]));
   for(const k in h.fert) fert[k] = Math.max(0, Math.min(100, fert[k] + h.fert[k]));
+  // Mit Veteranenpunkten vorweggenommene Ausbildung, oben auf Herkunft und Pool
+  for(const k in (punkte||{})){
+    if(attr[k] !== undefined) attr[k] = Math.min(100, attr[k] + punkte[k]);
+    else if(fert[k] !== undefined) fert[k] = Math.min(100, fert[k] + punkte[k]);
+  }
   const ausr = AUSRUESTUNG_START();
   let geld = 4;
   (kaeufe||[]).forEach(id=>{
@@ -787,7 +851,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe){
   return {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, gunst:0, kameradschaft:20, belastung:0,
-    atem:100, wunden:[], nennungen:0, kaeufe:kaeufe||[],
+    atem:100, wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
 }
@@ -891,6 +955,69 @@ function kopfzeile(){
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
 }
 
+/* ── Kampagnenverlauf links ──
+   Zeigt alle elf Kampagnen, aber innerhalb einer Kampagne nur die Stationen,
+   die man mindestens einmal betreten hat. Was danach kommt, weiß man nicht —
+   das ist Absicht und dieselbe Haltung wie im Gefecht: Du siehst, wo du bist,
+   nicht, was auf dich zukommt. Der Nebel liegt in META.bestKapitel und
+   überlebt deshalb den Tod. */
+
+let VERLAUF_OFFEN = {italien:1};
+
+function stationsArt(n){
+  return {kampf:'Gefecht', lager:'Lager', winter:'Winterquartier',
+          befoerderung:'Neuaufstellung', elite:'Auswahl', ende:'Ende'}[n.typ] || 'Station';
+}
+
+function verlauf(){
+  const jetzt = LAUF ? (KAPITEL[Math.min(LAUF.node,KAPITEL.length-1)]||{}).id : null;
+  const bloecke = KAMPAGNEN.map(k=>{
+    const auf = !!VERLAUF_OFFEN[k.id];
+    const st = STATIONEN[k.id] || [];
+    const gesehen = st.filter(n=>n.id && META.bestKapitel[n.id]);
+    const hier = st.some(n=>n.id===jetzt);
+    let inhalt;
+    if(!k.gebaut){
+      inhalt = `<div class="kmpleer">Noch nicht gebaut. ${esc(k.kurz)}</div>`;
+    } else if(!gesehen.length){
+      inhalt = '<div class="kmpleer">Du warst noch nirgends. Es fängt in Savona an.</div>';
+    } else {
+      inhalt = gesehen.map(n=>{
+        const b = META.bestKapitel[n.id];
+        const teil = (n.datum||'').split(' · ');
+        const ort = teil[1] || n.ort || n.id;
+        // Datum statt Gattungswort: „Savona" gibt es zweimal, den 1. April nur einmal
+        const unten = [teil[0], n.typ!=='szene' ? stationsArt(n) : '', b.mal>1 ? b.mal+'×' : '']
+          .filter(Boolean).join(' · ');
+        return `<div class="kmpst ${n.id===jetzt?'jetzt':''} ${n.typ==='kampf'?'gefecht':''}">
+          <span class="kmpst-ort">${esc(ort)}</span>
+          <span class="kmpst-art">${esc(unten)}</span></div>`;
+      }).join('');
+      if(gesehen.length < st.length)
+        inhalt += '<div class="kmpleer">Was danach kommt, weißt du nicht.</div>';
+    }
+    return `<div class="kmp ${auf?'auf':''} ${k.gebaut?'':'ungebaut'}" id="kmp_${k.id}">
+      <button class="kmpkopf" onclick="verlaufUm('${k.id}')">
+        <span class="kmppfeil">${auf?'▾':'▸'}</span>
+        <span class="kmpnr">${k.nr}</span>
+        <span class="kmpname">${esc(k.name)}${hier?' <i>· hier</i>':''}</span>
+        <span class="kmpjahr">${esc(k.jahre)}</span>
+      </button>
+      <div class="kmpliste">${inhalt}</div></div>`;
+  }).join('');
+  return `<aside class="card verlauf"><div class="ch"><span>Der Weg</span><span>11 Feldzüge</span></div>
+    <div class="cb">${bloecke}</div></aside>`;
+}
+
+/* Auf- und zuklappen ohne Neuaufbau des Bildschirms — sonst müsste jede
+   Ansicht wissen, wie sie sich selbst neu zeichnet. */
+function verlaufUm(id){
+  const e = document.getElementById('kmp_'+id); if(!e) return;
+  const auf = e.classList.toggle('auf');
+  if(auf) VERLAUF_OFFEN[id]=1; else delete VERLAUF_OFFEN[id];
+  const p = e.querySelector('.kmppfeil'); if(p) p.textContent = auf ? '▾' : '▸';
+}
+
 /* Ab 35 wird gewarnt, ab 30 kostet es wirklich (+5 Gefahr je Kampfrunde).
    Die Warnung kommt absichtlich fünf Punkte früher als der Malus — sie soll
    zum Schlafen im Lager bewegen, nicht den Schaden bloß melden. */
@@ -943,12 +1070,6 @@ function zeigeTitel(){
       <td class="d">${esc(c.rang)}</td><td class="d">${esc(c.ende)}</td><td class="n">${c.punkte}</td></tr>`).join('')
     : '<tr><td class="d" colspan="4">Noch kein Eintrag. Der erste Mann wartet.</td></tr>';
 
-  const best = KAPITEL.filter(n=>n.datum).map((n,i)=>{
-    const b = META.bestKapitel[n.id];
-    return `<tr><td class="d">${esc(n.datum.split(' · ')[1]||n.id)}</td>
-      <td class="n">${b?b.mal+'×':'—'}</td><td class="d">${b?esc(b.rang):'nie erreicht'}</td></tr>`;
-  }).join('');
-
   app.innerHTML = `
   <div class="card"><div class="ch"><span>Der Marschallstab</span><span>Prototyp · Italien 1796/97</span></div>
    <div class="cb">
@@ -972,16 +1093,42 @@ function zeigeTitel(){
   <div class="grid2">
     <div class="card"><div class="ch"><span>Chronik</span><span>${META.laeufe|0} Läufe</span></div>
       <div class="cb"><table><tr><th>Name</th><th>Endrang</th><th>Ende</th><th class="n">VP</th></tr>${chron}</table></div></div>
-    <div class="card"><div class="ch"><span>Wie weit ich schon war</span></div>
-      <div class="cb"><table><tr><th>Station</th><th class="n">erreicht</th><th>bester Rang dort</th></tr>${best}</table></div></div>
+    ${verlauf()}
   </div>`;
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
 }
 
-/* ── Veteranenpunkte ausgeben ── */
-let AUSWAHL = [];
+/* ── Veteranenpunkte ausgeben ──
+   Zwei Arten, sie loszuwerden: Ausrüstung als Ganzes, oder Ausbildung in
+   einzelnen Punkten. Die Punkte werden mit jedem Zehnerbereich teurer
+   (PRO_PUNKT in grundwerte.js) — von 10 auf 20 kostet 10 VP, von 50 auf 60
+   schon 40. Damit kauft man sich einen Vorsprung, aber nie eine Laufbahn:
+   Rang, Ruf und Gunst bleiben unkäuflich (Invariante 3). */
+
+let AUSWAHL = [], PUNKTE = {};
+const PUNKT_SCHRITT = 5;
+function istAttribut(k){ return ATTRIBUTE.some(([a])=>a===k); }
+function punktBasis(k){ return istAttribut(k) ? 20 : 10; }   // Sockel bei der Erschaffung
+function punktGrenze(k){ return istAttribut(k) ? 60 : 50; }  // darüber nur noch im Spiel
+function punktKosten(k){ const b = punktBasis(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
+function gesamtKosten(){
+  return AUSWAHL.reduce((s,id)=>s+LADEN.find(p=>p.id===id).vp,0)
+       + Object.keys(PUNKTE).reduce((s,k)=>s+punktKosten(k),0);
+}
+
+function punktZeile(k,n){
+  const p = PUNKTE[k]||0;
+  return `<div class="punktzeile" id="pz_${k}">
+    <span>${mitHilfe(k,n)}</span>
+    <span class="punktplus ${p?'':'aus'}" id="pp_${k}">${p?'+'+p:'—'}</span>
+    <span class="punktvp ${p?'':'aus'}" id="pv_${k}">${p?punktKosten(k)+' VP':''}</span>
+    <span><button class="pmbtn" onclick="stellePunkt('${k}',-PUNKT_SCHRITT)" id="pm_${k}">−</button>
+    <button class="pmbtn" onclick="stellePunkt('${k}',PUNKT_SCHRITT)" id="pa_${k}">+</button></span>
+  </div>`;
+}
+
 function zeigeLaden(){
-  AUSWAHL = [];
+  AUSWAHL = []; PUNKTE = {};
   const zeilen = LADEN.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
     <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
     onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
@@ -990,20 +1137,39 @@ function zeigeLaden(){
    <div class="cb">
     <div class="note">Der Vorrat ist die Punktzahl deines besten Laufs. Er wird nicht verbraucht — bei jedem Neustart verteilst du ihn neu.
     ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu.':''}</div>
-    <table style="margin-top:16px"><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
-    <div style="margin-top:16px;display:flex;gap:10px"><button class="plain" onclick="zeigeErschaffung()">Weiter zur Erschaffung</button>
+    <table style="margin-top:16px"><tr><th>Ausrüstung</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+   </div></div>
+
+  <div class="card"><div class="ch"><span>Ausbildung vorwegnehmen</span><span>je ${PUNKT_SCHRITT} Punkte · wird mit jedem Zehner teurer</span></div>
+   <div class="cb">
+    <div class="note">Was ein anderer sich in zwei Jahren beigebracht hätte. Der erste Zehner kostet 1 VP je Punkt, der fünfte schon 4 — wer hoch einsteigt, zahlt dafür.
+    <br><br>Attribute höchstens 60, Fertigkeiten höchstens 50. Alles darüber musst du dir im Feld verdienen.</div>
+    <div class="grid2" style="margin-top:16px">
+      <div><p class="mini">Attribute</p>${ATTRIBUTE.filter(([k])=>k!=='bildung').map(([k,n])=>punktZeile(k,n)).join('')}
+        <p class="mini" style="margin-top:14px">Bildung</p>${punktZeile('bildung','Bildung')}</div>
+      <div><p class="mini">Fertigkeiten</p>${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}</div>
+    </div>
+    <div style="margin-top:18px;display:flex;gap:10px"><button class="plain" onclick="zeigeErschaffung()">Weiter zur Erschaffung</button>
     <button class="plain" onclick="zeigeTitel()">Zurück</button></div>
    </div></div>`;
   aktualisiereLaden();
 }
 function waehle(id){
   const i = AUSWAHL.indexOf(id);
-  if(i>=0) AUSWAHL.splice(i,1); else AUSWAHL.push(id);
+  if(i>=0) AUSWAHL.splice(i,1);
+  else { AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop(); }
+  aktualisiereLaden();
+}
+function stellePunkt(k,d){
+  const alt = PUNKTE[k]||0, neu = alt + d;
+  if(neu < 0 || punktBasis(k)+neu > punktGrenze(k)) return;
+  PUNKTE[k] = neu;
+  if(gesamtKosten() > META.vp){ PUNKTE[k] = alt; }     // der Vorrat ist die Grenze
+  if(!PUNKTE[k]) delete PUNKTE[k];
   aktualisiereLaden();
 }
 function aktualisiereLaden(){
-  const aus = AUSWAHL.reduce((s,id)=>s+LADEN.find(p=>p.id===id).vp,0);
-  const rest = META.vp - aus;
+  const rest = META.vp - gesamtKosten();
   document.getElementById('vpanz').textContent = `${rest} von ${META.vp} übrig`;
   LADEN.forEach(p=>{
     const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
@@ -1011,6 +1177,16 @@ function aktualisiereLaden(){
     b.textContent = drin?'gewählt':'wählen';
     b.disabled = !drin && p.vp>rest;
     z.className = drin?'hi':'';
+  });
+  ATTRIBUTE.concat(FERTIGKEITEN).forEach(([k])=>{
+    const p = PUNKTE[k]||0, b = punktBasis(k);
+    const pp = document.getElementById('pp_'+k), pv = document.getElementById('pv_'+k);
+    pp.textContent = p?'+'+p:'—'; pp.className = 'punktplus'+(p?'':' aus');
+    pv.textContent = p?punktKosten(k)+' VP':''; pv.className = 'punktvp'+(p?'':' aus');
+    document.getElementById('pz_'+k).className = 'punktzeile'+(p?' hi':'');
+    document.getElementById('pm_'+k).disabled = !p;
+    document.getElementById('pa_'+k).disabled =
+      b+p+PUNKT_SCHRITT > punktGrenze(k) || kostenVon(b+p, b+p+PUNKT_SCHRITT) > rest;
   });
 }
 
@@ -1029,7 +1205,7 @@ function zeigeErschaffung(){
       <button class="pmbtn" onclick="stelle('${k}',10)" id="ap_${k}">+</button></span>
     </div>`).join('');
   app.innerHTML = `
-  <div class="stage">
+  <div class="stage">${verlauf()}
     <div>
       <div class="card"><div class="ch"><span>Wer bist du</span></div><div class="cb">
         <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${zufallsName()}" oninput="ERSCH.name=this.value">
@@ -1095,7 +1271,7 @@ function aktualisiereErschaffung(){
 }
 function starte(){
   laufVerwerfen();       // ein Platz, kein zweiter — der alte Feldzug ist damit vorbei
-  neuerLauf(neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL));
+  neuerLauf(neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL, PUNKTE));
   naechster();
 }
 
@@ -1138,7 +1314,7 @@ function zeigeSzene(n){
     return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
       ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`;
   }).join('');
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
@@ -1160,7 +1336,7 @@ function waehleOption(i){
   verschleiss(0.35);
   S.log.push(n.id+': '+o.label);
   stationErledigt();
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p class="said">${esc(o.label)}</p></div>
         <div class="ergebnis ${klasse}">${erg.text}${probeText}</div>
@@ -1258,7 +1434,7 @@ function zeigeAnmarsch(n){
   const l = n.lage || {};
   const zeilen = [['Gegner',l.gegner],['Auftrag',l.auftrag],['Gelände',l.gelaende],['Dein Platz',l.stellung]]
     .filter(([,v])=>v).map(([k,v])=>`<tr><td class="k">${k}</td><td class="d">${esc(v)}</td></tr>`).join('');
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}
       <div class="card"><div class="ch"><span>Anmarsch · ${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
         <div class="cb">
@@ -1312,7 +1488,7 @@ function zeigeKampf(text){
   const n = KAPITEL[LAUF.node];
   const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
       ${a.aus&&a.aus()?'disabled':''}>${a.label}<span class="cost">${a.cost}</span></button>`).join('');
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
@@ -1446,7 +1622,7 @@ function kampfEnde(sieg, letzterText){
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);
   stationErledigt();
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
@@ -1462,7 +1638,7 @@ function kampfEnde(sieg, letzterText){
 function zeigeElite(n){
   const kon = wert('konstitution'), ges = wert('geschick');
   const gr = kon>=55, vo = ges>=55;
-  app.innerHTML = `<div class="stage">
+  app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Mailand hat der Armee Sold gegeben und Schuhe, und jetzt werden die Bataillone neu geordnet. Jedes bekommt eine Grenadier- und eine Voltigeurkompanie, und die Chefs suchen sich die Männer aus.</p>
@@ -1489,7 +1665,7 @@ function waehleZweig(z){
     text = 'Er geht weiter, ohne etwas zu sagen. Du bleibst in der Mitte des Bataillons, wo die meisten bleiben. Es ist keine Schande, nur eben nichts.';
   }
   stationErledigt();
-  app.innerHTML = `<div class="stage"><div>
+  app.innerHTML = `<div class="stage">${verlauf()}<div>
     <div class="card"><div class="ch"><span>Mailand</span><span>Mai 1796</span></div>
       <div class="cb"><div class="ergebnis ${z?'gut':''}">${text}</div>
       ${z?`<div class="probe" style="margin-top:10px">NEUER RANG · ${rangName(2).toUpperCase()} · RUF +4</div>`:''}</div></div>
@@ -1526,7 +1702,7 @@ function zeigeBefoerderung(n){
     klasse='schlecht';
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
-  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
@@ -1655,7 +1831,7 @@ function zeigeLager(n){
     return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
       ${t.label}<span class="cost">${t.cost}</span></button>`;
   }).join('');
-  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
@@ -1683,23 +1859,31 @@ function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(
 
 function zeigeWinter(n){
   const W = LAUF.winter;
-  if(W.wochen===3 && !W.log.length){ W.log=[]; W.gesichert = Ablage.dauerhaft; laufSichern(); }
+  if(W.wochen===3 && !W.log.length){
+    W.log=[]; W.gesichert = Ablage.dauerhaft;
+    /* Drei Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem
+       ist danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung
+       und Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
+    W.atemVoll = S.atem < 100; S.atem = 100;
+    laufSichern();
+  }
   const tun = [
     {id:'ausr',label:'Ausrüstung instand setzen',cost:'Schuhe, Muskete und Tornister flicken'},
     {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
     {id:'lesen',label:'Lesen und Schreiben üben',cost:'Bildung und Verwaltung · kostet 6 Francs'},
     {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
-    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt, Atem steigt, Wunden heilen'}
+    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt stark, Wunden heilen'}
   ];
   const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
-  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
         <p>Es ist die einzige Zeit im Jahr, in der du entscheidest, was du tust. Drei Wochen, mehr nicht — im Januar geht es weiter.</p>
       </div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
+      ${W.atemVoll?'<div class="wirkung"><span>Wieder bei Atem</span>Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag. Du bist ausgeruht, wie du es seit April nicht warst. <b>Atem 100</b></div>':''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen}</div>
       </div></div>
@@ -1731,9 +1915,9 @@ function winterTun(id){
     W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
   }
   if(id==='ruhe'){
-    S.belastung=Math.max(0,S.belastung-16); S.atem=Math.min(100,S.atem+25);
-    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Atem +25 · Wunde geheilt</span>`); }
-    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16 · Atem +25</span>');
+    S.belastung=Math.max(0,S.belastung-16); S.atem=100;
+    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Wunde geheilt</span>`); }
+    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
   laufSichern();

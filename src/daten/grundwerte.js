@@ -67,6 +67,24 @@ const HERKUENFTE = [
    attr:{menschenkenntnis:25,kaltbluetigkeit:20,bildung:-15}, fert:{fouragieren:20}}
 ];
 
+/* Die elf Kampagnen. Nur die erste ist gebaut; die übrigen stehen so im
+   KONZEPT.md und werden im Verlauf links angezeigt, damit man sieht, wie lang
+   der Weg ist. Jede Kapiteldatei trägt ihre Stationen selbst in STATIONEN ein. */
+const KAMPAGNEN = [
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1800–04', kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    kurz:'Die perfekte Schlacht.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    kurz:'Waterloo. Epilog je nach Rang.'}
+];
+const STATIONEN = {};
+
 const AUSRUESTUNG_START = () => ({
   muskete:{name:'Charleville Modell 1777',zustand:70,verschleiss:15},
   seitenwaffe:{name:'Ausgabebajonett',zustand:80,verschleiss:8},

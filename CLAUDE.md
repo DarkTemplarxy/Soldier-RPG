@@ -33,6 +33,8 @@ Gebaut ist **Kapitel 1 (Italien 1796/97)**, Ränge 1–3, als reine HTML/JS-Anwe
 | Permadeath, Wertung, Chronik, Spielstand als Datei | |
 | Aussetz-Spielstand mit Fassungen und Wandlern | Dateisystem-Ablage, Steam-Cloud |
 | Erklärungen zu jedem Wert beim Überfahren | |
+| Kampagnenverlauf mit Nebel über Ungesehenem | |
+| Veteranenpunkte in einzelne Werte umsetzbar | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -179,6 +181,10 @@ Der Caporal-Anteil stieg mittelbar — mehr Atem heißt seltener der Malus `Atem
 
 **Stattdessen wird gewarnt, statt zu heilen.** Ab Atem 35 färbt sich der Balken rot und im Gefecht steht eine Warnung über der Rundenzeile; die Zahl 35 liegt absichtlich *fünf Punkte über* dem Malus bei 30. Der Spieler soll rechtzeitig „Schlafen und liegen bleiben" wählen — die Erholung bleibt eine Entscheidung im Lager und wird nicht verschenkt.
 
+**Das Winterquartier füllt den Atem ganz auf**, beim Betreten und ohne dass man dafür eine Woche opfern müsste (`src/abschluss.js`). Belastung und Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer als Kurzatmigkeit. Das ist die eine Stelle, an der Erholung geschenkt wird, und sie ist verdient: drei Wochen unter einem Dach, mit Sold und zweimal Essen am Tag.
+
+> **Diese eine Änderung hat die Balance wieder eingefangen.** Gemessen über 80 Läufe: überstanden **44 %** (vorher 38 %), Caporal **30 %** (vorher 23 %), Punkte-Median **86** (vorher 60). Beide Sollwerte getroffen, ohne dass Atem außerhalb von Lager und Winterquartier geschenkt wird. Ein einziger Erholungspunkt an der richtigen Stelle schlägt eine Erholung an jeder Station.
+
 > **Regel daraus:** Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Caporal-Anteil. Wer an Atem, Wunden oder Gefahr dreht, misst nicht nur die Überlebensquote, sondern auch die Endränge.
 
 ### Die Linie kämpft auch ohne dich (`src/kampf.js`)
@@ -245,38 +251,55 @@ Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP, alles zusammen 166.
 
 > Diese Wertung gilt nur für den Prototyp mit einem Kapitel. Die Skala des vollen Spiels (Maximum 918, Rangwerte bis 580) steht in KONZEPT.md und wird übernommen, sobald mehrere Kapitel existieren.
 
+### Veteranenpunkte in Ausbildung (`src/oberflaeche.js`, `PRO_PUNKT` in `grundwerte.js`)
+
+```js
+PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15]    // VP je Punkt, nach Zehnerbereich
+kostenVon(a,b)                          // Summe für den Weg von a nach b
+```
+
+Neben der Ausrüstung lassen sich einzelne Punkte kaufen, in Fünferschritten. Gerechnet wird immer vom **Sockel** (Attribute 20, Fertigkeiten 10), nicht vom späteren Wert — so ist der Preis vorhersagbar, bevor man Herkunft und Pool verteilt hat.
+
+| Kauf | Kosten |
+|---|---|
+| Fertigkeit 10 → 20 | 10 VP |
+| Fertigkeit 10 → 30 | 30 VP |
+| Attribut 20 → 30 | 20 VP |
+| Attribut 20 → 60 | 110 VP |
+
+**Obergrenzen: Attribute 60, Fertigkeiten 50** — darüber muss man sich im Feld verdienen. Die Herkunft und der Verteilungspool kommen oben drauf, wie bei den Ausrüstungskäufen auch.
+
+> **Warum die Staffelung reicht als Bremse.** Ein Spitzenlauf bringt etwa 160 VP; ein einzelnes Attribut von 20 auf 60 kostet 110 davon. Wer breit kauft, kauft flach. Dazu kommt die eingebaute zweite Bremse aus `nutzen()`: Hohe Startwerte wachsen langsamer, weil das Wachstum vom Abstand zu 100 abhängt. Der Vorsprung schrumpft im Spiel, statt sich aufzuschaukeln.
+
+**Invariante 3 bleibt gewahrt:** Gekauft wird der Ausgangspunkt, nie der Aufstieg. Rang, Ruf, Gunst und Nennungen sind unkäuflich.
+
 ### Zielwerte
 
-| Größe | Soll | Gemessen (120 Läufe) |
+| Größe | Soll | Gemessen (80 Läufe) |
 |---|---|---|
-| Kapitel 1 überstanden (Testskript) | 45–55 % | **38 %** |
+| Kapitel 1 überstanden (Testskript) | 45–55 % | **44 %** |
 | Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 55 % |
-| Elitekompanie erreicht (Rang 2) | — | 22 % |
-| Caporal im ersten Kapitel | ~30 % | 23 % |
-| Punkte, Median | — | 60 |
+| Erster Lauf ohne jede Beförderung | ~40 % | 56 % |
+| Elitekompanie erreicht (Rang 2) | — | 14 % |
+| Caporal im ersten Kapitel | ~30 % | **30 %** |
+| Punkte, Median | — | 86 |
 
 Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 
 | Stand | Läufe | überstanden | Caporal | Punkte-Median |
 |---|---|---|---|---|
 | nach der Schwellenänderung | 80 | 48 % | 28 % | 88 |
-| mit Atem-Erholung | 105 | 41 % | 42 % | 93 |
-| **ohne Erholung, mit Warnung (gültig)** | **120** | **38 %** | **23 %** | **60** |
+| mit Atem-Erholung an jeder Station | 105 | 41 % | 42 % | 93 |
+| ohne jede Erholung, nur Warnung | 120 | 38 % | 23 % | 60 |
+| **Warnung + volles Winterquartier (gültig)** | **80** | **44 %** | **30 %** | **86** |
+
+**Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 
 Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang von 43 % oder 57 % sagt für sich genommen nichts. **Bei Zweifeln 80 Läufe messen**, wie hier geschehen.
 
-**Offener Punkt — die Überlebensquote liegt mit 38 % unter dem Band 45–55 %, und der Punkte-Median ist von 88 auf 60 gefallen.** Der Median sagt mehr als die Quote: Die Läufe enden nicht nur genauso oft tödlich, sie enden **früher**. Genau das ist der Preis dafür, dass Atem sich nicht mehr erholt — wer ohne Luft ins zweite Gefecht geht, kommt nicht bis Arcole.
+**Offener Punkt:** Der Anteil ohne jede Beförderung liegt mit 56 % über dem Sollwert von 40 %, und nur 14 % erreichen die Elitekompanie. Der Engpass ist nicht die Caporal-Schwelle, sondern der Zwischenschritt davor: Grenadier verlangt Konstitution 55, Voltigeur Geschick 55, und daran scheitern die meisten schon bei der Erschaffung. Wer das ändern will, senkt diese 55 — nicht die Caporal-Schwelle, die jetzt sitzt.
 
-Der Vergleich mit den 48 % von vorher hinkt: Das war eine einzelne Messung über 80 Läufe, die jetzige geht über 120. Wahrscheinlich lag der wahre Wert schon vorher näher bei 42 % als bei 48 %.
-
-Drei Hebel, falls das gehoben werden soll — **jeder davon hebt über den Ruf auch den Caporal-Anteil**, der mit 23 % gerade unter dem Sollwert liegt:
-
-1. **Atem-Kosten im Gefecht senken** (Laden −8, Feuern −5, Bajonett −18). Der direkteste Weg, und er trifft genau das, was jetzt zu hart ist.
-2. **„Hinwerfen" stärker machen** (+10 Atem). Belohnt, wer die Warnung liest, statt sie wegzudrücken.
-3. **Gefahr um 1 senken.** Die grobe Kelle; verändert alle fünf Gefechte auf einmal.
-
-Nicht empfohlen: die Erholung wieder einbauen — sie ist genau deshalb ausgebaut worden.
+**Gelernte Regel aus dieser Sitzung:** Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Caporal-Anteil. Wer an Atem, Wunden oder Gefahr dreht, misst beide Zahlen — nicht nur die Überlebensquote. Und: **Ein einziger Erholungspunkt an der richtigen Stelle schlägt eine Erholung an jeder Station.**
 
 `node test/balance.js 40` misst das. **Weicht der Wert nach einer Änderung um mehr als zehn Punkte ab, ist die Änderung zu prüfen.**
 
