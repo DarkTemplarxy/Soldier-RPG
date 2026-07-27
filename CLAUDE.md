@@ -16,11 +16,11 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut ist **Kapitel 1 (Italien 1796/97)**, Ränge 1–3, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**, Ränge 1–3, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
-| Charaktererschaffung mit Pool und sechs Herkünften | Kapitel 2–11 |
+| Charaktererschaffung mit Pool und sechs Herkünften | Kapitel 3–11 |
 | Attribute und Fertigkeiten 0–100 mit Wachstum | Ränge 4–14 |
 | Gefecht auf zwei Maßstäben (Körper / Sektion) | Ausrüstungskauf im Spiel |
 | Voltigeur- und Grenadierzweig mit eigenen Aktionen | Orden und Ehrenlegion |
@@ -35,6 +35,7 @@ Gebaut ist **Kapitel 1 (Italien 1796/97)**, Ränge 1–3, als reine HTML/JS-Anwe
 | Erklärungen zu jedem Wert beim Überfahren | |
 | Kampagnenverlauf mit Nebel über Ungesehenem | |
 | Veteranenpunkte in einzelne Werte umsetzbar | |
+| Zwei Feldzüge mit Übergang dazwischen | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -71,6 +72,7 @@ index.html                      Gerüst, lädt die Skripte in fester Reihenfolge
 src/stil.css                    Gesamte Gestaltung
 src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kaufladen
 src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
+src/daten/kapitel02_aegypten.js Kapitel 2 als reine Daten, hängt sich selbst an
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -81,7 +83,15 @@ src/start.js                    Einstiegspunkt, muss zuletzt geladen werden
 
 Die Skripte sind **klassische Skripte, keine ES-Module** — absichtlich, damit `index.html` per Doppelklick über `file://` läuft. Module würden dort an der Sicherheitsprüfung des Browsers scheitern. Wer das ändert, braucht einen lokalen Server und nimmt dem Projekt seine wichtigste Eigenschaft.
 
-**Ein neues Kapitel** kommt als eigene Datei nach `src/daten/`, wird in `index.html` eingehängt und an `KAPITEL` angehängt. Kapiteldaten enthalten keine Logik.
+**Ein neues Kapitel** kommt als eigene Datei nach `src/daten/` und wird in `index.html` eingehängt. Am Ende der Datei hängt es sich selbst an — drei Zeilen, wie in `kapitel02_aegypten.js`:
+
+```js
+KAPITEL.push(...KAPITEL2);            // an das laufende Band
+STATIONEN.aegypten = KAPITEL2;        // für den Verlauf links
+(KAMPAGNEN.find(k=>k.id==='aegypten')||{}).gebaut = true;
+```
+
+Kapiteldaten enthalten keine Logik. **Was ein Kapitel enthalten muss:** einen `uebergang` am Ende (außer beim letzten, dort `ende` mit `text` und `ausblick`), eine `befoerderung`, ein `winter` mit eigenem `text`, ein Lager je zwei Gefechte. Alles, was früher fest im Code stand — Winterquartier-Text, Schlusstext —, kommt jetzt aus den Daten.
 
 ---
 
@@ -128,7 +138,21 @@ Diese acht Regeln nicht brechen. Wenn eine Änderung eine davon verletzt, ist di
 | Arcole | 9 | 74 | 14 |
 | Rivoli | 8 | 66 | 13 |
 
+### Gefechte Kapitel 2 (`src/daten/kapitel02_aegypten.js`)
+
+| Gefecht | Runden | Feindmoral | Gefahr | Anmarsch kostet |
+|---|---|---|---|---|
+| Alexandria | 5 | 40 | 9 | 0,10 · Atem 5 |
+| Pyramiden (Embabeh) | 7 | 60 | 12 | 0,25 · Atem 9 |
+| Kairoer Aufstand | 6 | 50 | 11 | 0,05 · Atem 2 |
+| Akkon | 9 | 85 | **14** | 0,30 · Atem 8 |
+| Abukir | 8 | 62 | 12 | 0,20 · Atem 7 |
+
 **Gefahr** ist die Trefferchance in Prozent pro Runde, bevor Deckung sie verändert.
+
+> **Ägypten ist nicht gefährlicher im Gefecht, sondern auf dem Weg dorthin.** Die Gefahr-Werte liegen im selben Band wie in Italien (9–14); was das Kapitel härter macht, sind der Anmarsch (`anmarschKosten` je Gefecht statt der italienischen Pauschale 0,15/4/1) und die Szenen: Hitzschlag im Wüstenmarsch, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Das ist die Umsetzung von „Krankheit sollte hier gefährlicher sein als Kugeln" aus KONZEPT.md — sie steht in den Szenen, nicht in den Gefahr-Zahlen.
+>
+> **Akkon ist das erste Gefecht, das man auch bei Sieg nicht gewinnt.** Feindmoral 85 ist der höchste Wert im Spiel, und der „Sieg" bringt nur die Erkenntnis, dass hinter der zweiten Mauer eine dritte steht. Historisch ist das der Fixpunkt: Akkon fiel nicht. Die Niederlage bringt hier deshalb auch nur −3 Ruf statt der üblichen −4 bis −6 — man hat es niemandem vorzuwerfen.
 
 > **Warum so niedrig?** Die erste Fassung hatte Gefahr 26–38 und Feindmoral bis 100. Ergebnis im Test: **100 % Tod**, keine einzige gewonnene Schlacht. Zwei Gründe — man wurde zu oft getroffen, *und* die Gefechte waren rechnerisch nicht zu gewinnen: Weil man nur jede zweite Runde feuert (Laden, Feuern, Laden…), kommt man in neun Runden auf vier Schuss zu je 12–32 Schaden, also nie an 100 Feindmoral heran.
 
@@ -157,6 +181,16 @@ Diese acht Regeln nicht brechen. Wenn eine Änderung eine davon verletzt, ist di
 **Der Rang gibt Zeit, nicht nur Knöpfe.** Ab Caporal ein Abend mehr je Lager, ab Sergent zwei (`abendeFuer()` in `src/abschluss.js`). Begründung im Spiel: Unteroffiziere sind vom Wachdienst und den Handreichungen befreit, die den Füsilier den halben Abend kosten — dafür haben sie die Korporalschaft am Hals. Begründung im Entwurf: Ohne den zusätzlichen Abend verdrängt die rangeigene Handlung („Deine acht Mann drillen") die eigene Ausbildung, und der Rang würde sich anfühlen wie eine Strafe. Das ist die eine Stelle, an der ein Rang mehr gibt als einen Knopf — und sie ist nötig, damit der Knopf überhaupt drückbar ist.
 
 Ein Lagerabend gibt bewusst **weniger als eine Winterwoche** (dort: alles +30 statt +20, Belastung −16 statt −10). Die drei rang- und zweigabhängigen Handlungen erfüllen Invariante 4 auch außerhalb des Gefechts.
+
+### Der Übergang zwischen zwei Feldzügen (`typ:'uebergang'`)
+
+Zwischen Leoben (April 1797) und der Überfahrt (Mai 1798) liegt ein Jahr Garnison. Der Übergang ist kein Kapitelende: Es wird **nichts eingetragen und nichts gewertet** — gewertet wird ein Lauf erst, wenn er endet. Zwischendurch zu banken wäre sinnlos, weil ein späterer Tod immer mindestens die Stationen von jetzt enthält, und es würde Invariante 2 aufweichen.
+
+```js
+S.atem = 100;  S.belastung = Math.floor(S.belastung/2);  S.wunden = [];
+```
+
+**Ein Jahr heilt alles, was heilbar ist.** Sonst stirbt in Ägypten niemand an Ägypten, sondern an Arcole: Wer mit vier Wunden und Belastung 80 aus Italien kommt, hat in Kapitel 2 keine Chance, und das Kapitel könnte seinen eigenen Charakter nicht entfalten. Dieselbe Logik wie beim Winterquartier (drei Wochen Dach = Atem voll), nur eine Größenordnung länger. Was bleibt, ist, was er gelernt hat — Attribute, Fertigkeiten, Rang, Ruf, Gunst.
 
 ### Anmarsch vor dem Gefecht (`src/kampf.js`)
 
@@ -217,6 +251,27 @@ else                  → Streifschuss (Abzug 5)
 - **Bildung ist vom Pool ausgenommen** und bleibt bei 20 — man kann nicht lesen.
 - Alle neun Fertigkeiten starten bei **10**.
 - **Jede Herkunft verteilt exakt 50 Punkte netto**, nur anders gewichtet, teils mit Abzügen. Keine ist stärker. Wer eine neue Herkunft hinzufügt, hält die 50 ein.
+- **Die Obergrenze gilt auch nach der Herkunft**: Attribute höchstens 70, Fertigkeiten höchstens 60 (`neuerCharakter()` in `src/mechanik.js`).
+
+#### Drei Exploits, die dort steckten
+
+**1. Konstitution ≥ 58 machte den Tod unmöglich.** Die Tödlichkeitsformel lautete `Math.random()*100 - (Konstitution-40)/3 > 94`. Bei Konstitution 58 ist der Abzug 6, die Schwelle also 100 — nicht erreichbar. Man konnte einen Mann bauen, der von einer Kugel *nie* stirbt, sondern nur Wunden sammelt, und Wunden heilen nach jedem Gefecht. Das hebelt Invariante 1 aus, ohne dass es jemand merkt.
+
+> Behoben durch eine Klammer: `schutz = clamp((Konstitution−40)/3, −10, +5)`. Damit liegt die Todeschance je Treffer zwischen **1 % und 16 %** — Konstitution bleibt der wichtigste Schutz, macht aber niemanden unverwundbar. Ein Schwächling stirbt nicht mehr zu 19 %, ein Hüne nicht mehr zu 0 %.
+
+**2. Die Herkunft wurde ungedeckelt addiert.** Der Pool war auf 70 begrenzt, die Herkunft kam obendrauf: Ein Bauernsohn mit 70 Konstitution stand nach der Herkunft bei **90** — und war damit über der Schwelle aus Exploit 1. Die beiden Fehler zusammen ergaben einen unsterblichen Charakter, den man in dreißig Sekunden bauen konnte. Jetzt deckelt `neuerCharakter()` auf 70 beziehungsweise 60; der Vorteil der Herkunft ist, dass sie die Grenze **billiger** erreicht (der Bauer braucht dafür 30 Poolpunkte statt 50), nicht dass sie darüber hinausgeht.
+
+**3. Zwei Herkünfte zahlten in tote Währung.** Netto verteilen alle sechs genau 50 Punkte, aber Reiten und Kartenkunde tun in den gebauten Kapiteln **nichts**. Gemessen an dem, was wirkt:
+
+| Herkunft | netto | davon wirksam (vorher) | jetzt |
+|---|---|---|---|
+| Bauernsohn, Schmiedsgeselle, Wilderer, Straßenjunge | 50 | 50 | 50 |
+| Fuhrmannssohn | 50 | **20** | 30 |
+| Schreibergehilfe | 50 | **30** | 40 |
+
+> Der Fuhrmannssohn bekam 30 Punkte auf Reiten — eine Fertigkeit, die frühestens ab Rang 7 zählt — und zahlte dafür mit Kaltblütigkeit. Der Schreibergehilfe zahlte −20 Konstitution, was ihn direkt gefährlicher lebte, für 20 Punkte Kartenkunde. Umgeschichtet: Fuhrmann Reiten 30 → **20**, Konstitution 10 → **15**, Kaltblütigkeit −10 → **−5**. Schreiber Kartenkunde 20 → **10**, Konstitution −20 → **−10**. Netto bleiben es 50; der Rest ist in Währung umgebucht, die im Spiel etwas kauft. Ganz gleich werden sie erst, wenn Reiten und Kartenkunde ab Rang 7 wirklich zählen — das ist Absicht und steht so im Konzept.
+
+**Was kein Exploit ist:** Zwei Attribute auf 70 zu ziehen (kostet 100 der 120 Poolpunkte) ist eine legitime Spezialisierung — sie öffnet beide Elitezweige und kostet Breite. Und dass „Auswürfeln" schlechter verteilt als die Hand, ist der Sinn des Knopfes.
 
 ### Proben und Wachstum (`src/mechanik.js`)
 
@@ -258,13 +313,13 @@ Beides sind Handlungen, die es für den Füsilier nicht gibt — sie sind der ei
 ### Wertung Kapitel 1 (`src/abschluss.js`)
 
 ```
-Rangwert + 3×Stationen + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 10 (nie gekniffen)
+Rangwert + 2×Stationen + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 10 (nie gekniffen)
 ```
-Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP, alles zusammen 166.
+Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP plus den Mantel (30), alles zusammen 196.
 
-> **Stationen von 4 auf 3 Punkte gesenkt**, weil es mit den drei Lagern jetzt 16 statt 13 Stationen sind. Bei 4 Punkten hätte allein das Durchkommen 64 statt 52 Punkte gebracht und ein Spitzenlauf hätte den ganzen Laden leergekauft. Gemessenes Maximum jetzt **162** — knapp unter der Ladensumme von 166, sodass immer ein Kauf übrig bleibt.
+> **Stationen von 3 auf 2 Punkte gesenkt**, weil es mit Kapitel 2 jetzt 32 statt 16 Stationen sind. Bei 3 Punkten hätte allein das Durchkommen 96 Punkte gebracht — mehr als der ganze bisherige Spitzenlauf. Die Reihe der Anpassungen (4 → 3 → 2) folgt derselben Regel: **Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein**, sonst kauft ein einziger guter Lauf alles.
 
-> Diese Wertung gilt nur für den Prototyp mit einem Kapitel. Die Skala des vollen Spiels (Maximum 918, Rangwerte bis 580) steht in KONZEPT.md und wird übernommen, sobald mehrere Kapitel existieren.
+> Diese Wertung gilt nur für den Prototyp mit zwei Kapiteln. Die Skala des vollen Spiels (Maximum 918, Rangwerte bis 580) steht in KONZEPT.md und wird übernommen, sobald mehrere Kapitel existieren.
 
 ### Veteranenpunkte in Ausbildung (`src/oberflaeche.js`, `PRO_PUNKT` in `grundwerte.js`)
 
@@ -297,16 +352,20 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 ### Zielwerte
 
-| Größe | Soll | Gemessen (120 Läufe) |
+| Größe | Soll | Gemessen (60 Läufe, mit Kapitel 2) |
 |---|---|---|
-| Kapitel 1 überstanden (Testskript) | 45–55 % | **43 %** |
+| **Italien überstanden** (Testskript) | 45–55 % | **45 %** |
+| **Beide Feldzüge überstanden** | noch kein Sollwert | 13–30 %, stark schwankend |
 | Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 58 % |
-| Elitekompanie erreicht (Rang 2) | — | 8 % |
-| Caporal im ersten Kapitel | ~30 % | **34 %** |
-| Punkte, Median | — | 91 |
+| Erster Lauf ohne jede Beförderung | ~40 % | 60 % |
+| Caporal am Ende | ~30 % | 40 % |
+| Punkte, Median | — | 45 · Spitze **230** |
 
-Die 120 Läufe sind die belastbarste Messung dieser Sitzung. Zur Einordnung: Derselbe Stand *ohne* die Anerkennung im Gefecht lieferte über 80 Läufe 43 % / 30 % / 91 — die Anerkennung hebt also den Caporal-Anteil um rund vier Punkte und sonst nichts, genau wie beabsichtigt. Der Anteil der Elitekompanie schwankt zwischen den Messreihen stark (8 % hier, 19 % zuvor), weil er fast nur davon abhängt, was `Auswürfeln` bei der Erschaffung an Konstitution und Geschick ausschüttet.
+**Seit Kapitel 2 misst `test/balance.js` zwei Quoten.** „Italien überstanden" ist der alte Zielwert und bleibt bei 45–55 %; „beide Feldzüge" ist neu und hat noch keinen Sollwert — der Bot muss dafür 32 statt 16 Stationen überleben. Ohne diese Trennung wäre der alte Zielwert nach dem Anbau bedeutungslos geworden. Der Punkte-Median fällt von 91 auf 45, weil Stationen nur noch 2 statt 3 Punkte zählen und die meisten Läufe jetzt vor dem Ende sterben; die Spitze steigt dafür von 162 auf 230.
+
+> **Ein Stolperstein beim Messen, zum zweiten Mal:** Die Erkennung von „Italien überstanden" prüft `/vorfrieden/i` **ohne Rücksicht auf Groß- und Kleinschreibung**. Kartenköpfe setzt das CSS in Großbuchstaben, und `innerText` liefert die gerenderte Fassung — eine Prüfung auf `'Vorfrieden mit Österreich'` meldete 0 %, während im selben Lauf acht Männer ganz Ägypten überlebten.
+
+Die 120 Läufe der vorigen Messreihe (nur Kapitel 1) waren die belastbarste Messung dieser Sitzung. Zur Einordnung: Derselbe Stand *ohne* die Anerkennung im Gefecht lieferte über 80 Läufe 43 % / 30 % / 91 — die Anerkennung hebt also den Caporal-Anteil um rund vier Punkte und sonst nichts, genau wie beabsichtigt. Der Anteil der Elitekompanie schwankt zwischen den Messreihen stark (8 % hier, 19 % zuvor), weil er fast nur davon abhängt, was `Auswürfeln` bei der Erschaffung an Konstitution und Geschick ausschüttet.
 
 Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 
@@ -318,7 +377,8 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | Warnung + volles Winterquartier | 80 | 44 % | 30 % | 86 |
 | zusätzlicher Lagerabend ab Caporal | 80 | 49 % | 39 % | 95 |
 | derselbe Stand am selben Nachmittag noch einmal | 80 | 43 % | 30 % | 91 |
-| **Anerkennung im Gefecht (gültig)** | **120** | **43 %** | **34 %** | **91** |
+| Anerkennung im Gefecht · nur Kapitel 1 | 120 | 43 % | 34 % | 91 |
+| **mit Kapitel 2 · Spalte zeigt „Italien überstanden" (gültig)** | **60** | **45 %** | **40 %** | **45** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 

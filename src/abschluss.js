@@ -170,10 +170,7 @@ function zeigeWinter(n){
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">
-        <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
-        <p>Es ist die einzige Zeit im Jahr, in der du entscheidest, was du tust. Drei Wochen, mehr nicht — im Januar geht es weiter.</p>
-      </div>
+      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
       ${W.atemVoll?'<div class="wirkung"><span>Wieder bei Atem</span>Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag. Du bist ausgeruht, wie du es seit April nicht warst. <b>Atem 100</b></div>':''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
@@ -224,7 +221,7 @@ function stationen(){ return Math.min(KAPITEL.length, LAUF.node+1); }
 function wertung(){
   const p = {};
   p.rang = rangWert(S.rang);
-  p.stationen = 3 * stationen();   // 3 statt 4, seit es 16 Stationen sind — siehe CLAUDE.md
+  p.stationen = 2 * stationen();   // 2 seit Kapitel 2: 32 Stationen — siehe CLAUDE.md
   p.ruf = 5 * Math.floor(S.ruf/10);
   p.nennungen = 3 * Math.min(10, S.nennungen);
   p.ueberleben = S.lebt ? 25 : 0;
@@ -273,7 +270,7 @@ function wertungsTabelleAus(c){
   return `<table>
     <tr><th>Wofür</th><th class="n">VP</th></tr>
     <tr><td class="d">Erreichter Rang — ${esc(c.rang)}</td><td class="n">${p.rang}</td></tr>
-    <tr><td class="d">Erreichte Stationen (${c.stationen} × 3)</td><td class="n">${p.stationen}</td></tr>
+    <tr><td class="d">Erreichte Stationen (${c.stationen} × 2)</td><td class="n">${p.stationen}</td></tr>
     <tr><td class="d">Ruf ${c.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
     <tr><td class="d">Im Tagesbefehl genannt (${c.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
@@ -319,22 +316,24 @@ function todesText(){
   return t[Math.floor(Math.random()*t.length)];
 }
 
-function zeigeKapitelende(){
-  const p = eintragen('Kapitel überstanden · '+rangName(S.rang));
+function zeigeKapitelende(n){
+  n = n || KAPITEL[KAPITEL.length-1] || {};
+  const p = eintragen('Feldzüge überstanden · '+rangName(S.rang));
   const neu = p.summe >= META.vp;
-  app.innerHTML = `<div class="card"><div class="ch"><span>18. April 1797 · Leoben</span><span>Vorfrieden mit Österreich</span></div>
+  const rangSatz = S.rang>=3 ? 'Acht Mann sehen dich morgens an und warten, was du sagst.'
+    : (S.rang===2 ? 'Du stehst nicht mehr in der Mitte des Bataillons, sondern dort, wo sie die Leute hinstellen, auf die es ankommt.'
+                  : 'Du stehst noch in der Reihe wie am ersten Tag — aber du stehst.');
+  app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
     <div class="cb"><div class="prose">
-      <p>In Leoben wird ein Vorfrieden unterschrieben. Für dich heißt das: Der Feldzug ist vorbei, und du lebst noch.</p>
-      <p>Vor einem Jahr bist du mit zerfallenen Schuhen in Savona angekommen und hast nicht gewusst, ob du bis Dego durchhältst. Seitdem warst du auf der Brücke von Lodi, im Sumpf von Arcole und auf der Hochebene von Rivoli. Von den Männern, die im April neben dir standen, ist ungefähr die Hälfte noch da.</p>
-      <p>Du bist <b>${rangName(S.rang)}</b>. ${S.rang>=3?'Acht Mann sehen dich morgens an und warten, was du sagst.':(S.rang===2?'Du stehst nicht mehr in der Mitte des Bataillons, sondern dort, wo sie die Leute hinstellen, auf die es ankommt.':'Du stehst noch in der Reihe wie im April — aber du stehst.')}</p>
-      <p class="said">Es heißt, als Nächstes geht es nach Ägypten. Niemand weiß, wo das genau liegt.</p>
+      ${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}
+      <p>Du bist <b>${rangName(S.rang)}</b>. ${rangSatz}</p>
     </div>
     <div class="grid2" style="margin-top:18px">
       <div>${wertungsTabelle(p)}</div>
       <div class="note ${neu?'green':''}">
         ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
-        <p style="margin-top:10px"><b>Hier endet der Prototyp.</b> Die Kapitel 2 bis 11 — Ägypten, Austerlitz, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo — stehen im Konzept, aber noch nicht im Code.</p>
-        <p style="margin-top:10px">Was hier funktioniert, funktioniert dort genauso: Proben gegen Attribute, Ausrüstung, die verschleißt, Ruf und Fürsprache, die über Beförderung entscheiden — und ein Tod, der endgültig ist.</p>
+        <p style="margin-top:10px">${n.ausblick||''}</p>
+        <p style="margin-top:10px">Was hier funktioniert, funktioniert in den nächsten Kapiteln genauso: Proben gegen Attribute, Ausrüstung, die verschleißt, Ruf und Fürsprache, die über Beförderung entscheiden — und ein Tod, der endgültig ist.</p>
       </div>
     </div>
     <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">

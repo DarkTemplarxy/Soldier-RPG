@@ -68,9 +68,11 @@ function anerkennung(betrag, was){
 function starteKampf(n){
   if(n.anmarsch && !S.anmarschGesehen){
     S.anmarschGesehen = n.id;
-    verschleiss(0.15);
-    S.atem = Math.max(0, S.atem-4);
-    S.belastung = Math.min(100, S.belastung+1);
+    // Der Weg dorthin kostet — in Ägypten mehr als in Italien (anmarschKosten in den Daten)
+    const ak = n.anmarschKosten || {verschleiss:0.15, atem:4, belastung:1};
+    verschleiss(ak.verschleiss);
+    S.atem = Math.max(0, S.atem-ak.atem);
+    S.belastung = Math.min(100, S.belastung+ak.belastung);
     laufSichern();
     zeigeAnmarsch(n);
     return;
@@ -389,7 +391,13 @@ function kampfAktion(id){
   gefahr = Math.max(4, gefahr);
   let treffer = '';
   if(Math.random()*100 < gefahr){
-    const schwere = Math.random()*100 - (wert('konstitution')-40)/3;
+    /* Konstitution schützt, aber macht nie unverwundbar. Ungedeckelt war der
+       Tod ab Konstitution 58 rechnerisch unmöglich (Schwelle 94 + 18/3 > 100)
+       — zusammen mit der ungedeckelten Herkunft der größte Exploit der
+       Erschaffung. Jetzt: höchstens +5 Schutz (Tod nie unter 1 % je Treffer),
+       höchstens −10 Malus (ein Schwächling stirbt zu 16 %, nicht zu 19 %). */
+    const schutz = Math.max(-10, Math.min(5, (wert('konstitution')-40)/3));
+    const schwere = Math.random()*100 - schutz;
     if(schwere > 94){
       kampfEnde(false, text + ' — Dann trifft dich etwas in die Brust, und du siehst noch, wie der Himmel kippt.');
       toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
@@ -496,8 +504,25 @@ function waehleZweig(z){
 const CAPORAL_RUF = 30, CAPORAL_GUNST = 4;
 
 function zeigeBefoerderung(n){
-  if(S.befoerderungGeprueft===undefined){ S.befoerderungRuf=S.ruf; S.befoerderungGunst=S.gunst; S.befoerderungGeprueft=true; }
-  const ruf = S.befoerderungRuf, gunst = S.befoerderungGunst;
+  /* Der Stand wird beim ersten Betreten der Station eingefroren, je Station —
+     seit Kairo gibt es eine zweite Musterung, und die prüft den Stand von
+     jetzt, nicht den von Verona. */
+  S.befPruefungen = S.befPruefungen || {};
+  if(!S.befPruefungen[n.id]) S.befPruefungen[n.id] = {ruf:S.ruf, gunst:S.gunst};
+  const {ruf, gunst} = S.befPruefungen[n.id];
+
+  if(S.rang>=3){
+    stationErledigt();
+    app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+      <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+        <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
+        <div class="ergebnis">Du trägst die Streifen schon. Der Capitaine geht die Liste durch, sieht dich kurz an und geht weiter — für mehr als den Caporal braucht es Lesen und Schreiben, und das steht auf einem anderen Blatt.</div>
+        </div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
+      </div>${seitenleiste()}</div>`;
+    kopfzeile();
+    return;
+  }
   const reichtRuf = ruf>=CAPORAL_RUF, reichtGunst = gunst>=CAPORAL_GUNST;
   const bekommt = reichtRuf && reichtGunst;
   let text, klasse;

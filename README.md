@@ -30,19 +30,21 @@ Dazu ein paar Regeln, die das Spiel zusammenhalten:
 - **Beförderung braucht eine Vakanz.** Ruf und Fürsprache reichen nicht; die Stelle muss frei sein. Frei wird sie, weil jemand gestorben ist. Das Spiel sagt das nie, es zeigt es nur.
 - **Ausrüstung ist ein Zustand, kein Besitz.** Schuhe halten einen Feldzug, keine zwei.
 
-Historische Fixpunkte, dazwischen freies Spiel: Montenotte, Dego, Mondovì, die Brücke von Lodi, Mailand, Mantua, Castiglione, Arcole, Rivoli, Leoben.
+Historische Fixpunkte, dazwischen freies Spiel: Montenotte, die Brücke von Lodi, Mantua, Castiglione, Arcole, Rivoli, Leoben — dann Alexandria, die Pyramiden, der Kairoer Aufstand, Akkon, Abukir und die Nacht, in der Bonaparte ohne seine Armee nach Frankreich segelt.
 
 ---
 
 ## Stand
 
-**Kapitel 1 (Italien 1796/97) ist spielbar** — sechzehn Stationen, fünf Gefechte, drei Lager, Winterquartier, Ränge 1 bis 3.
+**Zwei Feldzüge sind spielbar** — Italien 1796/97 und Ägypten 1798/99, zusammen zweiunddreißig Stationen, zehn Gefechte, fünf Lager, zwei Winterquartiere, Ränge 1 bis 3.
 
-Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, jede Station mit Entfernung und Dauer. Vor jedem Gefecht steht der Anmarsch — der Nachtmarsch im Regen, die vier Stunden Warten in den Gassen von Lodi, die Lagemeldung und das, womit du dastehst. In den Lagern entscheidest du, was du mit den zwei oder drei Abenden anfängst: exerzieren, scharf schießen, die Schuhe zum Schuster tragen, die Muskete ölen, schlafen. Es ist immer mehr zu tun als Zeit da ist.
+Italien ist das Lehrstück: barfuß über die Pässe, die Brücke von Lodi, der Sumpf von Arcole. Ägypten ist etwas anderes — dort töten die Wege mehr Männer als die Gefechte. Hitzschlag im Marsch auf Damanhur, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Akkon fällt nicht, so wie es 1799 nicht gefallen ist, und nach Abukir liegt die Flotte auf dem Meeresgrund: Es gibt keinen Weg mehr nach Hause.
 
-Entworfen, aber noch nicht gebaut: die Kapitel 2 bis 11 (Ägypten, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
+Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000 km über See und durch die Wüste, jede Station mit Entfernung und Dauer. Vor jedem Gefecht steht der Anmarsch — der Nachtmarsch im Regen, die vier Stunden Warten in den Gassen von Lodi, die Lagemeldung und das, womit du dastehst. In den Lagern entscheidest du, was du mit den zwei oder drei Abenden anfängst: exerzieren, scharf schießen, die Schuhe zum Schuster tragen, die Muskete ölen, schlafen. Es ist immer mehr zu tun als Zeit da ist.
 
-Gemessen über 80 automatisierte Durchläufe: **knapp die Hälfte übersteht das erste Kapitel**, rund 30 % werden Caporal. Etwa die Hälfte stirbt ohne eine einzige Beförderung.
+Entworfen, aber noch nicht gebaut: die Kapitel 3 bis 11 (Garnison, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
+
+Gemessen über automatisierte Durchläufe: **rund 45 % überstehen Italien**, etwa jeder vierte auch Ägypten. Wer beides schafft, hat zweiunddreißig Stationen hinter sich — und immer noch neun Feldzüge vor sich.
 
 ---
 
@@ -76,6 +78,7 @@ index.html                      lädt die Skripte in fester Reihenfolge
 src/stil.css
 src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kaufladen
 src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
+src/daten/kapitel02_aegypten.js Kapitel 2, hängt sich selbst an die Kette
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Erschaffung, Ablauf, Szenen

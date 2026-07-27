@@ -41,6 +41,34 @@ Der Testbot nimmt im Gefecht immer zuerst die Salve und rührt die Lücke nie an
 
 ---
 
+## 2026-07-27 — Kapitel 2: Ägypten 1798/99
+
+**Sechzehn neue Stationen** in `src/daten/kapitel02_aegypten.js`, angehängt an dieselbe Kette: Überfahrt, Alexandria, Wüstenmarsch, Pyramiden, Kairo, Musterung, Aufstand, Winterquartier Kairo, Sinai, Akkon, Rückzug, Abukir, Abreise Bonapartes, Ende. Fixpunkte historisch: Pyramiden am 21. Juli 1798, der Aufstand im Oktober, Akkon März–Mai 1799 (**fällt nicht**), Abukir am 25. Juli 1799, Bonapartes Abreise in der Nacht des 24. August.
+
+**Der Charakter des Kapitels steht in den Szenen, nicht in den Gefahr-Zahlen.** Die fünf Gefechte liegen mit Gefahr 9–14 im selben Band wie Italien. Was tötet, ist der Weg: `anmarschKosten` je Gefecht (bis 0,30 Verschleiß und Atem −9 statt der italienischen Pauschale 0,15/−4), dazu Hitzschlag im Wüstenmarsch, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Das setzt „Krankheit gefährlicher als Kugeln" aus dem Konzept um, ohne die Gefechtsbalance anzufassen.
+
+**Neuer Stationstyp `uebergang`.** Zwischen Leoben und der Überfahrt liegt ein Jahr Garnison: Atem voll, Wunden zu, Belastung halbiert — sonst stirbt in Ägypten niemand an Ägypten, sondern an Arcole. Es wird dabei **nichts gewertet und nichts eingetragen**; gewertet wird ein Lauf erst, wenn er endet.
+
+**Was dafür aus dem Code in die Daten gewandert ist:** der Winterquartier-Text, der Schlusstext samt Ausblick, die Anmarschkosten. Ein Kapitel hängt sich am Ende seiner Datei mit drei Zeilen selbst an (`KAPITEL.push`, `STATIONEN.x`, `KAMPAGNEN … gebaut`). Die Beförderung friert ihren Prüfstand jetzt **je Station** ein statt einmalig — Kairo prüft den Stand von Kairo, nicht den von Verona — und wer die Streifen schon trägt, bekommt einen eigenen kurzen Bildschirm statt einer zweiten Beförderung.
+
+**Wertung: Stationen von 3 auf 2 Punkte.** Mit 32 statt 16 Stationen hätte allein das Durchkommen 96 Punkte gebracht. Regel dahinter: Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein.
+
+**`test/balance.js` weist jetzt zwei Quoten aus** — „Italien überstanden" (der alte Zielwert 45–55 %) und „beide Feldzüge". Ohne diese Trennung wäre der Zielwert nach dem Anbau bedeutungslos geworden.
+
+---
+
+## 2026-07-27 — Drei Exploits in der Charaktererschaffung
+
+**1. Konstitution ≥ 58 machte den Tod unmöglich.** `Math.random()*100 − (Konstitution−40)/3 > 94` ist bei Konstitution 58 nicht mehr erreichbar. Ein solcher Mann sammelte nur Wunden, und Wunden heilen nach jedem Gefecht — Invariante 1 ausgehebelt, ohne dass es auffällt. Jetzt ist der Schutz auf `−10 … +5` geklammert: Todeschance je Treffer **1 % bis 16 %**, nie null.
+
+**2. Die Herkunft wurde ungedeckelt addiert.** Pool bis 70, Herkunft obendrauf: Bauernsohn mit 70 Konstitution stand bei **90** — direkt über der Schwelle aus Exploit 1. Beide Fehler zusammen ergaben einen unsterblichen Charakter in dreißig Sekunden. `neuerCharakter()` deckelt jetzt auf 70 (Attribute) und 60 (Fertigkeiten); die Herkunft erreicht die Grenze billiger, überschreitet sie aber nicht.
+
+**3. Zwei Herkünfte zahlten in toter Währung.** Alle sechs verteilen netto 50 Punkte, aber Reiten und Kartenkunde tun in den gebauten Kapiteln nichts. Wirksam waren: Fuhrmannssohn **20**, Schreibergehilfe **30**, alle anderen 50. Umgeschichtet — Fuhrmann Reiten 30 → 20, Konstitution 10 → 15, Kaltblütigkeit −10 → −5; Schreiber Kartenkunde 20 → 10, Konstitution −20 → −10. Netto weiter 50, wirksam jetzt 30 und 40. Ganz gleich werden sie erst, wenn Reiten und Kartenkunde ab Rang 7 zählen.
+
+**Dazu ein Kauf mehr im Laden:** Beutemantel (30 VP). Der Mantelplatz war seit dem ersten Meilenstein leer („Kein Mantel", Verschleiß 0) — in Ägypten sind die Nächte kalt, und spätestens in Russland ist es der wichtigste Platz überhaupt.
+
+---
+
 ## 2026-07-27 — Das Gefecht wird sichtbar, Rangabzeichen
 
 **Sichtfeld neu gezeichnet.** Vorher standen vier namenlose Klötze im Rauch. Jetzt ist es eine Aufstellung aus Augenhöhe: unten die eigene Linie in Blau, zwei Glieder mit Tschako und geschultertem Gewehr, versetzt wie es sich gehört; drüben der Feind in Rot, kleiner, weil weiter weg; dazwischen Pulverdampf, der mit jeder Runde dichter wird.

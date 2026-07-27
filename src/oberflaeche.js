@@ -55,7 +55,7 @@ function verlauf(){
     if(!k.gebaut){
       inhalt = `<div class="kmpleer">Noch nicht gebaut. ${esc(k.kurz)}</div>`;
     } else if(!gesehen.length){
-      inhalt = '<div class="kmpleer">Du warst noch nirgends. Es fängt in Savona an.</div>';
+      inhalt = '<div class="kmpleer">Noch keine Station dieses Feldzugs betreten.</div>';
     } else {
       // Eine Zeile je Station: nur Ort und Art. Datum und Besuchszähler standen
       // früher mit darin und machten aus der Liste eine Tabelle. Das Datum steht
@@ -256,8 +256,8 @@ function istAttribut(k){ return ATTRIBUTE.some(([a])=>a===k); }
 function istWert(k){
   const h = HERKUENFTE.find(x=>x.id===(ERSCH&&ERSCH.herkunft)) || {attr:{},fert:{}};
   return istAttribut(k)
-    ? Math.max(0, Math.min(100, (ERSCH?ERSCH.attr[k]:20) + (h.attr[k]||0)))
-    : Math.max(0, Math.min(100, 10 + (h.fert[k]||0)));
+    ? Math.max(0, Math.min(70, (ERSCH?ERSCH.attr[k]:20) + (h.attr[k]||0)))
+    : Math.max(0, Math.min(60, 10 + (h.fert[k]||0)));
 }
 function punktGrenze(k){ return istAttribut(k) ? 70 : 60; }   // darüber nur noch im Feld
 function punktKosten(k){ const b = istWert(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
@@ -468,7 +468,44 @@ function naechster(){
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
-  else if(n.typ==='ende') zeigeKapitelende();
+  else if(n.typ==='uebergang') zeigeUebergang(n);
+  else if(n.typ==='ende') zeigeKapitelende(n);
+}
+
+/* ── Übergang zwischen zwei Feldzügen ──
+   Kein Ende, kein Neuanfang: Der Mann bleibt derselbe, nur der Krieg wechselt
+   das Ufer. Der Zwischenstand wird gezeigt, aber nichts wird eingetragen —
+   gewertet wird ein Lauf erst, wenn er endet (Invariante 2: Banken zwischendurch
+   gäbe es nicht, weil ein späterer Tod immer mindestens die Stationen von jetzt
+   enthält). */
+function zeigeUebergang(n){
+  /* Zwischen zwei Feldzügen liegt ein Jahr Garnison. Nach derselben Regel wie
+     beim Winterquartier (drei Wochen Dach = Atem voll) heilt ein Jahr alles,
+     was heilbar ist: Atem voll, Wunden zu, Belastung halbiert. Der nächste
+     Feldzug beginnt mit seinem eigenen Elend, nicht mit dem alten — sonst
+     stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
+  if(LAUF.erholt !== n.id){
+    LAUF.erholt = n.id;
+    S.atem = 100;
+    S.belastung = Math.max(0, Math.floor(S.belastung/2));
+    S.wunden = [];
+    laufSichern();
+  }
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}
+      <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+        <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
+        <div class="wirkung"><span>Zwischenstand</span>
+          ${rangName(S.rang)} · Ruf ${S.ruf} · ${stationen()} Stationen · ${S.nennungen}× im Tagesbefehl</div>
+        <div class="wirkung"><span>Ein Jahr Garnison</span>
+          Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.</div>
+        </div></div>
+      <div class="orders"><div class="ordbody">
+        <button class="ord weiter" onclick="stationErledigt();naechster()">Weiter
+          <span class="cost">Der nächste Feldzug · derselbe Mann</span></button>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
 }
 
 /* ── Szene ── */

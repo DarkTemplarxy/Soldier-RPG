@@ -245,7 +245,11 @@ const KAPITEL = [
   niederlage:{text:'Der Damm bleibt österreichisch, und du liegst im Schilf, bis es dunkel wird.',ruf:-5,belastung:14}},
 
 /* 14 */ {typ:'winter',id:'winter',datum:'Dezember 1796 · Verona',ort:'Winterquartier',
-  marsch:{von:'Arcole',nach:'Verona',weg:'25 km zurück nach Nordwesten · drei Tage · zum ersten Mal seit November ein Dach'}},
+  marsch:{von:'Arcole',nach:'Verona',weg:'25 km zurück nach Nordwesten · drei Tage · zum ersten Mal seit November ein Dach'},
+  text:[
+    'Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.',
+    'Es ist die einzige Zeit im Jahr, in der du entscheidest, was du tust. Drei Wochen, mehr nicht — im Januar geht es weiter.'
+  ]},
 
 /* 15 */ {typ:'kampf',id:'rivoli',datum:'14. Januar 1797 · Rivoli',ort:'Hochebene über der Etsch',
   marsch:{von:'Verona',nach:'Hochebene von Rivoli',weg:'30 km die Etsch hinauf · Gewaltmarsch in der Nacht vom 13. auf den 14., Schnee, Ankunft um zwei Uhr früh'},
@@ -266,8 +270,14 @@ const KAPITEL = [
     ruf:15,nennung:true},
   niederlage:{text:'Ihr weicht von der Hochebene. Andere gewinnen die Schlacht ohne dich.',ruf:-5,belastung:12}},
 
-/* 16 */ {typ:'ende',id:'leoben',datum:'18. April 1797 · Leoben',ort:'Vorfrieden mit Österreich',
-  marsch:{von:'Rivoli',nach:'Leoben in der Steiermark',weg:'400 km nach Nordosten über die Alpen · zehn Wochen, drei Pässe, kein Gefecht mehr'}}
+/* 16 */ {typ:'uebergang',id:'leoben',datum:'18. April 1797 · Leoben',ort:'Vorfrieden mit Österreich',
+  marsch:{von:'Rivoli',nach:'Leoben in der Steiermark',weg:'400 km nach Nordosten über die Alpen · zehn Wochen, drei Pässe, kein Gefecht mehr'},
+  text:[
+    'In Leoben wird ein Vorfrieden unterschrieben. Für dich heißt das: Der Feldzug ist vorbei, und du lebst noch. Von den Männern, die im April 1796 neben dir über die Pässe gingen, ist ungefähr die Hälfte noch da.',
+    'Der erste Feldzug ist überstanden. Der Krieg ist es nicht — er macht nur eine Pause und sieht sich nach einem neuen Ufer um.',
+    'Ein Jahr lang liegt die Halbbrigade in Garnison in Norditalien. Dann, im Frühjahr 1798, kommt ein Marschbefehl, der keinen Zielort nennt: nach Toulon, an die Küste, wo eine Flotte zusammengezogen wird, wie sie keiner je gesehen hat.',
+    'Auf den Schiffen wird geredet: England. Irland. Indien. Erst auf See, hinter Malta, wird verlesen, wohin es wirklich geht — nach Afrika. Ägypten. Ein Land aus einem Buch, das keiner von euch lesen kann.'
+  ]}
 ];
 
 STATIONEN.italien = KAPITEL;   // meldet die Stationen beim Verlauf an

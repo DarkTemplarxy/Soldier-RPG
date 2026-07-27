@@ -18,10 +18,10 @@ const ATTRIBUTE = [
 const FERTIGKEITEN = [
   ['muskete','Muskete','Treffen im Rauch. Die wichtigste Zahl im Gefecht — und die einzige, die vom Zustand deiner Waffe abhängt.'],
   ['bajonett','Bajonett','Der Angriff auf zehn Schritt. Richtet mehr an als jeder Schuss und bringt dich weit nach vorn, wo es am gefährlichsten ist.'],
-  ['reiten','Reiten','In diesem Kapitel noch ohne Verwendung. Zählt ab den Rängen, die ein Pferd bekommen.'],
+  ['reiten','Reiten','Pferde führen und beruhigen — auf dem Rückzug durch den Sinai zählt es zum ersten Mal. Richtig wichtig ab den Rängen, die ein eigenes Pferd bekommen.'],
   ['drill','Drill','Handgriffe ohne Nachdenken. Hält die Linie und schließt Lücken, wenn du Männer zu befehligen hast.'],
   ['taktik','Taktik','Gelände lesen, Absichten erkennen. Kommt in Szenen vor, zählt aber erst in den höheren Rängen richtig.'],
-  ['kartenkunde','Kartenkunde','In diesem Kapitel noch ohne Verwendung. Für den Fusilier bedeutungslos, für den General alles.'],
+  ['kartenkunde','Kartenkunde','Eine Karte lesen können. In der Wüste rettet das Kilometer, später ganze Kolonnen — für den General ist es alles.'],
   ['verwaltung','Verwaltung','Listen, Rationen, Kompaniekasse. Der Weg zum Caporal-fourrier führt hier entlang.'],
   ['fouragieren','Fouragieren','Essen finden, wo keins ist. Hält dich und deine Kameradschaft am Leben, wenn der Nachschub ausbleibt.'],
   ['feldchirurgie','Feldchirurgie','In diesem Kapitel noch ohne Verwendung. Später der Unterschied zwischen einer Wunde und einem Grab.']
@@ -86,11 +86,11 @@ const HERKUENFTE = [
    text:'Muskete +30 · Fouragieren +20 · Geschick +15 · Autorität −15',
    attr:{geschick:15,autoritaet:-15}, fert:{muskete:30,fouragieren:20}},
   {id:'fuhrmann',name:'Fuhrmannssohn',
-   text:'Reiten +30 · Verwaltung +20 · Konstitution +10 · Kaltblütigkeit −10',
-   attr:{konstitution:10,kaltbluetigkeit:-10}, fert:{reiten:30,verwaltung:20}},
+   text:'Reiten +20 · Verwaltung +20 · Konstitution +15 · Kaltblütigkeit −5',
+   attr:{konstitution:15,kaltbluetigkeit:-5}, fert:{reiten:20,verwaltung:20}},
   {id:'schreiber',name:'Schreibergehilfe',
-   text:'Bildung +25 · Verwaltung +25 · Kartenkunde +20 · Konstitution −20',
-   attr:{bildung:25,konstitution:-20}, fert:{verwaltung:25,kartenkunde:20}},
+   text:'Bildung +25 · Verwaltung +25 · Kartenkunde +10 · Konstitution −10',
+   attr:{bildung:25,konstitution:-10}, fert:{verwaltung:25,kartenkunde:10}},
   {id:'strasse',name:'Straßenjunge aus Paris',
    text:'Menschenkenntnis +25 · Kaltblütigkeit +20 · Fouragieren +20 · Bildung −15',
    attr:{menschenkenntnis:25,kaltbluetigkeit:20,bildung:-15}, fert:{fouragieren:20}}
@@ -131,6 +131,7 @@ const LADEN = [
   {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},
   {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant',vp:24},
   {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:20},
+  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:30},
   {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
   {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:15},
   {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12}

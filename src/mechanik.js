@@ -31,8 +31,13 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
   const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
-  for(const k in h.attr) attr[k] = Math.max(0, Math.min(100, attr[k] + h.attr[k]));
-  for(const k in h.fert) fert[k] = Math.max(0, Math.min(100, fert[k] + h.fert[k]));
+  /* Obergrenze der Erschaffung: 70 für Attribute, 60 für Fertigkeiten — auch
+     nach der Herkunft. Vorher wurde die Herkunft ungedeckelt addiert: Ein
+     Bauernsohn mit Pool-70 stand bei Konstitution 90 und war damit praktisch
+     unsterblich (siehe Tödlichkeit in CLAUDE.md). Was über 70 hinausgeht,
+     muss man sich im Feld verdienen. */
+  for(const k in h.attr) attr[k] = Math.max(0, Math.min(70, attr[k] + h.attr[k]));
+  for(const k in h.fert) fert[k] = Math.max(0, Math.min(60, fert[k] + h.fert[k]));
   // Mit Veteranenpunkten vorweggenommene Ausbildung, oben auf Herkunft und Pool
   for(const k in (punkte||{})){
     if(attr[k] !== undefined) attr[k] = Math.min(100, attr[k] + punkte[k]);
@@ -45,6 +50,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; fert.bajonett+=5; }
     if(id==='schuhe_gut'){ ausr.schuhe={name:'Doppelt besohlte Schuhe',zustand:100,verschleiss:12}; }
     if(id==='tornister_gut'){ ausr.tornister={name:'Verstärkter Tornister',zustand:100,verschleiss:8}; }
+    if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
     if(id==='geld'){ geld += 50; }
   });
   return {
