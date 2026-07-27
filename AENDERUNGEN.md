@@ -11,7 +11,7 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **Der Preis rechnet vom Istwert statt vom Sockel.** Weil die Erschaffung zuerst kommt, ist der Ausgangswert bekannt. Ein Wilderer mit Muskete 40 zahlt für fünf Punkte 15 VP, einer bei Muskete 10 nur 5. Spezialisierung wird teuer, Breite bleibt bezahlbar — der eigentliche Sinn von `PRO_PUNKT`. Obergrenzen jetzt auf den Endwert bezogen: Attribute 70 (wie bei der Poolverteilung), Fertigkeiten 60.
 
-**Kampagnenverlauf entrümpelt.** Jede Station stand in zwei Zeilen mit Datum, Art und Zähler, was bei 246 px Spaltenbreite umbrach. Jetzt eine Zeile: Ort, kleines Artkürzel (Gefecht, Lager, Winter, Musterung, Auswahl), Besuchszähler. Das Datum steht im Titel-Attribut und ohnehin im Kartenkopf, sobald man dort ist.
+**Kampagnenverlauf entrümpelt.** Jede Station stand in zwei Zeilen mit Datum, Art und Besuchszähler, was bei 246 px Spaltenbreite umbrach. Jetzt eine Zeile mit nur zwei Angaben: Ort und ein kleines Artkürzel (Gefecht, Lager, Winter, Musterung, Auswahl). Datum und Zähler sind gestrichen — das Datum steht im Titel-Attribut und ohnehin im Kartenkopf, sobald man dort ist, und wie oft man schon irgendwo war, sagt über den laufenden Feldzug nichts.
 
 **Grün heißt: hier ist etwas dazugekommen.** Gekaufte Punkte und gewählte Ausrüstung bekommen einen grünen Balken, einen grünen Grundton und den neuen Wert in Grün — man sieht auf einen Blick, wo der Vorrat hingegangen ist. „Einrücken" steht jetzt rechts hinter „Zurück zur Erschaffung" und trägt als Hauptsache den Messingrand.
 

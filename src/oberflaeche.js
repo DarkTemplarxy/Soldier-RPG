@@ -57,18 +57,17 @@ function verlauf(){
     } else if(!gesehen.length){
       inhalt = '<div class="kmpleer">Du warst noch nirgends. Es fängt in Savona an.</div>';
     } else {
-      // Eine Zeile je Station: Ort, Art, wie oft. Das Datum stand früher darunter
-      // und machte aus der Liste eine Tabelle — es steht ohnehin im Kartenkopf,
-      // sobald man dort ist. Die beiden Stationen in Savona trennt jetzt die Art.
+      // Eine Zeile je Station: nur Ort und Art. Datum und Besuchszähler standen
+      // früher mit darin und machten aus der Liste eine Tabelle. Das Datum steht
+      // ohnehin im Kartenkopf, sobald man dort ist, und hängt hier im Titel.
+      // Die beiden Stationen in Savona trennt jetzt die Art.
       inhalt = gesehen.map(n=>{
-        const b = META.bestKapitel[n.id];
         const ort = (n.datum||'').split(' · ')[1] || n.ort || n.id;
         const art = stationsArt(n);
         return `<div class="kmpst ${n.id===jetzt?'jetzt':''} ${n.typ==='kampf'?'gefecht':''}"
           title="${esc(n.datum||'')}">
           <span class="kmpst-ort">${esc(ort)}</span>
-          ${art?`<span class="kmpst-art">${art}</span>`:''}
-          ${b.mal>1?`<span class="kmpst-mal">${b.mal}×</span>`:''}</div>`;
+          ${art?`<span class="kmpst-art">${art}</span>`:''}</div>`;
       }).join('');
       if(gesehen.length < st.length)
         inhalt += '<div class="kmpleer">Was danach kommt, weißt du nicht.</div>';

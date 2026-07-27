@@ -162,7 +162,7 @@
   .kmp.ungebaut .kmppfeil{color:var(--faint)}
   .kmpliste{display:none;padding:0 6px 9px 26px}
   .kmp.auf .kmpliste{display:block}
-  .kmpst{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;
+  .kmpst{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;
     padding:5px 6px 5px 10px;border-left:1px solid #3a342c;font-size:13.5px;color:var(--dim)}
   .kmpst.gefecht{border-left-color:var(--blood)}
   .kmpst.jetzt{border-left-color:var(--brass);background:#221e18}
@@ -173,8 +173,6 @@
     border:1px solid #322c25;padding:1px 5px;white-space:nowrap}
   .kmpst.gefecht .kmpst-art{color:#d99184;border-color:#5a2a24}
   .kmpst.jetzt .kmpst-art{color:var(--brass);border-color:#5a4526}
-  .kmpst-mal{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
-    color:var(--faint);white-space:nowrap}
   .kmpleer{padding:5px 0 5px 11px;font-size:12.5px;font-style:italic;color:var(--faint)}
 
   /* Warnung — nur da, wo es wirklich gleich etwas kostet */
@@ -998,18 +996,17 @@ function verlauf(){
     } else if(!gesehen.length){
       inhalt = '<div class="kmpleer">Du warst noch nirgends. Es fängt in Savona an.</div>';
     } else {
-      // Eine Zeile je Station: Ort, Art, wie oft. Das Datum stand früher darunter
-      // und machte aus der Liste eine Tabelle — es steht ohnehin im Kartenkopf,
-      // sobald man dort ist. Die beiden Stationen in Savona trennt jetzt die Art.
+      // Eine Zeile je Station: nur Ort und Art. Datum und Besuchszähler standen
+      // früher mit darin und machten aus der Liste eine Tabelle. Das Datum steht
+      // ohnehin im Kartenkopf, sobald man dort ist, und hängt hier im Titel.
+      // Die beiden Stationen in Savona trennt jetzt die Art.
       inhalt = gesehen.map(n=>{
-        const b = META.bestKapitel[n.id];
         const ort = (n.datum||'').split(' · ')[1] || n.ort || n.id;
         const art = stationsArt(n);
         return `<div class="kmpst ${n.id===jetzt?'jetzt':''} ${n.typ==='kampf'?'gefecht':''}"
           title="${esc(n.datum||'')}">
           <span class="kmpst-ort">${esc(ort)}</span>
-          ${art?`<span class="kmpst-art">${art}</span>`:''}
-          ${b.mal>1?`<span class="kmpst-mal">${b.mal}×</span>`:''}</div>`;
+          ${art?`<span class="kmpst-art">${art}</span>`:''}</div>`;
       }).join('');
       if(gesehen.length < st.length)
         inhalt += '<div class="kmpleer">Was danach kommt, weißt du nicht.</div>';
