@@ -205,9 +205,9 @@ function gesamtKosten(){
 
 function punktZeile(k,n){
   const p = PUNKTE[k]||0, ist = istWert(k);
-  return `<div class="punktzeile ${p?'hi':''}" id="pz_${k}">
+  return `<div class="punktzeile ${p?'gewaehlt':''}" id="pz_${k}">
     <span>${mitHilfe(k,n)}</span>
-    <span class="punktwert" id="pw_${k}">${ist}${p?` <i>→</i> ${ist+p}`:''}</span>
+    <span class="punktwert" id="pw_${k}">${ist}${p?` <i>→</i> <b>${ist+p}</b>`:''}</span>
     <span class="punktvp ${p?'':'aus'}" id="pv_${k}">${p?punktKosten(k)+' VP':''}</span>
     <span><button class="pmbtn" onclick="stellePunkt('${k}',-PUNKT_SCHRITT)" id="pm_${k}">−</button>
     <button class="pmbtn" onclick="stellePunkt('${k}',PUNKT_SCHRITT)" id="pa_${k}">+</button></span>
@@ -246,8 +246,8 @@ function zeigeLaden(){
    <div class="cb">
     <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
     <div style="margin-top:18px;display:flex;gap:10px">
-      <button class="plain" id="startbtn" onclick="starte()">Einrücken</button>
-      <button class="plain" onclick="zeigeErschaffung()">Zurück zur Erschaffung</button></div>
+      <button class="plain" onclick="zeigeErschaffung()">Zurück zur Erschaffung</button>
+      <button class="plain haupt" id="startbtn" onclick="starte()">Einrücken</button></div>
    </div></div>`;
   aktualisiereLaden();
 }
@@ -273,14 +273,15 @@ function aktualisiereLaden(){
     const drin = AUSWAHL.includes(p.id);
     b.textContent = drin?'gewählt':'wählen';
     b.disabled = !drin && p.vp>rest;
-    z.className = drin?'hi':'';
+    z.className = drin?'gewaehlt':'';
+    b.className = 'plain'+(drin?' gewaehlt':'');
   });
   ATTRIBUTE.concat(FERTIGKEITEN).forEach(([k])=>{
     const p = PUNKTE[k]||0, b = istWert(k);
     const pw = document.getElementById('pw_'+k), pv = document.getElementById('pv_'+k);
-    pw.innerHTML = p ? `${b} <i>→</i> ${b+p}` : String(b);
+    pw.innerHTML = p ? `${b} <i>→</i> <b>${b+p}</b>` : String(b);
     pv.textContent = p?punktKosten(k)+' VP':''; pv.className = 'punktvp'+(p?'':' aus');
-    document.getElementById('pz_'+k).className = 'punktzeile'+(p?' hi':'');
+    document.getElementById('pz_'+k).className = 'punktzeile'+(p?' gewaehlt':'');
     document.getElementById('pm_'+k).disabled = !p;
     document.getElementById('pa_'+k).disabled =
       b+p+PUNKT_SCHRITT > punktGrenze(k) || kostenVon(b+p, b+p+PUNKT_SCHRITT) > rest;

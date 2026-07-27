@@ -13,6 +13,8 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **Kampagnenverlauf entrümpelt.** Jede Station stand in zwei Zeilen mit Datum, Art und Zähler, was bei 246 px Spaltenbreite umbrach. Jetzt eine Zeile: Ort, kleines Artkürzel (Gefecht, Lager, Winter, Musterung, Auswahl), Besuchszähler. Das Datum steht im Titel-Attribut und ohnehin im Kartenkopf, sobald man dort ist.
 
+**Grün heißt: hier ist etwas dazugekommen.** Gekaufte Punkte und gewählte Ausrüstung bekommen einen grünen Balken, einen grünen Grundton und den neuen Wert in Grün — man sieht auf einen Blick, wo der Vorrat hingegangen ist. „Einrücken" steht jetzt rechts hinter „Zurück zur Erschaffung" und trägt als Hauptsache den Messingrand.
+
 Die drei Testskripte folgen der neuen Reihenfolge (`Auswürfeln` → Herkunft → `Weiter zu den Veteranenpunkten` → `Einrücken`).
 
 ---

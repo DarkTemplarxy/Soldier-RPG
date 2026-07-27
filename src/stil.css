@@ -85,6 +85,11 @@
   td.k{color:var(--brass);white-space:nowrap}
   td.d{color:#c2b8a6}
   tr.hi td{background:#201d17}
+  /* Grün heißt: hier ist etwas dazugekommen */
+  tr.gewaehlt td{background:#1a2016}
+  tr.gewaehlt td.k{color:#a9bb7d}
+  button.plain.gewaehlt{border-color:var(--green);color:#b6c48d}
+  button.plain.haupt{border-color:var(--brass);color:#efe6d4}
 
   .note{border-left:2px solid var(--brass);background:#1c1915;padding:13px 16px;
     color:#c9bfad;font-size:14.5px}
@@ -122,7 +127,9 @@
   .punktzeile{display:grid;grid-template-columns:1fr 96px 62px 68px;gap:10px;align-items:center;
     padding:5px 6px;border-bottom:1px solid #232019;font-size:14px}
   .punktzeile:last-child{border-bottom:none}
-  .punktzeile.hi{background:#201d17}
+  .punktzeile.gewaehlt{background:#1a2016;box-shadow:inset 2px 0 0 var(--green)}
+  .punktwert b{font-weight:normal;color:#a9bb7d}
+  .punktzeile.gewaehlt .punktwert i{color:var(--green)}
   .punktwert{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;
     text-align:right;color:#f0e7d5;white-space:nowrap}
   .punktwert i{color:var(--brass);font-style:normal;padding:0 3px}
