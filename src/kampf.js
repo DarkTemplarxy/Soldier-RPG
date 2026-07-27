@@ -121,52 +121,62 @@ function sichtfeld(){
   const gefallene = (anz,steht,a)=> new Set(
     Array.from({length:anz},(_,i)=>i).sort((p,q)=>streu(p,a)-streu(q,a)).slice(0, anz-steht));
 
-  /* Wenige, dafür große Figuren: Die Linie soll als Linie zu erkennen sein,
-     nicht als Punktwolke. Je Glied acht Mann, das Glied darüber versetzt —
-     so schließt sich die Lücke des Vordermanns, wie es sich gehört. */
-  const FEIND_JE = 7, EIGEN_JE = 8, PLAENKLER = 5;
+  /* Geschlossene Ordnung: Die Glieder stehen um eine halbe Teilung versetzt,
+     sodass das hintere Glied die Lücken des vorderen füllt — zusammen ergibt
+     das die dichte Wand, die eine Linie ausmacht. Einzeln gezählt sind es
+     wenige Männer je Glied, im Bild steht eine Linie. */
+  const FEIND_JE = 15, EIGEN_JE = 20, PLAENKLER = 5;
   const FEIND = FEIND_JE*2, EIGEN = EIGEN_JE*2;
   const feindWeg = gefallene(FEIND, Math.round(FEIND*feindTeil), 7);
   const eigenWeg = gefallene(EIGEN, Math.round(EIGEN*eigenTeil), 13);
 
   const ROT = '#c2483a', ROT_TOT = '#5e2a24', BLAU = '#7d93ad', BLAU_TOT = '#3a4655';
 
-  /* Ein Mann: Rumpf, Kopf, Tschako, geschultertes Gewehr. Das Gewehr macht aus
-     der Figur einen Soldaten — ohne es sind es Stäbchen. */
-  const mann = (x,y,h,f,o,gewehr)=>{
-    const b = h/22;                               // alles skaliert mit der Höhe
+  /* Die Kopfbedeckung sagt, wer da steht. 1796 trägt die Linie den Zweispitz,
+     die Grenadierkompanie die Bärenfellmütze mit rotem Stutz, der Voltigeur
+     denselben Zweispitz wie die Linie. Der Feind trägt den österreichischen
+     Kasket. */
+  const kopfbedeckung = (x,y,b,f,art)=>{
+    if(art==='baer') return `<rect x="${(x-4.6*b).toFixed(1)}" y="${(y-15.5*b).toFixed(1)}" width="${(9.2*b).toFixed(1)}" height="${(11*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}"/>`+
+      `<rect x="${(x+2.6*b).toFixed(1)}" y="${(y-19*b).toFixed(1)}" width="${(1.8*b).toFixed(1)}" height="${(5*b).toFixed(1)}" rx="${(0.9*b).toFixed(1)}" fill="#c2483a"/>`;
+    if(art==='kasket') return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.4*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}" ry="${(3.4*b).toFixed(1)}"/>`;
+    // Zweispitz: breit und flach, quer über dem Kopf getragen
+    return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.6*b).toFixed(1)}" rx="${(7.6*b).toFixed(1)}" ry="${(2.9*b).toFixed(1)}"`+
+           ` transform="rotate(-7 ${x.toFixed(1)} ${(y-8.6*b).toFixed(1)})"/>`;
+  };
+
+  const mann = (x,y,h,f,o,art,gewehr)=>{
+    const b = h/26;
     return `<g opacity="${o}" fill="${f}">`+
-      (gewehr!==false ? `<rect x="${(x+3*b).toFixed(1)}" y="${(y-11*b).toFixed(1)}" width="${(1.3*b).toFixed(1)}" height="${(h+9*b).toFixed(1)}" rx="${(0.6*b).toFixed(1)}" opacity=".42" transform="rotate(-24 ${(x+3*b).toFixed(1)} ${y.toFixed(1)})"/>` : '')+
-      `<rect x="${(x-3.4*b).toFixed(1)}" y="${y.toFixed(1)}" width="${(6.8*b).toFixed(1)}" height="${h}" rx="${(2.6*b).toFixed(1)}"/>`+
-      `<circle cx="${x.toFixed(1)}" cy="${(y-3.6*b).toFixed(1)}" r="${(3.2*b).toFixed(1)}"/>`+
-      `<rect x="${(x-3.8*b).toFixed(1)}" y="${(y-10.4*b).toFixed(1)}" width="${(7.6*b).toFixed(1)}" height="${(5.6*b).toFixed(1)}" rx="${(1.2*b).toFixed(1)}"/>`+
+      (gewehr!==false ? `<rect x="${(x+3.4*b).toFixed(1)}" y="${(y-13*b).toFixed(1)}" width="${(1.5*b).toFixed(1)}" height="${(h+11*b).toFixed(1)}" rx="${(0.7*b).toFixed(1)}" opacity=".4" transform="rotate(-22 ${(x+3.4*b).toFixed(1)} ${y.toFixed(1)})"/>` : '')+
+      `<rect x="${(x-4.4*b).toFixed(1)}" y="${y.toFixed(1)}" width="${(8.8*b).toFixed(1)}" height="${h}" rx="${(3*b).toFixed(1)}"/>`+
+      `<circle cx="${x.toFixed(1)}" cy="${(y-3.8*b).toFixed(1)}" r="${(3.4*b).toFixed(1)}"/>`+
+      kopfbedeckung(x,y,b,f,art)+
       `</g>`;
   };
   const toter = (x,y,f)=>`<rect x="${(x-7).toFixed(1)}" y="${y.toFixed(1)}" width="14" height="2.6" rx="1.3" fill="${f}" opacity=".55"/>`;
 
-  /* Hinter jedem Glied ein schwacher Streifen. Acht gezeichnete Männer sind
-     eine Andeutung, keine Kompanie — der Streifen macht daraus wieder eine
-     geschlossene Linie, ohne sechzig Figuren zeichnen zu müssen. */
-  const masse = (y,h,f,o)=>`<rect x="24" y="${(y+h*0.35).toFixed(0)}" width="592" height="${(h*0.65).toFixed(0)}" rx="4" fill="${f}" opacity="${o}"/>`;
+  /* Hinter jedem Glied ein schwacher Streifen: die Masse, aus der die
+     Einzelnen ragen — die Linie hört nicht am Bildrand auf. */
+  const masse = (y,h,f,o)=>`<rect x="0" y="${(y+h*0.3).toFixed(0)}" width="640" height="${(h*0.7).toFixed(0)}" fill="${f}" opacity="${o}"/>`;
 
-  // Feind: zwei Glieder, weiter weg und deshalb kleiner
-  let feind = masse(50, 16, '#c2483a', .07) + masse(59, 16, '#c2483a', .05);
+  // Feind: zwei versetzte Glieder, weiter weg und deshalb kleiner
+  let feind = masse(48, 15, ROT, .08) + masse(56, 15, ROT, .06);
   for(let g=0;g<2;g++) for(let i=0;i<FEIND_JE;i++){
-    const idx = g*FEIND_JE+i;
-    const x = 52 + i*(536/(FEIND_JE-1)) + g*38, y = 50 + g*9;
-    if(x > 620) continue;
-    feind += feindWeg.has(idx) ? toter(x, y+16, ROT_TOT) : mann(x, y, 16, ROT, g ? 0.55 : 0.92);
+    const idx = g*FEIND_JE+i, schritt = 640/FEIND_JE;
+    const x = 14 + i*schritt + g*schritt/2, y = 48 + g*8;
+    feind += feindWeg.has(idx) ? toter(x, y+15, ROT_TOT) : mann(x, y, 15, ROT, g ? 0.5 : 0.9, 'kasket');
   }
 
-  // Eigene Linie: erstes Glied weiter vorn und deshalb höher, deins darunter
+  // Eigene Linie: erstes Glied weiter vorn und darum höher, deins darunter
   const meinX = 320, meinGlied = 1;
-  let eigen = masse(132, 22, '#7d93ad', .06) + masse(148, 26, '#7d93ad', .09);
+  const meinHut = S.zweig==='grenadier' ? 'baer' : 'zwei';
+  let eigen = masse(130, 22, BLAU, .07) + masse(146, 26, BLAU, .10);
   for(let g=0;g<2;g++) for(let i=0;i<EIGEN_JE;i++){
-    const idx = g*EIGEN_JE+i;
-    const x = 42 + i*(556/(EIGEN_JE-1)) + (g?0:36), y = g ? 148 : 132, h = g ? 26 : 22;
-    if(x > 624) continue;
-    if(zw!=='voltigeur' && g===meinGlied && Math.abs(x-meinX)<26) continue;   // dein Platz bleibt frei
-    eigen += eigenWeg.has(idx) ? toter(x, y+h, BLAU_TOT) : mann(x, y, h, BLAU, g ? 1 : 0.62);
+    const idx = g*EIGEN_JE+i, schritt = 640/EIGEN_JE;
+    const x = 8 + i*schritt + (g?0:schritt/2), y = g ? 146 : 130, h = g ? 26 : 22;
+    if(zw!=='voltigeur' && g===meinGlied && Math.abs(x-meinX)<schritt*0.6) continue;   // dein Platz
+    eigen += eigenWeg.has(idx) ? toter(x, y+h, BLAU_TOT) : mann(x, y, h, BLAU, g ? 1 : 0.6, meinHut);
   }
 
   // Voltigeure schwärmen aus: wenige, weit auseinander, ohne Ordnung
@@ -174,19 +184,19 @@ function sichtfeld(){
   if(zw==='voltigeur') for(let i=0;i<PLAENKLER;i++){
     const x = 90 + i*(460/(PLAENKLER-1)) + (streu(i,5)-0.5)*48;
     if(Math.abs(x-meinX)<34) continue;
-    plaenkler += mann(x, 96 + streu(i,9)*16, 19, BLAU, 0.85);
+    plaenkler += mann(x, 92 + streu(i,9)*16, 20, BLAU, 0.85, 'zwei');
   }
 
   // Du, dort wo du hingehörst
-  let meinY = zw==='voltigeur' ? 104 : 148, meinH = zw==='voltigeur' ? 19 : 26;
-  if(K.vorn){ meinY = 88; meinH = 18; }             // mit dem Bajonett vorgegangen
+  let meinY = zw==='voltigeur' ? 100 : 146, meinH = zw==='voltigeur' ? 20 : 26;
+  if(K.vorn){ meinY = 86; meinH = 18; }             // mit dem Bajonett vorgegangen
   if(K.deckung){ meinY += meinH-10; meinH = 10; }   // kniend oder liegend
 
   /* Pulverdampf steht zwischen den Linien und wird mit jeder Runde dichter —
      feste Plätze, nur die Zahl wächst. */
   let qualm = '';
   for(let i=0;i<Math.round(3+9*rauch);i++){
-    const x = 40 + streu(i,17)*560, y = 88 + streu(i,23)*34;
+    const x = 40 + streu(i,17)*560, y = 86 + streu(i,23)*32;
     const r = 16 + streu(i,29)*28;
     qualm += `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${r.toFixed(0)}" ry="${(r*0.42).toFixed(0)}"`+
              ` fill="#3a352e" opacity="${(0.10+0.12*streu(i,31)).toFixed(2)}"/>`;
@@ -215,7 +225,7 @@ function sichtfeld(){
         ? (zw==='voltigeur'?'Du liegst. Über dir geht es hinweg.':'Du kniest. Über dir geht es hinweg.')
         : (K.vorn?'Du bist zehn Schritt vor der Linie.':'Rauch. Du siehst keine dreißig Schritt weit.')}</text>
     ${plaenkler}${eigen}
-    ${mann(meinX, meinY, meinH, '#d0a75e', 1, !K.deckung)}
+    ${mann(meinX, meinY, meinH, '#d0a75e', 1, meinHut, !K.deckung)}
     <text x="${meinX}" y="${meinY < 130 ? (meinY-13).toFixed(0) : (meinY+meinH+11).toFixed(0)}"
       text-anchor="middle" fill="#d0a75e" font-size="9.5"
       font-family="ui-monospace,monospace" letter-spacing="1">DU</text>

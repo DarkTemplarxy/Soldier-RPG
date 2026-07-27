@@ -385,7 +385,9 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 
 > **`K.eigen` ist reine Anzeige.** An dieser Zahl hängt keine Probe, keine Gefahr und keine Wertung — sie macht nur sichtbar, was die Texte ohnehin sagen: Drüben wird auch geschossen. Sie sinkt je Runde um 2–5, mal dem verbliebenen Widerstand des Feindes, sodass ein gebrochener Gegner kaum noch Verluste kostet. **Wer daran eine Mechanik hängt, ändert die Balance** und muss neu messen.
 
-**Wenige große Figuren statt vieler kleiner.** Je Glied acht Mann (Feind sieben), mit Tschako und geschultertem Gewehr — ohne das Gewehr sind es Stäbchen. Dahinter liegt je Glied ein schwacher Streifen: Acht gezeichnete Männer sind eine Andeutung, keine Kompanie, und der Streifen macht daraus wieder eine geschlossene Linie, ohne sechzig Figuren zeichnen zu müssen. Die erste Fassung hatte 56 Figuren und sah aus wie eine Punktwolke.
+**Geschlossene Ordnung durch Versatz.** Je Glied zwanzig Mann (Feind fünfzehn), und die Glieder stehen um eine **halbe Teilung versetzt** — das hintere Glied füllt die Lücken des vorderen, und zusammen ergibt das die dichte Wand, die eine Linie ausmacht. Dazu je Glied ein schwacher Streifen über die volle Breite, damit die Linie nicht am Bildrand aufhört. Der Voltigeur bleibt die Ausnahme: fünf Plänkler, weit auseinander, ohne Ordnung — er steht in keiner Linie.
+
+**Die Kopfbedeckung sagt, wer da steht.** 1796 trägt die Linie den Zweispitz (breit und flach, quer getragen), die Grenadierkompanie die Bärenfellmütze mit rotem Stutz, der Feind den österreichischen Kasket. Die Silhouetten sind absichtlich verschieden — flach und breit, hoch und rund, klein und rund —, weil man auf 640 Pixel Breite nichts anderes unterscheiden kann. Dazu ein geschultertes Gewehr: Ohne das sind es Stäbchen, keine Soldaten.
 
 **Nichts in dieser Funktion darf gewürfelt werden.** Das Bild wird bei jedem Zug neu gezeichnet; ein `Math.random()` darin ließe die Aufstellung bei jedem Klick springen. Deshalb liefert `streu(i, a)` einen festen Wert je Platz — dieselbe Aufstellung, solange sich die Zahlen nicht ändern.
 
