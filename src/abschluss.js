@@ -96,6 +96,13 @@ const LAGER_TUN = {
       return 'Von Deckung zu Deckung, hinlegen, zielen, weiter. Vor der Linie gibt es keinen Nebenmann, der dir sagt, wann du aufstehst. Das musst du selbst wissen. <span class="fein">Geschick und Muskete steigen · Atem −6</span>'; }}
 };
 
+/* Unteroffiziere sind vom Wachdienst und von den Handreichungen befreit, die
+   den Füsilier den halben Abend kosten — dafür haben sie die Korporalschaft am
+   Hals. Ein Rang gibt also nicht nur einen Knopf mehr, sondern auch den Abend,
+   an dem man ihn drücken kann; sonst verdrängt die Dienstpflicht die eigene
+   Ausbildung. Ab Sergent noch einen. */
+function abendeFuer(n){ return n.abende + (S.rang>=5 ? 2 : S.rang>=3 ? 1 : 0); }
+
 function lagerHandlungen(n){
   const ids = (n.tun||[]).slice();
   if(S.rang>=3) ids.push('korporalschaft');
@@ -109,7 +116,7 @@ function lagerHandlungen(n){
    Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
 function zeigeLager(n){
   const L = LAUF.lager;
-  if(L.id !== n.id){ L.id = n.id; L.abende = n.abende; L.log = []; L.gesichert = Ablage.dauerhaft; laufSichern(); }
+  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft; laufSichern(); }
   const opt = lagerHandlungen(n).map(id=>{
     const t = LAGER_TUN[id];
     return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
@@ -120,7 +127,8 @@ function zeigeLager(n){
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${n.abende}</div>
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${abendeFuer(n)}${
+        abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'EIN ABEND':'ZWEI ABENDE'} MEHR ALS ${rangName(S.rang).toUpperCase()}`:''}</div>
       </div></div>
     <div class="orders"><div class="ch"><span>Womit verbringst du den Abend?</span></div><div class="ordbody">
       ${opt}${L.abende<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}

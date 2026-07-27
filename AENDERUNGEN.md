@@ -5,6 +5,18 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-27 — Rang gibt Zeit, und die Befehle des Caporals bringen etwas
+
+**Ab Caporal ein Lagerabend mehr, ab Sergent zwei** (`abendeFuer()` in `src/abschluss.js`). Im Spiel: Unteroffiziere sind vom Wachdienst und den Handreichungen befreit, die den Füsilier den halben Abend kosten. Im Entwurf: Ohne den zusätzlichen Abend verdrängt die rangeigene Handlung „Deine acht Mann drillen" die eigene Ausbildung, und der Rang fühlt sich an wie eine Strafe. Das ist die eine Stelle, an der ein Rang mehr gibt als einen Knopf — und sie ist nötig, damit der Knopf überhaupt drückbar ist.
+
+**„Lücke schließen lassen" war sinnlos und ist es nicht mehr.** Vorher: Gefahr −14 und Kameradschaft +4 — während „Hinknien" jedem −22 Gefahr *und* +10 Atem gibt. Ein Rangbefehl, der schlechter ist als die Grundhandlung, ist kein Rangbefehl. Jetzt schützt Hinknien **dich**, die Lücke schützt **deine Leute**: Gefahr −8, und die eigene Linie verliert drei Runden lang halb so viele Männer — sichtbar an den blauen Figuren und der Waage im Sichtfeld. Dazu Kameradschaft +4 und beim ersten Mal je Gefecht Ruf +1; nur beim ersten Mal (`K.lueckeGelobt`), sonst ließe er sich in acht Runden achtmal einsammeln.
+
+**„Salve befehlen" war schon immer die stärkste Aktion, nur stand es nirgends.** 26–36 Schaden gegen 12–20 bei einem eigenen Schuss, und die eigene Muskete bleibt geladen, weil die acht Mann feuern und nicht du — als Caporal wird man vom Schützen zum Befehlsgeber. Der Knopf sagt das jetzt.
+
+Gemessen über 40 Läufe: überstanden 40 %, Caporal 23 %. Eine Bestätigung über 80 Läufe steht noch aus; der Testbot nimmt im Gefecht ohnehin immer zuerst die Salve und rührt die Lücke nie an, gemessen wird also fast nur der zusätzliche Lagerabend.
+
+---
+
 ## 2026-07-27 — Das Gefecht wird sichtbar, Rangabzeichen
 
 **Sichtfeld neu gezeichnet.** Vorher standen vier namenlose Klötze im Rauch. Jetzt ist es eine Aufstellung aus Augenhöhe: unten die eigene Linie in Blau, zwei Glieder mit Tschako und geschultertem Gewehr, versetzt wie es sich gehört; drüben der Feind in Rot, kleiner, weil weiter weg; dazwischen Pulverdampf, der mit jeder Runde dichter wird.

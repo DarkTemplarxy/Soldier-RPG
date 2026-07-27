@@ -154,6 +154,8 @@ Diese acht Regeln nicht brechen. Wenn eine Änderung eine davon verletzt, ist di
 | Tornistermarsch (Grenadier) | Konstitution | Atem −10 |
 | Gelände üben (Voltigeur) | Geschick und Muskete | Atem −6 |
 
+**Der Rang gibt Zeit, nicht nur Knöpfe.** Ab Caporal ein Abend mehr je Lager, ab Sergent zwei (`abendeFuer()` in `src/abschluss.js`). Begründung im Spiel: Unteroffiziere sind vom Wachdienst und den Handreichungen befreit, die den Füsilier den halben Abend kosten — dafür haben sie die Korporalschaft am Hals. Begründung im Entwurf: Ohne den zusätzlichen Abend verdrängt die rangeigene Handlung („Deine acht Mann drillen") die eigene Ausbildung, und der Rang würde sich anfühlen wie eine Strafe. Das ist die eine Stelle, an der ein Rang mehr gibt als einen Knopf — und sie ist nötig, damit der Knopf überhaupt drückbar ist.
+
 Ein Lagerabend gibt bewusst **weniger als eine Winterwoche** (dort: alles +30 statt +20, Belastung −16 statt −10). Die drei rang- und zweigabhängigen Handlungen erfüllen Invariante 4 auch außerhalb des Gefechts.
 
 ### Anmarsch vor dem Gefecht (`src/kampf.js`)
@@ -241,6 +243,17 @@ Abnehmender Ertrag ist Absicht: von 12 auf 40 geht schnell, von 80 auf 90 dauert
 > Deshalb zwei Änderungen zusammen: **Schwelle auf 4** und **keine einzelne Tat trägt sie mehr allein** — Mondovì „melden" 3 → **2**, Mantua „dem Fourier auf die Finger sehen" 4 → **3**. Wer Caporal werden will, braucht jetzt zwei Handlungen: eine sichtbare Tat *und* Abende am Feuer (Lager +1, Winterwoche +2, Savona zuhören +2, Dego Tornister +1).
 >
 > Der Ruf war beim Bot zweigipflig — 19–25 oder 36–41, dazwischen niemand. Zwischen 26 und 35 liegt also keine Trennlinie; **30** ist die lesbare Zahl in dieser Lücke und schneidet die untere Gruppe sauber ab.
+
+### Was die Befehle des Caporals bringen (`src/kampf.js`)
+
+Beides sind Handlungen, die es für den Füsilier nicht gibt — sie sind der eigentliche Rangunterschied.
+
+| Befehl | Wirkung | Wofür man ihn nimmt |
+|---|---|---|
+| **Salve befehlen** | Autoritäts-Probe 40 · 26–36 Schaden (Fehlschlag 6) · **deine eigene Muskete bleibt geladen** | Das Gefecht schneller entscheiden. Mehr als doppelt so viel Schaden wie ein eigener Schuss, und weil die anderen feuern, musst du nie nachladen — als Caporal wirst du in erster Linie zum Befehlsgeber und nicht mehr zum Schützen. |
+| **Lücke schließen lassen** | Drill-Probe 35 · Gefahr −8 · **eure Linie verliert drei Runden lang halb so viele Männer** · Kameradschaft +4 · beim ersten Mal je Gefecht Ruf +1 | Deine Leute am Leben halten. Sichtbar an der eigenen Linie im Sichtfeld und an der Waage darunter. |
+
+> **Warum „Lücke schließen" umgebaut wurde.** Vorher gab es −14 Gefahr und Kameradschaft +4 — und damit war die Handlung sinnlos: „Hinknien" gibt −22 Gefahr *und* +10 Atem und steht jedem offen. Ein Rangbefehl, der schlechter ist als die Grundhandlung, ist kein Rangbefehl. Jetzt schützt Hinknien **dich**, die Lücke schützt **deine Leute** — zwei verschiedene Fragen, und die zweite ist die, die einen Caporal von einem Füsilier unterscheidet. Der Ruf-Punkt gibt es nur einmal je Gefecht (`K.lueckeGelobt`), sonst ließe er sich in acht Runden achtmal einsammeln.
 
 ### Wertung Kapitel 1 (`src/abschluss.js`)
 

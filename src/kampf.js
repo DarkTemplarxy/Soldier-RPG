@@ -23,8 +23,10 @@ function aktionen(){
   a.push({id:'bajonett',label:zw==='grenadier'?'Bajonett fällen und vorgehen':'Mit dem Bajonett vor',
     cost:(zw==='grenadier'?'Bajonett +10 · ':'Bajonett · ')+'sehr gefährlich',risk:true});
   if(S.rang>=3){
-    a.push({id:'salve',label:'Der Korporalschaft Salve befehlen',cost:'Autorität · acht Mann feuern zugleich'});
-    a.push({id:'luecke',label:'Die Lücke links schließen lassen',cost:'Drill · schützt deine Männer'});
+    a.push({id:'salve',label:'Der Korporalschaft Salve befehlen',
+      cost:'Autorität · acht Musketen auf einmal — mehr als du allein triffst, und deine bleibt geladen'});
+    a.push({id:'luecke',label:'Die Lücke links schließen lassen',
+      cost:'Drill · eure Linie verliert weniger Männer · Ruf, wenn es gelingt'});
   }
   a.push({id:'zurueck',label:'Zurückweichen',cost:'Ruf −− · der Kampf ist für dich vorbei',risk:true});
   return a;
@@ -47,7 +49,7 @@ function starteKampf(n){
   }
   S.anmarschGesehen = null;
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
-              eigen:100, vorn:false,
+              eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -311,10 +313,18 @@ function kampfAktion(id){
     else { text='Du rufst den Befehl, und drei von acht hören ihn. Das Ergebnis ist ein trauriges Geknatter.'; schaden=6; }
   }
   else if(id==='luecke'){
+    /* Der Unterschied zum Hinknien: Das dort schützt dich, das hier deine
+       Leute. Die geschlossene Linie hält drei Runden lang die halben Verluste
+       aus, und das erste Mal je Gefecht sieht es jemand, der Listen führt. */
     const p = probe('drill', 35);
-    if(p.erfolg){ gefahrMod=-14; S.kameradschaft=Math.min(100,S.kameradschaft+4);
-      text='Du schiebst die Männer zusammen, bis kein Loch mehr in der Linie ist. Deine acht wissen jetzt, wozu du gut bist.'; }
-    else { text='Sie rücken auf, aber zu langsam, und die Lücke bleibt.'; }
+    if(p.erfolg){
+      gefahrMod = -8; K.geschlossen = 3;
+      S.kameradschaft = Math.min(100, S.kameradschaft+4);
+      let lob = '';
+      if(!K.lueckeGelobt){ K.lueckeGelobt = true; S.ruf += 1; lob = ' Der Capitaine geht hinter der Linie durch und sieht es.'; }
+      text = 'Du schiebst die Männer zusammen, bis kein Loch mehr in der Linie ist. Deine acht wissen jetzt, wozu du gut bist.'+lob;
+    }
+    else { text='Sie rücken auf, aber zu langsam, und die Lücke bleibt offen. Durch ein offenes Glied schießt es sich leichter.'; }
   }
   else if(id==='zurueck'){
     S.ruf = Math.max(0, S.ruf-8); S.belastung=Math.min(100,S.belastung+10); S.gekniffen=true;
@@ -331,7 +341,9 @@ function kampfAktion(id){
   /* Und sie verliert dabei Männer. Das ist reine Anzeige — an `eigen` hängt
      keine Probe und keine Gefahr, es macht nur sichtbar, was der Text sagt:
      Drüben wird auch geschossen. Je mehr Widerstand noch steht, desto teurer. */
-  K.eigen = Math.max(0, K.eigen - (2 + Math.random()*3) * Math.max(0, K.feindMoral/n.feindMoral));
+  const geschlossen = K.geschlossen > 0;
+  K.eigen = Math.max(0, K.eigen - (2 + Math.random()*3) * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
+  if(geschlossen) K.geschlossen--;
 
   K.protokoll.push(text);
 
