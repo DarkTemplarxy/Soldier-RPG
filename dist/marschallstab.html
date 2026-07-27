@@ -120,6 +120,23 @@
   .herk .hd{color:var(--dim);font-size:12.5px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Ortswechsel — das Band über der Station */
+  .weg{border:1px solid var(--line);border-left:2px solid var(--brass);background:#171512;
+    padding:9px 15px;margin-bottom:14px}
+  .wegorte{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+    letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+  .wegorte i{color:var(--brass);font-style:normal;padding:0 9px}
+  .wegtext{color:var(--faint);font-size:13px;font-style:italic;margin-top:2px}
+
+  /* Lagebild vor dem Gefecht */
+  .lage{border-top:1px solid var(--line);margin-top:16px;padding-top:13px}
+  .lagekopf{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:9px}
+  .lage table{font-size:13.5px}
+  .lage td{padding:4px 12px 4px 0}
+  .lage .prose p{margin:0 0 7px;font-size:15px;color:var(--dim)}
+  .fein{color:var(--faint);font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
+
   .log{max-height:200px;overflow-y:auto;font-size:13.5px;color:var(--dim)}
   .log div{padding:3px 0;border-bottom:1px solid #221f1a}
   .log div:last-child{border-bottom:none}
@@ -223,13 +240,29 @@ const LADEN = [
 
 
 'use strict';
-/* Kapitel 1 — Italien 1796/97. Reine Daten: Szenen, Gefechte, Ergebnisse.
-   Neue Kapitel als eigene Datei danebenlegen und in index.html einhängen. */
+/* Kapitel 1 — Italien 1796/97. Reine Daten: Szenen, Lager, Gefechte, Ergebnisse.
+   Neue Kapitel als eigene Datei danebenlegen und in index.html einhängen.
+
+   Stationstypen: szene · lager · kampf · elite · befoerderung · winter · ende
+   marsch:   Ortswechsel vor der Station. Wird als Band über der Karte gezeigt.
+   anmarsch: Text vor dem Gefecht. Der Weg dorthin, die Stellung, das Warten.
+   lage:     Nüchterne Meldung vor dem Gefecht. Nur Angaben, keine Wertung. */
 
 /* ══════════════════ KAPITEL ITALIEN 1796/97 ══════════════════ */
 
 const KAPITEL = [
-/* 1 */ {typ:'szene',id:'savona',datum:'12. April 1796 · Savona',ort:'Lager der Italienarmee',
+/* 1 */ {typ:'lager',id:'depot',datum:'1.–11. April 1796 · Savona',ort:'Rekrutendepot der 32. Halbbrigade',
+  marsch:{von:'Aushebung in Frankreich',nach:'Savona',weg:'elf Tage auf dem Karren und zu Fuß · zuletzt über den Küstenweg'},
+  abende:3,
+  text:[
+    'Du bist mit einundvierzig anderen angekommen und stehst jetzt in einem Hof, in dem es nach nassem Stroh riecht. Ein Sergent liest Namen von einer Liste und spricht die Hälfte falsch aus.',
+    'Man gibt dir eine Muskete, die schon jemand anderem gehört hat, ein Bajonett, einen Tornister ohne Riemen und keine Schuhe. Die Muskete hat einen Namen: Charleville, Modell 1777. Du wirst ihn oft hören.',
+    'Bis der Feldzug beginnt, bleiben elf Tage. In dieser Zeit soll aus dir ein Soldat werden. Man wird dir dabei nicht zusehen — hier sieht niemand jemandem zu.',
+    'Drei Abende gehören dir. Was du in dieser Zeit nicht lernst, lernst du im April unter Beschuss oder gar nicht.'
+  ],
+  tun:['exerzieren','bajonett','scharf','instand','leute','ruhe']},
+
+/* 2 */ {typ:'szene',id:'savona',datum:'12. April 1796 · Savona',ort:'Lager der Italienarmee',
   text:[
     'Du bist seit elf Tagen bei der Armee und hast in dieser Zeit zweimal etwas gegessen, das man Brot nennen konnte.',
     'Die Italienarmee ist keine Armee, sondern ein Haufen von dreißigtausend Männern, die zu wenig Schuhe und zu viele Läuse haben. Der neue Oberbefehlshaber ist seit zwölf Tagen da, sechsundzwanzig Jahre alt, klein, und niemand weiß, was man von ihm halten soll.',
@@ -257,13 +290,26 @@ const KAPITEL = [
      misserfolg:{text:'Sie reden über Weiber und über Brot. Du lernst nichts, außer dass es hier keiner besser hat als du.',kameradschaft:2}}
   ]},
 
-/* 2 */ {typ:'kampf',id:'montenotte',datum:'12. April 1796 · Montenotte',ort:'Höhenzug über Savona',
+/* 3 */ {typ:'kampf',id:'montenotte',datum:'12. April 1796 · Montenotte',ort:'Höhenzug über Savona',
+  marsch:{von:'Savona',nach:'Höhen von Montenotte',weg:'15 km bergauf · neun Stunden in der Nacht, Regen'},
+  anmarsch:[
+    'Um zehn Uhr abends heißt es antreten. Kein Licht, keine Trommel. Ihr geht in einer Reihe den Saumpfad hinauf, Mann hinter Mann, und wer stehen bleibt, bekommt den Kolben des Hintermanns in den Rücken.',
+    'Es regnet seit vier Stunden. Der Pfad ist Lehm. Zweimal rutscht vor dir einer aus und reißt zwei andere mit, und jedes Mal wartet die Kolonne, bis sie wieder stehen. Niemand flucht laut.',
+    'Gegen drei Uhr hält alles. Vierhundert Schritt weiter oben brennen Feuer. Man hat euch nicht gehört, weil der Regen lauter ist als ihr.',
+    'Ihr legt euch in den nassen Ginster und wartet. Neben dir kaut ein Mann an einem Lederriemen, weil er nichts anderes zu kauen hat. Martel geht die Reihe ab und sieht jedem ins Gesicht, ohne etwas zu sagen.',
+    'Dann wird es hell genug, dass man dreißig Schritt weit sieht, und vorne gibt einer den Befehl weiter, den du vier Sekunden später hörst.'
+  ],
+  lage:{gegner:'Österreichische Vorposten, etwa 3 000 Mann, halb angezogen',
+        auftrag:'Den Höhenzug nehmen, bevor es hell wird',
+        gelaende:'Nasser Hang, Ginster, oberhalb der Bäume keine Deckung',
+        stellung:'Zweites Glied, rechter Flügel der Kompanie'},
   intro:'Es ist noch dunkel, als die Kolonne den Hang hinaufgeht. Oben stehen Österreicher, die nicht damit gerechnet haben, dass jemand bei diesem Wetter angreift. Du auch nicht.',
   runden:6,feindMoral:45,gefahr:10,
   sieg:{text:'Die Österreicher gehen zurück, erst geordnet, dann nicht mehr. Du stehst zwischen umgeworfenen Zelten und begreifst, dass ihr gewonnen habt, ohne dass es dir jemand gesagt hätte.',ruf:5,fert:{muskete:0}},
   niederlage:{text:'Die Linie hält nicht. Ihr geht den Hang hinunter, schneller als hinauf, und niemand sieht dabei zu.',ruf:-4,belastung:8}},
 
-/* 3 */ {typ:'szene',id:'dego',datum:'15. April 1796 · Marsch auf Dego',ort:'Ligurische Alpen',
+/* 4 */ {typ:'szene',id:'dego',datum:'15. April 1796 · Marsch auf Dego',ort:'Ligurische Alpen',
+  marsch:{von:'Montenotte',nach:'Dego',weg:'12 km über zwei Sättel · dreißig Stunden mit vier Stunden Schlaf'},
   text:[
     'Dreißig Stunden Marsch mit vier Stunden Schlaf. Die Vorräte sind eine Vorstellung, die es in Papieren gibt und sonst nirgends.',
     'Am Nachmittag kommt ihr an einem Gehöft vorbei. Es ist nicht verlassen — hinter dem Fenster bewegt sich etwas. Der Sergent geht vorne und sieht es nicht.',
@@ -290,7 +336,8 @@ const KAPITEL = [
        belastung:3,kameradschaft:-3}}
   ]},
 
-/* 4 */ {typ:'szene',id:'mondovi',datum:'22. April 1796 · Mondovì',ort:'Piemont',
+/* 5 */ {typ:'szene',id:'mondovi',datum:'22. April 1796 · Mondovì',ort:'Piemont',
+  marsch:{von:'Dego',nach:'Mondovì',weg:'70 km nach Westen · sieben Tage, drei davon im Schneeregen'},
   text:[
     'Sardinien hat um Waffenstillstand gebeten. Für euch heißt das: eine Stadt, die man nicht stürmen muss, und Quartier in Häusern statt auf Stein.',
     'Am zweiten Abend brennt in der Vorstadt ein Haus. Es sind Franzosen, die es angezündet haben — vier Mann aus der dritten Kompanie, betrunken, mit Sachen unter dem Arm, die ihnen nicht gehören.',
@@ -318,16 +365,41 @@ const KAPITEL = [
        belastung:5}}
   ]},
 
-/* 5 */ {typ:'kampf',id:'lodi',datum:'10. Mai 1796 · Brücke von Lodi',ort:'Über der Adda',
+/* 6 */ {typ:'kampf',id:'lodi',datum:'10. Mai 1796 · Brücke von Lodi',ort:'Über der Adda',
+  marsch:{von:'Mondovì',nach:'Lodi an der Adda',weg:'220 km quer durch die Poebene · achtzehn Tage, zuletzt 40 km in einem Stück'},
+  anmarsch:[
+    'Achtzehn Tage Ebene. Maulbeerbäume, Reisfelder, Staub, der sich in den Augenwinkeln sammelt und dort bleibt. Zweimal Wein aus einem Fass, das jemand aufgeschlagen hat, sonst nichts Erwähnenswertes.',
+    'Am Morgen des zehnten Mai steht ihr in Lodi, und die Stadt ist leer. Die Österreicher sind über die Adda und haben die Brücke stehen lassen, weil sie sie mit dreißig Geschützen bestreichen können. Das ist kein Versehen. Das ist die Absicht.',
+    'Ihr wartet vier Stunden in den Gassen am Fluss. Vier Stunden sind lang. In der zweiten Stunde teilt jemand Branntwein aus, was er sonst nie tut, und danach redet keiner mehr über die Brücke.',
+    'Ein Adjutant reitet vorbei, hält an und sagt dem Capitaine etwas, das du nicht hörst. Der Capitaine kommt zurück und sagt: „Kolonne. Zu sechst nebeneinander. Über die Brücke, ohne zu halten." Ohne zu halten sagt er zweimal.',
+    'Vorne beginnen die Tambouren. Du stehst im vierten Glied und siehst nichts als den Rücken vor dir, und dahinter, zweihundert Schritt weit, das Holz und den Rauch.'
+  ],
+  lage:{gegner:'Sebottendorf mit 9 500 Mann und dreißig Geschützen am anderen Ufer',
+        auftrag:'Über die Brücke und das jenseitige Ufer nehmen',
+        gelaende:'Holzbrücke, 200 Schritt, keine Deckung, kein Ausweichen',
+        stellung:'Viertes Glied der Sturmkolonne'},
   intro:'Die Brücke ist zweihundert Schritt lang, aus Holz, und am anderen Ende stehen dreißig österreichische Geschütze. Die Kolonne steht darauf und kommt nicht vor und nicht zurück. Vor dir ist Rauch, und in dem Rauch schlägt Geschützfeuer ins Holz und wirft Splitter, so lang wie dein Unterarm.',
   runden:9,feindMoral:78,gefahr:15,ruhm:true,
   sieg:{text:'Ihr kommt hinüber. Wie, weiß hinterher niemand genau zu sagen. Auf der Brücke liegen mehr Männer, als darauf gestanden haben, so kommt es dir vor. Am Abend nennt jemand den Oberbefehlshaber zum ersten Mal beim Spitznamen: le petit caporal.',
     ruf:16,belastung:14,nennung:true},
   niederlage:{text:'Die Kolonne weicht von der Brücke zurück. Es dauert eine Stunde, bis sie es noch einmal versuchen — ohne dich.',ruf:-6,belastung:16}},
 
-/* 6 */ {typ:'elite',id:'mailand',datum:'15. Mai 1796 · Mailand',ort:'Einzug in die Lombardei'},
+/* 7 */ {typ:'elite',id:'mailand',datum:'15. Mai 1796 · Mailand',ort:'Einzug in die Lombardei',
+  marsch:{von:'Lodi',nach:'Mailand',weg:'30 km nach Nordwesten · zwei Tage, zum ersten Mal auf einer gepflasterten Straße'}},
 
-/* 7 */ {typ:'szene',id:'mantua',datum:'Juli 1796 · vor Mantua',ort:'Belagerung in den Sümpfen',
+/* 8 */ {typ:'lager',id:'kantonierung',datum:'Ende Mai 1796 · vor Mailand',ort:'Kantonierung in Corsico',
+  marsch:{von:'Mailand',nach:'Corsico',weg:'8 km vor die Stadt · Quartier in Scheunen, zwei Wochen'},
+  abende:2,
+  text:[
+    'Mailand hat gezahlt. Zwanzig Millionen Livres, sagt man, und ein Teil davon ist tatsächlich bei der Truppe angekommen: Sold für vier Monate, in Münzen, die man anfassen kann.',
+    'Die Halbbrigade liegt in Scheunen acht Kilometer vor der Stadt und tut zwei Wochen lang nichts. Es gibt einen Schuster im Dorf, einen Waffenschmied und einen Mann, der Pulver verkauft, das er nicht verkaufen dürfte.',
+    'Von den vierhundert Mann des Bataillons sind dreihundertelf übrig. Die Lücken werden im Juli aufgefüllt, heißt es. Bis dahin steht ihr weiter auseinander.',
+    'Zwei Abende, bevor es nach Süden gegen Mantua geht.'
+  ],
+  tun:['instand','schuhe','waffe','exerzieren','lesen','leute','ruhe']},
+
+/* 9 */ {typ:'szene',id:'mantua',datum:'Juli 1796 · vor Mantua',ort:'Belagerung in den Sümpfen',
+  marsch:{von:'Corsico',nach:'Mantua',weg:'150 km nach Südosten · neun Tage · die letzten zwanzig Kilometer durch Sumpfland'},
   text:[
     'Mantua liegt in einem Sumpf, und der Sumpf hat im Juli Fieber. Es sterben mehr Männer an der Luft als am Feind.',
     'Ihr grabt Laufgräben, die am nächsten Tag voll Wasser stehen, und wartet darauf, dass eine Festung aufgibt, die nicht aufgibt.',
@@ -357,36 +429,86 @@ const KAPITEL = [
        attr:{bildung:9},fert:{verwaltung:5},geld:-8,belastung:3}}
   ]},
 
-/* 8 */ {typ:'kampf',id:'castiglione',datum:'5. August 1796 · Castiglione',ort:'Hügel bei Solferino',
+/* 10 */ {typ:'kampf',id:'castiglione',datum:'5. August 1796 · Castiglione',ort:'Hügel bei Solferino',
+  marsch:{von:'Belagerungslinien vor Mantua',nach:'Castiglione delle Stiviere',weg:'30 km nach Nordwesten · in zwei Nachtmärschen, die Belagerungsgeschütze bleiben im Sumpf zurück'},
+  anmarsch:[
+    'Die Belagerung wird abgebrochen. Hundertsiebzig Geschütze bleiben stehen, wo sie stehen, weil keine Pferde da sind, und ihr geht nach Norden. Wer die Geschütze zurücklässt, hat es eilig — das versteht auch einer, der nicht lesen kann.',
+    'Zwei Nachtmärsche. Am zweiten Tag begegnet euch, was von zwei Bataillonen der 4. Halbbrigade übrig ist. Sie gehen in die andere Richtung und reden nicht.',
+    'Am fünften August früh steht ihr auf einem Hügelrücken bei Solferino. Unter euch, zwei Kilometer weit, eine Ebene mit Maulbeerbäumen und darin die Weißröcke — nicht als Haufen, sondern in Linien, sauber, wie auf dem Exerzierplatz. Es sind sehr viele.',
+    'Die Sonne steht schon um acht so, dass das Metall heiß wird. Man lässt euch die Tornister ablegen und in Reihen antreten und dann eine Stunde lang stehen.',
+    'In dieser Stunde denkst du zum ersten Mal ohne Umschweife daran, dass die letzten vier Monate umsonst gewesen sein könnten.'
+  ],
+  lage:{gegner:'Wurmsers Entsatzarmee, etwa 25 000 Mann in geschlossener Ordnung',
+        auftrag:'Die Höhe halten, bis der Umgehungsangriff im Rücken wirkt',
+        gelaende:'Offener Hügelrücken, Maulbeerbäume, kein Schatten, 34 Grad',
+        stellung:'Erstes Glied, Mitte des Bataillons'},
   intro:'Wurmser ist mit einer Entsatzarmee aus Tirol gekommen und hat euch von Mantua weggetrieben. Jetzt steht ihr wieder, auf einem Hügel, und es geht darum, ob die letzten vier Monate umsonst waren.',
   runden:7,feindMoral:58,gefahr:12,
   sieg:{text:'Die Österreicher gehen nach Norden zurück. Mantua ist wieder eingeschlossen, und ihr habt eine Armee geschlagen, die größer war als eure.',ruf:8},
   niederlage:{text:'Der Hügel geht verloren und mit ihm der halbe Tag. Ihr sammelt euch zwei Meilen weiter hinten.',ruf:-4,belastung:9}},
 
-/* 9 */ {typ:'befoerderung',id:'verona',datum:'September 1796 · Verona',ort:'Neuaufstellung der Kompanien',
+/* 11 */ {typ:'befoerderung',id:'verona',datum:'September 1796 · Verona',ort:'Neuaufstellung der Kompanien',
+  marsch:{von:'Castiglione',nach:'Verona',weg:'45 km nach Osten · vier Tage, zum ersten Mal seit Mai wieder Quartier in einer Stadt'},
   text:[
     'Nach Castiglione zählt das Bataillon nach. Von den vierhundert Mann, die im April über die Pässe gegangen sind, stehen zweihunderteinundvierzig in der Reihe.',
     'Die Lücken werden aufgefüllt — mit Rekruten aus Frankreich, die aussehen wie du im April. Und die Stellen der Unteroffiziere werden neu besetzt, weil sie neu besetzt werden müssen.',
     'Der Capitaine sitzt an einem Tisch im Hof und geht eine Liste durch. Sergent Martel steht neben ihm.'
   ]},
 
-/* 10 */ {typ:'kampf',id:'arcole',datum:'15.–17. November 1796 · Arcole',ort:'Damm im Sumpf von Alpone',
+/* 12 */ {typ:'lager',id:'feldlager',datum:'Oktober 1796 · bei Verona',ort:'Feldlager an der Etsch',
+  marsch:{von:'Verona',nach:'Feldlager an der Etsch',weg:'6 km flussaufwärts · Zelte, Regen seit neun Tagen'},
+  abende:2,
+  text:[
+    'Es regnet seit neun Tagen. Das Lager steht auf einem Acker, der keiner mehr ist, und alles, was Leder hat, wird weich und alles, was Eisen hat, wird braun.',
+    'Aus Tirol kommt eine dritte österreichische Armee herunter — Alvinczi, sagt man, und diesmal in zwei Kolonnen. Es wird wieder losgehen, und alle wissen es.',
+    'Die Rekruten aus dem September sitzen unter den Zeltbahnen und sehen aus, wie du im April ausgesehen hast. Einer von ihnen fragt dich, ob es stimmt, dass die Brücke von Lodi zweihundert Schritt lang ist.',
+    'Zwei Abende, bevor der Befehl kommt.'
+  ],
+  tun:['instand','waffe','exerzieren','bajonett','fouragieren','leute','ruhe']},
+
+/* 13 */ {typ:'kampf',id:'arcole',datum:'15.–17. November 1796 · Arcole',ort:'Damm im Sumpf von Alpone',
+  marsch:{von:'Feldlager an der Etsch',nach:'Ronco am Alpone',weg:'25 km nach Südosten · Nachtmarsch über eine Pontonbrücke, ab Mitternacht'},
+  anmarsch:[
+    'Ihr geht um Mitternacht los und um zwei Uhr über eine Pontonbrücke, die unter jedem Schritt nachgibt. Danach ist rechts Sumpf und links Sumpf, und dazwischen ein Damm, auf dem drei Mann nebeneinander gehen.',
+    'Bei Tagesanbruch steht die Kolonne. Vorne, achthundert Schritt weit, liegt ein Dorf hinter einem zweiten Damm, und in dem Dorf sind Kroaten, die seit zwei Tagen wissen, dass ihr kommt.',
+    'Es ist der dritte Versuch. Von den ersten beiden liegen die Männer noch da, wo sie hingefallen sind, denn niemand kann sie holen. Ihr werdet über sie hinweggehen müssen.',
+    'Ein Generaladjutant reitet den Damm entlang, gegen die Marschrichtung, und ruft etwas, das nach Aufmunterung klingt. Zwei Minuten später kommt er ohne Hut zurück.',
+    'Vorne wird eine Fahne aufgerichtet. Neben dir sagt einer aus dem September: „Warum gehen wir nicht außen herum?" Niemand antwortet ihm, weil niemand die Antwort weiß.'
+  ],
+  lage:{gegner:'Kroatische Grenzer in Arcole, seit zwei Tagen eingegraben',
+        auftrag:'Über den Damm und die Brücke von Arcole nehmen',
+        gelaende:'Damm, drei Mann breit, beidseitig Sumpf · dritter Versuch',
+        stellung:'In der Kolonne auf dem Damm, hinter den Grenadieren'},
   intro:'Der Damm ist so schmal, dass drei Mann nebeneinander gehen. Rechts und links Sumpf. Am anderen Ende Kroaten, die seit zwei Tagen wissen, dass ihr kommt. Es ist der dritte Versuch.',
   runden:9,feindMoral:74,gefahr:14,ruhm:true,
   sieg:{text:'Am dritten Tag geht es. Nicht, weil jemand tapferer geworden wäre, sondern weil jemand endlich auf die Idee kam, dass man den Sumpf auch umgehen kann. Auf dem Damm liegen die Männer der ersten beiden Tage.',
     ruf:14,belastung:16,nennung:true},
   niederlage:{text:'Der Damm bleibt österreichisch, und du liegst im Schilf, bis es dunkel wird.',ruf:-5,belastung:14}},
 
-/* 11 */ {typ:'winter',id:'winter',datum:'Dezember 1796 · Verona',ort:'Winterquartier'},
+/* 14 */ {typ:'winter',id:'winter',datum:'Dezember 1796 · Verona',ort:'Winterquartier',
+  marsch:{von:'Arcole',nach:'Verona',weg:'25 km zurück nach Nordwesten · drei Tage · zum ersten Mal seit November ein Dach'}},
 
-/* 12 */ {typ:'kampf',id:'rivoli',datum:'14. Januar 1797 · Rivoli',ort:'Hochebene über der Etsch',
+/* 15 */ {typ:'kampf',id:'rivoli',datum:'14. Januar 1797 · Rivoli',ort:'Hochebene über der Etsch',
+  marsch:{von:'Verona',nach:'Hochebene von Rivoli',weg:'30 km die Etsch hinauf · Gewaltmarsch in der Nacht vom 13. auf den 14., Schnee, Ankunft um zwei Uhr früh'},
+  anmarsch:[
+    'Der Befehl kommt am dreizehnten Januar um vier Uhr nachmittags, und um sechs seid ihr auf der Straße. Dreißig Kilometer die Etsch hinauf, im Dunkeln, bei Schnee, ohne Halt.',
+    'Um zwei Uhr früh kommt ihr oben an. Es ist so kalt, dass der Atem in den Bärten gefriert, und so still, dass man die Geschütze der Vorausabteilung sechs Kilometer weit hört.',
+    'Der Oberbefehlshaber ist selbst da. Er reitet in der Nacht über die Hochebene und sieht sich beim Schein von Fackeln an, wo die österreichischen Feuer brennen. Es sind sehr viele Feuer, in fünf Gruppen, und sie liegen um euch herum wie ein Hufeisen.',
+    'Ihr legt euch für zwei Stunden auf den gefrorenen Boden, ohne Feuer, weil kein Feuer erlaubt ist. Schlafen kann niemand. Ein Mann aus der zweiten Kompanie steht in dieser Nacht auf, geht in den Schnee hinaus und kommt nicht wieder.',
+    'Um halb sechs wird angetreten. Dir ist kalt bis in die Zähne, und deine Finger brauchen drei Versuche für den Riemen des Tornisters.'
+  ],
+  lage:{gegner:'Alvinczi in fünf Kolonnen, etwa 28 000 Mann, teils oberhalb von euch',
+        auftrag:'Die Hochebene halten, bis Masséna heran ist',
+        gelaende:'Hochebene, gefroren, offen · Steilabfall zur Etsch im Rücken',
+        stellung:'Linker Flügel, gegen die Kolonne aus dem Tal'},
   intro:'Alvinczi kommt in fünf Kolonnen von den Bergen herunter, und einen halben Tag lang sieht es so aus, als würde das hier zu Ende gehen. Dann sieht es plötzlich anders aus.',
   runden:8,feindMoral:66,gefahr:13,ruhm:true,
   sieg:{text:'Die Kolonne, die euch in die Flanke fallen sollte, läuft in ihr eigenes Verderben. Am Nachmittag ist die österreichische Armee in Italien keine Armee mehr. Mantua wird in zwei Wochen fallen.',
     ruf:15,nennung:true},
   niederlage:{text:'Ihr weicht von der Hochebene. Andere gewinnen die Schlacht ohne dich.',ruf:-5,belastung:12}},
 
-/* 13 */ {typ:'ende',id:'leoben',datum:'18. April 1797 · Leoben',ort:'Vorfrieden mit Österreich'}
+/* 16 */ {typ:'ende',id:'leoben',datum:'18. April 1797 · Leoben',ort:'Vorfrieden mit Österreich',
+  marsch:{von:'Rivoli',nach:'Leoben in der Steiermark',weg:'400 km nach Nordosten über die Alpen · zehn Wochen, drei Pässe, kein Gefecht mehr'}}
 ];
 
 
@@ -500,6 +622,16 @@ const untertitel = document.getElementById('untertitel');
 
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function balken(klasse, v, max){ return `<div class="bar ${klasse}"><i style="width:${Math.max(0,Math.min(100,100*v/max))}%"></i></div>`; }
+
+/* Ortswechsel über der Station: woher, wohin, wie weit, wie lange.
+   Die Wege sind die halbe Erzählung dieses Feldzugs — 1 200 km in einem Jahr. */
+function wegband(n){
+  if(!n || !n.marsch) return '';
+  const m = n.marsch;
+  return `<div class="weg">
+    <div class="wegorte">${esc(m.von)}<i>→</i>${esc(m.nach)}</div>
+    <div class="wegtext">${esc(m.weg)}</div></div>`;
+}
 
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
@@ -698,7 +830,7 @@ function aktualisiereErschaffung(){
 }
 function starte(){
   S = neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL);
-  NODE = 0; K = null; WOCHEN = 3; naechster();
+  NODE = 0; K = null; WOCHEN = 3; LAGER_ID = null; ABENDE = null; LLOG = []; naechster();
 }
 
 /* ══════════════════ ABLAUF ══════════════════ */
@@ -714,6 +846,7 @@ function naechster(){
   }
   kopfzeile();
   if(n.typ==='szene') zeigeSzene(n);
+  else if(n.typ==='lager') zeigeLager(n);
   else if(n.typ==='kampf') starteKampf(n);
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
@@ -730,7 +863,7 @@ function zeigeSzene(n){
       ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage">
-    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+    <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
     </div>${seitenleiste()}</div>`;
@@ -798,10 +931,66 @@ function aktionen(){
   return a;
 }
 
+/* ── Anmarsch: der Weg dorthin, die Lage, das Warten ──
+   Zwischen zwei Gefechten liegen Wochen und hunderte Kilometer. Wer direkt aus
+   der Szene in die erste Runde fällt, merkt davon nichts. Der Anmarsch kostet
+   deshalb auch etwas: Marsch nutzt Schuhe ab und geht auf den Atem. */
+
 function starteKampf(n){
+  if(n.anmarsch && !S.anmarschGesehen){
+    S.anmarschGesehen = n.id;
+    verschleiss(0.15);
+    S.atem = Math.max(0, S.atem-4);
+    S.belastung = Math.min(100, S.belastung+1);
+    zeigeAnmarsch(n);
+    return;
+  }
+  S.anmarschGesehen = null;
   K = {n, runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
        protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0};
   zeigeKampf(n.intro);
+}
+
+/* Was du über dich selbst weißt, bevor es losgeht. Keine Zahlen, die in der
+   Seitenleiste schon stehen — sondern was sie bedeuten. */
+function gefechtsbereitschaft(){
+  const z = [], m = S.ausr.muskete.zustand, sch = S.ausr.schuhe.zustand;
+  if(m<35) z.push('Das Schloss ist braun vom Rost. Ob die Muskete zündet, wird sich zeigen, wenn es darauf ankommt.');
+  else if(m<60) z.push('Die Muskete ist gebraucht, aber trocken. Sie hat bisher gezündet.');
+  else z.push('Die Muskete ist sauber und geölt. In dieser Armee ist das keine Selbstverständlichkeit.');
+  if(sch<25) z.push('Von deinen Schuhen ist wenig übrig. Du hast seit dem Aufbruch nasse Füße und spürst jeden Stein.');
+  else if(sch<50) z.push('Die Schuhe halten. Noch.');
+  if(S.wunden.length) z.push('Du trägst ' + (S.wunden.length===1?'eine alte Wunde':S.wunden.length+' alte Wunden') +
+    ' mit dir: ' + S.wunden.map(w=>esc(w.name)).join(', ') + '.');
+  if(S.atem<35) z.push('Du bist ausgepumpt, bevor der erste Schuss fällt.');
+  if(S.belastung>60) z.push('Deine Hände sind nicht ruhig. Du hältst sie an den Riemen, damit es niemand sieht.');
+  if(S.kameradschaft>=50) z.push('Links und rechts stehen Männer, die deinen Namen kennen. Das ist keine Kleinigkeit.');
+  if(S.rang>=3) z.push('Acht Mann sehen dich an und warten darauf, dass du etwas sagst.');
+  else if(S.zweig==='voltigeur') z.push('Du gehst vor der Linie. Wenn es losgeht, steht neben dir niemand.');
+  else if(S.zweig==='grenadier') z.push('Die Grenadierkompanie steht vorne. Das ist der Sinn der Bärenfellmütze.');
+  return z;
+}
+
+function zeigeAnmarsch(n){
+  const l = n.lage || {};
+  const zeilen = [['Gegner',l.gegner],['Auftrag',l.auftrag],['Gelände',l.gelaende],['Dein Platz',l.stellung]]
+    .filter(([,v])=>v).map(([k,v])=>`<tr><td class="k">${k}</td><td class="d">${esc(v)}</td></tr>`).join('');
+  app.innerHTML = `<div class="stage">
+    <div>${wegband(n)}
+      <div class="card"><div class="ch"><span>Anmarsch · ${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+        <div class="cb">
+          <div class="prose">${n.anmarsch.map(t=>`<p>${t}</p>`).join('')}</div>
+          ${zeilen?`<div class="lage"><div class="lagekopf">Was man weiß</div>
+            <table>${zeilen}</table></div>`:''}
+          <div class="lage"><div class="lagekopf">Womit du dastehst</div>
+            <div class="prose">${gefechtsbereitschaft().map(t=>`<p>${t}</p>`).join('')}</div></div>
+        </div></div>
+      <div class="orders"><div class="ordbody">
+        <button class="ord weiter" onclick="starteKampf(KAPITEL[NODE])">Antreten
+          <span class="cost">Danach gibt es keinen Weg zurück, der nicht Ruf kostet</span></button>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
 }
 
 function sichtfeld(){
@@ -988,7 +1177,7 @@ function zeigeElite(n){
   const kon = wert('konstitution'), ges = wert('geschick');
   const gr = kon>=55, vo = ges>=55;
   app.innerHTML = `<div class="stage">
-    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+    <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Mailand hat der Armee Sold gegeben und Schuhe, und jetzt werden die Bataillone neu geordnet. Jedes bekommt eine Grenadier- und eine Voltigeurkompanie, und die Chefs suchen sich die Männer aus.</p>
         <p>Die Grenadiere nehmen die Großen und die, die stehen bleiben. Die Voltigeure nehmen die Kleinen und die, die schnell sind und allein zurechtkommen.</p>
@@ -1045,7 +1234,7 @@ function zeigeBefoerderung(n){
     <br><br><em>Für den Caporal braucht es einen Fürsprecher — Gunst 3, du hast ${gunst}.</em>`;
     klasse='schlecht';
   }
-  app.innerHTML = `<div class="stage"><div>
+  app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
@@ -1058,7 +1247,139 @@ function zeigeBefoerderung(n){
 
 
 'use strict';
-/* Winterquartier, Punktwertung, Tod, Kapitelende, Spielstand. */
+/* Lager, Winterquartier, Punktwertung, Tod, Kapitelende, Spielstand. */
+
+/* ══════════════════ LAGER ══════════════════ */
+
+/* Ein Lager ist die kleine Fassung des Winterquartiers: zwei bis drei Abende,
+   und immer mehr zu tun, als Zeit da ist. Ausbildung und Instandhaltung
+   konkurrieren miteinander — das ist der ganze Entwurf. Was hier nicht getan
+   wird, fehlt im nächsten Gefecht.
+
+   Die Handlungen stehen hier, die Auswahl je Lager in den Kapiteldaten (tun:[…]).
+   Handlungen für Rang und Zweig kommen selbsttätig dazu — ein höherer Rang gibt
+   auch im Lager neue Knöpfe, nicht größere Zahlen. */
+
+const LAGER_TUN = {
+  exerzieren:{label:'Exerzieren, bis die Handgriffe von allein gehen',
+    cost:'Muskete und Drill · Atem −6',
+    tu(){ nutzen('muskete',2); nutzen('drill',2);
+      S.atem=Math.max(0,S.atem-6); S.belastung=Math.min(100,S.belastung+2);
+      return 'Laden in zwölf Zeiten, achtzig Mal hintereinander, bis die Hände es ohne den Kopf können. Ein Caporal zählt laut mit, und wer nachhängt, fängt von vorn an. <span class="fein">Muskete und Drill steigen · Atem −6</span>'; }},
+
+  bajonett:{label:'Bajonettfechten gegen einen Strohmann',
+    cost:'Bajonett · Atem −8',
+    tu(){ nutzen('bajonett',2.5);
+      S.atem=Math.max(0,S.atem-8); S.belastung=Math.min(100,S.belastung+2);
+      return 'Ein Sack Stroh an einem Pfahl, zweihundert Stöße. Der Sergent sagt, du sollst nicht stechen wie einer, der jemanden verletzen will, sondern wie einer, der weitergehen will. <span class="fein">Bajonett steigt · Atem −8</span>'; }},
+
+  scharf:{label:'Scharf schießen, mit gekauftem Pulver',
+    cost:'Muskete ++ · kostet 4 Francs',
+    tu(){ if(S.geld<4) return 'Der Mann mit dem Pulver rechnet nach und schickt dich weg. Vier Francs, sagt er, und du hast sie nicht. <span class="fein">nichts passiert</span>';
+      S.geld-=4; nutzen('muskete',3.5);
+      S.ausr.muskete.zustand = Math.max(0, S.ausr.muskete.zustand-5);
+      return 'Zwölf scharfe Schüsse auf eine Scheibe aus Brettern, achtzig Schritt. Beim Bataillon sind drei Schuss im Jahr vorgesehen; den Rest muss man sich selbst kaufen. Beim neunten triffst du zum ersten Mal, weil du es willst, und nicht, weil es sich ergeben hat. <span class="fein">Muskete steigt deutlich · −4 F · Waffe −5</span>'; }},
+
+  instand:{label:'Ausrüstung durchsehen und flicken',
+    cost:'Geschick · alles ein Stück besser',
+    tu(){ const p = probe('geschick',30);
+      const plus = p.erfolg ? 20 : 8;
+      for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+plus);
+      return (p.erfolg
+        ? 'Riemen nachgenäht, Sohlen mit Draht gefasst, das Schloss zerlegt und ausgewischt. Du bist der Letzte am Feuer und der Einzige, dessen Zeug morgen noch hält.'
+        : 'Du machst, was du kannst, und was du kannst, ist nicht viel. Der Riemen hält bis übermorgen, mehr nicht.')
+        + ` <span class="fein">Alle Ausrüstung +${plus}</span>`; }},
+
+  schuhe:{label:'Die Schuhe zum Schuster im Dorf tragen',
+    cost:'Schuhe ++ · kostet 6 Francs',
+    tu(){ if(S.geld<6) return 'Der Schuster hält die Hand auf, bevor er die Schuhe nimmt. Sechs Francs. Du hast sie nicht und gehst mit denselben Sohlen wieder hinaus. <span class="fein">nichts passiert</span>';
+      S.geld-=6; S.ausr.schuhe.zustand = Math.min(100, S.ausr.schuhe.zustand+45);
+      return 'Er sieht sie sich an, sagt etwas auf Italienisch, das nicht freundlich klingt, und näht trotzdem. Neue Sohlen, doppelt genagelt, und ein Stück Leder über der linken Ferse. <span class="fein">Schuhe +45 · −6 F</span>'; }},
+
+  waffe:{label:'Die Muskete zerlegen und ölen',
+    cost:'Waffenzustand ++',
+    tu(){ S.ausr.muskete.zustand = Math.min(100, S.ausr.muskete.zustand+30); nutzen('muskete',0.5);
+      return 'Schloss heraus, Feder ab, Pfanne blank, alles mit Öl und einem Lappen, den du dafür zerschnitten hast. Eine Muskete, die zündet, ist der Unterschied zwischen einem Soldaten und einem Mann mit einem Stock. <span class="fein">Muskete +30</span>'; }},
+
+  lesen:{label:'Buchstaben lernen, gegen Bezahlung',
+    cost:'Bildung · kostet 5 Francs',
+    tu(){ if(S.geld<5) return 'Der Schreiber der Kompanie will fünf Francs für zwei Abende. Du hast sie nicht, und er hat keine Zeit zu verschenken. <span class="fein">nichts passiert</span>';
+      S.geld-=5; S.attr.bildung=Math.min(100,S.attr.bildung+5); nutzen('verwaltung',1.5);
+      return 'Der Kompanieschreiber malt dir Buchstaben in den Sand und wischt sie wieder weg. Am Ende des Abends kannst du drei Wörter, und eines davon ist dein Name. <span class="fein">Bildung +5 · −5 F</span>'; }},
+
+  leute:{label:'Am Feuer sitzen bleiben',
+    cost:'Kameradschaft und Fürsprache',
+    tu(){ S.gunst+=1; S.kameradschaft=Math.min(100,S.kameradschaft+8);
+      S.belastung=Math.max(0,S.belastung-4); nutzen('menschenkenntnis',1);
+      return 'Karten um Knöpfe, weil niemand Geld hat. Martel erzählt von der Rheinfront und lässt die Stellen weg, an denen es schlecht ausging. Du merkst dir, wer redet und wer zuhört. <span class="fein">Kameradschaft +8 · Gunst +1 · Belastung −4</span>'; }},
+
+  fouragieren:{label:'Die Höfe in der Umgegend abgehen',
+    cost:'Fouragieren · Geld und Essen',
+    tu(){ const p = probe('fouragieren',40);
+      if(p.erfolg){ S.geld+=7; S.atem=Math.min(100,S.atem+8);
+        return 'Zwei Hühner, ein Sack Kastanien und ein Bauer, der lieber verkauft als beraubt wird. Du bringst mehr zurück, als du selbst brauchst, und das spricht sich herum. <span class="fein">+7 F · Atem +8</span>'; }
+      S.belastung=Math.min(100,S.belastung+3);
+      return 'Vier Stunden auf nassen Feldwegen. Die Höfe sind leer, die Leute sind in den Bergen, und ihr Vieh ist bei ihnen. <span class="fein">Belastung +3</span>'; }},
+
+  ruhe:{label:'Schlafen und liegen bleiben',
+    cost:'Belastung −10 · Atem +18',
+    tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
+      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Belastung −10 · Atem +18</span>'; }},
+
+  /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
+  korporalschaft:{label:'Deine acht Mann drillen',
+    cost:'Autorität und Drill · Ruf +1',
+    tu(){ nutzen('autoritaet',2); nutzen('drill',2); S.ruf+=1;
+      S.kameradschaft=Math.min(100,S.kameradschaft+6);
+      return 'Du stellst acht Mann in zwei Glieder und lässt sie laden, bis es gleichzeitig knackt. Zwei von ihnen sind älter als du. Einer sieht dich an, als wolle er etwas sagen, und sagt es dann doch nicht. <span class="fein">Autorität und Drill steigen · Ruf +1 · Kameradschaft +6</span>'; }},
+
+  tornister:{label:'Mit vollem Tornister auf den Hügel und zurück',
+    cost:'Konstitution · Atem −10',
+    tu(){ nutzen('konstitution',1.5); S.atem=Math.max(0,S.atem-10);
+      return 'Sechzig Pfund auf den Rücken, dreimal den Hang hinauf. Die Grenadierkompanie steht dort, wo es am dicksten kommt, und wer dort nicht stehen bleiben kann, bleibt liegen. <span class="fein">Konstitution steigt · Atem −10</span>'; }},
+
+  gelaende:{label:'Allein im Gelände üben',
+    cost:'Geschick und Muskete · Atem −6',
+    tu(){ nutzen('geschick',1.5); nutzen('muskete',1.5); S.atem=Math.max(0,S.atem-6);
+      return 'Von Deckung zu Deckung, hinlegen, zielen, weiter. Vor der Linie gibt es keinen Nebenmann, der dir sagt, wann du aufstehst. Das musst du selbst wissen. <span class="fein">Geschick und Muskete steigen · Atem −6</span>'; }}
+};
+
+function lagerHandlungen(n){
+  const ids = (n.tun||[]).slice();
+  if(S.rang>=3) ids.push('korporalschaft');
+  if(S.zweig==='grenadier') ids.push('tornister');
+  if(S.zweig==='voltigeur') ids.push('gelaende');
+  return ids.filter(id=>LAGER_TUN[id]);
+}
+
+let ABENDE = null, LAGER_ID = null, LLOG = [];
+function zeigeLager(n){
+  if(LAGER_ID !== n.id){ LAGER_ID = n.id; ABENDE = n.abende; LLOG = []; }
+  const opt = lagerHandlungen(n).map(id=>{
+    const t = LAGER_TUN[id];
+    return `<button class="ord" onclick="lagerTun('${id}')" ${ABENDE<=0?'disabled':''}>
+      ${t.label}<span class="cost">${t.cost}</span></button>`;
+  }).join('');
+  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
+      ${LLOG.length?`<div class="ergebnis">${LLOG.join('<br><br>')}</div>`:''}
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${ABENDE} VON ${n.abende}</div>
+      </div></div>
+    <div class="orders"><div class="ch"><span>Womit verbringst du den Abend?</span></div><div class="ordbody">
+      ${opt}${ABENDE<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+function lagerTun(id){
+  if(ABENDE<=0) return;
+  ABENDE--;
+  LLOG.push(LAGER_TUN[id].tu());
+  S.log.push(LAGER_ID+': '+LAGER_TUN[id].label);
+  zeigeLager(KAPITEL[NODE]);
+}
+function lagerEnde(){ LAGER_ID = null; ABENDE = null; LLOG = []; weiter(); }
 
 /* ══════════════════ WINTERQUARTIER ══════════════════ */
 
@@ -1074,7 +1395,7 @@ function zeigeWinter(n){
   ];
   const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${WOCHEN<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
-  app.innerHTML = `<div class="stage"><div>
+  app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
@@ -1125,7 +1446,7 @@ function stationen(){ return Math.min(KAPITEL.length, NODE+1); }
 function wertung(){
   const p = {};
   p.rang = rangWert(S.rang);
-  p.stationen = 4 * stationen();
+  p.stationen = 3 * stationen();   // 3 statt 4, seit es 16 Stationen sind — siehe CLAUDE.md
   p.ruf = 5 * Math.floor(S.ruf/10);
   p.nennungen = 3 * Math.min(10, S.nennungen);
   p.ueberleben = S.lebt ? 25 : 0;
@@ -1145,7 +1466,7 @@ function wertungsTabelle(p){
   return `<table>
     <tr><th>Wofür</th><th class="n">VP</th></tr>
     <tr><td class="d">Erreichter Rang — ${rangName(S.rang)}</td><td class="n">${p.rang}</td></tr>
-    <tr><td class="d">Erreichte Stationen (${stationen()} × 4)</td><td class="n">${p.stationen}</td></tr>
+    <tr><td class="d">Erreichte Stationen (${stationen()} × 3)</td><td class="n">${p.stationen}</td></tr>
     <tr><td class="d">Ruf ${S.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
     <tr><td class="d">Im Tagesbefehl genannt (${S.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>

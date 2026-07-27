@@ -11,6 +11,16 @@ const untertitel = document.getElementById('untertitel');
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function balken(klasse, v, max){ return `<div class="bar ${klasse}"><i style="width:${Math.max(0,Math.min(100,100*v/max))}%"></i></div>`; }
 
+/* Ortswechsel über der Station: woher, wohin, wie weit, wie lange.
+   Die Wege sind die halbe Erzählung dieses Feldzugs — 1 200 km in einem Jahr. */
+function wegband(n){
+  if(!n || !n.marsch) return '';
+  const m = n.marsch;
+  return `<div class="weg">
+    <div class="wegorte">${esc(m.von)}<i>→</i>${esc(m.nach)}</div>
+    <div class="wegtext">${esc(m.weg)}</div></div>`;
+}
+
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
   if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.chronik.length}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
@@ -208,7 +218,7 @@ function aktualisiereErschaffung(){
 }
 function starte(){
   S = neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL);
-  NODE = 0; K = null; WOCHEN = 3; naechster();
+  NODE = 0; K = null; WOCHEN = 3; LAGER_ID = null; ABENDE = null; LLOG = []; naechster();
 }
 
 /* ══════════════════ ABLAUF ══════════════════ */
@@ -224,6 +234,7 @@ function naechster(){
   }
   kopfzeile();
   if(n.typ==='szene') zeigeSzene(n);
+  else if(n.typ==='lager') zeigeLager(n);
   else if(n.typ==='kampf') starteKampf(n);
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
@@ -240,7 +251,7 @@ function zeigeSzene(n){
       ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage">
-    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+    <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
     </div>${seitenleiste()}</div>`;

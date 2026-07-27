@@ -113,6 +113,23 @@
   .herk .hd{color:var(--dim);font-size:12.5px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Ortswechsel — das Band über der Station */
+  .weg{border:1px solid var(--line);border-left:2px solid var(--brass);background:#171512;
+    padding:9px 15px;margin-bottom:14px}
+  .wegorte{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+    letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+  .wegorte i{color:var(--brass);font-style:normal;padding:0 9px}
+  .wegtext{color:var(--faint);font-size:13px;font-style:italic;margin-top:2px}
+
+  /* Lagebild vor dem Gefecht */
+  .lage{border-top:1px solid var(--line);margin-top:16px;padding-top:13px}
+  .lagekopf{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:9px}
+  .lage table{font-size:13.5px}
+  .lage td{padding:4px 12px 4px 0}
+  .lage .prose p{margin:0 0 7px;font-size:15px;color:var(--dim)}
+  .fein{color:var(--faint);font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
+
   .log{max-height:200px;overflow-y:auto;font-size:13.5px;color:var(--dim)}
   .log div{padding:3px 0;border-bottom:1px solid #221f1a}
   .log div:last-child{border-bottom:none}

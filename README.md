@@ -36,11 +36,13 @@ Historische Fixpunkte, dazwischen freies Spiel: Montenotte, Dego, Mondovì, die 
 
 ## Stand
 
-**Kapitel 1 (Italien 1796/97) ist spielbar** — dreizehn Stationen, fünf Gefechte, Winterquartier, Ränge 1 bis 3.
+**Kapitel 1 (Italien 1796/97) ist spielbar** — sechzehn Stationen, fünf Gefechte, drei Lager, Winterquartier, Ränge 1 bis 3.
+
+Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, jede Station mit Entfernung und Dauer. Vor jedem Gefecht steht der Anmarsch — der Nachtmarsch im Regen, die vier Stunden Warten in den Gassen von Lodi, die Lagemeldung und das, womit du dastehst. In den Lagern entscheidest du, was du mit den zwei oder drei Abenden anfängst: exerzieren, scharf schießen, die Schuhe zum Schuster tragen, die Muskete ölen, schlafen. Es ist immer mehr zu tun als Zeit da ist.
 
 Entworfen, aber noch nicht gebaut: die Kapitel 2 bis 11 (Ägypten, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
 
-Gemessen über 40 automatisierte Durchläufe: **rund die Hälfte übersteht das erste Kapitel.** Etwa 40 % sterben ohne eine einzige Beförderung.
+Gemessen über 120 automatisierte Durchläufe: **rund die Hälfte übersteht das erste Kapitel.** Etwa 40 % sterben ohne eine einzige Beförderung.
 
 ---
 
@@ -71,8 +73,8 @@ src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kau
 src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
 src/mechanik.js                 Proben, Wachstum, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Erschaffung, Ablauf, Szenen
-src/kampf.js                    Gefecht, Elitekompanie, Beförderung
-src/abschluss.js                Winterquartier, Wertung, Tod, Spielstand
+src/kampf.js                    Anmarsch, Gefecht, Elitekompanie, Beförderung
+src/abschluss.js                Lager, Winterquartier, Wertung, Tod, Spielstand
 src/start.js                    Einstiegspunkt
 ```
 

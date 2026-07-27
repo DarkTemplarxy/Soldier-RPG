@@ -1,5 +1,137 @@
 'use strict';
-/* Winterquartier, Punktwertung, Tod, Kapitelende, Spielstand. */
+/* Lager, Winterquartier, Punktwertung, Tod, Kapitelende, Spielstand. */
+
+/* ══════════════════ LAGER ══════════════════ */
+
+/* Ein Lager ist die kleine Fassung des Winterquartiers: zwei bis drei Abende,
+   und immer mehr zu tun, als Zeit da ist. Ausbildung und Instandhaltung
+   konkurrieren miteinander — das ist der ganze Entwurf. Was hier nicht getan
+   wird, fehlt im nächsten Gefecht.
+
+   Die Handlungen stehen hier, die Auswahl je Lager in den Kapiteldaten (tun:[…]).
+   Handlungen für Rang und Zweig kommen selbsttätig dazu — ein höherer Rang gibt
+   auch im Lager neue Knöpfe, nicht größere Zahlen. */
+
+const LAGER_TUN = {
+  exerzieren:{label:'Exerzieren, bis die Handgriffe von allein gehen',
+    cost:'Muskete und Drill · Atem −6',
+    tu(){ nutzen('muskete',2); nutzen('drill',2);
+      S.atem=Math.max(0,S.atem-6); S.belastung=Math.min(100,S.belastung+2);
+      return 'Laden in zwölf Zeiten, achtzig Mal hintereinander, bis die Hände es ohne den Kopf können. Ein Caporal zählt laut mit, und wer nachhängt, fängt von vorn an. <span class="fein">Muskete und Drill steigen · Atem −6</span>'; }},
+
+  bajonett:{label:'Bajonettfechten gegen einen Strohmann',
+    cost:'Bajonett · Atem −8',
+    tu(){ nutzen('bajonett',2.5);
+      S.atem=Math.max(0,S.atem-8); S.belastung=Math.min(100,S.belastung+2);
+      return 'Ein Sack Stroh an einem Pfahl, zweihundert Stöße. Der Sergent sagt, du sollst nicht stechen wie einer, der jemanden verletzen will, sondern wie einer, der weitergehen will. <span class="fein">Bajonett steigt · Atem −8</span>'; }},
+
+  scharf:{label:'Scharf schießen, mit gekauftem Pulver',
+    cost:'Muskete ++ · kostet 4 Francs',
+    tu(){ if(S.geld<4) return 'Der Mann mit dem Pulver rechnet nach und schickt dich weg. Vier Francs, sagt er, und du hast sie nicht. <span class="fein">nichts passiert</span>';
+      S.geld-=4; nutzen('muskete',3.5);
+      S.ausr.muskete.zustand = Math.max(0, S.ausr.muskete.zustand-5);
+      return 'Zwölf scharfe Schüsse auf eine Scheibe aus Brettern, achtzig Schritt. Beim Bataillon sind drei Schuss im Jahr vorgesehen; den Rest muss man sich selbst kaufen. Beim neunten triffst du zum ersten Mal, weil du es willst, und nicht, weil es sich ergeben hat. <span class="fein">Muskete steigt deutlich · −4 F · Waffe −5</span>'; }},
+
+  instand:{label:'Ausrüstung durchsehen und flicken',
+    cost:'Geschick · alles ein Stück besser',
+    tu(){ const p = probe('geschick',30);
+      const plus = p.erfolg ? 20 : 8;
+      for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+plus);
+      return (p.erfolg
+        ? 'Riemen nachgenäht, Sohlen mit Draht gefasst, das Schloss zerlegt und ausgewischt. Du bist der Letzte am Feuer und der Einzige, dessen Zeug morgen noch hält.'
+        : 'Du machst, was du kannst, und was du kannst, ist nicht viel. Der Riemen hält bis übermorgen, mehr nicht.')
+        + ` <span class="fein">Alle Ausrüstung +${plus}</span>`; }},
+
+  schuhe:{label:'Die Schuhe zum Schuster im Dorf tragen',
+    cost:'Schuhe ++ · kostet 6 Francs',
+    tu(){ if(S.geld<6) return 'Der Schuster hält die Hand auf, bevor er die Schuhe nimmt. Sechs Francs. Du hast sie nicht und gehst mit denselben Sohlen wieder hinaus. <span class="fein">nichts passiert</span>';
+      S.geld-=6; S.ausr.schuhe.zustand = Math.min(100, S.ausr.schuhe.zustand+45);
+      return 'Er sieht sie sich an, sagt etwas auf Italienisch, das nicht freundlich klingt, und näht trotzdem. Neue Sohlen, doppelt genagelt, und ein Stück Leder über der linken Ferse. <span class="fein">Schuhe +45 · −6 F</span>'; }},
+
+  waffe:{label:'Die Muskete zerlegen und ölen',
+    cost:'Waffenzustand ++',
+    tu(){ S.ausr.muskete.zustand = Math.min(100, S.ausr.muskete.zustand+30); nutzen('muskete',0.5);
+      return 'Schloss heraus, Feder ab, Pfanne blank, alles mit Öl und einem Lappen, den du dafür zerschnitten hast. Eine Muskete, die zündet, ist der Unterschied zwischen einem Soldaten und einem Mann mit einem Stock. <span class="fein">Muskete +30</span>'; }},
+
+  lesen:{label:'Buchstaben lernen, gegen Bezahlung',
+    cost:'Bildung · kostet 5 Francs',
+    tu(){ if(S.geld<5) return 'Der Schreiber der Kompanie will fünf Francs für zwei Abende. Du hast sie nicht, und er hat keine Zeit zu verschenken. <span class="fein">nichts passiert</span>';
+      S.geld-=5; S.attr.bildung=Math.min(100,S.attr.bildung+5); nutzen('verwaltung',1.5);
+      return 'Der Kompanieschreiber malt dir Buchstaben in den Sand und wischt sie wieder weg. Am Ende des Abends kannst du drei Wörter, und eines davon ist dein Name. <span class="fein">Bildung +5 · −5 F</span>'; }},
+
+  leute:{label:'Am Feuer sitzen bleiben',
+    cost:'Kameradschaft und Fürsprache',
+    tu(){ S.gunst+=1; S.kameradschaft=Math.min(100,S.kameradschaft+8);
+      S.belastung=Math.max(0,S.belastung-4); nutzen('menschenkenntnis',1);
+      return 'Karten um Knöpfe, weil niemand Geld hat. Martel erzählt von der Rheinfront und lässt die Stellen weg, an denen es schlecht ausging. Du merkst dir, wer redet und wer zuhört. <span class="fein">Kameradschaft +8 · Gunst +1 · Belastung −4</span>'; }},
+
+  fouragieren:{label:'Die Höfe in der Umgegend abgehen',
+    cost:'Fouragieren · Geld und Essen',
+    tu(){ const p = probe('fouragieren',40);
+      if(p.erfolg){ S.geld+=7; S.atem=Math.min(100,S.atem+8);
+        return 'Zwei Hühner, ein Sack Kastanien und ein Bauer, der lieber verkauft als beraubt wird. Du bringst mehr zurück, als du selbst brauchst, und das spricht sich herum. <span class="fein">+7 F · Atem +8</span>'; }
+      S.belastung=Math.min(100,S.belastung+3);
+      return 'Vier Stunden auf nassen Feldwegen. Die Höfe sind leer, die Leute sind in den Bergen, und ihr Vieh ist bei ihnen. <span class="fein">Belastung +3</span>'; }},
+
+  ruhe:{label:'Schlafen und liegen bleiben',
+    cost:'Belastung −10 · Atem +18',
+    tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
+      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Belastung −10 · Atem +18</span>'; }},
+
+  /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
+  korporalschaft:{label:'Deine acht Mann drillen',
+    cost:'Autorität und Drill · Ruf +1',
+    tu(){ nutzen('autoritaet',2); nutzen('drill',2); S.ruf+=1;
+      S.kameradschaft=Math.min(100,S.kameradschaft+6);
+      return 'Du stellst acht Mann in zwei Glieder und lässt sie laden, bis es gleichzeitig knackt. Zwei von ihnen sind älter als du. Einer sieht dich an, als wolle er etwas sagen, und sagt es dann doch nicht. <span class="fein">Autorität und Drill steigen · Ruf +1 · Kameradschaft +6</span>'; }},
+
+  tornister:{label:'Mit vollem Tornister auf den Hügel und zurück',
+    cost:'Konstitution · Atem −10',
+    tu(){ nutzen('konstitution',1.5); S.atem=Math.max(0,S.atem-10);
+      return 'Sechzig Pfund auf den Rücken, dreimal den Hang hinauf. Die Grenadierkompanie steht dort, wo es am dicksten kommt, und wer dort nicht stehen bleiben kann, bleibt liegen. <span class="fein">Konstitution steigt · Atem −10</span>'; }},
+
+  gelaende:{label:'Allein im Gelände üben',
+    cost:'Geschick und Muskete · Atem −6',
+    tu(){ nutzen('geschick',1.5); nutzen('muskete',1.5); S.atem=Math.max(0,S.atem-6);
+      return 'Von Deckung zu Deckung, hinlegen, zielen, weiter. Vor der Linie gibt es keinen Nebenmann, der dir sagt, wann du aufstehst. Das musst du selbst wissen. <span class="fein">Geschick und Muskete steigen · Atem −6</span>'; }}
+};
+
+function lagerHandlungen(n){
+  const ids = (n.tun||[]).slice();
+  if(S.rang>=3) ids.push('korporalschaft');
+  if(S.zweig==='grenadier') ids.push('tornister');
+  if(S.zweig==='voltigeur') ids.push('gelaende');
+  return ids.filter(id=>LAGER_TUN[id]);
+}
+
+let ABENDE = null, LAGER_ID = null, LLOG = [];
+function zeigeLager(n){
+  if(LAGER_ID !== n.id){ LAGER_ID = n.id; ABENDE = n.abende; LLOG = []; }
+  const opt = lagerHandlungen(n).map(id=>{
+    const t = LAGER_TUN[id];
+    return `<button class="ord" onclick="lagerTun('${id}')" ${ABENDE<=0?'disabled':''}>
+      ${t.label}<span class="cost">${t.cost}</span></button>`;
+  }).join('');
+  app.innerHTML = `<div class="stage"><div>${wegband(n)}
+    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
+      ${LLOG.length?`<div class="ergebnis">${LLOG.join('<br><br>')}</div>`:''}
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${ABENDE} VON ${n.abende}</div>
+      </div></div>
+    <div class="orders"><div class="ch"><span>Womit verbringst du den Abend?</span></div><div class="ordbody">
+      ${opt}${ABENDE<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+function lagerTun(id){
+  if(ABENDE<=0) return;
+  ABENDE--;
+  LLOG.push(LAGER_TUN[id].tu());
+  S.log.push(LAGER_ID+': '+LAGER_TUN[id].label);
+  zeigeLager(KAPITEL[NODE]);
+}
+function lagerEnde(){ LAGER_ID = null; ABENDE = null; LLOG = []; weiter(); }
 
 /* ══════════════════ WINTERQUARTIER ══════════════════ */
 
@@ -15,7 +147,7 @@ function zeigeWinter(n){
   ];
   const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${WOCHEN<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
-  app.innerHTML = `<div class="stage"><div>
+  app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
@@ -66,7 +198,7 @@ function stationen(){ return Math.min(KAPITEL.length, NODE+1); }
 function wertung(){
   const p = {};
   p.rang = rangWert(S.rang);
-  p.stationen = 4 * stationen();
+  p.stationen = 3 * stationen();   // 3 statt 4, seit es 16 Stationen sind — siehe CLAUDE.md
   p.ruf = 5 * Math.floor(S.ruf/10);
   p.nennungen = 3 * Math.min(10, S.nennungen);
   p.ueberleben = S.lebt ? 25 : 0;
@@ -86,7 +218,7 @@ function wertungsTabelle(p){
   return `<table>
     <tr><th>Wofür</th><th class="n">VP</th></tr>
     <tr><td class="d">Erreichter Rang — ${rangName(S.rang)}</td><td class="n">${p.rang}</td></tr>
-    <tr><td class="d">Erreichte Stationen (${stationen()} × 4)</td><td class="n">${p.stationen}</td></tr>
+    <tr><td class="d">Erreichte Stationen (${stationen()} × 3)</td><td class="n">${p.stationen}</td></tr>
     <tr><td class="d">Ruf ${S.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
     <tr><td class="d">Im Tagesbefehl genannt (${S.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>

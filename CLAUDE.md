@@ -27,7 +27,9 @@ Gebaut ist **Kapitel 1 (Italien 1796/97)**, Ränge 1–3, als reine HTML/JS-Anwe
 | Ausrüstung mit Zustandsverschleiß | Pferd, Kompaniekasse, Inspektionen |
 | Ruf, Gunst, Kameradschaft, Belastung, Wunden | Offizierspatente |
 | Vakanz-Regel für die Beförderung | Rangschranken und die vier Enden |
-| Winterquartier mit Wochenverteilung | Generalskampagnen |
+| Drei Lager mit Ausbildung und Instandhaltung | Generalskampagnen |
+| Winterquartier mit Wochenverteilung | |
+| Anmarsch und Lagebild vor jedem Gefecht | |
 | Permadeath, Wertung, Chronik, Spielstand als Datei | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
@@ -66,8 +68,8 @@ src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kau
 src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
 src/mechanik.js                 Zustand, Proben, Wachstum, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
-src/kampf.js                    Gefecht, Elitekompanie, Beförderung
-src/abschluss.js                Winterquartier, Wertung, Tod, Kapitelende, Spielstand
+src/kampf.js                    Anmarsch, Gefecht, Elitekompanie, Beförderung
+src/abschluss.js                Lager, Winterquartier, Wertung, Tod, Kapitelende, Spielstand
 src/start.js                    Einstiegspunkt, muss zuletzt geladen werden
 ```
 
@@ -124,6 +126,38 @@ Diese acht Regeln nicht brechen. Wenn eine Änderung eine davon verletzt, ist di
 
 > **Warum so niedrig?** Die erste Fassung hatte Gefahr 26–38 und Feindmoral bis 100. Ergebnis im Test: **100 % Tod**, keine einzige gewonnene Schlacht. Zwei Gründe — man wurde zu oft getroffen, *und* die Gefechte waren rechnerisch nicht zu gewinnen: Weil man nur jede zweite Runde feuert (Laden, Feuern, Laden…), kommt man in neun Runden auf vier Schuss zu je 12–32 Schaden, also nie an 100 Feindmoral heran.
 
+### Lager (`src/abschluss.js`, Auswahl in den Kapiteldaten)
+
+**Drei Lager in Kapitel 1, plus das Winterquartier.** Depot Savona (3 Abende, vor allem Ausbildung), Kantonierung Corsico (2 Abende, vor allem Instandhaltung, weil dort zum ersten Mal Sold gezahlt wird), Feldlager an der Etsch (2 Abende, vor Arcole).
+
+> **Warum drei und nicht mehr?** Ein Lager je zwei Gefechte ist die Grenze, ab der aus dem Spiel eine Verwaltung wird. Mehr Lager heißt vor allem: dieselben Knöpfe öfter — und Invariante 2 verbietet Grinding. Die Knappheit ist der Entwurf: Es gibt in jedem Lager mehr zu tun als Abende. **Regel für neue Kapitel: eins am Kapitelanfang, danach eins je zwei Gefechte, höchstens vier, immer mit knappem Zeitbudget.**
+
+| Handlung | Wirkung | Preis |
+|---|---|---|
+| Exerzieren | Muskete und Drill (Intensität 2) | Atem −6 |
+| Bajonettfechten | Bajonett (2,5) | Atem −8 |
+| Scharf schießen | Muskete (3,5) | 4 F, Waffe −5 |
+| Ausrüstung flicken | Geschick-Probe 30: alles +20, sonst +8 | ein Abend |
+| Schuster | Schuhe +45 | 6 F |
+| Muskete ölen | Muskete +30 | ein Abend |
+| Buchstaben lernen | Bildung +5, Verwaltung | 5 F |
+| Am Feuer bleiben | Kameradschaft +8, Gunst +1, Belastung −4 | ein Abend |
+| Fouragieren | Probe 40: +7 F, Atem +8 | sonst Belastung +3 |
+| Schlafen | Belastung −10, Atem +18 | ein Abend |
+| Korporalschaft drillen (ab Rang 3) | Autorität und Drill, Ruf +1 | ein Abend |
+| Tornistermarsch (Grenadier) | Konstitution | Atem −10 |
+| Gelände üben (Voltigeur) | Geschick und Muskete | Atem −6 |
+
+Ein Lagerabend gibt bewusst **weniger als eine Winterwoche** (dort: alles +30 statt +20, Belastung −16 statt −10). Die drei rang- und zweigabhängigen Handlungen erfüllen Invariante 4 auch außerhalb des Gefechts.
+
+### Anmarsch vor dem Gefecht (`src/kampf.js`)
+
+```js
+verschleiss(0.15); S.atem -= 4; S.belastung += 1;
+```
+
+**Der Weg zum Gefecht kostet etwas** — sonst wären die Lager ein reiner Zugewinn und die Instandhaltung eine Pflichtübung ohne Gegner. Erste Fassung war `verschleiss(0.3)`, Atem −6, Belastung +2: **gemessen 35 % Überleben statt 50 %.** Der Marschverschleiß über fünf Gefechte wog schwerer als alles, was drei Lager wieder einbringen. Halbiert liegt der Wert wieder im Band.
+
 ### Die Linie kämpft auch ohne dich (`src/kampf.js`)
 
 ```js
@@ -174,9 +208,11 @@ Abnehmender Ertrag ist Absicht: von 12 auf 40 geht schnell, von 80 auf 90 dauert
 ### Wertung Kapitel 1 (`src/abschluss.js`)
 
 ```
-Rangwert + 4×Stationen + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 10 (nie gekniffen)
+Rangwert + 3×Stationen + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 10 (nie gekniffen)
 ```
 Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP, alles zusammen 166.
+
+> **Stationen von 4 auf 3 Punkte gesenkt**, weil es mit den drei Lagern jetzt 16 statt 13 Stationen sind. Bei 4 Punkten hätte allein das Durchkommen 64 statt 52 Punkte gebracht und ein Spitzenlauf hätte den ganzen Laden leergekauft. Gemessenes Maximum jetzt **162** — knapp unter der Ladensumme von 166, sodass immer ein Kauf übrig bleibt.
 
 > Diese Wertung gilt nur für den Prototyp mit einem Kapitel. Die Skala des vollen Spiels (Maximum 918, Rangwerte bis 580) steht in KONZEPT.md und wird übernommen, sobald mehrere Kapitel existieren.
 
@@ -184,10 +220,14 @@ Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP, alles zusammen 166.
 
 | Größe | Soll | Gemessen |
 |---|---|---|
-| Kapitel 1 überstanden (Testskript) | 45–55 % | **50 %** |
+| Kapitel 1 überstanden (Testskript) | 45–55 % | **47 %** (120 Läufe: 57 % / 43 % in zwei Durchgängen) |
 | Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 47 % |
-| Caporal im ersten Kapitel | ~30 % | 37 % |
+| Erster Lauf ohne jede Beförderung | ~40 % | 41 % |
+| Caporal im ersten Kapitel | ~30 % | 44 % |
+
+Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang von 43 % oder 57 % sagt für sich genommen nichts. Bei Zweifeln 80 Läufe messen.
+
+**Offener Punkt:** Der Caporal-Anteil liegt mit 44 % über dem Sollwert von 30 % (vor den Lagern waren es 37 %). Der Zusammenhang ist direkt — wer bis September lebt, steht bei der Vakanz mit in der Reihe. Wenn das gesenkt werden soll, dann an der Schwelle (Ruf 25 / Gunst 3), nicht an der Tödlichkeit.
 
 `node test/balance.js 40` misst das. **Weicht der Wert nach einer Änderung um mehr als zehn Punkte ab, ist die Änderung zu prüfen.**
 

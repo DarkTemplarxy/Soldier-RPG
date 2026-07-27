@@ -26,10 +26,66 @@ function aktionen(){
   return a;
 }
 
+/* ── Anmarsch: der Weg dorthin, die Lage, das Warten ──
+   Zwischen zwei Gefechten liegen Wochen und hunderte Kilometer. Wer direkt aus
+   der Szene in die erste Runde fällt, merkt davon nichts. Der Anmarsch kostet
+   deshalb auch etwas: Marsch nutzt Schuhe ab und geht auf den Atem. */
+
 function starteKampf(n){
+  if(n.anmarsch && !S.anmarschGesehen){
+    S.anmarschGesehen = n.id;
+    verschleiss(0.15);
+    S.atem = Math.max(0, S.atem-4);
+    S.belastung = Math.min(100, S.belastung+1);
+    zeigeAnmarsch(n);
+    return;
+  }
+  S.anmarschGesehen = null;
   K = {n, runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
        protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0};
   zeigeKampf(n.intro);
+}
+
+/* Was du über dich selbst weißt, bevor es losgeht. Keine Zahlen, die in der
+   Seitenleiste schon stehen — sondern was sie bedeuten. */
+function gefechtsbereitschaft(){
+  const z = [], m = S.ausr.muskete.zustand, sch = S.ausr.schuhe.zustand;
+  if(m<35) z.push('Das Schloss ist braun vom Rost. Ob die Muskete zündet, wird sich zeigen, wenn es darauf ankommt.');
+  else if(m<60) z.push('Die Muskete ist gebraucht, aber trocken. Sie hat bisher gezündet.');
+  else z.push('Die Muskete ist sauber und geölt. In dieser Armee ist das keine Selbstverständlichkeit.');
+  if(sch<25) z.push('Von deinen Schuhen ist wenig übrig. Du hast seit dem Aufbruch nasse Füße und spürst jeden Stein.');
+  else if(sch<50) z.push('Die Schuhe halten. Noch.');
+  if(S.wunden.length) z.push('Du trägst ' + (S.wunden.length===1?'eine alte Wunde':S.wunden.length+' alte Wunden') +
+    ' mit dir: ' + S.wunden.map(w=>esc(w.name)).join(', ') + '.');
+  if(S.atem<35) z.push('Du bist ausgepumpt, bevor der erste Schuss fällt.');
+  if(S.belastung>60) z.push('Deine Hände sind nicht ruhig. Du hältst sie an den Riemen, damit es niemand sieht.');
+  if(S.kameradschaft>=50) z.push('Links und rechts stehen Männer, die deinen Namen kennen. Das ist keine Kleinigkeit.');
+  if(S.rang>=3) z.push('Acht Mann sehen dich an und warten darauf, dass du etwas sagst.');
+  else if(S.zweig==='voltigeur') z.push('Du gehst vor der Linie. Wenn es losgeht, steht neben dir niemand.');
+  else if(S.zweig==='grenadier') z.push('Die Grenadierkompanie steht vorne. Das ist der Sinn der Bärenfellmütze.');
+  return z;
+}
+
+function zeigeAnmarsch(n){
+  const l = n.lage || {};
+  const zeilen = [['Gegner',l.gegner],['Auftrag',l.auftrag],['Gelände',l.gelaende],['Dein Platz',l.stellung]]
+    .filter(([,v])=>v).map(([k,v])=>`<tr><td class="k">${k}</td><td class="d">${esc(v)}</td></tr>`).join('');
+  app.innerHTML = `<div class="stage">
+    <div>${wegband(n)}
+      <div class="card"><div class="ch"><span>Anmarsch · ${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+        <div class="cb">
+          <div class="prose">${n.anmarsch.map(t=>`<p>${t}</p>`).join('')}</div>
+          ${zeilen?`<div class="lage"><div class="lagekopf">Was man weiß</div>
+            <table>${zeilen}</table></div>`:''}
+          <div class="lage"><div class="lagekopf">Womit du dastehst</div>
+            <div class="prose">${gefechtsbereitschaft().map(t=>`<p>${t}</p>`).join('')}</div></div>
+        </div></div>
+      <div class="orders"><div class="ordbody">
+        <button class="ord weiter" onclick="starteKampf(KAPITEL[NODE])">Antreten
+          <span class="cost">Danach gibt es keinen Weg zurück, der nicht Ruf kostet</span></button>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
 }
 
 function sichtfeld(){
@@ -216,7 +272,7 @@ function zeigeElite(n){
   const kon = wert('konstitution'), ges = wert('geschick');
   const gr = kon>=55, vo = ges>=55;
   app.innerHTML = `<div class="stage">
-    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+    <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">
         <p>Mailand hat der Armee Sold gegeben und Schuhe, und jetzt werden die Bataillone neu geordnet. Jedes bekommt eine Grenadier- und eine Voltigeurkompanie, und die Chefs suchen sich die Männer aus.</p>
         <p>Die Grenadiere nehmen die Großen und die, die stehen bleiben. Die Voltigeure nehmen die Kleinen und die, die schnell sind und allein zurechtkommen.</p>
@@ -273,7 +329,7 @@ function zeigeBefoerderung(n){
     <br><br><em>Für den Caporal braucht es einen Fürsprecher — Gunst 3, du hast ${gunst}.</em>`;
     klasse='schlecht';
   }
-  app.innerHTML = `<div class="stage"><div>
+  app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
