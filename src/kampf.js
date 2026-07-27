@@ -11,6 +11,10 @@ function aktionen(){
     a.push({id:'zielen',label:'Sorgfältig zielen und feuern',cost:'Muskete +15 · kostet zwei Atemzüge',aus:()=>!K.geladen});
     a.push({id:'feuern',label:'Schnell feuern',cost:'Muskete',aus:()=>!K.geladen});
     a.push({id:'deckung',label:'Deckung wechseln',cost:'Geschick · du bist schwer zu treffen'});
+    // Der Plänkler ist gerade der, der sich hinlegt — er steht in keiner Linie,
+    // die jemand halten müsste. Ohne diese Wahl war der Zweig der einzige, der
+    // nicht verschnaufen konnte.
+    a.push({id:'ducken',label:'Flach hinlegen',cost:'Atem +10 · Belastung −2 · kein Schuss, aber auch kein Ziel'});
   } else {
     a.push({id:'feuern',label:'Anlegen und feuern',cost:'Muskete',aus:()=>!K.geladen});
     a.push({id:'ducken',label:'Hinwerfen',cost:'Atem +10 · Belastung −2 · du schießt nicht, aber sie treffen dich auch nicht'});
@@ -165,7 +169,9 @@ function kampfAktion(id){
   }
   else if(id==='ducken'){
     K.deckung=true; S.atem=Math.min(100,S.atem+10); S.belastung=Math.max(0,S.belastung-2);
-    text='Du wirfst dich hin. Über dir geht es hinweg. Man kann nicht ewig liegen bleiben, aber jetzt gerade schon.';
+    text = zw==='voltigeur'
+      ? 'Du gehst flach in eine Ackerfurche, das Gesicht im Dreck, und atmest zum ersten Mal seit zehn Minuten bis unten. Vor der Linie sucht dich jetzt niemand mehr — die eigenen Leute auch nicht.'
+      : 'Du wirfst dich hin. Über dir geht es hinweg. Man kann nicht ewig liegen bleiben, aber jetzt gerade schon.';
     gefahrMod = -22;
   }
   else if(id==='deckung'){

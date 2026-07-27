@@ -5,6 +5,16 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-27 — Der Voltigeur darf sich hinlegen
+
+**Fehlende Handlung ergänzt.** Der Voltigeur hatte „Hinwerfen" nicht — als einziger Zweig. Das ist doppelt falsch: Der Plänkler ist gerade der, der sich hinlegt, weil er in keiner Linie steht, die jemand halten müsste; und die Atem-Warnung im Gefecht verweist ausdrücklich auf „Hinwerfen bringt +10", was für ihn ins Leere lief. Damit war er der einzige Zweig, der im Gefecht nicht verschnaufen konnte.
+
+Die Handlung heißt bei ihm **„Flach hinlegen"** und hat einen eigenen Text — er liegt allein in einer Ackerfurche, nicht neben Kameraden in der Linie. Wirkung unverändert: Atem +10, Belastung −2, Gefahr −22, kein Schuss.
+
+Gemessen über 40 Läufe: überstanden 50 %, Caporal 33 % — im Rahmen der Streuung von ±8 Punkten um die gültigen 44 % / 30 % aus 80 Läufen. Der Zweig betrifft ohnehin nur rund jeden achten Lauf.
+
+---
+
 ## 2026-07-27 — Erschaffung in zwei Schritten, Verlauf entrümpelt
 
 **Reihenfolge umgedreht.** Vorher: Veteranenpunkte ausgeben, dann den Mann erschaffen. Jetzt: erst Name, Herkunft und Poolverteilung, dann die Punkte auf die **fertigen** Werte legen. Der Kaufteil stand vorher unter der Ausrüstungstabelle und war deshalb nicht zu finden — jetzt sind „Attribute ergänzen" und „Fertigkeiten ergänzen" zwei eigene Blöcke mit je einer Zeile pro Wert: jetziger Wert, Pfeil, neuer Wert, Preis.
