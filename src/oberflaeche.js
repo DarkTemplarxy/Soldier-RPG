@@ -141,10 +141,12 @@ function seitenleiste(){
 function zeigeTitel(){
   LAUF=null; binde(); kopfzeile();
   const offen = laufVorhanden();
-  const chron = META.chronik.length ? META.chronik.slice().reverse().map(c=>
-    `<tr${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?' class="hi"':''}>
-      <td class="d">${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?'★ ':''}${esc(c.name)}</td>
-      <td class="d">${esc(c.rang)}</td><td class="d">${esc(c.ende)}</td><td class="n">${c.punkte}</td></tr>`).join('')
+  const best = META.chronik.length ? Math.max(...META.chronik.map(x=>x.punkte)) : 0;
+  const chron = META.chronik.length ? META.chronik.map((c,i)=>
+    `<tr${c.punkte===best?' class="hi"':''}>
+      <td class="d"><button class="namebtn" onclick="zeigeBlatt(${i})">${c.punkte===best?'★ ':''}${esc(c.name)}</button></td>
+      <td class="d">${esc(c.rang)}</td><td class="d">${esc(c.ende)}</td><td class="n">${c.punkte}</td></tr>`)
+    .reverse().join('')
     : '<tr><td class="d" colspan="4">Noch kein Eintrag. Der erste Mann wartet.</td></tr>';
 
   app.innerHTML = `
@@ -173,6 +175,67 @@ function zeigeTitel(){
     ${verlauf()}
   </div>`;
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
+}
+
+/* ── Das Blatt eines Mannes ──
+   Was in der Chronik als eine Zeile steht, war ein ganzer Feldzug. Hier steht
+   er ausgeschrieben: womit er einrückte, was er unterwegs entschieden hat und
+   womit er aufgehört hat. Ältere Einträge kennen diese Felder nicht — dann
+   bleibt es bei der Zeile, und das Blatt sagt das auch. */
+function zeigeBlatt(i){
+  const c = META.chronik[i];
+  if(!c){ zeigeTitel(); return; }
+  const zeile = (k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;
+
+  if(!c.attr){
+    app.innerHTML = `<div class="card"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ende)}</span></div>
+      <div class="cb"><div class="note">Von diesem Mann ist nur die Zeile geblieben — er stammt aus einer Fassung,
+      die noch kein Blatt geführt hat. ${esc(c.rang)}, ${c.punkte} Punkte.</div>
+      <div style="margin-top:16px"><button class="plain" onclick="zeigeTitel()">Zurück zur Chronik</button></div>
+      </div></div>`;
+    return;
+  }
+
+  const taten = c.log.length ? c.log.map(z=>{
+    const t = z.split(': '), n = KAPITEL.find(x=>x.id===t[0]);
+    const wo = n ? ((n.datum||'').split(' · ')[1] || n.ort || t[0]) : t[0];
+    return `<div class="blattzeile"><span class="blattort">${esc(wo)}</span><span>${esc(t.slice(1).join(': '))}</span></div>`;
+  }).join('') : '<p class="hinweis">Er hat nichts entschieden, was jemand aufgeschrieben hätte.</p>';
+
+  const fert = FERTIGKEITEN.filter(([k])=>c.fert[k]>10);
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>
+      <div class="card"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ort||'')}</span></div>
+        <div class="cb">
+          <div class="rangzeile">${rangabzeichen({rang:c.rangN||1, zweig:c.zweig})}
+            <p class="whorank">${esc(c.rang)} · ${esc(c.herkunft||'')} · 32. Halbbrigade</p></div>
+          <div class="note ${c.gefallen?'red':'green'}">${c.gefallen
+            ? esc(c.ende)+'. Von den Stationen dieses Feldzugs hat er '+c.stationen+' erreicht.'
+            : esc(c.ende)+'. Er hat den Feldzug überstanden — '+c.stationen+' Stationen.'}</div>
+          <div class="lage"><div class="lagekopf">Was er unterwegs entschieden hat</div>${taten}</div>
+        </div></div>
+      <div class="card"><div class="ch"><span>Wertung</span><span>${c.punkte} Veteranenpunkte</span></div>
+        <div class="cb">${wertungsTabelleAus(c)}
+        <div style="margin-top:16px"><button class="plain" onclick="zeigeTitel()">Zurück zur Chronik</button></div>
+        </div></div>
+    </div>
+    <aside class="card"><div class="ch"><span>Sein Zustand am Ende</span></div><div class="cb">
+      <p class="mini">Attribute</p>
+      ${ATTRIBUTE.map(([k,n])=>zeile(mitHilfe(k,n), c.attr[k])).join('')}
+      <div class="rule"></div>
+      <p class="mini">Fertigkeiten</p>
+      ${fert.length ? fert.map(([k,n])=>zeile(mitHilfe(k,n), c.fert[k])).join('') : '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
+      <div class="rule"></div>
+      <p class="mini">Ausrüstung · Zustand</p>
+      ${c.ausr.filter(a=>a.verschleiss>0).map(a=>zeile(esc(a.name), a.zustand)).join('')}
+      <div class="rule"></div>
+      ${zeile('Ruf', c.ruf)}${zeile('Gunst Martel', c.gunst)}${zeile('Kameradschaft', c.kameradschaft)}
+      ${zeile('Belastung', c.belastung)}${zeile('Atem', c.atem)}${zeile('Geld', c.geld+' F')}
+      ${zeile('Im Tagesbefehl', c.nennungen+'×')}
+      ${zeile('Wunden', c.wunden.length ? c.wunden.map(esc).join(', ') : 'keine')}
+    </div></aside>
+  </div>`;
+  kopfzeile();
 }
 
 /* ── Veteranenpunkte ausgeben ──

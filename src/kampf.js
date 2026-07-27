@@ -37,6 +37,34 @@ function aktionen(){
    der Szene in die erste Runde fällt, merkt davon nichts. Der Anmarsch kostet
    deshalb auch etwas: Marsch nutzt Schuhe ab und geht auf den Atem. */
 
+/* ── Anerkennung im Gefecht ──
+   Ruf entsteht aus dem, was man tut, nicht nur daraus, wie es ausgeht. Jede
+   Tat, die jemand sehen konnte, bringt sofort etwas — sichtbar in der
+   Seitenleiste, bevor das Gefecht vorbei ist.
+
+   Höchstens drei je Gefecht — mehr sieht in diesem Rauch niemand. Die Grenze
+   ist knapp gewählt, weil Ruf die Beförderungswährung ist: Ein Zuschlag von
+   drei je Gefecht sind über fünf Gefechte fünfzehn Punkte auf eine Schwelle
+   von dreißig, und das ist schon viel. Neu ist außerdem, dass auch ein
+   verlorenes Gefecht Ruf bringen kann — gesehen wird man trotzdem.
+
+   *Ein Umweg, der nicht funktioniert hat:* Statt eines Zuschlags war das
+   zuerst eine Umverteilung — pauschaler Siegesruf minus vier, bis zu fünf hier
+   zurückzuverdienen. Gemessen brach der Caporal-Anteil von 39 % auf 21 % und
+   die Überlebensquote von 49 % auf 40 %, weil der Testbot sich nur etwa zwei
+   Punkte je Gefecht zurückholt und über den Rang auch der zusätzliche
+   Lagerabend wegfiel. Wer das noch einmal versucht, misst beide Zahlen. */
+const RUHM_JE_GEFECHT = 3;
+
+function anerkennung(betrag, was){
+  const rest = Math.max(0, RUHM_JE_GEFECHT - K.ruhm);
+  const gibt = Math.min(betrag, rest);
+  if(gibt <= 0) return '';
+  K.ruhm += gibt; S.ruf += gibt;
+  K.taten.push({was, ruf:gibt});
+  return ` <span class="fein">gesehen · Ruf +${gibt}</span>`;
+}
+
 function starteKampf(n){
   if(n.anmarsch && !S.anmarschGesehen){
     S.anmarschGesehen = n.id;
@@ -50,6 +78,7 @@ function starteKampf(n){
   S.anmarschGesehen = null;
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
+              ruhm:0, taten:[],
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -272,8 +301,9 @@ function kampfAktion(id){
     K.geladen = false;
     S.atem = Math.max(0, S.atem - (sorgfalt?10:5));
     if(p.erfolg){ schaden = sorgfalt? 22+Math.random()*10 : 12+Math.random()*8;
-      text = sorgfalt? 'Du liegst still, atmest aus und drückst ab. Drüben fällt einer, und du weißt, dass er dir gehört.'
-                     : 'Du feuerst in den Rauch. Irgendetwas drüben gerät in Unordnung.'; }
+      text = (sorgfalt? 'Du liegst still, atmest aus und drückst ab. Drüben fällt einer, und du weißt, dass er dir gehört.'
+                      : 'Du feuerst in den Rauch. Irgendetwas drüben gerät in Unordnung.')
+           + anerkennung(sorgfalt?2:1, sorgfalt?'Ein gezielter Schuss, der saß':'Getroffen'); }
     else { text = S.ausr.muskete.zustand<35 ? 'Das Schloss klickt und nichts geschieht. Die Waffe ist verrostet.'
                                             : 'Der Schuss geht zu hoch. In diesem Rauch trifft man mehr durch Zufall als durch Können.'; }
     if(S.ausr.muskete.verschleiss) S.ausr.muskete.zustand = Math.max(0,S.ausr.muskete.zustand-2);
@@ -293,8 +323,9 @@ function kampfAktion(id){
   else if(id==='halten'){
     const p = probe('kaltbluetigkeit', 40);
     K.deckung=false;
-    if(p.erfolg){ schaden = 6; S.belastung=Math.max(0,S.belastung-3);
-      text='Du bleibst stehen. Links und rechts bleiben sie auch stehen, weil du stehst. Die Linie hält.'; nutzen('drill',1); }
+    if(p.erfolg){ schaden = 6; S.belastung=Math.max(0,S.belastung-3); nutzen('drill',1);
+      text='Du bleibst stehen. Links und rechts bleiben sie auch stehen, weil du stehst. Die Linie hält.'
+         + anerkennung(1,'Stehen geblieben, als es darauf ankam'); }
     else { S.belastung=Math.min(100,S.belastung+6);
       text='Du stehst, aber deine Hände zittern so, dass du nichts damit anfangen kannst.'; }
   }
@@ -303,13 +334,15 @@ function kampfAktion(id){
     K.deckung=false; S.atem=Math.max(0,S.atem-18); gefahrMod = +26;
     K.vorn = p.erfolg;
     if(p.erfolg){ schaden = 30+Math.random()*14;
-      text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'; S.ruf+=2; }
+      text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'
+         + anerkennung(2,'Mit dem Bajonett vorgegangen'); }
     else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.'; S.belastung+=7; }
   }
   else if(id==='salve'){
     const p = probe('autoritaet', 40);
     if(p.erfolg){ schaden = 26+Math.random()*10; nutzen('drill',1);
-      text='„Anlegen — Feuer!" Acht Musketen gehen fast gleichzeitig los. Fast. Aber es reicht.'; }
+      text='„Anlegen — Feuer!" Acht Musketen gehen fast gleichzeitig los. Fast. Aber es reicht.'
+         + anerkennung(1,'Eine Salve, die saß'); }
     else { text='Du rufst den Befehl, und drei von acht hören ihn. Das Ergebnis ist ein trauriges Geknatter.'; schaden=6; }
   }
   else if(id==='luecke'){
@@ -321,7 +354,8 @@ function kampfAktion(id){
       gefahrMod = -8; K.geschlossen = 3;
       S.kameradschaft = Math.min(100, S.kameradschaft+4);
       let lob = '';
-      if(!K.lueckeGelobt){ K.lueckeGelobt = true; S.ruf += 1; lob = ' Der Capitaine geht hinter der Linie durch und sieht es.'; }
+      if(!K.lueckeGelobt){ K.lueckeGelobt = true; lob = ' Der Capitaine geht hinter der Linie durch und sieht es.'
+        + anerkennung(1,'Die Linie geschlossen gehalten'); }
       text = 'Du schiebst die Männer zusammen, bis kein Loch mehr in der Linie ist. Deine acht wissen jetzt, wozu du gut bist.'+lob;
     }
     else { text='Sie rücken auf, aber zu langsam, und die Lücke bleibt offen. Durch ein offenes Glied schießt es sich leichter.'; }
@@ -402,6 +436,10 @@ function kampfEnde(sieg, letzterText){
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
+        ${kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
+          ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
+          ${kk.ruhm>=RUHM_JE_GEFECHT?'<p class="hinweis" style="margin:9px 0 0">Mehr sieht in diesem Rauch niemand.</p>':''}
+        </div>`:''}
         <div class="probe" style="margin-top:10px">${sieg?'GEFECHT BESTANDEN':'GEFECHT VERLOREN'} · ${kk.runde} RUNDEN</div>
       </div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>

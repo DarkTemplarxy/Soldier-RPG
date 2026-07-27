@@ -233,9 +233,30 @@ function wertung(){
   return p;
 }
 
+/* Was von einem Mann bleibt. Die vier alten Felder stehen vorn, damit die
+   Chroniktabelle unverändert weiterläuft; alles Übrige ist der Zusatz, den das
+   Blatt anzeigt. Ältere Einträge ohne diese Felder bleiben lesbar — sie zeigen
+   dann eben nur die Zeile. */
+function chronikblatt(endeText, p){
+  const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  return {
+    name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe,
+    herkunft:S.herkunft, zweig:S.zweig, rangN:S.rang, gefallen:!S.lebt,
+    ort:letzte.datum || '', stationen:stationen(),
+    attr:Object.assign({},S.attr), fert:Object.assign({},S.fert),
+    ausr:Object.keys(S.ausr).map(k=>({name:S.ausr[k].name, zustand:S.ausr[k].zustand,
+                                      verschleiss:S.ausr[k].verschleiss})),
+    wunden:S.wunden.map(w=>w.name), ruf:S.ruf, gunst:S.gunst,
+    kameradschaft:S.kameradschaft, belastung:S.belastung, atem:S.atem,
+    nennungen:S.nennungen, geld:S.geld, gekniffen:!!S.gekniffen,
+    kaeufe:(S.kaeufe||[]).slice(), gekauft:Object.assign({},S.gekauft||{}),
+    log:(S.log||[]).slice(), wertung:p
+  };
+}
+
 function eintragen(endeText){
   const p = wertung();
-  META.chronik.push({name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe});
+  META.chronik.push(chronikblatt(endeText, p));
   META.laeufe = (META.laeufe|0) + 1;
   META.vp = Math.max(META.vp, p.summe);
   chronikKuerzen();
@@ -244,13 +265,17 @@ function eintragen(endeText){
   return p;
 }
 
-function wertungsTabelle(p){
+function wertungsTabelle(p){ return wertungsTabelleAus({wertung:p, rang:rangName(S.rang),
+  stationen:stationen(), ruf:S.ruf, nennungen:S.nennungen}); }
+
+function wertungsTabelleAus(c){
+  const p = c.wertung; if(!p) return '';
   return `<table>
     <tr><th>Wofür</th><th class="n">VP</th></tr>
-    <tr><td class="d">Erreichter Rang — ${rangName(S.rang)}</td><td class="n">${p.rang}</td></tr>
-    <tr><td class="d">Erreichte Stationen (${stationen()} × 3)</td><td class="n">${p.stationen}</td></tr>
-    <tr><td class="d">Ruf ${S.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
-    <tr><td class="d">Im Tagesbefehl genannt (${S.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
+    <tr><td class="d">Erreichter Rang — ${esc(c.rang)}</td><td class="n">${p.rang}</td></tr>
+    <tr><td class="d">Erreichte Stationen (${c.stationen} × 3)</td><td class="n">${p.stationen}</td></tr>
+    <tr><td class="d">Ruf ${c.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
+    <tr><td class="d">Im Tagesbefehl genannt (${c.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
     <tr><td class="d">Nie vor Zeugen gekniffen</td><td class="n">${p.sauber}</td></tr>
     <tr class="hi"><td class="d"><b>Summe</b></td><td class="n"><b>${p.summe}</b></td></tr>

@@ -328,6 +328,11 @@ Die Überlebensquote liegt mit 49 % dagegen sauber in der Mitte des Bandes, und 
 
 `node test/balance.js 40` misst das. **Weicht der Wert nach einer Änderung um mehr als zehn Punkte ab, ist die Änderung zu prüfen.**
 
+**Zwei Fallen beim Messen, beide teuer bezahlt:**
+
+1. **Der Punkte-Median ist bei ~50 % Überlebensquote unbrauchbar.** Ein überstandener Lauf bekommt +25 und +10 pauschal; der Median springt deshalb um rund dreißig Punkte, sobald die Quote die 50 % kreuzt. Gemessen: 91 bei 43 % Überleben, 59 bei 36 % — dieselbe Mechanik, nur die andere Seite der Schwelle. **Der Median misst hier nicht die Härte, sondern nur, ob der mittlere Lauf zufällig überlebt hat.** Wer eine Änderung beurteilen will, nimmt die Quote.
+2. **Das Rauschen ist größer, als es sich anfühlt.** Derselbe unveränderte Stand lieferte an einem Nachmittag 49 % und 43 %. Bei 80 Läufen ist eine Standardabweichung rund 5,6 Punkte, zwei also elf. **Wer einen Unterschied von unter zehn Punkten deutet, deutet Rauschen** — dagegen hilft nur, den alten Stand noch einmal zu messen (`git stash`) statt gegen eine Zahl von gestern zu vergleichen.
+
 **Was der Testbot kann und was nicht.** Er nimmt in Szenen immer die erste Wahl, im Gefecht die sinnvolle Aktion und im Lager seit der Gunst-Änderung „Am Feuer sitzen bleiben", solange seine Fürsprache unter 4 liegt. Ohne diese eine Ausnahme bemühte er sich nie um einen Fürsprecher und würde nie befördert — gemessen würde dann nicht die Schwelle, sondern die Blindheit des Bots. Wer eine Schwelle einführt, die mehrere Handlungen verlangt, muss dem Bot beibringen, sie zu verfolgen, sonst misst das Skript etwas anderes als das Spiel.
 
 ---

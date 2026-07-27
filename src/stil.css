@@ -140,6 +140,20 @@
     text-align:right;color:var(--brass)}
   .punktvp.aus{color:var(--faint)}
 
+  /* Chronikblatt: der Name ist ein Knopf, dahinter steht der ganze Feldzug */
+  .namebtn{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;
+    font-size:14px;color:#c2b8a6;text-align:left;border-bottom:1px dotted var(--faint)}
+  .namebtn:hover{color:var(--brass);border-bottom-color:var(--brass)}
+  .blattzeile{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:baseline;
+    padding:5px 0;border-bottom:1px solid #232019;font-size:14px;color:#c2b8a6}
+  .blattzeile:last-child{border-bottom:none}
+  .blattort{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+  .tat{display:flex;justify-content:space-between;gap:12px;padding:4px 0;
+    border-bottom:1px solid #232019;font-size:14px;color:#c2b8a6}
+  .tat:last-child{border-bottom:none}
+  .tat b{font-weight:normal;color:#a9bb7d;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+
   /* Kampagnenverlauf links — was man gesehen hat, sieht man; sonst nichts */
   .verlauf .cb{padding:8px 9px}
   .kmp{border-bottom:1px solid #262219}

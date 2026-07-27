@@ -5,6 +5,23 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-27 — Chronikblatt und Anerkennung im Gefecht
+
+**Die Namen in der Chronik sind anklickbar.** Dahinter steht der ganze Feldzug: Rangabzeichen, Herkunft, woran er gestorben ist, jede Entscheidung mit Ort, die Wertung und sein Zustand am Ende. `eintragen()` legt dafür ein `chronikblatt` an — die vier alten Felder stehen vorn, damit die Tabelle unverändert läuft, alles Übrige ist Zusatz. **Kein Fassungswechsel nötig:** Ältere Einträge ohne diese Felder bleiben lesbar und sagen es selbst („Von diesem Mann ist nur die Zeile geblieben").
+
+**Anerkennung im Gefecht.** Jede Tat, die jemand sehen konnte, bringt sofort Ruf — sichtbar in der Rundenzeile und in der Seitenleiste, nicht erst am Ende. Getroffen +1, gezielt getroffen +2, stehen geblieben +1, mit dem Bajonett vor +2, eine Salve, die saß +1, die Linie geschlossen gehalten +1. Am Gefechtsende steht „Was gesehen wurde" mit jeder Tat einzeln. Obergrenze **3 je Gefecht** — über fünf Gefechte fünfzehn Punkte auf eine Schwelle von dreißig, und das ist schon viel.
+
+**Ein Umweg, der nicht funktioniert hat.** Zuerst sollte das keine Zugabe sein, sondern eine Verschiebung: pauschaler Siegesruf minus vier, bis zu fünf im Gefecht zurückzuverdienen. Gemessen brach der Caporal-Anteil von 39 % auf 21 %, weil der Testbot sich nur etwa zwei Punkte je Gefecht zurückholt — und über den Rang fiel auch der zusätzliche Lagerabend weg. Zurückgenommen, der Siegesruf steht wieder bei 5 / 16 / 8 / 14 / 15.
+
+**Zwei Messfallen, beide teuer bezahlt und jetzt in `CLAUDE.md` vermerkt:**
+
+1. **Der Punkte-Median ist bei ~50 % Überlebensquote unbrauchbar.** Ein überstandener Lauf bekommt +35 pauschal; der Median springt um dreißig Punkte, sobald die Quote die 50 % kreuzt (gemessen 91 bei 43 %, 59 bei 36 % — dieselbe Mechanik). Ich hatte den Sprung als „die Männer sterben früher" gelesen. Er misst nur, ob der mittlere Lauf zufällig überlebt hat.
+2. **Das Rauschen ist größer, als es sich anfühlt.** Derselbe unveränderte Stand lieferte an einem Nachmittag 49 % und 43 %. Bei 80 Läufen sind zwei Standardabweichungen elf Punkte. Wer weniger als zehn Punkte deutet, deutet Rauschen — dagegen hilft nur, den alten Stand per `git stash` noch einmal zu messen statt gegen eine Zahl von vorhin zu vergleichen.
+
+Eine Messung über 120 Läufe läuft; der Wert wird nachgetragen.
+
+---
+
 ## 2026-07-27 — Rang gibt Zeit, und die Befehle des Caporals bringen etwas
 
 **Ab Caporal ein Lagerabend mehr, ab Sergent zwei** (`abendeFuer()` in `src/abschluss.js`). Im Spiel: Unteroffiziere sind vom Wachdienst und den Handreichungen befreit, die den Füsilier den halben Abend kosten. Im Entwurf: Ohne den zusätzlichen Abend verdrängt die rangeigene Handlung „Deine acht Mann drillen" die eigene Ausbildung, und der Rang fühlt sich an wie eine Strafe. Das ist die eine Stelle, an der ein Rang mehr gibt als einen Knopf — und sie ist nötig, damit der Knopf überhaupt drückbar ist.

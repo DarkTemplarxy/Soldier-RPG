@@ -147,6 +147,20 @@
     text-align:right;color:var(--brass)}
   .punktvp.aus{color:var(--faint)}
 
+  /* Chronikblatt: der Name ist ein Knopf, dahinter steht der ganze Feldzug */
+  .namebtn{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;
+    font-size:14px;color:#c2b8a6;text-align:left;border-bottom:1px dotted var(--faint)}
+  .namebtn:hover{color:var(--brass);border-bottom-color:var(--brass)}
+  .blattzeile{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:baseline;
+    padding:5px 0;border-bottom:1px solid #232019;font-size:14px;color:#c2b8a6}
+  .blattzeile:last-child{border-bottom:none}
+  .blattort{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+  .tat{display:flex;justify-content:space-between;gap:12px;padding:4px 0;
+    border-bottom:1px solid #232019;font-size:14px;color:#c2b8a6}
+  .tat:last-child{border-bottom:none}
+  .tat b{font-weight:normal;color:#a9bb7d;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+
   /* Kampagnenverlauf links — was man gesehen hat, sieht man; sonst nichts */
   .verlauf .cb{padding:8px 9px}
   .kmp{border-bottom:1px solid #262219}
@@ -1111,10 +1125,12 @@ function seitenleiste(){
 function zeigeTitel(){
   LAUF=null; binde(); kopfzeile();
   const offen = laufVorhanden();
-  const chron = META.chronik.length ? META.chronik.slice().reverse().map(c=>
-    `<tr${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?' class="hi"':''}>
-      <td class="d">${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?'★ ':''}${esc(c.name)}</td>
-      <td class="d">${esc(c.rang)}</td><td class="d">${esc(c.ende)}</td><td class="n">${c.punkte}</td></tr>`).join('')
+  const best = META.chronik.length ? Math.max(...META.chronik.map(x=>x.punkte)) : 0;
+  const chron = META.chronik.length ? META.chronik.map((c,i)=>
+    `<tr${c.punkte===best?' class="hi"':''}>
+      <td class="d"><button class="namebtn" onclick="zeigeBlatt(${i})">${c.punkte===best?'★ ':''}${esc(c.name)}</button></td>
+      <td class="d">${esc(c.rang)}</td><td class="d">${esc(c.ende)}</td><td class="n">${c.punkte}</td></tr>`)
+    .reverse().join('')
     : '<tr><td class="d" colspan="4">Noch kein Eintrag. Der erste Mann wartet.</td></tr>';
 
   app.innerHTML = `
@@ -1143,6 +1159,67 @@ function zeigeTitel(){
     ${verlauf()}
   </div>`;
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
+}
+
+/* ── Das Blatt eines Mannes ──
+   Was in der Chronik als eine Zeile steht, war ein ganzer Feldzug. Hier steht
+   er ausgeschrieben: womit er einrückte, was er unterwegs entschieden hat und
+   womit er aufgehört hat. Ältere Einträge kennen diese Felder nicht — dann
+   bleibt es bei der Zeile, und das Blatt sagt das auch. */
+function zeigeBlatt(i){
+  const c = META.chronik[i];
+  if(!c){ zeigeTitel(); return; }
+  const zeile = (k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;
+
+  if(!c.attr){
+    app.innerHTML = `<div class="card"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ende)}</span></div>
+      <div class="cb"><div class="note">Von diesem Mann ist nur die Zeile geblieben — er stammt aus einer Fassung,
+      die noch kein Blatt geführt hat. ${esc(c.rang)}, ${c.punkte} Punkte.</div>
+      <div style="margin-top:16px"><button class="plain" onclick="zeigeTitel()">Zurück zur Chronik</button></div>
+      </div></div>`;
+    return;
+  }
+
+  const taten = c.log.length ? c.log.map(z=>{
+    const t = z.split(': '), n = KAPITEL.find(x=>x.id===t[0]);
+    const wo = n ? ((n.datum||'').split(' · ')[1] || n.ort || t[0]) : t[0];
+    return `<div class="blattzeile"><span class="blattort">${esc(wo)}</span><span>${esc(t.slice(1).join(': '))}</span></div>`;
+  }).join('') : '<p class="hinweis">Er hat nichts entschieden, was jemand aufgeschrieben hätte.</p>';
+
+  const fert = FERTIGKEITEN.filter(([k])=>c.fert[k]>10);
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>
+      <div class="card"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ort||'')}</span></div>
+        <div class="cb">
+          <div class="rangzeile">${rangabzeichen({rang:c.rangN||1, zweig:c.zweig})}
+            <p class="whorank">${esc(c.rang)} · ${esc(c.herkunft||'')} · 32. Halbbrigade</p></div>
+          <div class="note ${c.gefallen?'red':'green'}">${c.gefallen
+            ? esc(c.ende)+'. Von den Stationen dieses Feldzugs hat er '+c.stationen+' erreicht.'
+            : esc(c.ende)+'. Er hat den Feldzug überstanden — '+c.stationen+' Stationen.'}</div>
+          <div class="lage"><div class="lagekopf">Was er unterwegs entschieden hat</div>${taten}</div>
+        </div></div>
+      <div class="card"><div class="ch"><span>Wertung</span><span>${c.punkte} Veteranenpunkte</span></div>
+        <div class="cb">${wertungsTabelleAus(c)}
+        <div style="margin-top:16px"><button class="plain" onclick="zeigeTitel()">Zurück zur Chronik</button></div>
+        </div></div>
+    </div>
+    <aside class="card"><div class="ch"><span>Sein Zustand am Ende</span></div><div class="cb">
+      <p class="mini">Attribute</p>
+      ${ATTRIBUTE.map(([k,n])=>zeile(mitHilfe(k,n), c.attr[k])).join('')}
+      <div class="rule"></div>
+      <p class="mini">Fertigkeiten</p>
+      ${fert.length ? fert.map(([k,n])=>zeile(mitHilfe(k,n), c.fert[k])).join('') : '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
+      <div class="rule"></div>
+      <p class="mini">Ausrüstung · Zustand</p>
+      ${c.ausr.filter(a=>a.verschleiss>0).map(a=>zeile(esc(a.name), a.zustand)).join('')}
+      <div class="rule"></div>
+      ${zeile('Ruf', c.ruf)}${zeile('Gunst Martel', c.gunst)}${zeile('Kameradschaft', c.kameradschaft)}
+      ${zeile('Belastung', c.belastung)}${zeile('Atem', c.atem)}${zeile('Geld', c.geld+' F')}
+      ${zeile('Im Tagesbefehl', c.nennungen+'×')}
+      ${zeile('Wunden', c.wunden.length ? c.wunden.map(esc).join(', ') : 'keine')}
+    </div></aside>
+  </div>`;
+  kopfzeile();
 }
 
 /* ── Veteranenpunkte ausgeben ──
@@ -1468,6 +1545,34 @@ function aktionen(){
    der Szene in die erste Runde fällt, merkt davon nichts. Der Anmarsch kostet
    deshalb auch etwas: Marsch nutzt Schuhe ab und geht auf den Atem. */
 
+/* ── Anerkennung im Gefecht ──
+   Ruf entsteht aus dem, was man tut, nicht nur daraus, wie es ausgeht. Jede
+   Tat, die jemand sehen konnte, bringt sofort etwas — sichtbar in der
+   Seitenleiste, bevor das Gefecht vorbei ist.
+
+   Höchstens drei je Gefecht — mehr sieht in diesem Rauch niemand. Die Grenze
+   ist knapp gewählt, weil Ruf die Beförderungswährung ist: Ein Zuschlag von
+   drei je Gefecht sind über fünf Gefechte fünfzehn Punkte auf eine Schwelle
+   von dreißig, und das ist schon viel. Neu ist außerdem, dass auch ein
+   verlorenes Gefecht Ruf bringen kann — gesehen wird man trotzdem.
+
+   *Ein Umweg, der nicht funktioniert hat:* Statt eines Zuschlags war das
+   zuerst eine Umverteilung — pauschaler Siegesruf minus vier, bis zu fünf hier
+   zurückzuverdienen. Gemessen brach der Caporal-Anteil von 39 % auf 21 % und
+   die Überlebensquote von 49 % auf 40 %, weil der Testbot sich nur etwa zwei
+   Punkte je Gefecht zurückholt und über den Rang auch der zusätzliche
+   Lagerabend wegfiel. Wer das noch einmal versucht, misst beide Zahlen. */
+const RUHM_JE_GEFECHT = 3;
+
+function anerkennung(betrag, was){
+  const rest = Math.max(0, RUHM_JE_GEFECHT - K.ruhm);
+  const gibt = Math.min(betrag, rest);
+  if(gibt <= 0) return '';
+  K.ruhm += gibt; S.ruf += gibt;
+  K.taten.push({was, ruf:gibt});
+  return ` <span class="fein">gesehen · Ruf +${gibt}</span>`;
+}
+
 function starteKampf(n){
   if(n.anmarsch && !S.anmarschGesehen){
     S.anmarschGesehen = n.id;
@@ -1481,6 +1586,7 @@ function starteKampf(n){
   S.anmarschGesehen = null;
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
+              ruhm:0, taten:[],
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -1703,8 +1809,9 @@ function kampfAktion(id){
     K.geladen = false;
     S.atem = Math.max(0, S.atem - (sorgfalt?10:5));
     if(p.erfolg){ schaden = sorgfalt? 22+Math.random()*10 : 12+Math.random()*8;
-      text = sorgfalt? 'Du liegst still, atmest aus und drückst ab. Drüben fällt einer, und du weißt, dass er dir gehört.'
-                     : 'Du feuerst in den Rauch. Irgendetwas drüben gerät in Unordnung.'; }
+      text = (sorgfalt? 'Du liegst still, atmest aus und drückst ab. Drüben fällt einer, und du weißt, dass er dir gehört.'
+                      : 'Du feuerst in den Rauch. Irgendetwas drüben gerät in Unordnung.')
+           + anerkennung(sorgfalt?2:1, sorgfalt?'Ein gezielter Schuss, der saß':'Getroffen'); }
     else { text = S.ausr.muskete.zustand<35 ? 'Das Schloss klickt und nichts geschieht. Die Waffe ist verrostet.'
                                             : 'Der Schuss geht zu hoch. In diesem Rauch trifft man mehr durch Zufall als durch Können.'; }
     if(S.ausr.muskete.verschleiss) S.ausr.muskete.zustand = Math.max(0,S.ausr.muskete.zustand-2);
@@ -1724,8 +1831,9 @@ function kampfAktion(id){
   else if(id==='halten'){
     const p = probe('kaltbluetigkeit', 40);
     K.deckung=false;
-    if(p.erfolg){ schaden = 6; S.belastung=Math.max(0,S.belastung-3);
-      text='Du bleibst stehen. Links und rechts bleiben sie auch stehen, weil du stehst. Die Linie hält.'; nutzen('drill',1); }
+    if(p.erfolg){ schaden = 6; S.belastung=Math.max(0,S.belastung-3); nutzen('drill',1);
+      text='Du bleibst stehen. Links und rechts bleiben sie auch stehen, weil du stehst. Die Linie hält.'
+         + anerkennung(1,'Stehen geblieben, als es darauf ankam'); }
     else { S.belastung=Math.min(100,S.belastung+6);
       text='Du stehst, aber deine Hände zittern so, dass du nichts damit anfangen kannst.'; }
   }
@@ -1734,13 +1842,15 @@ function kampfAktion(id){
     K.deckung=false; S.atem=Math.max(0,S.atem-18); gefahrMod = +26;
     K.vorn = p.erfolg;
     if(p.erfolg){ schaden = 30+Math.random()*14;
-      text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'; S.ruf+=2; }
+      text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'
+         + anerkennung(2,'Mit dem Bajonett vorgegangen'); }
     else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.'; S.belastung+=7; }
   }
   else if(id==='salve'){
     const p = probe('autoritaet', 40);
     if(p.erfolg){ schaden = 26+Math.random()*10; nutzen('drill',1);
-      text='„Anlegen — Feuer!" Acht Musketen gehen fast gleichzeitig los. Fast. Aber es reicht.'; }
+      text='„Anlegen — Feuer!" Acht Musketen gehen fast gleichzeitig los. Fast. Aber es reicht.'
+         + anerkennung(1,'Eine Salve, die saß'); }
     else { text='Du rufst den Befehl, und drei von acht hören ihn. Das Ergebnis ist ein trauriges Geknatter.'; schaden=6; }
   }
   else if(id==='luecke'){
@@ -1752,7 +1862,8 @@ function kampfAktion(id){
       gefahrMod = -8; K.geschlossen = 3;
       S.kameradschaft = Math.min(100, S.kameradschaft+4);
       let lob = '';
-      if(!K.lueckeGelobt){ K.lueckeGelobt = true; S.ruf += 1; lob = ' Der Capitaine geht hinter der Linie durch und sieht es.'; }
+      if(!K.lueckeGelobt){ K.lueckeGelobt = true; lob = ' Der Capitaine geht hinter der Linie durch und sieht es.'
+        + anerkennung(1,'Die Linie geschlossen gehalten'); }
       text = 'Du schiebst die Männer zusammen, bis kein Loch mehr in der Linie ist. Deine acht wissen jetzt, wozu du gut bist.'+lob;
     }
     else { text='Sie rücken auf, aber zu langsam, und die Lücke bleibt offen. Durch ein offenes Glied schießt es sich leichter.'; }
@@ -1833,6 +1944,10 @@ function kampfEnde(sieg, letzterText){
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
+        ${kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
+          ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
+          ${kk.ruhm>=RUHM_JE_GEFECHT?'<p class="hinweis" style="margin:9px 0 0">Mehr sieht in diesem Rauch niemand.</p>':''}
+        </div>`:''}
         <div class="probe" style="margin-top:10px">${sieg?'GEFECHT BESTANDEN':'GEFECHT VERLOREN'} · ${kk.runde} RUNDEN</div>
       </div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
@@ -2158,9 +2273,30 @@ function wertung(){
   return p;
 }
 
+/* Was von einem Mann bleibt. Die vier alten Felder stehen vorn, damit die
+   Chroniktabelle unverändert weiterläuft; alles Übrige ist der Zusatz, den das
+   Blatt anzeigt. Ältere Einträge ohne diese Felder bleiben lesbar — sie zeigen
+   dann eben nur die Zeile. */
+function chronikblatt(endeText, p){
+  const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  return {
+    name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe,
+    herkunft:S.herkunft, zweig:S.zweig, rangN:S.rang, gefallen:!S.lebt,
+    ort:letzte.datum || '', stationen:stationen(),
+    attr:Object.assign({},S.attr), fert:Object.assign({},S.fert),
+    ausr:Object.keys(S.ausr).map(k=>({name:S.ausr[k].name, zustand:S.ausr[k].zustand,
+                                      verschleiss:S.ausr[k].verschleiss})),
+    wunden:S.wunden.map(w=>w.name), ruf:S.ruf, gunst:S.gunst,
+    kameradschaft:S.kameradschaft, belastung:S.belastung, atem:S.atem,
+    nennungen:S.nennungen, geld:S.geld, gekniffen:!!S.gekniffen,
+    kaeufe:(S.kaeufe||[]).slice(), gekauft:Object.assign({},S.gekauft||{}),
+    log:(S.log||[]).slice(), wertung:p
+  };
+}
+
 function eintragen(endeText){
   const p = wertung();
-  META.chronik.push({name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe});
+  META.chronik.push(chronikblatt(endeText, p));
   META.laeufe = (META.laeufe|0) + 1;
   META.vp = Math.max(META.vp, p.summe);
   chronikKuerzen();
@@ -2169,13 +2305,17 @@ function eintragen(endeText){
   return p;
 }
 
-function wertungsTabelle(p){
+function wertungsTabelle(p){ return wertungsTabelleAus({wertung:p, rang:rangName(S.rang),
+  stationen:stationen(), ruf:S.ruf, nennungen:S.nennungen}); }
+
+function wertungsTabelleAus(c){
+  const p = c.wertung; if(!p) return '';
   return `<table>
     <tr><th>Wofür</th><th class="n">VP</th></tr>
-    <tr><td class="d">Erreichter Rang — ${rangName(S.rang)}</td><td class="n">${p.rang}</td></tr>
-    <tr><td class="d">Erreichte Stationen (${stationen()} × 3)</td><td class="n">${p.stationen}</td></tr>
-    <tr><td class="d">Ruf ${S.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
-    <tr><td class="d">Im Tagesbefehl genannt (${S.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
+    <tr><td class="d">Erreichter Rang — ${esc(c.rang)}</td><td class="n">${p.rang}</td></tr>
+    <tr><td class="d">Erreichte Stationen (${c.stationen} × 3)</td><td class="n">${p.stationen}</td></tr>
+    <tr><td class="d">Ruf ${c.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
+    <tr><td class="d">Im Tagesbefehl genannt (${c.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
     <tr><td class="d">Nie vor Zeugen gekniffen</td><td class="n">${p.sauber}</td></tr>
     <tr class="hi"><td class="d"><b>Summe</b></td><td class="n"><b>${p.summe}</b></td></tr>
