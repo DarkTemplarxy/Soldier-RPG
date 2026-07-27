@@ -11,6 +11,8 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 Die Handlung heißt bei ihm **„Flach hinlegen"** und hat einen eigenen Text — er liegt allein in einer Ackerfurche, nicht neben Kameraden in der Linie. Wirkung unverändert: Atem +10, Belastung −2, Gefahr −22, kein Schuss.
 
+**Bei Füsilier und Grenadier heißt sie jetzt „Hinknien"**, nicht mehr „Hinwerfen". In der geschlossenen Linie legt sich niemand hin — das Glied bliebe offen; man geht auf ein Knie und lässt den Kopf hinter den Rücken des Vordermanns. Damit trennen sich die beiden Zweige auch im Wort: Der Plänkler legt sich flach, der Mann in der Linie kniet. Die Atem-Warnung im Gefecht und die Zeile im Sichtfeld nennen jeweils die Handlung, die es beim eigenen Zweig wirklich gibt; die Testbots kennen beide Bezeichnungen.
+
 Gemessen über 40 Läufe: überstanden 50 %, Caporal 33 % — im Rahmen der Streuung von ±8 Punkten um die gültigen 44 % / 30 % aus 80 Läufen. Der Zweig betrifft ohnehin nur rund jeden achten Lauf.
 
 ---
