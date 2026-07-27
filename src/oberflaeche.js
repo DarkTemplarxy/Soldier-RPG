@@ -38,9 +38,10 @@ function kopfzeile(){
 
 let VERLAUF_OFFEN = {italien:1};
 
+/* Kurze Wörter: Die Spalte ist 246 px breit, „Neuaufstellung" bricht dort um. */
 function stationsArt(n){
-  return {kampf:'Gefecht', lager:'Lager', winter:'Winterquartier',
-          befoerderung:'Neuaufstellung', elite:'Auswahl', ende:'Ende'}[n.typ] || 'Station';
+  return {kampf:'Gefecht', lager:'Lager', winter:'Winter',
+          befoerderung:'Musterung', elite:'Auswahl', ende:'Ende'}[n.typ] || '';
 }
 
 function verlauf(){
@@ -56,16 +57,18 @@ function verlauf(){
     } else if(!gesehen.length){
       inhalt = '<div class="kmpleer">Du warst noch nirgends. Es fängt in Savona an.</div>';
     } else {
+      // Eine Zeile je Station: Ort, Art, wie oft. Das Datum stand früher darunter
+      // und machte aus der Liste eine Tabelle — es steht ohnehin im Kartenkopf,
+      // sobald man dort ist. Die beiden Stationen in Savona trennt jetzt die Art.
       inhalt = gesehen.map(n=>{
         const b = META.bestKapitel[n.id];
-        const teil = (n.datum||'').split(' · ');
-        const ort = teil[1] || n.ort || n.id;
-        // Datum statt Gattungswort: „Savona" gibt es zweimal, den 1. April nur einmal
-        const unten = [teil[0], n.typ!=='szene' ? stationsArt(n) : '', b.mal>1 ? b.mal+'×' : '']
-          .filter(Boolean).join(' · ');
-        return `<div class="kmpst ${n.id===jetzt?'jetzt':''} ${n.typ==='kampf'?'gefecht':''}">
+        const ort = (n.datum||'').split(' · ')[1] || n.ort || n.id;
+        const art = stationsArt(n);
+        return `<div class="kmpst ${n.id===jetzt?'jetzt':''} ${n.typ==='kampf'?'gefecht':''}"
+          title="${esc(n.datum||'')}">
           <span class="kmpst-ort">${esc(ort)}</span>
-          <span class="kmpst-art">${esc(unten)}</span></div>`;
+          ${art?`<span class="kmpst-art">${art}</span>`:''}
+          ${b.mal>1?`<span class="kmpst-mal">${b.mal}×</span>`:''}</div>`;
       }).join('');
       if(gesehen.length < st.length)
         inhalt += '<div class="kmpleer">Was danach kommt, weißt du nicht.</div>';
@@ -154,7 +157,7 @@ function zeigeTitel(){
       ${esc(offen.mann.name)} · ${esc(rangNameVon(offen.mann))} · ${esc((KAPITEL[Math.min(offen.node,KAPITEL.length-1)].datum||'').split(' · ')[0])}</div>` : ''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
       ${offen ? '<button class="plain" onclick="fortsetzen()">Feldzug fortsetzen</button>' : ''}
-      <button class="plain" onclick="zeigeLaden()">Neuen Mann aufstellen</button>
+      <button class="plain" onclick="zeigeErschaffung(true)">Neuen Mann aufstellen</button>
       <button class="plain" onclick="speichern()">Spielstand sichern</button>
       <button class="plain" onclick="document.getElementById('ladefeld').click()">Spielstand laden</button>
       <input type="file" id="ladefeld" accept=".json" class="hidden" onchange="laden(event)">
@@ -182,49 +185,69 @@ function zeigeTitel(){
 let AUSWAHL = [], PUNKTE = {};
 const PUNKT_SCHRITT = 5;
 function istAttribut(k){ return ATTRIBUTE.some(([a])=>a===k); }
-function punktBasis(k){ return istAttribut(k) ? 20 : 10; }   // Sockel bei der Erschaffung
-function punktGrenze(k){ return istAttribut(k) ? 60 : 50; }  // darüber nur noch im Spiel
-function punktKosten(k){ const b = punktBasis(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
+
+/* Der Preis rechnet vom **tatsächlichen** Wert, nicht vom Sockel: Die Erschaffung
+   kommt zuerst, also steht schon fest, was Herkunft und Pool ergeben haben. Wer
+   als Wilderer mit Muskete 40 anfängt, zahlt für den nächsten Punkt mehr als
+   einer, der bei 10 steht — das ist der Sinn von PRO_PUNKT. */
+function istWert(k){
+  const h = HERKUENFTE.find(x=>x.id===(ERSCH&&ERSCH.herkunft)) || {attr:{},fert:{}};
+  return istAttribut(k)
+    ? Math.max(0, Math.min(100, (ERSCH?ERSCH.attr[k]:20) + (h.attr[k]||0)))
+    : Math.max(0, Math.min(100, 10 + (h.fert[k]||0)));
+}
+function punktGrenze(k){ return istAttribut(k) ? 70 : 60; }   // darüber nur noch im Feld
+function punktKosten(k){ const b = istWert(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
 function gesamtKosten(){
   return AUSWAHL.reduce((s,id)=>s+LADEN.find(p=>p.id===id).vp,0)
        + Object.keys(PUNKTE).reduce((s,k)=>s+punktKosten(k),0);
 }
 
 function punktZeile(k,n){
-  const p = PUNKTE[k]||0;
-  return `<div class="punktzeile" id="pz_${k}">
+  const p = PUNKTE[k]||0, ist = istWert(k);
+  return `<div class="punktzeile ${p?'hi':''}" id="pz_${k}">
     <span>${mitHilfe(k,n)}</span>
-    <span class="punktplus ${p?'':'aus'}" id="pp_${k}">${p?'+'+p:'—'}</span>
+    <span class="punktwert" id="pw_${k}">${ist}${p?` <i>→</i> ${ist+p}`:''}</span>
     <span class="punktvp ${p?'':'aus'}" id="pv_${k}">${p?punktKosten(k)+' VP':''}</span>
     <span><button class="pmbtn" onclick="stellePunkt('${k}',-PUNKT_SCHRITT)" id="pm_${k}">−</button>
     <button class="pmbtn" onclick="stellePunkt('${k}',PUNKT_SCHRITT)" id="pa_${k}">+</button></span>
   </div>`;
 }
 
+/* Zweiter Schritt der Erschaffung: Was der Vorrat aus dem fertigen Mann macht. */
 function zeigeLaden(){
+  if(!ERSCH || !ERSCH.herkunft){ zeigeErschaffung(); return; }
   AUSWAHL = []; PUNKTE = {};
   const zeilen = LADEN.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
     <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
     onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
+  const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft);
   app.innerHTML = `
-  <div class="card"><div class="ch"><span>Veteranenpunkte ausgeben</span><span id="vpanz">${META.vp} verfügbar</span></div>
+  <div class="card"><div class="ch"><span>Zweiter Schritt · Veteranenpunkte</span><span id="vpanz">${META.vp} verfügbar</span></div>
    <div class="cb">
-    <div class="note">Der Vorrat ist die Punktzahl deines besten Laufs. Er wird nicht verbraucht — bei jedem Neustart verteilst du ihn neu.
-    ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu.':''}</div>
-    <table style="margin-top:16px"><tr><th>Ausrüstung</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+    <div class="note"><b>${esc(ERSCH.name)}</b>, ${esc(h.name)}. Die Werte unten sind die, mit denen er einrücken würde.
+    Der Vorrat ist die Punktzahl deines besten Laufs; er wird nicht verbraucht, sondern bei jedem Neustart neu verteilt.
+    ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu — der erste Mann rückt ein, wie er ist.':''}</div>
    </div></div>
 
-  <div class="card"><div class="ch"><span>Ausbildung vorwegnehmen</span><span>je ${PUNKT_SCHRITT} Punkte · wird mit jedem Zehner teurer</span></div>
+  <div class="card"><div class="ch"><span>Attribute ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 70</span></div>
    <div class="cb">
-    <div class="note">Was ein anderer sich in zwei Jahren beigebracht hätte. Der erste Zehner kostet 1 VP je Punkt, der fünfte schon 4 — wer hoch einsteigt, zahlt dafür.
-    <br><br>Attribute höchstens 60, Fertigkeiten höchstens 50. Alles darüber musst du dir im Feld verdienen.</div>
-    <div class="grid2" style="margin-top:16px">
-      <div><p class="mini">Attribute</p>${ATTRIBUTE.filter(([k])=>k!=='bildung').map(([k,n])=>punktZeile(k,n)).join('')}
-        <p class="mini" style="margin-top:14px">Bildung</p>${punktZeile('bildung','Bildung')}</div>
-      <div><p class="mini">Fertigkeiten</p>${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}</div>
-    </div>
-    <div style="margin-top:18px;display:flex;gap:10px"><button class="plain" onclick="zeigeErschaffung()">Weiter zur Erschaffung</button>
-    <button class="plain" onclick="zeigeTitel()">Zurück</button></div>
+    <p class="hinweis">Gerechnet wird vom jetzigen Wert. Der erste Zehner kostet 1 VP je Punkt, der fünfte schon 4 — wer schon hoch steht, zahlt für jeden weiteren Punkt mehr.</p>
+    ${ATTRIBUTE.map(([k,n])=>punktZeile(k,n)).join('')}
+   </div></div>
+
+  <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 60</span></div>
+   <div class="cb">
+    <p class="hinweis">Alle beginnen bei 10, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
+    ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
+   </div></div>
+
+  <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
+   <div class="cb">
+    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+    <div style="margin-top:18px;display:flex;gap:10px">
+      <button class="plain" id="startbtn" onclick="starte()">Einrücken</button>
+      <button class="plain" onclick="zeigeErschaffung()">Zurück zur Erschaffung</button></div>
    </div></div>`;
   aktualisiereLaden();
 }
@@ -236,7 +259,7 @@ function waehle(id){
 }
 function stellePunkt(k,d){
   const alt = PUNKTE[k]||0, neu = alt + d;
-  if(neu < 0 || punktBasis(k)+neu > punktGrenze(k)) return;
+  if(neu < 0 || istWert(k)+neu > punktGrenze(k)) return;
   PUNKTE[k] = neu;
   if(gesamtKosten() > META.vp){ PUNKTE[k] = alt; }     // der Vorrat ist die Grenze
   if(!PUNKTE[k]) delete PUNKTE[k];
@@ -253,9 +276,9 @@ function aktualisiereLaden(){
     z.className = drin?'hi':'';
   });
   ATTRIBUTE.concat(FERTIGKEITEN).forEach(([k])=>{
-    const p = PUNKTE[k]||0, b = punktBasis(k);
-    const pp = document.getElementById('pp_'+k), pv = document.getElementById('pv_'+k);
-    pp.textContent = p?'+'+p:'—'; pp.className = 'punktplus'+(p?'':' aus');
+    const p = PUNKTE[k]||0, b = istWert(k);
+    const pw = document.getElementById('pw_'+k), pv = document.getElementById('pv_'+k);
+    pw.innerHTML = p ? `${b} <i>→</i> ${b+p}` : String(b);
     pv.textContent = p?punktKosten(k)+' VP':''; pv.className = 'punktvp'+(p?'':' aus');
     document.getElementById('pz_'+k).className = 'punktzeile'+(p?' hi':'');
     document.getElementById('pm_'+k).disabled = !p;
@@ -267,9 +290,11 @@ function aktualisiereLaden(){
 /* ── Charaktererschaffung ── */
 const POOL = 120, SOCKEL = 20, MAXE = 70;
 let ERSCH = null;
-function zeigeErschaffung(){
-  ERSCH = {name:'', herkunft:null, attr:{}};
-  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+function zeigeErschaffung(neu){
+  if(neu || !ERSCH){
+    ERSCH = {name:'', herkunft:null, attr:{}};
+    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+  }
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
       <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
@@ -281,8 +306,8 @@ function zeigeErschaffung(){
   app.innerHTML = `
   <div class="stage">${verlauf()}
     <div>
-      <div class="card"><div class="ch"><span>Wer bist du</span></div><div class="cb">
-        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${zufallsName()}" oninput="ERSCH.name=this.value">
+      <div class="card"><div class="ch"><span>Erster Schritt · Wer bist du</span></div><div class="cb">
+        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value">
       </div></div>
       <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
         <div class="cb">${zeilen}
@@ -292,9 +317,10 @@ function zeigeErschaffung(){
       </div></div>
     </div>
     <div class="card"><div class="ch"><span>Herkunft</span><span>je genau 50 Punkte</span></div><div class="cb">
-      <div class="herkwahl">${HERKUENFTE.map(h=>`<div class="herk" id="h_${h.id}" onclick="waehleHerkunft('${h.id}')">
+      <div class="herkwahl">${HERKUENFTE.map(h=>`<div class="herk${h.id===ERSCH.herkunft?' on':''}" id="h_${h.id}" onclick="waehleHerkunft('${h.id}')">
         <div class="hn">${h.name}</div><div class="hd">${h.text}</div></div>`).join('')}</div>
-      <div style="margin-top:16px"><button class="plain" id="startbtn" onclick="starte()" disabled>Einrücken</button></div>
+      <div style="margin-top:16px"><button class="plain" id="weiterbtn" onclick="zeigeLaden()" disabled>Weiter zu den Veteranenpunkten</button>
+      <p class="hinweis" style="margin-top:10px">Danach kannst du auf diese Werte noch Veteranenpunkte legen.</p></div>
     </div></div>
   </div>`;
   ERSCH.name = document.getElementById('namefeld').value;
@@ -340,7 +366,7 @@ function aktualisiereErschaffung(){
     document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=SOCKEL;
     document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+10>POOL;
   });
-  const b = document.getElementById('startbtn');
+  const b = document.getElementById('weiterbtn');
   if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
 }
 function starte(){

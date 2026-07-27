@@ -119,12 +119,14 @@
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
   /* Ausbildung vorwegnehmen — Veteranenpunkte in Werte umsetzen */
-  .punktzeile{display:grid;grid-template-columns:1fr 34px 46px 62px;gap:8px;align-items:center;
-    padding:4px 0;border-bottom:1px solid #232019;font-size:13.5px}
+  .punktzeile{display:grid;grid-template-columns:1fr 96px 62px 68px;gap:10px;align-items:center;
+    padding:5px 6px;border-bottom:1px solid #232019;font-size:14px}
   .punktzeile:last-child{border-bottom:none}
-  .punktplus{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;
-    text-align:right;color:#f0e7d5}
-  .punktplus.aus{color:var(--faint)}
+  .punktzeile.hi{background:#201d17}
+  .punktwert{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;
+    text-align:right;color:#f0e7d5;white-space:nowrap}
+  .punktwert i{color:var(--brass);font-style:normal;padding:0 3px}
+  .hinweis{color:var(--faint);font-size:13px;margin:0 0 14px}
   .punktvp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
     text-align:right;color:var(--brass)}
   .punktvp.aus{color:var(--faint)}
@@ -146,13 +148,19 @@
   .kmp.ungebaut .kmppfeil{color:var(--faint)}
   .kmpliste{display:none;padding:0 6px 9px 26px}
   .kmp.auf .kmpliste{display:block}
-  .kmpst{padding:4px 0 4px 10px;border-left:1px solid #3a342c;font-size:13px;color:var(--dim)}
+  .kmpst{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;
+    padding:5px 6px 5px 10px;border-left:1px solid #3a342c;font-size:13.5px;color:var(--dim)}
   .kmpst.gefecht{border-left-color:var(--blood)}
   .kmpst.jetzt{border-left-color:var(--brass);background:#221e18}
   .kmpst.jetzt .kmpst-ort{color:#f0e7d5}
-  .kmpst-ort{display:block}
-  .kmpst-art{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;
-    font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .kmpst-ort{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .kmpst-art{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+    border:1px solid #322c25;padding:1px 5px;white-space:nowrap}
+  .kmpst.gefecht .kmpst-art{color:#d99184;border-color:#5a2a24}
+  .kmpst.jetzt .kmpst-art{color:var(--brass);border-color:#5a4526}
+  .kmpst-mal{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
+    color:var(--faint);white-space:nowrap}
   .kmpleer{padding:5px 0 5px 11px;font-size:12.5px;font-style:italic;color:var(--faint)}
 
   /* Warnung — nur da, wo es wirklich gleich etwas kostet */

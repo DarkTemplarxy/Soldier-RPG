@@ -270,7 +270,7 @@ function zeigeTod(){
       </div>
       <div class="probe" style="margin-top:14px">DER SPIELSTAND DIESES MANNES IST GELÖSCHT</div>
       <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="plain" onclick="zeigeLaden()">Nächster Mann</button>
+        <button class="plain" onclick="zeigeErschaffung(true)">Nächster Mann</button>
         <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
         <button class="plain" onclick="speichern()">Spielstand sichern</button>
       </div>
@@ -305,7 +305,7 @@ function zeigeKapitelende(){
       </div>
     </div>
     <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="plain" onclick="zeigeLaden()">Noch einmal, besser</button>
+      <button class="plain" onclick="zeigeErschaffung(true)">Noch einmal, besser</button>
       <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
       <button class="plain" onclick="speichern()">Spielstand sichern</button>
     </div>

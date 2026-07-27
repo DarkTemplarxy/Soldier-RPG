@@ -13,9 +13,9 @@ const ziel = path.resolve(__dirname, '../index.html');
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
     await p.click('text=Neuen Mann aufstellen');
-    await p.click('text=Weiter zur Erschaffung');
     await p.click('text=Auswürfeln');
     await p.click('#h_' + ['bauer', 'schmied', 'wilderer', 'strasse'][r % 4]);
+    await p.click('text=Weiter zu den Veteranenpunkten');
     await p.click('#startbtn');
     let s = 0;
     while (s++ < 300) {

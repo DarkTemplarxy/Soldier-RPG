@@ -253,23 +253,30 @@ Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP, alles zusammen 166.
 
 ### Veteranenpunkte in Ausbildung (`src/oberflaeche.js`, `PRO_PUNKT` in `grundwerte.js`)
 
+Die Erschaffung läuft in **zwei Schritten**, und die Reihenfolge ist der ganze Witz:
+
+1. **Wer bist du** — Name, Herkunft, die 120 Poolpunkte auf die Attribute.
+2. **Veteranenpunkte** — auf die *fertigen* Werte legen: Attribute, Fertigkeiten, Ausrüstung.
+
 ```js
 PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15]    // VP je Punkt, nach Zehnerbereich
 kostenVon(a,b)                          // Summe für den Weg von a nach b
 ```
 
-Neben der Ausrüstung lassen sich einzelne Punkte kaufen, in Fünferschritten. Gerechnet wird immer vom **Sockel** (Attribute 20, Fertigkeiten 10), nicht vom späteren Wert — so ist der Preis vorhersagbar, bevor man Herkunft und Pool verteilt hat.
+**Gerechnet wird vom tatsächlichen Wert, nicht vom Sockel.** Weil Schritt 1 zuerst kommt, steht schon fest, was Herkunft und Pool ergeben haben. Ein Wilderer mit Muskete 40 zahlt für die nächsten fünf Punkte 15 VP; wer bei 10 steht, zahlt 5. Spezialisierung wird teuer, Breite bleibt bezahlbar — genau das, wofür `PRO_PUNKT` gedacht war.
 
 | Kauf | Kosten |
 |---|---|
 | Fertigkeit 10 → 20 | 10 VP |
-| Fertigkeit 10 → 30 | 30 VP |
-| Attribut 20 → 30 | 20 VP |
-| Attribut 20 → 60 | 110 VP |
+| Fertigkeit 40 → 45 | 15 VP |
+| Attribut 20 → 25 | 10 VP |
+| Attribut 60 → 70 | 60 VP |
 
-**Obergrenzen: Attribute 60, Fertigkeiten 50** — darüber muss man sich im Feld verdienen. Die Herkunft und der Verteilungspool kommen oben drauf, wie bei den Ausrüstungskäufen auch.
+**Obergrenzen für den Endwert: Attribute 70, Fertigkeiten 60** — dieselbe 70 wie bei der Pool-Verteilung. Wer durch Herkunft schon darüber liegt, kann dort nichts mehr kaufen; das muss man sich im Feld verdienen.
 
-> **Warum die Staffelung reicht als Bremse.** Ein Spitzenlauf bringt etwa 160 VP; ein einzelnes Attribut von 20 auf 60 kostet 110 davon. Wer breit kauft, kauft flach. Dazu kommt die eingebaute zweite Bremse aus `nutzen()`: Hohe Startwerte wachsen langsamer, weil das Wachstum vom Abstand zu 100 abhängt. Der Vorsprung schrumpft im Spiel, statt sich aufzuschaukeln.
+> **Warum die Staffelung als Bremse reicht.** Ein Spitzenlauf bringt etwa 160 VP. Weil vom Istwert gerechnet wird, kostet das Nachschärfen einer Stärke am meisten — die 160 Punkte reichen für Breite oder für eine einzige Spitze, nie für beides. Dazu kommt die zweite, schon eingebaute Bremse aus `nutzen()`: Hohe Startwerte wachsen langsamer, weil das Wachstum vom Abstand zu 100 abhängt.
+
+**Der frühere Entwurf rechnete vom Sockel** (Attribute 20, Fertigkeiten 10) und stand *vor* der Erschaffung. Das war vorhersagbar, aber blind: Man kaufte Punkte, ohne zu wissen, was Herkunft und Pool daraus machen, und der Kaufbildschirm lag unter der Ausrüstungstabelle, wo ihn niemand fand.
 
 **Invariante 3 bleibt gewahrt:** Gekauft wird der Ausgangspunkt, nie der Aufstieg. Rang, Ruf, Gunst und Nennungen sind unkäuflich.
 

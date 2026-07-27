@@ -33,8 +33,9 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
   console.log('\nlocalStorage über file:// verfügbar:', dauerhaft);
 
   console.log('\n1 — Lauf beginnen, im Lager sichern');
-  await klick('Neuen Mann aufstellen'); await klick('Weiter zur Erschaffung');
-  await klick('Auswürfeln'); await p.click('#h_schmied'); await p.click('#startbtn');
+  await klick('Neuen Mann aufstellen'); await klick('Auswürfeln');
+  await p.click('#h_schmied'); await klick('Weiter zu den Veteranenpunkten');
+  await p.click('#startbtn');
   const name = await p.evaluate(() => LAUF.mann.name);
   pruef((await text()).includes('VERBLEIBENDE ABENDE'), 'Depot Savona ist die erste Station');
   pruef(await p.evaluate(()=>!!Ablage.lies('marschallstab.lauf')), 'Spielstand liegt beim Betreten des Lagers vor');
