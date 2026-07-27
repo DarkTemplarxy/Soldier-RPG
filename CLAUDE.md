@@ -297,14 +297,16 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 ### Zielwerte
 
-| Größe | Soll | Gemessen (80 Läufe) |
+| Größe | Soll | Gemessen (120 Läufe) |
 |---|---|---|
-| Kapitel 1 überstanden (Testskript) | 45–55 % | **49 %** |
+| Kapitel 1 überstanden (Testskript) | 45–55 % | **43 %** |
 | Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 43 % |
-| Elitekompanie erreicht (Rang 2) | — | 19 % |
-| Caporal im ersten Kapitel | ~30 % | **39 %** |
-| Punkte, Median | — | 95 |
+| Erster Lauf ohne jede Beförderung | ~40 % | 58 % |
+| Elitekompanie erreicht (Rang 2) | — | 8 % |
+| Caporal im ersten Kapitel | ~30 % | **34 %** |
+| Punkte, Median | — | 91 |
+
+Die 120 Läufe sind die belastbarste Messung dieser Sitzung. Zur Einordnung: Derselbe Stand *ohne* die Anerkennung im Gefecht lieferte über 80 Läufe 43 % / 30 % / 91 — die Anerkennung hebt also den Caporal-Anteil um rund vier Punkte und sonst nichts, genau wie beabsichtigt. Der Anteil der Elitekompanie schwankt zwischen den Messreihen stark (8 % hier, 19 % zuvor), weil er fast nur davon abhängt, was `Auswürfeln` bei der Erschaffung an Konstitution und Geschick ausschüttet.
 
 Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 
@@ -314,15 +316,17 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | mit Atem-Erholung an jeder Station | 105 | 41 % | 42 % | 93 |
 | ohne jede Erholung, nur Warnung | 120 | 38 % | 23 % | 60 |
 | Warnung + volles Winterquartier | 80 | 44 % | 30 % | 86 |
-| **zusätzlicher Lagerabend ab Caporal (gültig)** | **80** | **49 %** | **39 %** | **95** |
+| zusätzlicher Lagerabend ab Caporal | 80 | 49 % | 39 % | 95 |
+| derselbe Stand am selben Nachmittag noch einmal | 80 | 43 % | 30 % | 91 |
+| **Anerkennung im Gefecht (gültig)** | **120** | **43 %** | **34 %** | **91** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 
 Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang von 43 % oder 57 % sagt für sich genommen nichts. **Bei Zweifeln 80 Läufe messen**, wie hier geschehen.
 
-**Offener Punkt:** Der Caporal-Anteil steht mit 39 % neun Punkte über dem Sollwert von 30 % — gerade noch innerhalb der Zehn-Punkte-Regel, aber am oberen Rand. Der Weg dorthin ist mittelbar und war beabsichtigt: Der zusätzliche Lagerabend ab Caporal lässt mehr Beförderte den Feldzug überleben, und gezählt wird der Rang am Ende. Wer das senken will, hat zwei Hebel — die Caporal-Schwelle (`CAPORAL_RUF` / `CAPORAL_GUNST`) oder den Abend selbst. **Nicht empfohlen ist der Abend:** Er ist der Grund, warum der Rang sich nicht wie eine Strafe anfühlt.
+**Offener Punkt:** Der Caporal-Anteil steht mit 34 % vier Punkte über dem Sollwert von 30 % — gerade noch innerhalb der Zehn-Punkte-Regel, aber am oberen Rand. Der Weg dorthin ist mittelbar und war beabsichtigt: Der zusätzliche Lagerabend ab Caporal lässt mehr Beförderte den Feldzug überleben, und gezählt wird der Rang am Ende. Wer das senken will, hat zwei Hebel — die Caporal-Schwelle (`CAPORAL_RUF` / `CAPORAL_GUNST`) oder den Abend selbst. **Nicht empfohlen ist der Abend:** Er ist der Grund, warum der Rang sich nicht wie eine Strafe anfühlt.
 
-Die Überlebensquote liegt mit 49 % dagegen sauber in der Mitte des Bandes, und der Anteil ohne jede Beförderung ist mit 43 % nah am Sollwert von 40 % — beides besser als je zuvor gemessen.
+Die Überlebensquote liegt mit 43 % zwei Punkte unter dem Band 45–55 % — innerhalb des Rauschens, aber am unteren Rand. Der Anteil ohne jede Beförderung ist mit 58 % wieder weit über dem Sollwert von 40 %, und nur 8 % erreichen die Elitekompanie; der Engpass bleibt die Schwelle von 55 in Konstitution beziehungsweise Geschick, an der die meisten schon bei der Erschaffung scheitern. Wer daran etwas ändern will, senkt diese 55.
 
 **Gelernte Regel aus dieser Sitzung:** Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Caporal-Anteil. Wer an Atem, Wunden oder Gefahr dreht, misst beide Zahlen — nicht nur die Überlebensquote. Und: **Ein einziger Erholungspunkt an der richtigen Stelle schlägt eine Erholung an jeder Station.**
 

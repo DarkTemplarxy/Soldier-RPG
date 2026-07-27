@@ -18,7 +18,7 @@ Format: `Datum · Bereich · was · warum · gemessen`
 1. **Der Punkte-Median ist bei ~50 % Überlebensquote unbrauchbar.** Ein überstandener Lauf bekommt +35 pauschal; der Median springt um dreißig Punkte, sobald die Quote die 50 % kreuzt (gemessen 91 bei 43 %, 59 bei 36 % — dieselbe Mechanik). Ich hatte den Sprung als „die Männer sterben früher" gelesen. Er misst nur, ob der mittlere Lauf zufällig überlebt hat.
 2. **Das Rauschen ist größer, als es sich anfühlt.** Derselbe unveränderte Stand lieferte an einem Nachmittag 49 % und 43 %. Bei 80 Läufen sind zwei Standardabweichungen elf Punkte. Wer weniger als zehn Punkte deutet, deutet Rauschen — dagegen hilft nur, den alten Stand per `git stash` noch einmal zu messen statt gegen eine Zahl von vorhin zu vergleichen.
 
-Eine Messung über 120 Läufe läuft; der Wert wird nachgetragen.
+**Gemessen über 120 Läufe:** überstanden 43 %, Caporal 34 %, Median 91. Derselbe Stand *ohne* die Anerkennung lieferte über 80 Läufe 43 % / 30 % / 91 — die Zugabe hebt also den Caporal-Anteil um rund vier Punkte und sonst nichts, genau wie beabsichtigt. Die 36 %, die zwischendurch zweimal auftauchten, waren Rauschen; genau dafür stehen die beiden Messfallen jetzt in `CLAUDE.md`.
 
 ---
 
