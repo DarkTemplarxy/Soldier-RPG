@@ -13,7 +13,14 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **„Salve befehlen" war schon immer die stärkste Aktion, nur stand es nirgends.** 26–36 Schaden gegen 12–20 bei einem eigenen Schuss, und die eigene Muskete bleibt geladen, weil die acht Mann feuern und nicht du — als Caporal wird man vom Schützen zum Befehlsgeber. Der Knopf sagt das jetzt.
 
-Gemessen über 40 Läufe: überstanden 40 %, Caporal 23 %. Eine Bestätigung über 80 Läufe steht noch aus; der Testbot nimmt im Gefecht ohnehin immer zuerst die Salve und rührt die Lücke nie an, gemessen wird also fast nur der zusätzliche Lagerabend.
+| Stand | Läufe | überstanden | Caporal | Punkte-Median |
+|---|---|---|---|---|
+| volles Winterquartier | 80 | 44 % | 30 % | 86 |
+| **zusätzlicher Lagerabend ab Caporal** | **80** | **49 %** | **39 %** | **95** |
+
+Die Überlebensquote rückt in die Mitte des Bandes 45–55 %, der Anteil ohne jede Beförderung fällt von 56 % auf 43 % und damit nah an den Sollwert von 40 %. Der Caporal-Anteil steigt auf 39 % und steht neun Punkte über seinem Sollwert — gerade noch innerhalb der Zehn-Punkte-Regel, aber am oberen Rand; als offener Punkt in `CLAUDE.md` vermerkt. Der Weg dorthin ist mittelbar: Der zusätzliche Abend lässt mehr Beförderte den Feldzug überleben, und gezählt wird der Rang am Ende.
+
+Der Testbot nimmt im Gefecht immer zuerst die Salve und rührt die Lücke nie an — gemessen wurde also fast ausschließlich der zusätzliche Lagerabend.
 
 ---
 
