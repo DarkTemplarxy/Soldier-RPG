@@ -42,7 +42,7 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, jede Station
 
 Entworfen, aber noch nicht gebaut: die Kapitel 2 bis 11 (Ägypten, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
 
-Gemessen über 120 automatisierte Durchläufe: **rund die Hälfte übersteht das erste Kapitel.** Etwa 40 % sterben ohne eine einzige Beförderung.
+Gemessen über 120 automatisierte Durchläufe: **gut ein Drittel übersteht das erste Kapitel.** Etwa die Hälfte stirbt ohne eine einzige Beförderung.
 
 ---
 

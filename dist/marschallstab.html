@@ -123,6 +123,12 @@
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Warnung — nur da, wo es wirklich gleich etwas kostet */
+  .warnung{margin:7px 0 0;padding:8px 11px;background:#2a1815;
+    border-left:2px solid var(--blood);color:#eab5ab;font-size:13px;line-height:1.5}
+  .warnung b{color:#f3d0c8;font-weight:normal;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .statlab .warn{color:var(--blood)}
+
   /* Erklärung beim Überfahren — reines CSS, keine Abhängigkeit */
   .hilfe{position:relative;cursor:help;border-bottom:1px dotted var(--faint)}
   .hilfe:hover{color:#f0e7d5;border-bottom-color:var(--brass)}
@@ -839,16 +845,6 @@ function wundeGeben(name, abzug){
   S.belastung = Math.min(100, S.belastung + 6);
 }
 
-/* Atem erholt sich zwischen den Stationen von allein — zwischen zwei Gefechten
-   liegen Tage bis Wochen, und niemand bleibt monatelang außer Atem. Wer kräftig
-   ist, erholt sich schneller; Belastung und offene Wunden bremsen. Vorher war
-   Atem eine Einbahnstraße nach unten, die nur im Lager und im Winter umkehrbar
-   war — wer dort etwas anderes tat, ging ausgepumpt ins nächste Gefecht. */
-function erholung(){
-  const g = 8 + Math.round(S.attr.konstitution/12) - Math.floor(S.belastung/25) - S.wunden.length*2;
-  S.atem = Math.min(100, S.atem + Math.max(2, g));
-}
-
 function verschleiss(faktor){
   for(const k in S.ausr){
     const a = S.ausr[k];
@@ -895,6 +891,12 @@ function kopfzeile(){
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
 }
 
+/* Ab 35 wird gewarnt, ab 30 kostet es wirklich (+5 Gefahr je Kampfrunde).
+   Die Warnung kommt absichtlich fünf Punkte früher als der Malus — sie soll
+   zum Schlafen im Lager bewegen, nicht den Schaden bloß melden. */
+const ATEM_WARNUNG = 35;
+function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
   const w = S.wunden.length ? S.wunden.map(x=>esc(x.name)).join(', ') : 'keine';
@@ -905,7 +907,9 @@ function seitenleiste(){
     <div class="cb">
       <p class="who">${esc(S.name)}</p>
       <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p>
-      <div class="stat"><div class="statlab"><span>Atem</span><span>${S.atem}</span></div>${balken('b-steel',S.atem,100)}</div>
+      <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
+        ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
+        ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>
       <div class="stat"><div class="statlab"><span>Belastung</span><span>${S.belastung}</span></div>${balken('b-red',S.belastung,100)}</div>
       <div class="stat"><div class="statlab"><span>Ruf</span><span>${S.ruf}</span></div>${balken('b-brass',S.ruf,100)}</div>
       <div class="stat"><div class="statlab"><span>Kameradschaft</span><span>${S.kameradschaft}</span></div>${balken('b-green',S.kameradschaft,100)}</div>
@@ -1111,7 +1115,6 @@ function naechster(){
   const n = KAPITEL[LAUF.node];
   if(n.datum && n.id && LAUF.gezaehlt !== n.id){
     LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
-    erholung();                           // Tage bis Wochen zwischen den Stationen
     const b = META.bestKapitel[n.id] || {mal:0,rang:''};
     b.mal++; if(!b.rang || S.rang>=RANG.findIndex(r=>r.name===b.rang)+1) b.rang = rangName(S.rang);
     META.bestKapitel[n.id]=b;
@@ -1240,7 +1243,9 @@ function gefechtsbereitschaft(){
   else if(sch<50) z.push('Die Schuhe halten. Noch.');
   if(S.wunden.length) z.push('Du trägst ' + (S.wunden.length===1?'eine alte Wunde':S.wunden.length+' alte Wunden') +
     ' mit dir: ' + S.wunden.map(w=>esc(w.name)).join(', ') + '.');
-  if(S.atem<35) z.push('Du bist ausgepumpt, bevor der erste Schuss fällt.');
+  if(ausserAtem()) z.push(S.atem<30
+    ? 'Du bist ausgepumpt, bevor der erste Schuss fällt. Unter 30 Atem trifft dich mehr, als dich treffen müsste — das hier wird teuer.'
+    : 'Dir geht die Luft aus, bevor es losgeht. Unter 30 wird jede Runde gefährlicher.');
   if(S.belastung>60) z.push('Deine Hände sind nicht ruhig. Du hältst sie an den Riemen, damit es niemand sieht.');
   if(S.kameradschaft>=50) z.push('Links und rechts stehen Männer, die deinen Namen kennen. Das ist keine Kleinigkeit.');
   if(S.rang>=3) z.push('Acht Mann sehen dich an und warten darauf, dass du etwas sagst.');
@@ -1311,6 +1316,7 @@ function zeigeKampf(text){
     <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
+        ${ausserAtem()?`<p class="warnung">Du bekommst keine Luft mehr. ${S.atem<30?'Jeder Handgriff dauert zu lange, und du bist ein leichteres Ziel.':'Noch geht es — aber nicht mehr lange.'} <b>Atem ${S.atem}</b> · Hinwerfen bringt +10.</p>`:''}
         <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden} · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}</div>
         ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>

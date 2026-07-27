@@ -162,15 +162,24 @@ verschleiss(0.15); S.atem -= 4; S.belastung += 1;
 
 **Der Weg zum Gefecht kostet etwas** — sonst wären die Lager ein reiner Zugewinn und die Instandhaltung eine Pflichtübung ohne Gegner. Erste Fassung war `verschleiss(0.3)`, Atem −6, Belastung +2: **gemessen 35 % Überleben statt 50 %.** Der Marschverschleiß über fünf Gefechte wog schwerer als alles, was drei Lager wieder einbringen. Halbiert liegt der Wert wieder im Band.
 
-### Atem erholt sich zwischen den Stationen (`src/mechanik.js`)
+### Atem erholt sich nicht von allein (`src/oberflaeche.js`)
 
 ```js
-Erholung = 8 + Konstitution/12 − Belastung/25 − 2×Wunden,   mindestens 2
+const ATEM_WARNUNG = 35;     // gewarnt wird ab 35, gekostet wird ab 30
 ```
 
-Einmal je Station, also sechzehnmal im Kapitel; bei Konstitution 40 und keiner Wunde sind das etwa +11. **Vorher war Atem eine Einbahnstraße nach unten** — nur „Schlafen" im Lager und „Ruhe" im Winterquartier drehten ihn um, und wer dort etwas anderes tat, ging ausgepumpt ins nächste Gefecht. Das ist auch inhaltlich falsch: Zwischen Castiglione und Arcole liegen drei Monate, und niemand bleibt drei Monate außer Atem.
+**Eine selbsttätige Erholung war gebaut und ist wieder ausgebaut worden.** Die Formel lautete `8 + Konstitution/12 − Belastung/25 − 2×Wunden` je Station. Gemessen über 105 Läufe:
 
-Die Formel bestraft, was sie bestrafen soll: Belastung und offene Wunden bremsen die Erholung, Konstitution beschleunigt sie. Das gibt Konstitution eine dritte Aufgabe neben Tödlichkeit und Grenadierschwelle.
+| | vorher | mit Erholung |
+|---|---|---|
+| Kapitel 1 überstanden | 48 % | 41 % |
+| Caporal | 28 % | 42 % |
+
+Der Caporal-Anteil stieg mittelbar — mehr Atem heißt seltener der Malus `Atem < 30` (+5 Gefahr je Runde), heißt mehr gewonnene Gefechte, heißt mehr Ruf, und Ruf *ist* die Caporal-Schwelle. Damit war die gerade erst eingestellte Schwelle wieder hinfällig.
+
+**Stattdessen wird gewarnt, statt zu heilen.** Ab Atem 35 färbt sich der Balken rot und im Gefecht steht eine Warnung über der Rundenzeile; die Zahl 35 liegt absichtlich *fünf Punkte über* dem Malus bei 30. Der Spieler soll rechtzeitig „Schlafen und liegen bleiben" wählen — die Erholung bleibt eine Entscheidung im Lager und wird nicht verschenkt.
+
+> **Regel daraus:** Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Caporal-Anteil. Wer an Atem, Wunden oder Gefahr dreht, misst nicht nur die Überlebensquote, sondern auch die Endränge.
 
 ### Die Linie kämpft auch ohne dich (`src/kampf.js`)
 
@@ -238,21 +247,36 @@ Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP, alles zusammen 166.
 
 ### Zielwerte
 
-| Größe | Soll | Gemessen (105 Läufe) |
+| Größe | Soll | Gemessen (120 Läufe) |
 |---|---|---|
-| Kapitel 1 überstanden (Testskript) | 45–55 % | **41 %** |
+| Kapitel 1 überstanden (Testskript) | 45–55 % | **38 %** |
 | Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 43 % |
-| Elitekompanie erreicht (Rang 2) | — | 15 % |
-| Caporal im ersten Kapitel | ~30 % | 42 % |
+| Erster Lauf ohne jede Beförderung | ~40 % | 55 % |
+| Elitekompanie erreicht (Rang 2) | — | 22 % |
+| Caporal im ersten Kapitel | ~30 % | 23 % |
+| Punkte, Median | — | 60 |
 
-Werte vor der Atem-Erholung, zum Vergleich (80 Läufe): überstanden 48 %, ohne Beförderung 53 %, Caporal 28 %.
+Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
+
+| Stand | Läufe | überstanden | Caporal | Punkte-Median |
+|---|---|---|---|---|
+| nach der Schwellenänderung | 80 | 48 % | 28 % | 88 |
+| mit Atem-Erholung | 105 | 41 % | 42 % | 93 |
+| **ohne Erholung, mit Warnung (gültig)** | **120** | **38 %** | **23 %** | **60** |
 
 Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang von 43 % oder 57 % sagt für sich genommen nichts. **Bei Zweifeln 80 Läufe messen**, wie hier geschehen.
 
-**Offener Punkt — die Atem-Erholung hat den Caporal-Anteil zurückgetrieben.** Er lag nach der Schwellenänderung bei 28 %, jetzt wieder bei 42 %. Der Weg dorthin ist mittelbar und plausibel: Mehr Atem heißt seltener der Malus `Atem < 30` (+5 Gefahr je Runde), heißt mehr gewonnene Gefechte, heißt mehr Ruf — und Ruf ist die Caporal-Schwelle. Wer das wieder auf 30 % bringen will, hebt `CAPORAL_RUF` von 30 auf etwa 34; die Ruf-Verteilung war zweigipflig, deshalb bitte vorher neu messen, wo die Lücke jetzt liegt.
+**Offener Punkt — die Überlebensquote liegt mit 38 % unter dem Band 45–55 %, und der Punkte-Median ist von 88 auf 60 gefallen.** Der Median sagt mehr als die Quote: Die Läufe enden nicht nur genauso oft tödlich, sie enden **früher**. Genau das ist der Preis dafür, dass Atem sich nicht mehr erholt — wer ohne Luft ins zweite Gefecht geht, kommt nicht bis Arcole.
 
-**Zweiter offener Punkt:** Die Überlebensquote liegt mit 41 % knapp unter dem Band 45–55 %. Der Abstand zur letzten Messung (48 %) ist 7 Punkte und damit innerhalb dessen, was 80 Läufe an Streuung hergeben (±5,5 Punkte) — aber er zeigt in die falsche Richtung für eine Änderung, die dem Spieler nützt. Vor einer Gegenmaßnahme erst mit 160 Läufen nachmessen.
+Der Vergleich mit den 48 % von vorher hinkt: Das war eine einzelne Messung über 80 Läufe, die jetzige geht über 120. Wahrscheinlich lag der wahre Wert schon vorher näher bei 42 % als bei 48 %.
+
+Drei Hebel, falls das gehoben werden soll — **jeder davon hebt über den Ruf auch den Caporal-Anteil**, der mit 23 % gerade unter dem Sollwert liegt:
+
+1. **Atem-Kosten im Gefecht senken** (Laden −8, Feuern −5, Bajonett −18). Der direkteste Weg, und er trifft genau das, was jetzt zu hart ist.
+2. **„Hinwerfen" stärker machen** (+10 Atem). Belohnt, wer die Warnung liest, statt sie wegzudrücken.
+3. **Gefahr um 1 senken.** Die grobe Kelle; verändert alle fünf Gefechte auf einmal.
+
+Nicht empfohlen: die Erholung wieder einbauen — sie ist genau deshalb ausgebaut worden.
 
 `node test/balance.js 40` misst das. **Weicht der Wert nach einer Änderung um mehr als zehn Punkte ab, ist die Änderung zu prüfen.**
 

@@ -29,6 +29,12 @@ function kopfzeile(){
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
 }
 
+/* Ab 35 wird gewarnt, ab 30 kostet es wirklich (+5 Gefahr je Kampfrunde).
+   Die Warnung kommt absichtlich fünf Punkte früher als der Malus — sie soll
+   zum Schlafen im Lager bewegen, nicht den Schaden bloß melden. */
+const ATEM_WARNUNG = 35;
+function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
   const w = S.wunden.length ? S.wunden.map(x=>esc(x.name)).join(', ') : 'keine';
@@ -39,7 +45,9 @@ function seitenleiste(){
     <div class="cb">
       <p class="who">${esc(S.name)}</p>
       <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p>
-      <div class="stat"><div class="statlab"><span>Atem</span><span>${S.atem}</span></div>${balken('b-steel',S.atem,100)}</div>
+      <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
+        ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
+        ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>
       <div class="stat"><div class="statlab"><span>Belastung</span><span>${S.belastung}</span></div>${balken('b-red',S.belastung,100)}</div>
       <div class="stat"><div class="statlab"><span>Ruf</span><span>${S.ruf}</span></div>${balken('b-brass',S.ruf,100)}</div>
       <div class="stat"><div class="statlab"><span>Kameradschaft</span><span>${S.kameradschaft}</span></div>${balken('b-green',S.kameradschaft,100)}</div>
@@ -245,7 +253,6 @@ function naechster(){
   const n = KAPITEL[LAUF.node];
   if(n.datum && n.id && LAUF.gezaehlt !== n.id){
     LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
-    erholung();                           // Tage bis Wochen zwischen den Stationen
     const b = META.bestKapitel[n.id] || {mal:0,rang:''};
     b.mal++; if(!b.rang || S.rang>=RANG.findIndex(r=>r.name===b.rang)+1) b.rang = rangName(S.rang);
     META.bestKapitel[n.id]=b;

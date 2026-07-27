@@ -103,16 +103,6 @@ function wundeGeben(name, abzug){
   S.belastung = Math.min(100, S.belastung + 6);
 }
 
-/* Atem erholt sich zwischen den Stationen von allein — zwischen zwei Gefechten
-   liegen Tage bis Wochen, und niemand bleibt monatelang außer Atem. Wer kräftig
-   ist, erholt sich schneller; Belastung und offene Wunden bremsen. Vorher war
-   Atem eine Einbahnstraße nach unten, die nur im Lager und im Winter umkehrbar
-   war — wer dort etwas anderes tat, ging ausgepumpt ins nächste Gefecht. */
-function erholung(){
-  const g = 8 + Math.round(S.attr.konstitution/12) - Math.floor(S.belastung/25) - S.wunden.length*2;
-  S.atem = Math.min(100, S.atem + Math.max(2, g));
-}
-
 function verschleiss(faktor){
   for(const k in S.ausr){
     const a = S.ausr[k];

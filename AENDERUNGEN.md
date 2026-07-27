@@ -15,14 +15,19 @@ Format: `Datum · Bereich · was · warum · gemessen`
 - **Invariante 6 geändert:** `localStorage` war ganz verboten. Ohne Browser-Ablage kann ein Absturz keinen Feldzug retten. Neu: Die Datei bleibt maßgeblich, `localStorage` ist nur die bequeme Ablage, und das Spiel muss ohne sie vollständig funktionieren.
 - Neuer Test `test/spielstand.js` mit fünfzehn Prüfungen. Er hat sofort einen echten Fehler gefunden: Die Beförderungsstation rief `stationErledigt()` nicht auf und lief in eine Endlosschleife.
 
-**Atem erholt sich zwischen den Stationen:** `8 + Konstitution/12 − Belastung/25 − 2×Wunden`, mindestens 2, einmal je Station. Vorher war Atem eine Einbahnstraße nach unten, umkehrbar nur durch „Schlafen" im Lager und „Ruhe" im Winter. Inhaltlich war das ohnehin falsch — zwischen Castiglione und Arcole liegen drei Monate.
+**Atem-Erholung gebaut und wieder ausgebaut.** Die Formel lautete `8 + Konstitution/12 − Belastung/25 − 2×Wunden` je Station. Sie hob den Caporal-Anteil von 28 % auf 42 % und machte damit die Schwelle hinfällig, die zwei Stunden vorher darauf eingestellt worden war. Der Weg ist mittelbar: mehr Atem → seltener der Malus `Atem < 30` (+5 Gefahr je Runde) → mehr gewonnene Gefechte → mehr Ruf → mehr Beförderungen.
 
-| Gemessen (105 Läufe) | vorher | jetzt |
-|---|---|---|
-| Kapitel 1 überstanden | 48 % | **41 %** |
-| Caporal | 28 % | **42 %** |
+**Stattdessen wird gewarnt, statt zu heilen.** `ATEM_WARNUNG = 35`, fünf Punkte über dem Malus bei 30: roter Balken und rote Zahl in der Seitenleiste, ein roter Kasten mit der Folge im Klartext, eine Warnung über der Rundenzeile im Gefecht (mit dem Hinweis, dass „Hinwerfen" +10 bringt) und eine zweistufige Zeile im Anmarsch. Die Erholung bleibt damit eine Entscheidung im Lager und wird nicht verschenkt.
 
-Der Caporal-Anteil steigt mittelbar: mehr Atem → seltener der Malus `Atem < 30` → mehr gewonnene Gefechte → mehr Ruf → mehr Beförderungen. Beide Werte stehen als offene Punkte in `CLAUDE.md`; die Überlebensquote liegt knapp unter dem Band und ist vor einer Gegenmaßnahme mit 160 Läufen nachzumessen.
+| Stand | Läufe | überstanden | Caporal | Punkte-Median |
+|---|---|---|---|---|
+| nach der Schwellenänderung | 80 | 48 % | 28 % | 88 |
+| mit Atem-Erholung | 105 | 41 % | 42 % | 93 |
+| **ohne Erholung, mit Warnung (gültig)** | **120** | **38 %** | **23 %** | **60** |
+
+Der Punkte-Median sagt hier mehr als die Quote: Die Läufe enden nicht nur genauso oft tödlich, sie enden **früher**. Beides steht als offener Punkt in `CLAUDE.md`, mit drei benannten Hebeln — und dem Hinweis, dass jeder davon über den Ruf auch den Caporal-Anteil hebt.
+
+**Gelernte Regel:** Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Caporal-Anteil. Wer an Atem, Wunden oder Gefahr dreht, misst beide Zahlen — nicht nur die Überlebensquote.
 
 **Erklärungen beim Überfahren** für alle sechs Attribute und neun Fertigkeiten, in der Seitenleiste und bei der Erschaffung. Reines CSS, keine Abhängigkeit. Wo ein Wert in Kapitel 1 noch nichts tut — Reiten, Kartenkunde, Feldchirurgie —, steht das ausdrücklich da.
 

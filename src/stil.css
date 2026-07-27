@@ -116,6 +116,12 @@
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Warnung — nur da, wo es wirklich gleich etwas kostet */
+  .warnung{margin:7px 0 0;padding:8px 11px;background:#2a1815;
+    border-left:2px solid var(--blood);color:#eab5ab;font-size:13px;line-height:1.5}
+  .warnung b{color:#f3d0c8;font-weight:normal;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .statlab .warn{color:var(--blood)}
+
   /* Erklärung beim Überfahren — reines CSS, keine Abhängigkeit */
   .hilfe{position:relative;cursor:help;border-bottom:1px dotted var(--faint)}
   .hilfe:hover{color:#f0e7d5;border-bottom-color:var(--brass)}
