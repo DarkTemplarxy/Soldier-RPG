@@ -33,7 +33,7 @@ const ziel = process.argv[2] === 'dist'
       const txt = document.body.innerText;
       let z = null;
       if (txt.includes('RUNDE '))
-        z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinwerfen/);
+        z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinknien|Flach hinlegen/);
       if (!z && txt.includes('VERBLEIBENDE ABENDE') && +(txt.match(/Gunst Martel\s+(\d+)/) || [, 0])[1] < 4)
         z = f(/Am Feuer/);
       if (!z) z = btn.find(e => !/Zurückweichen|Mitmachen/.test(e.textContent)) || btn[0];

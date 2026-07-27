@@ -17,7 +17,7 @@ function aktionen(){
     a.push({id:'ducken',label:'Flach hinlegen',cost:'Atem +10 · Belastung −2 · kein Schuss, aber auch kein Ziel'});
   } else {
     a.push({id:'feuern',label:'Anlegen und feuern',cost:'Muskete',aus:()=>!K.geladen});
-    a.push({id:'ducken',label:'Hinwerfen',cost:'Atem +10 · Belastung −2 · du schießt nicht, aber sie treffen dich auch nicht'});
+    a.push({id:'ducken',label:'Hinknien',cost:'Atem +10 · Belastung −2 · du schießt nicht, aber sie treffen dich auch schlechter'});
     a.push({id:'halten',label:'Stehenbleiben und die Linie halten',cost:'Kaltblütigkeit'});
   }
   a.push({id:'bajonett',label:zw==='grenadier'?'Bajonett fällen und vorgehen':'Mit dem Bajonett vor',
@@ -115,7 +115,7 @@ function sichtfeld(){
       <rect x="172" y="59" width="9" height="25" rx="3"/><rect x="404" y="56" width="9" height="28" rx="3"/>
       <rect x="430" y="60" width="9" height="24" rx="3"/><rect x="456" y="57" width="9" height="27" rx="3"/></g>
     <text x="320" y="34" text-anchor="middle" fill="#5c554b" font-family="Georgia,serif" font-size="12"
-      font-style="italic">${K.deckung?'Du liegst. Über dir geht es hinweg.':'Rauch. Du siehst keine dreißig Schritt weit.'}</text>
+      font-style="italic">${K.deckung?(S.zweig==='voltigeur'?'Du liegst. Über dir geht es hinweg.':'Du kniest. Über dir geht es hinweg.'):'Rauch. Du siehst keine dreißig Schritt weit.'}</text>
     <g>
       <rect x="196" y="110" width="20" height="60" rx="6" fill="#3a352e"/><circle cx="206" cy="104" r="9" fill="#3a352e"/>
       <rect x="252" y="106" width="22" height="64" rx="6" fill="#4a443a"/><circle cx="263" cy="99" r="10" fill="#4a443a"/>
@@ -136,7 +136,7 @@ function zeigeKampf(text){
     <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
-        ${ausserAtem()?`<p class="warnung">Du bekommst keine Luft mehr. ${S.atem<30?'Jeder Handgriff dauert zu lange, und du bist ein leichteres Ziel.':'Noch geht es — aber nicht mehr lange.'} <b>Atem ${S.atem}</b> · Hinwerfen bringt +10.</p>`:''}
+        ${ausserAtem()?`<p class="warnung">Du bekommst keine Luft mehr. ${S.atem<30?'Jeder Handgriff dauert zu lange, und du bist ein leichteres Ziel.':'Noch geht es — aber nicht mehr lange.'} <b>Atem ${S.atem}</b> · ${S.zweig==='voltigeur'?'Flach hinlegen':'Hinknien'} bringt +10.</p>`:''}
         <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden} · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}</div>
         ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
@@ -171,7 +171,7 @@ function kampfAktion(id){
     K.deckung=true; S.atem=Math.min(100,S.atem+10); S.belastung=Math.max(0,S.belastung-2);
     text = zw==='voltigeur'
       ? 'Du gehst flach in eine Ackerfurche, das Gesicht im Dreck, und atmest zum ersten Mal seit zehn Minuten bis unten. Vor der Linie sucht dich jetzt niemand mehr — die eigenen Leute auch nicht.'
-      : 'Du wirfst dich hin. Über dir geht es hinweg. Man kann nicht ewig liegen bleiben, aber jetzt gerade schon.';
+      : 'Du gehst auf ein Knie, den Kolben in den Dreck, den Kopf hinter den Rücken des Vordermanns. Hinlegen kann sich in der Linie niemand — das Glied bliebe offen. Man kann nicht ewig knien, aber jetzt gerade schon.';
     gefahrMod = -22;
   }
   else if(id==='deckung'){

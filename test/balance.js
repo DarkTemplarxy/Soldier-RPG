@@ -29,7 +29,7 @@ const ziel = path.resolve(__dirname, '../index.html');
         const txt = document.body.innerText;
         let z = null;
         if (txt.includes('RUNDE '))
-          z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinwerfen/);
+          z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinknien|Flach hinlegen/);
         // Im Lager erst Fürsprache besorgen, solange sie zur Beförderung nicht reicht.
         // Ohne das säße der Bot nie am Feuer und würde nie befördert — gemessen würde
         // dann nicht die Schwelle, sondern die Blindheit des Bots.
