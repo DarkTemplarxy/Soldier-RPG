@@ -264,7 +264,9 @@ function waehleOption(i){
     const p = probe(o.probe.wert, o.probe.schw);
     erg = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
     klasse = p.erfolg ? 'gut' : 'schlecht';
-    probeText = `<div class="probe">${NAMEN[o.probe.wert].toUpperCase()} ${p.wertRoh} gegen ${o.probe.schw} → Zielwert ${p.ziel} · gewürfelt ${p.wurf} · ${p.erfolg?'GELUNGEN':'MISSLUNGEN'}</div>`;
+    // Nur das Ergebnis, nicht die Rechnung: Wert und Schwierigkeit stehen schon
+    // vor der Wahl auf dem Knopf, und Zielwert und Wurf sagen hinterher nichts mehr.
+    probeText = `<div class="pruefung ${klasse}">${NAMEN[o.probe.wert]} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
   } else { erg = o.erfolg; klasse='gut'; }
   anwenden(erg);
   verschleiss(0.35);
@@ -287,5 +289,5 @@ function wirkungen(e){
   if(e.ausr) for(const k in e.ausr) t.push(`${S.ausr[k].name} ${e.ausr[k]>0?'+':''}${e.ausr[k]}`);
   if(e.wunde) t.push('Wunde: '+e.wunde);
   if(e.nennung) t.push('Im Tagesbefehl genannt');
-  return t.length ? `<div class="probe" style="margin-top:12px">${t.join(' · ')}</div>` : '';
+  return t.length ? `<div class="wirkung"><span>Wirkung</span>${t.join(' · ')}</div>` : '';
 }

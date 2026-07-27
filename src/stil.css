@@ -22,7 +22,7 @@
 
   .card{background:var(--panel);border:1px solid var(--line);margin-bottom:18px}
   .ch{padding:8px 15px;border-bottom:1px solid var(--line);background:var(--panel2);
-    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c7bdab;
     display:flex;justify-content:space-between;gap:12px}
   .cb{padding:17px}
 
@@ -37,7 +37,7 @@
   .ergebnis.gut{border-left-color:var(--green)}
   .ergebnis.schlecht{border-left-color:var(--blood)}
   .probe{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
-    color:var(--faint);letter-spacing:.06em;margin-top:8px}
+    color:var(--dim);letter-spacing:.06em;margin-top:8px}
 
   .who{font-size:17px;margin:0 0 2px}
   .whorank{color:var(--brass);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 13px}
@@ -119,10 +119,10 @@
   /* Ortswechsel — das Band über der Station */
   .weg{border:1px solid var(--line);border-left:2px solid var(--brass);background:#171512;
     padding:9px 15px;margin-bottom:14px}
-  .wegorte{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
-    letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+  .wegorte{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
+    letter-spacing:.13em;text-transform:uppercase;color:#ded5c4}
   .wegorte i{color:var(--brass);font-style:normal;padding:0 9px}
-  .wegtext{color:var(--dim);font-size:13.5px;font-style:italic;margin-top:2px}
+  .wegtext{color:#c2b8a6;font-size:13.5px;font-style:italic;margin-top:3px}
 
   /* Lagebild vor dem Gefecht */
   .lage{border-top:1px solid var(--line);margin-top:16px;padding-top:13px}
@@ -132,6 +132,21 @@
   .lage td{padding:4px 12px 4px 0}
   .lage .prose p{margin:0 0 7px;font-size:15px;color:var(--dim)}
   .fein{color:var(--faint);font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
+
+  /* Ergebnis einer Probe — nur gelungen oder misslungen, nicht die Rechnung */
+  .pruefung{display:inline-block;margin-top:11px;padding:4px 12px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+    letter-spacing:.09em;text-transform:uppercase;
+    border:1px solid var(--line);background:#100f0d;color:var(--dim)}
+  .pruefung.gut{border-color:var(--green);color:#b6c48d}
+  .pruefung.schlecht{border-color:var(--blood);color:#e08a7e}
+
+  /* Was sich dadurch geändert hat — die wichtigste Zeile nach jeder Wahl */
+  .wirkung{margin-top:13px;padding:9px 14px;background:#221e18;
+    border-left:2px solid var(--brass);color:#e2d9c7;font-size:13.5px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}
+  .wirkung span{display:block;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--brass);margin-bottom:3px}
 
   .log{max-height:200px;overflow-y:auto;font-size:14px;color:var(--dim)}
   .log div{padding:3px 0;border-bottom:1px solid #221f1a}

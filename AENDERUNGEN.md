@@ -17,6 +17,8 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 Der Ruf war beim Bot zweigipflig (19–25 oder 36–41, dazwischen niemand); 30 liegt in dieser Lücke. Nebenbefund: Der Anteil ohne jede Beförderung steigt von 41 % auf 53 % — die Kehrseite derselben Schwelle.
 
+**Probenergebnis statt Probenrechnung.** Nach einer Wahl stand `GESCHICK 80 gegen 30 → Zielwert 95 · gewürfelt 52 · GELUNGEN`. Wert und Schwierigkeit stehen schon vor der Wahl auf dem Knopf, wo sie beim Entscheiden helfen; hinterher ist das nur noch Rechenweg. Jetzt `Geschick — gelungen` in einem Feld mit grünem oder rotem Rand. Die Wirkungszeile („Atem −5 · Ausgabeschuhe +22") war die blasseste Zeile des Bildschirms und ist jetzt die deutlichste: eigener Kasten mit Messingbalken, fast in Textfarbe.
+
 **Kontrast der Oberfläche angehoben.** `--dim` und `--faint` standen auf `#877e71` und `#5c554b`, was auf dem Braun der Karten **2,2 : 1** ergab — Attributnamen, Kartenköpfe und Kostenzeilen waren kaum lesbar. Jetzt `#aca192` (6,6 : 1) und `#948a79` (4,7 : 1), dazu Zahlen in der Seitenleiste fast weiß, Abschnittsüberschriften in Messing statt Grau, Kostenzeilen von 10,5 auf 11,5 px und deutlichere Knopfränder. Die Regeln stehen als eigener Abschnitt „Lesbarkeit" in `CLAUDE.md`.
 
 ---
