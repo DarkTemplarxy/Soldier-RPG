@@ -23,9 +23,9 @@ function wegband(n){
 
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
-  if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.chronik.length}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
+  if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
   kopf.innerHTML = `${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}`;
-  const n = KAPITEL[Math.min(NODE,KAPITEL.length-1)];
+  const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
 }
 
@@ -47,10 +47,10 @@ function seitenleiste(){
            <div class="kv"><span>Deckung</span><b>${K.deckung?'ja':'nein'}</b></div>`:''}
       <div class="rule"></div>
       <p class="mini">Attribute</p>
-      ${ATTRIBUTE.map(([k,n])=>`<div class="kv"><span>${n}</span><b>${S.attr[k]}</b></div>`).join('')}
+      ${ATTRIBUTE.map(([k,n])=>`<div class="kv"><span>${mitHilfe(k,n)}</span><b>${S.attr[k]}</b></div>`).join('')}
       <div class="rule"></div>
       <p class="mini">Fertigkeiten</p>
-      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>`<div class="kv"><span>${n}</span><b>${S.fert[k]}</b></div>`).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
+      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>`<div class="kv"><span>${mitHilfe(k,n)}</span><b>${S.fert[k]}</b></div>`).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
       <div class="rule"></div>
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
@@ -65,7 +65,8 @@ function seitenleiste(){
 
 /* ── Titelbildschirm ── */
 function zeigeTitel(){
-  S=null; K=null; kopfzeile();
+  LAUF=null; binde(); kopfzeile();
+  const offen = laufVorhanden();
   const chron = META.chronik.length ? META.chronik.slice().reverse().map(c=>
     `<tr${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?' class="hi"':''}>
       <td class="d">${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?'★ ':''}${esc(c.name)}</td>
@@ -84,16 +85,22 @@ function zeigeTitel(){
     <div class="zit">Du beginnst 1796 als Rekrut mit einer Muskete, die dir nicht gehört.<br>
     Wenn du dieses Kapitel überlebst, bist du vielleicht Caporal.<br>
     Wahrscheinlicher liegst du im April in einem Graben bei Montenotte.</div>
+    ${offen ? `<div class="wirkung" style="margin-bottom:14px"><span>Unterbrochener Feldzug</span>
+      ${esc(offen.mann.name)} · ${esc(rangNameVon(offen.mann))} · ${esc((KAPITEL[Math.min(offen.node,KAPITEL.length-1)].datum||'').split(' · ')[0])}</div>` : ''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      ${offen ? '<button class="plain" onclick="fortsetzen()">Feldzug fortsetzen</button>' : ''}
       <button class="plain" onclick="zeigeLaden()">Neuen Mann aufstellen</button>
       <button class="plain" onclick="speichern()">Spielstand sichern</button>
       <button class="plain" onclick="document.getElementById('ladefeld').click()">Spielstand laden</button>
       <input type="file" id="ladefeld" accept=".json" class="hidden" onchange="laden(event)">
     </div>
+    ${offen ? '' : `<p class="mini" style="margin:14px 0 0;color:var(--faint)">${Ablage.dauerhaft
+      ? 'Der Feldzug wird selbsttätig gesichert. Wer stirbt, verliert ihn — wer aufhört, kommt zurück.'
+      : 'Dieser Browser erlaubt keine selbsttätige Sicherung. Der Spielstand geht nur über die Datei.'}</p>`}
    </div></div>
 
   <div class="grid2">
-    <div class="card"><div class="ch"><span>Chronik</span><span>${META.chronik.length} Läufe</span></div>
+    <div class="card"><div class="ch"><span>Chronik</span><span>${META.laeufe|0} Läufe</span></div>
       <div class="cb"><table><tr><th>Name</th><th>Endrang</th><th>Ende</th><th class="n">VP</th></tr>${chron}</table></div></div>
     <div class="card"><div class="ch"><span>Wie weit ich schon war</span></div>
       <div class="cb"><table><tr><th>Station</th><th class="n">erreicht</th><th>bester Rang dort</th></tr>${best}</table></div></div>
@@ -145,7 +152,7 @@ function zeigeErschaffung(){
   ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
-      <span class="attrname">${n}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
+      <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
       ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
       <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
       <span><button class="pmbtn" onclick="stelle('${k}',-10)" id="am_${k}">−</button>
@@ -217,31 +224,43 @@ function aktualisiereErschaffung(){
   if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
 }
 function starte(){
-  S = neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL);
-  NODE = 0; K = null; WOCHEN = 3; LAGER_ID = null; ABENDE = null; LLOG = []; naechster();
+  laufVerwerfen();       // ein Platz, kein zweiter — der alte Feldzug ist damit vorbei
+  neuerLauf(neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL));
+  naechster();
+}
+
+/* Fortsetzen ist kein Zurückspulen: Der Spielstand zeigt immer auf den letzten
+   Schritt, nicht auf den letzten Halt. */
+function fortsetzen(){
+  const d = laufVorhanden();
+  if(!d){ zeigeTitel(); return; }
+  LAUF = d; binde(); naechster();
 }
 
 /* ══════════════════ ABLAUF ══════════════════ */
 
 function naechster(){
   if(!S.lebt){ zeigeTod(); return; }
-  if(NODE >= KAPITEL.length){ zeigeKapitelende(); return; }
-  const n = KAPITEL[NODE];
-  if(n.datum && n.id){
+  if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
+  const n = KAPITEL[LAUF.node];
+  if(n.datum && n.id && LAUF.gezaehlt !== n.id){
+    LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
+    erholung();                           // Tage bis Wochen zwischen den Stationen
     const b = META.bestKapitel[n.id] || {mal:0,rang:''};
     b.mal++; if(!b.rang || S.rang>=RANG.findIndex(r=>r.name===b.rang)+1) b.rang = rangName(S.rang);
     META.bestKapitel[n.id]=b;
+    chronikSichern();
   }
+  laufSichern();
   kopfzeile();
   if(n.typ==='szene') zeigeSzene(n);
   else if(n.typ==='lager') zeigeLager(n);
-  else if(n.typ==='kampf') starteKampf(n);
+  else if(n.typ==='kampf'){ if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.'); else starteKampf(n); }
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
   else if(n.typ==='ende') zeigeKapitelende();
 }
-function weiter(){ NODE++; naechster(); }
 
 /* ── Szene ── */
 function zeigeSzene(n){
@@ -255,10 +274,10 @@ function zeigeSzene(n){
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
     </div>${seitenleiste()}</div>`;
-  window.AKT = n;
+  LAUF.szene = n.id;
 }
 function waehleOption(i){
-  const n = window.AKT, o = n.optionen[i];
+  const n = KAPITEL[LAUF.node], o = n.optionen[i];
   let erg, klasse='', probeText='';
   if(o.probe){
     const p = probe(o.probe.wert, o.probe.schw);
@@ -271,12 +290,13 @@ function waehleOption(i){
   anwenden(erg);
   verschleiss(0.35);
   S.log.push(n.id+': '+o.label);
+  stationErledigt();
   app.innerHTML = `<div class="stage">
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p class="said">${esc(o.label)}</p></div>
         <div class="ergebnis ${klasse}">${erg.text}${probeText}</div>
         ${wirkungen(erg)}</div></div>
-      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }

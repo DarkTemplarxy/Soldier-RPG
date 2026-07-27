@@ -104,40 +104,46 @@ function lagerHandlungen(n){
   return ids.filter(id=>LAGER_TUN[id]);
 }
 
-let ABENDE = null, LAGER_ID = null, LLOG = [];
+/* Das Lager ist der angesagte Halt: Hier wird der Feldzug gesichert und
+   gesagt, dass er gesichert ist. Danach läuft die Sicherung still weiter, damit
+   Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
 function zeigeLager(n){
-  if(LAGER_ID !== n.id){ LAGER_ID = n.id; ABENDE = n.abende; LLOG = []; }
+  const L = LAUF.lager;
+  if(L.id !== n.id){ L.id = n.id; L.abende = n.abende; L.log = []; L.gesichert = Ablage.dauerhaft; laufSichern(); }
   const opt = lagerHandlungen(n).map(id=>{
     const t = LAGER_TUN[id];
-    return `<button class="ord" onclick="lagerTun('${id}')" ${ABENDE<=0?'disabled':''}>
+    return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
       ${t.label}<span class="cost">${t.cost}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
-      ${LLOG.length?`<div class="ergebnis">${LLOG.join('<br><br>')}</div>`:''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${ABENDE} VON ${n.abende}</div>
+      ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
+      ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${n.abende}</div>
       </div></div>
     <div class="orders"><div class="ch"><span>Womit verbringst du den Abend?</span></div><div class="ordbody">
-      ${opt}${ABENDE<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
+      ${opt}${L.abende<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
     </div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
 function lagerTun(id){
-  if(ABENDE<=0) return;
-  ABENDE--;
-  LLOG.push(LAGER_TUN[id].tu());
-  S.log.push(LAGER_ID+': '+LAGER_TUN[id].label);
-  zeigeLager(KAPITEL[NODE]);
+  const L = LAUF.lager;
+  if(L.abende<=0) return;
+  L.abende--;
+  L.log.push(LAGER_TUN[id].tu());
+  S.log.push(L.id+': '+LAGER_TUN[id].label);
+  laufSichern();
+  zeigeLager(KAPITEL[LAUF.node]);
 }
-function lagerEnde(){ LAGER_ID = null; ABENDE = null; LLOG = []; weiter(); }
+function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(); naechster(); }
 
 /* ══════════════════ WINTERQUARTIER ══════════════════ */
 
-let WOCHEN = 3, WLOG = [];
 function zeigeWinter(n){
-  if(WOCHEN===3) WLOG=[];
+  const W = LAUF.winter;
+  if(W.wochen===3 && !W.log.length){ W.log=[]; W.gesichert = Ablage.dauerhaft; laufSichern(); }
   const tun = [
     {id:'ausr',label:'Ausrüstung instand setzen',cost:'Schuhe, Muskete und Tornister flicken'},
     {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
@@ -145,7 +151,7 @@ function zeigeWinter(n){
     {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
     {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt, Atem steigt, Wunden heilen'}
   ];
-  const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${WOCHEN<=0?'disabled':''}>
+  const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
   app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
@@ -153,47 +159,51 @@ function zeigeWinter(n){
         <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
         <p>Es ist die einzige Zeit im Jahr, in der du entscheidest, was du tust. Drei Wochen, mehr nicht — im Januar geht es weiter.</p>
       </div>
-      ${WLOG.length?`<div class="ergebnis">${WLOG.join('<br><br>')}</div>`:''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${WOCHEN}</div>
+      ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
+      ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen}</div>
       </div></div>
     <div class="orders"><div class="ch"><span>Womit verbringst du die Woche?</span></div><div class="ordbody">
-      ${opt}${WOCHEN<=0?'<button class="ord weiter" onclick="WOCHEN=3;weiter()">Ins Feld zurück</button>':''}
+      ${opt}${W.wochen<=0?'<button class="ord weiter" onclick="winterEnde()">Ins Feld zurück</button>':''}
     </div></div>
     </div>${seitenleiste()}</div>`;
 }
 function winterTun(id){
-  if(WOCHEN<=0) return;
-  WOCHEN--;
+  const W = LAUF.winter;
+  if(W.wochen<=0) return;
+  W.wochen--;
   if(id==='ausr'){
     for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+30);
-    WLOG.push('Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>');
+    W.log.push('Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>');
   }
   if(id==='drill'){
     nutzen('muskete',3); nutzen('drill',3); nutzen('bajonett',2);
-    WLOG.push('Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>');
+    W.log.push('Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>');
   }
   if(id==='lesen'){
     if(S.geld>=6){ S.geld-=6; S.attr.bildung=Math.min(100,S.attr.bildung+7); nutzen('verwaltung',2);
-      WLOG.push('Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'); }
-    else WLOG.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
+      W.log.push('Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'); }
+    else W.log.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
   }
   if(id==='leute'){
     S.gunst+=2; S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
     nutzen('menschenkenntnis',2);
-    WLOG.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
+    W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
   }
   if(id==='ruhe'){
     S.belastung=Math.max(0,S.belastung-16); S.atem=Math.min(100,S.atem+25);
-    if(S.wunden.length){ const w=S.wunden.shift(); WLOG.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Atem +25 · Wunde geheilt</span>`); }
-    else WLOG.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16 · Atem +25</span>');
+    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Atem +25 · Wunde geheilt</span>`); }
+    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16 · Atem +25</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
-  zeigeWinter(KAPITEL[NODE]);
+  laufSichern();
+  zeigeWinter(KAPITEL[LAUF.node]);
 }
+function winterEnde(){ LAUF.winter = {wochen:3, log:[]}; stationErledigt(); naechster(); }
 
 /* ══════════════════ WERTUNG UND ENDE ══════════════════ */
 
-function stationen(){ return Math.min(KAPITEL.length, NODE+1); }
+function stationen(){ return Math.min(KAPITEL.length, LAUF.node+1); }
 
 function wertung(){
   const p = {};
@@ -210,7 +220,11 @@ function wertung(){
 function eintragen(endeText){
   const p = wertung();
   META.chronik.push({name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe});
+  META.laeufe = (META.laeufe|0) + 1;
   META.vp = Math.max(META.vp, p.summe);
+  chronikKuerzen();
+  laufVerwerfen();          // der Lauf ist zu Ende, in jedem Fall
+  chronikSichern();
   return p;
 }
 
@@ -229,6 +243,7 @@ function wertungsTabelle(p){
 
 function zeigeTod(){
   const grund = S.todesart || 'Gefallen';
+  laufVerwerfen();
   const p = eintragen(grund);
   const neu = p.summe >= META.vp;
   app.innerHTML = `<div class="card"><div class="ch"><span class="tot">Ende</span><span>${esc(grund)}</span></div>
@@ -245,13 +260,14 @@ function zeigeTod(){
           <p style="margin-top:10px">Gezählt wird nur der beste Lauf. Es gibt nichts zu grinden, nur zu übertreffen.</p>
         </div>
       </div>
+      <div class="probe" style="margin-top:14px">DER SPIELSTAND DIESES MANNES IST GELÖSCHT</div>
       <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="plain" onclick="zeigeLaden()">Nächster Mann</button>
         <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
         <button class="plain" onclick="speichern()">Spielstand sichern</button>
       </div>
     </div></div>`;
-  S=null; kopfzeile();
+  LAUF=null; binde(); kopfzeile();
 }
 function todesText(){
   const t = [
@@ -286,13 +302,13 @@ function zeigeKapitelende(){
       <button class="plain" onclick="speichern()">Spielstand sichern</button>
     </div>
   </div></div>`;
-  S=null; kopfzeile();
+  LAUF=null; binde(); kopfzeile();
 }
 
 /* ══════════════════ SPIELSTAND ══════════════════ */
 
 function speichern(){
-  const blob = new Blob([JSON.stringify(META,null,1)],{type:'application/json'});
+  const blob = new Blob([dateiInhalt()],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'marschallstab-spielstand.json';
@@ -303,11 +319,10 @@ function laden(ev){
   const f = ev.target.files[0]; if(!f) return;
   const r = new FileReader();
   r.onload = () => {
-    try{
-      const d = JSON.parse(r.result);
-      if(typeof d.vp === 'number'){ META = {vp:d.vp, chronik:d.chronik||[], bestKapitel:d.bestKapitel||{}}; zeigeTitel(); }
-      else alert('Diese Datei ist kein Spielstand.');
-    }catch(e){ alert('Diese Datei ließ sich nicht lesen.'); }
+    let e;
+    try{ e = dateiEinlesen(r.result); }
+    catch(x){ e = {ok:false, grund:'Diese Datei ließ sich nicht lesen.'}; }
+    if(e.ok) zeigeTitel(); else alert(e.grund);
   };
   r.readAsText(f);
 }

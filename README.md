@@ -50,7 +50,9 @@ Gemessen über 120 automatisierte Durchläufe: **rund die Hälfte übersteht das
 
 `index.html` im Browser öffnen. Doppelklick genügt — kein Server, kein Build, keine Abhängigkeiten. Zum Weitergeben liegt dieselbe Fassung als einzelne Datei unter `dist/marschallstab.html`.
 
-Chronik und Veteranenpunkte lassen sich über „Spielstand sichern" als Datei herunterladen und später wieder laden. Bewusst kein Browser-Speicher.
+Der angefangene Feldzug wird selbsttätig gesichert — beim Betreten eines Lagers wird es angesagt, danach still nach jedem Schritt. Wer aufhört, kommt genau dorthin zurück, wo er war. **Wer fällt, verliert den Spielstand im selben Augenblick:** Der Aussetz-Spielstand ist zum Aufhören da, nicht zum Wiederholen.
+
+Chronik und laufender Feldzug lassen sich über „Spielstand sichern" zusätzlich als Datei herunterladen und später wieder laden. Die Datei bleibt das maßgebliche Format; der Browser-Speicher ist nur dafür da, dass ein Absturz keinen Feldzug kostet.
 
 ---
 
@@ -60,6 +62,7 @@ Chronik und Veteranenpunkte lassen sich über „Spielstand sichern" als Datei h
 npm install playwright && npx playwright install chromium
 
 node test/durchspielen.js     # spielt einen Lauf durch, meldet Konsolenfehler
+node test/spielstand.js       # sichern, fortsetzen, sterben, alte Fassungen
 node test/balance.js 40       # 40 Läufe, misst die Überlebensquote
 node werkzeug/bauen.js        # baut dist/marschallstab.html
 ```
@@ -71,7 +74,8 @@ index.html                      lädt die Skripte in fester Reihenfolge
 src/stil.css
 src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kaufladen
 src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
-src/mechanik.js                 Proben, Wachstum, Verschleiß, Wunden
+src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
+src/mechanik.js                 Laufzustand, Proben, Wachstum, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Erschaffung, Ablauf, Szenen
 src/kampf.js                    Anmarsch, Gefecht, Elitekompanie, Beförderung
 src/abschluss.js                Lager, Winterquartier, Wertung, Tod, Spielstand

@@ -5,6 +5,29 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-27 — Spielstand, Atem-Erholung, Erklärungen
+
+**Aussetz-Spielstand.** Neu: `src/spielstand.js` mit Fassungen, Wandlern, Ablage und Prüfsumme. Der Laufzustand lag in acht verstreuten Globalen (`S`, `K`, `NODE`, `WOCHEN`, `WLOG`, `ABENDE`, `LAGER_ID`, `LLOG`) plus `window.AKT`, das ein Verweis mitten in die Kapiteldaten war — deshalb ließ sich ein laufender Feldzug gar nicht speichern. Jetzt ein `LAUF`-Objekt aus reinen Daten; `S` und `K` sind nur noch Kurznamen darauf.
+
+- Gesichert wird beim **Betreten eines Lagers** — dort wird es auch angesagt — und danach still nach **jedem** Schritt, auch nach jeder Kampfrunde.
+- **Der Tod löscht sofort.** Ein Spielstand, der nur im Lager stünde, wäre ein Rücksetzpunkt: Wer im Gefecht sieht, dass es schiefgeht, schließt den Reiter und stünde wieder im Lager. Ein immer aktueller Spielstand kann nicht zum Zurückspulen benutzt werden und leistet trotzdem alles, wofür man ihn will.
+- `stationErledigt()` setzt `LAUF.node` schon hoch, während der Ergebnisbildschirm noch steht — sonst ließe sich eine Szenenwahl durch Beenden rückgängig machen.
+- **Invariante 6 geändert:** `localStorage` war ganz verboten. Ohne Browser-Ablage kann ein Absturz keinen Feldzug retten. Neu: Die Datei bleibt maßgeblich, `localStorage` ist nur die bequeme Ablage, und das Spiel muss ohne sie vollständig funktionieren.
+- Neuer Test `test/spielstand.js` mit fünfzehn Prüfungen. Er hat sofort einen echten Fehler gefunden: Die Beförderungsstation rief `stationErledigt()` nicht auf und lief in eine Endlosschleife.
+
+**Atem erholt sich zwischen den Stationen:** `8 + Konstitution/12 − Belastung/25 − 2×Wunden`, mindestens 2, einmal je Station. Vorher war Atem eine Einbahnstraße nach unten, umkehrbar nur durch „Schlafen" im Lager und „Ruhe" im Winter. Inhaltlich war das ohnehin falsch — zwischen Castiglione und Arcole liegen drei Monate.
+
+| Gemessen (105 Läufe) | vorher | jetzt |
+|---|---|---|
+| Kapitel 1 überstanden | 48 % | **41 %** |
+| Caporal | 28 % | **42 %** |
+
+Der Caporal-Anteil steigt mittelbar: mehr Atem → seltener der Malus `Atem < 30` → mehr gewonnene Gefechte → mehr Ruf → mehr Beförderungen. Beide Werte stehen als offene Punkte in `CLAUDE.md`; die Überlebensquote liegt knapp unter dem Band und ist vor einer Gegenmaßnahme mit 160 Läufen nachzumessen.
+
+**Erklärungen beim Überfahren** für alle sechs Attribute und neun Fertigkeiten, in der Seitenleiste und bei der Erschaffung. Reines CSS, keine Abhängigkeit. Wo ein Wert in Kapitel 1 noch nichts tut — Reiten, Kartenkunde, Feldchirurgie —, steht das ausdrücklich da.
+
+---
+
 ## 2026-07-27 — Beförderungsschwelle und Lesbarkeit
 
 **Gunst war keine Hürde, sondern eine Konstante.** Über 60 gemessene Läufe kamen *alle* 42 Überlebenden mit exakt Gunst 3 bei Verona an, weil eine einzige Szenenwahl (Mondovì melden, +3) die Anforderung allein erfüllte. Damit war die Schwelle 3 geschenkt und jede höhere unerreichbar.

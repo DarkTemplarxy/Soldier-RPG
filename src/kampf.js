@@ -37,12 +37,14 @@ function starteKampf(n){
     verschleiss(0.15);
     S.atem = Math.max(0, S.atem-4);
     S.belastung = Math.min(100, S.belastung+1);
+    laufSichern();
     zeigeAnmarsch(n);
     return;
   }
   S.anmarschGesehen = null;
-  K = {n, runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
-       protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0};
+  setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
+              protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
+  laufSichern();
   zeigeKampf(n.intro);
 }
 
@@ -81,7 +83,7 @@ function zeigeAnmarsch(n){
             <div class="prose">${gefechtsbereitschaft().map(t=>`<p>${t}</p>`).join('')}</div></div>
         </div></div>
       <div class="orders"><div class="ordbody">
-        <button class="ord weiter" onclick="starteKampf(KAPITEL[NODE])">Antreten
+        <button class="ord weiter" onclick="starteKampf(KAPITEL[LAUF.node])">Antreten
           <span class="cost">Danach gibt es keinen Weg zurück, der nicht Ruf kostet</span></button>
       </div></div>
     </div>${seitenleiste()}</div>`;
@@ -121,7 +123,7 @@ function sichtfeld(){
 }
 
 function zeigeKampf(text){
-  const n = K.n;
+  const n = KAPITEL[LAUF.node];
   const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
       ${a.aus&&a.aus()?'disabled':''}>${a.label}<span class="cost">${a.cost}</span></button>`).join('');
   app.innerHTML = `<div class="stage">
@@ -137,7 +139,7 @@ function zeigeKampf(text){
 }
 
 function kampfAktion(id){
-  const n = K.n; let text = '', schaden = 0, gefahrMod = 0;
+  const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
   const zw = S.zweig;
 
   if(id==='laden'){
@@ -242,11 +244,12 @@ function kampfAktion(id){
     kampfEnde(knapp, text+treffer+(knapp?' Und dann ist es plötzlich vorbei.':' Es wird dunkel, und nichts ist entschieden.'));
     return;
   }
+  laufSichern();
   zeigeKampf(text + treffer);
 }
 
 function kampfEnde(sieg, letzterText){
-  const n = K.n;
+  const n = KAPITEL[LAUF.node];
   const erg = sieg ? n.sieg : n.niederlage;
   anwenden(erg);
   verschleiss(0.9);
@@ -254,14 +257,15 @@ function kampfEnde(sieg, letzterText){
   const leicht = S.wunden.findIndex(w=>w.abzug<=5);
   if(leicht>=0) S.wunden.splice(leicht,1);
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
-  const kk = K; K = null;
+  const kk = K; setzeKampf(null);
+  stationErledigt();
   app.innerHTML = `<div class="stage">
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
         <div class="probe" style="margin-top:10px">${sieg?'GEFECHT BESTANDEN':'GEFECHT VERLOREN'} · ${kk.runde} RUNDEN</div>
       </div></div>
-      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -297,11 +301,12 @@ function waehleZweig(z){
   } else {
     text = 'Er geht weiter, ohne etwas zu sagen. Du bleibst in der Mitte des Bataillons, wo die meisten bleiben. Es ist keine Schande, nur eben nichts.';
   }
+  stationErledigt();
   app.innerHTML = `<div class="stage"><div>
     <div class="card"><div class="ch"><span>Mailand</span><span>Mai 1796</span></div>
       <div class="cb"><div class="ergebnis ${z?'gut':''}">${text}</div>
       ${z?`<div class="probe" style="margin-top:10px">NEUER RANG · ${rangName(2).toUpperCase()} · RUF +4</div>`:''}</div></div>
-    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -333,13 +338,14 @@ function zeigeBefoerderung(n){
     <br><br><em>Für den Caporal braucht es einen Fürsprecher — Gunst ${CAPORAL_GUNST}, du hast ${gunst}. Fürsprache sammelt sich in Abenden am Feuer, nicht in einer einzigen Tat.</em>`;
     klasse='schlecht';
   }
+  stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
   app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
       <div class="probe" style="margin-top:10px">VAKANZ VORHANDEN · RUF ${ruf}/${CAPORAL_RUF} · FÜRSPRACHE ${gunst}/${CAPORAL_GUNST} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</div>
       </div></div>
-    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }

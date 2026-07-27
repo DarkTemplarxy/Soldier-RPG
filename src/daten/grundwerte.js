@@ -4,25 +4,46 @@
 
 /* ══════════════════ DATEN ══════════════════ */
 
+/* Dritter Eintrag ist der Erklärtext, der beim Überfahren erscheint. Er sagt,
+   was der Wert im Spiel tut — nicht, was er bedeutet. Wo ein Wert in diesem
+   Kapitel noch nichts tut, steht das auch da. */
 const ATTRIBUTE = [
-  ['konstitution','Konstitution'],['geschick','Geschick'],['kaltbluetigkeit','Kaltblütigkeit'],
-  ['autoritaet','Autorität'],['bildung','Bildung'],['menschenkenntnis','Menschenkenntnis']
+  ['konstitution','Konstitution','Was du aushältst. Entscheidet mit, ob eine Kugel eine Wunde oder ein Ende ist, und ob dich die Grenadiere nehmen — sie verlangen 55.'],
+  ['geschick','Geschick','Hände und Füße. Laden unter Beschuss, Deckung wechseln, Ausrüstung flicken. Die Voltigeure verlangen 55.'],
+  ['kaltbluetigkeit','Kaltblütigkeit','Ob du stehen bleibst, wenn die Linie steht. Wird geprüft, wenn es darauf ankommt, und nie vorher.'],
+  ['autoritaet','Autorität','Ob acht Männer tun, was du sagst. Als Fusilier ohne Wirkung, ab dem Caporal das Wichtigste.'],
+  ['bildung','Bildung','Lesen, schreiben, rechnen. Du kannst es nicht — und ab dem Caporal-fourrier geht es ohne nicht weiter.'],
+  ['menschenkenntnis','Menschenkenntnis','Wer redet, wer schweigt, wer dich deckt. Öffnet Wege durch Szenen, die andere nicht sehen.']
 ];
 const FERTIGKEITEN = [
-  ['muskete','Muskete'],['bajonett','Bajonett'],['reiten','Reiten'],['drill','Drill'],
-  ['taktik','Taktik'],['kartenkunde','Kartenkunde'],['verwaltung','Verwaltung'],
-  ['fouragieren','Fouragieren'],['feldchirurgie','Feldchirurgie']
+  ['muskete','Muskete','Treffen im Rauch. Die wichtigste Zahl im Gefecht — und die einzige, die vom Zustand deiner Waffe abhängt.'],
+  ['bajonett','Bajonett','Der Angriff auf zehn Schritt. Richtet mehr an als jeder Schuss und bringt dich weit nach vorn, wo es am gefährlichsten ist.'],
+  ['reiten','Reiten','In diesem Kapitel noch ohne Verwendung. Zählt ab den Rängen, die ein Pferd bekommen.'],
+  ['drill','Drill','Handgriffe ohne Nachdenken. Hält die Linie und schließt Lücken, wenn du Männer zu befehligen hast.'],
+  ['taktik','Taktik','Gelände lesen, Absichten erkennen. Kommt in Szenen vor, zählt aber erst in den höheren Rängen richtig.'],
+  ['kartenkunde','Kartenkunde','In diesem Kapitel noch ohne Verwendung. Für den Fusilier bedeutungslos, für den General alles.'],
+  ['verwaltung','Verwaltung','Listen, Rationen, Kompaniekasse. Der Weg zum Caporal-fourrier führt hier entlang.'],
+  ['fouragieren','Fouragieren','Essen finden, wo keins ist. Hält dich und deine Kameradschaft am Leben, wenn der Nachschub ausbleibt.'],
+  ['feldchirurgie','Feldchirurgie','In diesem Kapitel noch ohne Verwendung. Später der Unterschied zwischen einer Wunde und einem Grab.']
 ];
 const NAMEN = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,n])=>(o[k]=n,o),{});
+const ERKLAERUNG = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,,e])=>(o[k]=e||'',o),{});
+
+/* Ein Wort mit Erklärung beim Überfahren. Reines CSS, keine Abhängigkeit. */
+function mitHilfe(k, beschriftung){
+  const e = ERKLAERUNG[k];
+  return e ? `<span class="hilfe" data-hilfe="${String(e).replace(/"/g,'&quot;')}">${beschriftung}</span>` : beschriftung;
+}
 
 const RANG = [
   {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
   {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62}
 ];
-function rangName(n){
-  if(n===2) return S.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
-  const r=RANG.find(r=>r.n===n); return r?r.name:'Fusilier';
+function rangNameVon(mann){
+  if(mann.rang===2) return mann.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
+  const r=RANG.find(r=>r.n===mann.rang); return r?r.name:'Fusilier';
 }
+function rangName(n){ return rangNameVon({rang:n, zweig:S?S.zweig:null}); }
 function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
 
 const HERKUENFTE = [

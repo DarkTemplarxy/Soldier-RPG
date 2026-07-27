@@ -3,10 +3,29 @@
 
 /* ══════════════════ SPIELZUSTAND ══════════════════ */
 
-let META = { vp:0, chronik:[], bestKapitel:{} };
-let S = null;
-let K = null;      // Kampfzustand
-let NODE = 0;
+let META = neueChronik();
+
+/* Der ganze laufende Feldzug in einem Objekt — nur Daten, keine Verweise auf
+   Kapiteldaten, keine Funktionen. Genau deshalb lässt er sich speichern.
+   S und K sind bloß Kurznamen darauf und werden von binde() neu gesetzt. */
+let LAUF = null;
+let S = null;      // = LAUF.mann
+let K = null;      // = LAUF.kampf
+
+function binde(){ S = LAUF ? LAUF.mann : null; K = LAUF ? LAUF.kampf : null; }
+function setzeKampf(k){ if(LAUF) LAUF.kampf = k; K = k; }
+
+function neuerLauf(mann){
+  LAUF = {fassung:LAUF_FASSUNG, mann, node:0, kampf:null, szene:null,
+          lager:{id:null, abende:0, log:[]}, winter:{wochen:3, log:[]},
+          begonnen:new Date().toISOString(), zuletzt:null};
+  binde();
+}
+
+/* Die Station ist abgeschlossen und ihre Wirkung angewandt: Der Spielstand
+   zeigt schon auf die nächste, damit ein Beenden auf dem Ergebnisbildschirm
+   die Entscheidung nicht rückgängig macht. */
+function stationErledigt(){ if(LAUF){ LAUF.node++; LAUF.szene = null; laufSichern(); } }
 
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
@@ -84,6 +103,16 @@ function wundeGeben(name, abzug){
   S.belastung = Math.min(100, S.belastung + 6);
 }
 
+/* Atem erholt sich zwischen den Stationen von allein — zwischen zwei Gefechten
+   liegen Tage bis Wochen, und niemand bleibt monatelang außer Atem. Wer kräftig
+   ist, erholt sich schneller; Belastung und offene Wunden bremsen. Vorher war
+   Atem eine Einbahnstraße nach unten, die nur im Lager und im Winter umkehrbar
+   war — wer dort etwas anderes tat, ging ausgepumpt ins nächste Gefecht. */
+function erholung(){
+  const g = 8 + Math.round(S.attr.konstitution/12) - Math.floor(S.belastung/25) - S.wunden.length*2;
+  S.atem = Math.min(100, S.atem + Math.max(2, g));
+}
+
 function verschleiss(faktor){
   for(const k in S.ausr){
     const a = S.ausr[k];
@@ -91,6 +120,9 @@ function verschleiss(faktor){
   }
 }
 
+/* Der Tod nimmt dem Spielstand im selben Augenblick die Gültigkeit. Kein
+   Zurück, keine zweite Ausfertigung — Invariante 1. */
 function toetlich(grund){
   S.lebt = false; S.ende = 'tot'; S.todesart = grund;
+  laufVerwerfen();
 }

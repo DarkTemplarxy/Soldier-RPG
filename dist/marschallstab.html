@@ -123,6 +123,18 @@
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Erklärung beim Überfahren — reines CSS, keine Abhängigkeit */
+  .hilfe{position:relative;cursor:help;border-bottom:1px dotted var(--faint)}
+  .hilfe:hover{color:#f0e7d5;border-bottom-color:var(--brass)}
+  .hilfe:hover::after{content:attr(data-hilfe);position:absolute;z-index:30;
+    left:0;top:calc(100% + 7px);width:265px;padding:10px 13px;
+    background:#221e18;border:1px solid var(--line);border-left:2px solid var(--brass);
+    color:#ded5c4;font-family:Georgia,'Iowan Old Style',serif;font-size:13.5px;
+    line-height:1.55;letter-spacing:0;text-transform:none;font-style:normal;
+    box-shadow:0 8px 24px rgba(0,0,0,.65)}
+  /* In der schmalen Seitenleiste nach links ausklappen, sonst steht es draußen */
+  aside .hilfe:hover::after{left:auto;right:0}
+
   /* Ortswechsel — das Band über der Station */
   .weg{border:1px solid var(--line);border-left:2px solid var(--brass);background:#171512;
     padding:9px 15px;margin-bottom:14px}
@@ -192,25 +204,46 @@
 
 /* ══════════════════ DATEN ══════════════════ */
 
+/* Dritter Eintrag ist der Erklärtext, der beim Überfahren erscheint. Er sagt,
+   was der Wert im Spiel tut — nicht, was er bedeutet. Wo ein Wert in diesem
+   Kapitel noch nichts tut, steht das auch da. */
 const ATTRIBUTE = [
-  ['konstitution','Konstitution'],['geschick','Geschick'],['kaltbluetigkeit','Kaltblütigkeit'],
-  ['autoritaet','Autorität'],['bildung','Bildung'],['menschenkenntnis','Menschenkenntnis']
+  ['konstitution','Konstitution','Was du aushältst. Entscheidet mit, ob eine Kugel eine Wunde oder ein Ende ist, und ob dich die Grenadiere nehmen — sie verlangen 55.'],
+  ['geschick','Geschick','Hände und Füße. Laden unter Beschuss, Deckung wechseln, Ausrüstung flicken. Die Voltigeure verlangen 55.'],
+  ['kaltbluetigkeit','Kaltblütigkeit','Ob du stehen bleibst, wenn die Linie steht. Wird geprüft, wenn es darauf ankommt, und nie vorher.'],
+  ['autoritaet','Autorität','Ob acht Männer tun, was du sagst. Als Fusilier ohne Wirkung, ab dem Caporal das Wichtigste.'],
+  ['bildung','Bildung','Lesen, schreiben, rechnen. Du kannst es nicht — und ab dem Caporal-fourrier geht es ohne nicht weiter.'],
+  ['menschenkenntnis','Menschenkenntnis','Wer redet, wer schweigt, wer dich deckt. Öffnet Wege durch Szenen, die andere nicht sehen.']
 ];
 const FERTIGKEITEN = [
-  ['muskete','Muskete'],['bajonett','Bajonett'],['reiten','Reiten'],['drill','Drill'],
-  ['taktik','Taktik'],['kartenkunde','Kartenkunde'],['verwaltung','Verwaltung'],
-  ['fouragieren','Fouragieren'],['feldchirurgie','Feldchirurgie']
+  ['muskete','Muskete','Treffen im Rauch. Die wichtigste Zahl im Gefecht — und die einzige, die vom Zustand deiner Waffe abhängt.'],
+  ['bajonett','Bajonett','Der Angriff auf zehn Schritt. Richtet mehr an als jeder Schuss und bringt dich weit nach vorn, wo es am gefährlichsten ist.'],
+  ['reiten','Reiten','In diesem Kapitel noch ohne Verwendung. Zählt ab den Rängen, die ein Pferd bekommen.'],
+  ['drill','Drill','Handgriffe ohne Nachdenken. Hält die Linie und schließt Lücken, wenn du Männer zu befehligen hast.'],
+  ['taktik','Taktik','Gelände lesen, Absichten erkennen. Kommt in Szenen vor, zählt aber erst in den höheren Rängen richtig.'],
+  ['kartenkunde','Kartenkunde','In diesem Kapitel noch ohne Verwendung. Für den Fusilier bedeutungslos, für den General alles.'],
+  ['verwaltung','Verwaltung','Listen, Rationen, Kompaniekasse. Der Weg zum Caporal-fourrier führt hier entlang.'],
+  ['fouragieren','Fouragieren','Essen finden, wo keins ist. Hält dich und deine Kameradschaft am Leben, wenn der Nachschub ausbleibt.'],
+  ['feldchirurgie','Feldchirurgie','In diesem Kapitel noch ohne Verwendung. Später der Unterschied zwischen einer Wunde und einem Grab.']
 ];
 const NAMEN = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,n])=>(o[k]=n,o),{});
+const ERKLAERUNG = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,,e])=>(o[k]=e||'',o),{});
+
+/* Ein Wort mit Erklärung beim Überfahren. Reines CSS, keine Abhängigkeit. */
+function mitHilfe(k, beschriftung){
+  const e = ERKLAERUNG[k];
+  return e ? `<span class="hilfe" data-hilfe="${String(e).replace(/"/g,'&quot;')}">${beschriftung}</span>` : beschriftung;
+}
 
 const RANG = [
   {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
   {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62}
 ];
-function rangName(n){
-  if(n===2) return S.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
-  const r=RANG.find(r=>r.n===n); return r?r.name:'Fusilier';
+function rangNameVon(mann){
+  if(mann.rang===2) return mann.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
+  const r=RANG.find(r=>r.n===mann.rang); return r?r.name:'Fusilier';
 }
+function rangName(n){ return rangNameVon({rang:n, zweig:S?S.zweig:null}); }
 function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
 
 const HERKUENFTE = [
@@ -531,14 +564,204 @@ const KAPITEL = [
 
 
 'use strict';
+/* Spielstand: Fassungen, Wandler, Ablage, Aussetz-Spielstand.
+
+   Zwei Dinge werden gespeichert, und sie haben nichts miteinander zu tun:
+
+   CHRONIK  Veteranenpunkte, Chronik, erreichte Stationen. Lebt für immer,
+            wächst, gehört später in die Steam-Cloud.
+   LAUF     Der angefangene Feldzug. Ein einziger Platz, kein zweiter.
+            Wird beim Tod sofort gelöscht und ist danach nicht mehr zu laden.
+
+   Der Aussetz-Spielstand ist zum Aufhören da, nicht zum Wiederholen. Deshalb
+   wird er bei jedem Schritt überschrieben und zeigt immer auf das Jetzt: Wer
+   das Spiel beendet, kommt genau dorthin zurück, wo er war — nie weiter zurück.
+
+   Die Datei bleibt das maßgebliche Format (Invariante 6). `localStorage` ist
+   nur die bequeme Ablage, damit ein Absturz den Feldzug nicht kostet. Wo es
+   sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
+
+const CHRONIK_FASSUNG = 1;
+const LAUF_FASSUNG    = 1;
+const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
+
+const ORT_CHRONIK   = 'marschallstab.chronik';
+const ORT_SICHERUNG = 'marschallstab.chronik.bak';
+const ORT_LAUF      = 'marschallstab.lauf';
+
+/* ══════════════════ ABLAGE ══════════════════ */
+
+/* Eine Schicht, drei mögliche Rückseiten. Das Spiel darf nie wissen, wo es
+   liegt — dieselbe Schnittstelle bedient später auch den Benutzerordner einer
+   Electron-Verpackung und damit Steams Auto-Cloud. */
+const Ablage = (function(){
+  let echt = false;
+  try { localStorage.setItem('__probe','1'); localStorage.removeItem('__probe'); echt = true; }
+  catch(e){ echt = false; }        // file:// in manchen Browsern, privater Modus
+  const fluechtig = {};
+  return {
+    dauerhaft: echt,
+    lies(o){ try{ return echt ? localStorage.getItem(o) : (fluechtig[o] || null); }catch(e){ return fluechtig[o] || null; } },
+    schreibe(o,t){ try{ if(echt) localStorage.setItem(o,t); else fluechtig[o]=t; return true; }
+                   catch(e){ fluechtig[o]=t; return false; } },
+    loesche(o){ try{ if(echt) localStorage.removeItem(o); }catch(e){} delete fluechtig[o]; }
+  };
+})();
+
+/* ══════════════════ HÜLLE UND PRÜFSUMME ══════════════════ */
+
+/* Nicht gegen Betrüger — auf dem eigenen Rechner ist das aussichtslos, und
+   weil nur der beste Lauf zählt, lohnt es sich ohnehin nicht. Sondern gegen
+   halb geschriebene Dateien und kaputte Cloud-Abgleiche. */
+function pruefsumme(t){ let h = 0; for(let i=0;i<t.length;i++) h = (h*31 + t.charCodeAt(i))|0; return h; }
+
+function huelle(nutzlast){
+  const t = JSON.stringify(nutzlast);
+  return JSON.stringify({pruef:pruefsumme(t), inhalt:nutzlast}, null, 1);
+}
+function auspacken(text){
+  const d = JSON.parse(text);
+  if(d && typeof d === 'object' && d.inhalt !== undefined){
+    const heil = typeof d.pruef !== 'number' || d.pruef === pruefsumme(JSON.stringify(d.inhalt));
+    return {inhalt:d.inhalt, heil};
+  }
+  return {inhalt:d, heil:true};        // Fassung 0: nackte Nutzlast, ohne Hülle
+}
+
+/* ══════════════════ WANDLER ══════════════════ */
+
+/* Jeder Wandler hebt genau eine Fassung auf die nächste. Nie raten, nie eine
+   Fassung überspringen. Wer das Format ändert, hängt hier einen Eintrag an und
+   erhöht die Fassungszahl oben — sonst brechen alle Spielstände in der Welt. */
+const CHRONIK_WANDLER = {
+  0: alt => ({fassung:1, vp:alt.vp|0, chronik:alt.chronik||[], bestKapitel:alt.bestKapitel||{},
+              laeufe:(alt.chronik||[]).length, zuletzt:null})
+};
+const LAUF_WANDLER = {};
+
+function wandle(d, wandler, ziel){
+  if(!d || typeof d !== 'object') return null;
+  let f = typeof d.fassung === 'number' ? d.fassung : 0;
+  while(f < ziel){
+    const w = wandler[f];
+    if(!w) return null;
+    d = w(d); f = d.fassung;
+  }
+  return f === ziel ? d : null;        // aus der Zukunft: lieber nichts als Trümmer
+}
+
+function neueChronik(){
+  return {fassung:CHRONIK_FASSUNG, vp:0, chronik:[], bestKapitel:{}, laeufe:0, zuletzt:null};
+}
+
+/* ══════════════════ CHRONIK ══════════════════ */
+
+function chronikSichern(){
+  META.fassung = CHRONIK_FASSUNG;
+  META.zuletzt = new Date().toISOString();
+  const alt = Ablage.lies(ORT_CHRONIK);
+  if(alt) Ablage.schreibe(ORT_SICHERUNG, alt);     // eine Generation zurück bleibt
+  Ablage.schreibe(ORT_CHRONIK, huelle(META));
+}
+
+function chronikLaden(){
+  for(const ort of [ORT_CHRONIK, ORT_SICHERUNG]){
+    const t = Ablage.lies(ort);
+    if(!t) continue;
+    try{
+      const {inhalt, heil} = auspacken(t);
+      const d = wandle(inhalt, CHRONIK_WANDLER, CHRONIK_FASSUNG);
+      if(d && heil){ META = d; return true; }
+      if(d && !heil) continue;                     // beschädigt: Sicherung versuchen
+    }catch(e){ /* nächster Ort */ }
+  }
+  return false;
+}
+
+/* Die Chronik wächst mit jedem Lauf. Alle zählen, aber nur die jüngsten
+   werden einzeln behalten — und der beste immer, denn er ist der Vorrat. */
+function chronikKuerzen(){
+  if(META.chronik.length <= CHRONIK_GRENZE) return;
+  const best = META.chronik.reduce((a,b)=> b.punkte > a.punkte ? b : a);
+  const jung = META.chronik.slice(-(CHRONIK_GRENZE-1));
+  META.chronik = jung.indexOf(best) >= 0 ? jung : [best].concat(jung);
+}
+
+/* ══════════════════ AUSSETZ-SPIELSTAND ══════════════════ */
+
+function laufSichern(){
+  if(!LAUF || !LAUF.mann || !LAUF.mann.lebt) return;
+  LAUF.zuletzt = new Date().toISOString();
+  Ablage.schreibe(ORT_LAUF, huelle(LAUF));
+}
+
+/* Beim Tod. Sofort und ohne Umweg — danach gibt es nichts mehr zu laden. */
+function laufVerwerfen(){ Ablage.loesche(ORT_LAUF); }
+
+function laufVorhanden(){
+  const t = Ablage.lies(ORT_LAUF);
+  if(!t) return null;
+  try{
+    const {inhalt, heil} = auspacken(t);
+    if(!heil) return null;
+    const d = wandle(inhalt, LAUF_WANDLER, LAUF_FASSUNG);
+    if(!d || !d.mann || !d.mann.lebt) return null;
+    return d;
+  }catch(e){ return null; }
+}
+
+/* ══════════════════ DATEI ══════════════════ */
+
+/* Das maßgebliche Format: Chronik und, falls einer läuft, der Feldzug.
+   Eine Datei, damit niemand zwei verwalten muss. */
+function dateiInhalt(){
+  return huelle({fassung:CHRONIK_FASSUNG, chronik:META, lauf:LAUF || laufVorhanden() || null});
+}
+
+function dateiEinlesen(text){
+  const {inhalt, heil} = auspacken(text);
+  if(!heil) return {ok:false, grund:'Die Datei ist beschädigt — die Prüfsumme stimmt nicht.'};
+  // Fassung 0 war die nackte Chronik ohne Umschlag
+  const rohChronik = inhalt && inhalt.chronik !== undefined && inhalt.chronik.vp !== undefined
+    ? inhalt.chronik : inhalt;
+  const c = wandle(rohChronik, CHRONIK_WANDLER, CHRONIK_FASSUNG);
+  if(!c) return {ok:false, grund:'Diese Datei ist kein Spielstand oder stammt aus einer neueren Fassung des Spiels.'};
+  META = c;
+  chronikSichern();
+  const l = inhalt && inhalt.lauf ? wandle(inhalt.lauf, LAUF_WANDLER, LAUF_FASSUNG) : null;
+  if(l && l.mann && l.mann.lebt) Ablage.schreibe(ORT_LAUF, huelle(l));
+  return {ok:true, lauf:!!l};
+}
+
+
+'use strict';
 /* Mechanik: Spielzustand, Proben, Fertigkeitswachstum, Verschleiß, Wunden. */
 
 /* ══════════════════ SPIELZUSTAND ══════════════════ */
 
-let META = { vp:0, chronik:[], bestKapitel:{} };
-let S = null;
-let K = null;      // Kampfzustand
-let NODE = 0;
+let META = neueChronik();
+
+/* Der ganze laufende Feldzug in einem Objekt — nur Daten, keine Verweise auf
+   Kapiteldaten, keine Funktionen. Genau deshalb lässt er sich speichern.
+   S und K sind bloß Kurznamen darauf und werden von binde() neu gesetzt. */
+let LAUF = null;
+let S = null;      // = LAUF.mann
+let K = null;      // = LAUF.kampf
+
+function binde(){ S = LAUF ? LAUF.mann : null; K = LAUF ? LAUF.kampf : null; }
+function setzeKampf(k){ if(LAUF) LAUF.kampf = k; K = k; }
+
+function neuerLauf(mann){
+  LAUF = {fassung:LAUF_FASSUNG, mann, node:0, kampf:null, szene:null,
+          lager:{id:null, abende:0, log:[]}, winter:{wochen:3, log:[]},
+          begonnen:new Date().toISOString(), zuletzt:null};
+  binde();
+}
+
+/* Die Station ist abgeschlossen und ihre Wirkung angewandt: Der Spielstand
+   zeigt schon auf die nächste, damit ein Beenden auf dem Ergebnisbildschirm
+   die Entscheidung nicht rückgängig macht. */
+function stationErledigt(){ if(LAUF){ LAUF.node++; LAUF.szene = null; laufSichern(); } }
 
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
@@ -616,6 +839,16 @@ function wundeGeben(name, abzug){
   S.belastung = Math.min(100, S.belastung + 6);
 }
 
+/* Atem erholt sich zwischen den Stationen von allein — zwischen zwei Gefechten
+   liegen Tage bis Wochen, und niemand bleibt monatelang außer Atem. Wer kräftig
+   ist, erholt sich schneller; Belastung und offene Wunden bremsen. Vorher war
+   Atem eine Einbahnstraße nach unten, die nur im Lager und im Winter umkehrbar
+   war — wer dort etwas anderes tat, ging ausgepumpt ins nächste Gefecht. */
+function erholung(){
+  const g = 8 + Math.round(S.attr.konstitution/12) - Math.floor(S.belastung/25) - S.wunden.length*2;
+  S.atem = Math.min(100, S.atem + Math.max(2, g));
+}
+
 function verschleiss(faktor){
   for(const k in S.ausr){
     const a = S.ausr[k];
@@ -623,8 +856,11 @@ function verschleiss(faktor){
   }
 }
 
+/* Der Tod nimmt dem Spielstand im selben Augenblick die Gültigkeit. Kein
+   Zurück, keine zweite Ausfertigung — Invariante 1. */
 function toetlich(grund){
   S.lebt = false; S.ende = 'tot'; S.todesart = grund;
+  laufVerwerfen();
 }
 
 
@@ -653,9 +889,9 @@ function wegband(n){
 
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
-  if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.chronik.length}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
+  if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
   kopf.innerHTML = `${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}`;
-  const n = KAPITEL[Math.min(NODE,KAPITEL.length-1)];
+  const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
 }
 
@@ -677,10 +913,10 @@ function seitenleiste(){
            <div class="kv"><span>Deckung</span><b>${K.deckung?'ja':'nein'}</b></div>`:''}
       <div class="rule"></div>
       <p class="mini">Attribute</p>
-      ${ATTRIBUTE.map(([k,n])=>`<div class="kv"><span>${n}</span><b>${S.attr[k]}</b></div>`).join('')}
+      ${ATTRIBUTE.map(([k,n])=>`<div class="kv"><span>${mitHilfe(k,n)}</span><b>${S.attr[k]}</b></div>`).join('')}
       <div class="rule"></div>
       <p class="mini">Fertigkeiten</p>
-      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>`<div class="kv"><span>${n}</span><b>${S.fert[k]}</b></div>`).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
+      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>`<div class="kv"><span>${mitHilfe(k,n)}</span><b>${S.fert[k]}</b></div>`).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
       <div class="rule"></div>
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
@@ -695,7 +931,8 @@ function seitenleiste(){
 
 /* ── Titelbildschirm ── */
 function zeigeTitel(){
-  S=null; K=null; kopfzeile();
+  LAUF=null; binde(); kopfzeile();
+  const offen = laufVorhanden();
   const chron = META.chronik.length ? META.chronik.slice().reverse().map(c=>
     `<tr${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?' class="hi"':''}>
       <td class="d">${c.punkte===Math.max(...META.chronik.map(x=>x.punkte))?'★ ':''}${esc(c.name)}</td>
@@ -714,16 +951,22 @@ function zeigeTitel(){
     <div class="zit">Du beginnst 1796 als Rekrut mit einer Muskete, die dir nicht gehört.<br>
     Wenn du dieses Kapitel überlebst, bist du vielleicht Caporal.<br>
     Wahrscheinlicher liegst du im April in einem Graben bei Montenotte.</div>
+    ${offen ? `<div class="wirkung" style="margin-bottom:14px"><span>Unterbrochener Feldzug</span>
+      ${esc(offen.mann.name)} · ${esc(rangNameVon(offen.mann))} · ${esc((KAPITEL[Math.min(offen.node,KAPITEL.length-1)].datum||'').split(' · ')[0])}</div>` : ''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      ${offen ? '<button class="plain" onclick="fortsetzen()">Feldzug fortsetzen</button>' : ''}
       <button class="plain" onclick="zeigeLaden()">Neuen Mann aufstellen</button>
       <button class="plain" onclick="speichern()">Spielstand sichern</button>
       <button class="plain" onclick="document.getElementById('ladefeld').click()">Spielstand laden</button>
       <input type="file" id="ladefeld" accept=".json" class="hidden" onchange="laden(event)">
     </div>
+    ${offen ? '' : `<p class="mini" style="margin:14px 0 0;color:var(--faint)">${Ablage.dauerhaft
+      ? 'Der Feldzug wird selbsttätig gesichert. Wer stirbt, verliert ihn — wer aufhört, kommt zurück.'
+      : 'Dieser Browser erlaubt keine selbsttätige Sicherung. Der Spielstand geht nur über die Datei.'}</p>`}
    </div></div>
 
   <div class="grid2">
-    <div class="card"><div class="ch"><span>Chronik</span><span>${META.chronik.length} Läufe</span></div>
+    <div class="card"><div class="ch"><span>Chronik</span><span>${META.laeufe|0} Läufe</span></div>
       <div class="cb"><table><tr><th>Name</th><th>Endrang</th><th>Ende</th><th class="n">VP</th></tr>${chron}</table></div></div>
     <div class="card"><div class="ch"><span>Wie weit ich schon war</span></div>
       <div class="cb"><table><tr><th>Station</th><th class="n">erreicht</th><th>bester Rang dort</th></tr>${best}</table></div></div>
@@ -775,7 +1018,7 @@ function zeigeErschaffung(){
   ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
-      <span class="attrname">${n}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
+      <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
       ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
       <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
       <span><button class="pmbtn" onclick="stelle('${k}',-10)" id="am_${k}">−</button>
@@ -847,31 +1090,43 @@ function aktualisiereErschaffung(){
   if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
 }
 function starte(){
-  S = neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL);
-  NODE = 0; K = null; WOCHEN = 3; LAGER_ID = null; ABENDE = null; LLOG = []; naechster();
+  laufVerwerfen();       // ein Platz, kein zweiter — der alte Feldzug ist damit vorbei
+  neuerLauf(neuerCharakter(ERSCH.name.trim(), ERSCH.herkunft, ERSCH.attr, AUSWAHL));
+  naechster();
+}
+
+/* Fortsetzen ist kein Zurückspulen: Der Spielstand zeigt immer auf den letzten
+   Schritt, nicht auf den letzten Halt. */
+function fortsetzen(){
+  const d = laufVorhanden();
+  if(!d){ zeigeTitel(); return; }
+  LAUF = d; binde(); naechster();
 }
 
 /* ══════════════════ ABLAUF ══════════════════ */
 
 function naechster(){
   if(!S.lebt){ zeigeTod(); return; }
-  if(NODE >= KAPITEL.length){ zeigeKapitelende(); return; }
-  const n = KAPITEL[NODE];
-  if(n.datum && n.id){
+  if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
+  const n = KAPITEL[LAUF.node];
+  if(n.datum && n.id && LAUF.gezaehlt !== n.id){
+    LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
+    erholung();                           // Tage bis Wochen zwischen den Stationen
     const b = META.bestKapitel[n.id] || {mal:0,rang:''};
     b.mal++; if(!b.rang || S.rang>=RANG.findIndex(r=>r.name===b.rang)+1) b.rang = rangName(S.rang);
     META.bestKapitel[n.id]=b;
+    chronikSichern();
   }
+  laufSichern();
   kopfzeile();
   if(n.typ==='szene') zeigeSzene(n);
   else if(n.typ==='lager') zeigeLager(n);
-  else if(n.typ==='kampf') starteKampf(n);
+  else if(n.typ==='kampf'){ if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.'); else starteKampf(n); }
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
   else if(n.typ==='ende') zeigeKapitelende();
 }
-function weiter(){ NODE++; naechster(); }
 
 /* ── Szene ── */
 function zeigeSzene(n){
@@ -885,10 +1140,10 @@ function zeigeSzene(n){
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
     </div>${seitenleiste()}</div>`;
-  window.AKT = n;
+  LAUF.szene = n.id;
 }
 function waehleOption(i){
-  const n = window.AKT, o = n.optionen[i];
+  const n = KAPITEL[LAUF.node], o = n.optionen[i];
   let erg, klasse='', probeText='';
   if(o.probe){
     const p = probe(o.probe.wert, o.probe.schw);
@@ -901,12 +1156,13 @@ function waehleOption(i){
   anwenden(erg);
   verschleiss(0.35);
   S.log.push(n.id+': '+o.label);
+  stationErledigt();
   app.innerHTML = `<div class="stage">
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p class="said">${esc(o.label)}</p></div>
         <div class="ergebnis ${klasse}">${erg.text}${probeText}</div>
         ${wirkungen(erg)}</div></div>
-      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -962,12 +1218,14 @@ function starteKampf(n){
     verschleiss(0.15);
     S.atem = Math.max(0, S.atem-4);
     S.belastung = Math.min(100, S.belastung+1);
+    laufSichern();
     zeigeAnmarsch(n);
     return;
   }
   S.anmarschGesehen = null;
-  K = {n, runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
-       protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0};
+  setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
+              protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
+  laufSichern();
   zeigeKampf(n.intro);
 }
 
@@ -1006,7 +1264,7 @@ function zeigeAnmarsch(n){
             <div class="prose">${gefechtsbereitschaft().map(t=>`<p>${t}</p>`).join('')}</div></div>
         </div></div>
       <div class="orders"><div class="ordbody">
-        <button class="ord weiter" onclick="starteKampf(KAPITEL[NODE])">Antreten
+        <button class="ord weiter" onclick="starteKampf(KAPITEL[LAUF.node])">Antreten
           <span class="cost">Danach gibt es keinen Weg zurück, der nicht Ruf kostet</span></button>
       </div></div>
     </div>${seitenleiste()}</div>`;
@@ -1046,7 +1304,7 @@ function sichtfeld(){
 }
 
 function zeigeKampf(text){
-  const n = K.n;
+  const n = KAPITEL[LAUF.node];
   const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
       ${a.aus&&a.aus()?'disabled':''}>${a.label}<span class="cost">${a.cost}</span></button>`).join('');
   app.innerHTML = `<div class="stage">
@@ -1062,7 +1320,7 @@ function zeigeKampf(text){
 }
 
 function kampfAktion(id){
-  const n = K.n; let text = '', schaden = 0, gefahrMod = 0;
+  const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
   const zw = S.zweig;
 
   if(id==='laden'){
@@ -1167,11 +1425,12 @@ function kampfAktion(id){
     kampfEnde(knapp, text+treffer+(knapp?' Und dann ist es plötzlich vorbei.':' Es wird dunkel, und nichts ist entschieden.'));
     return;
   }
+  laufSichern();
   zeigeKampf(text + treffer);
 }
 
 function kampfEnde(sieg, letzterText){
-  const n = K.n;
+  const n = KAPITEL[LAUF.node];
   const erg = sieg ? n.sieg : n.niederlage;
   anwenden(erg);
   verschleiss(0.9);
@@ -1179,14 +1438,15 @@ function kampfEnde(sieg, letzterText){
   const leicht = S.wunden.findIndex(w=>w.abzug<=5);
   if(leicht>=0) S.wunden.splice(leicht,1);
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
-  const kk = K; K = null;
+  const kk = K; setzeKampf(null);
+  stationErledigt();
   app.innerHTML = `<div class="stage">
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
         <div class="probe" style="margin-top:10px">${sieg?'GEFECHT BESTANDEN':'GEFECHT VERLOREN'} · ${kk.runde} RUNDEN</div>
       </div></div>
-      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1222,11 +1482,12 @@ function waehleZweig(z){
   } else {
     text = 'Er geht weiter, ohne etwas zu sagen. Du bleibst in der Mitte des Bataillons, wo die meisten bleiben. Es ist keine Schande, nur eben nichts.';
   }
+  stationErledigt();
   app.innerHTML = `<div class="stage"><div>
     <div class="card"><div class="ch"><span>Mailand</span><span>Mai 1796</span></div>
       <div class="cb"><div class="ergebnis ${z?'gut':''}">${text}</div>
       ${z?`<div class="probe" style="margin-top:10px">NEUER RANG · ${rangName(2).toUpperCase()} · RUF +4</div>`:''}</div></div>
-    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1258,13 +1519,14 @@ function zeigeBefoerderung(n){
     <br><br><em>Für den Caporal braucht es einen Fürsprecher — Gunst ${CAPORAL_GUNST}, du hast ${gunst}. Fürsprache sammelt sich in Abenden am Feuer, nicht in einer einzigen Tat.</em>`;
     klasse='schlecht';
   }
+  stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
   app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
       <div class="probe" style="margin-top:10px">VAKANZ VORHANDEN · RUF ${ruf}/${CAPORAL_RUF} · FÜRSPRACHE ${gunst}/${CAPORAL_GUNST} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</div>
       </div></div>
-    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="weiter()">Weiter</button></div></div>
+    <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1376,40 +1638,46 @@ function lagerHandlungen(n){
   return ids.filter(id=>LAGER_TUN[id]);
 }
 
-let ABENDE = null, LAGER_ID = null, LLOG = [];
+/* Das Lager ist der angesagte Halt: Hier wird der Feldzug gesichert und
+   gesagt, dass er gesichert ist. Danach läuft die Sicherung still weiter, damit
+   Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
 function zeigeLager(n){
-  if(LAGER_ID !== n.id){ LAGER_ID = n.id; ABENDE = n.abende; LLOG = []; }
+  const L = LAUF.lager;
+  if(L.id !== n.id){ L.id = n.id; L.abende = n.abende; L.log = []; L.gesichert = Ablage.dauerhaft; laufSichern(); }
   const opt = lagerHandlungen(n).map(id=>{
     const t = LAGER_TUN[id];
-    return `<button class="ord" onclick="lagerTun('${id}')" ${ABENDE<=0?'disabled':''}>
+    return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
       ${t.label}<span class="cost">${t.cost}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
-      ${LLOG.length?`<div class="ergebnis">${LLOG.join('<br><br>')}</div>`:''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${ABENDE} VON ${n.abende}</div>
+      ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
+      ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${n.abende}</div>
       </div></div>
     <div class="orders"><div class="ch"><span>Womit verbringst du den Abend?</span></div><div class="ordbody">
-      ${opt}${ABENDE<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
+      ${opt}${L.abende<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
     </div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
 function lagerTun(id){
-  if(ABENDE<=0) return;
-  ABENDE--;
-  LLOG.push(LAGER_TUN[id].tu());
-  S.log.push(LAGER_ID+': '+LAGER_TUN[id].label);
-  zeigeLager(KAPITEL[NODE]);
+  const L = LAUF.lager;
+  if(L.abende<=0) return;
+  L.abende--;
+  L.log.push(LAGER_TUN[id].tu());
+  S.log.push(L.id+': '+LAGER_TUN[id].label);
+  laufSichern();
+  zeigeLager(KAPITEL[LAUF.node]);
 }
-function lagerEnde(){ LAGER_ID = null; ABENDE = null; LLOG = []; weiter(); }
+function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(); naechster(); }
 
 /* ══════════════════ WINTERQUARTIER ══════════════════ */
 
-let WOCHEN = 3, WLOG = [];
 function zeigeWinter(n){
-  if(WOCHEN===3) WLOG=[];
+  const W = LAUF.winter;
+  if(W.wochen===3 && !W.log.length){ W.log=[]; W.gesichert = Ablage.dauerhaft; laufSichern(); }
   const tun = [
     {id:'ausr',label:'Ausrüstung instand setzen',cost:'Schuhe, Muskete und Tornister flicken'},
     {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
@@ -1417,7 +1685,7 @@ function zeigeWinter(n){
     {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
     {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt, Atem steigt, Wunden heilen'}
   ];
-  const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${WOCHEN<=0?'disabled':''}>
+  const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
   app.innerHTML = `<div class="stage"><div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
@@ -1425,47 +1693,51 @@ function zeigeWinter(n){
         <p>Verona im Dezember. Die Armee liegt in Quartieren, die Österreicher liegen in ihren, und für ein paar Wochen schießt niemand auf niemanden.</p>
         <p>Es ist die einzige Zeit im Jahr, in der du entscheidest, was du tust. Drei Wochen, mehr nicht — im Januar geht es weiter.</p>
       </div>
-      ${WLOG.length?`<div class="ergebnis">${WLOG.join('<br><br>')}</div>`:''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${WOCHEN}</div>
+      ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
+      ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen}</div>
       </div></div>
     <div class="orders"><div class="ch"><span>Womit verbringst du die Woche?</span></div><div class="ordbody">
-      ${opt}${WOCHEN<=0?'<button class="ord weiter" onclick="WOCHEN=3;weiter()">Ins Feld zurück</button>':''}
+      ${opt}${W.wochen<=0?'<button class="ord weiter" onclick="winterEnde()">Ins Feld zurück</button>':''}
     </div></div>
     </div>${seitenleiste()}</div>`;
 }
 function winterTun(id){
-  if(WOCHEN<=0) return;
-  WOCHEN--;
+  const W = LAUF.winter;
+  if(W.wochen<=0) return;
+  W.wochen--;
   if(id==='ausr'){
     for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+30);
-    WLOG.push('Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>');
+    W.log.push('Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>');
   }
   if(id==='drill'){
     nutzen('muskete',3); nutzen('drill',3); nutzen('bajonett',2);
-    WLOG.push('Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>');
+    W.log.push('Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>');
   }
   if(id==='lesen'){
     if(S.geld>=6){ S.geld-=6; S.attr.bildung=Math.min(100,S.attr.bildung+7); nutzen('verwaltung',2);
-      WLOG.push('Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'); }
-    else WLOG.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
+      W.log.push('Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'); }
+    else W.log.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
   }
   if(id==='leute'){
     S.gunst+=2; S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
     nutzen('menschenkenntnis',2);
-    WLOG.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
+    W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
   }
   if(id==='ruhe'){
     S.belastung=Math.max(0,S.belastung-16); S.atem=Math.min(100,S.atem+25);
-    if(S.wunden.length){ const w=S.wunden.shift(); WLOG.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Atem +25 · Wunde geheilt</span>`); }
-    else WLOG.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16 · Atem +25</span>');
+    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Atem +25 · Wunde geheilt</span>`); }
+    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16 · Atem +25</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
-  zeigeWinter(KAPITEL[NODE]);
+  laufSichern();
+  zeigeWinter(KAPITEL[LAUF.node]);
 }
+function winterEnde(){ LAUF.winter = {wochen:3, log:[]}; stationErledigt(); naechster(); }
 
 /* ══════════════════ WERTUNG UND ENDE ══════════════════ */
 
-function stationen(){ return Math.min(KAPITEL.length, NODE+1); }
+function stationen(){ return Math.min(KAPITEL.length, LAUF.node+1); }
 
 function wertung(){
   const p = {};
@@ -1482,7 +1754,11 @@ function wertung(){
 function eintragen(endeText){
   const p = wertung();
   META.chronik.push({name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe});
+  META.laeufe = (META.laeufe|0) + 1;
   META.vp = Math.max(META.vp, p.summe);
+  chronikKuerzen();
+  laufVerwerfen();          // der Lauf ist zu Ende, in jedem Fall
+  chronikSichern();
   return p;
 }
 
@@ -1501,6 +1777,7 @@ function wertungsTabelle(p){
 
 function zeigeTod(){
   const grund = S.todesart || 'Gefallen';
+  laufVerwerfen();
   const p = eintragen(grund);
   const neu = p.summe >= META.vp;
   app.innerHTML = `<div class="card"><div class="ch"><span class="tot">Ende</span><span>${esc(grund)}</span></div>
@@ -1517,13 +1794,14 @@ function zeigeTod(){
           <p style="margin-top:10px">Gezählt wird nur der beste Lauf. Es gibt nichts zu grinden, nur zu übertreffen.</p>
         </div>
       </div>
+      <div class="probe" style="margin-top:14px">DER SPIELSTAND DIESES MANNES IST GELÖSCHT</div>
       <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="plain" onclick="zeigeLaden()">Nächster Mann</button>
         <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
         <button class="plain" onclick="speichern()">Spielstand sichern</button>
       </div>
     </div></div>`;
-  S=null; kopfzeile();
+  LAUF=null; binde(); kopfzeile();
 }
 function todesText(){
   const t = [
@@ -1558,13 +1836,13 @@ function zeigeKapitelende(){
       <button class="plain" onclick="speichern()">Spielstand sichern</button>
     </div>
   </div></div>`;
-  S=null; kopfzeile();
+  LAUF=null; binde(); kopfzeile();
 }
 
 /* ══════════════════ SPIELSTAND ══════════════════ */
 
 function speichern(){
-  const blob = new Blob([JSON.stringify(META,null,1)],{type:'application/json'});
+  const blob = new Blob([dateiInhalt()],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'marschallstab-spielstand.json';
@@ -1575,11 +1853,10 @@ function laden(ev){
   const f = ev.target.files[0]; if(!f) return;
   const r = new FileReader();
   r.onload = () => {
-    try{
-      const d = JSON.parse(r.result);
-      if(typeof d.vp === 'number'){ META = {vp:d.vp, chronik:d.chronik||[], bestKapitel:d.bestKapitel||{}}; zeigeTitel(); }
-      else alert('Diese Datei ist kein Spielstand.');
-    }catch(e){ alert('Diese Datei ließ sich nicht lesen.'); }
+    let e;
+    try{ e = dateiEinlesen(r.result); }
+    catch(x){ e = {ok:false, grund:'Diese Datei ließ sich nicht lesen.'}; }
+    if(e.ok) zeigeTitel(); else alert(e.grund);
   };
   r.readAsText(f);
 }
@@ -1589,6 +1866,7 @@ function laden(ev){
 /* Einstiegspunkt. Muss zuletzt geladen werden. */
 
 /* ══════════════════ START ══════════════════ */
+chronikLaden();
 zeigeTitel();
 
 </script>

@@ -116,6 +116,18 @@
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
+  /* Erklärung beim Überfahren — reines CSS, keine Abhängigkeit */
+  .hilfe{position:relative;cursor:help;border-bottom:1px dotted var(--faint)}
+  .hilfe:hover{color:#f0e7d5;border-bottom-color:var(--brass)}
+  .hilfe:hover::after{content:attr(data-hilfe);position:absolute;z-index:30;
+    left:0;top:calc(100% + 7px);width:265px;padding:10px 13px;
+    background:#221e18;border:1px solid var(--line);border-left:2px solid var(--brass);
+    color:#ded5c4;font-family:Georgia,'Iowan Old Style',serif;font-size:13.5px;
+    line-height:1.55;letter-spacing:0;text-transform:none;font-style:normal;
+    box-shadow:0 8px 24px rgba(0,0,0,.65)}
+  /* In der schmalen Seitenleiste nach links ausklappen, sonst steht es draußen */
+  aside .hilfe:hover::after{left:auto;right:0}
+
   /* Ortswechsel — das Band über der Station */
   .weg{border:1px solid var(--line);border-left:2px solid var(--brass);background:#171512;
     padding:9px 15px;margin-bottom:14px}
