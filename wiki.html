@@ -163,7 +163,7 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding-top:16px;
   <a href="#spielstand">Der Spielstand</a>
 
   <h2>Der Inhalt</h2>
-  <a href="#kapitel12">Kapitel 1 und 2, Station für Station</a>
+  <a href="#kapitel12">Die drei Kapitel, Station für Station</a>
   <a href="#raenge">Die vierzehn Ränge</a>
   <a href="#kapitelalle">Die elf Kapitel</a>
   <a href="#enden">Schranken und die vier Enden</a>
@@ -176,7 +176,7 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding-top:16px;
   <a href="#ton">Ton und Sprache</a>
   <a href="#historie">Historische Belege</a>
 
-  <div class="navmark">Stand 28. Juli 2026</div>
+  <div class="navmark">Stand 28. Juli 2026 · drei Kapitel</div>
 </nav>
 
 <main>
@@ -187,7 +187,7 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding-top:16px;
   <div class="links">
     <a href="https://darktemplarxy.github.io/Soldier-RPG/" target="_blank">▶ Spielen</a>
     <a href="https://github.com/DarkTemplarxy/Soldier-RPG" target="_blank">Quelltext</a>
-    <span style="color:var(--faint)">Stand: 28. Juli 2026 · nach dem Bau der Kette und der Ränge 4/5</span>
+    <span style="color:var(--faint)">Stand: 28. Juli 2026 · nach Kapitel 3, den Orden und der Leiter der Sichtbarkeit</span>
   </div>
 </header>
 
@@ -196,45 +196,49 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding-top:16px;
 <h2>Wo das Projekt steht</h2>
 
 <div class="ok">
-<b>Die veröffentlichte Fassung läuft.</b> Der Link liefert das Spiel mit beiden
-Feldzügen aus — der Titel der Seite lautet inzwischen „Italien 1796/97 · Ägypten
-1798/99“. Der Vermerk in der README, der Link funktioniere erst, sobald GitHub
-Pages aktiviert sei, ist überholt und kann weg.
+<b>Die veröffentlichte Fassung läuft und ist aktuell.</b> Der Kopf der Seite
+nennt jetzt alle gebauten Kapitel — <i>Prototyp · Italien 1796–97 · Ägypten
+1798–99 · Garnison 1801–04</i>. Diese Zeile stand früher wörtlich im Code und
+wurde beim Bau von Kapitel 3 nicht mitgezogen; sie kommt jetzt aus den Daten.
 </div>
 
-<p>Seit der letzten Sitzung sind drei größere Dinge dazugekommen:</p>
+<h3>Was seit der letzten Fassung dieses Handbuchs dazugekommen ist</h3>
 
 <table>
-<tr><th style="width:34%">Was</th><th>Bedeutung</th></tr>
-<tr><td><b>Kapitel 2 — Ägypten 1798/99</b></td><td>Sechzehn weitere Stationen, fünf Gefechte, eigene Feindgüte, Krankheit als eigenständige Bedrohung. Der Feldzug ist damit doppelt so lang wie zuvor.</td></tr>
-<tr><td><b>Der Spielstand</b></td><td><code>src/spielstand.js</code> existiert. Invariante 6 wurde gelockert: <code>localStorage</code> ist jetzt die bequeme Ablage, die Datei bleibt das maßgebliche Format. Gesichert wird bei <i>jedem</i> Schritt, gelöscht wird beim Tod sofort.</td></tr>
-<tr><td><b>Lebenspunkte statt Todeswurf</b></td><td>Der Tod ist keine eigene Probe mehr. <code>lebenMax = 40 + Konstitution·0,6</code>, Treffer ziehen davon ab. Damit ist der alte Exploit weg, bei dem ab Konstitution 58 praktisch nichts mehr tödlich war.</td></tr>
+<tr><th style="width:30%">Was</th><th>Bedeutung</th></tr>
+<tr><td><b>Die Kette über dir</b></td><td>Gunst ist keine Zahl mehr, sondern eine Beziehung je Person (−5…+5). Vier Männer — Martel, Collot, Berthaud, Vernet — die ganze Laufbahn lang dieselben, weil sie mit aufsteigen.</td></tr>
+<tr><td><b>Ränge 4 und 5</b></td><td>Caporal-fourrier (Bildungsschwelle 35) und Sergent mit zwei Wegen. Ab Rang 5 wechselt das Gefecht den Maßstab: zwanzig Mann statt eines Körpers, mit eigener Abrechnung danach.</td></tr>
+<tr><td><b>Kapitel 3 — Garnison 1801–04</b></td><td>Siebzehn Stationen, Nîmes und das Lager von Boulogne. Das Friedenskapitel: vier Saisons, ein Duell, ein Manöver mit Platzpatronen.</td></tr>
+<tr><td><b>Orden</b></td><td>Ehrenwaffe, Ehrensäbel, Ehrenlegion — mit Wertungspunkten, Ruf <i>und</i> einer Pension in Francs. Nennungen im Tagesbefehl haben endlich eine Folge.</td></tr>
+<tr><td><b>Die Leiter der Sichtbarkeit</b></td><td>Die Nennung war ein Würfelwurf; jetzt ist sie die mittlere von drei verdienten Stufen. Das Gefecht zählt Taten.</td></tr>
+<tr><td><b>Die volle Punkteskala</b></td><td>Rang und Zuschläge rechnen wieder in <i>einer</i> Skala. Je überlebtem Kapitel +8 statt je Station +2.</td></tr>
+<tr><td><b>Napoleonische Gestaltung</b></td><td>Papier für Schriftstücke, Kokarde und Adler, das Gefechtsbild nach Rang, Gelände je Gefecht.</td></tr>
+<tr><td><b>Marketender</b></td><td>Ausrüstung für Francs statt für Veteranenpunkte — Geld hat zum ersten Mal eine Verwendung.</td></tr>
 </table>
 
-<p>Dazu kamen: elf Marsch-Zwischenfälle, vier Sondermissions-Ketten (Brücke von
-Lodi, Sumpf von Arcole, Riss im Karree von Embabeh, Bresche von Akkon), fünf
-Hebel gegen die Unsterblichkeit, eine Fehlerdurchsicht mit siebzehn Funden
-(alle repariert), und ein Vier-Phasen-Plan für die Ränge 4 und 5, der noch
-nicht umgesetzt ist.</p>
-
 <h3>Was spielbar ist</h3>
-<p>Zweiunddreißig Stationen, zehn Gefechte, fünf Lager, zwei Winterquartiere,
-Ränge 1 bis 3. Sechs Herkünfte, sechs Attribute, neun Fertigkeiten, ein
-Kaufladen mit acht Posten.</p>
+<p><b>Fünfzig Stationen, elf Gefechte</b> (davon eines mit Platzpatronen),
+fünf Lager, zwei Winterquartiere, vier Garnisonssaisons, <b>Ränge 1 bis 5</b>.
+Sechs Herkünfte, sechs Attribute, neun Fertigkeiten, ein Kaufladen mit acht
+Posten, ein Marketender, drei Orden, fünfzehn Zwischenfälle.</p>
 
 <h3>Was entworfen, aber nicht gebaut ist</h3>
-<p>Kapitel 3 bis 11, Ränge 4 bis 14, Orden und Ehrenlegion, das Pferd, die
-Kompaniekasse, der Einheitszustand mit Inspektionen, die Rangschranken und die
-vier Enden, die Offizierspatente, die Generalskampagnen. Alles davon steht
-ausformuliert in <code>KONZEPT.md</code> — es fehlt der Code, nicht der Entwurf.</p>
+<p>Kapitel 4 bis 11, Ränge 6 bis 14, die höheren Ordensgrade und die
+Auszeichnungen der Kompanie, das Pferd, die Kompaniekasse, der Einheitszustand
+mit Inspektionen, die Rangschranken und die vier Enden, die Offizierspatente,
+die Generalskampagnen. Alles davon steht ausformuliert in
+<code>KONZEPT.md</code> — es fehlt der Code, nicht der Entwurf.</p>
 </section>
 
 <!-- ============================== OFFENE PUNKTE ============================== -->
 <section id="offen">
 <h2>Offene Punkte</h2>
 <p class="lead">Aus Quelltext, CLAUDE.md, AENDERUNGEN.md und KONZEPT.md zusammengetragen.
-Zehn Punkte der ursprünglichen Liste sind inzwischen gebaut und herausgenommen, zwei neue sind
-durch den Bau entstanden. Abhaken verändert nur diese Seite — sichere
+Von den ursprünglich zweiundvierzig Punkten sind <b>neunzehn erledigt</b> und
+herausgenommen — Kapitel 3, die Orden, der Marketender, die Ehe, die Ränge 4 und 5, die
+Personenkartei, die volle Punkteskala und die Sollwerte. Zwei weitere entstanden beim Bau
+und wurden noch in derselben Sitzung geschlossen; <b>einer</b> ist neu hinzugekommen
+(der mitwachsende Kaufladen). Es bleiben <b>vierundzwanzig</b>. Abhaken verändert nur diese Seite — sichere
 den Stand als Datei, wenn er erhalten bleiben soll.</p>
 
 <div class="werkzeug">
@@ -789,8 +793,9 @@ gekaufter Leutnant 760.</p>
 <tr><td>Ruf, je volle 10</td><td class="num">+5</td><td>in Betrieb</td></tr>
 <tr><td>Je Nennung im Tagesbefehl</td><td class="num">+3</td><td>in Betrieb, max. 10</td></tr>
 <tr><td>Nie gekniffen, nie desertiert</td><td class="num">+20</td><td>in Betrieb</td></tr>
-<tr><td>Je Grad der Ehrenlegion</td><td class="num">+12</td><td>fehlt — Orden sind nicht gebaut</td></tr>
-<tr><td>Je fremdem Orden (max. 2)</td><td class="num">+10</td><td>fehlt</td></tr>
+<tr><td>Orden — Ehrenwaffe / Ehrensäbel / Ehrenlegion</td><td class="num">10 / 14 / 12</td><td>in Betrieb</td></tr>
+<tr><td>Höhere Grade der Ehrenlegion</td><td class="num">+12</td><td>fehlt — brauchen Kapitel ab 1807</td></tr>
+<tr><td>Je fremdem Orden (max. 2)</td><td class="num">+10</td><td>fehlt — braucht Austerlitz</td></tr>
 <tr><td>Überlebensbonus</td><td class="num">+70 … +180</td><td><b>Platzhalter +25</b> — siehe unten</td></tr>
 </table>
 
@@ -870,7 +875,7 @@ eine Einmal-Marke im Lauf-Teil der Datei.</div>
 
 <!-- ============================== KAPITEL 1+2 ============================== -->
 <section id="kapitel12">
-<h2>Kapitel 1 und 2, Station für Station</h2>
+<h2>Die drei Kapitel, Station für Station</h2>
 
 <h3>Italien 1796/97 — Stationen 1 bis 16</h3>
 <div class="scroll"><table>
@@ -937,6 +942,53 @@ eine Einmal-Marke im Lauf-Teil der Datei.</div>
 <tr><td class="num">14</td><td>Maréchal d’Empire</td><td>Marschall</td><td class="num">Korps</td><td>Die Legende. Praktisch nie</td></tr>
 </table></div>
 
+<h3>Garnison 1801–04 — Stationen 34 bis 50</h3>
+<p class="lead"><b>Im Krieg ist der Feind die Kugel. Im Frieden ist der Feind die
+Zeit.</b> Die Maschine bleibt dieselbe, der Einsatz wechselt: nicht Blut,
+sondern Bildung, Geld, Beziehungen, Stand.</p>
+<div class="scroll"><table>
+<tr><th class="num">#</th><th>Ort</th><th>Datum</th><th>Art</th><th>Inhalt</th></tr>
+<tr><td class="num">34</td><td>Die Landung, Marseille</td><td>Oktober 1801</td><td>Szene</td><td>Heimkehr auf englischen Schiffen, dreihundert von achthundert</td></tr>
+<tr><td class="num">35</td><td>Quarantäne im Lazarett</td><td>November 1801</td><td>Szene</td><td>Sechs Wochen — hier wird man die Krankheiten aus Ägypten los</td></tr>
+<tr><td class="num">36</td><td>Einzug in die Garnison, Nîmes</td><td>Dezember 1801</td><td>Szene</td><td>„Es ist kein Feldzug in Aussicht. Für die nächsten Jahre nicht.“</td></tr>
+<tr><td class="num">37</td><td>Erste Garnisonssaison</td><td>Jan.–März 1802</td><td>Saison</td><td>Vier Wochen · <b>die Regimentsschule öffnet</b></td></tr>
+<tr><td class="num">38</td><td>Der Friede von Amiens</td><td>April 1802</td><td>Szene</td><td>Die Armee wird verkleinert — vier aus der Kompanie gehen</td></tr>
+<tr><td class="num">39</td><td>Die Färberei am Fluss</td><td>Juni 1802</td><td>Szene</td><td>Marguerite Aubanel · der Beginn der Ehe, falls man will</td></tr>
+<tr><td class="num">40</td><td>Zweite Garnisonssaison</td><td>Juli 1802 – Feb. 1803</td><td>Saison</td><td>Vier Wochen</td></tr>
+<tr><td class="num">41</td><td>Der Fall Rouvier</td><td>März 1803</td><td>Szene</td><td>Desertion, Kriegsgericht im Amphitheater, zwei Jahre Kette</td></tr>
+<tr><td class="num">42</td><td>Musterung im Kasernenhof</td><td>April 1803</td><td>Musterung</td><td><b>Zweites Fourrier-Fenster</b> — hier zählt, was in den Büchern steht</td></tr>
+<tr><td class="num">43</td><td>Das 79. rückt ein</td><td>Juli 1803</td><td>Szene</td><td>Sergent Chabert · der Streit, aus dem das Duell wird</td></tr>
+<tr><td class="num">44</td><td>Nach Norden</td><td>August 1803</td><td>Szene</td><td>Marschbefehl · <b>Erlaubnis zur Heirat</b> beim Kompaniechef</td></tr>
+<tr><td class="num">45</td><td>Baracke im Lager der Küste</td><td>Okt. 1803 – März 1804</td><td>Saison</td><td>Vier Wochen · Boulogne, zweitausend flache Boote</td></tr>
+<tr><td class="num">46</td><td>Hinter der Reitbahn</td><td>April 1804</td><td>Szene ★</td><td><b>Das Duell.</b> Drei Gänge als Kette — die einzige Szene im Spiel, die töten darf</td></tr>
+<tr><td class="num">47</td><td>Der Sommer an der Küste</td><td>Mai–Juli 1804</td><td>Saison</td><td>Vier Wochen · das Kaiserreich wird ausgerufen</td></tr>
+<tr><td class="num">48</td><td>Das große Manöver</td><td>14. August 1804</td><td>Gefecht</td><td><b>Platzpatronen.</b> Volles Kampfsystem, niemand stirbt — der Einsatz ist Sichtbarkeit</td></tr>
+<tr><td class="num">49</td><td>Musterung vor dem Feldzug</td><td>September 1804</td><td>Musterung</td><td>„Nichts frei.“ Auf dem Sergent-major-Posten sitzt Martel</td></tr>
+<tr><td class="num">50</td><td>Die Krönung, Paris</td><td>2. Dezember 1804</td><td>Ende</td><td>Adler statt Fahnen · Ausblick auf Austerlitz</td></tr>
+</table></div>
+
+<h4>Vier Hebel gegen die Verwaltung</h4>
+<p>Der Motor des Spiels lautet Gefecht → Tote → Vakanz → Aufstieg. Im Frieden
+fällt er aus, und KONZEPT setzt für die Garnison 98 % Überleben an. Wer das
+Kapitel als „Lager, nur länger“ baut, bekommt genau die Verwaltung, vor der die
+Lagerregel warnt.</p>
+<table>
+<tr><th style="width:30%">Hebel</th><th>Was er tut</th></tr>
+<tr><td><b>Vier Saisons</b></td><td>Dieselbe Knappheit wie im Lager, auf Jahresmaßstab: in jeder mehr zu tun als Wochen</td></tr>
+<tr><td><b>Das Duell</b></td><td>Die einzige Stelle, an der eine Szene töten darf — man betritt sie freiwillig, sie hat einen Namen und einen eigenen Todestext</td></tr>
+<tr><td><b>Das große Manöver</b></td><td>Dasselbe Spiel, andere Währung: Ein Treffer ist ein Unfall, der Einsatz ist, wer zusieht</td></tr>
+<tr><td><b>Die Decke hat ein Gesicht</b></td><td>Über dem Sergenten sitzt Martel, zweiundvierzig und gesund. Du weißt, was frei werden müsste. Das Spiel sagt es nie</td></tr>
+</table>
+
+<div class="warn"><b>Die Regimentsschule ist das Nadelöhr.</b> Kapitel 3 ist das
+einzige Fenster, in dem ein Analphabet auf die 35 des Fourriers und in die Nähe
+der 50 kommt, die Rang 7 später verlangt. Wer die Jahre vertrödelt, sitzt fest —
+das ist der „Rangstillstand als Druckmittel“ aus KONZEPT §9.</div>
+
+<p><b>Die Ehe ist Beiwerk, kein System</b>, genau wie das Konzept es festlegt:
+zwei Szenen, eine Mitgift, und Briefe von zu Hause senken die Belastung um 1 je
+Station. Keine Kinder, kein Erbe, keine Folgegeneration.</p>
+
 <h3>Warum Rang 4 mehr ist als eine Zwischenstufe</h3>
 <p>Vier Gründe: Bildung zahlt sich zum ersten Mal aus, lange vor der Schwelle 50.
 Die Verwaltungsschicht wird fünf Ränge vor der Kompaniekasse behutsam
@@ -958,7 +1010,7 @@ einzelne Beförderung, und oben muss es dünn bleiben.</div>
 <tr><th class="num">#</th><th>Feldzug</th><th class="num">Jahr</th><th>Charakter des Kapitels</th></tr>
 <tr><td class="num">1</td><td>Italien</td><td class="num">1796–97</td><td>Tutorial im Elend. Barfuß, hungrig, siegreich <span class="tag w">gebaut</span></td></tr>
 <tr><td class="num">2</td><td>Ägypten</td><td class="num">1798–99</td><td>Hitze und Krankheit, Karrees gegen Mamluken, Isolation. Nach Abukir liegt die Flotte auf dem Grund — es gibt keinen Weg nach Hause <span class="tag w">gebaut</span></td></tr>
-<tr><td class="num">3</td><td>Garnison</td><td class="num">1800–04</td><td><b>Management-Kapitel.</b> Bildung nachholen, heiraten, Beziehungen. Rangstillstand als Druckmittel</td></tr>
+<tr><td class="num">3</td><td>Garnison</td><td class="num">1801–04</td><td><b>Das Friedenskapitel.</b> Bildung nachholen, heiraten, Beziehungen. Rangstillstand als Druckmittel <span class="tag w">gebaut</span></td></tr>
 <tr><td class="num">4</td><td>Austerlitz</td><td class="num">1805</td><td>Die perfekte Schlacht. Erste große Bewährung als Offizier</td></tr>
 <tr><td class="num">5</td><td>Jena–Auerstedt</td><td class="num">1806</td><td>Tempo, Verfolgung, Marschstrapazen</td></tr>
 <tr><td class="num">6</td><td>Eylau &amp; Friedland</td><td class="num">1807</td><td>Schnee und Massenverluste. Viele Vakanzen, viele Beförderungen</td></tr>
@@ -1112,14 +1164,78 @@ jedes Kapitel Geld, ob man es benutzt oder nicht. <i>Und in Russland wird dein
 Pferd gegessen. Nicht vom Feind — von deinen eigenen Männern, und irgendwann von
 dir.</i></p>
 
-<h3>Orden <span class="tag s">entworfen</span></h3>
-<p><b>Nennung im Tagesbefehl</b> — beliebig oft, für eine sichtbare Tat vor einem
-Zeugen. Manche Männer wurden ein Dutzend Mal genannt. Im Charakterbogen steht
-dann <code>7× im Tagesbefehl genannt</code>. Wird bereits gezählt, hat aber noch
-keine Folge außer Wertungspunkten.</p>
-<p><b>Ehrenwaffen 1799–1802</b> — wer eine besaß, wurde 1804 automatisch in die
-Ehrenlegion aufgenommen. Wer 1796 in Italien etwas Verrücktes getan hat, bekommt
-acht Jahre später einen Brief.</p>
+<h3>Orden <span class="tag w">gebaut</span></h3>
+
+<p><b>Drei Auszeichnungen sind im Spiel</b>, und sie zahlen in <b>drei Währungen
+zugleich</b> — damit sie sich nicht wie Deko anfühlen:</p>
+
+<div class="scroll"><table>
+<tr><th>Orden</th><th>Bedingung</th><th class="num">VP</th><th class="num">Ruf</th><th class="num">Pension</th></tr>
+<tr><td class="k">Ehrenwaffe <i>(Fusil d’honneur)</i></td><td>3 Nennungen, 1799–1803</td><td class="num">10</td><td class="num">+6</td><td class="num">0,5 F/Station</td></tr>
+<tr><td class="k">Ehrensäbel <i>(Sabre d’honneur)</i></td><td><b>Eine Sondermission voll bestanden</b> und 5 Nennungen, 1799–1803</td><td class="num">14</td><td class="num">+8</td><td class="num">1 F/Station</td></tr>
+<tr><td class="k">Ehrenlegion <i>(Légionnaire)</i></td><td>Eine Ehrenwaffe oder ein Ehrensäbel — <i>oder</i> 5 Nennungen und Ruf 45, ab 1804</td><td class="num">12</td><td class="num">+10</td><td class="num">1 F/Station</td></tr>
+</table></div>
+
+<div class="warn"><b>Historisch trägt sich der Bogen selbst.</b> Die
+<i>armes d’honneur</i> gingen 1799–1802 an einfache Soldaten für einzelne Taten
+— genau die Jahre von Ägypten. Wer eine besaß, wurde bei der Stiftung der
+Ehrenlegion <b>von Rechts wegen aufgenommen</b>, ohne weitere Prüfung; die erste
+große Verleihung war das Lager von Boulogne am 16. August 1804.
+<b>Das ist die einzige Auszeichnung im Spiel, die man sich in einem Kapitel
+verdient und in einem anderen einlöst.</b></div>
+
+<p><b>Geprüft, nicht gewürfelt.</b> Ein Orden ist die einzige Belohnung, bei der
+man hinterher genau sagen können soll, wofür — Zufall würde das kaputtmachen.
+Der <b>Ehrensäbel</b> verlangt die Kette <i>voll</i>, nicht die Mehrheit: Wer
+durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln, bekommt
+nicht dasselbe wie einer, der dreimal aufgefallen ist.</p>
+
+<h4>Die Leiter der Sichtbarkeit</h4>
+<p>Napoleons Armee kannte keine gestuften Tapferkeitsmedaillen — aber sie kannte
+etwas Besseres: <b>Wer etwas tat, wurde gemeldet, und die Frage war nur, wie weit
+nach oben.</b> Die Nennung im Tagesbefehl war früher ein Würfelwurf am
+Gefechtsende; jetzt ist sie die mittlere von drei verdienten Stufen.</p>
+<div class="scroll"><table>
+<tr><th>Stufe</th><th>Bedingung</th><th>Wirkung</th></tr>
+<tr><td class="k">Lob vor der Front</td><td>Schaden ≥ 60 <i>oder</i> ein Ereignis</td><td>Kameradschaft +4 · <b>kein Ruf</b></td></tr>
+<tr><td class="k">Nennung im Tagesbefehl</td><td>Schaden ≥ 100 <b>und</b> überwiegend ungedeckt · <i>oder</i> zwei Ereignisse</td><td>+1 Nennung</td></tr>
+<tr><td class="k">Bulletin der Großen Armee<br><span style="color:var(--faint)">vor 1805: „dem Oberbefehl gemeldet“</span></td><td>Schaden ≥ 150 <i>oder</i> Sondermission voll bestanden <i>oder</i> Ereignis vor der Linie im Höhepunktgefecht</td><td><b>+2 Nennungen</b> · Ruf +4</td></tr>
+</table></div>
+
+<p>Gezählt wird der <b>Schaden an der Feindmoral</b>, nicht Tote — niemand zählt
+1796 im Pulverdampf Gefallene, aber jeder sieht, wessen Abschnitt der Linie
+wankt. Der Beitrag der Linie zählt nicht mit; das ist nicht deine Tat. Nur die
+höchste Stufe je Gefecht, sonst wäre es Grinding.</p>
+
+<div class="warn"><b>Die Sichtbarkeitsregel ist der Zahn des Systems:</b>
+<i>Gezählt wird nur, was aus dem Stand geschieht.</i> Wer kniet oder liegt,
+dessen Trefferserie reißt und dessen Schaden zählt <b>halb</b>. Historisch
+exakt — im Rauch sieht niemand, wer gut zielt; gesehen wird, wer steht.
+Mechanisch ist es die Bremse, ohne die alles kaputt wäre: <b>Man kann keine
+Auszeichnung aus der Deckung heraus erschießen.</b> Auszeichnungsjagd und
+Überleben ziehen an entgegengesetzten Enden desselben Seils.</div>
+
+<p><b>Warum die unterste Stufe keinen Ruf gibt:</b> Die teuerste gelernte Regel
+des Projekts lautet, dass alles, was den Ruf hebt, über die Schwellen auch den
+Aufstieg hebt. Ruf +2 je gutem Gefecht wären über einen Lauf rund +30 — die
+Sergent-Quote ginge durch die Decke. Bronze zahlt in Kameradschaft und in die
+Zählung.</p>
+
+<p><b>Am Gefechtsende steht die Bilanz mit Zahlen</b>, und wenn es knapp war,
+auch die verfehlte Schwelle: <i>„Eigener Anteil: 84. Für den Tagesbefehl hätte
+es 100 gebraucht — und man muss dabei stehen.“</i> Ein Auszeichnungssystem mit
+unsichtbaren Schwellen fühlt sich wie Zufall an.</p>
+
+<h4>Was noch entworfen ist <span class="tag s">entworfen</span></h4>
+<p>Die höheren Grade (Officier ab 1807, Commandeur ab 1809), die fremden Orden
+(Eiserne Krone ab 1805, höchstens zwei gewertet), die <b>Dotationen ab Tilsit</b>
+— Renten aus eroberten Gebieten, der historische Schlusspunkt des Systems — und
+die <b>Auszeichnungen der Kompanie ab Rang 9</b>: Belobigung im Divisionsbefehl,
+die Kompanie im Bulletin, die Inschrift auf der Fahne. Letztere brauchen eine
+zweite Gefechtsachse, die es noch nicht gibt: <b>jedes Gefecht bekommt einen
+Auftrag</b> neben der Feindmoral, und man kann siegen und ihn trotzdem verfehlen.
+Der Preis der Auszeichnung ist der Einsatz — wer bei Austerlitz auf der Fahne
+steht, steht bei Eylau in der ersten Welle.</p>
 <table>
 <tr><th>Grad der Ehrenlegion</th><th>Bedingung</th><th class="num">Pension</th></tr>
 <tr><td>Légionnaire</td><td>3 Nennungen oder eine Ehrenwaffe</td><td class="num">250 F/Jahr</td></tr>
@@ -1353,7 +1469,7 @@ Lemons</i>, <i>A Legionary's Life</i> (86 % positiv bei rund 2.200 Rezensionen,
 </section>
 
 <footer>
-  <span>Der Marschallstab · Handbuch, Stand 28. Juli 2026</span>
+  <span>Der Marschallstab · Handbuch, Stand 28. Juli 2026 · drei Kapitel, Ränge 1–5</span>
   <span>Code MIT · Inhalte CC BY-NC-SA 4.0</span>
 </footer>
 
@@ -1363,35 +1479,14 @@ Lemons</i>, <i>A Legionary's Life</i> (86 % positiv bei rund 2.200 Rezensionen,
 <script>
 const AUFGABEN = [
 /* ---------- blockierend ---------- */
-{n:11,d:'blockierend',k:'Balance',t:'Sergent-Schwellen neu eichen, bevor Kapitel 3 kommt',
- x:'Ausdrücklicher Vorbehalt aus der Planungsnotiz: Der Sergent in nur zwei Kapiteln staucht die Rangleiter — das Konzept sah ihn für die Kapitel 6 bis 7 vor. Anheben oder strecken, gemessen an den vier Leitzahlen. Nicht stillschweigend so lassen.',
- q:'CLAUDE.md Z. 740'},
+{n:11,d:'wichtig',k:'Balance',t:'Sergent in zwei Kapiteln staucht die Leiter — Entscheidung: bleibt',
+ x:'KONZEPT sah den Sergenten für Kapitel 6–7 vor; erreichbar ist er in Katia, Kapitel 2. Der Entwickler hat am 28.07.2026 entschieden, die Schwellen so zu lassen und dem Sergenten stattdessen in der Garnison eigene Tätigkeiten zu geben (Rekruten ausbilden, Berichte schreiben, über Strafen entscheiden). Der Punkt bleibt als Vermerk stehen, weil die Stauchung real ist — mit Kapitel 4 bis 6 wird sie sichtbarer, und dann ist neu zu entscheiden, ob Rang 6 und 7 weiter auseinanderrücken.',
+ q:'kampf.js LEITER · abschluss.js GARNISON_TUN'},
 {n:8,d:'blockierend',k:'Balance',t:'Feindgüte jedes neuen Kapitels selbst messen',
  x:'Die Werte 6 bis 12 für die Kapitel 3 bis 11 sind entworfen, nie gemessen. Nur Italien (0) und Ägypten (5) sind geeicht. Wer der Tabelle glaubt, statt zu messen, wiederholt den Fehler, gegen ein totes System zu balancieren.',
  q:'CLAUDE.md Z. 387–396 · grundwerte.js Z. 122–135'},
-{n:13,d:'blockierend',k:'Inhalt',t:'Kapitel 3 — Garnison 1800–04',
- x:'Das nächste Kapitel, und zugleich ein Management-Kapitel mit eigenen Regeln: Bildung nachholen, heiraten, Beziehungen pflegen, Rangstillstand als Druckmittel. Der Ausblick am Ende von Kapitel 2 kündigt es bereits an. Feindgüte 0.',
- q:'KONZEPT.md §9 · kapitel02_aegypten.js Z. 323'},
 
 /* ---------- wichtig ---------- */
-{n:4,d:'wichtig',k:'Balance',t:'„Italien überstanden“ hat keinen gültigen Sollwert mehr',
- x:'Gemessen 100 / 98 / 100 / 95 % — das alte Zielband von 45 bis 55 % wird um das Doppelte verfehlt und ist faktisch gegenstandslos. Ein neuer Sollwert wurde nie festgelegt. Damit hat die am häufigsten gemessene Zahl des Projekts keinen Maßstab.',
- q:'CLAUDE.md Z. 490–493, 517'},
-{n:5,d:'wichtig',k:'Balance',t:'Zielband für „beide Feldzüge überstanden“ festlegen',
- x:'Die neue Leitgröße (50 / 18 / 68 / 68 %) wurde ausdrücklich ohne Zielband eingeführt. Ohne Sollwert ist nicht entscheidbar, ob eine künftige Änderung die Balance verbessert oder verschlechtert.',
- q:'CLAUDE.md Z. 517'},
-{n:6,d:'wichtig',k:'Balance',t:'Caporal-Anteil liegt weit über dem Sollwert',
- x:'Aktuell 50 % (Erstlauf vorsichtig) bis 98 % (Veteran mit 260 VP) gegen einen alten Sollwert von 30 %. Die Ursache ist dokumentiert — gezählt wird der höchste je getragene Rang, und der Tod kommt später —, ein neuer Sollwert fehlt. Zwei Hebel stünden bereit (CAPORAL_RUF/CAPORAL_GUNST und RUHM_JE_GEFECHT), beide ungemessen.',
- q:'CLAUDE.md Z. 496, 576'},
-{n:7,d:'wichtig',k:'Dokumentation',t:'Elitekompanie-Absatz widerspricht der Messung daneben',
- x:'Der Absatz „nur 8 % erreichen die Elitekompanie, der Engpass bleibt die Schwelle von 55“ steht unmarkiert neben einer Tabelle, die 48 bis 95 % ausweist. Entweder die Empfehlung streichen oder als historisch kennzeichnen.',
- q:'CLAUDE.md Z. 580 gegen Z. 495'},
-{n:21,d:'wichtig',k:'Mechanik',t:'Orden und Ehrenlegion einbauen',
- x:'Nennungen im Tagesbefehl werden gezählt, haben aber keine Folge außer drei Wertungspunkten. Es fehlen: fünf Grade mit den historischen Pensionen (250 bis 5.000 Francs), Ehrenwaffen 1799–1802 mit automatischer Aufnahme 1804, fremde Orden (je +10, höchstens zwei). Orden sollen Einkommen sein, nicht Deko.',
- q:'KONZEPT.md §6 · CLAUDE.md Z. 747'},
-{n:22,d:'wichtig',k:'Mechanik',t:'Ausrüstungskauf im Spiel — Geld hat zu wenig Verwendung',
- x:'Ausrüstung kommt heute nur über Veteranenpunkte und Szenen. Geld wird an genau vier Stellen ausgegeben (scharf schießen 4 F, Schuster 6 F, Buchstaben lernen 5 F, Winterwoche 6 F). Ein Marketender im Lager wäre die naheliegende Anbindung.',
- q:'CLAUDE.md Z. 745 · abschluss.js Z. 30/47/58/212'},
 {n:28,d:'wichtig',k:'Mechanik',t:'Kaufladen deckt nur acht von rund zwanzig entworfenen Posten',
  x:'Es fehlen Manufakturmuskete, gezogener Stutzen, Sabre briquet, Offiziersdegen, Reitstiefel, pelzgefütterter Mantel, Taschenuhr, Schreibzeug, Fernrohr, Empfehlungsschreiben, 200 Francs Startgeld. Von den sieben Ausrüstungsplätzen sind Seitenwaffe und Pferd gar nicht belegt.',
  q:'grundwerte.js Z. 151–163 gegen KONZEPT.md §6'},
@@ -1441,9 +1536,6 @@ const AUFGABEN = [
  q:'KONZEPT.md §9'},
 {n:27,d:'später',k:'Mechanik',t:'Offizierspatente als Startpakete',
  x:'Sous-Lieutenant 110 VP, Lieutenant 145 VP, freigeschaltet ab einmal Rang 9. Die einzige zugelassene Ausnahme von Invariante 3 — ausgeglichen durch 158 Punkte Wertungsabzug, fehlenden Fürsprecher und acht Punkte höhere Anforderung in den Kapiteln 1 bis 4.',
- q:'KONZEPT.md §10'},
-{n:29,d:'später',k:'Inhalt',t:'Ehe als Beiwerk im Garnisonskapitel',
- x:'Kostet Geld und Zeit, bringt Briefe von zu Hause (senken die Belastung), eine Mitgift und einen Epilogsatz. Ausdrücklich kein System, keine Kinder, kein Erbe.',
  q:'KONZEPT.md §10'},
 {n:30,d:'später',k:'Technik',t:'Nation als Datensatz, Gattungs-Schalter im Kampf',
  x:'Getroffene Entscheidung: Rangnamen, Feldzugsliste, Ereignistexte und Beförderungsregeln sollen von Anfang an getrennt liegen, und das Kampfsystem soll gleich einen Gattungs-Schalter für Kavallerie und Artillerie bekommen. Im Code ist beides nicht angelegt — je später, desto teurer.',
