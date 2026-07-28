@@ -82,8 +82,11 @@ function ordenFaellig(){
   const jahr = jahrVonStation();
   if(!hatOrden('ehrenwaffe') && jahr >= 1799 && jahr <= 1803 && S.nennungen >= 3)
     return ordenVon('ehrenwaffe');
+  if(!hatOrden('ehrensaebel') && jahr >= 1799 && jahr <= 1803 &&
+     (S.sondermissionen|0) >= 1 && S.nennungen >= 5)
+    return ordenVon('ehrensaebel');
   if(!hatOrden('legion') && jahr >= 1804 &&
-     (hatOrden('ehrenwaffe') || (S.nennungen >= 5 && S.ruf >= 45)))
+     (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel') || (S.nennungen >= 5 && S.ruf >= 45)))
     return ordenVon('legion');
   return null;
 }
@@ -140,7 +143,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
-    wunden:[], nennungen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
+    wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);

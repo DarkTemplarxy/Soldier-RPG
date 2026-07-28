@@ -204,6 +204,16 @@ const ORDEN = [
    was:'Eine Muskete mit graviertem Schloss und deinem Namen darauf, verliehen im Namen der Konsuln. Sie schießt nicht besser. Sie sagt nur jedem, der sie sieht, was du getan hast.',
    bedingung:'Drei Nennungen im Tagesbefehl'},
 
+  /* Der Ehrensäbel ist die goldene Ehrenwaffe — historisch seltener und
+     wertvoller als das Gewehr, vergeben für eine einzelne, benannte Tat. Er
+     gibt der Sondermissions-Kette, der gefährlichsten Handlung im Spiel,
+     endlich einen eigenen Preis: Wer durch die Bresche von Akkon gegangen ist,
+     bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist. */
+  {id:'ehrensaebel', name:'Ehrensäbel', voll:'Sabre d\'honneur',
+   ab:'1799', vp:14, ruf:8, pension:1.0,
+   was:'Ein Säbel mit vergoldetem Gefäß und einer Gravur, die den Tag nennt und den Ort. Der Waffenmeister sagt, er sei zum Tragen und nicht zum Fechten, und hat unrecht: Er ist zum Angesehenwerden.',
+   bedingung:'Eine Sondermission voll bestanden und fünf Nennungen'},
+
   {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
    ab:'1804', vp:12, ruf:10, pension:1.0,
    was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
@@ -220,6 +230,11 @@ function ordensbild(id){
     <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#b8b0a2"/>
     <rect x="5" y="10" width="6" height="4" rx="1" fill="#8a6a3c"/>
     <circle cx="27" cy="12" r="3" fill="none" stroke="#d0a75e" stroke-width="1.4"/></svg>`;
+  if(id==='ehrensaebel') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrensäbel">
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
+    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#e8e2d4" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#d0a75e"/>
+    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#d0a75e" stroke-width="1.3"/></svg>`;
   if(id==='legion'){
     const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
       fill="#e8e2d4" transform="rotate(${a+45} 18 12)"/>`).join('');

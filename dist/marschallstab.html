@@ -577,6 +577,16 @@ const ORDEN = [
    was:'Eine Muskete mit graviertem Schloss und deinem Namen darauf, verliehen im Namen der Konsuln. Sie schießt nicht besser. Sie sagt nur jedem, der sie sieht, was du getan hast.',
    bedingung:'Drei Nennungen im Tagesbefehl'},
 
+  /* Der Ehrensäbel ist die goldene Ehrenwaffe — historisch seltener und
+     wertvoller als das Gewehr, vergeben für eine einzelne, benannte Tat. Er
+     gibt der Sondermissions-Kette, der gefährlichsten Handlung im Spiel,
+     endlich einen eigenen Preis: Wer durch die Bresche von Akkon gegangen ist,
+     bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist. */
+  {id:'ehrensaebel', name:'Ehrensäbel', voll:'Sabre d\'honneur',
+   ab:'1799', vp:14, ruf:8, pension:1.0,
+   was:'Ein Säbel mit vergoldetem Gefäß und einer Gravur, die den Tag nennt und den Ort. Der Waffenmeister sagt, er sei zum Tragen und nicht zum Fechten, und hat unrecht: Er ist zum Angesehenwerden.',
+   bedingung:'Eine Sondermission voll bestanden und fünf Nennungen'},
+
   {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
    ab:'1804', vp:12, ruf:10, pension:1.0,
    was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
@@ -593,6 +603,11 @@ function ordensbild(id){
     <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#b8b0a2"/>
     <rect x="5" y="10" width="6" height="4" rx="1" fill="#8a6a3c"/>
     <circle cx="27" cy="12" r="3" fill="none" stroke="#d0a75e" stroke-width="1.4"/></svg>`;
+  if(id==='ehrensaebel') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrensäbel">
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
+    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#e8e2d4" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#d0a75e"/>
+    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#d0a75e" stroke-width="1.3"/></svg>`;
   if(id==='legion'){
     const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
       fill="#e8e2d4" transform="rotate(${a+45} 18 12)"/>`).join('');
@@ -1646,7 +1661,7 @@ STATIONEN.garnison = KAPITEL3.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 4;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden
+const LAUF_FASSUNG    = 5;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden · 5: Tatenzählung
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -1736,6 +1751,18 @@ const LAUF_WANDLER = {
   3: alt => {
     if(alt.mann && !alt.mann.orden) alt.mann.orden = [];
     return Object.assign({}, alt, {fassung:4});
+  },
+  /* Fassung 4 zählte Taten noch nicht. Alle drei Zähler fangen bei null an —
+     rückwirkend aus den Nennungen zu raten wäre geraten, und die Zähler wirken
+     ohnehin erst auf die Gefechte, die noch kommen. */
+  4: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.belobigungen === undefined) m.belobigungen = 0;
+      if(m.bulletins === undefined) m.bulletins = 0;
+      if(m.sondermissionen === undefined) m.sondermissionen = 0;
+    }
+    return Object.assign({}, alt, {fassung:5});
   }
 };
 
@@ -1947,8 +1974,11 @@ function ordenFaellig(){
   const jahr = jahrVonStation();
   if(!hatOrden('ehrenwaffe') && jahr >= 1799 && jahr <= 1803 && S.nennungen >= 3)
     return ordenVon('ehrenwaffe');
+  if(!hatOrden('ehrensaebel') && jahr >= 1799 && jahr <= 1803 &&
+     (S.sondermissionen|0) >= 1 && S.nennungen >= 5)
+    return ordenVon('ehrensaebel');
   if(!hatOrden('legion') && jahr >= 1804 &&
-     (hatOrden('ehrenwaffe') || (S.nennungen >= 5 && S.ruf >= 45)))
+     (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel') || (S.nennungen >= 5 && S.ruf >= 45)))
     return ordenVon('legion');
   return null;
 }
@@ -2005,7 +2035,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
-    wunden:[], nennungen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
+    wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);
@@ -2387,6 +2417,8 @@ function seitenleiste(){
       <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
       <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
+      ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
+      ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}
       ${(S.orden||[]).map(id=>{ const o=ordenVon(id); return o?`<div class="kv"><span>${esc(o.name)}</span><b>${ordensbild(id)}</b></div>`:''; }).join('')}
       ${ueberDir()}
     </div>
@@ -3425,6 +3457,7 @@ function anerkennung(betrag, was){
      auffällt, kommt genau auf die vier, die der Feldweg verlangt. */
   if(!K.offizierGesehen){ K.offizierGesehen = true; gunstGeben('berthaud', 1); }
   K.taten.push({was, ruf:gibt});
+  if(K.zaehlung) K.zaehlung.ereignisse++;
   return ` <span class="fein">gesehen · Ruf +${gibt}</span>`;
 }
 
@@ -3459,6 +3492,9 @@ function starteKampf(n){
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
               ruhm:0, taten:[],
+              /* Was dieses Gefecht an Sichtbarem hervorgebracht hat. `taten` sind
+                 die Ruf-Ereignisse (Text), `zaehlung` sind die Zahlen dahinter. */
+              zaehlung:{schaden:0, serie:0, bestSerie:0, ereignisse:0, vorn:false, gedeckt:0, offen:0},
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
               sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
@@ -4176,6 +4212,12 @@ function ereignisWaehlen(i){
       }
     }
     w = (treffer*2 > o.kette.length) ? o.erfolg : (o.misserfolg || o.erfolg);
+    /* **Voll bestanden** heißt: jede Stufe gelungen, nicht die Mehrheit. Das
+       ist die Bedingung des Ehrensäbels und die einzige Stelle im Spiel, an der
+       ein Orden an einer einzelnen, benannten Tat hängt statt an einer Summe.
+       Wer durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln,
+       soll nicht dasselbe bekommen wie einer, der dreimal aufgefallen ist. */
+    if(treffer === o.kette.length){ S.sondermissionen = (S.sondermissionen|0) + 1; K.kette = true; }
     text = zeilen.join(' ') + '<br><br>' + w.text;
   } else {
     const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
@@ -4374,6 +4416,31 @@ function kampfAktion(id){
   const guete = feindGuete(n);
   const linie = (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   K.feindMoral -= schaden + linie;
+
+  /* ══════════════════ DIE TATENZÄHLUNG ══════════════════
+
+     **Die Sichtbarkeitsregel ist der Zahn des ganzen Ordenssystems:**
+     *Gezählt wird nur, was aus dem Stand geschieht.* Wer kniet oder liegt,
+     dessen Serie reißt und dessen Schaden zählt halb.
+
+     Historisch ist das exakt — im Pulverdampf sieht niemand, wer gut zielt;
+     gesehen wird, wer steht, wo geschossen wird. Mechanisch ist es die Bremse,
+     ohne die das System kaputt wäre: **Man kann keine Auszeichnung aus der
+     Deckung heraus erschießen.** Auszeichnungsjagd und Überleben ziehen damit
+     an entgegengesetzten Enden desselben Seils — dieselbe Achse, auf der die
+     Gefechts-Ereignisse gebaut sind (vorsichtig überlebt, mutig steigt auf).
+
+     Gezählt wird der **Schaden an der Feindmoral**, nicht Tote: Niemand zählt
+     1796 im Rauch Gefallene, aber jeder sieht, wessen Abschnitt der Linie
+     wankt. Der Beitrag der Linie (`linie`) zählt nicht mit — das ist nicht
+     deine Tat. */
+  const z = K.zaehlung;
+  if(schaden > 0){
+    z.schaden += K.deckung ? schaden*0.5 : schaden;
+    if(K.deckung){ z.serie = 0; z.gedeckt++; }
+    else { z.serie++; z.bestSerie = Math.max(z.bestSerie, z.serie); z.offen++; }
+  } else if(!K.deckung && id!=='laden') { z.serie = 0; }
+  if(K.vorn) z.vorn = true;
 
   /* Und sie verliert dabei Männer. Das ist reine Anzeige — an `eigen` hängt
      keine Probe und keine Gefahr, es macht nur sichtbar, was der Text sagt:
@@ -4673,6 +4740,47 @@ function kampfEnde(sieg, letzterText){
   const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
   if(leicht>=0){ S.wunden.splice(leicht,1); atemKlemmen(); }   // der Vorrat wächst wieder
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
+
+  /* ══════════════════ DIE LEITER DER SICHTBARKEIT ══════════════════
+
+     Napoleons Armee hatte keine gestuften Tapferkeitsmedaillen — sie hatte
+     etwas Besseres: **eine Leiter der Sichtbarkeit.** Wer etwas tat, wurde
+     gemeldet, und die einzige Frage war, wie weit nach oben die Meldung stieg.
+     Das ist die historische Entsprechung von Bronze, Silber und Gold:
+
+       1 · Lob vor der Front      — der Capitaine, am Abend des Gefechts
+       2 · Nennung im Tagesbefehl — der Divisionsstab
+       3 · Meldung an den Oberbefehl / ab 1805 **das Bulletin der Großen Armee**
+
+     Der Name der dritten Stufe schaltet mit der Epoche um, wie die Kokarde zum
+     Adler wird: Das Bulletin gab es erst ab 1805, gemeldet wurde vorher auch.
+
+     **Nur die höchste Stufe je Gefecht zählt.** Stapeln wäre Grinding, und
+     Invariante 2 verbietet es.
+
+     **Die Bronzestufe gibt bewusst keinen Ruf.** Die teuerste gelernte Regel
+     des Projekts lautet: Alles, was den Ruf hebt, hebt über die Schwellen auch
+     den Aufstieg. Ruf +2 je gutem Gefecht wären über einen Lauf rund +30 — die
+     Sergent-Quote würde durch die Decke gehen. Bronze zahlt deshalb in
+     Kameradschaft und in die *Zählung*: Belobigungen sind die Währung, aus der
+     später Ordensbedingungen erfüllt werden. */
+  const z = K.zaehlung || {schaden:0, ereignisse:0, vorn:false, offen:0, gedeckt:0};
+  const bulletinZeit = jahrVonStation() >= 1805;
+  let stufe = 0;
+  if(z.schaden >= 60 || z.ereignisse >= 1) stufe = 1;
+  /* Silber verlangt zusätzlich, dass man überwiegend gestanden hat — sonst
+     wäre die Sichtbarkeitsregel durch bloße Länge des Gefechts auszuhebeln. */
+  if((z.schaden >= 100 && z.offen > z.gedeckt) || (z.ereignisse >= 2)) stufe = 2;
+  if(z.schaden >= 150 || (z.ereignisse >= 1 && z.vorn && n.haerte) || K.kette) stufe = 3;
+
+  S.belobigungen = S.belobigungen || 0;
+  S.bulletins = S.bulletins || 0;
+  K.stufe = stufe;
+  if(stufe === 1) { S.belobigungen++; S.kameradschaft = Math.min(100, S.kameradschaft+4); }
+  if(stufe === 2) { S.nennungen++; }
+  if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; }
+  K.stufeName = ['','Lob vor der Front','Nennung im Tagesbefehl',
+                 bulletinZeit?'Im Bulletin der Großen Armee':'Dem Oberbefehl gemeldet'][stufe];
   /* ── Die Abrechnung ──
      Der eigentliche Rangunterschied des Sergenten. Ein Caporal kommt aus dem
      Gefecht und ist fertig; ein Sergent zählt ab, und die Zahl geht nach oben.
@@ -4709,11 +4817,33 @@ function kampfEnde(sieg, letzterText){
           ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
           ${kk.ruhm>=RUHM_JE_GEFECHT?'<p class="hinweis" style="margin:9px 0 0">Mehr sieht in diesem Rauch niemand.</p>':''}
         </div>`:''}
+        ${tatenBilanz(kk)}
         <div class="probe" style="margin-top:10px">${sieg?'GEFECHT BESTANDEN':'GEFECHT VERLOREN'} · ${kk.runde} RUNDEN</div>
       </div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
+}
+
+/* Die Bilanz des Gefechts in Zahlen — und, wenn es knapp war, woran es lag.
+
+   **Der zweite Satz ist der wichtigere.** Ein Auszeichnungssystem, dessen
+   Schwellen unsichtbar sind, fühlt sich wie Zufall an; eines, das sagt „für den
+   Tagesbefehl hätte es 100 gebraucht", macht aus dem nächsten Gefecht eine
+   Entscheidung. Genau dieselbe Überlegung wie bei den Proben, die ihren Wert
+   und ihre Schwierigkeit schon auf dem Knopf zeigen. */
+function tatenBilanz(kk){
+  const z = kk.zaehlung;
+  if(!z || (!z.schaden && !z.ereignisse)) return '';
+  const s = Math.round(z.schaden);
+  const naechste = s < 60 ? 60 : s < 100 ? 100 : s < 150 ? 150 : 0;
+  const wofuer = s < 60 ? 'ein Lob vor der Front' : s < 100 ? 'den Tagesbefehl' : 'die Meldung nach oben';
+  return `<div class="wirkung"><span>${kk.stufe?esc(kk.stufeName):'Nicht aufgefallen'}</span>
+    Eigener Anteil am Widerstand des Feindes: <b>${s}</b>${
+      z.bestSerie>=3?` · ${z.bestSerie} Treffer in Folge aus dem Stand`:''}${
+      z.gedeckt?` · ${z.gedeckt} Runden aus der Deckung, die halb zählen`:''}.
+    ${kk.stufe===0 && naechste ? `Für ${wofuer} hätte es ${naechste} gebraucht.` :
+      kk.stufe===1 && naechste ? `Für ${wofuer} hätte es ${naechste} gebraucht — und man muss dabei stehen.` : ''}</div>`;
 }
 
 /* ══════════════════ ELITEKOMPANIE ══════════════════ */

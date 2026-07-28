@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 4;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden
+const LAUF_FASSUNG    = 5;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden · 5: Tatenzählung
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -107,6 +107,18 @@ const LAUF_WANDLER = {
   3: alt => {
     if(alt.mann && !alt.mann.orden) alt.mann.orden = [];
     return Object.assign({}, alt, {fassung:4});
+  },
+  /* Fassung 4 zählte Taten noch nicht. Alle drei Zähler fangen bei null an —
+     rückwirkend aus den Nennungen zu raten wäre geraten, und die Zähler wirken
+     ohnehin erst auf die Gefechte, die noch kommen. */
+  4: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.belobigungen === undefined) m.belobigungen = 0;
+      if(m.bulletins === undefined) m.bulletins = 0;
+      if(m.sondermissionen === undefined) m.sondermissionen = 0;
+    }
+    return Object.assign({}, alt, {fassung:5});
   }
 };
 

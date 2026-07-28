@@ -465,10 +465,33 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 
 | Orden | Bedingung | VP | Ruf | Pension |
 |---|---|---|---|---|
-| **Ehrenwaffe** | 3 Nennungen, 1799–1803 | 10 | +6 | 0,5 F je Station |
-| **Ehrenlegion** | eine Ehrenwaffe — *oder* 5 Nennungen und Ruf 45, ab 1804 | 12 | +10 | 1 F je Station |
+| **Ehrenwaffe** (Fusil d'honneur) | 3 Nennungen, 1799–1803 | 10 | +6 | 0,5 F je Station |
+| **Ehrensäbel** (Sabre d'honneur) | **eine Sondermission voll bestanden** und 5 Nennungen, 1799–1803 | 14 | +8 | 1 F je Station |
+| **Ehrenlegion** | eine Ehrenwaffe oder ein Ehrensäbel — *oder* 5 Nennungen und Ruf 45, ab 1804 | 12 | +10 | 1 F je Station |
+
+**Der Ehrensäbel verlangt die Kette voll, nicht die Mehrheit** — jede Stufe gelungen. Er ist die einzige Auszeichnung, die an einer einzelnen, benannten Tat hängt statt an einer Summe: Wer durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln, bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist.
 
 > **Historisch trägt sich der Bogen selbst.** Die *armes d'honneur* wurden 1799–1802 an einfache Soldaten für einzelne Taten vergeben — genau die Jahre von Ägypten. Wer eine besaß, wurde bei der Stiftung der Ehrenlegion **von Rechts wegen aufgenommen**, ohne weitere Prüfung; die erste große Verleihung war das Lager von Boulogne am 16. August 1804. **Das ist die einzige Auszeichnung im Spiel, die man sich in einem Kapitel verdient und in einem anderen einlöst.**
+
+### Die Leiter der Sichtbarkeit (`K.zaehlung` in `src/kampf.js`)
+
+**Die Nennung im Tagesbefehl war ein Würfelwurf am Gefechtsende.** Jetzt ist sie die mittlere von drei Stufen, und alle drei werden verdient:
+
+| Stufe | Heißt | Bedingung | Wirkung |
+|---|---|---|---|
+| 1 | **Lob vor der Front** | Schaden ≥ 60 *oder* ein Ereignis | Kameradschaft +4 · **kein Ruf** |
+| 2 | **Nennung im Tagesbefehl** | Schaden ≥ 100 **und** überwiegend ungedeckt · *oder* zwei Ereignisse | +1 Nennung |
+| 3 | **Bulletin der Großen Armee** (ab 1805; vorher „dem Oberbefehl gemeldet") | Schaden ≥ 150 *oder* Sondermission voll bestanden *oder* Ereignis vor der Linie im Höhepunktgefecht | **+2 Nennungen** · Ruf +4 |
+
+Gezählt wird der **Schaden an der Feindmoral**, nicht Tote — niemand zählt 1796 im Rauch Gefallene, aber jeder sieht, wessen Abschnitt wankt. Der Beitrag der Linie zählt nicht mit; das ist nicht deine Tat. **Nur die höchste Stufe je Gefecht**, sonst wäre es Grinding.
+
+> **Die Sichtbarkeitsregel ist der Zahn des Systems:** *Gezählt wird nur, was aus dem Stand geschieht.* Wer kniet oder liegt, dessen Serie reißt und dessen Schaden zählt **halb**. Historisch exakt — im Rauch sieht niemand, wer gut zielt; gesehen wird, wer steht. Mechanisch ist es die Bremse, ohne die alles kaputt wäre: **Man kann keine Auszeichnung aus der Deckung heraus erschießen.** Auszeichnungsjagd und Überleben ziehen an entgegengesetzten Enden desselben Seils — dieselbe Achse wie bei den Gefechts-Ereignissen.
+
+> **Warum Stufe 1 keinen Ruf gibt.** Die teuerste gelernte Regel des Projekts: Alles, was den Ruf hebt, hebt über die Schwellen auch den Aufstieg. Ruf +2 je gutem Gefecht wären über einen Lauf rund +30, und die Sergent-Quote ginge durch die Decke. Bronze zahlt in Kameradschaft und in die Zählung — Belobigungen (`S.belobigungen`) sind die Währung für spätere Ordensbedingungen.
+
+**Am Gefechtsende steht die Bilanz** (`tatenBilanz()`) mit Zahlen und, wenn es knapp war, der verfehlten Schwelle: „Eigener Anteil: 84. Für den Tagesbefehl hätte es 100 gebraucht — und man muss dabei stehen." Ein Auszeichnungssystem mit unsichtbaren Schwellen fühlt sich wie Zufall an; dieselbe Überlegung wie bei den Proben, die Wert und Schwierigkeit schon auf dem Knopf zeigen.
+
+**Gemessen (je 40 Läufe, gegen denselben Stand ohne das System):** überlebt 55 → **57 / 25 → 30 / 70 → 70 %**, Sergent 23 → **25 / 25 → 28 / 78 → 70 %**. Alles im Rauschen; der Sergent beim Veteranen ist dabei von 78 zurück ins Band gerutscht. **Der Punkte-Median des Erstlaufs steigt deutlich (61 → 93)** — die Orden zahlen, und sie zahlen dem, der noch wenig hat, mehr als dem Veteranen (194).
 
 **Geprüft, nicht gewürfelt** (`ordenFaellig()`). Ein Orden ist die einzige Belohnung, bei der man hinterher genau sagen können soll, wofür — Zufall würde das kaputtmachen. Die Pension ist historisch der eigentliche Wert: Die Ehrenlegion war eine Rente, kein Blech, und seit es einen Marketender gibt, ist Geld auch im Spiel etwas wert.
 
@@ -601,8 +624,8 @@ Gemessen mit Kapitel 3, je 40 Läufe: überlebt **55 / 25 / 70 %**, Sergent **23
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **überlebt** *(Leitzahl)* | **55 %** | **25 %** | **70 %** | 63 % |
-| **Sergent erreicht** *(Leitzahl)* | **23 %** | **25 %** | **78 %** | 78 % |
+| **überlebt** *(Leitzahl)* | **57 %** | **30 %** | **70 %** | 63 % |
+| **Sergent erreicht** *(Leitzahl)* | **25 %** | **28 %** | **70 %** | 78 % |
 | Gestorben | 18 von 40 | **30 von 40** | 12 von 40 | 15 von 40 |
 | Italien überstanden *(Lehrstück)* | 98 % | 88 % | 100 % | 100 % |
 | Elitekompanie erreicht | 53 % | 57 % | 98 % | 98 % |
@@ -682,7 +705,8 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 95 %** | **88 / 95 %** | **207 / 226** |
 | **volle Punkteskala (gültig) · Erstlauf v / m** | **40 / 40** | **100 / 95 %** | **38 / 55 %** | **64 / 61** |
 | **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **93 / 100 %** | **192 / 186** |
-| **Kapitel 3 gebaut (gültig) · Erstlauf v / m** | **40 / 40** | **98 / 88 %** | **35 / 53 %** | **61 / 60** |
+| **Kapitel 3 gebaut · Erstlauf v / m** | 40 / 40 | 98 / 88 % | 35 / 53 % | 61 / 60 |
+| **Leiter der Sichtbarkeit (gültig) · Erstlauf v / m** | **40 / 40** | **100 / 98 %** | **45 / 53 %** | **93 / 87** |
 | **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **98 / 95 %** | **203 / 211** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
@@ -951,8 +975,9 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 ## Was als Nächstes ansteht
 
 1. **Kapitel 4, Austerlitz 1805** — nach drei Jahren Frieden das erste Gefecht der Grande Armée. Feindgüte 6. Der Ausblick am Ende von Kapitel 3 kündigt es an.
-2. **Weitere Orden.** Die Grade der Ehrenlegion (Officier, Commandeur) und die fremden Orden (+10, höchstens zwei) sind entworfen und haben ihren Platz in der Wertung, aber nur die erste Stufe ist gebaut. **Ausdrücklicher Wunsch des Entwicklers: Auszeichnungen ausbauen** — sie bringen VP *und* Ansehen.
-3. **Rang 6 (Sergent-major)** — die Decke des Prototyps. Sie hat in Boulogne bereits ein Gesicht (Martel sitzt darauf); was fehlt, ist die Vakanz, und die kommt erst mit einem Feldzug.
-4. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
+2. **Die höheren Ordensgrade** (Officier ab 1807, Commandeur ab 1809), die **fremden Orden** (Eiserne Krone ab 1805) und die **Dotationen** ab Tilsit. Alle drei sind in KONZEPT §6 vollständig entworfen und hängen nur an Kapiteln, die es noch nicht gibt.
+3. **Auszeichnungen der Kompanie ab Rang 9** — Belobigung, Bulletin, Fahneninschrift, samt der zweiten Gefechtsachse „Auftrag erfüllt". Entworfen in KONZEPT §6; braucht den Capitaine.
+4. **Rang 6 (Sergent-major)** — die Decke des Prototyps. Sie hat in Boulogne bereits ein Gesicht (Martel sitzt darauf); was fehlt, ist die Vakanz, und die kommt erst mit einem Feldzug.
+5. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
 
 > **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen (Punkt 3 der alten Liste), und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `Sergent erreicht` neu gesetzt (Punkt 2). Beides steht oben unter „Balance-Konstanten".

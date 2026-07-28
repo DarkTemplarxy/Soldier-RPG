@@ -200,6 +200,8 @@ function seitenleiste(){
       <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
       <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
+      ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
+      ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}
       ${(S.orden||[]).map(id=>{ const o=ordenVon(id); return o?`<div class="kv"><span>${esc(o.name)}</span><b>${ordensbild(id)}</b></div>`:''; }).join('')}
       ${ueberDir()}
     </div>

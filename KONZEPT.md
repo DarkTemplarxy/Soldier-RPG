@@ -405,6 +405,77 @@ Das Spiel kommentiert das nie. Es zeigt zwei Zahlen: dein Vermögen und den Zust
 
 **Fremde Orden:** Eiserne Krone (Königreich Italien, ab 1805) · Réunion (ab 1811) · Verbündeten-Orden aus Bayern, Sachsen, Württemberg. Je +10 VP, höchstens zwei gewertet.
 
+### Die Leiter der Sichtbarkeit — woher die Nennungen kommen
+
+*(Entworfen und ab Kapitel 1 gebaut, 28.07.2026.)*
+
+Bis dahin war die Nennung im Tagesbefehl ein Würfelwurf am Gefechtsende. **Sie ist jetzt die mittlere von drei Stufen, und alle drei werden verdient, nicht gewürfelt.**
+
+Napoleons Armee kannte keine gestuften Tapferkeitsmedaillen — aber sie kannte etwas Besseres: Wer etwas tat, wurde *gemeldet*, und die einzige Frage war, wie weit nach oben die Meldung stieg. Das ist die historische Entsprechung von Bronze, Silber und Gold:
+
+| Stufe | Heißt im Spiel | Wer es ausspricht | Wirkung |
+|---|---|---|---|
+| **1** | **Lob vor der Front** | der Capitaine, am Abend des Gefechts | Kameradschaft +4, wird gezählt — **kein Ruf** |
+| **2** | **Nennung im Tagesbefehl** | der Divisionsstab | +1 Nennung |
+| **3** | **Meldung an den Oberbefehl**, ab 1805 **das Bulletin der Großen Armee** | die Armee selbst; das Bulletin wurde in ganz Frankreich gedruckt | **+2 Nennungen**, Ruf +4 |
+
+Der Name der dritten Stufe schaltet mit der Epoche um, wie die Kokarde 1804 zum Adler wird.
+
+**Die Bronzestufe gibt bewusst keinen Ruf.** Die teuerste gelernte Regel des Projekts lautet: Alles, was den Ruf hebt, hebt über die Schwellen auch den Aufstieg. Ruf +2 je gutem Gefecht wären über einen Lauf rund +30 — die Beförderungsquoten würden durch die Decke gehen. Bronze zahlt in Kameradschaft und in die *Zählung*; Belobigungen sind die Währung, aus der später Ordensbedingungen erfüllt werden.
+
+**Nur die höchste Stufe je Gefecht zählt.** Stapeln wäre Grinding.
+
+#### Die Kampfmechanik: das Gefecht zählt Taten
+
+Gemessen wird der **Schaden an der Feindmoral**, nicht Tote. Das ist inhaltlich richtiger: Niemand zählt 1796 im Pulverdampf Gefallene, aber jeder sieht, wessen Abschnitt der Linie wankt. Der Beitrag der Linie zählt nicht mit — das ist nicht deine Tat.
+
+```
+K.zaehlung = { schaden, serie, bestSerie, ereignisse, vorn, gedeckt, offen }
+```
+
+| Stufe | Bedingung |
+|---|---|
+| 1 · Lob | Schaden ≥ 60 **oder** ein bestandenes Gefechts-Ereignis |
+| 2 · Tagesbefehl | Schaden ≥ 100 **und** überwiegend ungedeckte Runden — **oder** zwei Ereignisse |
+| 3 · Bulletin | Schaden ≥ 150 **oder** eine Sondermissions-Kette voll bestanden **oder** ein Ereignis vor der Linie in einem Höhepunktgefecht |
+
+**Die Sichtbarkeitsregel ist der Zahn des ganzen Systems:** *Gezählt wird nur, was aus dem Stand geschieht.* Wer kniet oder liegt, dessen Serie reißt und dessen Schaden zählt **halb**.
+
+Historisch ist das exakt — im Rauch sieht niemand, wer gut zielt; gesehen wird, wer steht, wo geschossen wird. Mechanisch ist es die Bremse, ohne die das System kaputt wäre: **Man kann keine Auszeichnung aus der Deckung heraus erschießen.** Auszeichnungsjagd und Überleben ziehen damit an entgegengesetzten Enden desselben Seils — dieselbe Achse, auf der die Gefechts-Ereignisse gebaut sind: *vorsichtig überlebt, mutig steigt auf.*
+
+**Am Gefechtsende steht die Bilanz mit Zahlen**, und wenn es knapp war, auch die verfehlte Schwelle: „Eigener Anteil: 84. Für den Tagesbefehl hätte es 100 gebraucht — und man muss dabei stehen." Ein Auszeichnungssystem mit unsichtbaren Schwellen fühlt sich wie Zufall an; dieselbe Überlegung wie bei den Proben, die Wert und Schwierigkeit schon auf dem Knopf zeigen.
+
+#### Der Ehrensäbel
+
+Die *goldene* Ehrenwaffe — historisch seltener und wertvoller als das Ehrengewehr, vergeben für eine einzelne, benannte Tat. **Bedingung: eine Sondermissions-Kette voll bestanden (jede Stufe, nicht die Mehrheit) und fünf Nennungen; Fenster 1799–1803.** +14 VP, Ruf +8, 1 F Pension je Station.
+
+Er gibt der gefährlichsten Handlung des Spiels einen eigenen Preis: Wer durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln, bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist. Wie das Ehrengewehr führt er 1804 automatisch in die Ehrenlegion.
+
+### Auszeichnungen der Kompanie — ab Rang 9
+
+*(Entworfen 28.07.2026, gebaut wird es mit den Capitaine-Kapiteln.)*
+
+**Ab Capitaine bist nicht mehr du es, der gesehen wird. Es ist deine Kompanie.** Das ist der Maßstabswechsel aus Abschnitt 3, konsequent zu Ende gedacht — und es ist der Grund, warum die Ordensleiter oben nicht einfach weiterläuft.
+
+Zwei Dinge ändern sich am Gefecht:
+
+- **`K.kompanie`** wie die Sektion des Sergenten, nur ~120 Mann.
+- **Jedes Gefecht bekommt einen Auftrag** statt nur einer Feindmoral: *„Haltet die Straße bis Runde 6." „Nehmt die Batterie." „Deckt den Rückzug der Zwölften."* Erfüllt/nicht erfüllt ist eine **zweite Achse** neben gewonnen/verloren — man kann siegen und den Auftrag verfehlen, und umgekehrt. Die Abrechnung nach dem Gefecht wird damit zur Kompanie-Abrechnung, mit der Kompaniekasse als Bindeglied.
+
+| Stufe | Heißt | Bedingung | Wirkung |
+|---|---|---|---|
+| **1** | **Belobigung im Divisionsbefehl** | Auftrag erfüllt, Verluste unter Soll | Kompanie-Güte steigt · Gunst des Colonel +1 |
+| **2** | **Die Kompanie im Bulletin** | Auftrag *übererfüllt* — vor der Zeit, Karree gegen Reiterei gehalten, zuerst in der Bresche | Ruf +6 · Dotation in die Kompaniekasse · Rekrutenzulauf, Güte steigt dauerhaft |
+| **3** | **Die Inschrift auf der Fahne** | einmal je Kampagne, nur im Höhepunktgefecht: übererfüllt **und** Verluste unter Soll | „AUSTERLITZ" steht künftig auf dem Fahnenband — die Kompanie hat einen **Moralboden**, sie bricht später, nie früher · +8 VP |
+
+**Und der Preis, ohne den es Deko wäre:** Eine ausgezeichnete Kompanie bekommt die Höhepunktaufträge. Wer bei Austerlitz auf der Fahne steht, steht bei Eylau in der ersten Welle. Der Ruhm der Einheit zieht Einsätze an, wie der Ruf des Mannes die Ereignisse anzieht — dieselbe Mechanik, eine Ebene höher.
+
+Historisch trägt das: Regimenter verdienten sich Beinamen (das 57e hieß nach Rivoli *Le Terrible*), Schlachtnamen kamen als Inschrift auf die Fahnen, und eine Bulletin-Nennung der Einheit war begehrter als Geld.
+
+### Dotationen — ab 1807
+
+Nach Tilsit zahlte Napoleon Tapferkeit in **Land**: Renten aus eroberten Gebieten, an Offiziere und verdiente Unteroffiziere. Im Spiel: eine einmalige Summe plus 3 F je Station, Bedingung ist eine Bulletin-Meldung als Offizier. **Das ist der historische Schlusspunkt des Ordenssystems** — und die Rente, die einen Ruhestand nach Russland trägt.
+
 ### Was das für die Punktewertung heißt
 
 | Auszeichnung | VP |

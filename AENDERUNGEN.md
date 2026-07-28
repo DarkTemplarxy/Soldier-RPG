@@ -5,6 +5,58 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Die Leiter der Sichtbarkeit, der Ehrensäbel, die Kompanie-Ebene im Entwurf
+
+**Die Nennung im Tagesbefehl war ein Würfelwurf am Gefechtsende.** Jetzt ist sie die mittlere von drei Stufen, und alle drei werden verdient.
+
+### Bronze, Silber, Gold — historisch eingekleidet
+
+Napoleons Armee kannte keine gestuften Tapferkeitsmedaillen, aber etwas Besseres: **eine Leiter der Sichtbarkeit.** Wer etwas tat, wurde gemeldet; die Frage war nur, wie weit nach oben.
+
+| Stufe | Heißt | Bedingung | Wirkung |
+|---|---|---|---|
+| 1 | **Lob vor der Front** | Schaden ≥ 60 *oder* ein Ereignis | Kameradschaft +4 · **kein Ruf** |
+| 2 | **Nennung im Tagesbefehl** | Schaden ≥ 100 **und** überwiegend ungedeckt · *oder* zwei Ereignisse | +1 Nennung |
+| 3 | **Bulletin der Großen Armee** (ab 1805; vorher „dem Oberbefehl gemeldet") | Schaden ≥ 150 *oder* Sondermission voll bestanden *oder* Ereignis vor der Linie im Höhepunktgefecht | **+2 Nennungen** · Ruf +4 |
+
+Der Name der dritten Stufe schaltet mit der Epoche um, wie die Kokarde 1804 zum Adler wird.
+
+**Gezählt wird der Schaden an der Feindmoral, nicht Tote.** Niemand zählt 1796 im Pulverdampf Gefallene, aber jeder sieht, wessen Abschnitt der Linie wankt. Der Beitrag der Linie zählt nicht mit — das ist nicht deine Tat. Nur die höchste Stufe je Gefecht, sonst wäre es Grinding.
+
+### Die Sichtbarkeitsregel — der Zahn des Systems
+
+*Gezählt wird nur, was aus dem Stand geschieht.* Wer kniet oder liegt, dessen Serie reißt und dessen Schaden zählt **halb**.
+
+Historisch exakt: Im Rauch sieht niemand, wer gut zielt — gesehen wird, wer steht, wo geschossen wird. Mechanisch ist es die Bremse, ohne die alles kaputt wäre: **Man kann keine Auszeichnung aus der Deckung heraus erschießen.** Auszeichnungsjagd und Überleben ziehen an entgegengesetzten Enden desselben Seils — dieselbe Achse, auf der die Gefechts-Ereignisse stehen.
+
+**Stufe 1 gibt bewusst keinen Ruf.** Die teuerste gelernte Regel des Projekts: Alles, was den Ruf hebt, hebt über die Schwellen auch den Aufstieg. Ruf +2 je gutem Gefecht wären über einen Lauf rund +30 — die Sergent-Quote ginge durch die Decke. Bronze zahlt in Kameradschaft und in die Zählung.
+
+**Am Gefechtsende steht die Bilanz mit Zahlen** und, wenn es knapp war, der verfehlten Schwelle: „Eigener Anteil: 84. Für den Tagesbefehl hätte es 100 gebraucht — und man muss dabei stehen." Unsichtbare Schwellen fühlen sich wie Zufall an; dieselbe Überlegung wie bei den Proben, die Wert und Schwierigkeit schon auf dem Knopf zeigen.
+
+### Der Ehrensäbel
+
+Die goldene Ehrenwaffe, historisch seltener als das Ehrengewehr. **Bedingung: eine Sondermissions-Kette voll bestanden — jede Stufe, nicht die Mehrheit — und fünf Nennungen, Fenster 1799–1803.** +14 VP, Ruf +8, 1 F je Station; führt wie das Gewehr 1804 automatisch in die Ehrenlegion.
+
+Er ist die einzige Auszeichnung, die an einer einzelnen benannten Tat hängt statt an einer Summe, und er gibt der gefährlichsten Handlung des Spiels endlich einen eigenen Preis.
+
+### In KONZEPT §6 nachgetragen, noch nicht gebaut
+
+**Auszeichnungen der Kompanie ab Rang 9** — Belobigung im Divisionsbefehl, die Kompanie im Bulletin, die Inschrift auf der Fahne. Dazu die zweite Gefechtsachse, die sie erst möglich macht: **jedes Gefecht bekommt einen Auftrag** neben der Feindmoral, und man kann siegen und ihn trotzdem verfehlen. Der Preis der Auszeichnung ist der Einsatz: Wer bei Austerlitz auf der Fahne steht, steht bei Eylau in der ersten Welle. Dazu die höheren Ordensgrade, die fremden Orden und die Dotationen ab Tilsit.
+
+### Gemessen, je 40 Läufe — gegen denselben Stand ohne das System
+
+| | Erstlauf v | mutig | Vet 160 |
+|---|---|---|---|
+| **überlebt** | 55 → **57 %** | 25 → **30 %** | 70 → **70 %** |
+| **Sergent** | 23 → **25 %** | 25 → **28 %** | 78 → **70 %** |
+| Punkte-Median | 61 → **93** | 60 → **87** | 203 → **194** |
+
+Alle Leitzahlen im Rauschen; der Sergent beim Veteranen ist dabei von 78 zurück ins Band (60–75) gerutscht. **Der Punkte-Median des Erstlaufs steigt deutlich** — die Orden zahlen, und sie zahlen dem, der noch wenig hat, mehr als dem Veteranen. Der Überlebens-Abstand bleibt bei 13 Punkten und damit unter der 25er-Grenze; Ursache und Begründung stehen unverändert im Eintrag zu Kapitel 3.
+
+Spielstand-Fassung 4 → **5** mit Wandler.
+
+---
+
 ## 2026-07-28 — Kapitel 3: Garnison 1801–04, und die Orden
 
 **Das dritte Kapitel, 17 Stationen, Nîmes und das Lager von Boulogne.** Dazu das Ordenssystem, ein Marketender und vier neue Zwischenfälle.

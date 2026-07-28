@@ -85,6 +85,7 @@ function anerkennung(betrag, was){
      auffällt, kommt genau auf die vier, die der Feldweg verlangt. */
   if(!K.offizierGesehen){ K.offizierGesehen = true; gunstGeben('berthaud', 1); }
   K.taten.push({was, ruf:gibt});
+  if(K.zaehlung) K.zaehlung.ereignisse++;
   return ` <span class="fein">gesehen · Ruf +${gibt}</span>`;
 }
 
@@ -119,6 +120,9 @@ function starteKampf(n){
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
               ruhm:0, taten:[],
+              /* Was dieses Gefecht an Sichtbarem hervorgebracht hat. `taten` sind
+                 die Ruf-Ereignisse (Text), `zaehlung` sind die Zahlen dahinter. */
+              zaehlung:{schaden:0, serie:0, bestSerie:0, ereignisse:0, vorn:false, gedeckt:0, offen:0},
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
               sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
@@ -836,6 +840,12 @@ function ereignisWaehlen(i){
       }
     }
     w = (treffer*2 > o.kette.length) ? o.erfolg : (o.misserfolg || o.erfolg);
+    /* **Voll bestanden** heißt: jede Stufe gelungen, nicht die Mehrheit. Das
+       ist die Bedingung des Ehrensäbels und die einzige Stelle im Spiel, an der
+       ein Orden an einer einzelnen, benannten Tat hängt statt an einer Summe.
+       Wer durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln,
+       soll nicht dasselbe bekommen wie einer, der dreimal aufgefallen ist. */
+    if(treffer === o.kette.length){ S.sondermissionen = (S.sondermissionen|0) + 1; K.kette = true; }
     text = zeilen.join(' ') + '<br><br>' + w.text;
   } else {
     const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
@@ -1034,6 +1044,31 @@ function kampfAktion(id){
   const guete = feindGuete(n);
   const linie = (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   K.feindMoral -= schaden + linie;
+
+  /* ══════════════════ DIE TATENZÄHLUNG ══════════════════
+
+     **Die Sichtbarkeitsregel ist der Zahn des ganzen Ordenssystems:**
+     *Gezählt wird nur, was aus dem Stand geschieht.* Wer kniet oder liegt,
+     dessen Serie reißt und dessen Schaden zählt halb.
+
+     Historisch ist das exakt — im Pulverdampf sieht niemand, wer gut zielt;
+     gesehen wird, wer steht, wo geschossen wird. Mechanisch ist es die Bremse,
+     ohne die das System kaputt wäre: **Man kann keine Auszeichnung aus der
+     Deckung heraus erschießen.** Auszeichnungsjagd und Überleben ziehen damit
+     an entgegengesetzten Enden desselben Seils — dieselbe Achse, auf der die
+     Gefechts-Ereignisse gebaut sind (vorsichtig überlebt, mutig steigt auf).
+
+     Gezählt wird der **Schaden an der Feindmoral**, nicht Tote: Niemand zählt
+     1796 im Rauch Gefallene, aber jeder sieht, wessen Abschnitt der Linie
+     wankt. Der Beitrag der Linie (`linie`) zählt nicht mit — das ist nicht
+     deine Tat. */
+  const z = K.zaehlung;
+  if(schaden > 0){
+    z.schaden += K.deckung ? schaden*0.5 : schaden;
+    if(K.deckung){ z.serie = 0; z.gedeckt++; }
+    else { z.serie++; z.bestSerie = Math.max(z.bestSerie, z.serie); z.offen++; }
+  } else if(!K.deckung && id!=='laden') { z.serie = 0; }
+  if(K.vorn) z.vorn = true;
 
   /* Und sie verliert dabei Männer. Das ist reine Anzeige — an `eigen` hängt
      keine Probe und keine Gefahr, es macht nur sichtbar, was der Text sagt:
@@ -1333,6 +1368,47 @@ function kampfEnde(sieg, letzterText){
   const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
   if(leicht>=0){ S.wunden.splice(leicht,1); atemKlemmen(); }   // der Vorrat wächst wieder
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
+
+  /* ══════════════════ DIE LEITER DER SICHTBARKEIT ══════════════════
+
+     Napoleons Armee hatte keine gestuften Tapferkeitsmedaillen — sie hatte
+     etwas Besseres: **eine Leiter der Sichtbarkeit.** Wer etwas tat, wurde
+     gemeldet, und die einzige Frage war, wie weit nach oben die Meldung stieg.
+     Das ist die historische Entsprechung von Bronze, Silber und Gold:
+
+       1 · Lob vor der Front      — der Capitaine, am Abend des Gefechts
+       2 · Nennung im Tagesbefehl — der Divisionsstab
+       3 · Meldung an den Oberbefehl / ab 1805 **das Bulletin der Großen Armee**
+
+     Der Name der dritten Stufe schaltet mit der Epoche um, wie die Kokarde zum
+     Adler wird: Das Bulletin gab es erst ab 1805, gemeldet wurde vorher auch.
+
+     **Nur die höchste Stufe je Gefecht zählt.** Stapeln wäre Grinding, und
+     Invariante 2 verbietet es.
+
+     **Die Bronzestufe gibt bewusst keinen Ruf.** Die teuerste gelernte Regel
+     des Projekts lautet: Alles, was den Ruf hebt, hebt über die Schwellen auch
+     den Aufstieg. Ruf +2 je gutem Gefecht wären über einen Lauf rund +30 — die
+     Sergent-Quote würde durch die Decke gehen. Bronze zahlt deshalb in
+     Kameradschaft und in die *Zählung*: Belobigungen sind die Währung, aus der
+     später Ordensbedingungen erfüllt werden. */
+  const z = K.zaehlung || {schaden:0, ereignisse:0, vorn:false, offen:0, gedeckt:0};
+  const bulletinZeit = jahrVonStation() >= 1805;
+  let stufe = 0;
+  if(z.schaden >= 60 || z.ereignisse >= 1) stufe = 1;
+  /* Silber verlangt zusätzlich, dass man überwiegend gestanden hat — sonst
+     wäre die Sichtbarkeitsregel durch bloße Länge des Gefechts auszuhebeln. */
+  if((z.schaden >= 100 && z.offen > z.gedeckt) || (z.ereignisse >= 2)) stufe = 2;
+  if(z.schaden >= 150 || (z.ereignisse >= 1 && z.vorn && n.haerte) || K.kette) stufe = 3;
+
+  S.belobigungen = S.belobigungen || 0;
+  S.bulletins = S.bulletins || 0;
+  K.stufe = stufe;
+  if(stufe === 1) { S.belobigungen++; S.kameradschaft = Math.min(100, S.kameradschaft+4); }
+  if(stufe === 2) { S.nennungen++; }
+  if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; }
+  K.stufeName = ['','Lob vor der Front','Nennung im Tagesbefehl',
+                 bulletinZeit?'Im Bulletin der Großen Armee':'Dem Oberbefehl gemeldet'][stufe];
   /* ── Die Abrechnung ──
      Der eigentliche Rangunterschied des Sergenten. Ein Caporal kommt aus dem
      Gefecht und ist fertig; ein Sergent zählt ab, und die Zahl geht nach oben.
@@ -1369,11 +1445,33 @@ function kampfEnde(sieg, letzterText){
           ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
           ${kk.ruhm>=RUHM_JE_GEFECHT?'<p class="hinweis" style="margin:9px 0 0">Mehr sieht in diesem Rauch niemand.</p>':''}
         </div>`:''}
+        ${tatenBilanz(kk)}
         <div class="probe" style="margin-top:10px">${sieg?'GEFECHT BESTANDEN':'GEFECHT VERLOREN'} · ${kk.runde} RUNDEN</div>
       </div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
+}
+
+/* Die Bilanz des Gefechts in Zahlen — und, wenn es knapp war, woran es lag.
+
+   **Der zweite Satz ist der wichtigere.** Ein Auszeichnungssystem, dessen
+   Schwellen unsichtbar sind, fühlt sich wie Zufall an; eines, das sagt „für den
+   Tagesbefehl hätte es 100 gebraucht", macht aus dem nächsten Gefecht eine
+   Entscheidung. Genau dieselbe Überlegung wie bei den Proben, die ihren Wert
+   und ihre Schwierigkeit schon auf dem Knopf zeigen. */
+function tatenBilanz(kk){
+  const z = kk.zaehlung;
+  if(!z || (!z.schaden && !z.ereignisse)) return '';
+  const s = Math.round(z.schaden);
+  const naechste = s < 60 ? 60 : s < 100 ? 100 : s < 150 ? 150 : 0;
+  const wofuer = s < 60 ? 'ein Lob vor der Front' : s < 100 ? 'den Tagesbefehl' : 'die Meldung nach oben';
+  return `<div class="wirkung"><span>${kk.stufe?esc(kk.stufeName):'Nicht aufgefallen'}</span>
+    Eigener Anteil am Widerstand des Feindes: <b>${s}</b>${
+      z.bestSerie>=3?` · ${z.bestSerie} Treffer in Folge aus dem Stand`:''}${
+      z.gedeckt?` · ${z.gedeckt} Runden aus der Deckung, die halb zählen`:''}.
+    ${kk.stufe===0 && naechste ? `Für ${wofuer} hätte es ${naechste} gebraucht.` :
+      kk.stufe===1 && naechste ? `Für ${wofuer} hätte es ${naechste} gebraucht — und man muss dabei stehen.` : ''}</div>`;
 }
 
 /* ══════════════════ ELITEKOMPANIE ══════════════════ */
