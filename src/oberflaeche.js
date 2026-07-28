@@ -367,8 +367,26 @@ function aktualisiereLaden(){
   });
 }
 
-/* ── Charaktererschaffung ── */
-const POOL = 120, SOCKEL = 20, MAXE = 70;
+/* ── Charaktererschaffung ──
+
+   **Der Pool ist von 120 auf 60 gesenkt worden (28.07.2026), und das ist die
+   größte Einzeländerung am Spielgefühl.** Vorher reichte er für zwei Attribute
+   auf 70 *und* Reserve — ein Erstlauf-Mann war damit so gut ausgestattet wie
+   ein Veteran, und die Veteranenpunkte waren Zierde: Der Testbot gewann alles,
+   ohne je einen zu kaufen.
+
+   Mit 60 Punkten reicht es für ein gutes Attribut und ein halbes. Die Schwelle
+   55 der Elitekompanien wird zur Entscheidung statt zur Selbstverständlichkeit,
+   und **der Rest des Weges führt über die Veteranenpunkte** — Lauf 2 spielt
+   ungefähr auf dem alten Niveau, Lauf 3 und 4 darüber. Damit entsteht die
+   Progression, die das Spiel bisher nur behauptet hat: Gegner, gegen die man am
+   Anfang chancenlos ist, werden später schlagbar.
+
+   Der Schritt ist 10, also muss POOL durch 10 teilbar sein — sonst lässt sich
+   der Vorrat nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
+   Invariante 3 bleibt unberührt: Gekauft wird der Ausgangspunkt, nie der
+   Aufstieg. */
+const POOL = 60, SOCKEL = 20, MAXE = 70;
 let ERSCH = null;
 function zeigeErschaffung(neu){
   if(neu || !ERSCH){
@@ -392,7 +410,8 @@ function zeigeErschaffung(neu){
       <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
         <div class="cb">${zeilen}
         <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel 20 · höchstens 70 bei der Erschaffung · Bildung ist vom Pool ausgenommen.
-        Alle neun Fertigkeiten beginnen bei 10.</p>
+        Alle neun Fertigkeiten beginnen bei 10.<br>
+        Sechzig Punkte sind wenig, und das ist Absicht: Ein Rekrut ist kein Veteran. Was fehlt, holen die Veteranenpunkte deiner früheren Männer im nächsten Schritt.</p>
         <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
       </div></div>
     </div>

@@ -270,7 +270,7 @@ Leben ≤ 0 → Tod
 
 ### Charaktererschaffung (`src/oberflaeche.js`, `src/daten/grundwerte.js`)
 
-- Sockel **20** auf allen sechs Attributen, Verteilungspool **120**, Höchstwert bei Erschaffung **70**.
+- Sockel **20** auf allen sechs Attributen, Verteilungspool **60** (bis 28.07.2026: 120), Höchstwert bei Erschaffung **70**. Der Schritt ist 10, also muss der Pool durch 10 teilbar sein — sonst lässt er sich nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
 - **Bildung ist vom Pool ausgenommen** und bleibt bei 20 — man kann nicht lesen.
 - Alle neun Fertigkeiten starten bei **10**.
 - **Jede Herkunft verteilt exakt 50 Punkte netto**, nur anders gewichtet, teils mit Abzügen. Keine ist stärker. Wer eine neue Herkunft hinzufügt, hält die 50 ein.
@@ -296,7 +296,7 @@ Leben ≤ 0 → Tod
 
 > Der Fuhrmannssohn bekam 30 Punkte auf Reiten — eine Fertigkeit, die frühestens ab Rang 7 zählt — und zahlte dafür mit Kaltblütigkeit. Der Schreibergehilfe zahlte −20 Konstitution, was ihn direkt gefährlicher lebte, für 20 Punkte Kartenkunde. Umgeschichtet: Fuhrmann Reiten 30 → **20**, Konstitution 10 → **15**, Kaltblütigkeit −10 → **−5**. Schreiber Kartenkunde 20 → **10**, Konstitution −20 → **−10**. Netto bleiben es 50; der Rest ist in Währung umgebucht, die im Spiel etwas kauft. Ganz gleich werden sie erst, wenn Reiten und Kartenkunde ab Rang 7 wirklich zählen — das ist Absicht und steht so im Konzept.
 
-**Was kein Exploit ist:** Zwei Attribute auf 70 zu ziehen (kostet 100 der 120 Poolpunkte) ist eine legitime Spezialisierung — sie öffnet beide Elitezweige und kostet Breite. Und dass „Auswürfeln" schlechter verteilt als die Hand, ist der Sinn des Knopfes.
+**Was kein Exploit ist:** dass „Auswürfeln" schlechter verteilt als die Hand — das ist der Sinn des Knopfes. *(Der frühere Eintrag „zwei Attribute auf 70 sind legitime Spezialisierung" ist mit dem Pool von 60 gegenstandslos: Es reicht für genau eines.)*
 
 ### Proben und Wachstum (`src/mechanik.js`)
 
@@ -364,6 +364,31 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 
 **Knien ist begrenzt: höchstens drei Runden am Stück** (`K.duckFolge`). Zwei Runden fragt niemand, die dritte kostet Ruf −2, eine vierte gibt es nicht — der Knopf ist gesperrt, bis man eine Runde etwas anderes getan hat. Ohne die Grenze war Knien ein Panzer (−22 Gefahr, Restrisiko ~4 %), hinter dem sich jedes Gefecht aussitzen ließ; der Blutzoll des Rückzugs machte das Aussitzen teuer, die Kniegrenze macht es unmöglich.
 
+### Die Eskalation: Feindgüte je Kampagne (`guete` in `grundwerte.js`)
+
+**Das Spiel hat elf Kapitel und einen Spieler, der von Lauf zu Lauf stärker wird. Wenn die Gegner gleich bleiben, wird es mit jedem Lauf leichter — statt andere Fragen zu stellen.** `guete` ist die Antwort darauf: **eine Zahl je Kampagne**, die drei Dinge zugleich schaltet (`feindGuete()` in `src/kampf.js`).
+
+| Wirkung | Formel | Warum diese |
+|---|---|---|
+| Trefferchance | `gefahr += guete` | Bessere Truppen treffen öfter — der einzige Teil, der auch den Vorsichtigen trifft |
+| **Die eigene Linie hilft weniger** | `linie = (2 + Zufall·4) · max(0,3; 1 − guete·0,15)` | Der wichtigste Hebel, siehe unten |
+| Eigene Verluste | `· (1 + guete·0,15)` | Sichtbar im Sichtfeld und an der Waage: Man *sieht*, dass dieser Feind besser ist |
+
+> **Warum der Linien-Hebel der eigentliche ist.** Die Zeile `feindMoral -= schaden + linie` ist die wichtigste im Kampfsystem — sie ist der Grund, warum ein Gefecht überhaupt gewinnbar ist (ohne sie: 100 % Verluste, siehe unten). Wenn sie mit der Güte schrumpft, entscheidet zunehmend die **eigene Feuerkraft** über die Länge des Gefechts. Und genau die ist es, was Veteranenpunkte kaufen: Ein Erstlauf-Mann mit Muskete 10 braucht gegen Akkon zehn Runden, ein Veteran mit Muskete 60 vier. Treffer kommen je Runde — also stirbt der eine und der andere nicht, **ohne dass eine einzige Schadenszahl unterschiedlich wäre.** Der Boden bei 0,3 hält die späten Kapitel rechnerisch gewinnbar.
+
+| Kampagne | Güte | | Kampagne | Güte |
+|---|---|---|---|---|
+| Italien 1796/97 | **0** | | Spanien | 8 |
+| Ägypten 1798/99 | **5** | | Russland | 10 |
+| Garnison | 0 | | Deutschland | 10 |
+| Austerlitz | 6 | | Frankreich | 11 |
+| Jena–Auerstedt | 7 | | Hundert Tage | 12 |
+| Eylau & Friedland | 8 | | | |
+
+**Nur Italien (0) und Ägypten (5) sind gemessen.** Alles ab Austerlitz ist eine entworfene Kurve für Kapitel, die es noch nicht gibt — wer eines baut, misst seine Güte neu, statt der Zahl zu glauben. Der Sinn der Tabelle ist, dass die Eskalation **einmal entworfen** ist und nicht elfmal neu erfunden wird.
+
+**Güte ist die Grundlinie einer Kampagne, `haerte` die Spitze eines einzelnen Gefechts.** Beide addieren sich: Akkon steht bei Gefahr 14 + 3 (Höhepunkt) + 5 (Güte) = **22**.
+
 ### Fünf Hebel, die das Spiel gefährlich machen (28.07.2026)
 
 Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide Feldzüge. Der Grund war eine Bilanz, keine Einzelzahl — über 200 Punkte Genesung je Lauf gegen rund 70 Punkte Schaden. Diese fünf greifen ineinander, statt am Schaden zu drehen:
@@ -419,7 +444,7 @@ Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP plus den Mantel (30), alles z
 
 Die Erschaffung läuft in **zwei Schritten**, und die Reihenfolge ist der ganze Witz:
 
-1. **Wer bist du** — Name, Herkunft, die 120 Poolpunkte auf die Attribute.
+1. **Wer bist du** — Name, Herkunft, die 60 Poolpunkte auf die Attribute.
 2. **Veteranenpunkte** — auf die *fertigen* Werte legen: Attribute, Fertigkeiten, Ausrüstung.
 
 ```js
@@ -438,6 +463,8 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 **Obergrenzen für den Endwert: Attribute 70, Fertigkeiten 60** — dieselbe 70 wie bei der Pool-Verteilung. Wer durch Herkunft schon darüber liegt, kann dort nichts mehr kaufen; das muss man sich im Feld verdienen.
 
+> **Seit dem Pool von 60 ist der Kauf kein Beiwerk mehr, sondern der halbe Charakter.** Vorher gewann der Testbot alles, ohne einen einzigen Punkt zu kaufen — der ganze Laden war Zierde. Jetzt trennt er 43 % von 68 % Überlebenden und 45 % von 88 % Caporals. Wer an `PRO_PUNKT` oder am Pool dreht, verschiebt damit unmittelbar, wie viele Läufe die Leiter hat.
+>
 > **Warum die Staffelung als Bremse reicht.** Ein Spitzenlauf bringt etwa 160 VP. Weil vom Istwert gerechnet wird, kostet das Nachschärfen einer Stärke am meisten — die 160 Punkte reichen für Breite oder für eine einzige Spitze, nie für beides. Dazu kommt die zweite, schon eingebaute Bremse aus `nutzen()`: Hohe Startwerte wachsen langsamer, weil das Wachstum vom Abstand zu 100 abhängt.
 
 **Der frühere Entwurf rechnete vom Sockel** (Attribute 20, Fertigkeiten 10) und stand *vor* der Erschaffung. Das war vorhersagbar, aber blind: Man kaufte Punkte, ohne zu wissen, was Herkunft und Pool daraus machen, und der Kaufbildschirm lag unter der Ausrüstungstabelle, wo ihn niemand fand.
@@ -450,20 +477,28 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 **`balance.js` misst seit den Gefechts-Ereignissen zwei Gemüter**, weil das Spiel zwei Antworten hat. `node test/balance.js 40` ist der vorsichtige Bot: Er tritt nur vor, wo seine Werte es klar tragen. `MUT=1 node test/balance.js 40` tritt immer vor, außer es steht um sein Leben. **Der Abstand zwischen beiden Zahlen ist die Balance der Ereignisse.**
 
-| Größe | Soll | vorsichtig | mutig |
-|---|---|---|---|
-| **Italien überstanden** | Sollwert wird neu gesetzt, siehe unten | **98 %** | **93 %** |
-| **Beide Feldzüge überstanden** | noch keiner | **98 %** | **78 %** |
-| Gestorben | — | 1 von 40 | **9 von 40** |
-| **Elitekompanie erreicht** | noch keiner | 85 % | 85 % |
-| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | 83 % | 85 % |
-| Punkte, Median | — | 199 | 192 · Spitze **240** |
+**Seit dem Pool von 60 werden drei Männer gemessen, nicht mehr einer** — der Bot kauft nichts, also *ist* er ohne `VP=` genau der Erstlauf-Spieler. Alle Zahlen je 40 Läufe:
+
+| Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
+|---|---|---|---|---|
+| **Italien überstanden** | 95 % | 100 % | 100 % | 100 % |
+| **Beide Feldzüge überstanden** | **43 %** | **20 %** | **68 %** | **75 %** |
+| Gestorben | 23 von 40 | **32 von 40** | 13 von 40 | 10 von 40 |
+| **Elitekompanie erreicht** | 48 % | 55 % | 93 % | 95 % |
+| **Caporal erreicht** | 45 % | 45 % | 88 % | **100 %** |
+| Punkte, Median | 106 | 115 | 185 | 188 |
+
+> **Das ist die Kurve, um die es geht.** Italien ist das Lehrstück und lässt fast jeden durch; **Ägypten tötet den ersten Mann** — vorsichtig sehen 43 % das Ende, wer aufsteigen will, nur 20 %. Mit dem Vorrat eines guten ersten Laufs (160 VP) steigt es auf 68 %, im dritten oder vierten Lauf (260 VP) auf 75 %, und der Caporal wird von einer Glückssache (45 %) zur Selbstverständlichkeit (100 %).
+>
+> **Gegner, gegen die man am Anfang chancenlos ist, sind später zu schlagen — nicht weil sie schwächer wurden, sondern weil man schneller lädt.** Genau das war die Vorgabe, und es steht in keiner einzigen Sonderregel: Es fällt aus Pool 60 + Feindgüte 5 + zollpflichtigem Rückzug von allein heraus.
+>
+> **Wer daran dreht, misst vier Zahlen** — Erstlauf vorsichtig, Erstlauf mutig, Veteran 160, Veteran 260. Der Abstand zwischen der ersten und der dritten *ist* die Progression.
 
 > **Die Achse trägt, und zwar deutlich:** Mut kostet neunmal so viele Männer wie Vorsicht (9 Tote gegen 1), und der mutige Lauf holt trotzdem die Spitzenwertung (240 gegen 227). Wer an den Ereignissen oder den fünf Hebeln dreht, muss diesen Abstand erhalten — **vorsichtig überlebt, mutig steigt auf und stirbt öfter.**
 
 > **Erreicht, nicht überlebt.** Gezählt wird seit dem 28.07.2026 der höchste Rang, den ein Mann je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das Skript den Rang *am Ende* — und das maß nach den Lebenspunkten vor allem, wann gestorben wird: Weil kaum noch jemand vor der Beförderungsstation stirbt, stieg die Endrang-Zahl auf 58 %, ohne dass die Beförderung leichter geworden wäre. Die neue Zahl misst die Schwelle selbst.
 
-> ### Wo die Härte jetzt steht
+> ### Wo die Härte jetzt steht (überholt seit Pool 60 — siehe die Tabelle oben)
 >
 > **Der Weg dorthin, zum Nachlesen:** Ein kundiger Spieler war lange nicht zu töten — 40 von 40 überlebten beide Feldzüge. Die alten 45–55 % waren nie die Härte des Spiels, sondern die Härte für einen Bot, der seine Attribute auswürfelte und sich nie ausruhte. Drei Dinge trugen den Unterschied: Konstitution 70 statt Zufall (82 statt 64 Lebenspunkte), kürzere Gefechte durch Salve und gezieltes Feuer (drei Runden statt acht, und Treffer kommen je Runde), und Ruhen im Lager.
 >
@@ -507,8 +542,20 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | + Marsch-Zwischenfälle · vorsichtig | 40 | 100 % | 78 % | 196 |
 | dieselbe Fassung · mutig | 40 | 98 % | 88 % | 202 |
 | + fünf Hebel ohne die Höhepunkt-Gefahr · v / m | 40 / 40 | 100 / 100 % | 83 / 88 % | 199 / 202 |
-| **+ Höhepunkte auch +3 Gefahr (gültig) · vorsichtig** | **40** | **98 %** | **83 %** | **199** |
-| **dieselbe Fassung · mutig** | **40** | **93 %** | **85 %** | **192** |
+| + Höhepunkte auch +3 Gefahr · vorsichtig / mutig | 40 / 40 | 98 / 93 % | 83 / 85 % | 199 / 192 |
+| Pool 120 → 60, Feindgüte gebaut (**wirkungslos, siehe Fehler unten**) · v / m | 40 / 40 | 100 / 100 % | 43 / 57 % | 139 / 157 |
+| **Güte wirksam (gültig) · Erstlauf vorsichtig** | **40** | **95 %** | **45 %** | **106** |
+| **dieselbe Fassung · Erstlauf mutig** | **40** | **100 %** | **45 %** | **115** |
+| **dieselbe Fassung · Veteran 160 VP** | **40** | **100 %** | **88 %** | **185** |
+| **dieselbe Fassung · Veteran 260 VP** | **40** | **100 %** | **100 %** | **188** |
+
+*(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
+
+> **Ein Fehler, der drei Messreihen wertlos gemacht hat, und wie er sich zeigte.** `kapitel01_italien.js` meldete seine Stationen mit `STATIONEN.italien = KAPITEL` an — **ohne Kopie**. Kapitel 2 hängt seine Stationen mit `KAPITEL.push(...)` an dasselbe Array, also wuchs `STATIONEN.italien` stillschweigend auf alle 32 Stationen mit. `feindGuete()` geht die Kampagnen der Reihe nach durch, fand für *jedes* Gefecht zuerst Italien und lieferte immer **0**. Zwei Runden Ägypten-Balance wurden gegen ein System gemessen, das nicht lief.
+>
+> Aufgefallen ist es erst, als ich aufgehört habe zu argumentieren, warum die Zahlen sich nicht bewegen, und stattdessen **den Mechanismus selbst ausgelesen habe** (`feindGuete(n)` je Gefecht in einer Tabelle). Regel daraus: **Wenn eine Änderung dreimal nichts bewegt, ist die Vermutung „das Modell ist falsch" wahrscheinlicher als „der Hebel ist zu schwach" — dann misst man den Hebel, nicht das Ergebnis.**
+>
+> Derselbe Fehler zeigte im Verlauf links ägyptische Stationen unter Italien. **Wer ein Kapitel anhängt, kopiert** (`KAPITEL.slice()`).
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 
@@ -535,14 +582,14 @@ Die Überlebensquote liegt mit 43 % zwei Punkte unter dem Band 45–55 % — inn
 
 | Wo | Was |
 |---|---|
-| Erschaffung | Konstitution 70, Geschick 60, Kaltblütigkeit 40, Autorität 30 — feste Verteilung statt „Auswürfeln". Herkunft reihum durch alle sechs. |
 | Elitewahl | Voltigeur vor Grenadier (zielen bringt 22–32 statt 12–20) |
 | Gefecht | Lücke einmal je Gefecht · hinknien bei wenig Blut oder Luft · als Caporal immer die Salve · sonst feuern · nachladen. Kein Bajonett. |
 | Lager | ruhen unter 60 % Leben · Fürsprache, solange Gunst < 4 · Muskete ölen · Schuster · scharf schießen · exerzieren |
 | Winterquartier | ruhen unter 80 % Leben oder bei einer Wunde · sonst Fürsprache, Ausrüstung, Drill |
 | Szenen | der Knopf mit dem größten Abstand zwischen Wert und Schwierigkeit; riskante mit Abschlag, bei wenig Blut gar nicht |
 | Gefechts-Ereignisse | dieselbe Rechnung. **`MUT=1` sucht das Risiko** statt es zu meiden — außer es steht um sein Leben. |
-| Veteranenpunkte | **kauft nichts.** Sonst wanderte die Messung: Der Vorrat ist der beste Lauf bisher, also spielte Lauf 40 ein anderes Spiel als Lauf 1. |
+| Erschaffung | Konstitution 60, Geschick 40 — die ganzen 60 Poolpunkte. Herkunft reihum durch alle sechs. |
+| Veteranenpunkte | **ohne `VP=` kauft er nichts** und ist damit genau der Erstlauf-Spieler. `VP=160` setzt einen festen Vorrat und gibt ihn nach fester Rangfolge aus (Konstitution 70 → Geschick 70 → Muskete 60 → Kaltblütigkeit 60 → …). Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0 — sonst ließe die Chronik im localStorage ihn anwachsen und die Messung wanderte. |
 
 **Warum die feste Verteilung wichtiger ist, als sie aussieht.** „Auswürfeln" maß vor allem den Zufallsgenerator: Weil der Tod seit den Lebenspunkten eine Schwelle ist und der Vorrat an der Konstitution hängt, entschied der Wurf über den Lauf, bevor er begann — derselbe Stand lieferte 48 %, 64 % und 51 %. Mit fester Verteilung ist die Streuung weg, und 40 Läufe sagen mehr als vorher 80.
 

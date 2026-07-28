@@ -196,7 +196,7 @@ Muskete · Bajonett · Reiten · Drill · Taktik · Kartenkunde · Verwaltung ·
 | Alle neun Fertigkeiten | 10 |
 | **Summe der Attribute · Durchschnitt** | **240 · 40** |
 
-120 Punkte bei einem Höchstwert von 70 heißt: Es lassen sich **höchstens zwei Attribute auf 70** bringen, der Rest bleibt beim Sockel. Würfeln oder selbst verteilen, drei Neuwürfe frei.
+**60 Punkte** bei einem Höchstwert von 70 heißt: Es lässt sich **genau ein Attribut auf 70** bringen — oder eines auf 60 und eines auf 40 —, der Rest bleibt beim Sockel. Würfeln oder selbst verteilen. *(Bis 28.07.2026 waren es 120; gesenkt, damit der Weg nach oben über die Veteranenpunkte führt und ein Erstlauf-Mann kein Veteran ist.)*
 
 | Beispielbauart | Verteilung | Wert in VP |
 |---|---|---|
@@ -864,7 +864,7 @@ Nach demselben Muster gebaut, gleiche Mechanik, anderes Kleid — jeweils mit de
 | **Startpakete** | Zwei Patente: Sous-Lieutenant 110 VP, Lieutenant 145 VP | Ab Kapitel 1, volle Kampagne. Freigeschaltet ab einmal Rang 9. Ausgeglichen durch Wertungsabzug, höhere Anforderung und fehlende Fertigkeiten. |
 | **Schwierigkeit** | Simuliert geeicht | Erster Lauf endet meist in Italien. Waterloo selbst mit vollem Vorrat nur zu ~42 %. |
 | **Skala** | Attribute und Fertigkeiten gemeinsam 0–100 | Kauf Punkt für Punkt, Preis je Punkt steigt von 1 auf 15 VP an den Zehnergrenzen. |
-| **Erschaffung** | Sockel 20, Pool 120 frei verteilbar, Maximum 70 | Ø 40 über sechs Attribute, Fertigkeiten bei 10. Plus eine Herkunft — alle sechs verteilen exakt 50 Punkte. |
+| **Erschaffung** | Sockel 20, Pool 60 frei verteilbar, Maximum 70 | Ø 40 über sechs Attribute, Fertigkeiten bei 10. Plus eine Herkunft — alle sechs verteilen exakt 50 Punkte. |
 | **Ausrüstung** | Sieben Plätze mit Zustand 0–100 | Waffe, Seitenwaffe, Schuhwerk, Mantel, Tornister, Kleinkram, Pferd. Verschleiß je Kapitel, Instandsetzung im Winterquartier. |
 | **Verantwortung** | Skaliert mit dem Rang | Ab Caporal für andere mitverantwortlich, ab Fourrier für die Listen, ab Capitaine für die Kasse. Einheitszustand wirkt auf Moral, Verluste und die Beurteilung durch Vorgesetzte. |
 | **Pferd** | Ab Rang 7 erlaubt, ab Rang 10 gestellt | Weniger Marschermüdung, mehr Ruf — aber ein Ziel für Schützen und ein Kostenposten. |

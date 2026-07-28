@@ -67,6 +67,15 @@ function anerkennung(betrag, was){
   return ` <span class="fein">gesehen · Ruf +${gibt}</span>`;
 }
 
+/* Die Güte des Gegners in diesem Gefecht — aus der Kampagne, zu der die
+   Station gehört. Einmal je Kampfrunde gerufen; die Suche über elf Kampagnen
+   ist billiger als ein zweites Feld in jedem Gefechtsdatensatz. */
+function feindGuete(n){
+  for(const k of KAMPAGNEN)
+    if((STATIONEN[k.id]||[]).some(x=>x.id===n.id)) return k.guete||0;
+  return 0;
+}
+
 function starteKampf(n){
   if(n.anmarsch && !S.anmarschGesehen){
     S.anmarschGesehen = n.id;
@@ -789,15 +798,24 @@ function kampfAktion(id){
   if(id!=='ducken') K.duckFolge = 0;
   if(id!=='bajonett') K.vorn = false;
 
-  // Die Linie kämpft auch ohne dich
-  const linie = 2 + Math.random()*4;
+  /* Die Linie kämpft auch ohne dich — aber gegen einen besseren Gegner weniger
+     erfolgreich. Das ist der wirksamste der drei Güte-Hebel und der leiseste:
+     Gegen Österreicher 1796 bricht der Feind von allein, gegen Dschesärs
+     Garnison steht er, bis *du* etwas tust. Das Gefecht dauert dadurch länger,
+     und weil Treffer je Runde kommen, kostet es mehr Blut — ohne dass eine
+     einzige Schadenszahl angefasst wurde. Boden bei 30 %, sonst wären die
+     späten Kapitel rechnerisch unmöglich (siehe „Warum so niedrig?"). */
+  const guete = feindGuete(n);
+  const linie = (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   K.feindMoral -= schaden + linie;
 
   /* Und sie verliert dabei Männer. Das ist reine Anzeige — an `eigen` hängt
      keine Probe und keine Gefahr, es macht nur sichtbar, was der Text sagt:
-     Drüben wird auch geschossen. Je mehr Widerstand noch steht, desto teurer. */
+     Drüben wird auch geschossen. Je mehr Widerstand noch steht, desto teurer,
+     und gegen einen besseren Gegner teurer als gegen einen schlechten. */
   const geschlossen = K.geschlossen > 0;
-  K.eigen = Math.max(0, K.eigen - (2 + Math.random()*3) * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
+  K.eigen = Math.max(0, K.eigen - (2 + Math.random()*3) * (1 + guete*0.15)
+    * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
   if(geschlossen) K.geschlossen--;
 
   K.protokoll.push(text);
@@ -820,6 +838,7 @@ function kampfAktion(id){
      wird man, ob man vortritt oder nicht. `haerte` schaltet beides zusammen,
      damit ein Gefecht mit einem einzigen Feld zum Höhepunkt wird. */
   if(n.haerte > 1) gefahr += 3;
+  gefahr += feindGuete(n);      // bessere Truppen treffen öfter
   gefahr = Math.max(4, gefahr);
   let treffer = '';
   if(Math.random()*100 < gefahr){
@@ -921,10 +940,24 @@ function kampfEnde(sieg, letzterText){
      auch die historische Wahrheit: Gefallen wird beim Weichen, nicht im Stehen.
      5–18 Leben je nach Restwiderstand; wen es unter null drückt, der stirbt
      auf dem Rückzug. Damit ist Aussitzen keine Antwort mehr, sondern eine
-     Wette darauf, dass die eigene Seite auch ohne dich gewinnt. */
+     Wette darauf, dass die eigene Seite auch ohne dich gewinnt.
+
+     **Und der Zoll wächst mit der Güte des Gegners (28.07.2026).** Das ist die
+     Stelle, an der die Progression wirklich beißt, und sie wurde gemessen
+     gefunden: Ein Erstlauf-Mann in Ägypten *stirbt* nicht an der höheren
+     Gefahr — er kniet sich hin, lässt die Runden auslaufen und **verliert**.
+     Bei Güte 5 verlor er reihenweise und überlebte trotzdem 98 %. Wer vor
+     Dschesärs Garnison zurückweicht, kommt aber nicht so davon wie vor
+     Beaulieus Kolonnen: Die verfolgen. Faktor `1 + guete·0,2`, in Ägypten
+     also das Doppelte — 10 bis 36 Leben je verlorenem Gefecht.
+
+     **Das trifft genau den Richtigen.** Ein Veteran gewinnt seine Gefechte und
+     zahlt den Zoll nie; ein Rekrut mit Muskete 10 verliert sie und zahlt ihn
+     fünfmal. Der Unterschied zwischen erstem und drittem Lauf ist damit nicht
+     mehr „etwas mehr Leben", sondern „gewinnen oder nicht". */
   if(!sieg && S.lebt && S.leben > 0){
     const rest = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
-    K.rueckzug = Math.round(5 + 13*rest);
+    K.rueckzug = Math.round((5 + 13*rest) * (1 + feindGuete(n)*0.2));
     S.leben = Math.max(0, S.leben - K.rueckzug);
     if(S.leben <= 0){
       setzeKampf(null);

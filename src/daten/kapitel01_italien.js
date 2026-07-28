@@ -280,4 +280,11 @@ const KAPITEL = [
   ]}
 ];
 
-STATIONEN.italien = KAPITEL;   // meldet die Stationen beim Verlauf an
+/* `.slice()` ist hier nicht Kosmetik, sondern notwendig: `KAPITEL` ist dasselbe
+   Array, an das Kapitel 2 später seine Stationen anhängt (`KAPITEL.push(...)`).
+   Ohne die Kopie wüchse `STATIONEN.italien` stillschweigend mit — der Verlauf
+   links zeigte ägyptische Stationen unter Italien, und `feindGuete()` fände für
+   jedes Gefecht zuerst Italien und lieferte immer 0. Genau das ist passiert und
+   hat die ganze Feindgüte wirkungslos gemacht, ohne einen Fehler zu werfen.
+   Wer ein Kapitel anhängt, kopiert. */
+STATIONEN.italien = KAPITEL.slice();   // meldet die Stationen beim Verlauf an

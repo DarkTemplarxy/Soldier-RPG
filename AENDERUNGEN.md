@@ -5,6 +5,31 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Progression über Läufe: Pool 60, Feindgüte, drei Messungen
+
+**Das Ziel:** Der erste Mann soll Ägypten mit hoher Wahrscheinlichkeit nicht überleben, und Gegner, gegen die man am Anfang chancenlos ist, sollen im dritten oder vierten Lauf zu schlagen sein. Umgesetzt in drei Teilen, in dieser Reihenfolge gebaut und je einzeln gemessen.
+
+**1 — Der Verteilungspool sinkt von 120 auf 60** (`POOL` in `src/oberflaeche.js`). Vorher reichte er für zwei Attribute auf 70 *und* Reserve; ein Erstlauf-Mann war so gut ausgestattet wie ein Veteran, und die Veteranenpunkte waren Zierde — der Testbot gewann alles, ohne einen einzigen zu kaufen. Mit 60 reicht es für ein gutes Attribut und ein halbes; die Elitegrenze 55 wird zur Entscheidung. Der Schritt ist 10, der Pool muss also durch 10 teilbar sein.
+
+**2 — Feindgüte je Kampagne** (`guete` in `grundwerte.js`, `feindGuete()` in `src/kampf.js`): eine Zahl, die drei Dinge zugleich schaltet — Trefferchance (`+guete`), wie stark die eigene Linie von allein hilft (`× max(0,3; 1 − guete·0,15)`) und die eigenen Verluste (`× (1 + guete·0,15)`). Italien 0 (Eichung), **Ägypten 5**. Der Linien-Hebel ist der eigentliche: Je weniger die Linie von allein schafft, desto mehr entscheidet die eigene Feuerkraft über die Länge des Gefechts — und genau die kaufen Veteranenpunkte. Die Werte ab Austerlitz (6 bis 12) sind eine entworfene Kurve für ungebaute Kapitel und ausdrücklich ungemessen.
+
+**3 — Der Rückzugszoll wächst mit der Güte** (`× (1 + guete·0,2)`, in Ägypten also doppelt: 10–36 Leben je verlorenem Gefecht). Das trifft genau den Richtigen: Ein Veteran gewinnt seine Gefechte und zahlt nie, ein Rekrut mit Muskete 10 verliert sie und zahlt fünfmal.
+
+**Dazu ein neuer Messmodus:** `VP=160 node test/balance.js 40` setzt einen festen Vorrat und gibt ihn nach fester Rangfolge aus. Ohne ihn ließe sich nach dem Pool-Umbau nur noch der erste Lauf messen. Fest deshalb, weil ein mitwachsender Vorrat die Messung wandern ließe.
+
+| je 40 Läufe | Italien | beide Feldzüge | Tote | Elite | Caporal | Punkte |
+|---|---|---|---|---|---|---|
+| Erstlauf, vorsichtig | 95 % | **43 %** | 23 | 48 % | 45 % | 106 |
+| Erstlauf, mutig | 100 % | **20 %** | **32** | 55 % | 45 % | 115 |
+| Veteran 160 VP | 100 % | **68 %** | 13 | 93 % | 88 % | 185 |
+| Veteran 260 VP | 100 % | **75 %** | 10 | 95 % | **100 %** | 188 |
+
+**Ein Fehler, der drei Messreihen wertlos gemacht hat.** `STATIONEN.italien = KAPITEL` meldete die Stationen **ohne Kopie** an; Kapitel 2 hängt mit `KAPITEL.push(...)` an dasselbe Array an, also wuchs `STATIONEN.italien` still auf alle 32 Stationen. `feindGuete()` fand damit für jedes Gefecht zuerst Italien und lieferte immer 0 — zwei Balance-Runden wurden gegen ein totes System gemessen. Derselbe Fehler zeigte im Verlauf links ägyptische Stationen unter Italien. Behoben mit `.slice()` in beiden Kapiteldateien.
+
+Gefunden wurde er erst, als ich aufgehört habe zu erklären, warum die Zahlen sich nicht bewegen, und stattdessen den Hebel selbst ausgelesen habe. **Regel: Bewegt eine Änderung dreimal nichts, misst man den Mechanismus, nicht das Ergebnis.**
+
+---
+
 ## 2026-07-28 — Fünf Hebel gegen die Unsterblichkeit
 
 Ein kundiger Spieler war nicht zu töten (40 von 40 überlebten beide Feldzüge). Der Grund war eine Bilanz, keine Einzelzahl: über 200 Punkte Genesung je Lauf gegen rund 70 Punkte Schaden. Fünf Hebel, die ineinandergreifen, statt am Schaden zu drehen:

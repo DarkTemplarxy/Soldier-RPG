@@ -377,18 +377,40 @@ const HERKUENFTE = [
 /* Die elf Kampagnen. Nur die erste ist gebaut; die übrigen stehen so im
    KONZEPT.md und werden im Verlauf links angezeigt, damit man sieht, wie lang
    der Weg ist. Jede Kapiteldatei trägt ihre Stationen selbst in STATIONEN ein. */
+/* `guete` ist die Güte des Gegners und die Eskalation des ganzen Spiels in
+   **einer Zahl je Kampagne**. Sie schaltet drei Dinge zugleich (`feindGuete()`
+   in `src/kampf.js`): Trefferchance je Runde, wie stark die eigene Linie von
+   allein hilft, und wie viele Männer sie dabei verliert.
+
+   Der Sinn: Man wird von Feldzug zu Feldzug stärker (Veteranenpunkte), also
+   müssen die Gegner mitwachsen — sonst wird das Spiel mit jedem Lauf leichter,
+   statt andere Fragen zu stellen. Die Kurve ist hier **einmal entworfen**,
+   damit sie nicht elfmal neu erfunden wird; ein neues Kapitel bringt sie als
+   ein Feld mit.
+
+   Italien ist die Eichung (0) — Beaulieus geschlagene Kolonnen laufen von
+   allein. **Ägypten steht auf 5**, und das ist ein Sprung, kein Schritt:
+   Dschesärs Garnison mit britischen Marineartilleristen und die osmanische
+   Landungsarmee bei Abukir laufen nicht weg. Ein Mann im ersten Lauf, der mit
+   sechzig Poolpunkten einrückt, stirbt dort mit hoher Wahrscheinlichkeit — das
+   ist die Absicht. Wer wiederkommt, bringt Veteranenpunkte mit und schießt
+   schneller, und schneller heißt kürzere Gefechte heißt weniger Treffer.
+
+   **Nur Italien (0) und Ägypten (5) sind gemessen.** Die Werte ab Austerlitz
+   sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
+   davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
-  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1800–04', kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
-  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    kurz:'Die perfekte Schlacht.'},
-  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    kurz:'Tempo, Verfolgung, Marschstrapazen.'},
-  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
-  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
-  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    kurz:'Kein Feldzug, ein Überlebensspiel.'},
-  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
-  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    kurz:'Verteidigung der Heimat, Abdankung.'},
-  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    kurz:'Waterloo. Epilog je nach Rang.'}
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1800–04', guete:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, kurz:'Die perfekte Schlacht.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, kurz:'Waterloo. Epilog je nach Rang.'}
 ];
 const STATIONEN = {};
 
@@ -698,7 +720,14 @@ const KAPITEL = [
   ]}
 ];
 
-STATIONEN.italien = KAPITEL;   // meldet die Stationen beim Verlauf an
+/* `.slice()` ist hier nicht Kosmetik, sondern notwendig: `KAPITEL` ist dasselbe
+   Array, an das Kapitel 2 später seine Stationen anhängt (`KAPITEL.push(...)`).
+   Ohne die Kopie wüchse `STATIONEN.italien` stillschweigend mit — der Verlauf
+   links zeigte ägyptische Stationen unter Italien, und `feindGuete()` fände für
+   jedes Gefecht zuerst Italien und lieferte immer 0. Genau das ist passiert und
+   hat die ganze Feindgüte wirkungslos gemacht, ohne einen Fehler zu werfen.
+   Wer ein Kapitel anhängt, kopiert. */
+STATIONEN.italien = KAPITEL.slice();   // meldet die Stationen beim Verlauf an
 
 
 'use strict';
@@ -1028,7 +1057,7 @@ const KAPITEL2 = [
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen. */
 KAPITEL.push(...KAPITEL2);
-STATIONEN.aegypten = KAPITEL2;
+STATIONEN.aegypten = KAPITEL2.slice();   // Kopie, siehe Kapitel 1
 (KAMPAGNEN.find(k=>k.id==='aegypten')||{}).gebaut = true;
 
 
@@ -1795,8 +1824,26 @@ function aktualisiereLaden(){
   });
 }
 
-/* ── Charaktererschaffung ── */
-const POOL = 120, SOCKEL = 20, MAXE = 70;
+/* ── Charaktererschaffung ──
+
+   **Der Pool ist von 120 auf 60 gesenkt worden (28.07.2026), und das ist die
+   größte Einzeländerung am Spielgefühl.** Vorher reichte er für zwei Attribute
+   auf 70 *und* Reserve — ein Erstlauf-Mann war damit so gut ausgestattet wie
+   ein Veteran, und die Veteranenpunkte waren Zierde: Der Testbot gewann alles,
+   ohne je einen zu kaufen.
+
+   Mit 60 Punkten reicht es für ein gutes Attribut und ein halbes. Die Schwelle
+   55 der Elitekompanien wird zur Entscheidung statt zur Selbstverständlichkeit,
+   und **der Rest des Weges führt über die Veteranenpunkte** — Lauf 2 spielt
+   ungefähr auf dem alten Niveau, Lauf 3 und 4 darüber. Damit entsteht die
+   Progression, die das Spiel bisher nur behauptet hat: Gegner, gegen die man am
+   Anfang chancenlos ist, werden später schlagbar.
+
+   Der Schritt ist 10, also muss POOL durch 10 teilbar sein — sonst lässt sich
+   der Vorrat nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
+   Invariante 3 bleibt unberührt: Gekauft wird der Ausgangspunkt, nie der
+   Aufstieg. */
+const POOL = 60, SOCKEL = 20, MAXE = 70;
 let ERSCH = null;
 function zeigeErschaffung(neu){
   if(neu || !ERSCH){
@@ -1820,7 +1867,8 @@ function zeigeErschaffung(neu){
       <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
         <div class="cb">${zeilen}
         <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel 20 · höchstens 70 bei der Erschaffung · Bildung ist vom Pool ausgenommen.
-        Alle neun Fertigkeiten beginnen bei 10.</p>
+        Alle neun Fertigkeiten beginnen bei 10.<br>
+        Sechzig Punkte sind wenig, und das ist Absicht: Ein Rekrut ist kein Veteran. Was fehlt, holen die Veteranenpunkte deiner früheren Männer im nächsten Schritt.</p>
         <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
       </div></div>
     </div>
@@ -2330,6 +2378,15 @@ function anerkennung(betrag, was){
   K.ruhm += gibt; S.ruf += gibt;
   K.taten.push({was, ruf:gibt});
   return ` <span class="fein">gesehen · Ruf +${gibt}</span>`;
+}
+
+/* Die Güte des Gegners in diesem Gefecht — aus der Kampagne, zu der die
+   Station gehört. Einmal je Kampfrunde gerufen; die Suche über elf Kampagnen
+   ist billiger als ein zweites Feld in jedem Gefechtsdatensatz. */
+function feindGuete(n){
+  for(const k of KAMPAGNEN)
+    if((STATIONEN[k.id]||[]).some(x=>x.id===n.id)) return k.guete||0;
+  return 0;
 }
 
 function starteKampf(n){
@@ -3054,15 +3111,24 @@ function kampfAktion(id){
   if(id!=='ducken') K.duckFolge = 0;
   if(id!=='bajonett') K.vorn = false;
 
-  // Die Linie kämpft auch ohne dich
-  const linie = 2 + Math.random()*4;
+  /* Die Linie kämpft auch ohne dich — aber gegen einen besseren Gegner weniger
+     erfolgreich. Das ist der wirksamste der drei Güte-Hebel und der leiseste:
+     Gegen Österreicher 1796 bricht der Feind von allein, gegen Dschesärs
+     Garnison steht er, bis *du* etwas tust. Das Gefecht dauert dadurch länger,
+     und weil Treffer je Runde kommen, kostet es mehr Blut — ohne dass eine
+     einzige Schadenszahl angefasst wurde. Boden bei 30 %, sonst wären die
+     späten Kapitel rechnerisch unmöglich (siehe „Warum so niedrig?"). */
+  const guete = feindGuete(n);
+  const linie = (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   K.feindMoral -= schaden + linie;
 
   /* Und sie verliert dabei Männer. Das ist reine Anzeige — an `eigen` hängt
      keine Probe und keine Gefahr, es macht nur sichtbar, was der Text sagt:
-     Drüben wird auch geschossen. Je mehr Widerstand noch steht, desto teurer. */
+     Drüben wird auch geschossen. Je mehr Widerstand noch steht, desto teurer,
+     und gegen einen besseren Gegner teurer als gegen einen schlechten. */
   const geschlossen = K.geschlossen > 0;
-  K.eigen = Math.max(0, K.eigen - (2 + Math.random()*3) * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
+  K.eigen = Math.max(0, K.eigen - (2 + Math.random()*3) * (1 + guete*0.15)
+    * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
   if(geschlossen) K.geschlossen--;
 
   K.protokoll.push(text);
@@ -3085,6 +3151,7 @@ function kampfAktion(id){
      wird man, ob man vortritt oder nicht. `haerte` schaltet beides zusammen,
      damit ein Gefecht mit einem einzigen Feld zum Höhepunkt wird. */
   if(n.haerte > 1) gefahr += 3;
+  gefahr += feindGuete(n);      // bessere Truppen treffen öfter
   gefahr = Math.max(4, gefahr);
   let treffer = '';
   if(Math.random()*100 < gefahr){
@@ -3186,10 +3253,24 @@ function kampfEnde(sieg, letzterText){
      auch die historische Wahrheit: Gefallen wird beim Weichen, nicht im Stehen.
      5–18 Leben je nach Restwiderstand; wen es unter null drückt, der stirbt
      auf dem Rückzug. Damit ist Aussitzen keine Antwort mehr, sondern eine
-     Wette darauf, dass die eigene Seite auch ohne dich gewinnt. */
+     Wette darauf, dass die eigene Seite auch ohne dich gewinnt.
+
+     **Und der Zoll wächst mit der Güte des Gegners (28.07.2026).** Das ist die
+     Stelle, an der die Progression wirklich beißt, und sie wurde gemessen
+     gefunden: Ein Erstlauf-Mann in Ägypten *stirbt* nicht an der höheren
+     Gefahr — er kniet sich hin, lässt die Runden auslaufen und **verliert**.
+     Bei Güte 5 verlor er reihenweise und überlebte trotzdem 98 %. Wer vor
+     Dschesärs Garnison zurückweicht, kommt aber nicht so davon wie vor
+     Beaulieus Kolonnen: Die verfolgen. Faktor `1 + guete·0,2`, in Ägypten
+     also das Doppelte — 10 bis 36 Leben je verlorenem Gefecht.
+
+     **Das trifft genau den Richtigen.** Ein Veteran gewinnt seine Gefechte und
+     zahlt den Zoll nie; ein Rekrut mit Muskete 10 verliert sie und zahlt ihn
+     fünfmal. Der Unterschied zwischen erstem und drittem Lauf ist damit nicht
+     mehr „etwas mehr Leben", sondern „gewinnen oder nicht". */
   if(!sieg && S.lebt && S.leben > 0){
     const rest = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
-    K.rueckzug = Math.round(5 + 13*rest);
+    K.rueckzug = Math.round((5 + 13*rest) * (1 + feindGuete(n)*0.2));
     S.leben = Math.max(0, S.leben - K.rueckzug);
     if(S.leben <= 0){
       setzeKampf(null);
@@ -3651,6 +3732,7 @@ function zeigeTod(){
           ${neu?`<b>Neuer Rekord.</b> Dein Vorrat steigt auf <b>${META.vp} Veteranenpunkte</b>. Der nächste Mann rückt besser ausgerüstet ein.`
                 :`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>. Dieser hier war nicht besser — er kostet dich aber auch nichts.`}
           <p style="margin-top:10px">Gezählt wird nur der beste Lauf. Es gibt nichts zu grinden, nur zu übertreffen.</p>
+          ${META.laeufe<=2?`<p style="margin-top:10px">Ein Rekrut rückt mit sechzig Punkten ein — das reicht für ein gutes Attribut und ein halbes. Der Rest des Weges führt über diesen Vorrat: Was dieser Mann gesehen hat, bringt der nächste schon mit. Gegen manche Gegner hattest du heute keine Chance. In zwei, drei Läufen hast du eine.</p>`:''}
         </div>
       </div>
       <div class="probe" style="margin-top:14px">DER SPIELSTAND DIESES MANNES IST GELÖSCHT</div>

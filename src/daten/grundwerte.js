@@ -99,18 +99,40 @@ const HERKUENFTE = [
 /* Die elf Kampagnen. Nur die erste ist gebaut; die übrigen stehen so im
    KONZEPT.md und werden im Verlauf links angezeigt, damit man sieht, wie lang
    der Weg ist. Jede Kapiteldatei trägt ihre Stationen selbst in STATIONEN ein. */
+/* `guete` ist die Güte des Gegners und die Eskalation des ganzen Spiels in
+   **einer Zahl je Kampagne**. Sie schaltet drei Dinge zugleich (`feindGuete()`
+   in `src/kampf.js`): Trefferchance je Runde, wie stark die eigene Linie von
+   allein hilft, und wie viele Männer sie dabei verliert.
+
+   Der Sinn: Man wird von Feldzug zu Feldzug stärker (Veteranenpunkte), also
+   müssen die Gegner mitwachsen — sonst wird das Spiel mit jedem Lauf leichter,
+   statt andere Fragen zu stellen. Die Kurve ist hier **einmal entworfen**,
+   damit sie nicht elfmal neu erfunden wird; ein neues Kapitel bringt sie als
+   ein Feld mit.
+
+   Italien ist die Eichung (0) — Beaulieus geschlagene Kolonnen laufen von
+   allein. **Ägypten steht auf 5**, und das ist ein Sprung, kein Schritt:
+   Dschesärs Garnison mit britischen Marineartilleristen und die osmanische
+   Landungsarmee bei Abukir laufen nicht weg. Ein Mann im ersten Lauf, der mit
+   sechzig Poolpunkten einrückt, stirbt dort mit hoher Wahrscheinlichkeit — das
+   ist die Absicht. Wer wiederkommt, bringt Veteranenpunkte mit und schießt
+   schneller, und schneller heißt kürzere Gefechte heißt weniger Treffer.
+
+   **Nur Italien (0) und Ägypten (5) sind gemessen.** Die Werte ab Austerlitz
+   sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
+   davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
-  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1800–04', kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
-  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    kurz:'Die perfekte Schlacht.'},
-  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    kurz:'Tempo, Verfolgung, Marschstrapazen.'},
-  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
-  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
-  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    kurz:'Kein Feldzug, ein Überlebensspiel.'},
-  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
-  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    kurz:'Verteidigung der Heimat, Abdankung.'},
-  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    kurz:'Waterloo. Epilog je nach Rang.'}
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1800–04', guete:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, kurz:'Die perfekte Schlacht.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, kurz:'Waterloo. Epilog je nach Rang.'}
 ];
 const STATIONEN = {};
 

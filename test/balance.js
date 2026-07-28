@@ -20,16 +20,32 @@
    beiden Messungen *ist* die Balance der Ereignisse — vorsichtig soll
    überleben und wenig erreichen, mutig soll erreichen und öfter fallen.
 
-   Aufruf:  node test/balance.js [anzahl]
-            MUT=1 node test/balance.js [anzahl]  */
+   **Drei Messungen, nicht mehr eine.** Seit der Pool von 120 auf 60 gesenkt
+   wurde, ist der Bot ohne Veteranenpunkte *genau* der Erstlauf-Spieler — und
+   der soll in Ägypten sterben. Wie es im dritten oder vierten Lauf aussieht,
+   misst `VP=`: Der Vorrat wird auf einen festen Betrag gesetzt und nach fester
+   Rangfolge ausgegeben. Fest deshalb, weil ein mitwachsender Vorrat die
+   Messung wandern ließe — Lauf 40 spielte sonst ein anderes Spiel als Lauf 1.
+
+   Aufruf:  node test/balance.js [anzahl]         erster Lauf, ohne Vorrat
+            MUT=1 node test/balance.js [anzahl]   derselbe Mann, aber mutig
+            VP=160 node test/balance.js [anzahl]  dritter Lauf, mit Vorrat  */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const N = parseInt(process.argv[2] || '40', 10);
 const MUT = process.env.MUT === '1';
+const VP  = parseInt(process.env.VP || '0', 10);   // Vorrat des Veteranen, 0 = erster Lauf
+
+/* Wofür ein Veteran seinen Vorrat ausgibt, in dieser Reihenfolge. Konstitution
+   zuerst, weil sie der Lebensvorrat *und* die Elitegrenze ist; dann Geschick
+   für den Voltigeur; dann die Muskete, weil kürzere Gefechte weniger Treffer
+   heißen. Was danach kommt, kauft nur ein reicher Lauf. */
+const VETERAN_ZIELE = [['konstitution',70],['geschick',70],['muskete',60],
+                       ['kaltbluetigkeit',60],['autoritaet',50],['bajonett',40]];
 const ziel = path.resolve(__dirname, '../index.html');
 
 /* ── Die Punkteverteilung ──
-   120 Punkte auf fünf Attribute (Bildung ist ausgenommen), Sockel 20, höchstens
+   60 Punkte auf fünf Attribute (Bildung ist ausgenommen), Sockel 20, höchstens
    70. Vorher drückte das Skript „Auswürfeln" — und maß damit vor allem den
    Zufallsgenerator: Weil der Tod seit den Lebenspunkten eine Schwelle ist
    (Summe des Schadens gegen den Vorrat) und der Vorrat an der Konstitution
@@ -38,15 +54,14 @@ const ziel = path.resolve(__dirname, '../index.html');
 
    Diese Verteilung ist die beste, die sich aus den zwei gebauten Kapiteln
    begründen lässt:
-     Konstitution 70 — der Lebensvorrat (82 statt 64) und die Schwelle 55 für die Grenadiere
-     Geschick      60 — Laden unter Beschuss, Deckung, Flicken, und die Schwelle 55 für die Voltigeure
-     Kaltblütigkeit 40 — „Stehenbleiben und die Linie halten", dazu viele Szenen
-     Autorität     30 — die Salve des Caporals steht und fällt damit
-     Menschenkenntnis 20 — bleibt auf dem Sockel; öffnet Szenenwege, rettet aber niemanden
+     Konstitution 60 — der Lebensvorrat (76) und die Schwelle 55 für die Grenadiere
+     Geschick      40 — Laden unter Beschuss, Deckung wechseln, Ausrüstung flicken
 
-   Beide Elitezweige offenzuhalten kostet 90 der 120 Punkte und ist es wert:
-   der Voltigeur zielt für 22–32 Schaden statt 12–20 zu feuern. */
-const VERTEILUNG = { konstitution: 70, geschick: 60, kaltbluetigkeit: 40, autoritaet: 30 };
+   Seit der Pool auf 60 steht, ist das alles: ein gutes Attribut und ein halbes.
+   Für die Voltigeure (Geschick 55) reicht es nur noch mit der Herkunft — genau
+   das ist der Sinn der Senkung. Kaltblütigkeit und Autorität bleiben auf dem
+   Sockel und werden im Feld verdient oder mit Veteranenpunkten gekauft. */
+const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ganze Pool
 
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
@@ -54,14 +69,36 @@ const VERTEILUNG = { konstitution: 70, geschick: 60, kaltbluetigkeit: 40, autori
   const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, punkte: [] };
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
+    /* Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0. Sonst ließe
+       die Chronik im localStorage ihn über die Läufe hinweg anwachsen, und die
+       Messung wanderte. */
+    await p.evaluate(v => { META.vp = v; }, VP);
     await p.click('text=Neuen Mann aufstellen');
-    await p.evaluate(v => { for (const k in v) while (ERSCH.attr[k] < v[k]) stelle(k, 10); }, VERTEILUNG);
+    /* Die Abbruchbedingung prüft, ob sich etwas bewegt hat — `stelle()` weigert
+       sich stumm, wenn der Pool leer ist, und eine Prüfung auf den Zielwert
+       allein hinge dann für immer. */
+    await p.evaluate(v => {
+      for (const k in v){
+        while (ERSCH.attr[k] < v[k]){
+          const vorher = ERSCH.attr[k];
+          stelle(k, 10);
+          if (ERSCH.attr[k] === vorher) break;
+        }
+      }
+    }, VERTEILUNG);
     await p.click('#h_' + ['bauer', 'schmied', 'wilderer', 'strasse', 'fuhrmann', 'schreiber'][r % 6]);
     await p.click('text=Weiter zu den Veteranenpunkten');
-    /* Der Bot kauft keine Veteranenpunkte, obwohl er welche hätte. Sonst
-       wanderte die Messung: Der Vorrat ist der beste Lauf bisher, also spielte
-       Lauf 80 ein anderes Spiel als Lauf 1. Alle Zahlen hier gelten für einen
-       Mann ohne gekaufte Ausbildung — wer kauft, spielt leichter. */
+    // Der Veteran gibt seinen Vorrat nach fester Rangfolge aus; bei VP=0 nichts.
+    if (VP > 0) await p.evaluate(ziele => {
+      for (const [k, bis] of ziele){
+        for(;;){
+          if (istWert(k) + (PUNKTE[k]||0) + PUNKT_SCHRITT > bis) break;
+          const vorher = PUNKTE[k]||0;
+          stellePunkt(k, PUNKT_SCHRITT);
+          if ((PUNKTE[k]||0) === vorher) break;      // der Vorrat reicht nicht mehr
+        }
+      }
+    }, VETERAN_ZIELE);
     await p.click('#startbtn');
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
@@ -173,7 +210,8 @@ const VERTEILUNG = { konstitution: 70, geschick: 60, kaltbluetigkeit: 40, autori
   }
   const pu = res.punkte.sort((a, b) => a - b);
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
-  console.log(`${N} Läufe · Italien überstanden ${q(res.italien)} · beide Feldzüge ${q(res.ende)} · gestorben ${res.tot}`);
+  console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`);
+  console.log(`Italien überstanden ${q(res.italien)} · beide Feldzüge ${q(res.ende)} · gestorben ${res.tot}`);
   console.log(`Erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
   await b.close();

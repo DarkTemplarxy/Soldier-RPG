@@ -29,6 +29,7 @@ Dazu ein paar Regeln, die das Spiel zusammenhalten:
 
 - **Der Tod ist endgültig.** Kein Weiterspielen, kein Nachfolger.
 - **Nur der beste Lauf zählt.** Veteranenpunkte sind das Maximum über alle Läufe, nie die Summe — es gibt nichts zu grinden, nur zu übertreffen.
+- **Dein erster Mann rückt mit sechzig Punkten ein und wird Ägypten sehr wahrscheinlich nicht überleben.** Das ist keine Strafe, sondern der Anfang: Was er erreicht, wird zum Startkapital des Nächsten. Gegner, gegen die du im ersten Lauf chancenlos bist, sind im dritten zu schlagen — nicht weil sie schwächer geworden sind, sondern weil du schneller lädst.
 - **Beförderung braucht eine Vakanz.** Ruf und Fürsprache reichen nicht; die Stelle muss frei sein. Frei wird sie, weil jemand gestorben ist. Das Spiel sagt das nie, es zeigt es nur.
 - **Ausrüstung ist ein Zustand, kein Besitz.** Schuhe halten einen Feldzug, keine zwei.
 - **Konstitution kauft Zähigkeit, nicht Unverwundbarkeit.** Sie bestimmt, wie viele Treffer du wegsteckst — fünf bis acht, dann ist es vorbei. Die Zeit heilt, langsam; aber der Atem steigt nie über das Leben, und wer zerschossen weiterkämpft, kämpft kurzatmig.
@@ -47,7 +48,7 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000
 
 Entworfen, aber noch nicht gebaut: die Kapitel 3 bis 11 (Garnison, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
 
-Gemessen über automatisierte Durchläufe: **rund die Hälfte übersteht Italien**, gut vier von zehn auch Ägypten. Wer beides schafft, hat zweiunddreißig Stationen hinter sich — und immer noch neun Feldzüge vor sich.
+Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht. Wer beides schafft, hat zweiunddreißig Stationen hinter sich — und immer noch neun Feldzüge vor sich.
 
 ---
 

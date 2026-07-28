@@ -319,6 +319,7 @@ function zeigeTod(){
           ${neu?`<b>Neuer Rekord.</b> Dein Vorrat steigt auf <b>${META.vp} Veteranenpunkte</b>. Der nächste Mann rückt besser ausgerüstet ein.`
                 :`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>. Dieser hier war nicht besser — er kostet dich aber auch nichts.`}
           <p style="margin-top:10px">Gezählt wird nur der beste Lauf. Es gibt nichts zu grinden, nur zu übertreffen.</p>
+          ${META.laeufe<=2?`<p style="margin-top:10px">Ein Rekrut rückt mit sechzig Punkten ein — das reicht für ein gutes Attribut und ein halbes. Der Rest des Weges führt über diesen Vorrat: Was dieser Mann gesehen hat, bringt der nächste schon mit. Gegen manche Gegner hattest du heute keine Chance. In zwei, drei Läufen hast du eine.</p>`:''}
         </div>
       </div>
       <div class="probe" style="margin-top:14px">DER SPIELSTAND DIESES MANNES IST GELÖSCHT</div>

@@ -325,5 +325,5 @@ const KAPITEL2 = [
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen. */
 KAPITEL.push(...KAPITEL2);
-STATIONEN.aegypten = KAPITEL2;
+STATIONEN.aegypten = KAPITEL2.slice();   // Kopie, siehe Kapitel 1
 (KAMPAGNEN.find(k=>k.id==='aegypten')||{}).gebaut = true;
