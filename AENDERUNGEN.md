@@ -5,6 +5,20 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Der Testbot spielt jetzt gut, und das deckt etwas auf
+
+**Gezählt wird der Rang, der *erreicht* wurde, nicht der, mit dem gestorben wird.** Die alte Zahl maß nach den Lebenspunkten vor allem, wann gestorben wird: Weil kaum noch jemand vor der Beförderungsstation stirbt, stieg der Endrang-Anteil auf 58 %, ohne dass die Beförderung leichter geworden wäre. `balance.js` merkt sich jetzt den höchsten Rang je Lauf und weist zusätzlich aus, wie viele die Elitekompanie erreicht haben.
+
+**Der Bot würfelt seine Attribute nicht mehr aus, sondern verteilt sie bewusst:** Konstitution 70, Geschick 60, Kaltblütigkeit 40, Autorität 30. Beide Elitezweige offenzuhalten kostet 90 der 120 Punkte und ist es wert. Dazu eine Rangfolge für Gefecht, Lager, Winterquartier und Szenen: ruhen unter 60 % Leben, Fürsprache solange Gunst < 4, als Caporal immer die Salve, im Gefecht hinknien, wenn Blut oder Luft fehlen, in Szenen der Knopf mit dem größten Abstand zwischen Wert und Schwierigkeit. Veteranenpunkte kauft er weiterhin nicht — sonst wanderte die Messung, weil der Vorrat der beste Lauf bisher ist.
+
+**Nebeneffekt, der die Messung brauchbarer macht:** Die Streuung ist weg. „Auswürfeln" maß vor allem den Zufallsgenerator — weil der Tod seit den Lebenspunkten eine Schwelle ist und der Vorrat an der Konstitution hängt, entschied der Wurf über den Lauf, bevor er begann (derselbe Stand: 48 %, 64 %, 51 %). Jetzt sagen 40 Läufe mehr als vorher 80, und ein Durchgang dauert drei Minuten.
+
+**Und damit der Befund: Für einen Spieler, der weiß, was er tut, hat das Spiel derzeit keine Zähne.** Gemessen über 40 Läufe: **100 % überstehen Italien, 100 % überstehen beide Feldzüge, keiner stirbt.** Elitekompanie erreicht 90 %, Caporal erreicht 93 %, Punkte-Median 210 von 230 möglichen. Die alten 45–55 % waren nie die Härte des Spiels, sondern die Härte für einen Bot, der auswürfelte und sich nie ausruhte. Drei Dinge tragen den Unterschied: Konstitution 70 statt Zufall (82–94 statt 64 Lebenspunkte), kürzere Gefechte durch Salve und gezieltes Feuer (drei Runden statt acht, und Treffer kommen je Runde), und Ruhen im Lager (25 % je Abend).
+
+**Der Sollwert 45–55 % ist damit hinfällig und in `CLAUDE.md` als offener Punkt vermerkt**, samt vorgeschlagenem Band (60–75 %) und den vier Hebeln nach erwarteter Wirkung: Schaden je Treffer, Gefahr-Werte der Gefechte, Heilung im Lager, Salven-Schaden. **Nichts davon ist gedreht worden** — die Zahlen des Spiels stehen unverändert, geändert wurde nur, was sie misst.
+
+---
+
 ## 2026-07-28 — Lebenspunkte statt Todeswurf je Treffer
 
 **Konstitution bestimmt jetzt, wie viel ein Mann aushält, statt ob eine Kugel ihn überhaupt töten kann.** Damit ist der letzte Rest des größten Erschaffungs-Exploits weg. Die alte Formel senkte die Todeschance je Treffer, und ab Konstitution 58 war sie rechnerisch null — eine Klammer hat das notdürftig geflickt, aber die Kurve blieb falsch. Neu: `lebenMax = 40 + Konstitution·0,6` (52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90), Schaden statt Todeswurf, Tod bei Leben ≤ 0. Die Kurve ist monoton — mehr Konstitution heißt mehr Treffer, die man wegsteckt, aber genug Treffer töten jeden.

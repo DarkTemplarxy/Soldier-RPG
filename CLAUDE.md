@@ -373,14 +373,27 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 ### Zielwerte
 
-| Größe | Soll | Gemessen (60 Läufe, mit Kapitel 2) |
+**Achtung: Der Testbot misst seit dem 28.07.2026 etwas anderes als vorher.** Er würfelt seine Attribute nicht mehr aus, sondern verteilt sie bewusst, ruht, wenn er verwundet ist, und befiehlt als Caporal die Salve. Gemessen wird damit, wie hart das Spiel für einen **kundigen** Spieler ist — vorher, wie hart es für einen blinden war. Alle Zahlen vor diesem Datum sind mit den neuen nicht vergleichbar.
+
+| Größe | Soll | Gemessen (40 Läufe, kundiger Bot) |
 |---|---|---|
-| **Italien überstanden** (Testskript) | 45–55 % | **55 %** (80 Läufe, mit Lebenspunkten) |
-| **Beide Feldzüge überstanden** | noch kein Sollwert | 33–48 %, stark schwankend |
-| Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 38 % |
-| Caporal am Ende | ~30 % | **58 %** — siehe „Offener Punkt" |
-| Punkte, Median | — | 107 · Spitze **230** |
+| **Italien überstanden** | Sollwert ungültig, siehe unten | **100 %** |
+| **Beide Feldzüge überstanden** | noch keiner | **100 %** |
+| **Elitekompanie erreicht** | noch keiner | 90 % |
+| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | **93 %** |
+| Punkte, Median | — | 210 · Spitze **230** |
+
+> **Erreicht, nicht überlebt.** Gezählt wird seit dem 28.07.2026 der höchste Rang, den ein Mann je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das Skript den Rang *am Ende* — und das maß nach den Lebenspunkten vor allem, wann gestorben wird: Weil kaum noch jemand vor der Beförderungsstation stirbt, stieg die Endrang-Zahl auf 58 %, ohne dass die Beförderung leichter geworden wäre. Die neue Zahl misst die Schwelle selbst.
+
+> ### Der offene Punkt, der jetzt alles überlagert
+>
+> **Für einen Spieler, der weiß, was er tut, hat das Spiel derzeit keine Zähne: 40 von 40 Läufen überstehen beide Feldzüge, keiner stirbt.** Die alten 45–55 % waren nie die Härte des Spiels, sondern die Härte für einen Bot, der seine Attribute auswürfelte und sich nie ausruhte. Drei Dinge tragen den Unterschied, in dieser Reihenfolge:
+>
+> 1. **Konstitution 70 statt ausgewürfelt** — 82 statt 64 Lebenspunkte, mit Herkunft bis 94.
+> 2. **Kürzere Gefechte.** Die Salve des Caporals bringt 26–36 Schaden je Runde und lässt die eigene Muskete geladen; der Voltigeur zielt für 22–32 statt für 12–20 zu feuern. Wer das nutzt, ist nach drei Runden fertig statt nach acht — und Treffer kommen je Runde, nicht je Gefecht.
+> 3. **Ruhen im Lager.** Ein Abend gibt 25 % zurück, eine Winterwoche 60 %. Wer bei 60 % ruht, kommt nie in die Nähe von null.
+>
+> **Der Sollwert 45–55 % ist damit hinfällig und muss neu gesetzt werden** — für einen kundigen Spieler gehört er höher als für einen blinden (gutes Spiel *soll* sich lohnen), aber sicher nicht auf 100 %. Ein vernünftiges Band wäre 60–75 %. Die Hebel, ungemessen und nach erwarteter Wirkung geordnet: der Schaden je Treffer (5–11 / 15–25), die Gefahr-Werte der Gefechte (9–15), die Heilung im Lager (25 %) und der Salven-Schaden (26–36). **Wer daran dreht, misst danach beide Zahlen** — Überleben und erreichte Ränge.
 
 **Seit Kapitel 2 misst `test/balance.js` zwei Quoten.** „Italien überstanden" ist der alte Zielwert und bleibt bei 45–55 %; „beide Feldzüge" ist neu und hat noch keinen Sollwert — der Bot muss dafür 32 statt 16 Stationen überleben. Ohne diese Trennung wäre der alte Zielwert nach dem Anbau bedeutungslos geworden. Der Punkte-Median fällt von 91 auf 45, weil Stationen nur noch 2 statt 3 Punkte zählen und die meisten Läufe jetzt vor dem Ende sterben; die Spitze steigt dafür von 162 auf 230.
 
@@ -403,7 +416,8 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | Lebenspunkte, erste Eichung (6 Schaden, Feldscher heilt) | 60 | **100 %** | 93 % | 207 |
 | Lebenspunkte, 12 Schaden, Streifschuss ohne Wunde | 60 / 80 / 80 | 48 / 64 / 51 % | 57 % | 77–183 |
 | dieselbe Eichung, Streifschuss mit Wunde | 80 | 41 % | 55 % | 89 |
-| **11 Schaden, Streifschuss mit Wunde (gültig)** | **80** | **55 %** | **58 %** | **107** |
+| 11 Schaden, Streifschuss mit Wunde · **blinder Bot** | 80 | 55 % | 58 % (am Ende) | 107 |
+| **derselbe Stand · kundiger Bot (gültig)** | **40** | **100 %** | **93 % (erreicht)** | **210** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 
@@ -426,7 +440,21 @@ Die Überlebensquote liegt mit 43 % zwei Punkte unter dem Band 45–55 % — inn
 1. **Der Punkte-Median ist bei ~50 % Überlebensquote unbrauchbar.** Ein überstandener Lauf bekommt +25 und +10 pauschal; der Median springt deshalb um rund dreißig Punkte, sobald die Quote die 50 % kreuzt. Gemessen: 91 bei 43 % Überleben, 59 bei 36 % — dieselbe Mechanik, nur die andere Seite der Schwelle. **Der Median misst hier nicht die Härte, sondern nur, ob der mittlere Lauf zufällig überlebt hat.** Wer eine Änderung beurteilen will, nimmt die Quote.
 2. **Das Rauschen ist größer, als es sich anfühlt.** Derselbe unveränderte Stand lieferte an einem Nachmittag 49 % und 43 %. Bei 80 Läufen ist eine Standardabweichung rund 5,6 Punkte, zwei also elf. **Wer einen Unterschied von unter zehn Punkten deutet, deutet Rauschen** — dagegen hilft nur, den alten Stand noch einmal zu messen (`git stash`) statt gegen eine Zahl von gestern zu vergleichen.
 
-**Was der Testbot kann und was nicht.** Er nimmt in Szenen immer die erste Wahl, im Gefecht die sinnvolle Aktion und im Lager seit der Gunst-Änderung „Am Feuer sitzen bleiben", solange seine Fürsprache unter 4 liegt. Ohne diese eine Ausnahme bemühte er sich nie um einen Fürsprecher und würde nie befördert — gemessen würde dann nicht die Schwelle, sondern die Blindheit des Bots. Wer eine Schwelle einführt, die mehrere Handlungen verlangt, muss dem Bot beibringen, sie zu verfolgen, sonst misst das Skript etwas anderes als das Spiel.
+**Was der Testbot tut.** Er spielt so gut, wie es ohne Vorauswissen geht — das ist seit dem 28.07.2026 der Zweck des Skripts:
+
+| Wo | Was |
+|---|---|
+| Erschaffung | Konstitution 70, Geschick 60, Kaltblütigkeit 40, Autorität 30 — feste Verteilung statt „Auswürfeln". Herkunft reihum durch alle sechs. |
+| Elitewahl | Voltigeur vor Grenadier (zielen bringt 22–32 statt 12–20) |
+| Gefecht | Lücke einmal je Gefecht · hinknien bei wenig Blut oder Luft · als Caporal immer die Salve · sonst feuern · nachladen. Kein Bajonett. |
+| Lager | ruhen unter 60 % Leben · Fürsprache, solange Gunst < 4 · Muskete ölen · Schuster · scharf schießen · exerzieren |
+| Winterquartier | ruhen unter 80 % Leben oder bei einer Wunde · sonst Fürsprache, Ausrüstung, Drill |
+| Szenen | der Knopf mit dem größten Abstand zwischen Wert und Schwierigkeit; riskante mit Abschlag, bei wenig Blut gar nicht |
+| Veteranenpunkte | **kauft nichts.** Sonst wanderte die Messung: Der Vorrat ist der beste Lauf bisher, also spielte Lauf 40 ein anderes Spiel als Lauf 1. |
+
+**Warum die feste Verteilung wichtiger ist, als sie aussieht.** „Auswürfeln" maß vor allem den Zufallsgenerator: Weil der Tod seit den Lebenspunkten eine Schwelle ist und der Vorrat an der Konstitution hängt, entschied der Wurf über den Lauf, bevor er begann — derselbe Stand lieferte 48 %, 64 % und 51 %. Mit fester Verteilung ist die Streuung weg, und 40 Läufe sagen mehr als vorher 80.
+
+**Regel, die daraus folgt:** Wer eine Schwelle einführt, die mehrere Handlungen verlangt, muss dem Bot beibringen, sie zu verfolgen — sonst misst das Skript die Blindheit des Bots und nicht das Spiel. Das galt für die Gunst und gilt für jede weitere Schwelle.
 
 ---
 
