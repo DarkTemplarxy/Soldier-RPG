@@ -31,7 +31,7 @@ Dazu ein paar Regeln, die das Spiel zusammenhalten:
 - **Nur der beste Lauf zählt.** Veteranenpunkte sind das Maximum über alle Läufe, nie die Summe — es gibt nichts zu grinden, nur zu übertreffen.
 - **Beförderung braucht eine Vakanz.** Ruf und Fürsprache reichen nicht; die Stelle muss frei sein. Frei wird sie, weil jemand gestorben ist. Das Spiel sagt das nie, es zeigt es nur.
 - **Ausrüstung ist ein Zustand, kein Besitz.** Schuhe halten einen Feldzug, keine zwei.
-- **Konstitution kauft Zähigkeit, nicht Unverwundbarkeit.** Sie bestimmt, wie viele Treffer du wegsteckst — fünf bis acht, dann ist es vorbei. Und sie erholt sich nur, wenn du einen Abend darauf verwendest.
+- **Konstitution kauft Zähigkeit, nicht Unverwundbarkeit.** Sie bestimmt, wie viele Treffer du wegsteckst — fünf bis acht, dann ist es vorbei. Die Zeit heilt, langsam; aber der Atem steigt nie über das Leben, und wer zerschossen weiterkämpft, kämpft kurzatmig.
 
 Historische Fixpunkte, dazwischen freies Spiel: Montenotte, die Brücke von Lodi, Mantua, Castiglione, Arcole, Rivoli, Leoben — dann Alexandria, die Pyramiden, der Kairoer Aufstand, Akkon, Abukir und die Nacht, in der Bonaparte ohne seine Armee nach Frankreich segelt.
 

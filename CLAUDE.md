@@ -247,13 +247,16 @@ Leben ≤ 0 → Tod
 
 > **Die Zahl, an der alles hängt, ist neun.** So oft wird ein Mann in beiden Feldzügen zusammen getroffen — gemessen über 20 Läufe: 8,9 Treffer bei 10 Gefechten und 57 Kampfrunden, also rund 16 % je Runde. Ein Vorrat, den neun Treffer nicht leeren, tötet niemanden. Die erste Eichung auf 6 Schaden je Treffer (plus Feldscher-Heilung nach jedem Gefecht) ergab gemessen **100 % Überlebende bei 60 Läufen** — kein einziger Toter. Ein Treffer muss also teuer sein: im Mittel 11 Punkte, damit ein Mann mit Konstitution 40 am sechsten stirbt, einer mit 20 am fünften, einer mit 70 am achten. Das ist auch inhaltlich richtig: Wer 1796 vier Mal getroffen wird, steht nicht mehr.
 
-**Genesung ist eine Entscheidung, kein Geschenk** — dieselbe Regel wie beim Atem, und aus demselben Grund. Der Feldscher gibt nach dem Gefecht **keine** Lebenspunkte zurück, nur die leichteste Wunde näht er zu. Wieder auf die Beine kommt man nur hier:
+**Geheilt wird mit der Zeit — aber der Atem steigt nie über das Leben** (`atemKlemmen()` in `src/mechanik.js`). Das ist das Paar, das einen Verwundeten verwundet spielen lässt, ohne ihn dauerhaft zu verkrüppeln *(Entscheidung vom 28.07.2026, ersetzt die frühere Regel „Genesung nur im Lager")*:
 
-| Wo | Wieviel |
+| Quelle | Wieviel |
 |---|---|
+| Jede Station, von allein („der Lauf der Zeit") | +5 % — erste Fassung 8 % fraß den Blutzoll des Rückzugs wieder auf |
 | Lagerabend „Schlafen und liegen bleiben" | +25 % |
 | Winterwoche „Schlafen, essen, nichts tun" | +60 % |
 | Ein Jahr Garnison beim `uebergang` | voll |
+
+**Der Atem-Deckel ist die Kehrseite:** Mit 25 Leben stehen einem höchstens 25 Atem zu — unter der Warnschwelle 35, nahe am Malus bei 30. Ein Schwerverwundeter kommt also von allein wieder hoch, aber bis dahin kämpft, marschiert und übt er als der, der er gerade ist. `atemKlemmen()` wird nach **jeder** Änderung an Atem oder Leben gerufen — wer eine neue Stelle baut, die daran dreht, ruft sie ebenfalls, sonst leckt der Deckel. Nebenwirkung, die Absicht ist: Auch ein Gesunder mit Konstitution 70 hat höchstens 82 Atem — Konstitution kauft jetzt auch Luft.
 
 - **Der Streifschuss kostet zweierlei, und das ist Absicht:** Blut (bleibt) und eine Wunde, die der Feldscher nach dem Gefecht zunäht (bleibt nicht). Ohne die Wunde stimmte zwar die Todesrechnung, aber ein Mann schoss den ganzen Feldzug wie am ersten Tag — gemessen stieg der Caporal-Anteil auf 57 %, weil bessere Gefechte mehr Ruf bringen und Ruf die Beförderungsschwelle ist. Der Kratzer soll den Rest des Gefechts wehtun, nicht den Rest des Krieges.
 - **Eine Wunde aus einer Szene kostet 10 Lebenspunkte**, tötet aber nie unmittelbar (`anwenden()` klemmt bei 1). Der Tod gehört ins Gefecht, wo er einen Text und einen Ort hat; Ruhr und das Fieber aus Jaffa lassen einen bloß so geschwächt hineingehen, dass die nächste Kugel reicht.
@@ -354,6 +357,10 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 - **Wer mitten in der Frage aufhört, steht wieder vor ihr.** `fortsetzen()` prüft `K.ereignis` — sonst ließe sich eine Mutprobe durch Beenden und Fortsetzen umgehen, und das wäre dieselbe Lücke wie ein Rücksetzpunkt im Lager.
 - **Mut kauft die Wertung, nicht den Rang.** Zum Caporal fehlt fast nie der Ruf, sondern die Gunst — und die holt man am Feuer, nicht vor der Linie.
 
+**Vier Gefechte haben eine Sondermission** (`nur:` trägt die Stations-ID) — der Moment, für den das Gefecht berühmt ist, aus der Höhe eines Mannes im zweiten Glied: die **Brücke von Lodi** (Spitze der Kolonne oder Furt), der **General im Sumpf von Arcole**, der **Riss im Karree von Embabeh**, die **Sturmkolonne von Akkon**. Beim Würfeln haben sie Vorrang und 60 % je Runde statt 45 — eine Sondermission, die fast nie stattfindet, wäre keine. Akkon fällt trotzdem nicht (Invariante 8): Auch wer die Bresche überlebt, sieht nur die zweite Mauer.
+
+**Knien ist begrenzt: höchstens drei Runden am Stück** (`K.duckFolge`). Zwei Runden fragt niemand, die dritte kostet Ruf −2, eine vierte gibt es nicht — der Knopf ist gesperrt, bis man eine Runde etwas anderes getan hat. Ohne die Grenze war Knien ein Panzer (−22 Gefahr, Restrisiko ~4 %), hinter dem sich jedes Gefecht aussitzen ließ; der Blutzoll des Rückzugs machte das Aussitzen teuer, die Kniegrenze macht es unmöglich.
+
 ### Ein verlorenes Gefecht kostet Blut (`kampfEnde` in `src/kampf.js`)
 
 ```js
@@ -427,13 +434,9 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 > 2. **Kürzere Gefechte.** Die Salve des Caporals bringt 26–36 Schaden je Runde und lässt die eigene Muskete geladen; der Voltigeur zielt für 22–32 statt für 12–20 zu feuern. Wer das nutzt, ist nach drei Runden fertig statt nach acht — und Treffer kommen je Runde, nicht je Gefecht.
 > 3. **Ruhen im Lager.** Ein Abend gibt 25 % zurück, eine Winterwoche 60 %. Wer bei 60 % ruht, kommt nie in die Nähe von null.
 >
-> **Die Gefechts-Ereignisse haben die Achse gebaut, aber die Quote kaum gesenkt** — 100 % gegen 95 %, ein Toter gegen vier. Das ist der richtige *Abstand* bei der falschen *Höhe*. Nach zwei Messrunden ist der Grund klar, und er liegt nicht im Gefecht:
+> **Die Gefechts-Ereignisse und der Blutzoll beim Rückzug haben die Achse gebaut** — mutig stirbt öfter als vorsichtig, Aussitzen ist unmöglich geworden (Kniegrenze), und ein Schwerverwundeter kämpft als Schwerverwundeter (Atem-Deckel). **Die Höhe steht weiter aus:** vorsichtig 100 %, mutig 98 %. Der Grund ist unverändert die Heilungsbilanz — über 200 Punkte Genesung (Lagerabende, Winterwochen, jetzt auch +5 % je Station) gegen rund 70 Punkte Schaden je Lauf. Solange die Bilanz so steht, kann kein Gefecht töten, das man überlebt hat.
 >
-> **Die Heilung ist um eine Größenordnung größer als der Schaden.** Kapitel 1 bietet 7 bis 10 Lagerabende (je 25 % ≈ 20 Leben) und drei Winterwochen (je 60 % ≈ 49 Leben) — zusammen über 200 Punkte Genesung. Dagegen stehen rund 4,5 Treffer à 11 Punkten plus ein bis zwei Ereignisse: **etwa 70**. Der `uebergang` setzt danach ohnehin alles auf voll. Solange das so ist, kann kein Gefecht töten, das man überlebt hat — man schläft es weg.
->
-> **Der wirksamste Hebel ist deshalb die Zahl der Abende, nicht der Schaden.** Wenn ein Lagerabend zwischen Genesung *und* Ausbildung entscheiden muss, wird Ruhen teuer, und dann kostet jedes Ereignis wirklich etwas. Das ist auch der Hebel, der zur Erzählung passt: Es soll in jedem Lager mehr zu tun geben als Zeit da ist — genau das steht schon unter „Lager", nur trägt es die Zahlen nicht mehr, seit es Lebenspunkte zu heilen gibt.
->
-> Weitere Hebel, ungemessen, nach erwarteter Wirkung: die Heilung je Abend (25 %), der Schaden je Treffer (5–11 / 15–25), die Gefahr-Werte (9–15), der Salven-Schaden (26–36). **Wer daran dreht, misst danach vier Zahlen** — Überleben und erreichte Ränge, je vorsichtig und mutig.
+> **Entschieden ist (28.07.2026): Die Lagerabende bleiben, wie sie sind, und geheilt wird von allein** — die Härte soll aus Entscheidungen kommen (Ereignisse, Kniegrenze, Atem-Deckel), nicht aus Verwaltungsknappheit. Die verbleibenden Hebel, ungemessen, nach erwarteter Wirkung: die Selbstheilung je Station (5 %), die Heilung je Lagerabend (25 %), der Schaden je Treffer (5–11 / 15–25), die Misserfolgskosten der Ereignisse (22–34), der Blutzoll des Rückzugs (5–18). **Wer daran dreht, misst danach vier Zahlen** — Überleben und erreichte Ränge, je vorsichtig und mutig.
 
 **Seit Kapitel 2 misst `test/balance.js` zwei Quoten.** „Italien überstanden" ist der alte Zielwert und bleibt bei 45–55 %; „beide Feldzüge" ist neu und hat noch keinen Sollwert — der Bot muss dafür 32 statt 16 Stationen überleben. Ohne diese Trennung wäre der alte Zielwert nach dem Anbau bedeutungslos geworden. Der Punkte-Median fällt von 91 auf 45, weil Stationen nur noch 2 statt 3 Punkte zählen und die meisten Läufe jetzt vor dem Ende sterben; die Spitze steigt dafür von 162 auf 230.
 
@@ -461,8 +464,11 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | Gefechts-Ereignisse · vorsichtig | 40 | 100 % | 88 % | 204 |
 | Gefechts-Ereignisse · mutig | 40 | 100 % | 90 % | 212 |
 | + höhere Misserfolgskosten, 45 % Wurf · vorsichtig / mutig | 40 / 40 | 100 / 100 % | 80 / 93 % | 201 / 210 |
-| **+ Blutzoll beim Rückzug (gültig) · vorsichtig** | **40** | **100 %** | **88 %** | **204** |
-| **dieselbe Fassung · mutig** | **40** | **95 %** | **85 %** | **211** |
+| + Blutzoll beim Rückzug · vorsichtig | 40 | 100 % | 88 % | 204 |
+| dieselbe Fassung · mutig | 40 | 95 % | 85 % | 211 |
+| + Selbstheilung 8 %, Atem-Deckel, Kniegrenze, Sondermissionen · v / m | 40 / 40 | 100 / 98 % | 93 / 93 % | 206 / 215 |
+| **Selbstheilung auf 5 % (gültig) · vorsichtig** | **40** | **100 %** | **85 %** | **202** |
+| **dieselbe Fassung · mutig** | **40** | **98 %** | **88 %** | **215** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 

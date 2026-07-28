@@ -502,8 +502,8 @@ function zeigeUebergang(n){
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
-    S.atem = 100;
     S.leben = lebenMax();
+    S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
     S.wunden = [];
     laufSichern();

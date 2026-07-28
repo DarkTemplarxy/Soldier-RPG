@@ -25,7 +25,21 @@ function neuerLauf(mann){
 /* Die Station ist abgeschlossen und ihre Wirkung angewandt: Der Spielstand
    zeigt schon auf die nächste, damit ein Beenden auf dem Ergebnisbildschirm
    die Entscheidung nicht rückgängig macht. */
-function stationErledigt(){ if(LAUF){ LAUF.node++; LAUF.szene = null; laufSichern(); } }
+function stationErledigt(){
+  if(!LAUF) return;
+  LAUF.node++; LAUF.szene = null;
+  /* Zwischen zwei Stationen liegen Tage bis Wochen Marsch, und in denen heilt
+     der Körper von allein — langsam: fünf Prozent des Vorrats je Station. Wer
+     mit einem Drittel aus einem Gefecht kommt, braucht sechs, sieben Stationen,
+     bis er wieder dasteht, und genau in dieser Zeit gilt der Atem-Deckel
+     unten. Das Lager („Schlafen und liegen bleiben") bleibt die schnelle
+     Genesung; das hier ist nur der Lauf der Zeit.
+     Erste Fassung war 8 % — damit fraß die Zeit den Blutzoll des Rückzugs
+     wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen). */
+  lebenAuffuellen(0.05);
+  atemKlemmen();
+  laufSichern();
+}
 
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
@@ -116,6 +130,7 @@ function anwenden(e){
      Gefecht, wo er einen Text und einen Ort hat. Sie lässt einen aber so
      geschwächt hineingehen, dass die nächste Kugel reicht. */
   if(e.wunde){ wundeGeben(e.wunde, 8); S.leben = Math.max(1, S.leben - 10); }
+  atemKlemmen();
 }
 
 /* ── Lebenspunkte ──
@@ -136,6 +151,14 @@ function lebenAuffuellen(anteil){
   const max = lebenMax();
   S.leben = Math.max(0, Math.min(max, S.leben + Math.round(max*anteil)));
 }
+
+/* Der Atem steigt nie über die Lebenspunkte. Das ist die eine Regel, die einen
+   schwer Verwundeten wirklich verwundet spielen lässt: Mit 25 Leben stehen ihm
+   höchstens 25 Atem zu — unter der Warnschwelle 35, nahe am Malus bei 30. Er
+   kann ins Gefecht, aber er geht als der hinein, der er gerade ist. Erst
+   heilen, dann verschnaufen. Aufgerufen nach jeder Änderung an Atem oder
+   Leben; wer eine neue Stelle baut, die daran dreht, ruft sie ebenfalls. */
+function atemKlemmen(){ if(S) S.atem = Math.max(0, Math.min(S.atem, S.leben)); }
 
 function wundeGeben(name, abzug){
   S.wunden.push({name, abzug});

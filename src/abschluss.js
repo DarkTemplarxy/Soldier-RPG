@@ -143,6 +143,7 @@ function lagerTun(id){
   L.abende--;
   L.log.push(LAGER_TUN[id].tu());
   S.log.push(L.id+': '+LAGER_TUN[id].label);
+  atemKlemmen();
   laufSichern();
   zeigeLager(KAPITEL[LAUF.node]);
 }
@@ -157,7 +158,7 @@ function zeigeWinter(n){
     /* Drei Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem
        ist danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung
        und Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
-    W.atemVoll = S.atem < 100; S.atem = 100;
+    W.atemVoll = S.atem < S.leben; S.atem = 100; atemKlemmen();
     laufSichern();
   }
   const tun = [
@@ -173,7 +174,7 @@ function zeigeWinter(n){
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
-      ${W.atemVoll?'<div class="wirkung"><span>Wieder bei Atem</span>Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag. Du bist ausgeruht, wie du es seit April nicht warst. <b>Atem 100</b></div>':''}
+      ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag. ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen}</div>
       </div></div>
@@ -209,7 +210,7 @@ function winterTun(id){
        und sie kostet eine der drei Wochen. Wer verwundet aus dem Feldzug kommt,
        muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
        Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
-    S.belastung=Math.max(0,S.belastung-16); S.atem=100; lebenAuffuellen(0.6);
+    S.belastung=Math.max(0,S.belastung-16); lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
     if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · Wunde geheilt</span>`); }
     else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
   }

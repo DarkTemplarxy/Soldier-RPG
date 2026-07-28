@@ -5,6 +5,20 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Zeit heilt, Atem folgt dem Leben, Knien hat eine Grenze, vier Sondermissionen
+
+**Geheilt wird jetzt von allein, mit der Zeit:** +5 % des Vorrats je Station (`stationErledigt()`). Die Lagerabende bleiben unverändert — Entscheidung: Die Härte soll aus Entscheidungen kommen, nicht aus Verwaltungsknappheit. Erste Fassung war 8 %; damit fraß die Zeit den Blutzoll des Rückzugs wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen), auf 5 % gesenkt.
+
+**Der Atem steigt nie über die Lebenspunkte** (`atemKlemmen()`, nach jeder Änderung an Atem oder Leben gerufen). Mit 25 Leben stehen einem höchstens 25 Atem zu — unter der Warnschwelle, nahe am Malus. Ein Schwerverwundeter kommt von allein wieder hoch, aber bis dahin kämpft er als der, der er gerade ist. Nebenwirkung, die Absicht ist: Konstitution kauft jetzt auch Luft — ein Gesunder mit Konstitution 70 hat höchstens 82 Atem.
+
+**Knien höchstens drei Runden am Stück** (`K.duckFolge`): zwei Runden fragt niemand, die dritte kostet Ruf −2 („Martel sieht her, sagt nichts und merkt es sich"), die vierte ist gesperrt, bis man eine Runde etwas anderes getan hat. Der Blutzoll machte Aussitzen teuer, die Kniegrenze macht es unmöglich.
+
+**Vier Gefechte haben eine Sondermission**, die es nur dort gibt (`nur:` in `GEFECHTS_EREIGNISSE`): die Brücke von Lodi (Spitze der Kolonne oder die Furt durch die Adda), der General im Sumpf von Arcole, der Riss im Karree von Embabeh, die Sturmkolonne von Akkon. Vorrang beim Würfeln und 60 % je Runde statt 45 — eine Sondermission, die fast nie stattfindet, wäre keine. Akkon fällt trotzdem nicht: Wer die Bresche überlebt, sieht die zweite Mauer.
+
+Gemessen über je 40 Läufe: vorsichtig 100 % / 0 Tote / Caporal erreicht 85 % / Median 202 · mutig 98 % / 1 Toter / 88 % / 215 (Spitze 240 — die Sondermissionen zahlen). Die Härte-Frage bleibt als offener Punkt in `CLAUDE.md`, mit den verbleibenden Hebeln.
+
+---
+
 ## 2026-07-28 — Ereignisse im Gefecht: wie weit gehst du
 
 **Sechs Ereignisse unterbrechen die Rundenaktionen mit einer Frage.** Der Adjutant sucht acht Mann für die Geschütze auf dem Hügel. Die Linie wankt. Sie kommen im Laufschritt, vierzig Schritt, für einen Schuss reicht es noch. Der Adlerträger fällt und der Adler steht schräg im Dreck, sechs Schritt vor der Linie. Jemand ruft, vier Schritt vor der Linie, und hat keine Luft für laut. Sie gehen, und ein Bataillon, das man laufen lässt, steht morgen wieder da.

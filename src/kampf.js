@@ -14,10 +14,12 @@ function aktionen(){
     // Der Plänkler ist gerade der, der sich hinlegt — er steht in keiner Linie,
     // die jemand halten müsste. Ohne diese Wahl war der Zweig der einzige, der
     // nicht verschnaufen konnte.
-    a.push({id:'ducken',label:'Flach hinlegen',cost:'Atem +10 · Belastung −2 · kein Schuss, aber auch kein Ziel'});
+    a.push({id:'ducken',label:'Flach hinlegen',cost:'Atem +10 · Belastung −2 · kein Schuss, aber auch kein Ziel · höchstens drei Runden am Stück',
+      aus:()=> (K.duckFolge||0)>=3});
   } else {
     a.push({id:'feuern',label:'Anlegen und feuern',cost:'Muskete',aus:()=>!K.geladen});
-    a.push({id:'ducken',label:'Hinknien',cost:'Atem +10 · Belastung −2 · du schießt nicht, aber sie treffen dich auch schlechter'});
+    a.push({id:'ducken',label:'Hinknien',cost:'Atem +10 · Belastung −2 · du schießt nicht, aber sie treffen dich auch schlechter · höchstens drei Runden am Stück',
+      aus:()=> (K.duckFolge||0)>=3});
     a.push({id:'halten',label:'Stehenbleiben und die Linie halten',cost:'Kaltblütigkeit'});
   }
   a.push({id:'bajonett',label:zw==='grenadier'?'Bajonett fällen und vorgehen':'Mit dem Bajonett vor',
@@ -73,6 +75,7 @@ function starteKampf(n){
     verschleiss(ak.verschleiss);
     S.atem = Math.max(0, S.atem-ak.atem);
     S.belastung = Math.min(100, S.belastung+ak.belastung);
+    atemKlemmen();
     laufSichern();
     zeigeAnmarsch(n);
     return;
@@ -81,7 +84,7 @@ function starteKampf(n){
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
               ruhm:0, taten:[],
-              ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0,
+              ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -398,14 +401,118 @@ const GEFECHTS_EREIGNISSE = [
               moral:-10}}]}
 ];
 
+/* ── Sondermissionen ──
+   Vier Gefechte haben ein Ereignis, das es nur dort gibt (`nur:` trägt die
+   Stations-ID). Es ist der Moment, für den das Gefecht berühmt ist, aus der
+   Höhe eines Mannes im zweiten Glied gesehen: die Brücke von Lodi, der General
+   im Sumpf von Arcole, der Riss im Karree von Embabeh, die Sturmkolonne von
+   Akkon. Beim Würfeln haben sie Vorrang und eine höhere Chance (60 % je Runde
+   statt 45 %) — eine Sondermission, die fast nie stattfindet, wäre keine.
+   Historische Fixpunkte bleiben fix (Invariante 8): Auch wer die Bresche von
+   Akkon überlebt, nimmt Akkon nicht ein. */
+
+GEFECHTS_EREIGNISSE.push(
+  {id:'lodi_bruecke', nur:'lodi', frage:'Die Brücke',
+   wenn:(n)=> K.feindMoral > n.feindMoral*0.35,
+   text:['Die Kolonne steht auf der Brücke und kommt nicht vor. Zweihundert Schritt Holz, drüben vierzehn Geschütze, und die schießen die Länge der Brücke aus, nicht die Breite. Vorn fallen Grenadiere, und die dahinter treten auf sie, weil es keinen anderen Platz für die Füße gibt.',
+         'Am Brückenkopf steigen Offiziere von den Pferden und stellen sich an die Spitze, als wäre das ihr Platz. Einer davon ist klein und wird nach heute einen Beinamen haben. Es heißt, fünfzig Schritt flussab sei eine Furt.'],
+   optionen:[
+     {label:'Mit in die Spitze der Kolonne drängen', hint:'Wo die Offiziere stehen', risk:true,
+      probe:{wert:'kaltbluetigkeit', schw:45},
+      erfolg:{text:'Du schiebst dich nach vorn, zwischen die Bärenfellmützen, und dann läuft die Kolonne, weil Stehen auf der Brücke schlimmer ist als Laufen. Die letzten fünfzig Schritt sind die längsten deines Lebens. Dann bist du drüben, und hinter dir kommt die ganze Armee.',
+              moral:-24, ruf:6, nennung:true, atem:-20, belastung:6,
+              tat:'In der Spitze über die Brücke von Lodi'},
+      misserfolg:{text:'Auf der Brückenmitte fegt es die erste Reihe weg, und du bist auf einmal die erste Reihe. Etwas wirft dich gegen das Geländer, und du hältst dich daran fest, bis dich jemand nach vorn weiterzieht. Drüben bist du trotzdem — als einer von denen, die getragen wurden.',
+              leben:-30, atem:-22, belastung:12}},
+     {label:'Durch die Furt unterhalb der Brücke', hint:'Bis zur Brust in der Adda', risk:true,
+      probe:{wert:'geschick', schw:40},
+      erfolg:{text:'Zu zwanzig steigt ihr in den Fluss, die Patronentasche über dem Kopf. Die Adda zieht an den Beinen, aber sie trägt euch nicht weg, und ihr kommt schräg unter dem Ufer heraus, wo die Geschütze nicht hinsehen. Von der Flanke her ist eine Batterie nur eine Reihe Männer mit Wischern.',
+              moral:-16, ruf:3, atem:-16,
+              tat:'Durch die Furt in die Flanke der Batterie'},
+      misserfolg:{text:'Die Adda ist schneller, als sie aussieht. Sie nimmt dir die Beine weg, und du gehst zweimal unter, bis dich einer am Riemen packt und ans Ufer zerrt — ans eigene. Deine Patronen sind nass, und du hustest Flusswasser, bis das Gefecht vorbei ist.',
+              leben:-20, atem:-30, belastung:10}},
+     {label:'In der Kolonne bleiben und warten', hint:'Irgendwann geht es vor',
+      erfolg:{text:'Du stehst im vierten Glied auf der Brücke und wartest, dass die vor dir gehen. Irgendwann gehen sie. Als du drüben ankommst, ist die Batterie schon genommen — von der Kavallerie, die durch die Furt geritten ist, sagt man später.',
+              moral:-6}}]},
+
+  {id:'arcole_sumpf', nur:'arcole', frage:'Der General im Sumpf',
+   wenn:()=> K.runde >= 3,
+   text:['Auf dem Damm drängt ein Stab nach vorn, mitten ins Feuer, eine Fahne in der Hand — als ließe sich die Kolonne an einem Stück Tuch vorwärtsziehen. Dann flutet die Kolonne zurück, drückt den Stab an den Dammrand, und der kleine General liegt im Sumpf, bis zur Brust im braunen Wasser.',
+         'Die Kroaten sind sechzig Schritt entfernt und laden. Zwei Adjutanten springen hinterher. Es reicht nicht.'],
+   optionen:[
+     {label:'Hinunter und mit anfassen', hint:'Der Sumpf will euch beide', risk:true,
+      probe:{wert:'konstitution', schw:45},
+      erfolg:{text:'Du springst vom Damm und stehst bis zu den Hüften im Schlamm, der nicht loslässt. Zu dritt zerrt ihr ihn heraus, Zug um Zug, während es über euch wegschlägt. Oben sitzt er einen Atemzug lang im Dreck, sieht dich an, und dann ist er wieder General. Jemand hat deinen Namen gefragt.',
+              ruf:6, nennung:true, atem:-25, leben:-4,
+              tat:'Den General aus dem Sumpf von Arcole gezogen'},
+      misserfolg:{text:'Der Sumpf nimmt dich sofort bis zur Brust. Du bekommst seinen Arm zu fassen und verlierst ihn wieder, und dann musst du dich selbst herausarbeiten, Handbreit um Handbreit, während neben dir ein Adjutant stirbt. Herausgezogen haben ihn andere.',
+              leben:-24, atem:-30, belastung:10}},
+     {label:'Auf dem Damm bleiben und Deckung schießen', hint:'Muskete · die Kroaten kurz ducken lassen',
+      probe:{wert:'muskete', schw:40},
+      erfolg:{text:'Du kniest an der Dammkante und feuerst auf alles, was drüben den Kopf hebt. Es sind die längsten zwei Minuten des Tages, aber die Kroaten schießen auf dich statt auf die Männer im Sumpf. Das war der Zweck.',
+              moral:-12, ruf:2, tat:'Den Männern im Sumpf Deckung geschossen'},
+      misserfolg:{text:'Deine Muskete versagt beim zweiten Schuss — nasses Pulver, der Sumpf ist überall. Du stehst nutzlos an der Kante, während unten gezogen und geschrien wird.',
+              leben:-16, atem:-10, belastung:8}},
+     {label:'Weitergehen', hint:'Adjutanten gibt es genug',
+      erfolg:{text:'Du gehst weiter, wie fast alle. Sie ziehen ihn auch ohne dich heraus — dafür sind Adjutanten da. In den Berichten wird der Sumpf hinterher trockener sein und der Damm breiter.'}}]},
+
+  {id:'pyramiden_riss', nur:'pyramiden', frage:'Der Riss im Karree',
+   wenn:()=> K.runde >= 2,
+   text:['Ein Mamluk setzt sein Pferd mitten auf die zweite Front, wo ein Gefallener eine Lücke gelassen hat. Das Pferd steigt in die Bajonette, schlägt aus, und auf einmal ist ein Loch im Karree, drei Mann breit — und ein Karree mit Loch ist keins mehr.',
+         'Hinter ihm wenden dreißig Reiter. Sie haben es gesehen.'],
+   optionen:[
+     {label:'Mit dem Bajonett in die Lücke', hint:'Du bist der Nächste am Loch', risk:true,
+      probe:{wert:'bajonett', schw:40},
+      erfolg:{text:'Du stehst im Loch, bevor du dich entschieden hast. Der Reiter geht über dir hoch, du stößt zu, wohin der Sergent es dich gelehrt hat — ins Pferd, nicht in den Mann —, und dann sind links und rechts wieder Schultern, und das Karree ist zu, und draußen dreht die Welle ab.',
+              moral:-20, ruf:4, eigen:8,
+              tat:'Das Karree bei Embabeh geschlossen'},
+      misserfolg:{text:'Der Krummsäbel kommt von oben, wo dein Bajonett nicht ist. Es reißt dich um, und über dich hinweg schließen andere die Lücke. Du liegst zwischen den Beinen des zweiten Glieds und siehst den Himmel zwischen dreißig Hüten.',
+              leben:-28, atem:-15, belastung:10}},
+     {label:'Das zweite Glied hineinziehen', hint:'Drill · Männer schieben statt selbst stehen',
+      probe:{wert:'drill', schw:35},
+      erfolg:{text:'Du packst zwei Mann an den Riemen und stellst sie in das Loch, wie man Steine in eine Mauer setzt. Es ist nicht tapfer, es ist Handwerk, und es macht das Karree zu, bevor die dreißig da sind.',
+              moral:-8, ruf:2, eigen:6},
+      misserfolg:{text:'Du zerrst am Falschen, er zerrt zurück, und drei Atemzüge lang ist das Loch größer statt kleiner. Dann macht es ein Sergent mit dem Kolben zu — das Loch und die Diskussion.',
+              leben:-16, eigen:-8, belastung:8}},
+     {label:'Ducken und die Flanken schießen lassen', hint:'Das Karree hat vier Seiten',
+      erfolg:{text:'Du machst dich klein und lädst. Die Flanken feuern schräg vor das Loch, und irgendwer anders wirft sich hinein. Das Karree hält — es hält nur ohne dich, und die daneben wissen es.',
+              eigen:-6, ruf:-1}}]},
+
+  {id:'akkon_bresche', nur:'akkon', frage:'Die Sturmkolonne',
+   wenn:(n)=> K.feindMoral > n.feindMoral*0.5,
+   text:['Vor der Bresche wird eine Sturmkolonne gesammelt. Die Bresche ist zwanzig Schritt breit und sieht von hier aus wie ein Tor; wer näher war, sagt, dahinter stehe eine zweite Mauer, und auf der stünden die Engländer von den Schiffen.',
+         'Die letzten zwei Kolonnen sind nicht zurückgekommen. Der Branntwein wird vorab ausgegeben, das sagt alles.'],
+   optionen:[
+     {label:'Sich melden', hint:'Doppelter Sold, wenn es einen Abend danach gibt', risk:true,
+      probe:{wert:'kaltbluetigkeit', schw:50},
+      erfolg:{text:'Ihr lauft die Schuttrampe hinauf, über das, was von den letzten Kolonnen übrig ist. Oben stehst du eine halbe Minute in der Bresche und siehst die zweite Mauer, von der keiner gesprochen hat, der es nicht gesehen hat. Dann kommt der Rückzugsbefehl. Du bist einer von neun, die ihn noch hören.',
+              moral:-22, ruf:7, nennung:true, geld:6, leben:-8, atem:-22, belastung:8,
+              tat:'Mit der Sturmkolonne in der Bresche von Akkon'},
+      misserfolg:{text:'Auf der Rampe zerlegt es die Kolonne von zwei Seiten. Du kommst bis an den Fuß der Bresche und dann rückwärts wieder herunter, gezogen von einem, dessen Gesicht du nie gesehen hast. Vom Branntwein spürst du nichts mehr.',
+              leben:-34, atem:-25, belastung:14}},
+     {label:'Die Leitern bis an den Graben tragen', hint:'Konstitution · nicht hinein, nur hin',
+      probe:{wert:'konstitution', schw:40},
+      erfolg:{text:'Vier Mann je Leiter, im Laufschritt durch das Vorfeld, ablegen, zurück. Es ist Trägerarbeit unter Feuer, und niemand nennt sie im Tagesbefehl — aber ohne die Leitern läuft niemand irgendwo hinauf.',
+              moral:-8, ruf:3, geld:3, atem:-14},
+      misserfolg:{text:'Auf halbem Weg schlägt es in die Leiter, und die Leiter schlägt in euch. Du bringst das vordere Ende allein bis an den Graben, weil die anderen drei nicht mehr tragen.',
+              leben:-20, atem:-18, belastung:10}},
+     {label:'Im Graben bleiben und schießen', hint:'Die Mauer ist nicht dein Befehl',
+      erfolg:{text:'Du feuerst aus dem Graben auf die Brustwehr, damit drüben die Köpfe unten bleiben. Die Kolonne läuft an dir vorbei die Rampe hinauf. Was von ihr zurückkommt, kommt einzeln.'}}]}
+);
+
 /* Höchstens zwei je Gefecht, frühestens ab der zweiten Runde, und jedes nur
    einmal. Ohne die Obergrenze würde ein langes Gefecht (Akkon: neun Runden) zu
    einer Ereigniskette, und die Frage „wie weit gehst du" nutzt sich ab, wenn
-   sie fünfmal hintereinander kommt. */
+   sie fünfmal hintereinander kommt. Sondermissionen (`nur`) kommen zuerst und
+   öfter; die allgemeinen Ereignisse füllen auf. */
 function ereignisWuerfeln(n){
+  const gesehen = K.gesehen || (K.gesehen = []);   // Läufe aus Fassung 2 kennen das Feld noch nicht
+  K.ereignisZahl = K.ereignisZahl || 0;
   if(K.ereignisZahl >= 2 || K.runde < 2) return null;
+  const sonder = GEFECHTS_EREIGNISSE.find(e => e.nur === n.id && !gesehen.includes(e.id) && e.wenn(n));
+  if(sonder && Math.random() < 0.6) return sonder;
   if(Math.random() > 0.45) return null;
-  const moeglich = GEFECHTS_EREIGNISSE.filter(e => !K.gesehen.includes(e.id) && e.wenn(n));
+  const moeglich = GEFECHTS_EREIGNISSE.filter(e => !e.nur && !gesehen.includes(e.id) && e.wenn(n));
   if(!moeglich.length) return null;
   return moeglich[Math.floor(Math.random()*moeglich.length)];
 }
@@ -446,6 +553,7 @@ function ereignisWirkung(w){
   if(w.nennung) S.nennungen++;
   if(w.vorn) K.vorn = true;
   if(w.tat && w.ruf > 0) K.taten.push({was:w.tat, ruf:w.ruf});
+  atemKlemmen();
 }
 
 function ereignisWaehlen(i){
@@ -518,10 +626,22 @@ function kampfAktion(id){
     if(S.ausr.muskete.verschleiss) S.ausr.muskete.zustand = Math.max(0,S.ausr.muskete.zustand-2);
   }
   else if(id==='ducken'){
+    /* Verschnaufen ja, verstecken nein: Zwei Runden am Stück fragt niemand.
+       Die dritte sieht der Sergent (Ruf −2), eine vierte gibt es nicht — der
+       Knopf ist gesperrt, bis man eine Runde lang etwas anderes getan hat.
+       Ohne diese Grenze war Knien ein Panzer: −22 Gefahr, Restrisiko ~4 %,
+       und ein Gefecht ließ sich vom Boden aus aussitzen. */
+    K.duckFolge = (K.duckFolge||0) + 1;
     K.deckung=true; S.atem=Math.min(100,S.atem+10); S.belastung=Math.max(0,S.belastung-2);
     text = zw==='voltigeur'
       ? 'Du gehst flach in eine Ackerfurche, das Gesicht im Dreck, und atmest zum ersten Mal seit zehn Minuten bis unten. Vor der Linie sucht dich jetzt niemand mehr — die eigenen Leute auch nicht.'
       : 'Du gehst auf ein Knie, den Kolben in den Dreck, den Kopf hinter den Rücken des Vordermanns. Hinlegen kann sich in der Linie niemand — das Glied bliebe offen. Man kann nicht ewig knien, aber jetzt gerade schon.';
+    if(K.duckFolge===3){
+      S.ruf = Math.max(0, S.ruf-2);
+      text += zw==='voltigeur'
+        ? ' Die dritte Runde im Dreck. Irgendwer wird nachher fragen, wo deine Patronen geblieben sind — die Antwort steht dir ins Gesicht geschrieben. <span class="fein">Ruf −2</span>'
+        : ' Die dritte Runde auf dem Knie. Martel sieht her, sagt nichts und merkt es sich. <span class="fein">Ruf −2</span>';
+    }
     gefahrMod = -22;
   }
   else if(id==='deckung'){
@@ -575,6 +695,7 @@ function kampfAktion(id){
     return;
   }
 
+  if(id!=='ducken') K.duckFolge = 0;
   if(id!=='bajonett') K.vorn = false;
 
   // Die Linie kämpft auch ohne dich
@@ -591,6 +712,7 @@ function kampfAktion(id){
   K.protokoll.push(text);
 
   // Feindliche Wirkung
+  atemKlemmen();
   let gefahr = n.gefahr + gefahrMod + (K.gefahrPlus||0);
   if(K.deckung && id!=='ducken' && id!=='deckung') K.deckung=false;
   if(S.belastung>60) gefahr += 6;
@@ -647,6 +769,7 @@ function kampfAktion(id){
       zeigeTod(); return;
     }
     if(S.leben <= lebenMax()*0.3) treffer += ' Du bist noch auf den Beinen, aber nicht mehr lange.';
+    atemKlemmen();
   }
 
   if(K.feindMoral <= 0){ kampfEnde(true, text+treffer); return; }
