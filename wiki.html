@@ -766,14 +766,42 @@ Fertigkeit von 10 auf 100 kostet 520.</p>
 <tr><td>Amulett</td><td>+5 Kaltblütigkeit — wirkt, weil du glaubst, dass es wirkt</td><td class="num">12</td></tr>
 </table></div>
 
-<h3>Die volle Skala (entworfen, noch nicht in Betrieb)</h3>
+<h3>Die volle Skala — seit dem 28. Juli 2026 in Betrieb</h3>
 <p>Gezählt wird der <i>Aufstieg</i>, nicht der Standort:
 <code>Rangpunkte = Wert des Endrangs − Wert des Startrangs</code>. Die Rangwerte
-reichen von 0 (Fusilier) bis 580 (Marschall). Dazu je überlebtem Kapitel +8, je
-volle 10 Ruf +5, je Nennung +3 (max. 10), je Grad der Ehrenlegion +12, je fremdem
-Orden +10 (max. 2), Überlebensbonus 70 bis 180, und +20 für „nie vor Zeugen
-gekniffen, nie desertiert“. <b>Maximum: 918 Punkte.</b> Als gekaufter Leutnant
-760.</p>
+reichen von 0 (Fusilier) bis 580 (Marschall). <b>Maximum: 918 Punkte</b>, als
+gekaufter Leutnant 760.</p>
+
+<table>
+<tr><th>Wofür</th><th class="num">VP</th><th>Stand im Prototyp</th></tr>
+<tr><td>Erreichter Rang</td><td class="num">0 … 580</td><td>in Betrieb, Ränge 1–5 (0/12/26/42/62)</td></tr>
+<tr><td>Je überlebtem Kapitel</td><td class="num">+8</td><td>in Betrieb, max. 2 Kapitel</td></tr>
+<tr><td>Ruf, je volle 10</td><td class="num">+5</td><td>in Betrieb</td></tr>
+<tr><td>Je Nennung im Tagesbefehl</td><td class="num">+3</td><td>in Betrieb, max. 10</td></tr>
+<tr><td>Nie gekniffen, nie desertiert</td><td class="num">+20</td><td>in Betrieb</td></tr>
+<tr><td>Je Grad der Ehrenlegion</td><td class="num">+12</td><td>fehlt — Orden sind nicht gebaut</td></tr>
+<tr><td>Je fremdem Orden (max. 2)</td><td class="num">+10</td><td>fehlt</td></tr>
+<tr><td>Überlebensbonus</td><td class="num">+70 … +180</td><td><b>Platzhalter +25</b> — siehe unten</td></tr>
+</table>
+
+<div class="warn"><b>Warum die Umstellung nötig wurde.</b> Die Rangwerte 42 und 62
+für Caporal-fourrier und Sergent standen schon immer in dieser Tabelle; solange
+diese Ränge unerreichbar waren, fiel es nicht auf. Seit sie erreichbar sind,
+rechneten Rang und Zuschläge in <b>zwei verschiedenen Skalen</b> — der Rang in
+der vollen, die Stationen (×2) in der des Prototyps. Ein Sergentenlauf bekam
+dadurch überproportional viel: gemessener Spitzenwert 273 bei einer Ladensumme
+von 196. Jetzt zieht die ganze Wertung in einer Skala.</div>
+
+<p><b>Ein Kapitel statt einer Station.</b> Die Prototypskala zahlte 2 VP je
+erreichter Station und belohnte damit den, der auf Station 30 von 32 fiel, fast
+wie den, der ankam. Die volle Skala zahlt <b>je überlebtem Kapitel</b>: Ein
+Feldzug ist ein Feldzug, und ein halber ist keiner.</p>
+
+<p><b>Der Überlebensbonus steht auf 25 und ist ein Platzhalter.</b> Die
+gestaffelten 70/120/180 ergeben erst Sinn, wenn es den freiwilligen Ausstieg an
+den Rangschranken gibt — dann ist die Höhe des Bonus die Belohnung dafür,
+rechtzeitig aufzuhören. Ohne diese Entscheidung wäre er nur eine große Zahl für
+alle, die nicht sterben.</p>
 </section>
 
 <!-- ============================== SPIELSTAND ============================== -->
@@ -1170,21 +1198,55 @@ Vier simulierte Spielweisen. Der Bot kauft ohne <code>VP=</code> nichts und
 
 <div class="scroll"><table>
 <tr><th>Größe</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160</th><th class="num">Veteran 260</th></tr>
-<tr><td>Italien überstanden</td><td class="num">98 %</td><td class="num">90 %</td><td class="num">100 %</td><td class="num">95 %</td></tr>
-<tr class="hi"><td><b>Beide Feldzüge überstanden</b></td><td class="num">48 %</td><td class="num">23 %</td><td class="num">83 %</td><td class="num">73 %</td></tr>
-<tr><td>Elitekompanie erreicht</td><td class="num">50 %</td><td class="num">55 %</td><td class="num">90 %</td><td class="num">93 %</td></tr>
-<tr><td>Caporal erreicht</td><td class="num">48 %</td><td class="num">48 %</td><td class="num">88 %</td><td class="num">95 %</td></tr>
-<tr class="hi"><td><b>Caporal-fourrier erreicht</b></td><td class="num">20 %</td><td class="num">33 %</td><td class="num">65 %</td><td class="num">68 %</td></tr>
-<tr class="hi"><td><b>Sergent erreicht</b></td><td class="num">20 %</td><td class="num">33 %</td><td class="num">65 %</td><td class="num">68 %</td></tr>
-<tr><td>Punkte, Median</td><td class="num">106</td><td class="num">112</td><td class="num">207</td><td class="num">226</td></tr>
+<tr class="hi"><td><b>überlebt</b> · Leitzahl</td><td class="num">43 %</td><td class="num">20 %</td><td class="num">73 %</td><td class="num">68 %</td></tr>
+<tr class="hi"><td><b>Sergent erreicht</b> · Leitzahl</td><td class="num">18 %</td><td class="num">20 %</td><td class="num">70 %</td><td class="num">80 %</td></tr>
+<tr><td>Gestorben (von 40)</td><td class="num">23</td><td class="num">32</td><td class="num">11</td><td class="num">13</td></tr>
+<tr><td>Italien überstanden · Lehrstück</td><td class="num">100 %</td><td class="num">95 %</td><td class="num">100 %</td><td class="num">100 %</td></tr>
+<tr><td>Elitekompanie erreicht</td><td class="num">45 %</td><td class="num">55 %</td><td class="num">93 %</td><td class="num">100 %</td></tr>
+<tr><td>Caporal erreicht</td><td class="num">38 %</td><td class="num">55 %</td><td class="num">93 %</td><td class="num">100 %</td></tr>
+<tr><td>Caporal-fourrier erreicht</td><td class="num">18 %</td><td class="num">20 %</td><td class="num">70 %</td><td class="num">80 %</td></tr>
+<tr><td>Punkte, Median</td><td class="num">64</td><td class="num">61</td><td class="num">192</td><td class="num">186</td></tr>
 </table></div>
 
-<p><b>Das ist die Kurve, um die es geht.</b> Italien ist das Lehrstück und lässt
-fast jeden durch; Ägypten tötet den ersten Mann. Mit dem Vorrat eines guten
-ersten Laufs steigt das Überleben auf 83 %, und der Sergent wird von einer
-Ausnahme (20 %) zum Regelfall (65 %). Fourrier und Sergent sind im Prototyp
-faktisch gekoppelt — wer in Kairo die Listen bekommt, hat bis Katia den Ruf
-ohnehin zusammen.</p>
+<h3>Die zwei Leitzahlen und ihre Sollwerte</h3>
+<p><b>Gemessen wird an zwei Zahlen, und nur an ihnen:</b> <code>überlebt</code>
+sagt, wie hart das Spiel ist; <code>Sergent erreicht</code> sagt, ob die Leiter
+trägt.</p>
+<table>
+<tr><th>Sollwert</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160</th></tr>
+<tr><td class="k">überlebt</td><td class="num">40–55 %</td><td class="num">15–30 %</td><td class="num">70–85 %</td></tr>
+<tr><td class="k">Sergent erreicht</td><td class="num">15–30 %</td><td class="num">15–30 %</td><td class="num">60–75 %</td></tr>
+</table>
+<p class="lead">Gemessen: überlebt 43 / 20 / 73 %, Sergent 18 / 20 / 70 %.
+Alle sechs im Band.</p>
+
+<div class="warn"><b>Zwei alte Sollwerte sind ersatzlos gestrichen.</b>
+„Italien überstanden“ hatte das Band 45–55 % und liefert seit den Lebenspunkten
+95–100 % — Italien ist das Lehrstück und <i>soll</i> fast jeden durchlassen. Der
+Caporal-Anteil war mit 30 % gegen ein Todesmodell geeicht, in dem ein Viertel
+der Männer die Beförderung nie erlebte; heute ist der Caporal der <i>unterste</i>
+erreichbare Aufstieg. Beide werden nur noch zur Einordnung mitgedruckt.</div>
+
+<p><b>Der Abstand ist die eigentliche Zahl.</b> Zwischen Erstlauf und Veteran
+liegen 30 Punkte beim Überleben und 52 beim Sergenten. Schrumpft einer davon
+unter 25 Punkte, trägt die Leiter nicht mehr — dann kaufen Veteranenpunkte
+keinen spürbaren Unterschied, und das ist der Kern des Spiels.</p>
+
+<p><b>Mut kostet, Mut steigt auf.</b> Der mutige Erstläufer überlebt halb so oft
+(20 gegen 43 %) und erreicht den Sergenten trotzdem etwas öfter (20 gegen 18 %).
+Dieser Kreuzungspunkt ist die Achse, um die die Ereignisse gebaut sind.</p>
+
+<p><b>Der Veteran mit 260 VP überlebt nicht besser als der mit 160</b> (68 gegen
+73 %, im Rauschen), <b>erreicht den Sergenten aber deutlich öfter</b> (80 gegen
+70 %). Das ist die Staffelung aus <code>PRO_PUNKT</code>: Die ersten 160 Punkte
+kaufen Konstitution und Muskete — Überleben. Die nächsten 100 kaufen nur noch
+das Nachschärfen einer Spitze, und die zahlt sich in Ruf aus, nicht in Blut.
+Veteranenpunkte haben eine Sättigungsgrenze beim Überleben und keine beim
+Aufstieg.</p>
+
+<p class="lead">Beide Bänder sind zwei Kapitel tief und vorläufig — sie sind an
+einem Spiel geeicht, das mit dem Sergenten endet. Mit Kapitel 3 werden sie neu
+gesetzt.</p>
 
 <div class="scroll"><table>
 <tr><th>Größe</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160 VP</th><th class="num">Veteran 260 VP</th></tr>
@@ -1288,12 +1350,6 @@ Lemons</i>, <i>A Legionary's Life</i> (86 % positiv bei rund 2.200 Rezensionen,
 <script>
 const AUFGABEN = [
 /* ---------- blockierend ---------- */
-{n:43,d:'blockierend',k:'Balance',t:'Zwei Punkteskalen mischen sich, seit Rang 4 und 5 erreichbar sind',
- x:'rangWert() liefert für Caporal-fourrier 42 und Sergent 62 — Zahlen aus der vollen Skala (Maximum 918). Stationen (×2), Ruf (5 je volle 10) und der Kaufladen (196 VP) rechnen weiter in der Prototypskala. Ein Sergentenlauf bekommt dadurch überproportional viele Veteranenpunkte: gemessener Spitzenwert 268 statt bisher 230. Entweder die volle Skala übernehmen oder die Rangwerte 4/5 vorläufig auf die Prototypskala setzen.',
- q:'grundwerte.js Z. 38–41 · abschluss.js wertung()'},
-{n:44,d:'blockierend',k:'Balance',t:'Drei Leitzahlen haben keinen Sollwert mehr',
- x:'„Italien überstanden“ (Band 45–55 %, gemessen 90–100 %), „beide Feldzüge“ (nie ein Band) und der Caporal-Anteil (Sollwert 30 %, gemessen 48–98 %). Alle drei sind gegen ein anderes Todesmodell geeicht worden. Solange kein neuer Maßstab steht, ist nach jeder Änderung nicht entscheidbar, ob sie gut war.',
- q:'CLAUDE.md Zielwerte'},
 {n:11,d:'blockierend',k:'Balance',t:'Sergent-Schwellen neu eichen, bevor Kapitel 3 kommt',
  x:'Ausdrücklicher Vorbehalt aus der Planungsnotiz: Der Sergent in nur zwei Kapiteln staucht die Rangleiter — das Konzept sah ihn für die Kapitel 6 bis 7 vor. Anheben oder strecken, gemessen an den vier Leitzahlen. Nicht stillschweigend so lassen.',
  q:'CLAUDE.md Z. 740'},
@@ -1317,9 +1373,6 @@ const AUFGABEN = [
 {n:7,d:'wichtig',k:'Dokumentation',t:'Elitekompanie-Absatz widerspricht der Messung daneben',
  x:'Der Absatz „nur 8 % erreichen die Elitekompanie, der Engpass bleibt die Schwelle von 55“ steht unmarkiert neben einer Tabelle, die 48 bis 95 % ausweist. Entweder die Empfehlung streichen oder als historisch kennzeichnen.',
  q:'CLAUDE.md Z. 580 gegen Z. 495'},
-{n:12,d:'wichtig',k:'Balance',t:'Punkteskala des Prototyps auf die volle Skala umstellen',
- x:'Aktuell Rangwerte 0/12/26, Stationen mal 2, Ladensumme 196. Die volle Skala (Maximum 918, Rangwerte bis 580, +8 je Kapitel, Überlebensbonus) soll übernommen werden, sobald mehrere Kapitel stehen. Achtung: rangWert() zieht schon jetzt 42 und 62 aus der vollen Skala — sobald Rang 4 und 5 erreichbar sind, mischen sich zwei Skalen.',
- q:'CLAUDE.md Z. 445–449 · abschluss.js Z. 247–256'},
 {n:21,d:'wichtig',k:'Mechanik',t:'Orden und Ehrenlegion einbauen',
  x:'Nennungen im Tagesbefehl werden gezählt, haben aber keine Folge außer drei Wertungspunkten. Es fehlen: fünf Grade mit den historischen Pensionen (250 bis 5.000 Francs), Ehrenwaffen 1799–1802 mit automatischer Aufnahme 1804, fremde Orden (je +10, höchstens zwei). Orden sollen Einkommen sein, nicht Deko.',
  q:'KONZEPT.md §6 · CLAUDE.md Z. 747'},

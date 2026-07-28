@@ -284,15 +284,41 @@ function winterEnde(){ LAUF.winter = {wochen:3, log:[]}; stationErledigt(); naec
 
 function stationen(){ return Math.min(KAPITEL.length, LAUF.node+1); }
 
+/* Wie viele Kapitel dieser Mann hinter sich gebracht hat.
+
+   Die volle Skala zahlt **je überlebtem Kapitel**, nicht je Station (KONZEPT
+   §5): Ein Kapitel ist ein Feldzug, und ein halber Feldzug ist keiner. Das ist
+   der Unterschied zur Prototypskala — die zahlte 2 VP je Station und belohnte
+   damit auch den, der auf Station 30 von 32 fiel, fast wie den, der ankam. */
+function kapitelUeberlebt(){
+  let grenze = 0, zahl = 0;
+  for(const k of KAMPAGNEN){
+    const st = STATIONEN[k.id];
+    if(!st || !st.length) continue;          // ungebaute Kapitel zählen nicht mit
+    grenze += st.length;
+    if(stationen() >= grenze) zahl++;
+  }
+  return zahl;
+}
+
+/* Die volle Skala aus KONZEPT §5. Die Rangwerte (0/12/26/42/62) standen schon
+   immer darin; seit Rang 4 und 5 erreichbar sind, ziehen die Zuschläge nach —
+   vorher rechneten Rang und Zuschläge in zwei verschiedenen Skalen, und ein
+   Sergentenlauf bekam dadurch überproportional viel.
+
+   `ueberleben` bleibt bei 25 und ist der Platzhalter für den gestaffelten
+   Überlebensbonus (70/120/180), der erst mit dem freiwilligen Ausstieg an den
+   Rangschranken Sinn ergibt — den gibt es noch nicht. Wer ihn baut, ersetzt
+   hier die 25. */
 function wertung(){
   const p = {};
   p.rang = rangWert(S.rang);
-  p.stationen = 2 * stationen();   // 2 seit Kapitel 2: 32 Stationen — siehe CLAUDE.md
+  p.kapitel = 8 * kapitelUeberlebt();          // volle Skala: 8 je Kapitel, max. 11
   p.ruf = 5 * Math.floor(S.ruf/10);
   p.nennungen = 3 * Math.min(10, S.nennungen);
-  p.ueberleben = S.lebt ? 25 : 0;
-  p.sauber = (!S.gekniffen && S.lebt) ? 10 : 0;
-  p.summe = p.rang+p.stationen+p.ruf+p.nennungen+p.ueberleben+p.sauber;
+  p.ueberleben = S.lebt ? 25 : 0;              // Platzhalter, siehe oben
+  p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
+  p.summe = p.rang+p.kapitel+p.ruf+p.nennungen+p.ueberleben+p.sauber;
   return p;
 }
 
@@ -337,14 +363,16 @@ function eintragen(endeText){
 }
 
 function wertungsTabelle(p){ return wertungsTabelleAus({wertung:p, rang:rangName(S.rang),
-  stationen:stationen(), ruf:S.ruf, nennungen:S.nennungen}); }
+  stationen:stationen(), kapitel:kapitelUeberlebt(), ruf:S.ruf, nennungen:S.nennungen}); }
 
 function wertungsTabelleAus(c){
   const p = c.wertung; if(!p) return '';
   return `<table>
     <tr><th>Wofür</th><th class="n">VP</th></tr>
     <tr><td class="d">Erreichter Rang — ${esc(c.rang)}</td><td class="n">${p.rang}</td></tr>
-    <tr><td class="d">Erreichte Stationen (${c.stationen} × 2)</td><td class="n">${p.stationen}</td></tr>
+    ${p.kapitel!==undefined
+      ? `<tr><td class="d">Überlebte Kapitel (${c.kapitel!==undefined?c.kapitel:p.kapitel/8} × 8)</td><td class="n">${p.kapitel}</td></tr>`
+      : `<tr><td class="d">Erreichte Stationen (${c.stationen} × 2)</td><td class="n">${p.stationen}</td></tr>`}
     <tr><td class="d">Ruf ${c.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
     <tr><td class="d">Im Tagesbefehl genannt (${c.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>

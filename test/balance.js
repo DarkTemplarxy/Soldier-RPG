@@ -1,8 +1,17 @@
 /* Misst über viele Läufe, wie weit ein Mann kommt.
 
-   Ausgewiesen werden vier Zahlen: „Italien überstanden" (der Zielwert 45–55 %),
-   „beide Feldzüge", und wie viele die Elitekompanie und den Caporal **erreicht**
-   haben. Erreicht, nicht überlebt — gezählt wird der höchste Rang, den ein Mann
+   **Zwei Zahlen sind die Leitzahlen, alles andere ist Beiwerk:**
+
+     1. `überlebt` — wie viele alle gebauten Kapitel hinter sich gebracht haben.
+     2. `Sergent erreicht` — wie viele den höchsten gebauten Rang bekommen haben.
+
+   Die erste misst, wie hart das Spiel ist, die zweite, ob die Leiter trägt. Sie
+   lösen „Italien überstanden" (Band 45–55 %) und den Caporal-Anteil (Sollwert
+   30 %) ab: Italien ist inzwischen das Lehrstück und lässt 90–100 % durch, und
+   der Caporal ist der *unterste* erreichbare Aufstieg — beide sagen nichts mehr
+   über den Stand des Spiels. Die Sollwerte stehen in CLAUDE.md.
+
+   Erreicht, nicht überlebt — gezählt wird der höchste Rang, den ein Mann
    je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das
    Skript den Rang *am Ende*, und das maß etwas anderes: Seit die Lebenspunkte
    den frühen Tod abgeschafft haben, stirbt kaum noch jemand vor der
@@ -229,8 +238,11 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   const pu = res.punkte.sort((a, b) => a - b);
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
   console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`);
-  console.log(`Italien überstanden ${q(res.italien)} · beide Feldzüge ${q(res.ende)} · gestorben ${res.tot}`);
-  console.log(`Erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
+  /* Die beiden Leitzahlen zuerst und für sich — sie tragen die Sollwerte.
+     Wer eine Änderung beurteilt, liest diese Zeile und sonst nichts. */
+  console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   SERGENT ERREICHT ${q(res.sergent)}\n`);
+  console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
+  console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
   await b.close();
 })();

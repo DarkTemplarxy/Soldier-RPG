@@ -41,6 +41,7 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**
 | Ränge 4 und 5 mit zwei Wegen, Sektion und Abrechnung | |
 | Napoleonische Gestaltung: Papier, Kokarde, Livret, Gelände | |
 | Handbuch als eigene Seite (`wiki.html`), aus dem Spiel verlinkt | |
+| Volle Punkteskala aus KONZEPT §5 | Orden und Überlebensbonus darin |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -442,12 +443,29 @@ if(!sieg) S.leben -= 5 + 13·(Restwiderstand des Feindes / Anfangswert)
 
 **Verlieren war gratis, und das machte alle Ereignisse zahnlos.** Wer unter 40 % Leben fiel, kniete sich hin (−22 Gefahr, Restgefahr etwa 4 %), ließ die Runden auslaufen und schlief sich im Lager wieder hoch — gemessen null Tote in 80 Läufen, mutig wie vorsichtig. Ein Gefecht, das man nicht gewinnt, muss man verlassen, und eine Linie, die rückwärts durchs Feuer geht, lässt Männer liegen. Historisch ist das dieselbe Wahrheit: Gefallen wird beim Weichen, nicht im Stehen. Wen es unter null drückt, den trägt es auf dem Rückzug — `todesart` sagt das dann auch.
 
-### Wertung Kapitel 1 (`src/abschluss.js`)
+### Wertung: die volle Skala (`wertung()` in `src/abschluss.js`)
 
 ```
-Rangwert + 2×Stationen + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 10 (nie gekniffen)
+Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 20 (nie gekniffen)
 ```
-Rangwerte 0 / 12 / 26. Kaufladen kostet 12–40 VP plus den Mantel (30), alles zusammen 196.
+
+**Seit dem 28.07.2026 rechnet die ganze Wertung in der vollen Skala aus KONZEPT §5** (Maximum 918). Rangwerte 0 / 12 / 26 / 42 / 62 — die standen dort schon immer, auch die 42 und die 62.
+
+> **Warum die Umstellung nötig war.** Solange die Ränge 4 und 5 unerreichbar waren, fiel nicht auf, dass `rangWert()` die volle Skala benutzt, während die Zuschläge die des Prototyps benutzten. Seit sie erreichbar sind, **rechneten Rang und Zuschläge in zwei verschiedenen Skalen**: Ein Sergentenlauf bekam überproportional viel, gemessener Spitzenwert **273 bei einer Ladensumme von 196** — ein einziger guter Lauf kaufte alles und noch etwas dazu. Genau das verbietet die Regel „Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein".
+
+**Ein Kapitel statt einer Station.** Die Prototypskala zahlte 2 VP je erreichter Station und belohnte damit den, der auf Station 30 von 32 fiel, fast wie den, der ankam. Die volle Skala zahlt **je überlebtem Kapitel** (`kapitelUeberlebt()`): Ein Feldzug ist ein Feldzug, und ein halber ist keiner. Das ist der Grund, warum der Punkte-Median so deutlich fällt — ein abgebrochener Lauf ist jetzt sichtbar weniger wert als ein vollendeter, und das war der Sinn.
+
+**Der Überlebensbonus steht auf 25 und ist ein Platzhalter.** Die volle Skala sieht gestaffelte 70/120/180 vor, aber die ergeben erst Sinn, wenn es den **freiwilligen Ausstieg an den Rangschranken** gibt — dann ist die Höhe des Bonus die Belohnung dafür, rechtzeitig aufzuhören. Ohne diese Entscheidung wäre er nur eine große Zahl für jeden, der nicht stirbt. **Wer den Ausstieg baut, ersetzt hier die 25.**
+
+**Was noch fehlt:** Ehrenlegion (+12 je Grad) und fremde Orden (+10, höchstens zwei) — beides hängt an den Orden, die es nicht gibt.
+
+| Gemessen, je 40 Läufe | Prototypskala | volle Skala |
+|---|---|---|
+| Punkte-Median Erstlauf | 109 | **64** |
+| Punkte-Median Veteran 160 | 218 | **192** |
+| Höchster gemessener Lauf | 273 | **223** |
+
+Kaufladen kostet 12–40 VP je Posten, alles zusammen 196 — **jetzt wieder mehr, als ein Spitzenlauf einbringt.**
 
 > **Stationen von 3 auf 2 Punkte gesenkt**, weil es mit Kapitel 2 jetzt 32 statt 16 Stationen sind. Bei 3 Punkten hätte allein das Durchkommen 96 Punkte gebracht — mehr als der ganze bisherige Spitzenlauf. Die Reihe der Anpassungen (4 → 3 → 2) folgt derselben Regel: **Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein**, sonst kauft ein einziger guter Lauf alles.
 
@@ -490,20 +508,46 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 **`balance.js` misst seit den Gefechts-Ereignissen zwei Gemüter**, weil das Spiel zwei Antworten hat. `node test/balance.js 40` ist der vorsichtige Bot: Er tritt nur vor, wo seine Werte es klar tragen. `MUT=1 node test/balance.js 40` tritt immer vor, außer es steht um sein Leben. **Der Abstand zwischen beiden Zahlen ist die Balance der Ereignisse.**
 
+### Die zwei Leitzahlen und ihre Sollwerte *(neu gesetzt am 28.07.2026)*
+
+**Gemessen wird an zwei Zahlen, und nur an ihnen:**
+
+| | Was sie misst |
+|---|---|
+| **überlebt** | Wie viele alle gebauten Kapitel hinter sich gebracht haben — *wie hart das Spiel ist.* |
+| **Sergent erreicht** | Wie viele den höchsten gebauten Rang bekommen haben — *ob die Leiter trägt.* |
+
+| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 |
+|---|---|---|---|
+| **überlebt** | **40–55 %** | **15–30 %** | **70–85 %** |
+| **Sergent erreicht** | **15–30 %** | **15–30 %** | **60–75 %** |
+
+Gemessen am 28.07.2026, je 40 Läufe: überlebt **43 / 20 / 73 %**, Sergent **18 / 20 / 70 %**. Alle sechs im Band.
+
+> **Warum diese beiden und nicht die alten.** „Italien überstanden" hatte das Band 45–55 % und liefert seit den Lebenspunkten 95–100 %: Italien ist das Lehrstück und *soll* fast jeden durchlassen — die Zahl misst nichts mehr. Der Caporal-Anteil war mit 30 % gegen ein Todesmodell geeicht, in dem ein Viertel der Männer die Beförderung nie erlebte; heute ist der Caporal der *unterste* erreichbare Aufstieg und sagt über den Stand des Spiels nichts. **Beide sind als Sollwert ersatzlos gestrichen** und werden nur noch zur Einordnung mitgedruckt.
+>
+> **Der Abstand ist die eigentliche Zahl.** Zwischen Erstlauf und Veteran liegen 30 Punkte beim Überleben und 52 beim Sergenten. **Schrumpft einer davon unter 25 Punkte, trägt die Leiter nicht mehr** — dann kaufen Veteranenpunkte keinen spürbaren Unterschied, und das ist der Kern des Spiels. Wächst er über 60, ist der Erstlauf zu hart.
+>
+> **Mut kostet, Mut steigt auf.** Der mutige Erstläufer überlebt halb so oft (20 gegen 43 %) und erreicht den Sergenten trotzdem etwas öfter (20 gegen 18 %). Dieser Kreuzungspunkt ist die Achse, um die die Ereignisse gebaut sind — **wer daran dreht, erhält ihn.**
+>
+> **Beide Bänder sind zwei Kapitel tief und vorläufig.** Sie sind an einem Spiel geeicht, das mit dem Sergenten endet. **Mit Kapitel 3 werden sie neu gesetzt** — zusammen mit den Rangschranken, für die derselbe Vorbehalt gilt.
+
 **Seit dem Pool von 60 werden drei Männer gemessen, nicht mehr einer** — der Bot kauft nichts, also *ist* er ohne `VP=` genau der Erstlauf-Spieler. Alle Zahlen je 40 Läufe:
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **Italien überstanden** | 98 % | 90 % | 100 % | 95 % |
-| **Beide Feldzüge überstanden** | **48 %** | **23 %** | **83 %** | **73 %** |
-| Gestorben | 21 von 40 | **31 von 40** | 7 von 40 | 11 von 40 |
-| **Elitekompanie erreicht** | 50 % | 55 % | 90 % | 93 % |
-| **Caporal erreicht** | 48 % | 48 % | 88 % | 95 % |
-| **Caporal-fourrier erreicht** | 20 % | 33 % | **65 %** | **68 %** |
-| **Sergent erreicht** | 20 % | 33 % | **65 %** | **68 %** |
-| Punkte, Median | 106 | 112 | 207 | **226** |
+| **überlebt** *(Leitzahl)* | **43 %** | **20 %** | **73 %** | 68 % |
+| **Sergent erreicht** *(Leitzahl)* | **18 %** | **20 %** | **70 %** | 80 % |
+| Gestorben | 23 von 40 | **32 von 40** | 11 von 40 | 13 von 40 |
+| Italien überstanden *(Lehrstück)* | 100 % | 95 % | 100 % | 100 % |
+| Elitekompanie erreicht | 45 % | 55 % | 93 % | 100 % |
+| Caporal erreicht | 38 % | 55 % | 93 % | 100 % |
+| Caporal-fourrier erreicht | 18 % | 20 % | 70 % | 80 % |
+| Punkte, Median | 64 | 61 | 192 | 186 |
 
-> **Das ist die Kurve, um die es geht.** Italien ist das Lehrstück und lässt fast jeden durch; **Ägypten tötet den ersten Mann** — vorsichtig sehen 43 % das Ende, wer aufsteigen will, nur 20 %. Mit dem Vorrat eines guten ersten Laufs (160 VP) steigt es auf 68 %, im dritten oder vierten Lauf (260 VP) auf 75 %, und der Caporal wird von einer Glückssache (45 %) zur Selbstverständlichkeit (100 %).
+> **Das ist die Kurve, um die es geht.** Italien ist das Lehrstück und lässt fast jeden durch; **Ägypten tötet den ersten Mann** — vorsichtig sehen 43 % das Ende, wer aufsteigen will, nur 20 %. Mit dem Vorrat eines guten ersten Laufs (160 VP) steigt es auf 73 %, und der Sergent wird von einer Ausnahme (18 %) zum Regelfall (70 %).
+>
+> **Der Veteran mit 260 VP überlebt nicht besser als der mit 160** (68 gegen 73 %, im Rauschen), **erreicht den Sergenten aber deutlich öfter** (80 gegen 70 %). Das ist kein Fehler, sondern die Staffelung aus `PRO_PUNKT`: Die ersten 160 Punkte kaufen Konstitution und Muskete — Überleben. Die nächsten 100 kaufen nur noch das Nachschärfen einer Spitze, und die zahlt sich in Ruf aus, nicht in Blut. **Veteranenpunkte haben eine Sättigungsgrenze beim Überleben und keine beim Aufstieg** — genau so war die Kostenkurve gedacht.
 >
 > **Gegner, gegen die man am Anfang chancenlos ist, sind später zu schlagen — nicht weil sie schwächer wurden, sondern weil man schneller lädt.** Genau das war die Vorgabe, und es steht in keiner einzigen Sonderregel: Es fällt aus Pool 60 + Feindgüte 5 + zollpflichtigem Rückzug von allein heraus.
 >
@@ -569,6 +613,8 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | Gunst-Quellen verteilt, Schwellen Ruf 25/40 · V160 / V260 | 40 / 40 | 100 / 100 % | 88 / 100 % | 197 / 229 |
 | **Schwellen Ruf 35/52/62 (gültig) · Erstlauf v / m** | **40 / 40** | **98 / 90 %** | **48 / 48 %** | **106 / 112** |
 | **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 95 %** | **88 / 95 %** | **207 / 226** |
+| **volle Punkteskala (gültig) · Erstlauf v / m** | **40 / 40** | **100 / 95 %** | **38 / 55 %** | **64 / 61** |
+| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **93 / 100 %** | **192 / 186** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
 
@@ -836,7 +882,8 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 ## Was als Nächstes ansteht
 
 1. **Kapitel 3, Garnison 1800–04** — das nächste Kapitel und zugleich ein Verwaltungskapitel: Bildung nachholen, Beziehungen pflegen, Rangstillstand als Druckmittel. Feindgüte 0. Der Ausblick am Ende von Kapitel 2 kündigt es an.
-2. **Sollwerte neu setzen.** „Italien überstanden" hat mit 45–55 % kein gültiges Band mehr (gemessen 90–100 %), „beide Feldzüge" hatte nie eines, und der Caporal-Sollwert von 30 % stammt aus einem anderen Todesmodell. **Drei Zahlen ohne Maßstab — das ist der teuerste offene Punkt des Projekts.**
-3. **Die volle Punkteskala übernehmen.** Dringend geworden: `rangWert()` liefert für die jetzt erreichbaren Ränge 4 und 5 bereits 42 und 62 aus der vollen Skala, während Stationen und Laden noch in der Prototypskala rechnen. **Zwei Skalen mischen sich.**
-4. **Orden** — Nennung im Tagesbefehl wird schon gezählt, hat aber noch keine Folge.
-5. **Ausrüstungskauf im Spiel** — Geld hat weiterhin zu wenig Verwendung; ein Marketender im Lager wäre die naheliegende Anbindung.
+2. **Orden** — Nennung im Tagesbefehl wird schon gezählt, hat aber noch keine Folge. Die volle Skala hält die Plätze schon frei (+12 je Grad der Ehrenlegion, +10 je fremdem Orden).
+3. **Ausrüstungskauf im Spiel** — Geld hat weiterhin zu wenig Verwendung; ein Marketender im Lager wäre die naheliegende Anbindung.
+4. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
+
+> **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen (Punkt 3 der alten Liste), und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `Sergent erreicht` neu gesetzt (Punkt 2). Beides steht oben unter „Balance-Konstanten".

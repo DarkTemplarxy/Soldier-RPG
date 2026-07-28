@@ -5,6 +5,54 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Die volle Punkteskala, zwei neue Leitzahlen
+
+**Zwei Entscheidungen des Entwicklers, beide umgesetzt und gemessen.**
+
+### Die volle Skala löst die des Prototyps ab
+
+```
+vorher:  Rangwert + 2×Stationen + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 10 (sauber)
+jetzt:   Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 20 (sauber)
+```
+
+**Der Anlass war ein Fehler, der erst mit den neuen Rängen sichtbar wurde.** `rangWert()` benutzte schon immer die volle Skala aus KONZEPT §5 — die Werte 0/12/26/42/62 stehen dort so —, die Zuschläge dagegen die des Prototyps. Solange die Ränge 4 und 5 unerreichbar waren, fiel das nicht auf. Seit sie erreichbar sind, **rechneten Rang und Zuschläge in zwei verschiedenen Skalen**: gemessener Spitzenwert **273 bei einer Ladensumme von 196**, ein einziger guter Lauf kaufte also alles und noch etwas dazu. Das verletzt die Regel „Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein".
+
+**Entschieden wurde, die Rangwerte zu behalten und die Zuschläge nachzuziehen** statt umgekehrt. Damit steht die ganze Wertung in einer Skala, und die vier noch fehlenden Posten (Ehrenlegion, fremde Orden, gestaffelter Überlebensbonus) haben ihren Platz schon frei.
+
+**Ein Kapitel statt einer Station** (`kapitelUeberlebt()`). Die Prototypskala zahlte 2 VP je erreichter Station und belohnte den, der auf Station 30 von 32 fiel, fast wie den, der ankam. Die volle Skala zahlt je überlebtem Kapitel: **Ein Feldzug ist ein Feldzug, und ein halber ist keiner.** Daher der deutliche Rückgang des Medians — ein abgebrochener Lauf ist jetzt sichtbar weniger wert als ein vollendeter, und das war der Sinn.
+
+**Der Überlebensbonus bleibt bei 25 und ist ausdrücklich ein Platzhalter.** Die vollen 70/120/180 ergeben erst Sinn mit dem freiwilligen Ausstieg an den Rangschranken — dann ist die Höhe des Bonus die Belohnung dafür, rechtzeitig aufzuhören. Ohne diese Entscheidung wäre er nur eine große Zahl für jeden, der nicht stirbt.
+
+| Gemessen, je 40 Läufe | vorher | jetzt |
+|---|---|---|
+| Punkte-Median Erstlauf | 109 | **64** |
+| Punkte-Median Veteran 160 | 218 | **192** |
+| Höchster gemessener Lauf | 273 | **223** |
+
+Der Laden kostet weiterhin 196 — **jetzt wieder mehr, als ein Spitzenlauf einbringt.** Alte Chronikeinträge bleiben lesbar: `wertungsTabelleAus()` zeigt für sie weiterhin die Stationszeile.
+
+### Zwei Leitzahlen statt vier Zahlen ohne Maßstab
+
+`test/balance.js` stellt jetzt zwei Zahlen voran, und nur die tragen Sollwerte:
+
+| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 |
+|---|---|---|---|
+| **überlebt** | 40–55 % | 15–30 % | 70–85 % |
+| **Sergent erreicht** | 15–30 % | 15–30 % | 60–75 % |
+
+Gemessen: überlebt **43 / 20 / 73 %**, Sergent **18 / 20 / 70 %** — alle sechs im Band.
+
+**„Italien überstanden" und der Caporal-Anteil sind als Sollwert ersatzlos gestrichen.** Das italienische Band 45–55 % liefert seit den Lebenspunkten 95–100 %: Italien ist das Lehrstück und *soll* fast jeden durchlassen. Der Caporal-Sollwert von 30 % war gegen ein Todesmodell geeicht, in dem ein Viertel der Männer die Beförderung nie erlebte; heute ist der Caporal der *unterste* erreichbare Aufstieg. Beide werden nur noch zur Einordnung mitgedruckt.
+
+**Der Abstand zwischen Erstlauf und Veteran ist die eigentliche Zahl** — 30 Punkte beim Überleben, 52 beim Sergenten. Schrumpft einer unter 25, trägt die Leiter nicht mehr.
+
+**Nebenbefund, der die Kostenkurve bestätigt:** Der Veteran mit 260 VP überlebt nicht besser als der mit 160 (68 gegen 73 %, im Rauschen), erreicht den Sergenten aber deutlich öfter (80 gegen 70 %). Die ersten 160 Punkte kaufen Konstitution und Muskete, also Überleben; die nächsten 100 kaufen nur noch das Nachschärfen einer Spitze, und die zahlt sich in Ruf aus. **Veteranenpunkte haben eine Sättigungsgrenze beim Überleben und keine beim Aufstieg** — genau so war `PRO_PUNKT` gedacht.
+
+Beide Bänder sind zwei Kapitel tief und vorläufig; mit Kapitel 3 werden sie neu gesetzt.
+
+---
+
 ## 2026-07-28 — Das Bild der Epoche, das Gefechtsfeld nach Rang, ein Handbuch
 
 **Reine Darstellung — keine Balance-Zahl angefasst.** Gegengemessen: Erstlauf 50 %, Veteran 160 78 % (vorher 48/83) — im Rauschen.
