@@ -36,6 +36,7 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**
 | Kampagnenverlauf mit Nebel über Ungesehenem | |
 | Veteranenpunkte in einzelne Werte umsetzbar | |
 | Zwei Feldzüge mit Übergang dazwischen | |
+| Elf Marsch-Zwischenfälle mit Sperr-Sätzen | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -363,6 +364,16 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 
 **Knien ist begrenzt: höchstens drei Runden am Stück** (`K.duckFolge`). Zwei Runden fragt niemand, die dritte kostet Ruf −2, eine vierte gibt es nicht — der Knopf ist gesperrt, bis man eine Runde etwas anderes getan hat. Ohne die Grenze war Knien ein Panzer (−22 Gefahr, Restrisiko ~4 %), hinter dem sich jedes Gefecht aussitzen ließ; der Blutzoll des Rückzugs machte das Aussitzen teuer, die Kniegrenze macht es unmöglich.
 
+### Zwischenfälle auf dem Marsch (`MARSCH_EREIGNISSE` in `src/oberflaeche.js`)
+
+**Elf kleine Szenen zwischen den Stationen** — sieben allgemeine (Verbandsplatz, Briefe, Protze, Nachtwache, Kartenspiel, Requisition, der kranke Nebenmann), vier ägyptische (Brunnen, Beutepferd, Ingenieurkarte, Basar). Gewürfelt beim ersten Betreten einer Station mit Marschweg (35 %, jeder Zwischenfall einmal je Lauf, nie vor Gefechten — dort trägt der Anmarsch die Last). Ein Zwischenfall tötet nie: `anwenden()` klemmt das Leben bei 1, der Tod gehört ins Gefecht.
+
+**Die Sperr-Regel:** Wer eine Probe erkennbar nicht bestehen kann (`ab:{min, sonst}`), bekommt **keinen Knopf, sondern einen Satz** — der Analphabet wird nicht gefragt, ob er Briefe schreiben will: „Die Kameraden fragen die Reihe entlang, wer schreiben kann. Auch dich. Du musst verneinen, wie fast alle." Geprüft wird gegen `wert()`, nicht das rohe Attribut — ein Verwundeter kann Wege verlieren, die ihm gesund offenstünden. Wer eine neue Sperre baut, schreibt den `sonst`-Satz mit; ein stummer gesperrter Knopf wäre die falsche Fassung derselben Idee.
+
+**Vier Zwischenfälle geben toten Fertigkeiten ihre erste Verwendung:** Feldchirurgie (Verbandsplatz), Reiten (Protze, Beutepferd), Kartenkunde (Ingenieur), Bildung vor Rang 4 (Briefe). Das ist die Einlösung von Exploit 3: Die Herkünfte, die in diese Währungen zahlen, sehen jetzt etwas dafür. Der Hänge-Zustand steht in `LAUF.marsch` und wird von `naechster()` vor der Station geprüft — wer mitten im Zwischenfall aufhört, steht wieder vor ihm, wie bei den Gefechts-Ereignissen.
+
+Gemessen (je 40 Läufe): Die Zwischenfälle kosten auch den Vorsichtigen — 95 % statt 100 %, 2 Tote je Gemüt. Der Abstand der Gemüter liegt jetzt in Rang und Punkten, nicht mehr nur im Überleben.
+
 ### Ein verlorenes Gefecht kostet Blut (`kampfEnde` in `src/kampf.js`)
 
 ```js
@@ -473,8 +484,10 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | + Selbstheilung 8 %, Atem-Deckel, Kniegrenze, Sondermissionen · v / m | 40 / 40 | 100 / 98 % | 93 / 93 % | 206 / 215 |
 | Selbstheilung auf 5 % · vorsichtig | 40 | 100 % | 85 % | 202 |
 | dieselbe Fassung · mutig | 40 | 98 % | 88 % | 215 |
-| **+ Sondermissions-Ketten, Stufenschaden 12–20 (gültig) · vorsichtig** | **40** | **100 %** | **85 %** | **202** |
-| **dieselbe Fassung · mutig** | **40** | **95 %** | **95 %** | **202** |
+| + Sondermissions-Ketten, Stufenschaden 12–20 · vorsichtig | 40 | 100 % | 85 % | 202 |
+| dieselbe Fassung · mutig | 40 | 95 % | 95 % | 202 |
+| **+ Marsch-Zwischenfälle (gültig) · vorsichtig** | **40** | **100 %** | **78 %** | **196** |
+| **dieselbe Fassung · mutig** | **40** | **98 %** | **88 %** | **202** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 

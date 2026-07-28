@@ -5,6 +5,18 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Elf Zwischenfälle auf dem Marsch, mit Sperr-Sätzen
+
+**Zwischen den Stationen kann jetzt etwas passieren** (`MARSCH_EREIGNISSE`, 35 % je Station mit Marschweg, jeder einmal je Lauf, nie vor Gefechten): der Verbandsplatz nach dem Gefecht, Briefe für die Kameraden, die durchgehende Protze, die Nachtwache, Karten um Sold, Requisition mit Quittung, der kranke Nebenmann — und in Ägypten der halbe Brunnen, das reiterlose Mamlukenpferd, die Karte des Ingenieurs, der Basar von Kairo. Ein Zwischenfall tötet nie (Leben klemmt bei 1); er kostet Blut, Atem, Geld oder Ruf und gibt Kameradschaft, Gunst und Fertigkeiten.
+
+**Die Sperr-Regel ist neu:** Wer eine Probe erkennbar nicht bestehen kann (`ab:{min, sonst}`), bekommt keinen Knopf, sondern einen Satz — „Du musst verneinen, wie fast alle." Geprüft gegen `wert()`, ein Verwundeter kann also Wege verlieren.
+
+**Feldchirurgie, Reiten, Kartenkunde und Bildung haben damit ihre erste Verwendung** — die Einlösung des dritten Erschaffungs-Exploits: Die Herkünfte, die in diese Währungen zahlen (Fuhrmann, Schreiber), sehen jetzt etwas dafür.
+
+Gemessen (je 40): vorsichtig 95 % beide Feldzüge, 2 Tote · mutig 95 %, 2 Tote, mehr Elite (93 gegen 80 %) und mehr Punkte. Die Zwischenfälle kosten auch den Vorsichtigen.
+
+---
+
 ## 2026-07-28 — Sondermissionen sind Ketten: Proben, die sofort bluten
 
 **Der riskante Weg der vier Sondermissionen ist jetzt ein Gang aus zwei bis drei Proben** (`kette:` statt `probe:`), und jeder Fehlschlag kostet sofort 12–20 Leben — Akkon: Rampe (Geschick 40) → Bresche (Bajonett 45) → Rückweg (Kaltblütigkeit 45), Worst Case rund 50 Punkte in einem Zug. Wer unterwegs auf null fällt, fällt dort, mit eigenem Todestext („Gefallen in der Bresche von Akkon", „Im Sumpf von Arcole geblieben", „Im Karree bei Embabeh gefallen", „Gefallen auf der Brücke von Lodi"). Zurück gibt es ab der ersten Stufe nicht.

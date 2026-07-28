@@ -1853,6 +1853,239 @@ function fortsetzen(){
   LAUF = d; binde(); naechster();
 }
 
+/* ══════════════════ ZWISCHENFÄLLE AUF DEM MARSCH ══════════════════
+
+   Zwischen den Gefechten liegen Wochen, und bisher lagen sie nur im Wegband.
+   Ein Zwischenfall ist eine kleine Szene, die beim Betreten einer Station mit
+   Marschweg fallen kann (35 %, jeder nur einmal je Lauf): ein Weg mit Probe
+   und Preis, ein Weg, der wenig kostet. Der Tod gehört ins Gefecht —
+   `anwenden()` klemmt das Leben bei 1, ein Zwischenfall schwächt höchstens.
+
+   **Wer eine Probe erkennbar nicht bestehen kann, bekommt keinen Knopf,
+   sondern einen Satz** (`ab:{min, sonst}`): Der Analphabet wird nicht gefragt,
+   ob er Briefe schreiben will — er muss verneinen, und das steht dann da.
+   Geprüft wird gegen wert(), nicht das rohe Attribut: Ein Verwundeter kann
+   Wege verlieren, die ihm gesund offenstünden.
+
+   Vier Zwischenfälle geben toten Fertigkeiten ihre erste Verwendung:
+   Feldchirurgie (der Verbandsplatz), Reiten (Protze und Beutepferd),
+   Kartenkunde (der Ingenieur), Bildung (die Briefe). Das ist Absicht — die
+   Herkünfte, die in diese Währungen zahlen, sollen etwas dafür sehen. */
+
+const MARSCH_EREIGNISSE = [
+
+  {id:'feldscher', titel:'Der Feldscher braucht Hände',
+   wenn:(n)=> LAUF.node>0 && (KAPITEL[LAUF.node-1]||{}).typ==='kampf',
+   text:['Hinter der Kirche liegen die Verwundeten von gestern in zwei Reihen, und zwischen ihnen geht ein einziger Mann mit aufgekrempelten Ärmeln. Er sieht dich an, weil du gerade da bist.',
+         '„Halten kannst du doch", sagt er. Es ist keine Frage.'],
+   optionen:[
+     {label:'Die Nacht am Verbandsplatz bleiben', hint:'Halten, ziehen, zunähen', risk:true,
+      probe:{wert:'feldchirurgie', schw:25},
+      erfolg:{text:'Du hältst, was gehalten werden muss, und lernst, wohin man sieht und wohin nicht. Gegen Morgen sagt der Feldscher, du hättest ruhige Hände. Von ihm ist das eine Auszeichnung.',
+              kameradschaft:8, gunst:1, ruf:1, fert:{feldchirurgie:6}, atem:-8},
+      misserfolg:{text:'Der dritte Mann stirbt, während du ihn hältst, und du spürst genau den Augenblick, in dem er es tut. Der Feldscher arbeitet weiter. Du auch, aber deine Hände sind es nicht mehr.',
+              belastung:8, fert:{feldchirurgie:4}, atem:-8}},
+     {label:'Weitergehen', hint:'Dafür gibt es Sanitäter',
+      erfolg:{text:'Du gehst weiter, wie fast alle. Was hinter der Kirche passiert, hört man bis zum Morgen.'}}]},
+
+  {id:'briefe', titel:'Briefe nach Hause',
+   text:['Nach dem Sold kommt das Heimweh. Drei Männer aus deiner Korporalschaft sitzen um eine Kiste und drehen ein leeres Blatt zwischen den Fingern — die Familie soll wissen, dass man lebt, und keiner von ihnen kann es ihr schreiben.'],
+   optionen:[
+     {label:'Sich als Schreiber anbieten', hint:'Zwei Sous je Brief',
+      probe:{wert:'bildung', schw:35}, ab:{min:30,
+        sonst:'Die Kameraden fragen die Reihe entlang, wer schreiben kann. Auch dich. Du musst verneinen, wie fast alle, und das Blatt bleibt leer, bis einer den Fourier bezahlt.'},
+      erfolg:{text:'Du schreibst drei Briefe, langsam und in großen Buchstaben. Was die Männer diktieren, ist immer dasselbe: Es geht mir gut, das Land ist reich, schickt Nachricht. Sie zahlen, und sie merken sich, wer ihnen geholfen hat.',
+              geld:4, kameradschaft:6},
+      misserfolg:{text:'Beim zweiten Brief gerät der Name des Dorfes falsch, und der Mann sieht es nicht — aber der Fourier, der abends die Post siegelt, sieht es und liest ihn laut vor. Es wird gelacht. Nicht über den Mann.',
+              ruf:-1, belastung:4, kameradschaft:2}},
+     {label:'Zuhören, wie diktiert wird', hint:'Es kostet nichts',
+      erfolg:{text:'Du sitzt dabei und hörst zu, was Männer nach Hause schreiben lassen, die seit einem Jahr nicht zu Hause waren. Es ist immer derselbe Brief. Er stimmt nie, und er soll auch nicht stimmen.',
+              kameradschaft:2}}]},
+
+  {id:'protze', titel:'Die durchgehende Protze',
+   text:['Vor dir in der Kolonne geht ein Geschirr durch: zwei Pferde, eine Munitionsprotze, die Deichsel voran in die Marschordnung. Der Fahrer hängt halb im Sattel und hat die Zügel nicht mehr.',
+         'Es sind vierzig Schritt, bis sie die Kompanie erreicht.'],
+   optionen:[
+     {label:'Den Pferden in die Zügel fallen', hint:'Vor die Deichsel, nicht daneben', risk:true,
+      probe:{wert:'reiten', schw:35}, ab:{min:20,
+        sonst:'Du hast nie im Leben ein Pferd am Zügel gehabt und weißt es. Du springst zur Seite, wie alle springen.'},
+      erfolg:{text:'Du fasst das Sattelpferd am Backenstück und lehnst dich mit dem ganzen Gewicht hinein, und nach zwanzig Schritt steht es, zitternd und weiß am Hals. Der Fahrer wird abgelöst. Dich fragt ein Leutnant nach deinem Namen.',
+              ruf:2, gunst:1, fert:{reiten:4}},
+      misserfolg:{text:'Du bekommst den Zügel zu fassen und dann den Huf. Er trifft den Oberschenkel, nicht das Knie — das ist der ganze Unterschied zwischen einer schlechten Woche und einem Lazarett.',
+              wunde:'Huftritt', belastung:4}},
+     {label:'Die Deichsel packen', hint:'Geschick · mit dem Gewicht bremsen', risk:true,
+      probe:{wert:'geschick', schw:40},
+      erfolg:{text:'Du wirfst dich an die Deichsel und drückst sie herum, und die Protze schert aus der Kolonne, statt hineinzupflügen. Zwei andere hängen sich dazu. Es reicht.',
+              ruf:2, atem:-8},
+      misserfolg:{text:'Die Deichsel schlägt aus wie ein Balken im Sturm und wirft dich ins Feld. Die Protze fängt ein anderer — du fängst die Blicke.',
+              leben:-8, belastung:6}},
+     {label:'Beiseite springen', hint:'Das Naheliegende',
+      erfolg:{text:'Du springst, die Kolonne spritzt auseinander, und hundert Schritt weiter läuft sich das Gespann im Acker fest. Zwei Mann liegen im Graben. Es hätte schlimmer kommen können, sagt man sich, bis es einer nicht mehr sagen kann.',
+              belastung:2}}]},
+
+  {id:'nachtwache', titel:'Die vierte Stunde',
+   wenn:()=> S.rang <= 2,
+   text:['Doppelposten am Rand des Lagers, die Stunde vor dem Morgengrauen. Dein Nebenposten schläft im Stehen, den Rücken am Baum, und vor euch ist ein Geräusch, das ein Igel sein kann oder nicht.'],
+   optionen:[
+     {label:'Wach bleiben und nachsehen', hint:'Zehn Schritt ins Dunkel',
+      probe:{wert:'kaltbluetigkeit', schw:35},
+      erfolg:{text:'Du gehst dem Geräusch entgegen, die Muskete halb angeschlagen, und stellst zwei Nachzügler einer feindlichen Patrouille, die sich verlaufen haben. Der wachhabende Sergent nimmt sie dir ab und merkt sich, wer sie gebracht hat.',
+              ruf:2, gunst:1},
+      misserfolg:{text:'Du gehst hin und findest nichts, und auf dem Rückweg findet dich der Rundgang — zehn Schritt vom Posten entfernt, den du nicht hättest verlassen dürfen. Die Erklärung interessiert niemanden.',
+              ruf:-1, belastung:5}},
+     {label:'Am Posten dösen wie der Nebenmann', hint:'Es ist die vierte Stunde',
+      erfolg:{text:'Du döst im Stehen, das Kinn auf der Brust, und nichts passiert. In dieser Nacht.',
+              belastung:-2}}]},
+
+  {id:'kartenspiel', titel:'Karten um Sold',
+   text:['Zahltag, und am dritten Feuer wird nicht um Knöpfe gespielt. Der Bursche, der die Bank hält, hat weiche Hände und gewinnt seit einer Stunde etwas zu gleichmäßig.'],
+   optionen:[
+     {label:'Sich setzen und die Bank beobachten', hint:'Menschenkenntnis · sein Sold gegen deinen', risk:true,
+      probe:{wert:'menschenkenntnis', schw:45},
+      erfolg:{text:'Du siehst nach vier Spielen, wann er unten abhebt, und setzt nur dann dagegen. Er merkt, dass du es merkst, und die Bank wird ehrlich — für dich. Du stehst mit acht Francs auf.',
+              geld:8, kameradschaft:2},
+      misserfolg:{text:'Du siehst nichts, setzt zweimal falsch und stehst mit leichter Tasche auf. Am nächsten Feuer erzählt einer, der Bursche zinke — aber das hilft deinem Sold nicht mehr.',
+              geld:-6, belastung:4}},
+     {label:'Zusehen und die Finger vom Sold lassen', hint:'Es kostet nichts',
+      erfolg:{text:'Du siehst zu, wie andere verlieren, und trinkst den Schnaps, den ein Gewinner ausgibt. Das ist die einzige sichere Rechnung an diesem Feuer.',
+              kameradschaft:2}}]},
+
+  {id:'requisition', titel:'Requisition mit Quittung',
+   text:['Der Fourier braucht zwei Mann für ein Dorf abseits der Straße: Heu, Brot und einen Ochsen — gegen Quittung, sagt der Befehl, denn geplündert wird hier nicht mehr, seit der Stab im Land lebt.'],
+   optionen:[
+     {label:'Die Quittung führen', hint:'Verwaltung · das Papier ist die Waffe',
+      probe:{wert:'verwaltung', schw:35}, ab:{min:20,
+        sonst:'Der Fourier hält dir Papier und Feder hin und sieht dich an. Dann sieht er dich genauer an und gibt beides dem Nebenmann.'},
+      erfolg:{text:'Du schreibst auf, was genommen wird, mit Menge und Namen, und der Bauer bekommt sein Papier. Er glaubt nicht daran, aber er sieht, dass gezählt wurde — und der Fourier sieht es auch.',
+              gunst:1, geld:5, fert:{verwaltung:5}},
+      misserfolg:{text:'Deine Liste und der Wagen stimmen nicht überein, und was fehlt, fehlt zu deinen Lasten. Der Bauer beschwert sich beim Stab, mit deinem Zettel in der Hand.',
+              ruf:-2, belastung:4}},
+     {label:'Nur tragen und laden', hint:'Das Papier führen andere',
+      erfolg:{text:'Du lädst Heu und treibst den Ochsen, und was auf dem Papier steht, ist nicht deine Sache. Der Rückweg ist lang und riecht nach Stall.',
+              atem:-6}}]},
+
+  {id:'nebenmann', titel:'Der Mann neben dir',
+   text:['Guérin hält seit zwei Tagen nicht mehr Schritt. Das Fieber sitzt ihm in den Augen, die Schuhe sind seit Wochen offen, und heute Mittag ist er zum ersten Mal aus der Reihe gekippt und wieder aufgestanden, als hätte niemand es gesehen.',
+         'Der Weg ist noch elf Kilometer.'],
+   optionen:[
+     {label:'Seinen Tornister dazunehmen', hint:'Sechzig Pfund werden hundert', risk:true,
+      probe:{wert:'konstitution', schw:40},
+      erfolg:{text:'Du trägst beide Tornister die elf Kilometer, und Guérin geht neben dir, leicht wie ein Kranker. Im Lager stellt er dir wortlos seinen Wein hin. Ab heute ist das dein Mann, und jeder weiß es.',
+              kameradschaft:10, gunst:1, ruf:1, atem:-14},
+      misserfolg:{text:'Nach sechs Kilometern trägst du zwei Tornister und schleifst einen Mann, und dann geht es nicht mehr. Der Karren der Nachhut nimmt ihn auf — was er dort aufschnappt, überlebt nicht jeder.',
+              atem:-16, belastung:6, kameradschaft:4}},
+     {label:'Weitermarschieren', hint:'Jeder trägt seins',
+      erfolg:{text:'Du marschierst weiter, wie die Reihe marschiert. Guérin kommt am Abend nicht ins Lager. Am Morgen auch nicht. Sein Platz im Glied bleibt zwei Tage leer, dann rückt einer nach.',
+              kameradschaft:-4}}]},
+
+  /* ── Ägypten: die Wüste stellt andere Fragen ── */
+
+  {id:'brunnen', titel:'Der halbe Brunnen', kapitel:'aegypten',
+   text:['Der Brunnen am Rastplatz gibt Wasser für die Hälfte derer, die darum stehen. Es gibt keinen Offizier in Sichtweite, nur Durst, Ellenbogen und einen Eimer an einem zu kurzen Seil.'],
+   optionen:[
+     {label:'Eine Reihenfolge durchsetzen', hint:'Autorität · Verwundete zuerst', risk:true,
+      probe:{wert:'autoritaet', schw:40},
+      erfolg:{text:'Du stellst dich an den Rand und teilst ein: Verwundete, dann die Kompanien der Reihe nach, ein Eimer je Korporalschaft. Es murrt, aber es hält — weil einer da ist, der zählt.',
+              ruf:2, gunst:1, kameradschaft:4},
+      misserfolg:{text:'Du hebst die Stimme, und für einen Augenblick hört sogar jemand hin. Dann kippt der erste Eimer im Gedränge, und danach gilt wieder das Recht des längeren Arms. Deinen Namen merken sich die Falschen.',
+              belastung:6, kameradschaft:-4}},
+     {label:'Sich anstellen wie alle', hint:'Der Arm ist lang genug',
+      erfolg:{text:'Du wartest, drängst, wenn gedrängt wird, und bekommst einen halben Eimer, lauwarm und trüb. Es ist das beste Wasser seit Tagen.',
+              atem:4}}]},
+
+  {id:'beutepferd', titel:'Das reiterlose Pferd', kapitel:'aegypten',
+   text:['Nach dem Gefecht läuft ein Mamlukenpferd zwischen den Kompanien umher, gesattelt, die Steigbügel schlagend, die Satteltaschen schwer. Wer es fängt, dem gehört, was der Reiter nicht mehr braucht — so hält es die Armee, solange kein Offizier zusieht.'],
+   optionen:[
+     {label:'Es einfangen', hint:'Ruhig, von der Seite, an die Trense', risk:true,
+      probe:{wert:'reiten', schw:40}, ab:{min:20,
+        sonst:'Du weißt nicht einmal, an welcher Seite man ein Pferd anfasst. Zwei Chasseure wissen es, und die Satteltaschen gehören ihnen.'},
+      erfolg:{text:'Du gehst schräg von hinten heran, redest Unsinn in ruhigem Ton und hast auf einmal die Trense in der Hand. In den Satteltaschen: ein Beutel Piaster und ein Pistolenpaar, das ein Escadronchef dir gegen gutes Geld abnimmt.',
+              geld:12, ruf:1, fert:{reiten:4}},
+      misserfolg:{text:'Das Pferd lässt dich bis auf einen Schritt heran und dreht dann die Hinterhand. Der Schlag wirft dich in den Sand, und als du wieder Luft hast, führt ein Chasseur das Pferd am Zügel davon.',
+              leben:-8, belastung:4}},
+     {label:'Es laufen lassen', hint:'Beute macht Neider',
+      erfolg:{text:'Du siehst zu, wie andere sich darum balgen. Am Abend hat es ein Wachtmeister der Kavallerie, und die, die es fingen, haben den Streit.'}}]},
+
+  {id:'ingenieur', titel:'Die Karte des Ingenieurs', kapitel:'aegypten',
+   text:['Ein Ingenieurgeograph des Stabes sitzt am Rand der Marschsäule, die Karte auf den Knien, und vergleicht Brunnen, die es geben soll, mit Brunnen, die es gibt. Er sucht jemanden, der gestern die Vorhut gegangen ist — und der eine Karte halten kann, ohne sie zu drehen.'],
+   optionen:[
+     {label:'Die Route mit ihm abgleichen', hint:'Kartenkunde · Brunnen, Wadis, Stunden',
+      probe:{wert:'kartenkunde', schw:35}, ab:{min:20,
+        sonst:'Er hält dir die Karte hin. Die Linien sagen dir nichts, und er sieht es an deinen Augen, bevor du etwas sagen musst. „Schon gut", sagt er und winkt den Nächsten heran.'},
+      erfolg:{text:'Du zeigst ihm den Brunnen, der versandet ist, und den Umweg über das Wadi, der eine Stunde kostet und zwei spart. Er zeichnet nach, fragt zweimal nach und schreibt sich am Ende deine Kompanie auf.',
+              gunst:1, ruf:1, fert:{kartenkunde:6}},
+      misserfolg:{text:'Du verwechselst zwei Wadis, die auf der Karte gleich aussehen und im Sand nicht. Die Kolonne merkt es am nächsten Mittag, als der Brunnen nicht kommt. Dass es dein Finger auf der Karte war, wissen zum Glück nur zwei.',
+              belastung:5, atem:-6, fert:{kartenkunde:3}}},
+     {label:'Wasser holen, während andere rechnen', hint:'Karten sind Offizierssache',
+      erfolg:{text:'Du füllst die Feldflaschen der Korporalschaft, solange die Reihe kurz ist. Es ist die nützlichste Viertelstunde des Tages, auch wenn sie in keinem Bericht steht.',
+              atem:4}}]},
+
+  {id:'basar', titel:'Der Basar', kapitel:'aegypten',
+   text:['Im Basar von Kairo gibt es alles, was der Armee fehlt: Kaffee, Datteln, Seife, Tabak. Die Preise entstehen beim Ansehen des Käufers, und du trägst die falsche Uniform für gute Preise.'],
+   optionen:[
+     {label:'Handeln, wie der Dolmetscher es vorgemacht hat', hint:'Menschenkenntnis · weggehen gehört dazu', risk:true,
+      probe:{wert:'menschenkenntnis', schw:45},
+      erfolg:{text:'Du bietest ein Drittel, gehst zweimal weg und lässt dich zweimal zurückrufen. Am Ende zahlst du die Hälfte des ersten Preises und bekommst den Kaffee dazu, den der Händler „nur für dich" aufbrüht. Ihr betrügt euch beide und seid zufrieden.',
+              geld:6, belastung:-4},
+      misserfolg:{text:'Du zahlst den ersten Preis, und am Nachbarstand zahlt ein Chasseur für dasselbe die Hälfte. Der Händler segnet dich beim Einpacken. Jetzt weißt du auch, warum.',
+              geld:-5, belastung:3}},
+     {label:'Das Geld in der Tasche lassen', hint:'Sold ist Sold',
+      erfolg:{text:'Du gehst durch die Gassen, siehst und riechst, was es alles gäbe, und behältst die Hand am Beutel — auch, weil hier Hände unterwegs sind, die schneller sind als deine.'}}]}
+];
+
+/* Welche Wege offenstehen: Ein `ab.min` gegen wert() sperrt den Knopf und
+   liefert stattdessen den Satz, der an seine Stelle tritt. */
+function marschOffen(e){ return e.optionen.filter(o => !(o.ab && o.probe && wert(o.probe.wert) < o.ab.min)); }
+function marschVerwehrt(e){ return e.optionen.filter(o => o.ab && o.probe && wert(o.probe.wert) < o.ab.min); }
+
+function marschWuerfeln(n){
+  const gesehen = S.marschGesehen || [];
+  const aeg = (STATIONEN.aegypten||[]).some(x=>x.id===n.id);
+  const pool = MARSCH_EREIGNISSE.filter(e =>
+    !gesehen.includes(e.id) &&
+    (!e.kapitel || (e.kapitel==='aegypten' && aeg)) &&
+    (!e.wenn || e.wenn(n)));
+  if(!pool.length || Math.random() > 0.35) return null;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function zeigeMarschEreignis(e, n){
+  const offen = marschOffen(e);
+  const opt = offen.map((o,i)=>`<button class="ord ${o.risk?'risk':''}" onclick="marschWaehlen(${i})">
+    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`).join('');
+  const gesperrt = marschVerwehrt(e).map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}<div class="card"><div class="ch"><span>Auf dem Marsch · ${esc(e.titel)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="prose">${e.text.map(t=>`<p>${t}</p>`).join('')}${gesperrt}</div></div></div>
+      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+function marschWaehlen(i){
+  const e = MARSCH_EREIGNISSE.find(x=>x.id===LAUF.marsch);
+  const n = KAPITEL[LAUF.node];
+  const o = marschOffen(e)[i];
+  let w, klasse='gut', probeText='';
+  if(o.probe){
+    const p = probe(o.probe.wert, o.probe.schw);
+    w = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
+    klasse = p.erfolg ? 'gut' : 'schlecht';
+    probeText = `<div class="pruefung ${klasse}">${NAMEN[o.probe.wert]} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+  } else w = o.erfolg;
+  anwenden(w);
+  S.log.push('marsch: '+o.label);
+  LAUF.marsch = null;
+  laufSichern();
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>Auf dem Marsch · ${esc(e.titel)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="ergebnis ${klasse}">${w.text}${probeText}</div>${wirkungen(w)}
+      </div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 /* ══════════════════ ABLAUF ══════════════════ */
 
 function naechster(){
@@ -1868,6 +2101,25 @@ function naechster(){
   }
   laufSichern();
   kopfzeile();
+  /* Zwischenfall auf dem Marsch: hängt einer an (auch nach Fortsetzen), steht
+     er wieder da; sonst wird beim ersten Betreten einer Station mit Marschweg
+     einmal gewürfelt. Vor Gefechten nicht — dort trägt der Anmarsch die Last. */
+  if(LAUF.marsch){
+    const me = MARSCH_EREIGNISSE.find(x=>x.id===LAUF.marsch);
+    if(me){ zeigeMarschEreignis(me, n); return; }
+    LAUF.marsch = null;
+  }
+  if(n.marsch && n.id && n.typ!=='kampf' && LAUF.marschGeprueft !== n.id){
+    LAUF.marschGeprueft = n.id;
+    const me = marschWuerfeln(n);
+    if(me){
+      LAUF.marsch = me.id;
+      (S.marschGesehen = S.marschGesehen||[]).push(me.id);
+      laufSichern();
+      zeigeMarschEreignis(me, n); return;
+    }
+    laufSichern();
+  }
   if(n.typ==='szene') zeigeSzene(n);
   else if(n.typ==='lager') zeigeLager(n);
   else if(n.typ==='kampf'){
@@ -1962,7 +2214,7 @@ function waehleOption(i){
 }
 function wirkungen(e){
   const t=[];
-  const m = {ruf:'Ruf',gunst:'Gunst',kameradschaft:'Kameradschaft',belastung:'Belastung',atem:'Atem',geld:'Francs'};
+  const m = {ruf:'Ruf',gunst:'Gunst',kameradschaft:'Kameradschaft',belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben'};
   for(const k in m) if(e[k]) t.push(`${m[k]} ${e[k]>0?'+':''}${e[k]}`);
   if(e.attr) for(const k in e.attr) t.push(`${NAMEN[k]} ${e.attr[k]>0?'+':''}${e.attr[k]}`);
   if(e.fert) for(const k in e.fert) if(e.fert[k]) t.push(`${NAMEN[k]} ${e.fert[k]>0?'+':''}${e.fert[k]}`);
