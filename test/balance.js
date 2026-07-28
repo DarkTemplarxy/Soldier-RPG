@@ -191,11 +191,25 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
         }
 
         else if (txt.includes('VERBLEIBENDE WOCHEN')) {
-          // Winterquartier: die einzige Woche, die 60 % Leben und eine Wunde zurückgibt.
+          /* Winterquartier **und** Garnisonssaison — dieselbe Maschine, zwei
+             sehr verschiedene Fragen. Im Winterquartier zwischen zwei Feldzügen
+             geht es ums Heilwerden; in der Garnison ist der Feind die Zeit, und
+             wer sie vertrödelt, sitzt in fünf Jahren bei Bildung 20 fest.
+
+             **Die Reihenfolge ist die Lektion des Kapitels.** Bildung zuerst,
+             solange die Schwellen nicht stehen (35 für den Fourrier, 50 für den
+             Offizier später) — sonst misst das Skript wieder die Blindheit des
+             Bots und nicht das Spiel. Dieselbe Regel wie damals bei der Gunst. */
           if (anteil < 0.8 || S.wunden.length) z = f(/Schlafen, essen/);
-          if (!z && gunst('martel') < 4) z = f(/Martel/);
+          // Garnison: die Regimentsschule ist das einzige Fenster für Bildung
+          if (!z && S.attr.bildung < 50) z = f(/Regimentsschule/);
+          if (!z && S.rang >= 5) z = f(/Rekruten des Jahrgangs|Berichte schreiben/);
+          if (!z && S.rang >= 4 && gunst('collot') < 4) z = f(/Magazin verwalten/);
+          if (!z && gunst('martel') < 4) z = f(/Martel|Wirtshaus/);
+          if (!z && S.ausr.schuhe.zustand < 55 && S.geld >= 18) z = f(/Marketender/);
           if (!z && S.ausr.schuhe.zustand < 70) z = f(/Ausrüstung instand/);
-          if (!z) z = f(/Drillen/);
+          if (!z && S.geld < 20) z = f(/Nebenher arbeiten/);
+          if (!z) z = f(/Drillen/) || f(/Fechtboden/) || f(/Schlafen, essen/);
         }
 
         else if (f(/Zu den Voltigeuren/) || f(/Zu den Grenadieren/)) {

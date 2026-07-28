@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 3;   // 2: Lebenspunkte · 3: die Kette über dir statt einer Gunst-Zahl
+const LAUF_FASSUNG    = 4;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -100,6 +100,13 @@ const LAUF_WANDLER = {
       delete m.gunst;
     }
     return Object.assign({}, alt, {fassung:3});
+  },
+  /* Fassung 3 kannte keine Orden. Ein angefangener Feldzug bekommt eine leere
+     Liste — nachträglich verleihen wäre geraten, und `ordenFaellig()` holt es
+     an der nächsten Station ohnehin nach, wenn die Bedingungen stimmen. */
+  3: alt => {
+    if(alt.mann && !alt.mann.orden) alt.mann.orden = [];
+    return Object.assign({}, alt, {fassung:4});
   }
 };
 

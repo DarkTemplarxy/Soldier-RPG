@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**, Ränge 1–3, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)** und **Kapitel 3 (Garnison 1801–04)**, Ränge 1–5, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -41,7 +41,12 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**
 | Ränge 4 und 5 mit zwei Wegen, Sektion und Abrechnung | |
 | Napoleonische Gestaltung: Papier, Kokarde, Livret, Gelände | |
 | Handbuch als eigene Seite (`wiki.html`), aus dem Spiel verlinkt | |
-| Volle Punkteskala aus KONZEPT §5 | Orden und Überlebensbonus darin |
+| Volle Punkteskala aus KONZEPT §5 | Überlebensbonus darin |
+| **Kapitel 3 (Garnison 1801–04)**, 17 Stationen | Kapitel 4–11 |
+| **Orden**: Ehrenwaffe und Ehrenlegion, VP + Ruf + Pension | weitere Grade, fremde Orden |
+| **Marketender**: Ausrüstung für Francs | Pferd, Fernrohr, Patente |
+| Vier Garnisonssaisons mit eigenen Handlungen | |
+| Ehe als Beiwerk · Duell mit Todespfad · Übungsgefecht | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -80,6 +85,7 @@ src/stil.css                    Gesamte Gestaltung
 src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kaufladen
 src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
 src/daten/kapitel02_aegypten.js Kapitel 2 als reine Daten, hängt sich selbst an
+src/daten/kapitel03_garnison.js Kapitel 3 — das Friedenskapitel, Saisons statt Lager
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -425,6 +431,47 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 
 **5 — Ein bis zwei Höhepunkte je Feldzug.** Es sind dieselben vier, die eine Sondermission tragen — **Lodi, Arcole, Embabeh, Akkon** —, und das ist kein Zufall, sondern der Entwurf: Das Gefecht, für das man berühmt wird, ist das, an dem man stirbt. Montenotte und Alexandria bleiben Lehrgefechte. `haerte` schaltet Schaden *und* Gefahr zusammen, damit ein Feld genügt; angesagt wird es im Lagebild („Das hier wird kein gewöhnliches Gefecht"), überrascht wird niemand. **Die +3 Gefahr sind der einzige der fünf Hebel, der auch den Vorsichtigen trifft** — beschossen wird man, ob man vortritt oder nicht.
 
+### Kapitel 3 — das Friedenskapitel (`kapitel03_garnison.js`)
+
+**Im Krieg ist der Feind die Kugel. Im Frieden ist der Feind die Zeit.** Das ist der ganze Entwurf. Die Maschine bleibt dieselbe — Stationen, Proben, Saisons, am Ende sogar ein Gefecht —, aber der Einsatz ist nicht Blut, sondern Zukunft: Bildung, Geld, Beziehungen, Stand.
+
+> **Warum das Kapitel überhaupt eine Gefahr ist.** Der Motor des Spiels lautet Gefecht → Tote → Vakanz → Aufstieg. Im Frieden fällt er aus, und KONZEPT setzt für die Garnison 98 % Überleben an. Wer es als „Lager, nur länger" baut, bekommt genau die Verwaltung, vor der die Lagerregel warnt. Vier Dinge halten dagegen:
+
+| Hebel | Was es tut |
+|---|---|
+| **Vier Saisons statt sechzehn Abende** | Dieselbe Knappheit wie im Lager, auf Jahresmaßstab: in jeder Saison mehr zu tun als Wochen |
+| **Das Duell** (`duell`) | Die einzige Kette des Kapitels und die einzige Stelle, an der eine **Szene töten darf** |
+| **Das große Manöver** (`uebung:true`) | Volles Kampfsystem mit Platzpatronen — dasselbe Spiel, andere Währung |
+| **Die Decke hat ein Gesicht** | Über dem Sergenten sitzt Martel, und der geht nicht weg (`keinZiel` in der Boulogne-Musterung) |
+
+**Die Regimentsschule ist das eigentliche Nadelöhr.** Kapitel 3 ist das einzige Fenster, in dem ein Analphabet auf die 35 des Fourriers und in die Nähe der 50 kommt, die Rang 7 später verlangt. Wer die Jahre vertrödelt, sitzt fest — der „Rangstillstand als Druckmittel" aus KONZEPT §9. **Deshalb muss der Testbot die Schule kennen**, sonst misst das Skript wieder seine eigene Blindheit statt der Schwelle (dieselbe Lektion wie damals bei der Gunst).
+
+**Die Ehe ist Beiwerk, kein System** — genau wie KONZEPT §10 es festlegt. Zwei Szenen (Werbung, Erlaubnis des Kompaniechefs), eine Mitgift, und `S.verheiratet` senkt die Belastung um **1 je Station**. Keine Kinder, kein Erbe, keine Folgegeneration.
+
+**Was Kapitel 3 an Code gebraucht hat** — bewusst wenig, alles wiederverwendbar:
+
+| Bau | Wo | Wofür |
+|---|---|---|
+| Wochenverteilung datengesteuert | `WINTER_TUN`, `winterHandlungen()` | Saisons sehen anders aus als Winterquartiere, ohne Code je Kapitel |
+| Ketten in Szenen | `waehleOption()` | das Duell — Semantik identisch zu den Sondermissionen |
+| `heilt:` und `setzt:` | `anwenden()` | Lazarett von Marseille · Ehe- und Streit-Merkmale |
+| `uebung:true` | `kampfAktion()` | ein Treffer ist ein Unfall, tötet nie |
+| `zwischenfall:true` | `naechster()` | Zwischenfälle ohne Marschweg — in einer Garnison marschiert niemand |
+| `ab:` in Szenen | `szeneVerwehrt()` | dieselbe Sperr-Regel wie beim Marsch: kein Knopf, sondern ein Satz |
+
+### Orden und Auszeichnungen (`ORDEN` in `grundwerte.js`)
+
+**Nennungen im Tagesbefehl waren bis dahin eine Zahl ohne Folge.** Orden sind die Folge, und sie zahlen in drei Währungen zugleich, damit sie sich nicht wie Deko anfühlen:
+
+| Orden | Bedingung | VP | Ruf | Pension |
+|---|---|---|---|---|
+| **Ehrenwaffe** | 3 Nennungen, 1799–1803 | 10 | +6 | 0,5 F je Station |
+| **Ehrenlegion** | eine Ehrenwaffe — *oder* 5 Nennungen und Ruf 45, ab 1804 | 12 | +10 | 1 F je Station |
+
+> **Historisch trägt sich der Bogen selbst.** Die *armes d'honneur* wurden 1799–1802 an einfache Soldaten für einzelne Taten vergeben — genau die Jahre von Ägypten. Wer eine besaß, wurde bei der Stiftung der Ehrenlegion **von Rechts wegen aufgenommen**, ohne weitere Prüfung; die erste große Verleihung war das Lager von Boulogne am 16. August 1804. **Das ist die einzige Auszeichnung im Spiel, die man sich in einem Kapitel verdient und in einem anderen einlöst.**
+
+**Geprüft, nicht gewürfelt** (`ordenFaellig()`). Ein Orden ist die einzige Belohnung, bei der man hinterher genau sagen können soll, wofür — Zufall würde das kaputtmachen. Die Pension ist historisch der eigentliche Wert: Die Ehrenlegion war eine Rente, kein Blech, und seit es einen Marketender gibt, ist Geld auch im Spiel etwas wert.
+
 ### Zwischenfälle auf dem Marsch (`MARSCH_EREIGNISSE` in `src/oberflaeche.js`)
 
 **Elf kleine Szenen zwischen den Stationen** — sieben allgemeine (Verbandsplatz, Briefe, Protze, Nachtwache, Kartenspiel, Requisition, der kranke Nebenmann), vier ägyptische (Brunnen, Beutepferd, Ingenieurkarte, Basar). Gewürfelt beim ersten Betreten einer Station mit Marschweg (35 %, jeder Zwischenfall einmal je Lauf, nie vor Gefechten — dort trägt der Anmarsch die Last). Ein Zwischenfall tötet nie: `anwenden()` klemmt das Leben bei 1, der Tod gehört ins Gefecht.
@@ -530,7 +577,17 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 | **überlebt** | **40–55 %** | **15–30 %** | **70–85 %** |
 | **Sergent erreicht** | **15–30 %** | **15–30 %** | **60–75 %** |
 
-Gemessen am 28.07.2026, je 40 Läufe: überlebt **43 / 20 / 73 %**, Sergent **18 / 20 / 70 %**. Alle sechs im Band.
+Gemessen mit Kapitel 3, je 40 Läufe: überlebt **55 / 25 / 70 %**, Sergent **23 / 25 / 78 %**. Fünf der sechs im Band, der Sergent beim Veteranen mit 78 % knapp darüber.
+
+> ### ⚠ Der Überlebens-Abstand ist auf 15 Punkte gefallen — die Leitzahl trägt gerade nicht
+>
+> **Die eigene Regel schlägt an:** „Schrumpft einer der beiden Abstände unter 25 Punkte, trägt die Leiter nicht mehr." Beim Sergenten stehen 55 Punkte (23 → 78), beim Überleben nur noch **15** (55 → 70). Vorher waren es 30.
+>
+> **Die Ursache ist verstanden und folgt aus dem Entwurf, nicht aus einem Fehler.** Kapitel 3 ist ein Friedenskapitel und tötet fast niemanden — KONZEPT setzt dafür 98 % an. Es *heilt* aber: Der `uebergang` am Ende von Ägypten gibt vollen Vorrat, das Lazarett von Marseille nimmt die Krankheiten, vier Saisons geben Ruhe. **Davon hat der angeschlagene Erstläufer mehr als der gesunde Veteran** — der Schwache holt auf, weil dem Starken nichts mehr zu geben ist. Deshalb steigt die untere Zahl (43 → 55 %) und die obere nicht.
+>
+> **Das Band bleibt vorerst stehen, und die Zahl wird nicht schöngerechnet.** Zwei Gründe: Erstens ist die Kompression eine Eigenschaft des *letzten* Kapitels, nicht des Spiels — mit Kapitel 4 (Austerlitz, Feindgüte 6) endet die Kampagne wieder auf einem gefährlichen Kapitel, und der Abstand öffnet sich von allein. Zweitens wäre die Alternative, ein Friedenskapitel künstlich tödlich zu machen, und das widerspricht seinem ganzen Zweck.
+>
+> **Was daraus als Regel folgt:** Die Leitzahl `überlebt` misst nur so scharf, wie das **letzte gebaute Kapitel** gefährlich ist. Endet der Ausbaustand auf einem ruhigen Kapitel, ist sie stumpf — dann ist `Sergent erreicht` die aussagekräftigere der beiden. **Wer nach Kapitel 4 misst, prüft zuerst, ob der Abstand wieder über 25 liegt.**
 
 > **Warum diese beiden und nicht die alten.** „Italien überstanden" hatte das Band 45–55 % und liefert seit den Lebenspunkten 95–100 %: Italien ist das Lehrstück und *soll* fast jeden durchlassen — die Zahl misst nichts mehr. Der Caporal-Anteil war mit 30 % gegen ein Todesmodell geeicht, in dem ein Viertel der Männer die Beförderung nie erlebte; heute ist der Caporal der *unterste* erreichbare Aufstieg und sagt über den Stand des Spiels nichts. **Beide sind als Sollwert ersatzlos gestrichen** und werden nur noch zur Einordnung mitgedruckt.
 >
@@ -544,14 +601,16 @@ Gemessen am 28.07.2026, je 40 Läufe: überlebt **43 / 20 / 73 %**, Sergent **18
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **überlebt** *(Leitzahl)* | **43 %** | **20 %** | **73 %** | 68 % |
-| **Sergent erreicht** *(Leitzahl)* | **18 %** | **20 %** | **70 %** | 80 % |
-| Gestorben | 23 von 40 | **32 von 40** | 11 von 40 | 13 von 40 |
-| Italien überstanden *(Lehrstück)* | 100 % | 95 % | 100 % | 100 % |
-| Elitekompanie erreicht | 45 % | 55 % | 93 % | 100 % |
-| Caporal erreicht | 38 % | 55 % | 93 % | 100 % |
-| Caporal-fourrier erreicht | 18 % | 20 % | 70 % | 80 % |
-| Punkte, Median | 64 | 61 | 192 | 186 |
+| **überlebt** *(Leitzahl)* | **55 %** | **25 %** | **70 %** | 63 % |
+| **Sergent erreicht** *(Leitzahl)* | **23 %** | **25 %** | **78 %** | 78 % |
+| Gestorben | 18 von 40 | **30 von 40** | 12 von 40 | 15 von 40 |
+| Italien überstanden *(Lehrstück)* | 98 % | 88 % | 100 % | 100 % |
+| Elitekompanie erreicht | 53 % | 57 % | 98 % | 98 % |
+| Caporal erreicht | 35 % | 53 % | 98 % | 95 % |
+| Caporal-fourrier erreicht | 23 % | 25 % | 78 % | 78 % |
+| Punkte, Median | 61 | 60 | 203 | 211 |
+
+*(Drei Kapitel, Stand 28.07.2026. „überlebt" heißt jetzt: alle drei hinter sich gebracht.)*
 
 > **Das ist die Kurve, um die es geht.** Italien ist das Lehrstück und lässt fast jeden durch; **Ägypten tötet den ersten Mann** — vorsichtig sehen 43 % das Ende, wer aufsteigen will, nur 20 %. Mit dem Vorrat eines guten ersten Laufs (160 VP) steigt es auf 73 %, und der Sergent wird von einer Ausnahme (18 %) zum Regelfall (70 %).
 >
@@ -623,6 +682,8 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 95 %** | **88 / 95 %** | **207 / 226** |
 | **volle Punkteskala (gültig) · Erstlauf v / m** | **40 / 40** | **100 / 95 %** | **38 / 55 %** | **64 / 61** |
 | **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **93 / 100 %** | **192 / 186** |
+| **Kapitel 3 gebaut (gültig) · Erstlauf v / m** | **40 / 40** | **98 / 88 %** | **35 / 53 %** | **61 / 60** |
+| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **98 / 95 %** | **203 / 211** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
 
@@ -889,9 +950,9 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 ## Was als Nächstes ansteht
 
-1. **Kapitel 3, Garnison 1800–04** — das nächste Kapitel und zugleich ein Verwaltungskapitel: Bildung nachholen, Beziehungen pflegen, Rangstillstand als Druckmittel. Feindgüte 0. Der Ausblick am Ende von Kapitel 2 kündigt es an.
-2. **Orden** — Nennung im Tagesbefehl wird schon gezählt, hat aber noch keine Folge. Die volle Skala hält die Plätze schon frei (+12 je Grad der Ehrenlegion, +10 je fremdem Orden).
-3. **Ausrüstungskauf im Spiel** — Geld hat weiterhin zu wenig Verwendung; ein Marketender im Lager wäre die naheliegende Anbindung.
+1. **Kapitel 4, Austerlitz 1805** — nach drei Jahren Frieden das erste Gefecht der Grande Armée. Feindgüte 6. Der Ausblick am Ende von Kapitel 3 kündigt es an.
+2. **Weitere Orden.** Die Grade der Ehrenlegion (Officier, Commandeur) und die fremden Orden (+10, höchstens zwei) sind entworfen und haben ihren Platz in der Wertung, aber nur die erste Stufe ist gebaut. **Ausdrücklicher Wunsch des Entwicklers: Auszeichnungen ausbauen** — sie bringen VP *und* Ansehen.
+3. **Rang 6 (Sergent-major)** — die Decke des Prototyps. Sie hat in Boulogne bereits ein Gesicht (Martel sitzt darauf); was fehlt, ist die Vakanz, und die kommt erst mit einem Feldzug.
 4. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
 
 > **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen (Punkt 3 der alten Liste), und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `Sergent erreicht` neu gesetzt (Punkt 2). Beides steht oben unter „Balance-Konstanten".

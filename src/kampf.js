@@ -1105,6 +1105,25 @@ function kampfAktion(id){
        das man berühmt wird, ist das, an dem man stirbt. Die Lehrgefechte
        (Montenotte, Alexandria) bleiben Lehrgefechte. Angesagt wird es im
        Lagebild vor dem Anmarsch — überrascht wird niemand. */
+    /* ── Übungsgefecht (Kapitel 3) ──
+       Das große Manöver von Boulogne benutzt das volle Kampfsystem — Sichtfeld,
+       Salven, für den Sergenten die Sektion —, aber es wird mit Platzpatronen
+       geschossen. **Dasselbe Spiel, andere Währung:** Der Einsatz ist nicht
+       Blut, sondern Sichtbarkeit, denn der Stab sieht zu.
+
+       Ein „Treffer" ist hier ein Unfall — ein Rohrkrepierer, ein Ladestock im
+       Gesicht, ein durchgehendes Pferd —, und die gab es reichlich. Er kostet
+       ein paar Punkte und Atem, tötet aber nie: Die Klemme bei 1 ist dieselbe
+       Regel wie bei den Szenen. Der Tod gehört dorthin, wo scharf geschossen
+       wird. */
+    if(n.uebung){
+      const schaden = 2 + Math.floor(Math.random()*4);        // 2–5
+      S.leben = Math.max(1, S.leben - schaden);
+      S.atem = Math.max(0, S.atem - 6);
+      treffer = ' Der Ladestock des Nebenmanns erwischt dich am Ohr, weil er ihn im Eifer nicht herausgezogen hat. Es blutet, es ist lächerlich, und der Schiedsrichter notiert dich als gefallen — für zwei Runden.';
+      K.protokoll.push('Ein Unfall im Manöver.');
+      atemKlemmen();
+    } else {
     const haerte = n.haerte || 1;
     let schaden;
     if(Math.random()*100 > 75){
@@ -1135,6 +1154,7 @@ function kampfAktion(id){
     }
     if(S.leben <= lebenMax()*0.3) treffer += ' Du bist noch auf den Beinen, aber nicht mehr lange.';
     atemKlemmen();
+    }
   }
 
   if(K.feindMoral <= 0){ kampfEnde(true, text+treffer); return; }
@@ -1494,7 +1514,7 @@ function zeigeBefoerderung(n){
     app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
       <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
         <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
-        <div class="ergebnis">Du trägst die Tresse schon. Was darüber kommt, wird nicht im Hof einer Zitadelle vergeben, sondern in Paris — und dafür braucht es mehr als einen guten Feldzug.</div>
+        <div class="ergebnis">${n.keinZiel || 'Du trägst die Tresse schon. Was darüber kommt, wird nicht im Hof einer Zitadelle vergeben, sondern in Paris — und dafür braucht es mehr als einen guten Feldzug.'}</div>
         </div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
       </div>${seitenleiste()}</div>`;

@@ -17,7 +17,7 @@ function setzeKampf(k){ if(LAUF) LAUF.kampf = k; K = k; }
 
 function neuerLauf(mann){
   LAUF = {fassung:LAUF_FASSUNG, mann, node:0, kampf:null, szene:null,
-          lager:{id:null, abende:0, log:[]}, winter:{wochen:3, log:[]},
+          lager:{id:null, abende:0, log:[]}, winter:{ort:null, wochen:3, log:[]},
           begonnen:new Date().toISOString(), zuletzt:null};
   binde();
 }
@@ -50,8 +50,58 @@ function stationErledigt(){
   const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
   if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
   else lebenAuffuellen(0.05);
+  /* Die Pension läuft, solange der Mann lebt. Historisch war die Ehrenlegion
+     genau das — eine Rente, kein Blech —, und seit es einen Marketender gibt,
+     ist Geld auch im Spiel etwas wert. Halbe Francs summieren sich langsam;
+     über ein Kapitel sind das rund zwanzig. */
+  const rente = ordenPension();
+  if(rente) S.geld += rente;
+  /* KONZEPT §10: „Briefe von zu Hause senken Belastung." Genau ein Punkt je
+     Station — kein System, ein Beiwerk, wie es dort ausdrücklich heißt. */
+  if(S.verheiratet) S.belastung = Math.max(0, S.belastung - 1);
   atemKlemmen();
   laufSichern();
+}
+
+/* ══════════════════ ORDEN ══════════════════ */
+
+function ordenPension(){
+  if(!S || !S.orden) return 0;
+  return S.orden.reduce((sum,id)=>{ const o = ordenVon(id); return sum + (o ? o.pension : 0); }, 0);
+}
+
+/* Wer welchen Orden verdient hat — **geprüft, nicht gewürfelt.** Ein Orden ist
+   die einzige Belohnung im Spiel, bei der man hinterher genau sagen können
+   soll, wofür. Zufall würde das kaputtmachen.
+
+   Rückgabe: der neu verdiente Orden oder null. Der Aufrufer zeigt ihn an;
+   verliehen wird in `ordenVerleihen()`, damit die Anzeige nicht doppelt zählt. */
+function ordenFaellig(){
+  if(!S) return null;
+  S.orden = S.orden || [];
+  const jahr = jahrVonStation();
+  if(!hatOrden('ehrenwaffe') && jahr >= 1799 && jahr <= 1803 && S.nennungen >= 3)
+    return ordenVon('ehrenwaffe');
+  if(!hatOrden('legion') && jahr >= 1804 &&
+     (hatOrden('ehrenwaffe') || (S.nennungen >= 5 && S.ruf >= 45)))
+    return ordenVon('legion');
+  return null;
+}
+
+function ordenVerleihen(o){
+  if(!o || hatOrden(o.id)) return null;
+  S.orden.push(o.id);
+  S.ruf += o.ruf;
+  S.log.push('Ausgezeichnet: ' + o.name);
+  return o;
+}
+
+/* Die Jahreszahl der aktuellen Station. Dieselbe Quelle, aus der `kaiserreich()`
+   den Adler schaltet — ein Datum, zwei Verbraucher. */
+function jahrVonStation(){
+  const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  const m = String(n.datum||'').match(/1[78]\d\d/);
+  return m ? +m[0] : 1796;
 }
 
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
@@ -90,7 +140,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
-    wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
+    wunden:[], nennungen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);
@@ -187,6 +237,17 @@ function anwenden(e){
      — Ruhr und das Fieber aus Jaffa liefern einen Mann beim nächsten Gefecht
      mit leerem Vorrat und keiner Luft ab, ohne ihn je selbst zu töten. */
   if(e.wunde){ wundeGeben(e.wunde, 8, e.zehrt); S.leben = Math.max(1, S.leben - 10); }
+  /* `heilt` nimmt Wunden weg, statt welche zu geben — die Gegenrichtung, und
+     bis Kapitel 3 gab es sie nicht. Das Lazarett von Marseille braucht sie:
+     Wer mit der Ruhr aus Ägypten kommt, soll sie *gespielt* loswerden und
+     nicht stillschweigend beim Kapitelwechsel. `'krank'` nimmt alles Zehrende,
+     eine Zahl nimmt so viele Wunden von vorn. */
+  if(e.heilt === 'krank') S.wunden = S.wunden.filter(w=>!w.zehrt);
+  else if(typeof e.heilt === 'number') S.wunden.splice(0, e.heilt);
+  /* Ein Merkmal, das über die Station hinaus gilt (Ehe, Schulden, gesehene
+     Dinge). Bewusst schmal: nur setzen, nie rechnen — wer eine Zahl braucht,
+     nimmt eines der bestehenden Felder. */
+  if(e.setzt) for(const k in e.setzt) S[k] = e.setzt[k];
   atemKlemmen();
 }
 

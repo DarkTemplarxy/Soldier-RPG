@@ -5,6 +5,57 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Kapitel 3: Garnison 1801–04, und die Orden
+
+**Das dritte Kapitel, 17 Stationen, Nîmes und das Lager von Boulogne.** Dazu das Ordenssystem, ein Marketender und vier neue Zwischenfälle.
+
+### Der Entwurf in einem Satz
+
+**Im Krieg ist der Feind die Kugel. Im Frieden ist der Feind die Zeit.** Die Maschine bleibt dieselbe — Stationen, Proben, Saisons, am Ende sogar ein Gefecht —, aber der Einsatz ist nicht Blut, sondern Zukunft: Bildung, Geld, Beziehungen, Stand.
+
+Die Gefahr war, aus vier Friedensjahren eine Verwaltung zu machen. Vier Hebel halten dagegen:
+
+| Hebel | Was es tut |
+|---|---|
+| **Vier Saisons statt sechzehn Abende** | dieselbe Knappheit wie im Lager, auf Jahresmaßstab |
+| **Das Duell hinter der Reitbahn** | die einzige Stelle im Spiel, an der eine **Szene töten darf** — man betritt sie freiwillig |
+| **Das große Manöver** (`uebung:true`) | volles Kampfsystem mit Platzpatronen: dasselbe Spiel, andere Währung |
+| **Die Decke hat ein Gesicht** | über dem Sergenten sitzt Martel, und der geht nicht weg |
+
+**Die Regimentsschule ist das Nadelöhr.** Kapitel 3 ist das einzige Fenster, in dem ein Analphabet auf die 35 des Fourriers und in die Nähe der 50 kommt, die Rang 7 verlangt — der „Rangstillstand als Druckmittel" aus KONZEPT §9.
+
+**Die Ehe ist Beiwerk, kein System**, genau wie KONZEPT §10 es festlegt: zwei Szenen, eine Mitgift, Belastung −1 je Station. Keine Kinder, kein Erbe.
+
+### Orden — Nennungen bekommen endlich eine Folge
+
+| Orden | Bedingung | VP | Ruf | Pension |
+|---|---|---|---|---|
+| **Ehrenwaffe** | 3 Nennungen, 1799–1803 | 10 | +6 | 0,5 F je Station |
+| **Ehrenlegion** | eine Ehrenwaffe — *oder* 5 Nennungen und Ruf 45, ab 1804 | 12 | +10 | 1 F je Station |
+
+**Historisch trägt sich der Bogen selbst:** Die *armes d'honneur* gingen 1799–1802 an einfache Soldaten für einzelne Taten — die Jahre von Ägypten. Wer eine besaß, wurde bei der Stiftung der Ehrenlegion **von Rechts wegen aufgenommen**; die erste große Verleihung war Boulogne, 16. August 1804. **Die einzige Auszeichnung, die man sich in einem Kapitel verdient und in einem anderen einlöst.** Geprüft, nicht gewürfelt — bei einem Orden soll man hinterher sagen können, wofür.
+
+### Was an Code nötig war
+
+Bewusst wenig, alles wiederverwendbar: Wochenverteilung **datengesteuert** (`WINTER_TUN`, Auswahl aus den Kapiteldaten), **Ketten in Szenen** (Semantik identisch zu den Sondermissionen), `heilt:` und `setzt:` in `anwenden()`, `uebung:true` im Gefecht, `zwischenfall:true` für Zwischenfälle ohne Marschweg, `ab:` als Sperr-Regel in Szenen. Spielstand-Fassung 3 → **4** mit Wandler.
+
+Dazu der **Marketender** (Ausrüstung für Francs, nicht für Veteranenpunkte — die Grenze zieht Invariante 3) und vier Friedens-Zwischenfälle: **Patrouille**, Werber, Markttag, die kenternden Boote von Boulogne.
+
+### Gemessen, je 40 Läufe
+
+| | Erstlauf v | mutig | Vet 160 | Vet 260 |
+|---|---|---|---|---|
+| **überlebt** | 55 % | 25 % | 70 % | 63 % |
+| **Sergent erreicht** | 23 % | 25 % | 78 % | 78 % |
+
+Fünf der sechs Werte im Band, der Sergent beim Veteranen mit 78 % knapp über den 75.
+
+> **⚠ Der Überlebens-Abstand ist auf 15 Punkte gefallen (vorher 30) und damit unter die selbstgesetzte Grenze von 25.** Ursache verstanden: Kapitel 3 tötet fast niemanden, *heilt* aber — Übergang, Lazarett, vier Saisons. Davon hat der angeschlagene Erstläufer mehr als der gesunde Veteran, also steigt die untere Zahl und die obere nicht.
+>
+> **Nicht schöngerechnet, sondern eingetragen.** Mit Kapitel 4 (Austerlitz, Feindgüte 6) endet die Kampagne wieder auf einem gefährlichen Kapitel, und der Abstand öffnet sich von allein. Die Regel daraus: **`überlebt` misst nur so scharf, wie das letzte gebaute Kapitel gefährlich ist** — endet der Ausbaustand auf einem ruhigen Kapitel, ist `Sergent erreicht` die aussagekräftigere der beiden.
+
+---
+
 ## 2026-07-28 — Die volle Punkteskala, zwei neue Leitzahlen
 
 **Zwei Entscheidungen des Entwicklers, beide umgesetzt und gemessen.**

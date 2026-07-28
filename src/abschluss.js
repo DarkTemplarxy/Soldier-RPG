@@ -201,84 +201,226 @@ function lagerTun(id){
 }
 function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(); naechster(); }
 
-/* ══════════════════ WINTERQUARTIER ══════════════════ */
+/* ══════════════════ WINTERQUARTIER UND SAISON ══════════════════
+
+   Dieselbe Maschine trägt zwei Dinge: das Winterquartier zwischen zwei
+   Feldzügen (drei Wochen, fünf Handlungen) und die **Saison** des
+   Garnisonskapitels (mehr Wochen, andere Handlungen, ein einmaliges Fenster).
+
+   Deshalb steht die Auswahl seit dem 28.07.2026 **in den Kapiteldaten**, nicht
+   mehr fest im Code: `tun:[...]` nennt die Handlungen, `wochen:` die Zahl,
+   `frage:` die Zeile über den Knöpfen. Ohne diese Felder verhält sich alles wie
+   das alte Winterquartier — die bestehenden Kapitel mussten nicht angefasst
+   werden. */
+
+const WINTER_TUN = {
+
+  ausr:{label:'Ausrüstung instand setzen', cost:'Schuhe, Muskete und Tornister flicken',
+    tu(){ for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+30);
+      return 'Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>'; }},
+
+  drill:{label:'Drillen und schießen üben', cost:'Muskete und Drill steigen',
+    tu(){ nutzen('muskete',3); nutzen('drill',3); nutzen('bajonett',2);
+      return 'Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>'; }},
+
+  lesen:{label:'Lesen und Schreiben üben', cost:'Bildung und Verwaltung · kostet 6 Francs',
+    tu(){ if(S.geld>=6){ S.geld-=6; S.attr.bildung=Math.min(100,S.attr.bildung+7); nutzen('verwaltung',2);
+        return 'Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'; }
+      return 'Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>'; }},
+
+  leute:{label:'Zeit mit Martel und den Männern verbringen', cost:'Gunst und Kameradschaft',
+    tu(){ gunstGeben('martel',2); S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
+      nutzen('menschenkenntnis',2);
+      return 'Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>'; }},
+
+  /* Die einzige Handlung, die den Lebensvorrat wirklich wieder auffüllt — und
+     sie kostet eine der Wochen. Wer verwundet aus dem Feldzug kommt, muss sich
+     zwischen Genesung und Ausbildung entscheiden.
+
+     Reihenfolge: **erst die Wunde heraus, dann heilen.** Andersherum rechnete
+     `lebenAuffuellen` gegen den wundenverkleinerten Vorrat, und die teuerste
+     Woche des Spiels verschenkte einen Teil ihrer Wirkung. */
+  ruhe:{label:'Schlafen, essen, nichts tun', cost:'Leben und Belastung erholen sich, Wunden heilen',
+    tu(){ S.belastung=Math.max(0,S.belastung-16);
+      const krank = S.wunden.findIndex(w=>w.zehrt);          // Krankheiten zuerst
+      if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
+      const weg = S.wunden.length ? S.wunden.shift() : null;
+      lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
+      return weg
+        ? `${weg.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(weg.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(weg.name)}" überstanden</span>`
+        : 'Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>'; }}
+};
+
+/* ── Handlungen der Garnisonssaisons (Kapitel 3) ──
+
+   **Im Krieg ist der Feind die Kugel, im Frieden ist es die Zeit.** Die Maschine
+   bleibt dieselbe, die Währung wechselt: Es gibt keine Vakanzen zu erben und
+   keinen Ruf zu erkämpfen, sondern nur das, was man aus vier Jahren macht.
+   Deshalb zahlen diese Handlungen in Bildung, Geld und Beziehungen — und
+   deshalb ist die Knappheit dieselbe wie im Lager: mehr zu tun als Wochen. */
+
+  const GARNISON_TUN = {
+
+  schule:{label:'Die Regimentsschule besuchen', cost:'Bildung — der Flaschenhals des ganzen Spiels',
+    tu(){ const p = probe('bildung', 20, true);
+      /* Der Sprung ist absichtlich groß. Kapitel 3 ist das einzige Fenster, in
+         dem ein Analphabet auf die 35 des Fourriers und in die Nähe der 50
+         kommt, die Rang 7 später verlangt. Wer die Jahre vertrödelt, sitzt fest
+         — das ist der „Rangstillstand als Druckmittel" aus KONZEPT §9. */
+      const zu = p.erfolg ? 9 : 5;
+      S.attr.bildung = Math.min(100, S.attr.bildung + zu);
+      nutzen('verwaltung', 2);
+      return p.erfolg
+        ? `Ein invalider Sergent mit einer Hand unterrichtet zwölf Mann in einem Stall. Er lässt dich Buchstaben abschreiben, bis die Hand weh tut, und nennt es Dienst. In der dritten Woche liest du eine Seite ohne Hilfe. <span style="color:var(--faint)">Bildung +${zu} · Verwaltung steigt</span>`
+        : `Die Buchstaben bleiben Zeichen, und der Sergent wird laut. Etwas bleibt trotzdem hängen, weil etwas immer hängen bleibt. <span style="color:var(--faint)">Bildung +${zu} · Verwaltung steigt</span>`; }},
+
+  fechtboden:{label:'Auf den Fechtboden gehen', cost:'Bajonett und Geschick · in Nîmes wird viel gefochten',
+    tu(){ nutzen('bajonett',3); nutzen('geschick',1.5); S.atem=Math.max(0,S.atem-4);
+      return 'Der Waffenmeister des Regiments ist ein Piemonteser, der behauptet, er habe unter dem König gedient, und keiner fragt nach, unter welchem. Er zeigt dir, wie man mit dem Bajonett nicht sticht, sondern schiebt. <span style="color:var(--faint)">Bajonett und Geschick steigen · Atem −4</span>'; }},
+
+  verdienst:{label:'Nebenher arbeiten', cost:'Francs · in der Stadt wird gebaut',
+    tu(){ const p = probe('konstitution', 30, true);
+      const f = p.erfolg ? 14 : 7;
+      S.geld += f; S.atem = Math.max(0, S.atem-6); S.belastung = Math.min(100, S.belastung+3);
+      return p.erfolg
+        ? `Die Seidenmanufaktur am Fluss nimmt Soldaten für den Tag, weil Soldaten billiger sind als Tagelöhner und nicht verhandeln. Es ist stumpf, es ist erlaubt, und am Samstag zahlen sie. <span style="color:var(--faint)">+${f} F · Atem −6 · Belastung +3</span>`
+        : `Zwei Wochen Ziegel schleppen für einen Bauunternehmer, der am Ende weniger zahlt, als er versprochen hat. Beschweren kann man sich bei niemandem. <span style="color:var(--faint)">+${f} F · Atem −6 · Belastung +3</span>`; }},
+
+  wirtshaus:{label:'Die Abende im Wirtshaus verbringen', cost:'Kameradschaft und Belastung · kostet Francs',
+    tu(){ const kosten = Math.min(S.geld, 8);
+      S.geld -= kosten;
+      S.kameradschaft = Math.min(100, S.kameradschaft + (kosten>=8?12:5));
+      S.belastung = Math.max(0, S.belastung - (kosten>=8?10:4));
+      gunstGeben('martel',1);
+      nutzen('menschenkenntnis',1.5);
+      return kosten>=8
+        ? 'Vier Jahre Frieden bestehen aus Abenden, und die Abende bestehen aus Wein, Karten und denselben Geschichten. Martel erzählt Ägypten inzwischen so, dass es besser klingt, als es war. Niemand widerspricht. <span style="color:var(--faint)">Kameradschaft +12 · Belastung −10 · Fürsprache Martel +1 · −8 F</span>'
+        : 'Du sitzt dabei und trinkst, was andere ausgeben. Es ist nicht dasselbe, und alle merken es. <span style="color:var(--faint)">Kameradschaft +5 · Belastung −4 · Fürsprache Martel +1</span>'; }},
+
+  /* ── Der Marketender ──
+     KONZEPT und die Aufgabenliste führten „Ausrüstungskauf im Spiel" lange als
+     offenen Punkt: Geld hatte zu wenig Verwendung. Hier ist die natürliche
+     Anbindung — eine Garnison hat Läden, ein Feldlager nicht.
+
+     Gekauft wird in **Francs**, nicht in Veteranenpunkten. Das ist die Grenze,
+     die Invariante 3 zieht: Der Vorrat kauft den Ausgangspunkt eines Mannes,
+     Francs kaufen, was dieser eine Mann sich im Feld leisten kann. Beides sind
+     Ausrüstungsgegenstände, aber nur eines davon überlebt seinen Tod. */
+  marketender:{label:'Zum Marketender gehen', cost:'Ausrüstung gegen Francs · was der Sold hergibt',
+    tu(){
+      const angebot = [
+        {k:'schuhe',   preis:14, zu:45, was:'ein Paar doppelt genähte Schuhe'},
+        {k:'mantel',   preis:18, zu:50, was:'einen Mantel, den ein Schneider gemacht hat'},
+        {k:'muskete',  preis:10, zu:35, was:'eine Überholung des Schlosses beim Büchsenmacher'},
+        {k:'tornister',preis:8,  zu:40, was:'einen neuen Tornisterriemen aus Rindsleder'}
+      ];
+      /* Gekauft wird, was am nötigsten ist und noch bezahlbar — der Spieler
+         entscheidet über die Woche, der Marketender über die Reihenfolge. So
+         bleibt es ein Knopf und wird kein zweiter Laden mit eigener Oberfläche. */
+      const offen = angebot.filter(a=>S.ausr[a.k] && S.ausr[a.k].zustand < 70 && S.geld >= a.preis)
+                           .sort((a,b)=> S.ausr[a.k].zustand - S.ausr[b.k].zustand);
+      if(!offen.length){
+        if(S.geld < 8) return 'Der Marketender führt alles, was ein Soldat braucht, und nichts davon auf Kredit. Du siehst dir die Auslage an und gehst wieder. <span style="color:var(--faint)">zu wenig Geld</span>';
+        return 'Deine Ausrüstung ist in Ordnung, und der Marketender merkt das schneller als du. Er versucht es mit einem Fernrohr und einer Uhr und lässt dich dann in Ruhe. <span style="color:var(--faint)">nichts Nötiges im Angebot</span>';
+      }
+      const kauf = offen[0];
+      S.geld -= kauf.preis;
+      S.ausr[kauf.k].zustand = Math.min(100, S.ausr[kauf.k].zustand + kauf.zu);
+      return `Der Marketender ist ein entlassener Sergent aus dem 14., der jetzt mehr verdient als je im Dienst. Du kaufst ${kauf.was}. Er rechnet zweimal nach, zu seinen Gunsten, und ihr wisst es beide. <span style="color:var(--faint)">${S.ausr[kauf.k].name} +${kauf.zu} · −${kauf.preis} F</span>`; }},
+
+  /* ── Ab Rang 4: die Listen einer Garnison ── */
+  magazin:{label:'Das Magazin verwalten', cost:'Verwaltung und Francs · Fürsprache Collot',
+    tu(){ const p = probe('verwaltung', 35);
+      nutzen('verwaltung',2.5); S.attr.bildung = Math.min(100, S.attr.bildung+3);
+      if(p.erfolg){ gunstGeben('collot',1); S.geld += 6;
+        return 'Vier Jahre Frieden heißt vier Jahre Bestand, und ein Bestand, der stimmt, ist in einer Garnison seltener als einer, der nicht stimmt. Du findest zweimal einen Fehler, bevor ihn jemand anders findet. <span style="color:var(--faint)">Verwaltung und Bildung steigen · Fürsprache Collot +1 · +6 F</span>'; }
+      gunstGeben('collot',-1);
+      return 'Der Bestand stimmt nicht, und diesmal findet es der Sergent-fourrier zuerst. Es waren keine sechzig Francs, es waren vierzig, aber der Unterschied interessiert ihn nicht. <span style="color:var(--faint)">Verwaltung und Bildung steigen · Fürsprache Collot −1</span>'; }},
+
+  /* ── Ab Rang 5: der Sergent in der Garnison ──
+     Ausdrücklicher Wunsch: Der Sergent bleibt, wo er ist, soll aber in der
+     Garnison etwas Lohnendes zu tun haben. Alle drei zahlen auf das ein, was
+     ihn im Feld ausmacht — die Sektion —, und keine davon geht im Feld. */
+  ausbilden:{label:'Die Rekruten des Jahrgangs ausbilden', cost:'Autorität und Drill · deine Sektion wird besser',
+    tu(){ const p = probe('autoritaet', 40);
+      nutzen('autoritaet',3); nutzen('drill',3);
+      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 14 : 5);
+      if(p.erfolg) S.ruf += 1;
+      return p.erfolg
+        ? 'Die Konskribierten des Jahrgangs XI sind achtzehn und haben noch nie einen Toten gesehen. Du hast vier Wochen, ihnen die zwölf Handgriffe beizubringen, und du nimmst dir acht. Danach laden sie im Schlaf. <span style="color:var(--faint)">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'
+        : 'Du brüllst zu viel und erklärst zu wenig, und am Ende laden sie schnell und falsch. Im Frieden fällt das niemandem auf. <span style="color:var(--faint)">Autorität und Drill steigen · Sektion etwas besser</span>'; }},
+
+  schreiber:{label:'Dem Capitaine die Berichte schreiben', cost:'Bildung und Fürsprache Berthaud · nur wer schreiben kann',
+    tu(){ if(S.attr.bildung < 30)
+        return 'Du bietest es an. Der Capitaine sieht deine Handschrift an, sagt nichts und gibt das Blatt einem anderen. <span style="color:var(--faint)">nichts passiert</span>';
+      const p = probe('bildung', 40);
+      S.attr.bildung = Math.min(100, S.attr.bildung+4); nutzen('verwaltung',2);
+      if(p.erfolg){ gunstGeben('berthaud',1); gunstGeben('vernet',1);
+        return 'Monatsberichte, Krankenlisten, Schuhbestände. Es ist die langweiligste Arbeit, die du je gemacht hast, und sie findet in einem Zimmer statt, in dem der Capitaine sitzt. Er weiß jetzt, wie du heißt. <span style="color:var(--faint)">Bildung +4 · Fürsprache Berthaud und Vernet +1</span>'; }
+      return 'Du brauchst für zwei Seiten einen ganzen Abend, und am Ende schreibt der Fourier sie noch einmal ab. Gelernt hast du trotzdem etwas. <span style="color:var(--faint)">Bildung +4 · Verwaltung steigt</span>'; }},
+
+  strafdienst:{label:'Über die Strafen entscheiden', cost:'Menschenkenntnis · Kameradschaft gegen Fürsprache',
+    tu(){ const p = probe('menschenkenntnis', 40);
+      nutzen('autoritaet',1.5);
+      if(p.erfolg){ S.kameradschaft = Math.min(100,S.kameradschaft+8); gunstGeben('berthaud',1);
+        return 'Zwei deiner Leute kommen zu spät aus der Stadt zurück, einer davon zum dritten Mal. Du meldest den einen und behältst den anderen für dich, und beide wissen genau, warum. <span style="color:var(--faint)">Kameradschaft +8 · Fürsprache Berthaud +1</span>'; }
+      S.kameradschaft = Math.max(0,S.kameradschaft-8); gunstGeben('berthaud',1);
+      return 'Du meldest beide. Es ist korrekt, es steht so im Reglement, und es kostet dich mehr, als du gedacht hättest. <span style="color:var(--faint)">Kameradschaft −8 · Fürsprache Berthaud +1</span>'; }}
+};
+Object.assign(WINTER_TUN, GARNISON_TUN);
+
+const WINTER_STANDARD = ['ausr','drill','lesen','leute','ruhe'];
+
+function winterHandlungen(n){
+  const ids = (n.tun && n.tun.length ? n.tun : WINTER_STANDARD).slice();
+  if(n.rangTun) for(const r in n.rangTun) if(S.rang >= +r) ids.push(...n.rangTun[r]);
+  if(S.zweig==='grenadier' && n.zweigTun && n.zweigTun.grenadier) ids.push(...n.zweigTun.grenadier);
+  if(S.zweig==='voltigeur' && n.zweigTun && n.zweigTun.voltigeur) ids.push(...n.zweigTun.voltigeur);
+  return ids.filter((id,i,a)=>WINTER_TUN[id] && a.indexOf(id)===i);
+}
+function wochenFuer(n){ return n.wochen || 3; }
 
 function zeigeWinter(n){
   const W = LAUF.winter;
-  if(W.wochen===3 && !W.log.length){
-    W.log=[]; W.gesichert = Ablage.dauerhaft;
-    /* Drei Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem
-       ist danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung
-       und Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
+  if(W.ort !== n.id){                       // neue Saison: Wochen frisch setzen
+    W.ort = n.id; W.wochen = wochenFuer(n); W.log = []; W.gesichert = Ablage.dauerhaft;
+    /* Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem ist
+       danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
+       Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
     W.atemVoll = S.atem < S.leben; S.atem = 100; atemKlemmen();
     laufSichern();
   }
-  const tun = [
-    {id:'ausr',label:'Ausrüstung instand setzen',cost:'Schuhe, Muskete und Tornister flicken'},
-    {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
-    {id:'lesen',label:'Lesen und Schreiben üben',cost:'Bildung und Verwaltung · kostet 6 Francs'},
-    {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
-    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Leben und Belastung erholen sich, Wunden heilen'}
-  ];
-  const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
-    ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
+  const opt = winterHandlungen(n).map(id=>{
+    const t = WINTER_TUN[id];
+    return `<button class="ord" onclick="winterTun('${id}')" ${W.wochen<=0?'disabled':''}>
+      ${t.label}<span class="cost">${t.cost}</span></button>`;
+  }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
-      ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag. ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
+      ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen}</div>
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen} VON ${wochenFuer(n)}</div>
       </div></div>
-    <div class="orders"><div class="ch"><span>Womit verbringst du die Woche?</span></div><div class="ordbody">
-      ${opt}${W.wochen<=0?'<button class="ord weiter" onclick="winterEnde()">Ins Feld zurück</button>':''}
+    <div class="orders"><div class="ch"><span>${esc(n.frage||'Womit verbringst du die Woche?')}</span></div><div class="ordbody">
+      ${opt}${W.wochen<=0?`<button class="ord weiter" onclick="winterEnde()">${esc(n.weiter||'Ins Feld zurück')}</button>`:''}
     </div></div>
     </div>${seitenleiste()}</div>`;
+  kopfzeile();
 }
 function winterTun(id){
   const W = LAUF.winter;
-  if(W.wochen<=0) return;
+  if(W.wochen<=0 || !WINTER_TUN[id]) return;
   W.wochen--;
-  if(id==='ausr'){
-    for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+30);
-    W.log.push('Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>');
-  }
-  if(id==='drill'){
-    nutzen('muskete',3); nutzen('drill',3); nutzen('bajonett',2);
-    W.log.push('Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>');
-  }
-  if(id==='lesen'){
-    if(S.geld>=6){ S.geld-=6; S.attr.bildung=Math.min(100,S.attr.bildung+7); nutzen('verwaltung',2);
-      W.log.push('Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'); }
-    else W.log.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
-  }
-  if(id==='leute'){
-    gunstGeben('martel',2); S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
-    nutzen('menschenkenntnis',2);
-    W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
-  }
-  if(id==='ruhe'){
-    /* Die einzige Handlung, die den Lebensvorrat wirklich wieder auffüllt —
-       und sie kostet eine der drei Wochen. Wer verwundet aus dem Feldzug kommt,
-       muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
-       Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
-    /* Reihenfolge: **erst die Wunde heraus, dann heilen.** Andersherum rechnete
-       `lebenAuffuellen` noch gegen den wundenverkleinerten Vorrat, und die
-       teuerste Woche des Spiels verschenkte einen Teil ihrer Wirkung. */
-    S.belastung=Math.max(0,S.belastung-16);
-    // Krankheiten zuerst — sie sind das, was einen Mann über Wochen aufzehrt
-    const krank = S.wunden.findIndex(w=>w.zehrt);
-    if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
-    const weg = S.wunden.length ? S.wunden.shift() : null;
-    lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
-    if(weg) W.log.push(`${weg.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(weg.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(weg.name)}" überstanden</span>`);
-    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
-  }
+  W.log.push(WINTER_TUN[id].tu());
+  S.log.push((KAPITEL[LAUF.node]||{}).ort+': '+WINTER_TUN[id].label);
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
+  atemKlemmen();
   laufSichern();
   zeigeWinter(KAPITEL[LAUF.node]);
 }
-function winterEnde(){ LAUF.winter = {wochen:3, log:[]}; stationErledigt(); naechster(); }
+function winterEnde(){ LAUF.winter = {ort:null, wochen:3, log:[]}; stationErledigt(); naechster(); }
 
 /* ══════════════════ WERTUNG UND ENDE ══════════════════ */
 
@@ -316,9 +458,10 @@ function wertung(){
   p.kapitel = 8 * kapitelUeberlebt();          // volle Skala: 8 je Kapitel, max. 11
   p.ruf = 5 * Math.floor(S.ruf/10);
   p.nennungen = 3 * Math.min(10, S.nennungen);
+  p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
   p.ueberleben = S.lebt ? 25 : 0;              // Platzhalter, siehe oben
   p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
-  p.summe = p.rang+p.kapitel+p.ruf+p.nennungen+p.ueberleben+p.sauber;
+  p.summe = p.rang+p.kapitel+p.ruf+p.nennungen+p.orden+p.ueberleben+p.sauber;
   return p;
 }
 
@@ -340,7 +483,7 @@ function chronikblatt(endeText, p){
                          lebt:!!(S.leute&&S.leute[l.id]&&S.leute[l.id].lebt)})),
     kameradschaft:S.kameradschaft, belastung:S.belastung, atem:S.atem,
     leben:S.leben, lebenMax:lebenMax(),
-    nennungen:S.nennungen, geld:S.geld, gekniffen:!!S.gekniffen,
+    nennungen:S.nennungen, orden:(S.orden||[]).slice(), geld:S.geld, gekniffen:!!S.gekniffen,
     kaeufe:(S.kaeufe||[]).slice(), gekauft:Object.assign({},S.gekauft||{}),
     log:(S.log||[]).slice(), wertung:p
   };
@@ -363,7 +506,8 @@ function eintragen(endeText){
 }
 
 function wertungsTabelle(p){ return wertungsTabelleAus({wertung:p, rang:rangName(S.rang),
-  stationen:stationen(), kapitel:kapitelUeberlebt(), ruf:S.ruf, nennungen:S.nennungen}); }
+  stationen:stationen(), kapitel:kapitelUeberlebt(), ruf:S.ruf, nennungen:S.nennungen,
+  orden:(S.orden||[]).slice()}); }
 
 function wertungsTabelleAus(c){
   const p = c.wertung; if(!p) return '';
@@ -375,6 +519,7 @@ function wertungsTabelleAus(c){
       : `<tr><td class="d">Erreichte Stationen (${c.stationen} × 2)</td><td class="n">${p.stationen}</td></tr>`}
     <tr><td class="d">Ruf ${c.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
     <tr><td class="d">Im Tagesbefehl genannt (${c.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
+    ${p.orden ? `<tr><td class="d">Orden — ${esc((c.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean).join(', '))}</td><td class="n">${p.orden}</td></tr>` : ''}
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
     <tr><td class="d">Nie vor Zeugen gekniffen</td><td class="n">${p.sauber}</td></tr>
     <tr class="hi"><td class="d"><b>Summe</b></td><td class="n"><b>${p.summe}</b></td></tr>

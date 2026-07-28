@@ -200,6 +200,7 @@ function seitenleiste(){
       <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
       <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
+      ${(S.orden||[]).map(id=>{ const o=ordenVon(id); return o?`<div class="kv"><span>${esc(o.name)}</span><b>${ordensbild(id)}</b></div>`:''; }).join('')}
       ${ueberDir()}
     </div>
   </aside>`;
@@ -312,6 +313,7 @@ function zeigeBlatt(i){
       ${c.lebenMax ? zeile('Leben', c.leben+' / '+c.lebenMax) : ''}
       ${zeile('Belastung', c.belastung)}${zeile('Atem', c.atem)}${zeile('Geld', c.geld+' F')}
       ${zeile('Im Tagesbefehl', c.nennungen+'×')}
+      ${(c.orden||[]).length ? zeile('Ausgezeichnet', (c.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean).join(', ')) : ''}
       ${zeile('Wunden', c.wunden.length ? c.wunden.map(esc).join(', ') : 'keine')}
     </div></aside>
   </div>`;
@@ -565,7 +567,94 @@ function fortsetzen(){
    Kartenkunde (der Ingenieur), Bildung (die Briefe). Das ist Absicht — die
    Herkünfte, die in diese Währungen zahlen, sollen etwas dafür sehen. */
 
+/* Ein Zwischenfall mit `kapitel:` erscheint nur dort. Bis Kapitel 3 gab es nur
+   `'aegypten'`; jetzt auch `'garnison'` — im Frieden begegnet man anderen Dingen
+   als auf einem Wüstenmarsch, und ein Verbandsplatz zwischen zwei Kasernentagen
+   wäre falsch. */
 const MARSCH_EREIGNISSE = [
+
+  /* ── Garnison 1801–04 ──
+     Vier Jahre Frieden brauchen ihre eigenen kleinen Fragen. Zwei davon
+     (Patrouille, Werbung) gibt es nur hier, weil es sie im Feld nicht gibt. */
+
+  {id:'patrouille', titel:'Patrouille durch die Stadt', kapitel:'garnison',
+   text:['Zwei Mann, eine Laterne, vier Stunden. Die Nachtpatrouille geht die Straßen ab, in denen die Wirtsstuben sind, und sammelt ein, was die Wirtsstuben ausspucken.',
+         'Um halb zwei findet ihr drei Mann vom 79. vor einer Tür, von denen zwei den dritten halten. Der dritte hat einer Frau ins Fenster geschrien, und die Frau hat einen Mann, und der Mann steht jetzt mit einem Beil in der Tür. Es ist noch nichts passiert.'],
+   optionen:[
+     {label:'Die drei einsammeln und abführen', hint:'Autorität · es ist der Dienstweg',
+      probe:{wert:'autoritaet', schw:35},
+      erfolg:{text:'Du sagst es einmal, laut, und dann noch einmal, leiser. Der mit dem Beil geht zuerst hinein, weil ihm jemand einen Grund gegeben hat, es zu tun, ohne das Gesicht zu verlieren. Die drei vom 79. gehen mit, weil sie zu betrunken sind, um sich etwas Besseres einfallen zu lassen. Im Rapport steht am Morgen: keine besonderen Vorkommnisse.',
+              ruf:2, gunst:1, gunstVon:'berthaud', fert:{drill:3}},
+      misserfolg:{text:'Du sagst es dreimal, und beim dritten Mal lacht einer. Es wird eine Prügelei, in der du einen Schlag abbekommst, der für jemand anderen gedacht war, und am Ende ist die Tür kaputt und der Wirt schreibt eine Rechnung. Der Rapport wird länger als die Nacht.',
+              belastung:6, leben:-6, gunst:-1, gunstVon:'berthaud'}},
+     {label:'Erst mit dem Mann in der Tür reden', hint:'Menschenkenntnis · das Beil ist das Problem',
+      probe:{wert:'menschenkenntnis', schw:40},
+      erfolg:{text:'Du gehst an den drei Betrunkenen vorbei und stellst dich zu dem mit dem Beil, mit dem Rücken zu ihnen, und fragst ihn, ob er Kinder im Haus hat. Er sagt: zwei. Dann sagst du, es wäre gut, wenn die morgen früh nichts zu sehen bekämen. Er geht hinein. Die drei sammelt ihr danach in Ruhe ein.',
+              ruf:3, kameradschaft:6, attr:{menschenkenntnis:3}},
+      misserfolg:{text:'Du redest, und er hört nicht zu, weil er zu weit ist. Es geht am Ende ohne Toten aus, aber nicht ohne Blut, und du hast eine Hand voll Splitter aus einem Türrahmen.',
+              belastung:8, leben:-8}},
+     {label:'Einen Bogen machen', hint:'In vier Stunden sieht man vieles',
+      erfolg:{text:'Ihr geht die Gasse nicht hinunter, sondern die nächste. Was ihr nicht gesehen habt, steht nicht im Rapport. Am Morgen hört man, dass es beim 79. eine Anzeige gegeben hat, wegen einer eingeschlagenen Tür.',
+              ruf:-2, belastung:2}}
+   ]},
+
+  {id:'werber', titel:'Der Werber des Regiments', kapitel:'garnison',
+   text:['Ein Regiment im Frieden muss sich auffüllen, und Konskribierte kommen ungern. Also schickt man Werber auf die Dörfer, mit einer Trommel, einer Fahne und Geld, und weil ein Werber allein nichts wert ist, schickt man einen Soldaten mit, der aussieht, als sei es ihm gut ergangen.',
+         'Diese Woche bist du das. Vier Dörfer im Umland, ein Tisch vor der Kirche, und die Aufgabe, jungen Männern das Leben zu erklären, das du hinter dir hast.'],
+   optionen:[
+     {label:'Erzählen, wie es war', hint:'Menschenkenntnis · die Wahrheit wirbt schlecht',
+      probe:{wert:'menschenkenntnis', schw:45},
+      erfolg:{text:'Du erzählst Lodi und Embabeh und lässt nichts weg, auch nicht den Sinai und nicht die Ruhr. Am Ende des Tages haben zwei unterschrieben — zwei, die zugehört haben und trotzdem wollten. Der Werber ist unzufrieden, weil er auf sechs gehofft hatte. In zwei Jahren wirst du froh sein, dass es diese zwei sind.',
+              ruf:2, kameradschaft:6, gunst:1, gunstVon:'martel'},
+      misserfolg:{text:'Du erzählst, wie es war, und nach zwanzig Minuten steht keiner mehr am Tisch. Der Werber sagt auf dem Rückweg kein Wort und meldet im Regiment, du seist für so etwas ungeeignet. Er hat recht.',
+              belastung:4}},
+     {label:'Erzählen, wie es klingen soll', hint:'Sechs Unterschriften sind sechs Unterschriften',
+      erfolg:{text:'Du erzählst Ägypten als Abenteuer, den Sold als Vermögen und die Beförderung als Frage der Zeit. Es ist nicht gelogen, es ist nur alles weggelassen. Sechs unterschreiben, einer davon ist fünfzehn und behauptet, er sei achtzehn. Der Werber gibt dir zehn Francs von seinem Kopfgeld.',
+              geld:10, ruf:1, kameradschaft:-6}},
+     {label:'Krank melden', hint:'Es geht auch ohne dich',
+      erfolg:{text:'Du meldest dich mit dem Rücken krank, und der Feldscher schreibt es auf, weil er es bei einem aus Ägypten glaubt. Die Woche verbringst du im Quartier. Es ist die langweiligste des Jahres.',
+              belastung:-4, ruf:-1}}
+   ]},
+
+  {id:'markt', titel:'Markttag in Nîmes', kapitel:'garnison',
+   text:['Am Donnerstag ist Markt vor dem Amphitheater, und am Donnerstag ist die halbe Kompanie dort, weil es der einzige Ort ist, an dem etwas passiert.',
+         'Ein Händler aus Lyon verkauft Ausrüstung, die er von irgendwoher hat und über die man besser nicht fragt: Schuhe, Mäntel, Klingen, ein Fernrohr mit einem Sprung im Glas.'],
+   optionen:[
+     {label:'Ein Paar richtige Schuhe kaufen', hint:'12 Francs · doppelt genäht',
+      erfolg:{text:'Zwölf Francs für ein Paar Schuhe, die ein Schuster gemacht hat und nicht ein Lieferant mit einem Vertrag. Man merkt den Unterschied am dritten Tag eines Marsches, und der nächste Marsch kommt bestimmt.',
+              geld:-12, ausr:{schuhe:45}}},
+     {label:'Nach dem Fernrohr fragen', hint:'Kartenkunde · es ist zu teuer und zu gut',
+      probe:{wert:'kartenkunde', schw:35},
+      erfolg:{text:'Du siehst hindurch und siehst, dass der Sprung im Glas nur am Rand sitzt und in der Mitte nichts stört. Der Händler merkt, dass du weißt, was du in der Hand hast, und geht von dreißig auf achtzehn. Es ist immer noch zu viel für einen Unteroffizier. Du kaufst es trotzdem.',
+              geld:-18, fert:{kartenkunde:8, taktik:4}},
+      misserfolg:{text:'Du siehst hindurch und siehst einen Sprung. Der Händler redet zwei Minuten über Amsterdam und optische Gläser, und du legst es zurück, weil du nicht beurteilen kannst, ob eines der Wörter stimmt.',
+              geld:0}},
+     {label:'Zusehen, wie andere kaufen', hint:'Der Sold reicht nicht für alles',
+      erfolg:{text:'Du gehst über den Markt, siehst dir alles an und kaufst ein Brot. Zwei aus der Kompanie geben an einem Nachmittag aus, was sie in drei Wochen verdient haben. In vier Wochen borgen sie sich Geld.',
+              geld:3, attr:{menschenkenntnis:2}}}
+   ]},
+
+  {id:'boote', titel:'Die Boote im Hafen', kapitel:'garnison',
+   text:['Zweitausend flache Boote liegen im Hafen von Boulogne, und jedes soll hundert Mann übersetzen. Geübt wird das Einschiffen bei jedem Wetter, weil bei jedem Wetter gelandet werden soll.',
+         'Heute ist Wind aus Nordwest, und bei Wind aus Nordwest kentert regelmäßig eines. Heute ist es das dritte in der Reihe neben euch, mit achtzig Mann des 51. an Bord, vierzig Meter vom Kai.'],
+   optionen:[
+     {label:'Hinterher ins Wasser', hint:'Konstitution · es ist November und der Kanal',
+      risk:true, probe:{wert:'konstitution', schw:45},
+      erfolg:{text:'Das Wasser ist so kalt, dass es einen Augenblick lang nicht kalt ist, sondern nur laut. Du bekommst zwei zu fassen und schiebst sie an den Bootshaken, den jemand von oben herunterhält. Der Zweite ist bewusstlos und wird es überleben. Der Capitaine des 51. schreibt einen Namen auf, und es ist deiner.',
+              ruf:5, nennung:true, kameradschaft:10, leben:-12, belastung:8, atem:-15},
+      misserfolg:{text:'Du kommst zwanzig Meter weit, und dann nimmt dir der Mantel das Wasser auf und zieht. Man fischt dich mit einem Haken heraus, zusammen mit denen, die du holen wolltest. Zwei von denen sind tot, und es lag nicht an dir. Das hilft am Abend nicht.',
+              leben:-16, belastung:12, atem:-20, wunde:'Unterkühlung'}},
+     {label:'Die Leine werfen', hint:'Geschick · vom Kai aus',
+      probe:{wert:'geschick', schw:35},
+      erfolg:{text:'Du wirfst zweimal daneben und beim dritten Mal richtig, und an der Leine hängen am Ende sechs Mann. Es ist die vernünftige Art, so etwas zu tun, und deshalb schreibt sie niemand auf.',
+              ruf:2, kameradschaft:6},
+      misserfolg:{text:'Du wirfst dreimal und triffst nichts, und dann nimmt dir ein Matrose die Leine aus der Hand und macht es richtig. Er sagt nichts dazu, was schlimmer ist, als wenn er etwas gesagt hätte.',
+              belastung:4}},
+     {label:'Am Kai bleiben', hint:'Es sind Matrosen da, die das können',
+      erfolg:{text:'Du stehst am Kai und siehst zu, wie es die machen, die es können. Sie holen sechzig der achtzig heraus. Die anderen zwanzig findet man in den nächsten Tagen an der Küste, und keiner von ihnen ist ertrunken, weil du am Kai gestanden hast.',
+              belastung:6}}
+   ]},
+
 
   {id:'feldscher', titel:'Der Feldscher braucht Hände',
    wenn:(n)=> LAUF.node>0 && (KAPITEL[LAUF.node-1]||{}).typ==='kampf',
@@ -731,12 +820,20 @@ const MARSCH_EREIGNISSE = [
 function marschOffen(e){ return e.optionen.filter(o => !(o.ab && o.probe && wert(o.probe.wert) < o.ab.min)); }
 function marschVerwehrt(e){ return e.optionen.filter(o => o.ab && o.probe && wert(o.probe.wert) < o.ab.min); }
 
+/* In welchem Kapitel diese Station liegt. Früher stand hier eine feste Abfrage
+   auf Ägypten; mit dem dritten Kapitel wäre das die Stelle gewesen, an der man
+   eine zweite Sonderregel danebenschreibt. Stattdessen einmal nachschlagen. */
+function kapitelVon(n){
+  for(const id in STATIONEN) if((STATIONEN[id]||[]).some(x=>x.id===n.id)) return id;
+  return null;
+}
+
 function marschWuerfeln(n){
   const gesehen = S.marschGesehen || [];
-  const aeg = (STATIONEN.aegypten||[]).some(x=>x.id===n.id);
+  const hier = kapitelVon(n);
   const pool = MARSCH_EREIGNISSE.filter(e =>
     !gesehen.includes(e.id) &&
-    (!e.kapitel || (e.kapitel==='aegypten' && aeg)) &&
+    (!e.kapitel || e.kapitel === hier) &&
     (!e.wenn || e.wenn(n)));
   if(!pool.length || Math.random() > 0.35) return null;
   return pool[Math.floor(Math.random()*pool.length)];
@@ -804,6 +901,34 @@ function zeigeNachfolger(nf, n){
 
 /* ══════════════════ ABLAUF ══════════════════ */
 
+/* Die Verleihung steht auf Papier, wie der Beförderungsbescheid und das
+   Chronikblatt: Ein Orden ist ein Schriftstück, bevor er ein Stück Blech ist.
+   Der Ton bleibt trocken — verliehen wird, nicht gefeiert. */
+function zeigeOrden(o, n){
+  ordenVerleihen(o);
+  laufSichern();
+  const auto = o.id==='legion' && hatOrden('ehrenwaffe');
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    <div class="card papier"><div class="ch"><span>${esc(o.voll)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb">
+        <div class="prose">
+          <p>${esc(o.was)}</p>
+          <p>${auto
+            ? 'Du musstest dich nicht bewerben. Wer eine Ehrenwaffe trägt, steht von Rechts wegen auf der Liste — so hat es der Kaiser verfügen lassen, und so steht es in der Verordnung, die der Adjutant vorliest, während dreitausend Mann in der Sonne stehen.'
+            : 'Der Adjutant liest deinen Namen von einem Blatt ab, auf dem noch neunzehn andere stehen. Er spricht ihn falsch aus. Dann geht er zum nächsten.'}</p>
+          <p>${esc(S.name)}, ${rangName(S.rang)} der 32. ${jahrVonStation()>=1803?'Linie':'Halbbrigade'}. Verliehen für: ${S.nennungen} Nennungen im Tagesbefehl.</p>
+        </div>
+        <div class="wirkung"><span>${esc(o.name)}</span>
+          ${ordensbild(o.id)} Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
+      </div></div>
+    <div class="orders"><div class="ordbody">
+      <button class="ord weiter" onclick="ordenWeiter()">Wegtreten</button>
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+function ordenWeiter(){ LAUF.orden = null; laufSichern(); naechster(); }
+
 function naechster(){
   if(!S.lebt){ zeigeTod(); return; }
   if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
@@ -826,6 +951,20 @@ function naechster(){
      irgendetwas anderes passiert. Ein Todesfall ist keine Fußnote. */
   if(LAUF.nachfolger){ zeigeNachfolger(LAUF.nachfolger, n); return; }
 
+  /* Ein fälliger Orden wird angesagt, bevor die Station kommt — er gehört zu
+     dem, was gerade passiert ist, nicht zu dem, was als Nächstes kommt.
+     `LAUF.orden` hält ihn fest, damit ein Beenden mitten in der Verleihung
+     nicht darüber hinweggeht. */
+  if(!LAUF.orden){
+    const faellig = ordenFaellig();
+    if(faellig){ LAUF.orden = faellig.id; laufSichern(); }
+  }
+  if(LAUF.orden){
+    const o = ordenVon(LAUF.orden);
+    if(o){ zeigeOrden(o, n); return; }
+    LAUF.orden = null;
+  }
+
   /* Zwischenfall auf dem Marsch: hängt einer an (auch nach Fortsetzen), steht
      er wieder da; sonst wird beim ersten Betreten einer Station mit Marschweg
      einmal gewürfelt. Vor Gefechten nicht — dort trägt der Anmarsch die Last. */
@@ -834,7 +973,12 @@ function naechster(){
     if(me){ zeigeMarschEreignis(me, n); return; }
     LAUF.marsch = null;
   }
-  if(n.marsch && n.id && n.typ!=='kampf' && LAUF.marschGeprueft !== n.id){
+  /* Gewürfelt wird auf Stationen mit Marschweg — und seit Kapitel 3 auch auf
+     solchen, die es ausdrücklich anfordern (`zwischenfall:true`). In einer
+     Garnison marschiert niemand, und ohne diese zweite Tür hätten die vier
+     Friedens-Zwischenfälle nie eine Gelegenheit. Vor Gefechten weiterhin nicht:
+     dort trägt der Anmarsch die Last. */
+  if((n.marsch || n.zwischenfall) && n.id && n.typ!=='kampf' && LAUF.marschGeprueft !== n.id){
     LAUF.marschGeprueft = n.id;
     const me = marschWuerfeln(n);
     if(me){
@@ -903,23 +1047,76 @@ function zeigeUebergang(n){
 }
 
 /* ── Szene ── */
+/* Ob eine Szenenwahl überhaupt offensteht. Dieselbe Sperr-Regel wie bei den
+   Marsch-Zwischenfällen (CLAUDE.md): **Wer eine Probe erkennbar nicht bestehen
+   kann, bekommt keinen Knopf, sondern einen Satz.** Ein stummer gesperrter
+   Knopf wäre die falsche Fassung derselben Idee.
+
+   `ab:{wert:'…', min:n, sonst:'…'}` prüft entweder ein Merkmal auf `S`
+   (die Heirat setzt voraus, dass man geworben hat) oder einen Attributwert. */
+function szeneVerwehrt(o){
+  if(!o.ab) return false;
+  const k = o.ab.wert;
+  if(k && S[k] !== undefined && typeof S[k] !== 'number') return !S[k];
+  const v = (k && NAMEN[k]) ? wert(k) : (S[k]|0);
+  return v < (o.ab.min|0);
+}
+
 function zeigeSzene(n){
-  const opt = n.optionen.map((o,i)=>{
+  const gesperrtText = n.optionen.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
+    .map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
+  const opt = n.optionen.filter(o=>!szeneVerwehrt(o)).map((o)=>{
+    const i = n.optionen.indexOf(o);
     const gesperrt = o.probe && wert(o.probe.wert)<5;
     return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
-      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`;
+      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}${
+        o.kette?' · '+o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw).join(' · '):''}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
+      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div></div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
     </div>${seitenleiste()}</div>`;
   LAUF.szene = n.id;
 }
 function waehleOption(i){
   const n = KAPITEL[LAUF.node], o = n.optionen[i];
-  let erg, klasse='', probeText='';
-  if(o.probe){
+  let erg, klasse='', probeText='', kettenText='';
+
+  /* ── Ketten in Szenen ──
+     Dieselbe Semantik wie die Sondermissionen im Gefecht (`kette:` in
+     GEFECHTS_EREIGNISSE): mehrere Proben hintereinander, jeder Fehlschlag
+     kostet sofort Blut, die Mehrheit der Stufen entscheidet über die Wirkung.
+
+     **Das ist die einzige Stelle, an der eine Szene töten darf.** Sonst klemmt
+     `anwenden()` das Leben bei 1, weil der Tod ins Gefecht gehört, wo er einen
+     Text und einen Ort hat. Eine Kette hat beides — man betritt sie
+     freiwillig, sie hat einen Namen, und sie hat einen eigenen Todestext.
+     Ohne diese Ausnahme wäre das Duell im Garnisonskapitel folgenlos, und ein
+     Friedenskapitel ohne jede Todesmöglichkeit macht aus einem
+     Permadeath-Spiel für vier Jahre ein Menü. */
+  if(o.kette){
+    const zeilen = []; let treffer = 0;
+    for(const st of o.kette){
+      const p = probe(st.wert, st.schw);
+      let schaden = 0;
+      if(p.erfolg) treffer++;
+      else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
+      atemKlemmen();
+      zeilen.push((p.erfolg?st.gut:st.schlecht) +
+        ` <span class="fein">${NAMEN[st.wert]} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+      if(S.leben <= 0){
+        S.log.push(n.id+': '+o.label);
+        toetlich(o.todesart || 'Gefallen');
+        zeigeTod(zeilen.join(' ') + ' ' + (o.tod||''));
+        return;
+      }
+    }
+    erg = (treffer*2 > o.kette.length) ? o.erfolg : (o.misserfolg || o.erfolg);
+    klasse = (treffer*2 > o.kette.length) ? 'gut' : 'schlecht';
+    kettenText = zeilen.join(' ') + '<br><br>';
+  }
+  else if(o.probe){
     const p = probe(o.probe.wert, o.probe.schw);
     erg = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
     klasse = p.erfolg ? 'gut' : 'schlecht';
@@ -934,7 +1131,7 @@ function waehleOption(i){
   app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p class="said">${esc(o.label)}</p></div>
-        <div class="ergebnis ${klasse}">${erg.text}${probeText}</div>
+        <div class="ergebnis ${klasse}">${kettenText}${erg.text}${probeText}</div>
         ${wirkungen(erg)}</div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;

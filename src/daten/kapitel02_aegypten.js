@@ -322,13 +322,14 @@ const KAPITEL2 = [
      misserfolg:{text:'Das Gerücht läuft, wächst und platzt nach einer Woche. Und weil jeder weiß, wo es herkam, bist du jetzt der Mann, der Märchen erzählt.',ruf:-4,belastung:4}}
   ]},
 
-/* 33 */ {typ:'ende',id:'ende_aegypten',datum:'Herbst 1799 · Kairo',ort:'Die Armee des Orients bleibt',
+/* 33 */ {typ:'uebergang',id:'ende_aegypten',datum:'Herbst 1799 · Kairo',ort:'Die Armee des Orients bleibt',
   text:[
     'Der Herbst kommt, so weit man das hier Herbst nennen kann. Die Armee des Orients hält Ägypten — ohne Flotte, ohne Nachschub, ohne Nachricht, wann jemand sie holt.',
     'Du hast zwei Feldzüge überstanden. Italien hat dich zum Soldaten gemacht; Ägypten hat dir gezeigt, dass die meisten nicht am Feind sterben. Von den Männern, die in Toulon an Bord gingen, ist jeder dritte nicht mehr da, und die wenigsten davon hat eine Kugel getroffen.',
-    'Es heißt, irgendwann werden Schiffe kommen. Bis dahin wird gedient.'
-  ],
-  ausblick:'<b>Hier endet der Prototyp.</b> Kapitel 3 — die Garnisonsjahre 1800–04, in denen Bildung, Heirat und Beziehungen zählen — steht im Konzept, aber noch nicht im Code. Danach: Austerlitz.'}
+    'Es heißt, irgendwann werden Schiffe kommen. Bis dahin wird gedient — zwei Jahre lang, in einem Land, das euch nicht will, unter einem General, der längst in Paris ist und dort regiert.',
+    'Im Sommer 1801 landen die Engländer bei Abukir, wo ihr vor zwei Jahren gesiegt habt. Diesmal seid ihr zu wenige. Im September wird in Alexandria eine Kapitulation unterschrieben, die keine Schande ist: freier Abzug, mit Waffen und Fahnen, auf englischen Schiffen nach Frankreich.',
+    'Ihr geht nach Hause. Nach drei Jahren, elf Monaten und einer Woche.'
+  ]}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen. */

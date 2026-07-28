@@ -179,6 +179,58 @@ const KAMPAGNEN = [
 ];
 const STATIONEN = {};
 
+/* ══════════════════ ORDEN UND AUSZEICHNUNGEN ══════════════════
+
+   **Nennungen im Tagesbefehl waren bis zum 28.07.2026 eine Zahl ohne Folge.**
+   Orden sind die Folge — und sie zahlen in drei Währungen zugleich, damit sie
+   sich nicht wie Deko anfühlen:
+
+     `vp`      in der Wertung (KONZEPT §5 hält die Plätze frei)
+     `ruf`     einmalig beim Verleihen — wer das Kreuz trägt, ist bekannt
+     `pension` Francs je Station, lebenslang. Historisch der eigentliche Wert:
+               Die Ehrenlegion war eine Rente, kein Blech.
+
+   **Historisch trägt sich der Bogen selbst.** Die Ehrenwaffen (armes d'honneur)
+   wurden 1799–1802 an einfache Soldaten für einzelne Taten vergeben — genau die
+   Jahre von Ägypten. Wer eine besaß, wurde bei der Stiftung der Ehrenlegion
+   **von Rechts wegen aufgenommen**, ohne weitere Prüfung. Die erste große
+   Verleihung war das Lager von Boulogne am 16. August 1804: Kapitel 3.
+
+   Ein Orden ist damit die einzige Auszeichnung im Spiel, die man sich in einem
+   Kapitel verdient und in einem anderen einlöst. */
+const ORDEN = [
+  {id:'ehrenwaffe', name:'Ehrenwaffe', voll:'Fusil d\'honneur',
+   ab:'1799', vp:10, ruf:6, pension:0.5,
+   was:'Eine Muskete mit graviertem Schloss und deinem Namen darauf, verliehen im Namen der Konsuln. Sie schießt nicht besser. Sie sagt nur jedem, der sie sieht, was du getan hast.',
+   bedingung:'Drei Nennungen im Tagesbefehl'},
+
+  {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
+   ab:'1804', vp:12, ruf:10, pension:1.0,
+   was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
+   bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'}
+];
+function ordenVon(id){ return ORDEN.find(o=>o.id===id) || null; }
+function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
+
+/* Das Kreuz, wie es am Rock hängt. Wie die Rangabzeichen: ein Bild statt eines
+   Wortes, und in derselben Größe, damit die Seitenleiste ruhig bleibt. */
+function ordensbild(id){
+  if(id==='ehrenwaffe') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenwaffe">
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
+    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#b8b0a2"/>
+    <rect x="5" y="10" width="6" height="4" rx="1" fill="#8a6a3c"/>
+    <circle cx="27" cy="12" r="3" fill="none" stroke="#d0a75e" stroke-width="1.4"/></svg>`;
+  if(id==='legion'){
+    const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
+      fill="#e8e2d4" transform="rotate(${a+45} 18 12)"/>`).join('');
+    return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenlegion">
+      <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
+      <rect x="13" y="2" width="10" height="4" fill="#c2483a"/>
+      ${arme}<circle cx="18" cy="12" r="2.6" fill="#d0a75e"/></svg>`;
+  }
+  return '';
+}
+
 const AUSRUESTUNG_START = () => ({
   muskete:{name:'Charleville Modell 1777',zustand:70,verschleiss:15},
   seitenwaffe:{name:'Ausgabebajonett',zustand:80,verschleiss:8},

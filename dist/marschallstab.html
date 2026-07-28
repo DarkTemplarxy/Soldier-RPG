@@ -552,6 +552,58 @@ const KAMPAGNEN = [
 ];
 const STATIONEN = {};
 
+/* ══════════════════ ORDEN UND AUSZEICHNUNGEN ══════════════════
+
+   **Nennungen im Tagesbefehl waren bis zum 28.07.2026 eine Zahl ohne Folge.**
+   Orden sind die Folge — und sie zahlen in drei Währungen zugleich, damit sie
+   sich nicht wie Deko anfühlen:
+
+     `vp`      in der Wertung (KONZEPT §5 hält die Plätze frei)
+     `ruf`     einmalig beim Verleihen — wer das Kreuz trägt, ist bekannt
+     `pension` Francs je Station, lebenslang. Historisch der eigentliche Wert:
+               Die Ehrenlegion war eine Rente, kein Blech.
+
+   **Historisch trägt sich der Bogen selbst.** Die Ehrenwaffen (armes d'honneur)
+   wurden 1799–1802 an einfache Soldaten für einzelne Taten vergeben — genau die
+   Jahre von Ägypten. Wer eine besaß, wurde bei der Stiftung der Ehrenlegion
+   **von Rechts wegen aufgenommen**, ohne weitere Prüfung. Die erste große
+   Verleihung war das Lager von Boulogne am 16. August 1804: Kapitel 3.
+
+   Ein Orden ist damit die einzige Auszeichnung im Spiel, die man sich in einem
+   Kapitel verdient und in einem anderen einlöst. */
+const ORDEN = [
+  {id:'ehrenwaffe', name:'Ehrenwaffe', voll:'Fusil d\'honneur',
+   ab:'1799', vp:10, ruf:6, pension:0.5,
+   was:'Eine Muskete mit graviertem Schloss und deinem Namen darauf, verliehen im Namen der Konsuln. Sie schießt nicht besser. Sie sagt nur jedem, der sie sieht, was du getan hast.',
+   bedingung:'Drei Nennungen im Tagesbefehl'},
+
+  {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
+   ab:'1804', vp:12, ruf:10, pension:1.0,
+   was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
+   bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'}
+];
+function ordenVon(id){ return ORDEN.find(o=>o.id===id) || null; }
+function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
+
+/* Das Kreuz, wie es am Rock hängt. Wie die Rangabzeichen: ein Bild statt eines
+   Wortes, und in derselben Größe, damit die Seitenleiste ruhig bleibt. */
+function ordensbild(id){
+  if(id==='ehrenwaffe') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenwaffe">
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
+    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#b8b0a2"/>
+    <rect x="5" y="10" width="6" height="4" rx="1" fill="#8a6a3c"/>
+    <circle cx="27" cy="12" r="3" fill="none" stroke="#d0a75e" stroke-width="1.4"/></svg>`;
+  if(id==='legion'){
+    const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
+      fill="#e8e2d4" transform="rotate(${a+45} 18 12)"/>`).join('');
+    return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenlegion">
+      <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
+      <rect x="13" y="2" width="10" height="4" fill="#c2483a"/>
+      ${arme}<circle cx="18" cy="12" r="2.6" fill="#d0a75e"/></svg>`;
+  }
+  return '';
+}
+
 const AUSRUESTUNG_START = () => ({
   muskete:{name:'Charleville Modell 1777',zustand:70,verschleiss:15},
   seitenwaffe:{name:'Ausgabebajonett',zustand:80,verschleiss:8},
@@ -1192,19 +1244,387 @@ const KAPITEL2 = [
      misserfolg:{text:'Das Gerücht läuft, wächst und platzt nach einer Woche. Und weil jeder weiß, wo es herkam, bist du jetzt der Mann, der Märchen erzählt.',ruf:-4,belastung:4}}
   ]},
 
-/* 33 */ {typ:'ende',id:'ende_aegypten',datum:'Herbst 1799 · Kairo',ort:'Die Armee des Orients bleibt',
+/* 33 */ {typ:'uebergang',id:'ende_aegypten',datum:'Herbst 1799 · Kairo',ort:'Die Armee des Orients bleibt',
   text:[
     'Der Herbst kommt, so weit man das hier Herbst nennen kann. Die Armee des Orients hält Ägypten — ohne Flotte, ohne Nachschub, ohne Nachricht, wann jemand sie holt.',
     'Du hast zwei Feldzüge überstanden. Italien hat dich zum Soldaten gemacht; Ägypten hat dir gezeigt, dass die meisten nicht am Feind sterben. Von den Männern, die in Toulon an Bord gingen, ist jeder dritte nicht mehr da, und die wenigsten davon hat eine Kugel getroffen.',
-    'Es heißt, irgendwann werden Schiffe kommen. Bis dahin wird gedient.'
-  ],
-  ausblick:'<b>Hier endet der Prototyp.</b> Kapitel 3 — die Garnisonsjahre 1800–04, in denen Bildung, Heirat und Beziehungen zählen — steht im Konzept, aber noch nicht im Code. Danach: Austerlitz.'}
+    'Es heißt, irgendwann werden Schiffe kommen. Bis dahin wird gedient — zwei Jahre lang, in einem Land, das euch nicht will, unter einem General, der längst in Paris ist und dort regiert.',
+    'Im Sommer 1801 landen die Engländer bei Abukir, wo ihr vor zwei Jahren gesiegt habt. Diesmal seid ihr zu wenige. Im September wird in Alexandria eine Kapitulation unterschrieben, die keine Schande ist: freier Abzug, mit Waffen und Fahnen, auf englischen Schiffen nach Frankreich.',
+    'Ihr geht nach Hause. Nach drei Jahren, elf Monaten und einer Woche.'
+  ]}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen. */
 KAPITEL.push(...KAPITEL2);
 STATIONEN.aegypten = KAPITEL2.slice();   // Kopie, siehe Kapitel 1
 (KAMPAGNEN.find(k=>k.id==='aegypten')||{}).gebaut = true;
+
+
+'use strict';
+/* Kapitel 3 — Garnison 1801–04. Reine Daten, wie Kapitel 1 und 2.
+
+   ══════════════════ Der Charakter dieses Kapitels ══════════════════
+
+   **Im Krieg ist der Feind die Kugel. Im Frieden ist der Feind die Zeit.**
+
+   Das ist der ganze Entwurf in einem Satz. Die Maschine bleibt dieselbe —
+   Stationen, Proben, Saisons, am Ende sogar ein Gefecht —, aber der Einsatz ist
+   nicht mehr Blut, sondern Zukunft: Bildung, Geld, Beziehungen, Stand. Und über
+   allem steht eine Uhr, die jeder sieht: Der Krieg kommt zurück, und was du bis
+   dahin nicht gelernt hast, hast du nicht.
+
+   Vier Dinge halten das Kapitel davon ab, eine Verwaltung zu werden:
+
+   1. **Knappheit statt Fülle.** Vier Saisons, nicht sechzehn Abende — und in
+      jeder mehr zu tun als Wochen. Dieselbe Regel wie im Lager (CLAUDE.md),
+      nur auf Jahresmaßstab.
+   2. **Der Tod bleibt möglich, aber man muss ihn einladen.** Das Duell hinter
+      der Reitbahn ist die einzige Kette des Kapitels und die einzige Stelle,
+      an der eine Szene töten darf. Ein Permadeath-Spiel, das vier Jahre lang
+      niemanden töten kann, ist vier Jahre lang ein Menü.
+   3. **Das große Manöver** benutzt das volle Kampfsystem mit Platzpatronen —
+      dasselbe Spiel, andere Währung. Es ist die Lektion des Kapitels als
+      Bildschirm.
+   4. **Die Decke hat ein Gesicht.** Über dem Sergenten sitzt Martel, und der
+      geht nicht weg. Wer weiterwill, braucht eine Vakanz — und die entsteht im
+      Frieden nicht. Das Spiel sagt das nie laut.
+
+   ══════════════════ Historische Fixpunkte (Invariante 8) ══════════════════
+
+   Kapitulation von Alexandria 2. September 1801 · Rückkehr über Marseille im
+   Herbst 1801 · Friede von Amiens 25. März 1802 · Ehrenlegion gestiftet
+   19. Mai 1802 · Umbenennung der Halbbrigaden in Regimenter September 1803 ·
+   Bruch von Amiens Mai 1803 · Lager von Boulogne ab Sommer 1803 · erste große
+   Verleihung der Ehrenlegion im Lager von Boulogne 16. August 1804 · Krönung
+   2. Dezember 1804. Dazwischen ist alles frei erfunden.
+
+   Feindgüte 0 (KAMPAGNEN) — es gibt keinen Feind. */
+
+const KAPITEL3 = [
+
+/* 34 */ {typ:'szene',id:'heimkehr',datum:'Oktober 1801 · Marseille',ort:'Die Landung',
+  marsch:{von:'Alexandria',nach:'Marseille',weg:'2 400 km auf englischen Schiffen · sechs Wochen, als Gäste derer, die gewonnen haben'},
+  text:[
+    'Die Engländer bringen euch nach Hause, wie es abgemacht war. Sie sind höflich, sie sind sauber, und sie geben euch Zwieback, der besser ist als alles, was ihr seit Toulon gegessen habt. Das ist schwerer zu ertragen als eine Niederlage.',
+    'Am 20. Oktober läuft das Schiff in Marseille ein. Auf dem Kai steht niemand. Es gab keine Nachricht, dass ihr kommt, und in Frankreich hat man euch drei Jahre lang für verschollen gehalten — eine Armee, die irgendwo in Afrika verschwunden ist und über die man in der Zeitung nichts Genaues las.',
+    'Ihr geht von Bord, dreihundert Mann von den achthundert, die eingeschifft wurden. Die Uniformen sind aus Ägypten, das heißt: aus Fetzen. Ein Zollbeamter fragt, ob ihr etwas zu verzollen habt.'
+  ],
+  optionen:[
+    {label:'Der Erste sein, der französischen Boden anfasst',hint:'Es ist eine Geste, und alle sehen sie',
+     erfolg:{text:'Du gehst über die Planke, knietest dich hin und legst die Hand auf den nassen Stein des Kais. Es ist albern, es ist die Sorte Geste, über die man später lacht, und in diesem Augenblick lacht keiner. Hinter dir tun es vier andere.',
+       kameradschaft:8,belastung:-6}},
+    {label:'Nach Briefen fragen',hint:'Drei Jahre lang kam keiner an',
+     probe:{wert:'bildung',schw:20},
+     erfolg:{text:'Im Hafenamt liegen zwei Säcke Post für die Armee des Orients, seit über einem Jahr. Du findest nichts mit deinem Namen. Ein Schreiber sagt, das heiße gar nichts, die Hälfte sei nie angekommen. Du glaubst ihm die Hälfte.',
+       belastung:4},
+     misserfolg:{text:'Du stehst vor zwei Postsäcken und den Namen darauf, und die Namen sind Zeichen. Ein Korporal liest dir zwanzig davon vor, bevor ihm die Geduld ausgeht. Deiner ist nicht dabei gewesen — sagt er.',
+       belastung:6}},
+    {label:'Sofort nach dem Sold fragen',hint:'Drei Jahre Rückstand',
+     probe:{wert:'verwaltung',schw:35},
+     erfolg:{text:'Du findest den Zahlmeister, bevor die anderen wissen, dass es einen gibt, und legst ihm vor, was dir zusteht. Er zahlt nicht alles. Er zahlt mehr, als die zahlen, die morgen fragen.',geld:22},
+     misserfolg:{text:'Der Zahlmeister sagt, die Listen der Armee des Orients seien in Kairo. Kairo, sagst du, ist englisch. Er sagt, das sei nicht sein Problem, und hat damit recht.',belastung:4,geld:4}},
+    {label:'Nichts tun und sich umsehen',hint:'Europa',
+     erfolg:{text:'Häuser aus Stein mit Dächern aus Ziegeln. Frauen in Schuhen. Ein Baum, dessen Blätter ohne Bewässerung grün sind. Du stehst zehn Minuten da und siehst zu, wie es regnet, und es ist der erste Regen seit dreiundvierzig Monaten.',
+       belastung:-8,atem:4}}
+  ]},
+
+/* 35 */ {typ:'szene',id:'lazarett',datum:'November 1801 · Marseille',ort:'Quarantäne im Lazarett',
+  text:[
+    'Niemand aus Ägypten kommt ohne Quarantäne ins Land. Sechs Wochen hinter einer Mauer am Hafen, weil man in Marseille die Pest von 1720 nicht vergessen hat und nicht vergessen will.',
+    'Es ist das erste Mal seit drei Jahren, dass jemand euch untersucht. Ein Arzt aus der Stadt, kein Feldscher — er hat saubere Hände, Instrumente in einem Kasten und eine Handschrift, die man lesen kann. Er notiert, was er findet, und findet bei jedem etwas.',
+    'Die Augenkrankheit, sagt er, geht meistens weg. Die Ruhr auch, wenn man liegt und trinkt und nicht arbeitet. Was nicht weggeht, sagt er nicht, aber man sieht es ihm an, bei wem er es denkt.'
+  ],
+  optionen:[
+    {label:'Sechs Wochen liegen bleiben und tun, was er sagt',hint:'Was aus Ägypten mitkam, bleibt in Marseille',
+     erfolg:{text:'Du liegst sechs Wochen auf einer Pritsche und tust nichts, und es ist die vernünftigste Sache, die du in diesem Jahr tust. Was du aus Ägypten mitgebracht hast, geht in Marseille von dir ab — langsam, ohne dass ein Tag der Tag wäre, an dem es aufhört.',
+       heilt:'krank',leben:25,belastung:-10}},
+    {label:'Dem Arzt zur Hand gehen',hint:'Feldchirurgie · er nimmt jeden, der stillhalten kann',
+     probe:{wert:'feldchirurgie',schw:30},
+     erfolg:{text:'Er lässt dich halten, waschen und aufschreiben, was er diktiert — die letzten beiden Wochen sogar nähen, an einem Mann, dem es gleich war. Was du bei Guérin und am Sinai gelernt hast, hat zum ersten Mal einen Namen: Er nennt es Erfahrung und sagt es ohne Spott.',
+       heilt:'krank',fert:{feldchirurgie:8},attr:{bildung:3},leben:12},
+     misserfolg:{text:'Du hältst zweimal nicht still genug, und beim dritten Mal schickt er dich zurück auf die Pritsche. Immerhin liegst du dann. Das ist es, was hilft.',
+       heilt:'krank',leben:15}},
+    {label:'Über die Mauer und in die Stadt',hint:'Sechs Wochen sind lang',risk:true,
+     probe:{wert:'geschick',schw:45},
+     erfolg:{text:'Zweimal in sechs Wochen, nachts, über die Mauer am Westende, wo der Wachposten schläft, weil dort seit hundert Jahren nichts passiert. Wein, eine Wirtsstube, Menschen, die nicht deine Uniform tragen. Es ist jedes Mal die Sache wert und heilt nichts.',
+       kameradschaft:6,belastung:-8,geld:-6},
+     misserfolg:{text:'Beim zweiten Mal steht der Posten doch da. Er meldet es nicht — er nimmt dir das Geld ab und lässt dich zurückklettern. Die sechs Wochen werden dadurch nicht kürzer, und die Ruhr geht davon auch nicht weg.',
+       geld:-12,belastung:6}}
+  ]},
+
+/* 36 */ {typ:'szene',id:'einzug',datum:'Dezember 1801 · Nîmes',ort:'Einzug in die Garnison',
+  marsch:{von:'Marseille',nach:'Nîmes',weg:'120 km westwärts durch die Rhône-Ebene · fünf Tage, zum ersten Mal auf einer gepflasterten Straße'},
+  text:[
+    'Nîmes ist eine Stadt aus gelbem Stein mit einem römischen Amphitheater mitten drin, in dem Leute wohnen. Die Halbbrigade bekommt eine Kaserne am nördlichen Tor, zwei Stockwerke, echte Betten, ein Hof zum Exerzieren.',
+    'Es ist Textilland hier: Seide, Wolle, Färbereien am Fluss, und ein Bürgertum, das Soldaten für eine Naturgewalt hält — nicht böse, aber besser abgedeckt.',
+    'Der Capitaine verliest, was jetzt gilt. Wachdienst, Exerzieren, Kirchgang freiwillig. Und ein Satz, den keiner erwartet hat: Es ist kein Feldzug in Aussicht. Für die nächsten Jahre nicht.',
+    'Draußen auf dem Hof braucht einer eine Weile, bis er begreift, was das heißt, und sagt dann laut, was alle denken: Und was machen wir jetzt?'
+  ],
+  optionen:[
+    {label:'Dich beim Waffenmeister melden',hint:'Wer nichts zu tun hat, sucht sich etwas',
+     erfolg:{text:'Der Waffenmeister ist ein Piemonteser mit einer Narbe vom Ohr zum Kinn und behauptet, er habe unter dem König gedient. Er fragt nicht, welchem. Er fragt, ob du das Bajonett schon einmal gegen einen benutzt hast, der auch eins hatte, und nickt zu deiner Antwort.',
+       fert:{bajonett:5},kameradschaft:4}},
+    {label:'Dich in der Stadt umsehen',hint:'Vier Jahre werden hier stattfinden',
+     probe:{wert:'menschenkenntnis',schw:30},
+     erfolg:{text:'Du gehst zwei Tage lang durch Nîmes und lernst, wo die Wirtsstuben billig sind, welche Färberei Tagelöhner nimmt, und dass die Leute hier über die Armee reden, als wäre sie das Wetter. Wer eine Stadt kennt, hat vier Jahre lang einen Vorteil.',
+       fert:{fouragieren:5},attr:{menschenkenntnis:3},geld:5},
+     misserfolg:{text:'Du läufst zwei Tage durch enge Gassen, die alle gleich aussehen, und kommst zweimal wieder beim Amphitheater heraus. In einer Wirtsstube zahlst du das Doppelte, weil man dir ansieht, dass du neu bist.',
+       geld:-5}},
+    {label:'Nach der Schule des Regiments fragen',hint:'Es gibt eine · Bildung',
+     erfolg:{text:'Es gibt eine, sagt der Fourier und sieht dabei nicht auf. Ein invalider Sergent unterrichtet im Stall hinter dem Magazin, dienstags und freitags, für den, der will. Es wollen selten mehr als zwölf. Du merkst dir den Weg.',
+       attr:{bildung:2},gunst:1,gunstVon:'collot'}},
+    {label:'Schlafen',hint:'Zum ersten Mal seit 1798 in einem Bett',
+     erfolg:{text:'Ein Strohsack in einem Raum mit einem Dach, das dicht ist, und einem Ofen, den jemand anders heizt. Du schläfst vierzehn Stunden und wachst auf, weil es still ist.',
+       belastung:-12,atem:10,leben:15}}
+  ]},
+
+/* 37 */ {typ:'winter',id:'saison_nimes1',datum:'Januar–März 1802 · Nîmes',ort:'Erste Garnisonssaison',
+  wochen:4,
+  frage:'Womit verbringst du diese Monate?',
+  weiter:'Das Frühjahr kommt',
+  atemText:'Ein Winter in der Kaserne, mit Sold, Ofen und zweimal Essen am Tag.',
+  tun:['schule','fechtboden','verdienst','wirtshaus','marketender','ausr','ruhe'],
+  rangTun:{4:['magazin'],5:['ausbilden','schreiber','strafdienst']},
+  text:[
+    'Der erste Winter in Nîmes ist der längste deines Lebens, und das liegt daran, dass nichts passiert. Um sechs Uhr Wecken, Exerzieren bis zehn, Wachdienst nach Liste, um acht Zapfenstreich. Dazwischen liegt der Tag wie ein Feld ohne Weg.',
+    'Vier Jahre klingen nach viel. Sie sind es auch — aber sie gehen weg, ohne dass man ihnen dabei zusieht, und am Ende steht die Frage, was in dieser Zeit aus dir geworden ist. Der Krieg wird das prüfen, und er wird nicht ankündigen, wann.',
+    'Was du jetzt lernst, kannst du. Was du jetzt nicht lernst, wirst du in fünf Jahren brauchen und nicht haben.'
+  ]},
+
+/* 38 */ {typ:'szene',id:'amiens',zwischenfall:true,datum:'April 1802 · Nîmes',ort:'Der Friede von Amiens',
+  text:[
+    'Am 25. März wird in Amiens Friede mit England geschlossen. Zehn Tage später steht es in der Zeitung, die im Wachlokal herumgeht, und wer lesen kann, liest sie den anderen vor.',
+    'Frieden mit allen. Zum ersten Mal seit zehn Jahren. In der Stadt läuten sie die Glocken, und abends brennen auf dem Platz vor dem Amphitheater Fässer mit Pech.',
+    'Am nächsten Morgen wird ein zweiter Befehl verlesen: Die Armee wird verkleinert. Wer über vierzig ist, wer nicht mehr voll dienstfähig ist, wer es beantragt, geht nach Hause. Halbsold, ein Abschiedspapier, und ein Platz auf einem Karren nach Norden.',
+    'Vier aus deiner Kompanie stehen auf der Liste. Einer davon ist Bertrand, der bei Embabeh im Karree neben dir stand und seitdem nicht mehr richtig hört.'
+  ],
+  optionen:[
+    {label:'Bertrand zum Tor bringen',hint:'Es sieht ihm sonst keiner nach',
+     erfolg:{text:'Du trägst seinen Sack bis zum Nordtor, wo die Karren stehen. Er redet die ganze Zeit zu laut, weil er sich selbst nicht hört, und erzählt, was er zu Hause machen wird — sein Bruder hat eine Werkstatt, es gibt Arbeit, es wird schon. Am Tor gibt er dir die Hand und sagt: Pass auf dich auf, wenn es wieder losgeht. Wenn, sagst du. Er hört das Wort nicht.',
+       kameradschaft:10,belastung:6}},
+    {label:'Fragen, ob du selbst gehen kannst',hint:'Der Frieden könnte halten',risk:true,
+     probe:{wert:'menschenkenntnis',schw:50},
+     erfolg:{text:'Du fragst den Fourier, halb im Scherz, was ein Antrag kosten würde. Er sieht dich an, ohne zu lachen, und sagt: Was willst du draußen? Du kannst nichts, was man draußen bezahlt. Bleib, lern etwas, und wenn du in fünf Jahren immer noch gehen willst, gehst du als jemand. Es ist der beste Rat, den dir hier jemand gibt, und er kostet dich nichts als den Stolz.',
+       gunst:2,gunstVon:'collot',attr:{menschenkenntnis:3}},
+     misserfolg:{text:'Du fragst zur falschen Stunde und beim falschen Mann. Der Sergent-major hört es, und ab dann bist du der, der bei der ersten Gelegenheit gehen wollte. Es wird nicht gemeldet. Es wird nur nicht vergessen.',
+       ruf:-4,gunst:-1}},
+    {label:'Auf dem Platz mitfeiern',hint:'Zehn Jahre Krieg sind vorbei',
+     erfolg:{text:'Die halbe Stadt ist auf dem Platz, es gibt Wein aus Fässern, und irgendwann tanzt jemand mit jemandem. Es ist der Abend, an dem du zum ersten Mal seit Toulon nicht daran denkst, was morgen ist. Am nächsten Tag hast du Kopfweh und vier Francs weniger.',
+       belastung:-10,kameradschaft:6,geld:-4}},
+    {label:'In den Stall zur Schule gehen',hint:'Es sind heute noch weniger da als sonst',
+     erfolg:{text:'Der Stall ist fast leer, weil alle auf dem Platz sind. Der invalide Sergent ist trotzdem da und sagt, das treffe sich gut, dann komme man mal weiter. Zwei Stunden für dich allein. Am Ende schreibst du deinen Namen dreimal hintereinander gleich.',
+       attr:{bildung:5},gunst:1,gunstVon:'collot'}}
+  ]},
+
+/* 39 */ {typ:'szene',id:'begegnung',zwischenfall:true,datum:'Juni 1802 · Nîmes',ort:'Die Färberei am Fluss',
+  text:[
+    'Sie heißt Marguerite Aubanel, ist die Tochter eines Färbers am Vistre und zählt Ballen, während du im Hof stehst und auf den Feldwebel wartest, der Tuch für die Kompanie holen soll.',
+    'Sie sieht auf, sieht die Uniform, sieht wieder weg, zählt weiter. Beim dritten Mal, dass du dort stehst, fragt sie, ob es in Ägypten wirklich keinen Regen gibt. Beim fünften Mal fragt sie nach deinem Namen.',
+    'Es ist nichts dabei. Es ist eine Stadt, in der man vier Jahre bleibt, und in solchen Städten passiert so etwas ständig. Man kann es lassen. Die meisten lassen es.'
+  ],
+  optionen:[
+    {label:'Wiederkommen',hint:'Es kostet Abende und ist nicht umsonst',
+     erfolg:{text:'Du findest Gründe, in die Färberei zu gehen, und die Gründe werden mit der Zeit dünner. Ihr Vater sieht es und sagt nichts, was in dieser Stadt heißt: noch nicht nein. Im Herbst gehst du an einem Sonntag mit ihr am Fluss entlang, vor Zeugen, und danach weiß es die halbe Straße.',
+       setzt:{umworben:true},belastung:-8,geld:-10}},
+    {label:'Höflich sein und es dabei belassen',hint:'Ein Soldat zieht weiter',
+     erfolg:{text:'Du grüßt, wenn du sie siehst, und sie grüßt zurück, und mehr wird es nicht. Es ist die vernünftige Entscheidung. In zwei Jahren, im Lager von Boulogne, wirst du an einem Abend daran denken und nicht mehr genau wissen, warum du sie getroffen hast.',
+       belastung:2}},
+    {label:'Sie fragen, ob sie dir schreiben beibringt',hint:'Bildung · sie führt die Bücher ihres Vaters',
+     probe:{wert:'menschenkenntnis',schw:35},
+     erfolg:{text:'Sie lacht, sagt zuerst nein und fängt dann doch an — sonntags, in der Kontorstube, mit den Rechnungsbüchern ihres Vaters als Vorlage. Sie ist ungeduldiger als der Sergent im Stall und erklärt besser. Nach drei Monaten liest du eine Rechnung, ohne mit dem Finger mitzugehen.',
+       setzt:{umworben:true},attr:{bildung:8},fert:{verwaltung:5}},
+     misserfolg:{text:'Sie sagt, sie habe die Bücher ihres Vaters zu führen und keine Zeit, einem Soldaten Buchstaben beizubringen. Es ist freundlich gesagt und trotzdem ein Nein. Immerhin weiß sie jetzt, dass du es willst.',
+       attr:{bildung:2}}}
+  ]},
+
+/* 40 */ {typ:'winter',id:'saison_nimes2',datum:'Juli 1802 – Februar 1803 · Nîmes',ort:'Zweite Garnisonssaison',
+  wochen:4,
+  frage:'Womit verbringst du diese Monate?',
+  weiter:'Der Winter geht',
+  atemText:'Ein zweites Jahr in Stein und Ordnung.',
+  tun:['schule','fechtboden','verdienst','wirtshaus','marketender','drill','ruhe'],
+  rangTun:{4:['magazin'],5:['ausbilden','schreiber','strafdienst']},
+  text:[
+    'Der Sommer 1802 ist heiß und ereignislos. Im August lässt sich der Erste Konsul auf Lebenszeit wählen, im Mai hat er einen Orden gestiftet, den es noch nicht gibt und über den in der Kaserne schon gestritten wird: ein Orden für Verdienst, nicht für Geburt, und angeblich mit Geld dabei.',
+    'Im September wird verlesen, dass aus den Halbbrigaden wieder Regimenter werden sollen — dieselben Männer, dieselben Fahnen, ein anderes Wort. Ein alter Sergent sagt, so habe es vor der Revolution auch geheißen, und wird dafür schief angesehen.',
+    'Es ist das zweite Jahr. Wer im ersten nichts angefangen hat, hat jetzt noch zwei.'
+  ]},
+
+/* 41 */ {typ:'szene',id:'desertion',zwischenfall:true,datum:'März 1803 · Nîmes',ort:'Der Fall Rouvier',
+  text:[
+    'Rouvier ist neunzehn, aus einem Dorf bei Alès, seit vierzehn Monaten dabei und seit vier Tagen weg. Er hat keine Waffe mitgenommen, was ihm später hilft, und keinen Urlaubsschein, was ihm nicht hilft.',
+    'Die Gendarmerie bringt ihn am Freitag zurück. Sie haben ihn nicht in Alès gefunden, sondern zwölf Meilen weiter, wo eine Erntearbeit war, und er hat nicht einmal versucht wegzulaufen, als sie kamen.',
+    'Das Kriegsgericht tagt im Amphitheater, weil es der einzige Raum ist, in den das Bataillon passt. Er bekommt zwei Jahre Kette. Für Desertion in Friedenszeiten ohne Waffe ist das milde, und alle wissen es.',
+    'Verlesen wird das Urteil vor der aufmarschierten Truppe, und die Truppe steht dabei still. Du auch.'
+  ],
+  optionen:[
+    {label:'Ihm vorher etwas zu essen bringen',hint:'Er sitzt seit Freitag im Loch',risk:true,
+     probe:{wert:'menschenkenntnis',schw:40},
+     erfolg:{text:'Der Posten vor dem Arrestlokal ist einer aus deiner Kompanie, und er sieht weg, so lange es dauert. Rouvier isst nichts, redet aber. Er sagt, er habe nur nachsehen wollen, ob sein Vater noch lebt, und sei dann eingeschlafen und habe verschlafen, und dann sei es zu spät gewesen. Du glaubst ihm. Das ändert am Urteil nichts.',
+       kameradschaft:10,belastung:6},
+     misserfolg:{text:'Der Posten ist keiner aus deiner Kompanie. Er meldet es nicht, aber er lässt dich auch nicht durch, und er sieht dich dabei an wie einen, der etwas vorhat. Du gehst mit dem Brot zurück.',
+       belastung:4}},
+    {label:'Im Spalier stehen und das Urteil hören',hint:'Es steht so im Reglement',
+     erfolg:{text:'Zwölfhundert Mann in drei Gliedern in einem römischen Theater, und in der Mitte ein Neunzehnjähriger, dem der Auditeur zwei Jahre Kette vorliest. Es dauert vier Minuten. Danach ist Ausbildungsdienst wie immer.',
+       belastung:4}},
+    {label:'Beim Lieutenant ein Wort für ihn einlegen',hint:'Kaltblütigkeit · es wird nichts nützen',risk:true,
+     probe:{wert:'kaltbluetigkeit',schw:45},
+     erfolg:{text:'Du gehst zu Berthaud, ehe das Gericht tagt, und sagst deinen Satz — kurz, ohne zu betteln, ohne das Urteil in Frage zu stellen: dass der Junge in Ägypten nicht dabei war und nicht weiß, was hier eine Fahnenflucht wiegt. Berthaud hört zu, sagt: Zur Kenntnis genommen, und schickt dich weg. Am Urteil ändert sich nichts. An dem, was er von dir hält, schon.',
+       gunst:2,gunstVon:'berthaud',ruf:2},
+     misserfolg:{text:'Du kommst zur Unzeit und sagst drei Sätze zu viel. Berthaud lässt dich ausreden und erklärt dir dann, ruhig und der Reihe nach, warum ein Unteroffizier, der so redet, seinen Leuten schadet. Du hast auf jeden Satz eine Antwort und sagst keine davon.',
+       gunst:-1,gunstVon:'berthaud',belastung:6}}
+  ]},
+
+/* 42 */ {typ:'befoerderung',id:'nimes_musterung',datum:'April 1803 · Nîmes',ort:'Musterung im Kasernenhof',
+  text:[
+    'Einmal im Jahr wird durchgezählt, und im Frieden zählt man gründlicher, weil man Zeit hat. Der Capitaine sitzt an einem Tisch im Hof, neben ihm der Fourier mit den Büchern, und es geht Mann für Mann.',
+    'Es gibt keine Lücken zu füllen, wie es sie in Verona und in Kairo gab. Hier wird niemandes Stelle frei, weil niemand gefallen ist. Was hier zählt, ist, was in den Büchern steht: wer lesen kann, wer rechnen kann, wer im Magazin nichts hat verschwinden lassen.',
+    'Es ist die Sorte Beförderung, die man sich in einer Stube verdient und nicht auf einem Damm.'
+  ]},
+
+/* 43 */ {typ:'szene',id:'streit',zwischenfall:true,datum:'Juli 1803 · Nîmes',ort:'Das 79. rückt ein',
+  text:[
+    'Im Sommer legt man ein zweites Regiment nach Nîmes, das 79., frisch aus der Vendée und stolz darauf, nie in Ägypten gewesen zu sein. Zwei Regimenter, eine Stadt, vier Wirtsstuben — das geht selten lange gut.',
+    'Ihr Sergent heißt Chabert, ist einen Kopf größer als du und hat eine Art, das Wort „Ägypten" auszusprechen, dass es klingt wie eine Krankheit. Beim dritten Mal in derselben Woche fügt er hinzu, man rieche die Armee des Orients, bevor man sie sehe, und in Marseille habe man sie deshalb sechs Wochen hinter eine Mauer gesperrt.',
+    'Die halbe Stube hört es. Deine Leute sehen dich an, weil du der bist, den sie ansehen.'
+  ],
+  optionen:[
+    {label:'Es stehen lassen',hint:'Es ist nur ein Sergent aus der Vendée',
+     erfolg:{text:'Du trinkst aus, zahlst und gehst. Es ist die Sorte Entscheidung, die niemand lobt und die sich am nächsten Morgen richtig anfühlt. In der Stube redet man noch eine Woche darüber, und dann über etwas anderes.',
+       ruf:-3,belastung:4,kameradschaft:-4}},
+    {label:'Ihn vor Zeugen berichtigen',hint:'Kaltblütigkeit · ohne die Hand zu heben',
+     probe:{wert:'kaltbluetigkeit',schw:40},
+     erfolg:{text:'Du stehst auf, gehst zu seinem Tisch und sagst — leise genug, dass er sich vorbeugen muss, laut genug für die zwei Tische daneben —, dass von den achthundert, die in Toulon eingeschifft wurden, dreihundert zurückgekommen sind, und dass er die Namen der anderen fünfhundert gern haben könne, du kennest einige. Dann gehst du zurück und setzt dich. Er sagt in dieser Woche nichts mehr.',
+       ruf:4,kameradschaft:8,setzt:{chabert:true}},
+     misserfolg:{text:'Du stehst auf und sagst deinen Satz, und er ist einen Satz zu lang. Chabert lacht, und die Stube lacht mit, weil eine Stube immer mit dem lacht, der zuletzt gelacht hat. Du sitzt wieder, und die Sache ist nicht erledigt.',
+       ruf:-2,belastung:6,setzt:{chabert:true}}}
+  ]},
+
+/* 44 */ {typ:'szene',id:'marschbefehl',datum:'August 1803 · Nîmes',ort:'Nach Norden',
+  text:[
+    'Der Friede hat vierzehn Monate gehalten. Im Mai erklärt England wieder den Krieg, und diesmal soll es nicht auf dem Festland ausgetragen werden, sondern drüben: An der Kanalküste wird ein Lager gebaut, hunderttausend Mann stark, für eine Landung in England.',
+    'Der Marschbefehl kommt im August. Achthundert Kilometer nach Norden, quer durch Frankreich, sechs Wochen.',
+    'Am Abend vorher stehst du im Hof und siehst zu, wie die Kompanie packt. Nîmes war zwanzig Monate lang ein Ort mit einem Namen. Ab morgen ist es wieder eine Straße.'
+  ],
+  optionen:[
+    {label:'Um Erlaubnis zur Heirat bitten',hint:'Der Kompaniechef muss sie geben · nur wer geworben hat',
+     ab:{min:1,wert:'umworben',sonst:'Es gibt niemanden in dieser Stadt, von dem du dich verabschieden müsstest. Das macht das Packen leichter.'},
+     probe:{wert:'menschenkenntnis',schw:40},
+     erfolg:{text:'Eine Heirat braucht die Erlaubnis des Kompaniechefs, und Vernet gibt sie ungern, weil ein verheirateter Soldat ein Soldat mit einem zweiten Gedanken ist. Er gibt sie trotzdem — nach vier Fragen, von denen zwei nach Geld sind. Getraut wird an einem Dienstagmorgen, in zwanzig Minuten, mit zwei Kameraden als Zeugen. Ihr Vater kommt nicht. Ihre Mutter schon.',
+       setzt:{verheiratet:true},geld:35,belastung:-10,gunst:1,gunstVon:'vernet'},
+     misserfolg:{text:'Vernet hört sich die Bitte an und sagt nein, ohne unfreundlich zu sein: nicht vor einem Feldzug, nicht bei einem Mann deines Dienstalters, nicht in dieser Woche. Du hast am Abend eine Stunde, um es ihr zu sagen. Sie nimmt es besser auf als du.',
+       belastung:8}},
+    {label:'Die Nacht in der Stadt verbringen',hint:'Es ist die letzte',
+     erfolg:{text:'Du gehst durch Straßen, die du zwanzig Monate lang gegangen bist, und siehst sie zum ersten Mal an. Am Amphitheater sitzen Leute auf den Stufen, wie sie dort seit siebzehnhundert Jahren sitzen. Um vier Uhr früh ist Antreten.',
+       belastung:-6,kameradschaft:4}},
+    {label:'Die Ausrüstung für sechs Wochen Marsch herrichten',hint:'Achthundert Kilometer',
+     probe:{wert:'geschick',schw:30},
+     erfolg:{text:'Schuhe doppelt besohlen lassen, den Tornister neu schnüren, das Schloss der Muskete auseinandernehmen und ölen. Zwanzig Monate Garnison haben aus deiner Ausrüstung ein Kasernenstück gemacht; ab morgen ist es wieder Werkzeug.',
+       ausr:{schuhe:35,muskete:25,tornister:20}},
+     misserfolg:{text:'Du machst, was du kannst, und was du kannst, ist weniger, als du dachtest. Zwanzig Monate ohne Feldzug — man verlernt es schneller, als man es gelernt hat.',
+       ausr:{schuhe:15,muskete:10}}}
+  ]},
+
+/* 45 */ {typ:'winter',id:'saison_boulogne1',datum:'Oktober 1803 – März 1804 · Lager von Boulogne',ort:'Baracke im Lager der Küste',
+  wochen:4,
+  frage:'Womit verbringst du den Winter an der Küste?',
+  weiter:'Das Frühjahr an der Küste',
+  atemText:'Eine Bretterbaracke mit Ofen, hunderttausend Mann und ein Meer, das man nicht überqueren kann.',
+  tun:['schule','fechtboden','wirtshaus','marketender','drill','ausr','ruhe'],
+  rangTun:{4:['magazin'],5:['ausbilden','schreiber','strafdienst']},
+  text:[
+    'Das Lager von Boulogne ist keine Garnison, sondern eine Stadt aus Brettern: Baracken in Reihen bis zum Horizont, Straßen mit Namen, Gärten, in denen Kompanien Kohl ziehen, und über allem der Wind vom Kanal, der niemals aufhört.',
+    'Hunderttausend Mann warten darauf, nach England überzusetzen. Zweitausend flache Boote liegen im Hafen. Bei klarem Wetter sieht man die englische Küste — nicht als Gerücht, sondern als graue Linie, dreißig Kilometer weit weg, mit bloßem Auge.',
+    'Geübt wird das Einschiffen, immer wieder, hinein in die Boote und wieder heraus, bei jedem Wetter. Zwischendurch wird exerziert wie nie zuvor. Aus einer Armee, die drei Jahre lang nichts getan hat, wird hier in achtzehn Monaten die beste, die Frankreich je hatte — nur weiß das an diesem Winterabend noch niemand.'
+  ]},
+
+/* 46 */ {typ:'szene',id:'duell',zwischenfall:true,datum:'April 1804 · Hinter der Reitbahn',ort:'Vier Uhr früh',
+  text:[
+    'Chabert und das 79. liegen zwei Straßen weiter im selben Lager. Man begegnet sich beim Einschiffungsdrill, in der Kantine, an der Latrine, und es hört seit Nîmes nicht auf. Diesmal geht es nicht mehr um Ägypten, sondern nur noch darum, dass es weitergeht.',
+    'Am Ostermontag sagt er einen Satz über deine Kompanie, und es ist gleichgültig, welcher. Zwei seiner Leute sind dabei, zwei von deinen. Ab einem bestimmten Punkt entscheidet nicht mehr, was gesagt wurde, sondern wer dabeistand.',
+    'Sein Zeuge findet dich am Abend und nennt Ort und Zeit: hinter der Reitbahn, morgen früh um vier, Säbel. Duelle sind bei Todesstrafe verboten. Sie finden im Lager von Boulogne ungefähr dreimal die Woche statt, und die Offiziere gehen so lange spazieren.',
+    'Man kann absagen. Es kostet nichts als das, was es kostet.'
+  ],
+  optionen:[
+    {label:'Absagen lassen',hint:'Der Zeuge wird es weitererzählen',
+     erfolg:{text:'Du schickst seinen Zeugen ohne Antwort weg, was Antwort genug ist. Es spricht sich bis zum Mittag herum. Niemand sagt dir etwas ins Gesicht, außer einem aus deiner eigenen Kompanie, und der sagt es nur einmal. In vier Wochen redet keiner mehr davon. Du wirst dich noch in zehn Jahren daran erinnern.',
+       ruf:-8,kameradschaft:-10,belastung:10,setzt:{gekniffen:true}}},
+    {label:'Um vier Uhr hinter der Reitbahn sein',hint:'Säbel · drei Gänge · es kann tödlich enden',risk:true,
+     kette:[
+       {name:'Der erste Gang',wert:'kaltbluetigkeit',schw:40,schaden:13,
+        gut:'Es ist kalt, es ist noch nicht hell, und deine Hand ist ruhiger, als sie sein dürfte. Drei Jahre Ägypten haben wenigstens das gebracht: Du weißt, wie sich das anfühlt, wenn jemand dich umbringen will, und es ist nicht neu.',
+        schlecht:'Er ist schneller, als er aussieht, und beim zweiten Ausfall spürst du den Schnitt am Oberarm, bevor du ihn siehst. Der Zeuge fragt, ob es weitergeht. Es geht weiter.'},
+       {name:'Der zweite Gang',wert:'bajonett',schw:45,schaden:15,
+        gut:'Der Säbel ist nicht das Bajonett, aber die Beine sind dieselben. Du gehst nicht zurück, sondern zur Seite, wie es dir der Piemonteser in Nîmes gezeigt hat, und triffst ihn oberhalb des Knies. Er flucht auf eine Art, die zeigt, dass es weh tut.',
+        schlecht:'Du gehst zurück statt zur Seite, und er kommt nach. Es trifft dich an der Schulter und geht tiefer, als es sollte. Jetzt bluten zwei.'},
+       {name:'Der dritte Gang',wert:'geschick',schw:45,schaden:16,
+        gut:'Beim dritten Mal ist er zu wütend, um noch zu sehen, was er tut, und du bist nur noch müde. Müde ist besser. Du setzt einmal richtig, quer über die Stirn, und es ist vorbei — Blut in den Augen sieht keiner mehr etwas.',
+        schlecht:'Beim dritten Mal seid ihr beide zu langsam und zu wütend, und es wird eine hässliche, ungeschickte Sache, bei der ihr euch gegenseitig trefft, weil keiner mehr deckt.'}],
+     tod:'Hinter der Reitbahn, um zwanzig nach vier, im nassen Gras, wegen eines Satzes, an den sich zwei Wochen später niemand mehr genau erinnert.',
+     todesart:'Im Duell gefallen, Lager von Boulogne',
+     erfolg:{text:'Sein Zeuge bricht ab, als das Blut ihm in die Augen läuft. Ihr gebt euch nicht die Hand — so weit geht die Vorschrift nicht —, aber er nickt, und das Nicken ist mehr wert als der Handschlag. Es spricht sich schneller herum als jede Meldung. Zwei Tage später weiß es das halbe Lager, und niemand hat es offiziell erfahren.',
+       ruf:9,kameradschaft:12,belastung:6,leben:-8,fert:{bajonett:6}},
+     misserfolg:{text:'Ihr werdet beide weggetragen, und keiner hat gewonnen. Der Feldscher näht, ohne zu fragen, wo es herkommt, weil er es dreimal die Woche macht. Hingegangen bist du trotzdem, und das ist das Einzige, was hängenbleibt.',
+       ruf:4,kameradschaft:6,belastung:10,wunde:'Säbelhieb aus dem Duell'}}
+  ]},
+
+/* 47 */ {typ:'winter',id:'saison_boulogne2',datum:'Mai – Juli 1804 · Lager von Boulogne',ort:'Der Sommer an der Küste',
+  wochen:4,
+  frage:'Womit verbringst du den Sommer?',
+  weiter:'Es wird August',
+  atemText:'Ein Sommer an der Küste, mit Sold, Ordnung und dreimal am Tag Exerzieren.',
+  tun:['schule','fechtboden','drill','wirtshaus','marketender','ausr','ruhe'],
+  rangTun:{4:['magazin'],5:['ausbilden','schreiber','strafdienst']},
+  text:[
+    'Im Mai lässt sich der Erste Konsul zum Kaiser der Franzosen ausrufen. Im Lager wird es an einem Nachmittag verlesen, das Bataillon ruft dreimal, was es rufen soll, und danach ist Dienst.',
+    'Ein alter Sergent, der 1792 dabei war, sagt am Abend leise, dafür hätten sie damals nicht den König weggeschickt. Zwei widersprechen ihm. Die anderen sagen nichts und denken an den Sold, der seit dem Konsulat pünktlich kommt.',
+    'Für August ist eine Verleihung angekündigt. Der neue Orden, der im Mai 1802 gestiftet wurde und den bisher niemand gesehen hat, soll im Lager an die ausgegeben werden, die auf einer Liste stehen. Es heißt, es sei Geld dabei — fünfhundert Francs im Jahr, lebenslang.',
+    'In der Kompanie wird gerechnet, wer draufstehen könnte. Es dauert nicht lange.'
+  ]},
+
+/* 48 */ {typ:'kampf',id:'manoever',datum:'14. August 1804 · Lager von Boulogne',ort:'Das große Manöver',
+  uebung:true,
+  marsch:{von:'Baracke der 32.',nach:'Übungsfeld über den Dünen',weg:'6 km · aufgesessen um drei Uhr früh, damit um sechs alles steht'},
+  anmarschKosten:{verschleiss:0.05,atem:3,belastung:0},
+  anmarsch:[
+    'Vierzigtausend Mann auf einem Feld, das dafür planiert wurde. Zwei Parteien, blaue und weiße Armbinden, Platzpatronen, und Schiedsrichter zu Pferd, die entscheiden, wer als gefallen gilt.',
+    'Es ist eine Übung. Es ist auch die erste Gelegenheit seit Abukir, dass jemand zusieht, der etwas zu vergeben hat — der Kaiser ist seit gestern im Lager, und mit ihm zwei Marschälle und ein Stab, für den die halbe Nacht Zelte aufgebaut wurden.',
+    'Der Capitaine sagt es vor dem Abmarsch, ohne Umschweife: Heute wird nicht gestorben, heute wird gesehen. Wer heute schlecht aussieht, sieht vier Jahre lang schlecht aus.',
+    'Neben dir prüft einer zum dritten Mal den Feuerstein, obwohl heute keine Kugel geladen wird.'
+  ],
+  lage:{gegner:'Das 79. Linienregiment, weiße Armbinden, in Linie über den Dünenkamm',
+        auftrag:'Den Kamm nehmen und halten, unter den Augen des Stabes',
+        gelaende:'Sand, flache Dünen, kein Deckungsgelände · trocken und heiß',
+        stellung:'Zweites Treffen, rechter Flügel'},
+  intro:'Es wird mit Platzpatronen geschossen und mit Schiedsrichtern gezählt. Was hier verloren geht, ist kein Blut, sondern vier Jahre Ansehen.',
+  runden:6,feindMoral:52,gefahr:6,gelaende:'wueste',
+  sieg:{text:'Um halb elf steht die 32. auf dem Kamm, und die Schiedsrichter zählen dem 79. mehr Ausfälle an, als es verkraften kann. Der Stab hat auf dem rechten Flügel zugesehen, weil dort etwas zu sehen war. Am Nachmittag lässt der Capitaine drei Namen aufschreiben.',ruf:6,nennung:true},
+  niederlage:{text:'Der Kamm bleibt weiß. Es kostet niemanden das Leben und die 32. einen Nachmittag, an dem der Capitaine wenig sagt und alles zweimal wiederholen lässt. Gesehen worden ist trotzdem etwas — nur nicht das.',ruf:-4,belastung:6}},
+
+/* 49 */ {typ:'befoerderung',id:'boulogne_musterung',datum:'September 1804 · Lager von Boulogne',ort:'Musterung vor dem Feldzug',
+  keinZiel:'Über dir sitzt der Sergent-major, und der Sergent-major ist Martel. Er hat den Posten im Sommer 1799 bekommen, als sein Vorgänger vor Akkon liegen blieb, und er ist zweiundvierzig und gesund. Der Capitaine sieht in die Liste, sieht dich an und sagt: Nichts frei. Nächstes Jahr wieder. Es ist kein Vorwurf und kein Trost, es ist eine Zahl in einem Buch. Du weißt, was frei werden müsste, damit es weitergeht, und du denkst es nicht zu Ende.',
+  text:[
+    'Vor jedem Feldzug wird gemustert, und diesmal riecht es zum ersten Mal seit drei Jahren wieder nach einem. Die Boote im Hafen werden nicht mehr beladen. Die Karten auf dem Tisch des Stabes zeigen nicht mehr England, sondern die Donau.',
+    'Der Capitaine sitzt vor der Baracke, neben ihm der Fourier mit den Büchern und Berthaud, der inzwischen Capitaine ist und in einer anderen Kompanie sitzt, aber heute hier. Man geht die Namen durch.',
+    'Was in Nîmes gelernt wurde, steht hier in Zahlen. Wer lesen kann, steht anders da als vor drei Jahren. Wer es nicht gelernt hat, auch.'
+  ]},
+
+/* 50 */ {typ:'ende',id:'ende_garnison',datum:'2. Dezember 1804 · Paris',ort:'Die Krönung',
+  marsch:{von:'Lager von Boulogne',nach:'Paris',weg:'240 km · Abordnungen aller Regimenter, für einen Tag in der Hauptstadt'},
+  text:[
+    'Von jedem Regiment geht eine Abordnung nach Paris. Am 2. Dezember 1804 wird in Notre-Dame ein Korse zum Kaiser der Franzosen gekrönt, und weil es kalt ist und der Weg lang, stehen die Abordnungen drei Stunden auf dem Platz, bevor etwas passiert.',
+    'Sechs Tage später bekommen die Regimenter ihre neuen Fahnen: nicht mehr das Tuch von 1796, sondern ein Adler aus vergoldeter Bronze auf einem Stab, mit der Nummer des Regiments im Sockel. Der Kaiser sagt dazu einen Satz, den die vorderen Reihen hören und die hinteren später erzählt bekommen — dass man diese Adler nie aus den Augen lassen dürfe.',
+    'Drei Jahre und zwei Monate Frieden. Du bist nicht besser im Schießen geworden. Was du gelernt hast, steht in Büchern, hängt an deiner Brust oder wohnt in Nîmes.',
+    'Im Sommer 1805 wird das Lager von Boulogne abgebrochen, ohne dass ein einziges Boot ausgelaufen wäre. Die Armee, die für England gebaut wurde, marschiert nach Osten — siebenhundert Kilometer in fünf Wochen, gegen Österreich und Russland. Sie heißt jetzt Grande Armée, sie ist die beste, die Frankreich je hatte, und sie hat es im Frieden von Boulogne gelernt.'
+  ],
+  ausblick:'<b>Hier endet der Prototyp.</b> Am 2. Dezember 1805, auf den Tag ein Jahr nach der Krönung, steht die Grande Armée vor einem Dorf in Mähren, das Austerlitz heißt. Kapitel 4 steht im Konzept, aber noch nicht im Code.'}
+];
+
+/* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.
+   `.slice()` ist Pflicht, nicht Kosmetik — siehe die Warnung in Kapitel 1. */
+KAPITEL.push(...KAPITEL3);
+STATIONEN.garnison = KAPITEL3.slice();
+(KAMPAGNEN.find(k=>k.id==='garnison')||{}).gebaut = true;
 
 
 'use strict';
@@ -1226,7 +1646,7 @@ STATIONEN.aegypten = KAPITEL2.slice();   // Kopie, siehe Kapitel 1
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 3;   // 2: Lebenspunkte · 3: die Kette über dir statt einer Gunst-Zahl
+const LAUF_FASSUNG    = 4;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -1309,6 +1729,13 @@ const LAUF_WANDLER = {
       delete m.gunst;
     }
     return Object.assign({}, alt, {fassung:3});
+  },
+  /* Fassung 3 kannte keine Orden. Ein angefangener Feldzug bekommt eine leere
+     Liste — nachträglich verleihen wäre geraten, und `ordenFaellig()` holt es
+     an der nächsten Station ohnehin nach, wenn die Bedingungen stimmen. */
+  3: alt => {
+    if(alt.mann && !alt.mann.orden) alt.mann.orden = [];
+    return Object.assign({}, alt, {fassung:4});
   }
 };
 
@@ -1455,7 +1882,7 @@ function setzeKampf(k){ if(LAUF) LAUF.kampf = k; K = k; }
 
 function neuerLauf(mann){
   LAUF = {fassung:LAUF_FASSUNG, mann, node:0, kampf:null, szene:null,
-          lager:{id:null, abende:0, log:[]}, winter:{wochen:3, log:[]},
+          lager:{id:null, abende:0, log:[]}, winter:{ort:null, wochen:3, log:[]},
           begonnen:new Date().toISOString(), zuletzt:null};
   binde();
 }
@@ -1488,8 +1915,58 @@ function stationErledigt(){
   const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
   if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
   else lebenAuffuellen(0.05);
+  /* Die Pension läuft, solange der Mann lebt. Historisch war die Ehrenlegion
+     genau das — eine Rente, kein Blech —, und seit es einen Marketender gibt,
+     ist Geld auch im Spiel etwas wert. Halbe Francs summieren sich langsam;
+     über ein Kapitel sind das rund zwanzig. */
+  const rente = ordenPension();
+  if(rente) S.geld += rente;
+  /* KONZEPT §10: „Briefe von zu Hause senken Belastung." Genau ein Punkt je
+     Station — kein System, ein Beiwerk, wie es dort ausdrücklich heißt. */
+  if(S.verheiratet) S.belastung = Math.max(0, S.belastung - 1);
   atemKlemmen();
   laufSichern();
+}
+
+/* ══════════════════ ORDEN ══════════════════ */
+
+function ordenPension(){
+  if(!S || !S.orden) return 0;
+  return S.orden.reduce((sum,id)=>{ const o = ordenVon(id); return sum + (o ? o.pension : 0); }, 0);
+}
+
+/* Wer welchen Orden verdient hat — **geprüft, nicht gewürfelt.** Ein Orden ist
+   die einzige Belohnung im Spiel, bei der man hinterher genau sagen können
+   soll, wofür. Zufall würde das kaputtmachen.
+
+   Rückgabe: der neu verdiente Orden oder null. Der Aufrufer zeigt ihn an;
+   verliehen wird in `ordenVerleihen()`, damit die Anzeige nicht doppelt zählt. */
+function ordenFaellig(){
+  if(!S) return null;
+  S.orden = S.orden || [];
+  const jahr = jahrVonStation();
+  if(!hatOrden('ehrenwaffe') && jahr >= 1799 && jahr <= 1803 && S.nennungen >= 3)
+    return ordenVon('ehrenwaffe');
+  if(!hatOrden('legion') && jahr >= 1804 &&
+     (hatOrden('ehrenwaffe') || (S.nennungen >= 5 && S.ruf >= 45)))
+    return ordenVon('legion');
+  return null;
+}
+
+function ordenVerleihen(o){
+  if(!o || hatOrden(o.id)) return null;
+  S.orden.push(o.id);
+  S.ruf += o.ruf;
+  S.log.push('Ausgezeichnet: ' + o.name);
+  return o;
+}
+
+/* Die Jahreszahl der aktuellen Station. Dieselbe Quelle, aus der `kaiserreich()`
+   den Adler schaltet — ein Datum, zwei Verbraucher. */
+function jahrVonStation(){
+  const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  const m = String(n.datum||'').match(/1[78]\d\d/);
+  return m ? +m[0] : 1796;
 }
 
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
@@ -1528,7 +2005,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
-    wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
+    wunden:[], nennungen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);
@@ -1625,6 +2102,17 @@ function anwenden(e){
      — Ruhr und das Fieber aus Jaffa liefern einen Mann beim nächsten Gefecht
      mit leerem Vorrat und keiner Luft ab, ohne ihn je selbst zu töten. */
   if(e.wunde){ wundeGeben(e.wunde, 8, e.zehrt); S.leben = Math.max(1, S.leben - 10); }
+  /* `heilt` nimmt Wunden weg, statt welche zu geben — die Gegenrichtung, und
+     bis Kapitel 3 gab es sie nicht. Das Lazarett von Marseille braucht sie:
+     Wer mit der Ruhr aus Ägypten kommt, soll sie *gespielt* loswerden und
+     nicht stillschweigend beim Kapitelwechsel. `'krank'` nimmt alles Zehrende,
+     eine Zahl nimmt so viele Wunden von vorn. */
+  if(e.heilt === 'krank') S.wunden = S.wunden.filter(w=>!w.zehrt);
+  else if(typeof e.heilt === 'number') S.wunden.splice(0, e.heilt);
+  /* Ein Merkmal, das über die Station hinaus gilt (Ehe, Schulden, gesehene
+     Dinge). Bewusst schmal: nur setzen, nie rechnen — wer eine Zahl braucht,
+     nimmt eines der bestehenden Felder. */
+  if(e.setzt) for(const k in e.setzt) S[k] = e.setzt[k];
   atemKlemmen();
 }
 
@@ -1899,6 +2387,7 @@ function seitenleiste(){
       <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
       <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
+      ${(S.orden||[]).map(id=>{ const o=ordenVon(id); return o?`<div class="kv"><span>${esc(o.name)}</span><b>${ordensbild(id)}</b></div>`:''; }).join('')}
       ${ueberDir()}
     </div>
   </aside>`;
@@ -2011,6 +2500,7 @@ function zeigeBlatt(i){
       ${c.lebenMax ? zeile('Leben', c.leben+' / '+c.lebenMax) : ''}
       ${zeile('Belastung', c.belastung)}${zeile('Atem', c.atem)}${zeile('Geld', c.geld+' F')}
       ${zeile('Im Tagesbefehl', c.nennungen+'×')}
+      ${(c.orden||[]).length ? zeile('Ausgezeichnet', (c.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean).join(', ')) : ''}
       ${zeile('Wunden', c.wunden.length ? c.wunden.map(esc).join(', ') : 'keine')}
     </div></aside>
   </div>`;
@@ -2264,7 +2754,94 @@ function fortsetzen(){
    Kartenkunde (der Ingenieur), Bildung (die Briefe). Das ist Absicht — die
    Herkünfte, die in diese Währungen zahlen, sollen etwas dafür sehen. */
 
+/* Ein Zwischenfall mit `kapitel:` erscheint nur dort. Bis Kapitel 3 gab es nur
+   `'aegypten'`; jetzt auch `'garnison'` — im Frieden begegnet man anderen Dingen
+   als auf einem Wüstenmarsch, und ein Verbandsplatz zwischen zwei Kasernentagen
+   wäre falsch. */
 const MARSCH_EREIGNISSE = [
+
+  /* ── Garnison 1801–04 ──
+     Vier Jahre Frieden brauchen ihre eigenen kleinen Fragen. Zwei davon
+     (Patrouille, Werbung) gibt es nur hier, weil es sie im Feld nicht gibt. */
+
+  {id:'patrouille', titel:'Patrouille durch die Stadt', kapitel:'garnison',
+   text:['Zwei Mann, eine Laterne, vier Stunden. Die Nachtpatrouille geht die Straßen ab, in denen die Wirtsstuben sind, und sammelt ein, was die Wirtsstuben ausspucken.',
+         'Um halb zwei findet ihr drei Mann vom 79. vor einer Tür, von denen zwei den dritten halten. Der dritte hat einer Frau ins Fenster geschrien, und die Frau hat einen Mann, und der Mann steht jetzt mit einem Beil in der Tür. Es ist noch nichts passiert.'],
+   optionen:[
+     {label:'Die drei einsammeln und abführen', hint:'Autorität · es ist der Dienstweg',
+      probe:{wert:'autoritaet', schw:35},
+      erfolg:{text:'Du sagst es einmal, laut, und dann noch einmal, leiser. Der mit dem Beil geht zuerst hinein, weil ihm jemand einen Grund gegeben hat, es zu tun, ohne das Gesicht zu verlieren. Die drei vom 79. gehen mit, weil sie zu betrunken sind, um sich etwas Besseres einfallen zu lassen. Im Rapport steht am Morgen: keine besonderen Vorkommnisse.',
+              ruf:2, gunst:1, gunstVon:'berthaud', fert:{drill:3}},
+      misserfolg:{text:'Du sagst es dreimal, und beim dritten Mal lacht einer. Es wird eine Prügelei, in der du einen Schlag abbekommst, der für jemand anderen gedacht war, und am Ende ist die Tür kaputt und der Wirt schreibt eine Rechnung. Der Rapport wird länger als die Nacht.',
+              belastung:6, leben:-6, gunst:-1, gunstVon:'berthaud'}},
+     {label:'Erst mit dem Mann in der Tür reden', hint:'Menschenkenntnis · das Beil ist das Problem',
+      probe:{wert:'menschenkenntnis', schw:40},
+      erfolg:{text:'Du gehst an den drei Betrunkenen vorbei und stellst dich zu dem mit dem Beil, mit dem Rücken zu ihnen, und fragst ihn, ob er Kinder im Haus hat. Er sagt: zwei. Dann sagst du, es wäre gut, wenn die morgen früh nichts zu sehen bekämen. Er geht hinein. Die drei sammelt ihr danach in Ruhe ein.',
+              ruf:3, kameradschaft:6, attr:{menschenkenntnis:3}},
+      misserfolg:{text:'Du redest, und er hört nicht zu, weil er zu weit ist. Es geht am Ende ohne Toten aus, aber nicht ohne Blut, und du hast eine Hand voll Splitter aus einem Türrahmen.',
+              belastung:8, leben:-8}},
+     {label:'Einen Bogen machen', hint:'In vier Stunden sieht man vieles',
+      erfolg:{text:'Ihr geht die Gasse nicht hinunter, sondern die nächste. Was ihr nicht gesehen habt, steht nicht im Rapport. Am Morgen hört man, dass es beim 79. eine Anzeige gegeben hat, wegen einer eingeschlagenen Tür.',
+              ruf:-2, belastung:2}}
+   ]},
+
+  {id:'werber', titel:'Der Werber des Regiments', kapitel:'garnison',
+   text:['Ein Regiment im Frieden muss sich auffüllen, und Konskribierte kommen ungern. Also schickt man Werber auf die Dörfer, mit einer Trommel, einer Fahne und Geld, und weil ein Werber allein nichts wert ist, schickt man einen Soldaten mit, der aussieht, als sei es ihm gut ergangen.',
+         'Diese Woche bist du das. Vier Dörfer im Umland, ein Tisch vor der Kirche, und die Aufgabe, jungen Männern das Leben zu erklären, das du hinter dir hast.'],
+   optionen:[
+     {label:'Erzählen, wie es war', hint:'Menschenkenntnis · die Wahrheit wirbt schlecht',
+      probe:{wert:'menschenkenntnis', schw:45},
+      erfolg:{text:'Du erzählst Lodi und Embabeh und lässt nichts weg, auch nicht den Sinai und nicht die Ruhr. Am Ende des Tages haben zwei unterschrieben — zwei, die zugehört haben und trotzdem wollten. Der Werber ist unzufrieden, weil er auf sechs gehofft hatte. In zwei Jahren wirst du froh sein, dass es diese zwei sind.',
+              ruf:2, kameradschaft:6, gunst:1, gunstVon:'martel'},
+      misserfolg:{text:'Du erzählst, wie es war, und nach zwanzig Minuten steht keiner mehr am Tisch. Der Werber sagt auf dem Rückweg kein Wort und meldet im Regiment, du seist für so etwas ungeeignet. Er hat recht.',
+              belastung:4}},
+     {label:'Erzählen, wie es klingen soll', hint:'Sechs Unterschriften sind sechs Unterschriften',
+      erfolg:{text:'Du erzählst Ägypten als Abenteuer, den Sold als Vermögen und die Beförderung als Frage der Zeit. Es ist nicht gelogen, es ist nur alles weggelassen. Sechs unterschreiben, einer davon ist fünfzehn und behauptet, er sei achtzehn. Der Werber gibt dir zehn Francs von seinem Kopfgeld.',
+              geld:10, ruf:1, kameradschaft:-6}},
+     {label:'Krank melden', hint:'Es geht auch ohne dich',
+      erfolg:{text:'Du meldest dich mit dem Rücken krank, und der Feldscher schreibt es auf, weil er es bei einem aus Ägypten glaubt. Die Woche verbringst du im Quartier. Es ist die langweiligste des Jahres.',
+              belastung:-4, ruf:-1}}
+   ]},
+
+  {id:'markt', titel:'Markttag in Nîmes', kapitel:'garnison',
+   text:['Am Donnerstag ist Markt vor dem Amphitheater, und am Donnerstag ist die halbe Kompanie dort, weil es der einzige Ort ist, an dem etwas passiert.',
+         'Ein Händler aus Lyon verkauft Ausrüstung, die er von irgendwoher hat und über die man besser nicht fragt: Schuhe, Mäntel, Klingen, ein Fernrohr mit einem Sprung im Glas.'],
+   optionen:[
+     {label:'Ein Paar richtige Schuhe kaufen', hint:'12 Francs · doppelt genäht',
+      erfolg:{text:'Zwölf Francs für ein Paar Schuhe, die ein Schuster gemacht hat und nicht ein Lieferant mit einem Vertrag. Man merkt den Unterschied am dritten Tag eines Marsches, und der nächste Marsch kommt bestimmt.',
+              geld:-12, ausr:{schuhe:45}}},
+     {label:'Nach dem Fernrohr fragen', hint:'Kartenkunde · es ist zu teuer und zu gut',
+      probe:{wert:'kartenkunde', schw:35},
+      erfolg:{text:'Du siehst hindurch und siehst, dass der Sprung im Glas nur am Rand sitzt und in der Mitte nichts stört. Der Händler merkt, dass du weißt, was du in der Hand hast, und geht von dreißig auf achtzehn. Es ist immer noch zu viel für einen Unteroffizier. Du kaufst es trotzdem.',
+              geld:-18, fert:{kartenkunde:8, taktik:4}},
+      misserfolg:{text:'Du siehst hindurch und siehst einen Sprung. Der Händler redet zwei Minuten über Amsterdam und optische Gläser, und du legst es zurück, weil du nicht beurteilen kannst, ob eines der Wörter stimmt.',
+              geld:0}},
+     {label:'Zusehen, wie andere kaufen', hint:'Der Sold reicht nicht für alles',
+      erfolg:{text:'Du gehst über den Markt, siehst dir alles an und kaufst ein Brot. Zwei aus der Kompanie geben an einem Nachmittag aus, was sie in drei Wochen verdient haben. In vier Wochen borgen sie sich Geld.',
+              geld:3, attr:{menschenkenntnis:2}}}
+   ]},
+
+  {id:'boote', titel:'Die Boote im Hafen', kapitel:'garnison',
+   text:['Zweitausend flache Boote liegen im Hafen von Boulogne, und jedes soll hundert Mann übersetzen. Geübt wird das Einschiffen bei jedem Wetter, weil bei jedem Wetter gelandet werden soll.',
+         'Heute ist Wind aus Nordwest, und bei Wind aus Nordwest kentert regelmäßig eines. Heute ist es das dritte in der Reihe neben euch, mit achtzig Mann des 51. an Bord, vierzig Meter vom Kai.'],
+   optionen:[
+     {label:'Hinterher ins Wasser', hint:'Konstitution · es ist November und der Kanal',
+      risk:true, probe:{wert:'konstitution', schw:45},
+      erfolg:{text:'Das Wasser ist so kalt, dass es einen Augenblick lang nicht kalt ist, sondern nur laut. Du bekommst zwei zu fassen und schiebst sie an den Bootshaken, den jemand von oben herunterhält. Der Zweite ist bewusstlos und wird es überleben. Der Capitaine des 51. schreibt einen Namen auf, und es ist deiner.',
+              ruf:5, nennung:true, kameradschaft:10, leben:-12, belastung:8, atem:-15},
+      misserfolg:{text:'Du kommst zwanzig Meter weit, und dann nimmt dir der Mantel das Wasser auf und zieht. Man fischt dich mit einem Haken heraus, zusammen mit denen, die du holen wolltest. Zwei von denen sind tot, und es lag nicht an dir. Das hilft am Abend nicht.',
+              leben:-16, belastung:12, atem:-20, wunde:'Unterkühlung'}},
+     {label:'Die Leine werfen', hint:'Geschick · vom Kai aus',
+      probe:{wert:'geschick', schw:35},
+      erfolg:{text:'Du wirfst zweimal daneben und beim dritten Mal richtig, und an der Leine hängen am Ende sechs Mann. Es ist die vernünftige Art, so etwas zu tun, und deshalb schreibt sie niemand auf.',
+              ruf:2, kameradschaft:6},
+      misserfolg:{text:'Du wirfst dreimal und triffst nichts, und dann nimmt dir ein Matrose die Leine aus der Hand und macht es richtig. Er sagt nichts dazu, was schlimmer ist, als wenn er etwas gesagt hätte.',
+              belastung:4}},
+     {label:'Am Kai bleiben', hint:'Es sind Matrosen da, die das können',
+      erfolg:{text:'Du stehst am Kai und siehst zu, wie es die machen, die es können. Sie holen sechzig der achtzig heraus. Die anderen zwanzig findet man in den nächsten Tagen an der Küste, und keiner von ihnen ist ertrunken, weil du am Kai gestanden hast.',
+              belastung:6}}
+   ]},
+
 
   {id:'feldscher', titel:'Der Feldscher braucht Hände',
    wenn:(n)=> LAUF.node>0 && (KAPITEL[LAUF.node-1]||{}).typ==='kampf',
@@ -2430,12 +3007,20 @@ const MARSCH_EREIGNISSE = [
 function marschOffen(e){ return e.optionen.filter(o => !(o.ab && o.probe && wert(o.probe.wert) < o.ab.min)); }
 function marschVerwehrt(e){ return e.optionen.filter(o => o.ab && o.probe && wert(o.probe.wert) < o.ab.min); }
 
+/* In welchem Kapitel diese Station liegt. Früher stand hier eine feste Abfrage
+   auf Ägypten; mit dem dritten Kapitel wäre das die Stelle gewesen, an der man
+   eine zweite Sonderregel danebenschreibt. Stattdessen einmal nachschlagen. */
+function kapitelVon(n){
+  for(const id in STATIONEN) if((STATIONEN[id]||[]).some(x=>x.id===n.id)) return id;
+  return null;
+}
+
 function marschWuerfeln(n){
   const gesehen = S.marschGesehen || [];
-  const aeg = (STATIONEN.aegypten||[]).some(x=>x.id===n.id);
+  const hier = kapitelVon(n);
   const pool = MARSCH_EREIGNISSE.filter(e =>
     !gesehen.includes(e.id) &&
-    (!e.kapitel || (e.kapitel==='aegypten' && aeg)) &&
+    (!e.kapitel || e.kapitel === hier) &&
     (!e.wenn || e.wenn(n)));
   if(!pool.length || Math.random() > 0.35) return null;
   return pool[Math.floor(Math.random()*pool.length)];
@@ -2503,6 +3088,34 @@ function zeigeNachfolger(nf, n){
 
 /* ══════════════════ ABLAUF ══════════════════ */
 
+/* Die Verleihung steht auf Papier, wie der Beförderungsbescheid und das
+   Chronikblatt: Ein Orden ist ein Schriftstück, bevor er ein Stück Blech ist.
+   Der Ton bleibt trocken — verliehen wird, nicht gefeiert. */
+function zeigeOrden(o, n){
+  ordenVerleihen(o);
+  laufSichern();
+  const auto = o.id==='legion' && hatOrden('ehrenwaffe');
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    <div class="card papier"><div class="ch"><span>${esc(o.voll)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb">
+        <div class="prose">
+          <p>${esc(o.was)}</p>
+          <p>${auto
+            ? 'Du musstest dich nicht bewerben. Wer eine Ehrenwaffe trägt, steht von Rechts wegen auf der Liste — so hat es der Kaiser verfügen lassen, und so steht es in der Verordnung, die der Adjutant vorliest, während dreitausend Mann in der Sonne stehen.'
+            : 'Der Adjutant liest deinen Namen von einem Blatt ab, auf dem noch neunzehn andere stehen. Er spricht ihn falsch aus. Dann geht er zum nächsten.'}</p>
+          <p>${esc(S.name)}, ${rangName(S.rang)} der 32. ${jahrVonStation()>=1803?'Linie':'Halbbrigade'}. Verliehen für: ${S.nennungen} Nennungen im Tagesbefehl.</p>
+        </div>
+        <div class="wirkung"><span>${esc(o.name)}</span>
+          ${ordensbild(o.id)} Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
+      </div></div>
+    <div class="orders"><div class="ordbody">
+      <button class="ord weiter" onclick="ordenWeiter()">Wegtreten</button>
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+function ordenWeiter(){ LAUF.orden = null; laufSichern(); naechster(); }
+
 function naechster(){
   if(!S.lebt){ zeigeTod(); return; }
   if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
@@ -2525,6 +3138,20 @@ function naechster(){
      irgendetwas anderes passiert. Ein Todesfall ist keine Fußnote. */
   if(LAUF.nachfolger){ zeigeNachfolger(LAUF.nachfolger, n); return; }
 
+  /* Ein fälliger Orden wird angesagt, bevor die Station kommt — er gehört zu
+     dem, was gerade passiert ist, nicht zu dem, was als Nächstes kommt.
+     `LAUF.orden` hält ihn fest, damit ein Beenden mitten in der Verleihung
+     nicht darüber hinweggeht. */
+  if(!LAUF.orden){
+    const faellig = ordenFaellig();
+    if(faellig){ LAUF.orden = faellig.id; laufSichern(); }
+  }
+  if(LAUF.orden){
+    const o = ordenVon(LAUF.orden);
+    if(o){ zeigeOrden(o, n); return; }
+    LAUF.orden = null;
+  }
+
   /* Zwischenfall auf dem Marsch: hängt einer an (auch nach Fortsetzen), steht
      er wieder da; sonst wird beim ersten Betreten einer Station mit Marschweg
      einmal gewürfelt. Vor Gefechten nicht — dort trägt der Anmarsch die Last. */
@@ -2533,7 +3160,12 @@ function naechster(){
     if(me){ zeigeMarschEreignis(me, n); return; }
     LAUF.marsch = null;
   }
-  if(n.marsch && n.id && n.typ!=='kampf' && LAUF.marschGeprueft !== n.id){
+  /* Gewürfelt wird auf Stationen mit Marschweg — und seit Kapitel 3 auch auf
+     solchen, die es ausdrücklich anfordern (`zwischenfall:true`). In einer
+     Garnison marschiert niemand, und ohne diese zweite Tür hätten die vier
+     Friedens-Zwischenfälle nie eine Gelegenheit. Vor Gefechten weiterhin nicht:
+     dort trägt der Anmarsch die Last. */
+  if((n.marsch || n.zwischenfall) && n.id && n.typ!=='kampf' && LAUF.marschGeprueft !== n.id){
     LAUF.marschGeprueft = n.id;
     const me = marschWuerfeln(n);
     if(me){
@@ -2602,23 +3234,76 @@ function zeigeUebergang(n){
 }
 
 /* ── Szene ── */
+/* Ob eine Szenenwahl überhaupt offensteht. Dieselbe Sperr-Regel wie bei den
+   Marsch-Zwischenfällen (CLAUDE.md): **Wer eine Probe erkennbar nicht bestehen
+   kann, bekommt keinen Knopf, sondern einen Satz.** Ein stummer gesperrter
+   Knopf wäre die falsche Fassung derselben Idee.
+
+   `ab:{wert:'…', min:n, sonst:'…'}` prüft entweder ein Merkmal auf `S`
+   (die Heirat setzt voraus, dass man geworben hat) oder einen Attributwert. */
+function szeneVerwehrt(o){
+  if(!o.ab) return false;
+  const k = o.ab.wert;
+  if(k && S[k] !== undefined && typeof S[k] !== 'number') return !S[k];
+  const v = (k && NAMEN[k]) ? wert(k) : (S[k]|0);
+  return v < (o.ab.min|0);
+}
+
 function zeigeSzene(n){
-  const opt = n.optionen.map((o,i)=>{
+  const gesperrtText = n.optionen.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
+    .map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
+  const opt = n.optionen.filter(o=>!szeneVerwehrt(o)).map((o)=>{
+    const i = n.optionen.indexOf(o);
     const gesperrt = o.probe && wert(o.probe.wert)<5;
     return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
-      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`;
+      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}${
+        o.kette?' · '+o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw).join(' · '):''}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div></div></div>
+      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div></div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
     </div>${seitenleiste()}</div>`;
   LAUF.szene = n.id;
 }
 function waehleOption(i){
   const n = KAPITEL[LAUF.node], o = n.optionen[i];
-  let erg, klasse='', probeText='';
-  if(o.probe){
+  let erg, klasse='', probeText='', kettenText='';
+
+  /* ── Ketten in Szenen ──
+     Dieselbe Semantik wie die Sondermissionen im Gefecht (`kette:` in
+     GEFECHTS_EREIGNISSE): mehrere Proben hintereinander, jeder Fehlschlag
+     kostet sofort Blut, die Mehrheit der Stufen entscheidet über die Wirkung.
+
+     **Das ist die einzige Stelle, an der eine Szene töten darf.** Sonst klemmt
+     `anwenden()` das Leben bei 1, weil der Tod ins Gefecht gehört, wo er einen
+     Text und einen Ort hat. Eine Kette hat beides — man betritt sie
+     freiwillig, sie hat einen Namen, und sie hat einen eigenen Todestext.
+     Ohne diese Ausnahme wäre das Duell im Garnisonskapitel folgenlos, und ein
+     Friedenskapitel ohne jede Todesmöglichkeit macht aus einem
+     Permadeath-Spiel für vier Jahre ein Menü. */
+  if(o.kette){
+    const zeilen = []; let treffer = 0;
+    for(const st of o.kette){
+      const p = probe(st.wert, st.schw);
+      let schaden = 0;
+      if(p.erfolg) treffer++;
+      else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
+      atemKlemmen();
+      zeilen.push((p.erfolg?st.gut:st.schlecht) +
+        ` <span class="fein">${NAMEN[st.wert]} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+      if(S.leben <= 0){
+        S.log.push(n.id+': '+o.label);
+        toetlich(o.todesart || 'Gefallen');
+        zeigeTod(zeilen.join(' ') + ' ' + (o.tod||''));
+        return;
+      }
+    }
+    erg = (treffer*2 > o.kette.length) ? o.erfolg : (o.misserfolg || o.erfolg);
+    klasse = (treffer*2 > o.kette.length) ? 'gut' : 'schlecht';
+    kettenText = zeilen.join(' ') + '<br><br>';
+  }
+  else if(o.probe){
     const p = probe(o.probe.wert, o.probe.schw);
     erg = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
     klasse = p.erfolg ? 'gut' : 'schlecht';
@@ -2633,7 +3318,7 @@ function waehleOption(i){
   app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p class="said">${esc(o.label)}</p></div>
-        <div class="ergebnis ${klasse}">${erg.text}${probeText}</div>
+        <div class="ergebnis ${klasse}">${kettenText}${erg.text}${probeText}</div>
         ${wirkungen(erg)}</div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
@@ -3760,6 +4445,25 @@ function kampfAktion(id){
        das man berühmt wird, ist das, an dem man stirbt. Die Lehrgefechte
        (Montenotte, Alexandria) bleiben Lehrgefechte. Angesagt wird es im
        Lagebild vor dem Anmarsch — überrascht wird niemand. */
+    /* ── Übungsgefecht (Kapitel 3) ──
+       Das große Manöver von Boulogne benutzt das volle Kampfsystem — Sichtfeld,
+       Salven, für den Sergenten die Sektion —, aber es wird mit Platzpatronen
+       geschossen. **Dasselbe Spiel, andere Währung:** Der Einsatz ist nicht
+       Blut, sondern Sichtbarkeit, denn der Stab sieht zu.
+
+       Ein „Treffer" ist hier ein Unfall — ein Rohrkrepierer, ein Ladestock im
+       Gesicht, ein durchgehendes Pferd —, und die gab es reichlich. Er kostet
+       ein paar Punkte und Atem, tötet aber nie: Die Klemme bei 1 ist dieselbe
+       Regel wie bei den Szenen. Der Tod gehört dorthin, wo scharf geschossen
+       wird. */
+    if(n.uebung){
+      const schaden = 2 + Math.floor(Math.random()*4);        // 2–5
+      S.leben = Math.max(1, S.leben - schaden);
+      S.atem = Math.max(0, S.atem - 6);
+      treffer = ' Der Ladestock des Nebenmanns erwischt dich am Ohr, weil er ihn im Eifer nicht herausgezogen hat. Es blutet, es ist lächerlich, und der Schiedsrichter notiert dich als gefallen — für zwei Runden.';
+      K.protokoll.push('Ein Unfall im Manöver.');
+      atemKlemmen();
+    } else {
     const haerte = n.haerte || 1;
     let schaden;
     if(Math.random()*100 > 75){
@@ -3790,6 +4494,7 @@ function kampfAktion(id){
     }
     if(S.leben <= lebenMax()*0.3) treffer += ' Du bist noch auf den Beinen, aber nicht mehr lange.';
     atemKlemmen();
+    }
   }
 
   if(K.feindMoral <= 0){ kampfEnde(true, text+treffer); return; }
@@ -4149,7 +4854,7 @@ function zeigeBefoerderung(n){
     app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
       <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
         <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
-        <div class="ergebnis">Du trägst die Tresse schon. Was darüber kommt, wird nicht im Hof einer Zitadelle vergeben, sondern in Paris — und dafür braucht es mehr als einen guten Feldzug.</div>
+        <div class="ergebnis">${n.keinZiel || 'Du trägst die Tresse schon. Was darüber kommt, wird nicht im Hof einer Zitadelle vergeben, sondern in Paris — und dafür braucht es mehr als einen guten Feldzug.'}</div>
         </div></div>
       <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
       </div>${seitenleiste()}</div>`;
@@ -4401,84 +5106,226 @@ function lagerTun(id){
 }
 function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(); naechster(); }
 
-/* ══════════════════ WINTERQUARTIER ══════════════════ */
+/* ══════════════════ WINTERQUARTIER UND SAISON ══════════════════
+
+   Dieselbe Maschine trägt zwei Dinge: das Winterquartier zwischen zwei
+   Feldzügen (drei Wochen, fünf Handlungen) und die **Saison** des
+   Garnisonskapitels (mehr Wochen, andere Handlungen, ein einmaliges Fenster).
+
+   Deshalb steht die Auswahl seit dem 28.07.2026 **in den Kapiteldaten**, nicht
+   mehr fest im Code: `tun:[...]` nennt die Handlungen, `wochen:` die Zahl,
+   `frage:` die Zeile über den Knöpfen. Ohne diese Felder verhält sich alles wie
+   das alte Winterquartier — die bestehenden Kapitel mussten nicht angefasst
+   werden. */
+
+const WINTER_TUN = {
+
+  ausr:{label:'Ausrüstung instand setzen', cost:'Schuhe, Muskete und Tornister flicken',
+    tu(){ for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+30);
+      return 'Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>'; }},
+
+  drill:{label:'Drillen und schießen üben', cost:'Muskete und Drill steigen',
+    tu(){ nutzen('muskete',3); nutzen('drill',3); nutzen('bajonett',2);
+      return 'Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>'; }},
+
+  lesen:{label:'Lesen und Schreiben üben', cost:'Bildung und Verwaltung · kostet 6 Francs',
+    tu(){ if(S.geld>=6){ S.geld-=6; S.attr.bildung=Math.min(100,S.attr.bildung+7); nutzen('verwaltung',2);
+        return 'Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'; }
+      return 'Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>'; }},
+
+  leute:{label:'Zeit mit Martel und den Männern verbringen', cost:'Gunst und Kameradschaft',
+    tu(){ gunstGeben('martel',2); S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
+      nutzen('menschenkenntnis',2);
+      return 'Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>'; }},
+
+  /* Die einzige Handlung, die den Lebensvorrat wirklich wieder auffüllt — und
+     sie kostet eine der Wochen. Wer verwundet aus dem Feldzug kommt, muss sich
+     zwischen Genesung und Ausbildung entscheiden.
+
+     Reihenfolge: **erst die Wunde heraus, dann heilen.** Andersherum rechnete
+     `lebenAuffuellen` gegen den wundenverkleinerten Vorrat, und die teuerste
+     Woche des Spiels verschenkte einen Teil ihrer Wirkung. */
+  ruhe:{label:'Schlafen, essen, nichts tun', cost:'Leben und Belastung erholen sich, Wunden heilen',
+    tu(){ S.belastung=Math.max(0,S.belastung-16);
+      const krank = S.wunden.findIndex(w=>w.zehrt);          // Krankheiten zuerst
+      if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
+      const weg = S.wunden.length ? S.wunden.shift() : null;
+      lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
+      return weg
+        ? `${weg.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(weg.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(weg.name)}" überstanden</span>`
+        : 'Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>'; }}
+};
+
+/* ── Handlungen der Garnisonssaisons (Kapitel 3) ──
+
+   **Im Krieg ist der Feind die Kugel, im Frieden ist es die Zeit.** Die Maschine
+   bleibt dieselbe, die Währung wechselt: Es gibt keine Vakanzen zu erben und
+   keinen Ruf zu erkämpfen, sondern nur das, was man aus vier Jahren macht.
+   Deshalb zahlen diese Handlungen in Bildung, Geld und Beziehungen — und
+   deshalb ist die Knappheit dieselbe wie im Lager: mehr zu tun als Wochen. */
+
+  const GARNISON_TUN = {
+
+  schule:{label:'Die Regimentsschule besuchen', cost:'Bildung — der Flaschenhals des ganzen Spiels',
+    tu(){ const p = probe('bildung', 20, true);
+      /* Der Sprung ist absichtlich groß. Kapitel 3 ist das einzige Fenster, in
+         dem ein Analphabet auf die 35 des Fourriers und in die Nähe der 50
+         kommt, die Rang 7 später verlangt. Wer die Jahre vertrödelt, sitzt fest
+         — das ist der „Rangstillstand als Druckmittel" aus KONZEPT §9. */
+      const zu = p.erfolg ? 9 : 5;
+      S.attr.bildung = Math.min(100, S.attr.bildung + zu);
+      nutzen('verwaltung', 2);
+      return p.erfolg
+        ? `Ein invalider Sergent mit einer Hand unterrichtet zwölf Mann in einem Stall. Er lässt dich Buchstaben abschreiben, bis die Hand weh tut, und nennt es Dienst. In der dritten Woche liest du eine Seite ohne Hilfe. <span style="color:var(--faint)">Bildung +${zu} · Verwaltung steigt</span>`
+        : `Die Buchstaben bleiben Zeichen, und der Sergent wird laut. Etwas bleibt trotzdem hängen, weil etwas immer hängen bleibt. <span style="color:var(--faint)">Bildung +${zu} · Verwaltung steigt</span>`; }},
+
+  fechtboden:{label:'Auf den Fechtboden gehen', cost:'Bajonett und Geschick · in Nîmes wird viel gefochten',
+    tu(){ nutzen('bajonett',3); nutzen('geschick',1.5); S.atem=Math.max(0,S.atem-4);
+      return 'Der Waffenmeister des Regiments ist ein Piemonteser, der behauptet, er habe unter dem König gedient, und keiner fragt nach, unter welchem. Er zeigt dir, wie man mit dem Bajonett nicht sticht, sondern schiebt. <span style="color:var(--faint)">Bajonett und Geschick steigen · Atem −4</span>'; }},
+
+  verdienst:{label:'Nebenher arbeiten', cost:'Francs · in der Stadt wird gebaut',
+    tu(){ const p = probe('konstitution', 30, true);
+      const f = p.erfolg ? 14 : 7;
+      S.geld += f; S.atem = Math.max(0, S.atem-6); S.belastung = Math.min(100, S.belastung+3);
+      return p.erfolg
+        ? `Die Seidenmanufaktur am Fluss nimmt Soldaten für den Tag, weil Soldaten billiger sind als Tagelöhner und nicht verhandeln. Es ist stumpf, es ist erlaubt, und am Samstag zahlen sie. <span style="color:var(--faint)">+${f} F · Atem −6 · Belastung +3</span>`
+        : `Zwei Wochen Ziegel schleppen für einen Bauunternehmer, der am Ende weniger zahlt, als er versprochen hat. Beschweren kann man sich bei niemandem. <span style="color:var(--faint)">+${f} F · Atem −6 · Belastung +3</span>`; }},
+
+  wirtshaus:{label:'Die Abende im Wirtshaus verbringen', cost:'Kameradschaft und Belastung · kostet Francs',
+    tu(){ const kosten = Math.min(S.geld, 8);
+      S.geld -= kosten;
+      S.kameradschaft = Math.min(100, S.kameradschaft + (kosten>=8?12:5));
+      S.belastung = Math.max(0, S.belastung - (kosten>=8?10:4));
+      gunstGeben('martel',1);
+      nutzen('menschenkenntnis',1.5);
+      return kosten>=8
+        ? 'Vier Jahre Frieden bestehen aus Abenden, und die Abende bestehen aus Wein, Karten und denselben Geschichten. Martel erzählt Ägypten inzwischen so, dass es besser klingt, als es war. Niemand widerspricht. <span style="color:var(--faint)">Kameradschaft +12 · Belastung −10 · Fürsprache Martel +1 · −8 F</span>'
+        : 'Du sitzt dabei und trinkst, was andere ausgeben. Es ist nicht dasselbe, und alle merken es. <span style="color:var(--faint)">Kameradschaft +5 · Belastung −4 · Fürsprache Martel +1</span>'; }},
+
+  /* ── Der Marketender ──
+     KONZEPT und die Aufgabenliste führten „Ausrüstungskauf im Spiel" lange als
+     offenen Punkt: Geld hatte zu wenig Verwendung. Hier ist die natürliche
+     Anbindung — eine Garnison hat Läden, ein Feldlager nicht.
+
+     Gekauft wird in **Francs**, nicht in Veteranenpunkten. Das ist die Grenze,
+     die Invariante 3 zieht: Der Vorrat kauft den Ausgangspunkt eines Mannes,
+     Francs kaufen, was dieser eine Mann sich im Feld leisten kann. Beides sind
+     Ausrüstungsgegenstände, aber nur eines davon überlebt seinen Tod. */
+  marketender:{label:'Zum Marketender gehen', cost:'Ausrüstung gegen Francs · was der Sold hergibt',
+    tu(){
+      const angebot = [
+        {k:'schuhe',   preis:14, zu:45, was:'ein Paar doppelt genähte Schuhe'},
+        {k:'mantel',   preis:18, zu:50, was:'einen Mantel, den ein Schneider gemacht hat'},
+        {k:'muskete',  preis:10, zu:35, was:'eine Überholung des Schlosses beim Büchsenmacher'},
+        {k:'tornister',preis:8,  zu:40, was:'einen neuen Tornisterriemen aus Rindsleder'}
+      ];
+      /* Gekauft wird, was am nötigsten ist und noch bezahlbar — der Spieler
+         entscheidet über die Woche, der Marketender über die Reihenfolge. So
+         bleibt es ein Knopf und wird kein zweiter Laden mit eigener Oberfläche. */
+      const offen = angebot.filter(a=>S.ausr[a.k] && S.ausr[a.k].zustand < 70 && S.geld >= a.preis)
+                           .sort((a,b)=> S.ausr[a.k].zustand - S.ausr[b.k].zustand);
+      if(!offen.length){
+        if(S.geld < 8) return 'Der Marketender führt alles, was ein Soldat braucht, und nichts davon auf Kredit. Du siehst dir die Auslage an und gehst wieder. <span style="color:var(--faint)">zu wenig Geld</span>';
+        return 'Deine Ausrüstung ist in Ordnung, und der Marketender merkt das schneller als du. Er versucht es mit einem Fernrohr und einer Uhr und lässt dich dann in Ruhe. <span style="color:var(--faint)">nichts Nötiges im Angebot</span>';
+      }
+      const kauf = offen[0];
+      S.geld -= kauf.preis;
+      S.ausr[kauf.k].zustand = Math.min(100, S.ausr[kauf.k].zustand + kauf.zu);
+      return `Der Marketender ist ein entlassener Sergent aus dem 14., der jetzt mehr verdient als je im Dienst. Du kaufst ${kauf.was}. Er rechnet zweimal nach, zu seinen Gunsten, und ihr wisst es beide. <span style="color:var(--faint)">${S.ausr[kauf.k].name} +${kauf.zu} · −${kauf.preis} F</span>`; }},
+
+  /* ── Ab Rang 4: die Listen einer Garnison ── */
+  magazin:{label:'Das Magazin verwalten', cost:'Verwaltung und Francs · Fürsprache Collot',
+    tu(){ const p = probe('verwaltung', 35);
+      nutzen('verwaltung',2.5); S.attr.bildung = Math.min(100, S.attr.bildung+3);
+      if(p.erfolg){ gunstGeben('collot',1); S.geld += 6;
+        return 'Vier Jahre Frieden heißt vier Jahre Bestand, und ein Bestand, der stimmt, ist in einer Garnison seltener als einer, der nicht stimmt. Du findest zweimal einen Fehler, bevor ihn jemand anders findet. <span style="color:var(--faint)">Verwaltung und Bildung steigen · Fürsprache Collot +1 · +6 F</span>'; }
+      gunstGeben('collot',-1);
+      return 'Der Bestand stimmt nicht, und diesmal findet es der Sergent-fourrier zuerst. Es waren keine sechzig Francs, es waren vierzig, aber der Unterschied interessiert ihn nicht. <span style="color:var(--faint)">Verwaltung und Bildung steigen · Fürsprache Collot −1</span>'; }},
+
+  /* ── Ab Rang 5: der Sergent in der Garnison ──
+     Ausdrücklicher Wunsch: Der Sergent bleibt, wo er ist, soll aber in der
+     Garnison etwas Lohnendes zu tun haben. Alle drei zahlen auf das ein, was
+     ihn im Feld ausmacht — die Sektion —, und keine davon geht im Feld. */
+  ausbilden:{label:'Die Rekruten des Jahrgangs ausbilden', cost:'Autorität und Drill · deine Sektion wird besser',
+    tu(){ const p = probe('autoritaet', 40);
+      nutzen('autoritaet',3); nutzen('drill',3);
+      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 14 : 5);
+      if(p.erfolg) S.ruf += 1;
+      return p.erfolg
+        ? 'Die Konskribierten des Jahrgangs XI sind achtzehn und haben noch nie einen Toten gesehen. Du hast vier Wochen, ihnen die zwölf Handgriffe beizubringen, und du nimmst dir acht. Danach laden sie im Schlaf. <span style="color:var(--faint)">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'
+        : 'Du brüllst zu viel und erklärst zu wenig, und am Ende laden sie schnell und falsch. Im Frieden fällt das niemandem auf. <span style="color:var(--faint)">Autorität und Drill steigen · Sektion etwas besser</span>'; }},
+
+  schreiber:{label:'Dem Capitaine die Berichte schreiben', cost:'Bildung und Fürsprache Berthaud · nur wer schreiben kann',
+    tu(){ if(S.attr.bildung < 30)
+        return 'Du bietest es an. Der Capitaine sieht deine Handschrift an, sagt nichts und gibt das Blatt einem anderen. <span style="color:var(--faint)">nichts passiert</span>';
+      const p = probe('bildung', 40);
+      S.attr.bildung = Math.min(100, S.attr.bildung+4); nutzen('verwaltung',2);
+      if(p.erfolg){ gunstGeben('berthaud',1); gunstGeben('vernet',1);
+        return 'Monatsberichte, Krankenlisten, Schuhbestände. Es ist die langweiligste Arbeit, die du je gemacht hast, und sie findet in einem Zimmer statt, in dem der Capitaine sitzt. Er weiß jetzt, wie du heißt. <span style="color:var(--faint)">Bildung +4 · Fürsprache Berthaud und Vernet +1</span>'; }
+      return 'Du brauchst für zwei Seiten einen ganzen Abend, und am Ende schreibt der Fourier sie noch einmal ab. Gelernt hast du trotzdem etwas. <span style="color:var(--faint)">Bildung +4 · Verwaltung steigt</span>'; }},
+
+  strafdienst:{label:'Über die Strafen entscheiden', cost:'Menschenkenntnis · Kameradschaft gegen Fürsprache',
+    tu(){ const p = probe('menschenkenntnis', 40);
+      nutzen('autoritaet',1.5);
+      if(p.erfolg){ S.kameradschaft = Math.min(100,S.kameradschaft+8); gunstGeben('berthaud',1);
+        return 'Zwei deiner Leute kommen zu spät aus der Stadt zurück, einer davon zum dritten Mal. Du meldest den einen und behältst den anderen für dich, und beide wissen genau, warum. <span style="color:var(--faint)">Kameradschaft +8 · Fürsprache Berthaud +1</span>'; }
+      S.kameradschaft = Math.max(0,S.kameradschaft-8); gunstGeben('berthaud',1);
+      return 'Du meldest beide. Es ist korrekt, es steht so im Reglement, und es kostet dich mehr, als du gedacht hättest. <span style="color:var(--faint)">Kameradschaft −8 · Fürsprache Berthaud +1</span>'; }}
+};
+Object.assign(WINTER_TUN, GARNISON_TUN);
+
+const WINTER_STANDARD = ['ausr','drill','lesen','leute','ruhe'];
+
+function winterHandlungen(n){
+  const ids = (n.tun && n.tun.length ? n.tun : WINTER_STANDARD).slice();
+  if(n.rangTun) for(const r in n.rangTun) if(S.rang >= +r) ids.push(...n.rangTun[r]);
+  if(S.zweig==='grenadier' && n.zweigTun && n.zweigTun.grenadier) ids.push(...n.zweigTun.grenadier);
+  if(S.zweig==='voltigeur' && n.zweigTun && n.zweigTun.voltigeur) ids.push(...n.zweigTun.voltigeur);
+  return ids.filter((id,i,a)=>WINTER_TUN[id] && a.indexOf(id)===i);
+}
+function wochenFuer(n){ return n.wochen || 3; }
 
 function zeigeWinter(n){
   const W = LAUF.winter;
-  if(W.wochen===3 && !W.log.length){
-    W.log=[]; W.gesichert = Ablage.dauerhaft;
-    /* Drei Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem
-       ist danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung
-       und Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
+  if(W.ort !== n.id){                       // neue Saison: Wochen frisch setzen
+    W.ort = n.id; W.wochen = wochenFuer(n); W.log = []; W.gesichert = Ablage.dauerhaft;
+    /* Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem ist
+       danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
+       Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
     W.atemVoll = S.atem < S.leben; S.atem = 100; atemKlemmen();
     laufSichern();
   }
-  const tun = [
-    {id:'ausr',label:'Ausrüstung instand setzen',cost:'Schuhe, Muskete und Tornister flicken'},
-    {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
-    {id:'lesen',label:'Lesen und Schreiben üben',cost:'Bildung und Verwaltung · kostet 6 Francs'},
-    {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
-    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Leben und Belastung erholen sich, Wunden heilen'}
-  ];
-  const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
-    ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
+  const opt = winterHandlungen(n).map(id=>{
+    const t = WINTER_TUN[id];
+    return `<button class="ord" onclick="winterTun('${id}')" ${W.wochen<=0?'disabled':''}>
+      ${t.label}<span class="cost">${t.cost}</span></button>`;
+  }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
-      ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag. ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
+      ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen}</div>
+      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen} VON ${wochenFuer(n)}</div>
       </div></div>
-    <div class="orders"><div class="ch"><span>Womit verbringst du die Woche?</span></div><div class="ordbody">
-      ${opt}${W.wochen<=0?'<button class="ord weiter" onclick="winterEnde()">Ins Feld zurück</button>':''}
+    <div class="orders"><div class="ch"><span>${esc(n.frage||'Womit verbringst du die Woche?')}</span></div><div class="ordbody">
+      ${opt}${W.wochen<=0?`<button class="ord weiter" onclick="winterEnde()">${esc(n.weiter||'Ins Feld zurück')}</button>`:''}
     </div></div>
     </div>${seitenleiste()}</div>`;
+  kopfzeile();
 }
 function winterTun(id){
   const W = LAUF.winter;
-  if(W.wochen<=0) return;
+  if(W.wochen<=0 || !WINTER_TUN[id]) return;
   W.wochen--;
-  if(id==='ausr'){
-    for(const k in S.ausr) if(S.ausr[k].verschleiss) S.ausr[k].zustand = Math.min(100, S.ausr[k].zustand+30);
-    W.log.push('Eine Woche Draht, Pech und Leder. Die Schuhe halten wieder, das Schloss der Muskete ist trocken. <span style="color:var(--faint)">Alle Ausrüstung +30</span>');
-  }
-  if(id==='drill'){
-    nutzen('muskete',3); nutzen('drill',3); nutzen('bajonett',2);
-    W.log.push('Exerzieren auf einem gefrorenen Feld, bis die Handgriffe von allein gehen. <span style="color:var(--faint)">Muskete, Drill und Bajonett steigen</span>');
-  }
-  if(id==='lesen'){
-    if(S.geld>=6){ S.geld-=6; S.attr.bildung=Math.min(100,S.attr.bildung+7); nutzen('verwaltung',2);
-      W.log.push('Ein Sergent aus Lyon bringt dir Buchstaben bei, gegen Schnaps und sechs Francs. Es ist mühsamer als Grabenschaufeln. <span style="color:var(--faint)">Bildung +7 · −6 F</span>'); }
-    else W.log.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
-  }
-  if(id==='leute'){
-    gunstGeben('martel',2); S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
-    nutzen('menschenkenntnis',2);
-    W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
-  }
-  if(id==='ruhe'){
-    /* Die einzige Handlung, die den Lebensvorrat wirklich wieder auffüllt —
-       und sie kostet eine der drei Wochen. Wer verwundet aus dem Feldzug kommt,
-       muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
-       Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
-    /* Reihenfolge: **erst die Wunde heraus, dann heilen.** Andersherum rechnete
-       `lebenAuffuellen` noch gegen den wundenverkleinerten Vorrat, und die
-       teuerste Woche des Spiels verschenkte einen Teil ihrer Wirkung. */
-    S.belastung=Math.max(0,S.belastung-16);
-    // Krankheiten zuerst — sie sind das, was einen Mann über Wochen aufzehrt
-    const krank = S.wunden.findIndex(w=>w.zehrt);
-    if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
-    const weg = S.wunden.length ? S.wunden.shift() : null;
-    lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
-    if(weg) W.log.push(`${weg.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(weg.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(weg.name)}" überstanden</span>`);
-    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
-  }
+  W.log.push(WINTER_TUN[id].tu());
+  S.log.push((KAPITEL[LAUF.node]||{}).ort+': '+WINTER_TUN[id].label);
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
+  atemKlemmen();
   laufSichern();
   zeigeWinter(KAPITEL[LAUF.node]);
 }
-function winterEnde(){ LAUF.winter = {wochen:3, log:[]}; stationErledigt(); naechster(); }
+function winterEnde(){ LAUF.winter = {ort:null, wochen:3, log:[]}; stationErledigt(); naechster(); }
 
 /* ══════════════════ WERTUNG UND ENDE ══════════════════ */
 
@@ -4516,9 +5363,10 @@ function wertung(){
   p.kapitel = 8 * kapitelUeberlebt();          // volle Skala: 8 je Kapitel, max. 11
   p.ruf = 5 * Math.floor(S.ruf/10);
   p.nennungen = 3 * Math.min(10, S.nennungen);
+  p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
   p.ueberleben = S.lebt ? 25 : 0;              // Platzhalter, siehe oben
   p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
-  p.summe = p.rang+p.kapitel+p.ruf+p.nennungen+p.ueberleben+p.sauber;
+  p.summe = p.rang+p.kapitel+p.ruf+p.nennungen+p.orden+p.ueberleben+p.sauber;
   return p;
 }
 
@@ -4540,7 +5388,7 @@ function chronikblatt(endeText, p){
                          lebt:!!(S.leute&&S.leute[l.id]&&S.leute[l.id].lebt)})),
     kameradschaft:S.kameradschaft, belastung:S.belastung, atem:S.atem,
     leben:S.leben, lebenMax:lebenMax(),
-    nennungen:S.nennungen, geld:S.geld, gekniffen:!!S.gekniffen,
+    nennungen:S.nennungen, orden:(S.orden||[]).slice(), geld:S.geld, gekniffen:!!S.gekniffen,
     kaeufe:(S.kaeufe||[]).slice(), gekauft:Object.assign({},S.gekauft||{}),
     log:(S.log||[]).slice(), wertung:p
   };
@@ -4563,7 +5411,8 @@ function eintragen(endeText){
 }
 
 function wertungsTabelle(p){ return wertungsTabelleAus({wertung:p, rang:rangName(S.rang),
-  stationen:stationen(), kapitel:kapitelUeberlebt(), ruf:S.ruf, nennungen:S.nennungen}); }
+  stationen:stationen(), kapitel:kapitelUeberlebt(), ruf:S.ruf, nennungen:S.nennungen,
+  orden:(S.orden||[]).slice()}); }
 
 function wertungsTabelleAus(c){
   const p = c.wertung; if(!p) return '';
@@ -4575,6 +5424,7 @@ function wertungsTabelleAus(c){
       : `<tr><td class="d">Erreichte Stationen (${c.stationen} × 2)</td><td class="n">${p.stationen}</td></tr>`}
     <tr><td class="d">Ruf ${c.ruf}, je volle 10 Punkte</td><td class="n">${p.ruf}</td></tr>
     <tr><td class="d">Im Tagesbefehl genannt (${c.nennungen}×)</td><td class="n">${p.nennungen}</td></tr>
+    ${p.orden ? `<tr><td class="d">Orden — ${esc((c.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean).join(', '))}</td><td class="n">${p.orden}</td></tr>` : ''}
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
     <tr><td class="d">Nie vor Zeugen gekniffen</td><td class="n">${p.sauber}</td></tr>
     <tr class="hi"><td class="d"><b>Summe</b></td><td class="n"><b>${p.summe}</b></td></tr>
