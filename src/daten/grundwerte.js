@@ -75,6 +75,49 @@ function rangabzeichen(mann){
   return '';                                   // Fusilier: der Ärmel ist leer
 }
 
+/* ══════════════════ DIE KETTE ÜBER DIR ══════════════════
+
+   Vier Männer, die ganze Laufbahn lang dieselben. Das ist der Kern: **Wer über
+   dir steht, bleibt über dir — weil er selbst aufsteigt.** Martel ist dein
+   Sergent, solange du Füsilier bist; wirst du selbst Sergent, ist er längst
+   Sergent-major und immer noch dein Vorgesetzter. Man lernt in einer Karriere
+   vier Gesichter kennen, nicht vierzehn.
+
+   Ein neues Gesicht gibt es nur, wenn eines fällt — und dann fängt man bei
+   Gunst 0 wieder an. Genau deshalb pflegt man zwei Beziehungen und nicht eine
+   (KONZEPT §7: „Dein Gönner stirbt bei Eylau, und dein halber aufgebauter
+   Einfluss ist weg").
+
+   `stufen` ist die Rangfolge der Person selbst: Index 0, bis sie aufrückt.
+   Die Gunst läuft von −5 bis +5 (KONZEPT §8) — negativ heißt, dass jemand
+   über dir etwas gegen dich hat, und das blockt. */
+const LEUTE = [
+  {id:'martel', kurz:'Martel', stufen:['Sergent','Sergent-major'],
+   was:'Dein Sergent. Er hat dich im April über die Pässe gebracht und weiß, wer bei Lodi wo gestanden hat.'},
+  {id:'collot', kurz:'Collot', stufen:['Fourier','Sergent-fourrier'],
+   was:'Der Schreiber der Kompanie. Er führt die Listen, und in den Listen steht, wer Schuhe bekommt.'},
+  {id:'berthaud', kurz:'Berthaud', stufen:['Lieutenant','Capitaine'],
+   was:'Der Zugführer. Er entscheidet, welche Namen der Capitaine überhaupt zu hören bekommt.'},
+  {id:'vernet', kurz:'Vernet', stufen:['Capitaine','Chef de bataillon'],
+   was:'Der Kompaniechef. Er kennt deinen Namen erst, wenn ihn jemand nennt.'}
+];
+
+/* Nachrücker, wenn einer fällt. Der Nachfolger trägt denselben Posten und
+   kennt dich nicht — deshalb Gunst 0 und ein eigener Satz zur Einführung. */
+const NACHFOLGER = {
+  martel:  [{kurz:'Ricard',  satz:'Ricard trägt seit heute Morgen die Streifen. Er kommt aus einem anderen Bataillon, kennt hier niemanden und lässt sich nichts sagen.'},
+            {kurz:'Dupleix', satz:'Dupleix war gestern noch Caporal in der zweiten Kompanie. Er tut, als wäre er es nie gewesen.'}],
+  collot:  [{kurz:'Sarrazin', satz:'Der neue Fourier heißt Sarrazin und rechnet schneller als sein Vorgänger. Das ist keine gute Nachricht für die, die auf seiner Liste stehen.'}],
+  berthaud:[{kurz:'Mareuil',  satz:'Der neue Lieutenant heißt Mareuil, ist dreiundzwanzig und hat die Epauletten seit vier Tagen. Er sieht über die Köpfe hinweg, wenn er spricht.'}],
+  vernet:  [{kurz:'Lassalle', satz:'Der neue Capitaine kommt vom Stab und hat noch keinen seiner Männer nach dem Namen gefragt.'}]
+};
+
+function leuteStart(){
+  const o = {};
+  LEUTE.forEach(l => { o[l.id] = {gunst:0, stufe:0, lebt:true, kurz:l.kurz}; });
+  return o;
+}
+
 const HERKUENFTE = [
   {id:'bauer',name:'Bauernsohn',
    text:'Konstitution +20 · Fouragieren +25 · Bajonett +15 · Bildung −10',

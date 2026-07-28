@@ -21,7 +21,7 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**
 | Fertig | Noch nicht |
 |---|---|
 | Charaktererschaffung mit Pool und sechs Herkünften | Kapitel 3–11 |
-| Attribute und Fertigkeiten 0–100 mit Wachstum | Ränge 4–14 |
+| Attribute und Fertigkeiten 0–100 mit Wachstum | Ränge 6–14 |
 | Gefecht auf zwei Maßstäben (Körper / Sektion) | Ausrüstungskauf im Spiel |
 | Voltigeur- und Grenadierzweig mit eigenen Aktionen | Orden und Ehrenlegion |
 | Ausrüstung mit Zustandsverschleiß | Pferd, Kompaniekasse, Inspektionen |
@@ -37,6 +37,8 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**
 | Veteranenpunkte in einzelne Werte umsetzbar | |
 | Zwei Feldzüge mit Übergang dazwischen | |
 | Elf Marsch-Zwischenfälle mit Sperr-Sätzen | |
+| Die Kette über dir: vier Vorgesetzte mit Gunst und Mitaufstieg | |
+| Ränge 4 und 5 mit zwei Wegen, Sektion und Abrechnung | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -489,12 +491,14 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **Italien überstanden** | 100 % | 98 % | 100 % | 95 % |
-| **Beide Feldzüge überstanden** | **50 %** | **18 %** | **68 %** | **68 %** |
-| Gestorben | 20 von 40 | **33 von 40** | 13 von 40 | 13 von 40 |
-| **Elitekompanie erreicht** | 55 % | 48 % | 93 % | 95 % |
-| **Caporal erreicht** | 50 % | 45 % | 90 % | **98 %** |
-| Punkte, Median | 121 | 109 | 186 | 188 |
+| **Italien überstanden** | 98 % | 90 % | 100 % | 95 % |
+| **Beide Feldzüge überstanden** | **48 %** | **23 %** | **83 %** | **73 %** |
+| Gestorben | 21 von 40 | **31 von 40** | 7 von 40 | 11 von 40 |
+| **Elitekompanie erreicht** | 50 % | 55 % | 90 % | 93 % |
+| **Caporal erreicht** | 48 % | 48 % | 88 % | 95 % |
+| **Caporal-fourrier erreicht** | 20 % | 33 % | **65 %** | **68 %** |
+| **Sergent erreicht** | 20 % | 33 % | **65 %** | **68 %** |
+| Punkte, Median | 106 | 112 | 207 | **226** |
 
 > **Das ist die Kurve, um die es geht.** Italien ist das Lehrstück und lässt fast jeden durch; **Ägypten tötet den ersten Mann** — vorsichtig sehen 43 % das Ende, wer aufsteigen will, nur 20 %. Mit dem Vorrat eines guten ersten Laufs (160 VP) steigt es auf 68 %, im dritten oder vierten Lauf (260 VP) auf 75 %, und der Caporal wird von einer Glückssache (45 %) zur Selbstverständlichkeit (100 %).
 >
@@ -556,8 +560,12 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | **dieselbe Fassung · Erstlauf mutig** | **40** | **100 %** | **45 %** | **115** |
 | **dieselbe Fassung · Veteran 160 VP** | **40** | **100 %** | **88 %** | **185** |
 | dieselbe Fassung · Veteran 260 VP | 40 | 100 % | 100 % | 188 |
-| **+ Fehlerbereinigung (Todespfad, Krankheit, Heilreihenfolge) · Erstlauf v / m** | **40 / 40** | **100 / 98 %** | **50 / 45 %** | **121 / 109** |
-| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 95 %** | **90 / 98 %** | **186 / 188** |
+| + Fehlerbereinigung (Todespfad, Krankheit, Heilreihenfolge) · Erstlauf v / m | 40 / 40 | 100 / 98 % | 50 / 45 % | 121 / 109 |
+| dieselbe Fassung · Veteran 160 / 260 | 40 / 40 | 100 / 95 % | 90 / 98 % | 186 / 188 |
+| Kette + Leiter, erste Schwellen (**Fourrier/Sergent 0 %, Henne-Ei**) · V160 | 40 | 100 % | 90 % | 187 |
+| Gunst-Quellen verteilt, Schwellen Ruf 25/40 · V160 / V260 | 40 / 40 | 100 / 100 % | 88 / 100 % | 197 / 229 |
+| **Schwellen Ruf 35/52/62 (gültig) · Erstlauf v / m** | **40 / 40** | **98 / 90 %** | **48 / 48 %** | **106 / 112** |
+| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 95 %** | **88 / 95 %** | **207 / 226** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
 
@@ -728,16 +736,54 @@ Ohne diese vier Schritte ist das Wissen bei der nächsten Sitzung verloren, und 
 
 ---
 
-## Geplant und entschieden, noch nicht gebaut (28.07.2026)
+## Die Kette über dir und die Leiter (`LEUTE` in `grundwerte.js`, `LEITER` in `kampf.js`)
 
-**Die Kette über dir, Rang 4 und 5.** Vollständiger Plan in der Sitzung vom 28.07. entworfen, vier Phasen: (1) Personenkartei `S.leute` — vier benannte Vorgesetzte (Sergent Martel, Fourier Collot, Lieutenant Berthaud, Capitaine Vernet) mit Gunst je Person (−5…+5, wie KONZEPT §7/8), Migration von `S.gunst`, `LAUF_FASSUNG` 3; (2) Fürsprecher können fallen, Gunst kann negativ werden; (3) Caporal-fourrier; (4) Sergent mit Sektion. Entscheidungen dazu:
+**Gunst ist keine Zahl mehr, sondern eine Beziehung je Person** (−5…+5, wie KONZEPT §8 es immer vorsah). Vier Männer, die ganze Laufbahn lang dieselben:
 
-- **Die Kette rückt mit:** Vorgesetzte steigen selbst auf und bleiben über dir — man lernt in einer Karriere vier Gesichter kennen, nicht vierzehn. Neue Figuren nur durch Tod, Nachfolger starten bei Gunst 0.
-- **Sergent-Vakanz:** Bei erreichter Schwelle fällt der Sergent-major **im nächsten Gefecht** (nicht sofort — die Naht darf man nicht sehen), Martel rückt auf, seine Stelle wird deine. Invariante 5 versetzt: Am Anfang der Kette steht weiter ein Toter. Der Sergent-major wird vorher zweimal als Randfigur gezeigt. Fällt er, bevor man qualifiziert ist, bekommt ein Fremder die Stelle.
-- **Der Fourrier ist überspringbar** — ein Seitenweg wie die Elitekompanie. Feldweg: Caporal → Sergent bei Ruf ≥ 50, Berthaud ≥ 4. Listenweg: Fourrier (Ruf ≥ 25, **Bildung ≥ 35**, Collot ≥ 3) → Sergent bei Ruf ≥ **40**, Berthaud ≥ 3 — die Listen sind Fürsprache. Übersprungene Stufen kosten keine Wertung (gezählt wird der höchste Rang).
-- **Prototyp-Fenster:** Fourrier ab dem Übergang, **Sergent nach Akkon — Abukir ist das erste Sektionsgefecht.** Soll: ~30–40 % der Veteranenläufe erreichen ihn, Erstläufe praktisch nie.
+| Person | Posten | steigt auf zu |
+|---|---|---|
+| **Martel** | Sergent | Sergent-major |
+| **Collot** | Fourier | Sergent-fourrier |
+| **Berthaud** | Lieutenant | Capitaine |
+| **Vernet** | Capitaine | Chef de bataillon |
 
-> **REVIEW-VORBEHALT (ausdrücklich vom Entwickler):** Sergent in zwei Kapiteln staucht die Leiter — das Konzept sah ihn für Kapitel 6–7 vor. **Sobald Kapitel 3 (Garnison) gebaut wird, die Schwellen und Fenster neu eichen** — anheben oder strecken, gemessen an den vier Zahlen. Nicht stillschweigend so lassen.
+**Die Kette rückt mit.** Wer über dir steht, bleibt über dir, weil er selbst aufsteigt — man lernt in einer Karriere vier Gesichter kennen, nicht vierzehn. Ein neues Gesicht gibt es nur, wenn eines fällt: In Höhepunktgefechten stirbt mit 22 % einer aus der Kette, der Nachfolger tritt an der nächsten Station an und **fängt bei Gunst 0 an**. Genau deshalb pflegt man zwei Beziehungen, nicht eine.
+
+**Die Leiter** prüft drei Dinge gleichzeitig — Ruf, einen **Fürsprecher mit Gesicht** und eine Vakanz:
+
+| Rang | Ruf | Fürsprecher | dazu | Vakanz entsteht durch |
+|---|---|---|---|---|
+| 3 · Caporal | 30 | Martel ≥ 4 | — | Guérins Tod |
+| 4 · Caporal-fourrier | 35 | Collot ≥ 3 | **Bildung ≥ 35** | Collot rückt selbst auf |
+| 5 · Sergent *(Feldweg)* | 62 | Berthaud ≥ 5 | — | der Sergent-major fällt |
+| 5 · Sergent *(Listenweg)* | 52 | Berthaud ≥ 4 | ab Rang 4 | dieselbe |
+
+> **Der Fourrier ist ein Seitenweg, kein Pflichtglied** — überspringen kostet keine Wertung (gezählt wird der höchste Rang, nicht die Summe der Stufen). `leiterZiel()` bietet **den höchsten Eintrag an, den man tatsächlich erfüllt**; wer den Ruf für den Feldweg hat, steht direkt vor der Sergent-Stelle, wem er fehlt, dem bietet dieselbe Musterung die Listen an. Niemand muss wählen — man merkt am Angebot, welchen Weg man ohnehin geht.
+
+> **Die Vakanz wird angesagt, nicht geschenkt.** Sobald Ruf und Fürsprache für den Sergenten stimmen, setzt `vakanzPruefen()` ein Flag — und der Sergent-major fällt **im nächsten Gefecht**, nicht auf dem Bildschirm, auf dem die Zahlen stimmen. Danach rückt Martel auf seinen Posten, und Martels alte Stelle ist die, die du bekommst. Invariante 5 bleibt intakt, sie wandert nur eine Stufe: Am Anfang der Kette steht weiterhin ein Toter. Wäre der Tod sofort, drehte sich die Welt sichtbar um den Spieler.
+
+> **Ein Henne-Ei-Fehler, gemessen gefunden.** Die erste Fassung erreichte in 120 Läufen **0 % Fourrier und 0 % Sergent**. Grund: Alle bestehenden Gunst-Quellen liefen ohne `gunstVon` und damit an Martel; Collot und Berthaud bekamen Fürsprache nur aus Handlungen, die es erst *ab* Rang 4 gibt. Behoben durch zweierlei — die Szenen und Zwischenfälle wurden nach Inhalt zugeordnet (der Fourier-Szenen an Collot, die Offiziers-Szenen an Berthaud), und **`anerkennung()` gibt einmal je Gefecht Berthaud +1**: Der Lieutenant führt die Liste der Namen. Das ist die einzige Quelle seiner Fürsprache, die schon einem Füsilier offensteht, und sie muss es sein.
+
+### Die Sektion des Sergenten (`K.sektion`)
+
+Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KONZEPT §3, nicht größere Zahlen, ein anderes Spiel:
+
+| Knopf | Probe | Wirkung |
+|---|---|---|
+| Salve auf Kommando | Autorität 45 | 34–48 Schaden, **skaliert mit der Sektionsstärke** · Muskete bleibt geladen |
+| Die Glieder wechseln | Drill 40 | drei Runden halbe Verluste |
+| Den Wankenden herausziehen | Menschenkenntnis 40 | Sektion +6, Kameradschaft +4 · **+10 Gefahr, du stehst dabei im Freien** |
+| Schließen und halten | Drill 40 | Gefahr −6, Sektion +4, Ruf beim ersten Mal |
+
+**Die Abrechnung ist der eigentliche Rangunterschied.** Nach jedem Gefecht wird gezählt: Von zwanzig unter neun Verlusten gibt Fürsprache, ab neun kostet sie. Zum ersten Mal kann man ein Gefecht gewinnen und trotzdem verlieren — „Wer barfuß marschiert, ist dein Versäumnis" (KONZEPT). Im Lager kommen „Rekruten aussuchen" (Menschenkenntnis, hebt `S.sektionGuete` für den Rest des Laufs) und „exerzieren lassen" dazu.
+
+## Was an der Leiter noch offen ist
+
+**Die Stationen im Prototyp:** Caporal in Verona (Italien), Fourrier bei der Musterung in Kairo, **Sergent in Katia** — der neuen Station zwischen dem Rückzug aus Syrien und Abukir. **Abukir ist damit das erste und einzige Sektionsgefecht**, und das ist dramaturgisch der richtige Ort: ein Gefecht im neuen Maßstab als Schlussstein, statt Rang 5 zu verwalten.
+
+> **Fourrier und Sergent sind im Prototyp faktisch gekoppelt.** Gemessen erreichen exakt dieselben Läufe beides (65 % / 65 % beim Veteranen): Wer in Kairo den Fourrier bekommt, hat bis Katia den Ruf für den Listenweg ohnehin zusammen. Der Feldweg (Ruf 62 ohne Fourrier) ist gebaut und erreichbar, wird vom Testbot aber nie genommen, weil der immer Buchstaben lernt. Das ist kein Fehler, aber es heißt: **Die zweite Schwelle bindet in zwei Kapiteln nicht.** Mit Kapitel 3 sollte sie das.
+
+> **REVIEW-VORBEHALT (ausdrücklich vom Entwickler, 28.07.2026):** Sergent in zwei Kapiteln staucht die Leiter — KONZEPT sah ihn für Kapitel 6–7 vor. **Sobald Kapitel 3 (Garnison) gebaut wird, Schwellen und Fenster neu eichen** — anheben oder strecken, gemessen an den vier Zahlen. Nicht stillschweigend so lassen. Dazu gehört auch die Frage, ob der Erstlauf den Sergenten überhaupt sehen können soll (heute: vorsichtig 20 %, mutig 33 %).
 
 ## Was als Nächstes ansteht
 

@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 2;   // 2: Lebenspunkte statt Todeswurf je Treffer
+const LAUF_FASSUNG    = 3;   // 2: Lebenspunkte · 3: die Kette über dir statt einer Gunst-Zahl
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -88,6 +88,18 @@ const LAUF_WANDLER = {
       m.leben = Math.max(Math.round(max*0.3), max - gezahlt);
     }
     return Object.assign({}, alt, {fassung:2});
+  },
+  /* Fassung 2 hatte eine einzige Gunst-Zahl, die immer Martel meinte. Sie wird
+     zu seiner Beziehung; die drei anderen fangen bei null an — man hat sie in
+     diesem Feldzug schlicht noch nicht kennengelernt. */
+  2: alt => {
+    const m = alt.mann;
+    if(m && !m.leute){
+      m.leute = leuteStart();
+      m.leute.martel.gunst = Math.max(-5, Math.min(5, m.gunst|0));
+      delete m.gunst;
+    }
+    return Object.assign({}, alt, {fassung:3});
   }
 };
 

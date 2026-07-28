@@ -5,6 +5,35 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Die Kette über dir, Rang 4 und Rang 5
+
+**Gunst ist keine Zahl mehr, sondern eine Beziehung je Person** (−5…+5, wie KONZEPT §8 es immer vorsah, aber nie gebaut war). Vier Männer, die ganze Laufbahn lang dieselben: Sergent Martel, Fourier Collot, Lieutenant Berthaud, Capitaine Vernet — jeder mit eigener Gunst, eigenem Erklärtext und einem Block „Über dir" in der Seitenleiste.
+
+**Die Kette rückt mit.** Wer über dir steht, bleibt über dir, weil er selbst aufsteigt: Martel ist dein Sergent, solange du Füsilier bist, und Sergent-major, wenn du Sergent wirst. Man lernt in einer Karriere vier Gesichter kennen, nicht vierzehn. Ein neues gibt es nur, wenn eines fällt — in Höhepunktgefechten mit 22 %, und der Nachfolger tritt an der nächsten Station an, mit **Gunst 0**. Genau deshalb pflegt man zwei Beziehungen, nicht eine.
+
+**Die Leiter** prüft Ruf, einen Fürsprecher mit Gesicht und eine Vakanz: Caporal (Ruf 30 · Martel 4), Caporal-fourrier (Ruf 35 · Collot 3 · **Bildung 35**), Sergent im Feldweg (Ruf 62 · Berthaud 5) oder im Listenweg über den Fourrier (Ruf 52 · Berthaud 4). `leiterZiel()` bietet den höchsten Eintrag an, den man tatsächlich erfüllt — dadurch ist der Fourrier ein **Seitenweg, kein Pflichtglied**, und Überspringen kostet keine Wertung.
+
+**Die Vakanz wird angesagt, nicht geschenkt.** Sobald die Zahlen für den Sergenten stimmen, fällt der Sergent-major **im nächsten Gefecht**, nicht auf dem Bildschirm, auf dem die Zahlen stimmen. Danach rückt Martel auf, und seine alte Stelle ist die, die du bekommst. Invariante 5 wandert damit eine Stufe nach oben, bleibt aber intakt: Am Anfang der Kette steht weiterhin ein Toter.
+
+**Rang 4 — die Listen:** „Die Listen der Kompanie führen" (Verwaltung, Fürsprache bei Collot und Berthaud — oder ein Rüffel) und „Die Ausgabe verteilen" (Kameradschaft gegen Fürsprache, die erste Handlung, die beide Währungen gegeneinanderstellt). Keine neuen Kampfknöpfe — das ist der Witz an ihm.
+
+**Rang 5 — die Sektion:** `K.sektion` als eigene Größe, vier neue Kampfknöpfe statt der Caporal-Befehle (Salve auf Kommando, Glieder wechseln, den Wankenden herausziehen, schließen und halten), Verluste je Runde und eine **Abrechnung nach dem Gefecht**: unter neun Verlusten von zwanzig gibt es Fürsprache, ab neun kostet es welche. Zum ersten Mal kann man ein Gefecht gewinnen und trotzdem verlieren. Im Lager dazu „Rekruten aussuchen" und „exerzieren lassen". Neue Station **Katia** zwischen Rückzug und Abukir; Abukir ist damit das erste Sektionsgefecht.
+
+**Ein Henne-Ei-Fehler, gemessen gefunden.** Die erste Fassung erreichte in 120 Läufen **0 % Fourrier und 0 % Sergent**. Alle bestehenden Gunst-Quellen liefen ohne Angabe und damit an Martel; Collot und Berthaud bekamen Fürsprache nur aus Handlungen, die es erst *ab* Rang 4 gibt. Behoben durch zweierlei: Die Szenen und Zwischenfälle wurden nach Inhalt zugeordnet (Fourier-Szenen an Collot, Offiziers-Szenen an Berthaud), und **`anerkennung()` gibt einmal je Gefecht Berthaud +1** — der Lieutenant führt die Liste der Namen. Gefunden wurde es, indem ich alle Gunst-Quellen des Spiels aufgelistet habe, statt an den Schwellen zu drehen. Dieselbe Regel wie beim Güte-Fehler: **Bewegt sich nichts, misst man den Mechanismus.**
+
+**`LAUF_FASSUNG` 2 → 3** mit Wandler: Die alte Gunst-Zahl wird zu Martels Beziehung, die drei anderen fangen bei null an.
+
+| je 40 Läufe | Erstlauf v | Erstlauf m | Veteran 160 | Veteran 260 |
+|---|---|---|---|---|
+| beide Feldzüge | 48 % | 23 % | **83 %** | 73 % |
+| Caporal erreicht | 48 % | 48 % | 88 % | 95 % |
+| **Fourrier / Sergent erreicht** | 20 % | 33 % | **65 %** | **68 %** |
+| Punkte, Median | 106 | 112 | 207 | **226** |
+
+Offen und dokumentiert: Fourrier und Sergent sind im Prototyp faktisch gekoppelt — wer in Kairo die Listen bekommt, hat bis Katia den Ruf ohnehin zusammen. Der Review-Vorbehalt für Kapitel 3 steht in `CLAUDE.md`.
+
+---
+
 ## 2026-07-28 — Fehlerdurchsicht: siebzehn Funde, vier davon schwer
 
 Drei unabhängige Durchsichten über den ganzen Baum, jeder Fund am Code belegt und vor der Reparatur im Browser nachgestellt.

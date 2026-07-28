@@ -88,7 +88,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   });
   const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
-    rang:1, zweig:null, ruf:0, gunst:0, kameradschaft:20, belastung:0,
+    rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
@@ -96,6 +96,32 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   mann.leben = lebenMax(mann);
   return mann;
 }
+
+/* ══════════════════ DIE KETTE ÜBER DIR ══════════════════ */
+
+/* Gunst ist keine Zahl mehr, sondern eine Beziehung je Person (−5…+5). Wer
+   über dir steht, kann dich fördern *oder* blockieren — ein Fourier, den du
+   beim Unterschlagen gemeldet hast, sitzt immer noch an den Listen, wenn deine
+   Beförderung dort vorbeikommt. */
+function person(id){ return (S && S.leute && S.leute[id]) || null; }
+function gunst(id){ const p = person(id); return p ? p.gunst : 0; }
+
+function gunstGeben(id, n){
+  const p = person(id);
+  if(!p || !p.lebt) return;        // einem Toten kann man nicht mehr gefallen
+  p.gunst = Math.max(-5, Math.min(5, p.gunst + n));
+}
+
+/* Anrede mit Rang: „Sergent Martel", nach seinem Aufstieg „Sergent-major
+   Martel". Dieselbe Person, andere Anrede — KONZEPT §3 („Kostet nichts, wirkt
+   enorm"), nur in die andere Richtung. */
+function personName(id){
+  const d = LEUTE.find(l => l.id === id), p = person(id);
+  if(!d) return '';
+  const kurz = (p && p.kurz) || d.kurz;
+  return d.stufen[Math.min((p ? p.stufe : 0), d.stufen.length-1)] + ' ' + kurz;
+}
+function personKurz(id){ const p = person(id), d = LEUTE.find(l=>l.id===id); return (p && p.kurz) || (d ? d.kurz : ''); }
 
 /* ══════════════════ MECHANIK ══════════════════ */
 
@@ -138,7 +164,9 @@ function nutzen(k, intens){
 function anwenden(e){
   if(!e) return;
   if(e.ruf) S.ruf = Math.max(0, S.ruf + e.ruf);
-  if(e.gunst) S.gunst = Math.max(0, S.gunst + e.gunst);
+  // Ohne Angabe geht Gunst an Martel — er ist der unmittelbare Vorgesetzte,
+  // und alle bestehenden Szenen meinen ihn. Neue Daten setzen `gunstVon`.
+  if(e.gunst) gunstGeben(e.gunstVon || 'martel', e.gunst);
   if(e.kameradschaft) S.kameradschaft = Math.max(0, Math.min(100, S.kameradschaft + e.kameradschaft));
   if(e.belastung) S.belastung = Math.max(0, Math.min(100, S.belastung + e.belastung));
   if(e.atem) S.atem = Math.max(0, Math.min(100, S.atem + e.atem));

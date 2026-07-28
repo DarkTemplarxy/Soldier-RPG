@@ -117,6 +117,21 @@ function angeschlagen(){ return S && S.leben <= lebenMax()/3; }
    drittes Mal zu schreiben. */
 function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
 
+/* Die Kette über dir. Vier Namen statt einer Zahl — und der Rang davor ändert
+   sich mit, wenn die Person selbst aufsteigt. Gefallene bleiben stehen, damit
+   man sieht, wer einmal für einen gesprochen hätte. */
+function ueberDir(){
+  if(!S.leute) return '';
+  const zeile = l => {
+    const p = S.leute[l.id]; if(!p) return '';
+    const g = p.gunst, farbe = g<0 ? 'warn' : (g>=3 ? 'ok' : '');
+    return `<div class="kv"><span class="hilfe" data-hilfe="${String(l.was).replace(/"/g,'&quot;')}">${
+      p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
+      <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
+  };
+  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}`;
+}
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
   // Krankheiten werden ausgewiesen: Sie zehren an jeder Station weiter, Wunden nicht.
@@ -155,7 +170,7 @@ function seitenleiste(){
       <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
       <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
-      <div class="kv"><span>Gunst Martel</span><b>${S.gunst}</b></div>
+      ${ueberDir()}
     </div>
   </aside>`;
 }
@@ -259,7 +274,9 @@ function zeigeBlatt(i){
       <p class="mini">Ausrüstung · Zustand</p>
       ${c.ausr.filter(a=>a.verschleiss>0).map(a=>zeile(esc(a.name), a.zustand)).join('')}
       <div class="rule"></div>
-      ${zeile('Ruf', c.ruf)}${zeile('Gunst Martel', c.gunst)}${zeile('Kameradschaft', c.kameradschaft)}
+      ${zeile('Ruf', c.ruf)}${zeile('Kameradschaft', c.kameradschaft)}
+      ${c.leute ? '<div class="rule"></div><p class="mini">Über ihm</p>' + c.leute.map(l=>
+        zeile(l.lebt?esc(l.name):'<s>'+esc(l.name)+'</s>', l.lebt?((l.gunst>0?'+':'')+l.gunst):'†')).join('') : ''}
       ${c.lebenMax ? zeile('Leben', c.leben+' / '+c.lebenMax) : ''}
       ${zeile('Belastung', c.belastung)}${zeile('Atem', c.atem)}${zeile('Geld', c.geld+' F')}
       ${zeile('Im Tagesbefehl', c.nennungen+'×')}
@@ -554,7 +571,7 @@ const MARSCH_EREIGNISSE = [
       probe:{wert:'reiten', schw:35}, ab:{min:20,
         sonst:'Du hast nie im Leben ein Pferd am Zügel gehabt und weißt es. Du springst zur Seite, wie alle springen.'},
       erfolg:{text:'Du fasst das Sattelpferd am Backenstück und lehnst dich mit dem ganzen Gewicht hinein, und nach zwanzig Schritt steht es, zitternd und weiß am Hals. Der Fahrer wird abgelöst. Dich fragt ein Leutnant nach deinem Namen.',
-              ruf:2, gunst:1, fert:{reiten:4}},
+              ruf:2, gunst:1, gunstVon:'berthaud', fert:{reiten:4}},
       misserfolg:{text:'Du bekommst den Zügel zu fassen und dann den Huf. Er trifft den Oberschenkel, nicht das Knie — das ist der ganze Unterschied zwischen einer schlechten Woche und einem Lazarett.',
               wunde:'Huftritt', belastung:4}},
      {label:'Die Deichsel packen', hint:'Geschick · mit dem Gewicht bremsen', risk:true,
@@ -601,7 +618,7 @@ const MARSCH_EREIGNISSE = [
       probe:{wert:'verwaltung', schw:35}, ab:{min:20,
         sonst:'Der Fourier hält dir Papier und Feder hin und sieht dich an. Dann sieht er dich genauer an und gibt beides dem Nebenmann.'},
       erfolg:{text:'Du schreibst auf, was genommen wird, mit Menge und Namen, und der Bauer bekommt sein Papier. Er glaubt nicht daran, aber er sieht, dass gezählt wurde — und der Fourier sieht es auch.',
-              gunst:1, geld:5, fert:{verwaltung:5}},
+              gunst:1, gunstVon:'collot', geld:5, fert:{verwaltung:5}},
       misserfolg:{text:'Deine Liste und der Wagen stimmen nicht überein, und was fehlt, fehlt zu deinen Lasten. Der Bauer beschwert sich beim Stab, mit deinem Zettel in der Hand.',
               ruf:-2, belastung:4}},
      {label:'Nur tragen und laden', hint:'Das Papier führen andere',
@@ -630,7 +647,7 @@ const MARSCH_EREIGNISSE = [
      {label:'Eine Reihenfolge durchsetzen', hint:'Autorität · Verwundete zuerst', risk:true,
       probe:{wert:'autoritaet', schw:40},
       erfolg:{text:'Du stellst dich an den Rand und teilst ein: Verwundete, dann die Kompanien der Reihe nach, ein Eimer je Korporalschaft. Es murrt, aber es hält — weil einer da ist, der zählt.',
-              ruf:2, gunst:1, kameradschaft:4},
+              ruf:2, gunst:1, gunstVon:'berthaud', kameradschaft:4},
       misserfolg:{text:'Du hebst die Stimme, und für einen Augenblick hört sogar jemand hin. Dann kippt der erste Eimer im Gedränge, und danach gilt wieder das Recht des längeren Arms. Deinen Namen merken sich die Falschen.',
               belastung:6, kameradschaft:-4}},
      {label:'Sich anstellen wie alle', hint:'Der Arm ist lang genug',
@@ -657,7 +674,7 @@ const MARSCH_EREIGNISSE = [
       probe:{wert:'kartenkunde', schw:35}, ab:{min:20,
         sonst:'Er hält dir die Karte hin. Die Linien sagen dir nichts, und er sieht es an deinen Augen, bevor du etwas sagen musst. „Schon gut", sagt er und winkt den Nächsten heran.'},
       erfolg:{text:'Du zeigst ihm den Brunnen, der versandet ist, und den Umweg über das Wadi, der eine Stunde kostet und zwei spart. Er zeichnet nach, fragt zweimal nach und schreibt sich am Ende deine Kompanie auf.',
-              gunst:1, ruf:1, fert:{kartenkunde:6}},
+              gunst:1, gunstVon:'berthaud', ruf:1, fert:{kartenkunde:6}},
       misserfolg:{text:'Du verwechselst zwei Wadis, die auf der Karte gleich aussehen und im Sand nicht. Die Kolonne merkt es am nächsten Mittag, als der Brunnen nicht kommt. Dass es dein Finger auf der Karte war, wissen zum Glück nur zwei.',
               belastung:5, atem:-6, fert:{kartenkunde:3}}},
      {label:'Wasser holen, während andere rechnen', hint:'Karten sind Offizierssache',
@@ -733,6 +750,26 @@ function marschWaehlen(i){
   kopfzeile();
 }
 
+/* Der Nachfolger stellt sich vor. Kurz, ohne Wahl — man hat hier nichts zu
+   entscheiden, und genau das ist der Punkt: Die Armee ersetzt ihre Leute, und
+   der Neue kennt dich nicht. */
+function zeigeNachfolger(nf, n){
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>Die Stelle wird besetzt</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="prose">
+        <p>${esc(nf.alt)} ist tot. Sein Posten war zwei Tage lang unbesetzt, und zwei Tage sind in dieser Armee lang.</p>
+        <p>${esc(nf.satz)}</p>
+        <p class="said">Er sieht die Reihe entlang, an dir vorbei. Was du dir bei seinem Vorgänger erarbeitet hast, steht in keiner Liste.</p>
+      </div>
+      <div class="wirkung"><span>Von vorn</span>Bei ihm stehst du bei null. <b>Fürsprache 0</b></div>
+      </div></div>
+      <div class="orders"><div class="ordbody">
+        <button class="ord weiter" onclick="nachfolgerAntreten();naechster()">Weiter</button>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 /* ══════════════════ ABLAUF ══════════════════ */
 
 function naechster(){
@@ -753,6 +790,10 @@ function naechster(){
   }
   laufSichern();
   kopfzeile();
+  /* Ist einer aus der Kette gefallen, tritt sein Nachfolger an, bevor
+     irgendetwas anderes passiert. Ein Todesfall ist keine Fußnote. */
+  if(LAUF.nachfolger){ zeigeNachfolger(LAUF.nachfolger, n); return; }
+
   /* Zwischenfall auf dem Marsch: hängt einer an (auch nach Fortsetzen), steht
      er wieder da; sonst wird beim ersten Betreten einer Station mit Marschweg
      einmal gewürfelt. Vor Gefechten nicht — dort trägt der Anmarsch die Last. */
@@ -869,7 +910,8 @@ function waehleOption(i){
 }
 function wirkungen(e){
   const t=[];
-  const m = {ruf:'Ruf',gunst:'Gunst',kameradschaft:'Kameradschaft',belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben'};
+  const m = {ruf:'Ruf',gunst:'Gunst '+personKurz(e.gunstVon||'martel'),kameradschaft:'Kameradschaft',
+             belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben'};
   for(const k in m) if(e[k]) t.push(`${m[k]} ${e[k]>0?'+':''}${e[k]}`);
   if(e.attr) for(const k in e.attr) t.push(`${NAMEN[k]} ${e.attr[k]>0?'+':''}${e.attr[k]}`);
   if(e.fert) for(const k in e.fert) if(e.fert[k]) t.push(`${NAMEN[k]} ${e.fert[k]>0?'+':''}${e.fert[k]}`);

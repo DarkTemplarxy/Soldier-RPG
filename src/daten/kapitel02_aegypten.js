@@ -31,7 +31,7 @@ const KAPITEL2 = [
     {label:'Bei den Offizieren zuhören',hint:'Auf dem Achterdeck wird geredet',
      probe:{wert:'menschenkenntnis',schw:40},
      erfolg:{text:'Du trägst zweimal Kaffee nach achtern und hältst die Ohren offen. Die Worte „Alexandria" und „Wüste" fallen, drei Tage bevor sie verlesen werden. Ein Adjutant merkt sich dein Gesicht.',
-       fert:{taktik:4},gunst:1},
+       fert:{taktik:4},gunst:1,gunstVon:'berthaud'},
      misserfolg:{text:'Man schickt dich nach unten, bevor du drei Sätze gehört hast. Oben ist oben und unten ist unten, auch auf einem Schiff.',belastung:2}}
   ]},
 
@@ -90,7 +90,7 @@ const KAPITEL2 = [
     {label:'Die Karte des Adjutanten lesen',hint:'Kartenkunde · die Kolonne läuft einen Bogen',
      probe:{wert:'kartenkunde',schw:40},kosten:'Kartenkunde',
      erfolg:{text:'Du siehst über die Schulter des Adjutanten auf ein Blatt, das er selbst nicht versteht, und zeigst ihm, dass der Weg einen Bogen um eine Salzsenke macht, die nicht mehr da ist. Am Abend ist die Kolonne acht Kilometer weiter, als sie sein müsste. Der Adjutant nennt es seine Idee. Der Lieutenant weiß es besser.',
-       atem:8,ruf:3,gunst:1,fert:{kartenkunde:6}},
+       atem:8,ruf:3,gunst:1,gunstVon:'berthaud',fert:{kartenkunde:6}},
      misserfolg:{text:'Die Linien auf dem Blatt sind Linien, mehr sagen sie dir nicht. Der Adjutant nimmt dir die Karte aus der Hand, ohne dich anzusehen.',
        belastung:3,fert:{kartenkunde:3}}},
     {label:'Nur die Füße setzen, einen vor den anderen',hint:'Nicht denken, nicht hinsehen',
@@ -130,7 +130,7 @@ const KAPITEL2 = [
     {label:'Dem Fourier die Listen führen helfen',hint:'Verwaltung · irgendjemand muss es ja können',
      probe:{wert:'verwaltung',schw:35},
      erfolg:{text:'Du sitzt drei Abende über Soldlisten in zwei Währungen und findest den Fehler, den alle suchen. Der Fourier merkt sich das. Der Sergent-major auch.',
-       gunst:2,ruf:2,fert:{verwaltung:6}},
+       gunst:2,gunstVon:'collot',ruf:2,fert:{verwaltung:6}},
      misserfolg:{text:'Die Zahlen sind arabisch, die Kurse erfunden, und nach zwei Abenden gibt der Fourier dir einen Krug und keine Listen mehr.',fert:{verwaltung:3},belastung:2}},
     {label:'Auf dem Basar handeln lernen',hint:'Menschenkenntnis · alles hat drei Preise',
      probe:{wert:'menschenkenntnis',schw:45},
@@ -190,7 +190,7 @@ const KAPITEL2 = [
     {label:'Die Wasserwache übernehmen',hint:'Autorität · nachts an den Ziegenhäuten stehen',
      probe:{wert:'autoritaet',schw:40},
      erfolg:{text:'Zwei Nächte stehst du an den Wasserkarren und schickst Männer weg, die dreimal so lange dienen wie du. Es macht dich nicht beliebt. Es macht dich bekannt.',
-       ruf:3,gunst:1,atem:-6},
+       ruf:3,gunst:1,gunstVon:'berthaud',atem:-6},
      misserfolg:{text:'In deiner zweiten Nacht fehlen am Morgen zwei Häute. Niemand hat etwas gesehen, und der Lieutenant sieht dich an, als hättest du sie selbst getrunken.',
        ruf:-2,belastung:5}},
     {label:'Abstand halten von den Karren der Kranken',hint:'Die Ruhr springt über',
@@ -257,7 +257,7 @@ const KAPITEL2 = [
     {label:'Das Zählen der Kolonne übernehmen',hint:'Verwaltung · abends fehlt immer jemand',
      probe:{wert:'verwaltung',schw:35},
      erfolg:{text:'Du führst die Abendliste deiner Kompanie: wer geht, wer fährt, wer fehlt. Es ist Schreibarbeit über Sterbende, aber sie sorgt dafür, dass morgens nach den Fehlenden gesucht wird.',
-       gunst:1,ruf:2,fert:{verwaltung:5}},
+       gunst:1,gunstVon:'collot',ruf:2,fert:{verwaltung:5}},
      misserfolg:{text:'Deine Liste stimmt zwei Abende nicht, weil Männer sich totstellen lassen, um auf die Karren zu kommen. Der Fourier nimmt dir die Liste wieder ab.',fert:{verwaltung:3}}},
     {label:'Die Zugpferde vor den Karren übernehmen',hint:'Reiten · die Pferde sind so kaputt wie die Männer',
      probe:{wert:'reiten',schw:35},kosten:'Reiten',
@@ -270,7 +270,15 @@ const KAPITEL2 = [
        belastung:6,kameradschaft:-3}}
   ]},
 
-/* 30 */ {typ:'kampf',id:'abukir',datum:'25. Juli 1799 · Abukir',ort:'Halbinsel von Abukir',
+/* 30 */ {typ:'befoerderung',id:'katia_musterung',datum:'Juli 1799 · Katia',ort:'Was von der Syrienarmee zurückkommt',
+  marsch:{von:'El-Arisch',nach:'Katia',weg:'110 km durch den Sand · die letzten Tage ohne Karren, weil die Ochsen gegessen sind'},
+  text:[
+    'Von den dreizehntausend, die nach Syrien gezogen sind, zählt der Adjutant in Katia achttausendachthundert. Die Differenz liegt in Jaffa, vor Akkon und auf der Straße dazwischen.',
+    'Was das für die Listen bedeutet, sieht man am Hof: Die Stellen der Unteroffiziere werden neu besetzt, und zwar alle auf einmal. Es sind mehr Stellen als Männer, die dafür in Frage kommen.',
+    'Der Lieutenant sitzt auf einer Kiste, die Liste auf den Knien. Neben ihm steht der Sergent-major und sagt, wen er kennt.'
+  ]},
+
+/* 31 */ {typ:'kampf',id:'abukir',datum:'25. Juli 1799 · Abukir',ort:'Halbinsel von Abukir',
   marsch:{von:'Kairo',nach:'Abukir',weg:'220 km in sechs Tagen · ein osmanisches Heer ist dort gelandet, wo eure Flotte unterging'},
   anmarschKosten:{verschleiss:0.2,atem:7,belastung:2},
   anmarsch:[
@@ -290,7 +298,7 @@ const KAPITEL2 = [
   niederlage:{text:'Der erste Angriff bleibt im Graben liegen. Die Reserve holt am Nachmittag heraus, was du am Morgen nicht geschafft hast, und du hörst den Sieg aus der zweiten Reihe.',
     ruf:-4,belastung:12}},
 
-/* 31 */ {typ:'szene',id:'abreise',datum:'24. August 1799 · Kairo',ort:'Die Armee erfährt es zuletzt',
+/* 32 */ {typ:'szene',id:'abreise',datum:'24. August 1799 · Kairo',ort:'Die Armee erfährt es zuletzt',
   text:[
     'Am Morgen des 24. August heißt es, der Oberbefehlshaber sei zur Inspektion im Delta. Am Abend weiß es die ganze Stadt: Er ist in der Nacht mit zwei Fregatten nach Frankreich gesegelt. Mit ihm die besten Generäle und kein einziger von euch.',
     'Kléber übernimmt. In der Schreibstube, sagt man, hat er einen Satz gesagt, den keiner wiederholen darf und jeder wiederholt: „Er hat uns hier gelassen wie seine schmutzige Wäsche."',
@@ -314,7 +322,7 @@ const KAPITEL2 = [
      misserfolg:{text:'Das Gerücht läuft, wächst und platzt nach einer Woche. Und weil jeder weiß, wo es herkam, bist du jetzt der Mann, der Märchen erzählt.',ruf:-4,belastung:4}}
   ]},
 
-/* 32 */ {typ:'ende',id:'ende_aegypten',datum:'Herbst 1799 · Kairo',ort:'Die Armee des Orients bleibt',
+/* 33 */ {typ:'ende',id:'ende_aegypten',datum:'Herbst 1799 · Kairo',ort:'Die Armee des Orients bleibt',
   text:[
     'Der Herbst kommt, so weit man das hier Herbst nennen kann. Die Armee des Orients hält Ägypten — ohne Flotte, ohne Nachschub, ohne Nachricht, wann jemand sie holt.',
     'Du hast zwei Feldzüge überstanden. Italien hat dich zum Soldaten gemacht; Ägypten hat dir gezeigt, dass die meisten nicht am Feind sterben. Von den Männern, die in Toulon an Bord gingen, ist jeder dritte nicht mehr da, und die wenigsten davon hat eine Kugel getroffen.',

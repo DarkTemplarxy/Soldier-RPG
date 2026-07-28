@@ -41,7 +41,11 @@ const VP  = parseInt(process.env.VP || '0', 10);   // Vorrat des Veteranen, 0 = 
    für den Voltigeur; dann die Muskete, weil kürzere Gefechte weniger Treffer
    heißen. Was danach kommt, kauft nur ein reicher Lauf. */
 const VETERAN_ZIELE = [['konstitution',70],['geschick',70],['muskete',60],
-                       ['kaltbluetigkeit',60],['autoritaet',50],['bajonett',40]];
+                       ['bildung',40],['kaltbluetigkeit',60],['autoritaet',50],['bajonett',40]];
+/* Bildung 40 steht bewusst vor Kaltblütigkeit: Sie ist die Schwelle zum
+   Caporal-fourrier (35) und damit der einzige Weg, den ein Veteran *kaufen*
+   kann — im Feld kostet sie Lagerabende und Geld. KONZEPT nennt sie „den
+   eigentlichen Flaschenhals dieses Spiels". */
 const ziel = path.resolve(__dirname, '../index.html');
 
 /* ── Die Punkteverteilung ──
@@ -66,7 +70,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
   const p = await b.newPage();
-  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, punkte: [] };
+  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, punkte: [] };
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
     /* Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0. Sonst ließe
@@ -144,8 +148,13 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           // Nur in den ersten beiden Runden versuchen: `lueckeGelobt` wird erst
           // bei gelungener Probe gesetzt, sonst drückte der Bot acht Runden lang
           // denselben Knopf, statt zu schießen.
-          if (S.rang >= 3 && !K.lueckeGelobt && K.runde <= 2) z = f(/Lücke/);
+          if (S.rang >= 3 && S.rang < 5 && !K.lueckeGelobt && K.runde <= 2) z = f(/Lücke/);
+          // Ab Sergent: erst die Sektion schließen, dann die Salve. Wer die
+          // Sektion verkommen lässt, verliert die Fürsprache des Lieutenants.
+          if (!z && S.rang >= 5 && !K.sektionGelobt && K.runde <= 2) z = f(/Schließen und halten/);
+          if (!z && S.rang >= 5 && K.sektion != null && K.sektion < 70) z = f(/Glieder wechseln/);
           if (!z && (anteil <= 0.35 || S.atem <= 35)) z = f(/Hinknien|Flach hinlegen/);
+          if (!z && S.rang >= 5) z = f(/Salve auf Kommando/);
           if (!z && S.rang >= 3) z = f(/Salve befehlen/);
           if (!z) z = f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/Schnell feuern/);
           if (!z) z = f(/^Laden/);
@@ -157,7 +166,14 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
              um Fürsprache und würde nie befördert — gemessen würde dann nicht
              die Schwelle, sondern die Blindheit des Bots. */
           if (anteil < 0.6) z = f(/Schlafen und liegen/);
-          if (!z && S.gunst < 4) z = f(/Am Feuer/);
+          if (!z && gunst('martel') < 4) z = f(/Am Feuer/);
+          /* Die Leiter verlangt jetzt verschiedene Fürsprecher und Bildung 35.
+             Wem man das nicht beibringt, der misst wieder die Blindheit des
+             Bots statt der Schwelle — dieselbe Lektion wie bei der Gunst. */
+          if (!z && S.rang >= 5) z = f(/zwanzig Mann exerzieren|Rekruten für deine Sektion/);
+          if (!z && S.rang >= 4) z = f(/Listen der Kompanie/);
+          if (!z && S.rang === 3 && S.attr.bildung < 35 && S.geld >= 5) z = f(/Buchstaben lernen/);
+          if (!z && S.rang >= 3 && gunst('berthaud') < 4) z = f(/acht Mann drillen|Listen der Kompanie/);
           if (!z && S.atem < 55) z = f(/Schlafen und liegen/);
           if (!z && S.ausr.muskete.zustand < 55) z = f(/Muskete zerlegen/);
           if (!z && S.ausr.schuhe.zustand < 40 && S.geld >= 6) z = f(/Schuster/);
@@ -168,7 +184,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
         else if (txt.includes('VERBLEIBENDE WOCHEN')) {
           // Winterquartier: die einzige Woche, die 60 % Leben und eine Wunde zurückgibt.
           if (anteil < 0.8 || S.wunden.length) z = f(/Schlafen, essen/);
-          if (!z && S.gunst < 4) z = f(/Martel/);
+          if (!z && gunst('martel') < 4) z = f(/Martel/);
           if (!z && S.ausr.schuhe.zustand < 70) z = f(/Ausrüstung instand/);
           if (!z) z = f(/Drillen/);
         }
@@ -205,6 +221,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     }
     if (zweig) res.elite++;
     if (hoechster >= 3) res.caporal++;
+    if (hoechster >= 4) res.fourrier++;
+    if (hoechster >= 5) res.sergent++;
     const t = await p.$eval('#app', e => e.innerText);
     const m = t.match(/Summe\s+(\d+)/); if (m) res.punkte.push(+m[1]);
   }
@@ -212,7 +230,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
   console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`);
   console.log(`Italien überstanden ${q(res.italien)} · beide Feldzüge ${q(res.ende)} · gestorben ${res.tot}`);
-  console.log(`Erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)}`);
+  console.log(`Erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
   await b.close();
 })();

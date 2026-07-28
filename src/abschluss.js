@@ -61,7 +61,7 @@ const LAGER_TUN = {
 
   leute:{label:'Am Feuer sitzen bleiben',
     cost:'Kameradschaft und Fürsprache',
-    tu(){ S.gunst+=1; S.kameradschaft=Math.min(100,S.kameradschaft+8);
+    tu(){ gunstGeben('martel',1); S.kameradschaft=Math.min(100,S.kameradschaft+8);
       S.belastung=Math.max(0,S.belastung-4); nutzen('menschenkenntnis',1);
       return 'Karten um Knöpfe, weil niemand Geld hat. Martel erzählt von der Rheinfront und lässt die Stellen weg, an denen es schlecht ausging. Du merkst dir, wer redet und wer zuhört. <span class="fein">Kameradschaft +8 · Gunst +1 · Belastung −4</span>'; }},
 
@@ -99,6 +99,43 @@ const LAGER_TUN = {
       S.kameradschaft=Math.min(100,S.kameradschaft+6);
       return 'Du stellst acht Mann in zwei Glieder und lässt sie laden, bis es gleichzeitig knackt. Zwei von ihnen sind älter als du. Einer sieht dich an, als wolle er etwas sagen, und sagt es dann doch nicht. <span class="fein">Autorität und Drill steigen · Ruf +1 · Kameradschaft +6</span>'; }},
 
+  /* ── Ab Rang 4: die Listen ──
+     Der Fourrier hat keine neuen Kampfknöpfe, und das ist der Witz an ihm
+     (KONZEPT: „ein Weg nach oben für schlechte Kämpfer"). Seine Arbeit liegt
+     im Lager, und sie zahlt in der Währung, die er dafür braucht. */
+  listen:{label:'Die Listen der Kompanie führen',
+    cost:'Verwaltung und Bildung · Fürsprache',
+    tu(){ const p = probe('verwaltung',35);
+      nutzen('verwaltung',2); S.attr.bildung = Math.min(100, S.attr.bildung+2);
+      if(p.erfolg){ gunstGeben('collot',1); gunstGeben('berthaud',1);
+        return 'Bestand, Abgang, Zugang, dreimal nachgezählt, weil es beim zweiten Mal nie stimmt. Am Ende geht die Liste durch, ohne dass jemand etwas sagt — und das ist bei Listen das höchste Lob. <span class="fein">Verwaltung und Bildung steigen · Fürsprache Collot und Berthaud +1</span>'; }
+      gunstGeben('berthaud',-1);
+      return 'Zwölf Paar Schuhe fehlen, und du findest nicht heraus, wo sie geblieben sind. Der Lieutenant findet es auch nicht heraus, aber er weiß, auf wessen Blatt es steht. <span class="fein">Verwaltung steigt · Fürsprache Berthaud −1</span>'; }},
+
+  ausgabe:{label:'Die Ausgabe verteilen',
+    cost:'Wer bekommt die Schuhe zuerst?',
+    tu(){ const p = probe('menschenkenntnis',35);
+      if(p.erfolg){ S.kameradschaft=Math.min(100,S.kameradschaft+10); gunstGeben('collot',1);
+        return 'Du gibst die Schuhe denen, die am längsten barfuß gehen, und nicht denen, die am lautesten fragen. Es dauert länger und macht zwei Leute wütend, aber am Abend erzählt es die Kompanie weiter. <span class="fein">Kameradschaft +10 · Fürsprache Collot +1</span>'; }
+      S.kameradschaft=Math.max(0,S.kameradschaft-6); gunstGeben('berthaud',1); S.geld+=3;
+      return 'Du gibst die Schuhe der Reihe nach aus, wie es die Liste vorsieht, und die Liste ist nach Dienstalter geordnet. Es geht schnell, der Lieutenant nickt, und drei Männer im hinteren Glied gehen weiter barfuß. <span class="fein">Kameradschaft −6 · Fürsprache Berthaud +1 · +3 F</span>'; }},
+
+  /* ── Ab Rang 5: zwanzig Mann ── */
+  rekruten:{label:'Die Rekruten für deine Sektion aussuchen',
+    cost:'Menschenkenntnis · wer neben dir steht, entscheidet mit',
+    tu(){ const p = probe('menschenkenntnis',40);
+      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 12 : -6);
+      nutzen('autoritaet',1);
+      return p.erfolg
+        ? 'Du gehst die Neuen ab und siehst nicht auf die Schultern, sondern auf die Hände und auf die Augen. Zwei nimmst du, die niemand wollte, und einen Großen lässt du stehen. Man wird dich in vier Wochen dafür verstehen. <span class="fein">Deine Sektion wird besser</span>'
+        : 'Du nimmst die Größten und die, die am geradesten stehen. Es sieht gut aus auf dem Hof. Was davon im Rauch übrig bleibt, wirst du sehen. <span class="fein">Deine Sektion wird schlechter</span>'; }},
+
+  sektion:{label:'Deine zwanzig Mann exerzieren lassen',
+    cost:'Autorität und Drill · Ruf +1 · deine Sektion hält besser',
+    tu(){ nutzen('autoritaet',2.5); nutzen('drill',2.5); S.ruf+=1;
+      S.sektionGuete = (S.sektionGuete||0) + 8;
+      return 'Zwanzig Mann in zwei Gliedern, Salve auf Kommando, vierzig Mal. Beim vierzigsten geht es gleichzeitig los, und das Geräusch ist ein einziges. Genau darum geht es: Zwanzig Musketen, die nacheinander knallen, sind Lärm. Zwanzig auf einmal sind eine Wand. <span class="fein">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'; }},
+
   tornister:{label:'Mit vollem Tornister auf den Hügel und zurück',
     cost:'Konstitution · Atem −10',
     tu(){ nutzen('konstitution',1.5); S.atem=Math.max(0,S.atem-10);
@@ -120,6 +157,8 @@ function abendeFuer(n){ return n.abende + (S.rang>=5 ? 2 : S.rang>=3 ? 1 : 0); }
 function lagerHandlungen(n){
   const ids = (n.tun||[]).slice();
   if(S.rang>=3) ids.push('korporalschaft');
+  if(S.rang>=4) ids.push('listen','ausgabe');
+  if(S.rang>=5) ids.push('rekruten','sektion');
   if(S.zweig==='grenadier') ids.push('tornister');
   if(S.zweig==='voltigeur') ids.push('gelaende');
   return ids.filter(id=>LAGER_TUN[id]);
@@ -214,7 +253,7 @@ function winterTun(id){
     else W.log.push('Du hast keine sechs Francs. Der Sergent lacht und dreht sich um. <span style="color:var(--faint)">nichts passiert</span>');
   }
   if(id==='leute'){
-    S.gunst+=2; S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
+    gunstGeben('martel',2); S.kameradschaft=Math.min(100,S.kameradschaft+10); S.belastung=Math.max(0,S.belastung-5);
     nutzen('menschenkenntnis',2);
     W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
   }
@@ -270,7 +309,9 @@ function chronikblatt(endeText, p){
     attr:Object.assign({},S.attr), fert:Object.assign({},S.fert),
     ausr:Object.keys(S.ausr).map(k=>({name:S.ausr[k].name, zustand:S.ausr[k].zustand,
                                       verschleiss:S.ausr[k].verschleiss})),
-    wunden:S.wunden.map(w=>w.name), ruf:S.ruf, gunst:S.gunst,
+    wunden:S.wunden.map(w=>w.name), ruf:S.ruf, gunst:gunst('martel'),
+    leute:LEUTE.map(l=>({name:personName(l.id), gunst:gunst(l.id),
+                         lebt:!!(S.leute&&S.leute[l.id]&&S.leute[l.id].lebt)})),
     kameradschaft:S.kameradschaft, belastung:S.belastung, atem:S.atem,
     leben:S.leben, lebenMax:lebenMax(),
     nennungen:S.nennungen, geld:S.geld, gekniffen:!!S.gekniffen,
