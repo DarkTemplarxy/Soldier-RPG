@@ -31,13 +31,13 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
   const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
-  /* Obergrenze der Erschaffung: 70 für Attribute, 60 für Fertigkeiten — auch
-     nach der Herkunft. Vorher wurde die Herkunft ungedeckelt addiert: Ein
-     Bauernsohn mit Pool-70 stand bei Konstitution 90 und war damit praktisch
-     unsterblich (siehe Tödlichkeit in CLAUDE.md). Was über 70 hinausgeht,
-     muss man sich im Feld verdienen. */
-  for(const k in h.attr) attr[k] = Math.max(0, Math.min(70, attr[k] + h.attr[k]));
-  for(const k in h.fert) fert[k] = Math.max(0, Math.min(60, fert[k] + h.fert[k]));
+  /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
+     was man mitbringt, nicht das, was man sich aussucht. Das war früher der
+     halbe Exploit (Konstitution 90 = unsterblich); die andere Hälfte lag in der
+     Tödlichkeitsformel und ist dort behoben worden: Konstitution gibt jetzt
+     Lebenspunkte statt Unverwundbarkeit. */
+  for(const k in h.attr) attr[k] = Math.max(0, Math.min(100, attr[k] + h.attr[k]));
+  for(const k in h.fert) fert[k] = Math.max(0, Math.min(100, fert[k] + h.fert[k]));
   // Mit Veteranenpunkten vorweggenommene Ausbildung, oben auf Herkunft und Pool
   for(const k in (punkte||{})){
     if(attr[k] !== undefined) attr[k] = Math.min(100, attr[k] + punkte[k]);
@@ -53,12 +53,15 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
     if(id==='geld'){ geld += 50; }
   });
-  return {
+  const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, gunst:0, kameradschaft:20, belastung:0,
-    atem:100, wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
+    atem:100, leben:0,
+    wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
+  mann.leben = lebenMax(mann);
+  return mann;
 }
 
 /* ══════════════════ MECHANIK ══════════════════ */
@@ -106,7 +109,32 @@ function anwenden(e){
   if(e.attr) for(const k in e.attr) S.attr[k] = Math.max(0, Math.min(100, S.attr[k] + e.attr[k]));
   if(e.fert) for(const k in e.fert) S.fert[k] = Math.max(0, Math.min(100, S.fert[k] + e.fert[k]));
   if(e.ausr) for(const k in e.ausr) S.ausr[k].zustand = Math.max(0, Math.min(100, S.ausr[k].zustand + e.ausr[k]));
-  if(e.wunde) wundeGeben(e.wunde, 8);
+  if(e.leben) S.leben = Math.max(1, Math.min(lebenMax(), S.leben + e.leben));
+  /* Eine Wunde aus einer Szene kostet auch Kraft — Ruhr, Hitzschlag und das
+     Fieber aus Jaffa sind in Ägypten gefährlicher als Kugeln, und das muss man
+     an derselben Zahl sehen. Sie tötet nie unmittelbar: Der Tod gehört ins
+     Gefecht, wo er einen Text und einen Ort hat. Sie lässt einen aber so
+     geschwächt hineingehen, dass die nächste Kugel reicht. */
+  if(e.wunde){ wundeGeben(e.wunde, 8); S.leben = Math.max(1, S.leben - 10); }
+}
+
+/* ── Lebenspunkte ──
+   Konstitution bestimmt, wie viel ein Mann aushält, nicht ob ihn eine Kugel
+   überhaupt töten kann. Das ist der Unterschied zur alten Formel: Dort senkte
+   Konstitution die Todeschance je Treffer, und ab 58 war sie rechnerisch null
+   — ein Mann, den keine Kugel tötet. Hier ist die Kurve monoton: Mehr
+   Konstitution heißt mehr Treffer, die man wegsteckt, aber genug Treffer
+   töten jeden.
+
+   Gerechnet wird vom **rohen** Attribut, nicht von wert(): Sonst schrumpfte
+   die Obergrenze mitten im Gefecht, weil Wunden die Konstitution senken. */
+function lebenMax(mann){
+  const m = mann || S;
+  return 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+}
+function lebenAuffuellen(anteil){
+  const max = lebenMax();
+  S.leben = Math.max(0, Math.min(max, S.leben + Math.round(max*anteil)));
 }
 
 function wundeGeben(name, abzug){

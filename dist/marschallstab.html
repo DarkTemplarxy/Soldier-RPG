@@ -282,7 +282,7 @@
    was der Wert im Spiel tut — nicht, was er bedeutet. Wo ein Wert in diesem
    Kapitel noch nichts tut, steht das auch da. */
 const ATTRIBUTE = [
-  ['konstitution','Konstitution','Was du aushältst. Entscheidet mit, ob eine Kugel eine Wunde oder ein Ende ist, und ob dich die Grenadiere nehmen — sie verlangen 55.'],
+  ['konstitution','Konstitution','Was du aushältst. Bestimmt deinen Lebensvorrat — 40 plus drei Fünftel deiner Konstitution —, also wie viele Treffer du wegsteckst, bevor einer zu viel ist. Und ob dich die Grenadiere nehmen; sie verlangen 55.'],
   ['geschick','Geschick','Hände und Füße. Laden unter Beschuss, Deckung wechseln, Ausrüstung flicken. Die Voltigeure verlangen 55.'],
   ['kaltbluetigkeit','Kaltblütigkeit','Ob du stehen bleibst, wenn die Linie steht. Wird geprüft, wenn es darauf ankommt, und nie vorher.'],
   ['autoritaet','Autorität','Ob acht Männer tun, was du sagst. Als Fusilier ohne Wirkung, ab dem Caporal das Wichtigste.'],
@@ -1047,7 +1047,7 @@ STATIONEN.aegypten = KAPITEL2;
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 1;
+const LAUF_FASSUNG    = 2;   // 2: Lebenspunkte statt Todeswurf je Treffer
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -1102,7 +1102,21 @@ const CHRONIK_WANDLER = {
   0: alt => ({fassung:1, vp:alt.vp|0, chronik:alt.chronik||[], bestKapitel:alt.bestKapitel||{},
               laeufe:(alt.chronik||[]).length, zuletzt:null})
 };
-const LAUF_WANDLER = {};
+/* Fassung 1 kannte keine Lebenspunkte — der Tod war ein Wurf je Treffer. Ein
+   angefangener Feldzug von damals bekommt sie voll, abzüglich dessen, was seine
+   bleibenden Wunden ohnehin schon gekostet haben. Wer mit vier Wunden aus der
+   alten Fassung kommt, steht also angeschlagen da, aber nicht tot. */
+const LAUF_WANDLER = {
+  1: alt => {
+    const m = alt.mann;
+    if(m && m.leben === undefined){
+      const max = 40 + Math.round((m.attr && m.attr.konstitution || 20) * 0.6);
+      const gezahlt = (m.wunden||[]).reduce((s,w)=> s + (w.abzug||0), 0);
+      m.leben = Math.max(Math.round(max*0.3), max - gezahlt);
+    }
+    return Object.assign({}, alt, {fassung:2});
+  }
+};
 
 function wandle(d, wandler, ziel){
   if(!d || typeof d !== 'object') return null;
@@ -1232,13 +1246,13 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
   const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
-  /* Obergrenze der Erschaffung: 70 für Attribute, 60 für Fertigkeiten — auch
-     nach der Herkunft. Vorher wurde die Herkunft ungedeckelt addiert: Ein
-     Bauernsohn mit Pool-70 stand bei Konstitution 90 und war damit praktisch
-     unsterblich (siehe Tödlichkeit in CLAUDE.md). Was über 70 hinausgeht,
-     muss man sich im Feld verdienen. */
-  for(const k in h.attr) attr[k] = Math.max(0, Math.min(70, attr[k] + h.attr[k]));
-  for(const k in h.fert) fert[k] = Math.max(0, Math.min(60, fert[k] + h.fert[k]));
+  /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
+     was man mitbringt, nicht das, was man sich aussucht. Das war früher der
+     halbe Exploit (Konstitution 90 = unsterblich); die andere Hälfte lag in der
+     Tödlichkeitsformel und ist dort behoben worden: Konstitution gibt jetzt
+     Lebenspunkte statt Unverwundbarkeit. */
+  for(const k in h.attr) attr[k] = Math.max(0, Math.min(100, attr[k] + h.attr[k]));
+  for(const k in h.fert) fert[k] = Math.max(0, Math.min(100, fert[k] + h.fert[k]));
   // Mit Veteranenpunkten vorweggenommene Ausbildung, oben auf Herkunft und Pool
   for(const k in (punkte||{})){
     if(attr[k] !== undefined) attr[k] = Math.min(100, attr[k] + punkte[k]);
@@ -1254,12 +1268,15 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
     if(id==='geld'){ geld += 50; }
   });
-  return {
+  const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, gunst:0, kameradschaft:20, belastung:0,
-    atem:100, wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
+    atem:100, leben:0,
+    wunden:[], nennungen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
+  mann.leben = lebenMax(mann);
+  return mann;
 }
 
 /* ══════════════════ MECHANIK ══════════════════ */
@@ -1307,7 +1324,32 @@ function anwenden(e){
   if(e.attr) for(const k in e.attr) S.attr[k] = Math.max(0, Math.min(100, S.attr[k] + e.attr[k]));
   if(e.fert) for(const k in e.fert) S.fert[k] = Math.max(0, Math.min(100, S.fert[k] + e.fert[k]));
   if(e.ausr) for(const k in e.ausr) S.ausr[k].zustand = Math.max(0, Math.min(100, S.ausr[k].zustand + e.ausr[k]));
-  if(e.wunde) wundeGeben(e.wunde, 8);
+  if(e.leben) S.leben = Math.max(1, Math.min(lebenMax(), S.leben + e.leben));
+  /* Eine Wunde aus einer Szene kostet auch Kraft — Ruhr, Hitzschlag und das
+     Fieber aus Jaffa sind in Ägypten gefährlicher als Kugeln, und das muss man
+     an derselben Zahl sehen. Sie tötet nie unmittelbar: Der Tod gehört ins
+     Gefecht, wo er einen Text und einen Ort hat. Sie lässt einen aber so
+     geschwächt hineingehen, dass die nächste Kugel reicht. */
+  if(e.wunde){ wundeGeben(e.wunde, 8); S.leben = Math.max(1, S.leben - 10); }
+}
+
+/* ── Lebenspunkte ──
+   Konstitution bestimmt, wie viel ein Mann aushält, nicht ob ihn eine Kugel
+   überhaupt töten kann. Das ist der Unterschied zur alten Formel: Dort senkte
+   Konstitution die Todeschance je Treffer, und ab 58 war sie rechnerisch null
+   — ein Mann, den keine Kugel tötet. Hier ist die Kurve monoton: Mehr
+   Konstitution heißt mehr Treffer, die man wegsteckt, aber genug Treffer
+   töten jeden.
+
+   Gerechnet wird vom **rohen** Attribut, nicht von wert(): Sonst schrumpfte
+   die Obergrenze mitten im Gefecht, weil Wunden die Konstitution senken. */
+function lebenMax(mann){
+  const m = mann || S;
+  return 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+}
+function lebenAuffuellen(anteil){
+  const max = lebenMax();
+  S.leben = Math.max(0, Math.min(max, S.leben + Math.round(max*anteil)));
 }
 
 function wundeGeben(name, abzug){
@@ -1432,6 +1474,11 @@ function verlaufUm(id){
 const ATEM_WARNUNG = 35;
 function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
 
+/* Dieselbe Regel für die Lebenspunkte: gewarnt wird bei einem Drittel, lange
+   bevor es rechnerisch eng wird. Wer rot sieht, soll im Lager „Schlafen und
+   liegen bleiben" wählen, statt scharf zu schießen. */
+function angeschlagen(){ return S && S.leben <= lebenMax()/3; }
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
   const w = S.wunden.length ? S.wunden.map(x=>esc(x.name)).join(', ') : 'keine';
@@ -1443,6 +1490,9 @@ function seitenleiste(){
       <p class="who">${esc(S.name)}</p>
       <div class="rangzeile">${rangabzeichen(S)}
         <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p></div>
+      <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}</span></div>
+        ${balken(angeschlagen()?'b-red':'b-green',S.leben,lebenMax())}
+        ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}</div>
       <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
         ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
         ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>
@@ -1562,6 +1612,7 @@ function zeigeBlatt(i){
       ${c.ausr.filter(a=>a.verschleiss>0).map(a=>zeile(esc(a.name), a.zustand)).join('')}
       <div class="rule"></div>
       ${zeile('Ruf', c.ruf)}${zeile('Gunst Martel', c.gunst)}${zeile('Kameradschaft', c.kameradschaft)}
+      ${c.lebenMax ? zeile('Leben', c.leben+' / '+c.lebenMax) : ''}
       ${zeile('Belastung', c.belastung)}${zeile('Atem', c.atem)}${zeile('Geld', c.geld+' F')}
       ${zeile('Im Tagesbefehl', c.nennungen+'×')}
       ${zeile('Wunden', c.wunden.length ? c.wunden.map(esc).join(', ') : 'keine')}
@@ -1813,12 +1864,13 @@ function naechster(){
 function zeigeUebergang(n){
   /* Zwischen zwei Feldzügen liegt ein Jahr Garnison. Nach derselben Regel wie
      beim Winterquartier (drei Wochen Dach = Atem voll) heilt ein Jahr alles,
-     was heilbar ist: Atem voll, Wunden zu, Belastung halbiert. Der nächste
+     was heilbar ist: Leben und Atem voll, Wunden zu, Belastung halbiert. Der nächste
      Feldzug beginnt mit seinem eigenen Elend, nicht mit dem alten — sonst
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
     S.atem = 100;
+    S.leben = lebenMax();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
     S.wunden = [];
     laufSichern();
@@ -1990,6 +2042,9 @@ function gefechtsbereitschaft(){
   else if(sch<50) z.push('Die Schuhe halten. Noch.');
   if(S.wunden.length) z.push('Du trägst ' + (S.wunden.length===1?'eine alte Wunde':S.wunden.length+' alte Wunden') +
     ' mit dir: ' + S.wunden.map(w=>esc(w.name)).join(', ') + '.');
+  if(angeschlagen()) z.push(S.leben <= lebenMax()*0.15
+    ? 'Du hast zu viel Blut verloren, um hier zu stehen. Wenn dich heute etwas trifft, war es das.'
+    : 'Du bist nicht wiederhergestellt. Was noch nicht zu ist, wird gleich wieder aufgehen.');
   if(ausserAtem()) z.push(S.atem<30
     ? 'Du bist ausgepumpt, bevor der erste Schuss fällt. Unter 30 Atem trifft dich mehr, als dich treffen müsste — das hier wird teuer.'
     : 'Dir geht die Luft aus, bevor es losgeht. Unter 30 wird jede Runde gefährlicher.');
@@ -2284,31 +2339,55 @@ function kampfAktion(id){
   gefahr = Math.max(4, gefahr);
   let treffer = '';
   if(Math.random()*100 < gefahr){
-    /* Konstitution schützt, aber macht nie unverwundbar. Ungedeckelt war der
-       Tod ab Konstitution 58 rechnerisch unmöglich (Schwelle 94 + 18/3 > 100)
-       — zusammen mit der ungedeckelten Herkunft der größte Exploit der
-       Erschaffung. Jetzt: höchstens +5 Schutz (Tod nie unter 1 % je Treffer),
-       höchstens −10 Malus (ein Schwächling stirbt zu 16 %, nicht zu 19 %). */
-    const schutz = Math.max(-10, Math.min(5, (wert('konstitution')-40)/3));
-    const schwere = Math.random()*100 - schutz;
-    if(schwere > 94){
-      kampfEnde(false, text + ' — Dann trifft dich etwas in die Brust, und du siehst noch, wie der Himmel kippt.');
-      toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
-      zeigeTod(); return;
-    } else if(schwere > 72){
+    /* Ein Treffer tötet nicht mehr durch einen eigenen Wurf, sondern zehrt an
+       den Lebenspunkten. Der Unterschied ist der ganze Sinn des Umbaus:
+
+       Vorher senkte Konstitution die Todeschance je Treffer — und ab
+       Konstitution 58 war sie rechnerisch null (Schwelle 94 + 18/3 > 100). Ein
+       Mann, den keine Kugel töten kann, hebelt Invariante 1 aus. Eine Klammer
+       auf den Schutz hat das notdürftig geflickt, aber die Kurve blieb falsch:
+       Konstitution kaufte Unverwundbarkeit, nicht Zähigkeit.
+
+       Jetzt ist sie monoton. `lebenMax()` wächst mit der Konstitution
+       (52 bei 20 · 64 bei 40 · 82 bei 70), der Schaden je Treffer nicht — mehr
+       Konstitution heißt also mehr Treffer, die man wegsteckt, aber genug
+       Treffer töten jeden. Deshalb darf die Herkunft auch über 70 gehen.
+
+       Geeicht an einer gemessenen Zahl: Ein Mann wird in beiden Feldzügen
+       zusammen nur **rund neun Mal** getroffen — 10 Gefechte, 57 Kampfrunden,
+       etwa 16 % Trefferchance je Runde. Ein Vorrat, den neun Treffer nicht
+       leeren, tötet niemanden; die erste Eichung auf 6 Schaden je Treffer
+       ergab gemessen **100 % Überlebende**. Deshalb ist ein Treffer teuer:
+       im Mittel 11 Punkte, also stirbt ein Mann mit Konstitution 40 am
+       sechsten, einer mit 20 am fünften, einer mit 70 am achten. Das ist auch
+       inhaltlich richtig — wer 1796 vier Mal getroffen wird, steht nicht mehr. */
+    let schaden;
+    if(Math.random()*100 > 75){
+      schaden = 15 + Math.floor(Math.random()*11);            // 15–25
       wundeGeben('Schwere Wunde ('+n.datum.split(' · ')[1]+')', 14);
       treffer = ' Ein Schlag gegen die Schulter, dann Nässe im Ärmel. Du kannst den Arm noch bewegen, aber es tut sehr weh.';
       S.atem = Math.max(0,S.atem-20);
     } else {
+      /* Der Streifschuss kostet zweierlei, und das ist Absicht: Blut (bleibt)
+         und eine Wunde, die der Feldscher nach dem Gefecht zunäht (bleibt
+         nicht). Ohne die Wunde stimmte zwar die Todesrechnung, aber ein Mann
+         schoss den ganzen Feldzug lang wie am ersten Tag — gemessen stieg der
+         Caporal-Anteil von 40 % auf 57 %, weil bessere Gefechte mehr Ruf
+         bringen und Ruf die Beförderungsschwelle ist. Der Kratzer soll den
+         Rest des Gefechts wehtun, nicht den Rest des Krieges. */
+      schaden = 5 + Math.floor(Math.random()*7);              // 5–11
       wundeGeben('Streifschuss', 5);
       treffer = ' Etwas reißt dir den Ärmel auf und brennt. Nicht schlimm. Noch nicht.';
       S.atem = Math.max(0,S.atem-8);
     }
+    S.leben = Math.max(0, S.leben - schaden);
     K.protokoll.push('Du wirst getroffen.');
-  }
-  if(S.wunden.length>=5){
-    kampfEnde(false, text+treffer);
-    toetlich('Verblutet bei '+n.datum.split(' · ')[1]); zeigeTod(); return;
+    if(S.leben <= 0){
+      kampfEnde(false, text + treffer + ' Du willst dich abstützen und findest den Boden nicht, wo er sein müsste. Jemand ruft deinen Namen, weit weg.');
+      toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
+      zeigeTod(); return;
+    }
+    if(S.leben <= lebenMax()*0.3) treffer += ' Du bist noch auf den Beinen, aber nicht mehr lange.';
   }
 
   if(K.feindMoral <= 0){ kampfEnde(true, text+treffer); return; }
@@ -2327,8 +2406,16 @@ function kampfEnde(sieg, letzterText){
   const erg = sieg ? n.sieg : n.niederlage;
   anwenden(erg);
   verschleiss(0.9);
-  // Der Feldscher flickt nach dem Gefecht die leichteste Wunde
-  const leicht = S.wunden.findIndex(w=>w.abzug<=5);
+  /* Der Feldscher näht die leichteste Wunde zu — in der Regel den Streifschuss
+     des letzten Gefechts. Lebenspunkte gibt er nicht zurück.
+
+     Das ist dieselbe Regel wie beim Atem, und aus demselben Grund: Eine
+     Erholung an jeder Station verschenkt genau das, was die Lager knapp machen
+     soll. Gemessen mit einem Viertel je Gefecht überlebten **alle sechzig**
+     Läufe beide Feldzüge — bei rund neun Treffern im ganzen Spiel wiegt jede
+     geschenkte Genesung schwerer als der Schaden. Wer wieder auf die Beine
+     will, verbringt einen Lagerabend oder eine Winterwoche damit. */
+  const leicht = S.wunden.findIndex(w=>w.abzug<=8);
   if(leicht>=0) S.wunden.splice(leicht,1);
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);
@@ -2524,9 +2611,10 @@ const LAGER_TUN = {
       return 'Vier Stunden auf nassen Feldwegen. Die Höfe sind leer, die Leute sind in den Bergen, und ihr Vieh ist bei ihnen. <span class="fein">Belastung +3</span>'; }},
 
   ruhe:{label:'Schlafen und liegen bleiben',
-    cost:'Belastung −10 · Atem +18',
+    cost:'Leben, Belastung −10 · Atem +18',
     tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
-      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Belastung −10 · Atem +18</span>'; }},
+      lebenAuffuellen(0.25);
+      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>'; }},
 
   /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
   korporalschaft:{label:'Deine acht Mann drillen',
@@ -2614,7 +2702,7 @@ function zeigeWinter(n){
     {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
     {id:'lesen',label:'Lesen und Schreiben üben',cost:'Bildung und Verwaltung · kostet 6 Francs'},
     {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
-    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt stark, Wunden heilen'}
+    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Leben und Belastung erholen sich, Wunden heilen'}
   ];
   const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
@@ -2654,9 +2742,13 @@ function winterTun(id){
     W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
   }
   if(id==='ruhe'){
-    S.belastung=Math.max(0,S.belastung-16); S.atem=100;
-    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Wunde geheilt</span>`); }
-    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16</span>');
+    /* Die einzige Handlung, die den Lebensvorrat wirklich wieder auffüllt —
+       und sie kostet eine der drei Wochen. Wer verwundet aus dem Feldzug kommt,
+       muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
+       Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
+    S.belastung=Math.max(0,S.belastung-16); S.atem=100; lebenAuffuellen(0.6);
+    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · Wunde geheilt</span>`); }
+    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
   laufSichern();
@@ -2695,6 +2787,7 @@ function chronikblatt(endeText, p){
                                       verschleiss:S.ausr[k].verschleiss})),
     wunden:S.wunden.map(w=>w.name), ruf:S.ruf, gunst:S.gunst,
     kameradschaft:S.kameradschaft, belastung:S.belastung, atem:S.atem,
+    leben:S.leben, lebenMax:lebenMax(),
     nennungen:S.nennungen, geld:S.geld, gekniffen:!!S.gekniffen,
     kaeufe:(S.kaeufe||[]).slice(), gekauft:Object.assign({},S.gekauft||{}),
     log:(S.log||[]).slice(), wertung:p

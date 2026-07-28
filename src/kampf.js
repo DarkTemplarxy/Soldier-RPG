@@ -97,6 +97,9 @@ function gefechtsbereitschaft(){
   else if(sch<50) z.push('Die Schuhe halten. Noch.');
   if(S.wunden.length) z.push('Du trägst ' + (S.wunden.length===1?'eine alte Wunde':S.wunden.length+' alte Wunden') +
     ' mit dir: ' + S.wunden.map(w=>esc(w.name)).join(', ') + '.');
+  if(angeschlagen()) z.push(S.leben <= lebenMax()*0.15
+    ? 'Du hast zu viel Blut verloren, um hier zu stehen. Wenn dich heute etwas trifft, war es das.'
+    : 'Du bist nicht wiederhergestellt. Was noch nicht zu ist, wird gleich wieder aufgehen.');
   if(ausserAtem()) z.push(S.atem<30
     ? 'Du bist ausgepumpt, bevor der erste Schuss fällt. Unter 30 Atem trifft dich mehr, als dich treffen müsste — das hier wird teuer.'
     : 'Dir geht die Luft aus, bevor es losgeht. Unter 30 wird jede Runde gefährlicher.');
@@ -391,31 +394,55 @@ function kampfAktion(id){
   gefahr = Math.max(4, gefahr);
   let treffer = '';
   if(Math.random()*100 < gefahr){
-    /* Konstitution schützt, aber macht nie unverwundbar. Ungedeckelt war der
-       Tod ab Konstitution 58 rechnerisch unmöglich (Schwelle 94 + 18/3 > 100)
-       — zusammen mit der ungedeckelten Herkunft der größte Exploit der
-       Erschaffung. Jetzt: höchstens +5 Schutz (Tod nie unter 1 % je Treffer),
-       höchstens −10 Malus (ein Schwächling stirbt zu 16 %, nicht zu 19 %). */
-    const schutz = Math.max(-10, Math.min(5, (wert('konstitution')-40)/3));
-    const schwere = Math.random()*100 - schutz;
-    if(schwere > 94){
-      kampfEnde(false, text + ' — Dann trifft dich etwas in die Brust, und du siehst noch, wie der Himmel kippt.');
-      toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
-      zeigeTod(); return;
-    } else if(schwere > 72){
+    /* Ein Treffer tötet nicht mehr durch einen eigenen Wurf, sondern zehrt an
+       den Lebenspunkten. Der Unterschied ist der ganze Sinn des Umbaus:
+
+       Vorher senkte Konstitution die Todeschance je Treffer — und ab
+       Konstitution 58 war sie rechnerisch null (Schwelle 94 + 18/3 > 100). Ein
+       Mann, den keine Kugel töten kann, hebelt Invariante 1 aus. Eine Klammer
+       auf den Schutz hat das notdürftig geflickt, aber die Kurve blieb falsch:
+       Konstitution kaufte Unverwundbarkeit, nicht Zähigkeit.
+
+       Jetzt ist sie monoton. `lebenMax()` wächst mit der Konstitution
+       (52 bei 20 · 64 bei 40 · 82 bei 70), der Schaden je Treffer nicht — mehr
+       Konstitution heißt also mehr Treffer, die man wegsteckt, aber genug
+       Treffer töten jeden. Deshalb darf die Herkunft auch über 70 gehen.
+
+       Geeicht an einer gemessenen Zahl: Ein Mann wird in beiden Feldzügen
+       zusammen nur **rund neun Mal** getroffen — 10 Gefechte, 57 Kampfrunden,
+       etwa 16 % Trefferchance je Runde. Ein Vorrat, den neun Treffer nicht
+       leeren, tötet niemanden; die erste Eichung auf 6 Schaden je Treffer
+       ergab gemessen **100 % Überlebende**. Deshalb ist ein Treffer teuer:
+       im Mittel 11 Punkte, also stirbt ein Mann mit Konstitution 40 am
+       sechsten, einer mit 20 am fünften, einer mit 70 am achten. Das ist auch
+       inhaltlich richtig — wer 1796 vier Mal getroffen wird, steht nicht mehr. */
+    let schaden;
+    if(Math.random()*100 > 75){
+      schaden = 15 + Math.floor(Math.random()*11);            // 15–25
       wundeGeben('Schwere Wunde ('+n.datum.split(' · ')[1]+')', 14);
       treffer = ' Ein Schlag gegen die Schulter, dann Nässe im Ärmel. Du kannst den Arm noch bewegen, aber es tut sehr weh.';
       S.atem = Math.max(0,S.atem-20);
     } else {
+      /* Der Streifschuss kostet zweierlei, und das ist Absicht: Blut (bleibt)
+         und eine Wunde, die der Feldscher nach dem Gefecht zunäht (bleibt
+         nicht). Ohne die Wunde stimmte zwar die Todesrechnung, aber ein Mann
+         schoss den ganzen Feldzug lang wie am ersten Tag — gemessen stieg der
+         Caporal-Anteil von 40 % auf 57 %, weil bessere Gefechte mehr Ruf
+         bringen und Ruf die Beförderungsschwelle ist. Der Kratzer soll den
+         Rest des Gefechts wehtun, nicht den Rest des Krieges. */
+      schaden = 5 + Math.floor(Math.random()*7);              // 5–11
       wundeGeben('Streifschuss', 5);
       treffer = ' Etwas reißt dir den Ärmel auf und brennt. Nicht schlimm. Noch nicht.';
       S.atem = Math.max(0,S.atem-8);
     }
+    S.leben = Math.max(0, S.leben - schaden);
     K.protokoll.push('Du wirst getroffen.');
-  }
-  if(S.wunden.length>=5){
-    kampfEnde(false, text+treffer);
-    toetlich('Verblutet bei '+n.datum.split(' · ')[1]); zeigeTod(); return;
+    if(S.leben <= 0){
+      kampfEnde(false, text + treffer + ' Du willst dich abstützen und findest den Boden nicht, wo er sein müsste. Jemand ruft deinen Namen, weit weg.');
+      toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
+      zeigeTod(); return;
+    }
+    if(S.leben <= lebenMax()*0.3) treffer += ' Du bist noch auf den Beinen, aber nicht mehr lange.';
   }
 
   if(K.feindMoral <= 0){ kampfEnde(true, text+treffer); return; }
@@ -434,8 +461,16 @@ function kampfEnde(sieg, letzterText){
   const erg = sieg ? n.sieg : n.niederlage;
   anwenden(erg);
   verschleiss(0.9);
-  // Der Feldscher flickt nach dem Gefecht die leichteste Wunde
-  const leicht = S.wunden.findIndex(w=>w.abzug<=5);
+  /* Der Feldscher näht die leichteste Wunde zu — in der Regel den Streifschuss
+     des letzten Gefechts. Lebenspunkte gibt er nicht zurück.
+
+     Das ist dieselbe Regel wie beim Atem, und aus demselben Grund: Eine
+     Erholung an jeder Station verschenkt genau das, was die Lager knapp machen
+     soll. Gemessen mit einem Viertel je Gefecht überlebten **alle sechzig**
+     Läufe beide Feldzüge — bei rund neun Treffern im ganzen Spiel wiegt jede
+     geschenkte Genesung schwerer als der Schaden. Wer wieder auf die Beine
+     will, verbringt einen Lagerabend oder eine Winterwoche damit. */
+  const leicht = S.wunden.findIndex(w=>w.abzug<=8);
   if(leicht>=0) S.wunden.splice(leicht,1);
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);

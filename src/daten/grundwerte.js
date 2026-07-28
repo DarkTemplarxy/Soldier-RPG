@@ -8,7 +8,7 @@
    was der Wert im Spiel tut — nicht, was er bedeutet. Wo ein Wert in diesem
    Kapitel noch nichts tut, steht das auch da. */
 const ATTRIBUTE = [
-  ['konstitution','Konstitution','Was du aushältst. Entscheidet mit, ob eine Kugel eine Wunde oder ein Ende ist, und ob dich die Grenadiere nehmen — sie verlangen 55.'],
+  ['konstitution','Konstitution','Was du aushältst. Bestimmt deinen Lebensvorrat — 40 plus drei Fünftel deiner Konstitution —, also wie viele Treffer du wegsteckst, bevor einer zu viel ist. Und ob dich die Grenadiere nehmen; sie verlangen 55.'],
   ['geschick','Geschick','Hände und Füße. Laden unter Beschuss, Deckung wechseln, Ausrüstung flicken. Die Voltigeure verlangen 55.'],
   ['kaltbluetigkeit','Kaltblütigkeit','Ob du stehen bleibst, wenn die Linie steht. Wird geprüft, wenn es darauf ankommt, und nie vorher.'],
   ['autoritaet','Autorität','Ob acht Männer tun, was du sagst. Als Fusilier ohne Wirkung, ab dem Caporal das Wichtigste.'],

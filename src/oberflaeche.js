@@ -100,6 +100,11 @@ function verlaufUm(id){
 const ATEM_WARNUNG = 35;
 function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
 
+/* Dieselbe Regel für die Lebenspunkte: gewarnt wird bei einem Drittel, lange
+   bevor es rechnerisch eng wird. Wer rot sieht, soll im Lager „Schlafen und
+   liegen bleiben" wählen, statt scharf zu schießen. */
+function angeschlagen(){ return S && S.leben <= lebenMax()/3; }
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
   const w = S.wunden.length ? S.wunden.map(x=>esc(x.name)).join(', ') : 'keine';
@@ -111,6 +116,9 @@ function seitenleiste(){
       <p class="who">${esc(S.name)}</p>
       <div class="rangzeile">${rangabzeichen(S)}
         <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p></div>
+      <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}</span></div>
+        ${balken(angeschlagen()?'b-red':'b-green',S.leben,lebenMax())}
+        ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}</div>
       <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
         ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
         ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>
@@ -230,6 +238,7 @@ function zeigeBlatt(i){
       ${c.ausr.filter(a=>a.verschleiss>0).map(a=>zeile(esc(a.name), a.zustand)).join('')}
       <div class="rule"></div>
       ${zeile('Ruf', c.ruf)}${zeile('Gunst Martel', c.gunst)}${zeile('Kameradschaft', c.kameradschaft)}
+      ${c.lebenMax ? zeile('Leben', c.leben+' / '+c.lebenMax) : ''}
       ${zeile('Belastung', c.belastung)}${zeile('Atem', c.atem)}${zeile('Geld', c.geld+' F')}
       ${zeile('Im Tagesbefehl', c.nennungen+'×')}
       ${zeile('Wunden', c.wunden.length ? c.wunden.map(esc).join(', ') : 'keine')}
@@ -481,12 +490,13 @@ function naechster(){
 function zeigeUebergang(n){
   /* Zwischen zwei Feldzügen liegt ein Jahr Garnison. Nach derselben Regel wie
      beim Winterquartier (drei Wochen Dach = Atem voll) heilt ein Jahr alles,
-     was heilbar ist: Atem voll, Wunden zu, Belastung halbiert. Der nächste
+     was heilbar ist: Leben und Atem voll, Wunden zu, Belastung halbiert. Der nächste
      Feldzug beginnt mit seinem eigenen Elend, nicht mit dem alten — sonst
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
     S.atem = 100;
+    S.leben = lebenMax();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
     S.wunden = [];
     laufSichern();

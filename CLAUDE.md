@@ -25,7 +25,7 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**
 | Gefecht auf zwei Maßstäben (Körper / Sektion) | Ausrüstungskauf im Spiel |
 | Voltigeur- und Grenadierzweig mit eigenen Aktionen | Orden und Ehrenlegion |
 | Ausrüstung mit Zustandsverschleiß | Pferd, Kompaniekasse, Inspektionen |
-| Ruf, Gunst, Kameradschaft, Belastung, Wunden | Offizierspatente |
+| Ruf, Gunst, Kameradschaft, Belastung, Wunden, Lebenspunkte | Offizierspatente |
 | Vakanz-Regel für die Beförderung | Rangschranken und die vier Enden |
 | Drei Lager mit Ausbildung und Instandhaltung | Generalskampagnen |
 | Winterquartier mit Wochenverteilung | |
@@ -173,21 +173,21 @@ Diese acht Regeln nicht brechen. Wenn eine Änderung eine davon verletzt, ist di
 | Buchstaben lernen | Bildung +5, Verwaltung | 5 F |
 | Am Feuer bleiben | Kameradschaft +8, Gunst +1, Belastung −4 | ein Abend |
 | Fouragieren | Probe 40: +7 F, Atem +8 | sonst Belastung +3 |
-| Schlafen | Belastung −10, Atem +18 | ein Abend |
+| Schlafen | **Leben +25 %**, Belastung −10, Atem +18 | ein Abend |
 | Korporalschaft drillen (ab Rang 3) | Autorität und Drill, Ruf +1 | ein Abend |
 | Tornistermarsch (Grenadier) | Konstitution | Atem −10 |
 | Gelände üben (Voltigeur) | Geschick und Muskete | Atem −6 |
 
 **Der Rang gibt Zeit, nicht nur Knöpfe.** Ab Caporal ein Abend mehr je Lager, ab Sergent zwei (`abendeFuer()` in `src/abschluss.js`). Begründung im Spiel: Unteroffiziere sind vom Wachdienst und den Handreichungen befreit, die den Füsilier den halben Abend kosten — dafür haben sie die Korporalschaft am Hals. Begründung im Entwurf: Ohne den zusätzlichen Abend verdrängt die rangeigene Handlung („Deine acht Mann drillen") die eigene Ausbildung, und der Rang würde sich anfühlen wie eine Strafe. Das ist die eine Stelle, an der ein Rang mehr gibt als einen Knopf — und sie ist nötig, damit der Knopf überhaupt drückbar ist.
 
-Ein Lagerabend gibt bewusst **weniger als eine Winterwoche** (dort: alles +30 statt +20, Belastung −16 statt −10). Die drei rang- und zweigabhängigen Handlungen erfüllen Invariante 4 auch außerhalb des Gefechts.
+Ein Lagerabend gibt bewusst **weniger als eine Winterwoche** (dort: alles +30 statt +20, Belastung −16 statt −10, Leben +60 % statt +25 %). Die drei rang- und zweigabhängigen Handlungen erfüllen Invariante 4 auch außerhalb des Gefechts.
 
 ### Der Übergang zwischen zwei Feldzügen (`typ:'uebergang'`)
 
 Zwischen Leoben (April 1797) und der Überfahrt (Mai 1798) liegt ein Jahr Garnison. Der Übergang ist kein Kapitelende: Es wird **nichts eingetragen und nichts gewertet** — gewertet wird ein Lauf erst, wenn er endet. Zwischendurch zu banken wäre sinnlos, weil ein späterer Tod immer mindestens die Stationen von jetzt enthält, und es würde Invariante 2 aufweichen.
 
 ```js
-S.atem = 100;  S.belastung = Math.floor(S.belastung/2);  S.wunden = [];
+S.atem = 100;  S.leben = lebenMax();  S.belastung = Math.floor(S.belastung/2);  S.wunden = [];
 ```
 
 **Ein Jahr heilt alles, was heilbar ist.** Sonst stirbt in Ägypten niemand an Ägypten, sondern an Arcole: Wer mit vier Wunden und Belastung 80 aus Italien kommt, hat in Kapitel 2 keine Chance, und das Kapitel könnte seinen eigenen Charakter nicht entfalten. Dieselbe Logik wie beim Winterquartier (drei Wochen Dach = Atem voll), nur eine Größenordnung länger. Was bleibt, ist, was er gelernt hat — Attribute, Fertigkeiten, Rang, Ruf, Gunst.
@@ -232,18 +232,37 @@ K.feindMoral -= schaden + linie;
 
 **Das ist die wichtigste Zeile im Kampfsystem.** Jede Runde sinkt der Widerstand des Feindes um 2–6 von allein, weil zweihundert andere Männer ebenfalls schießen. Ohne sie sind alle Gefechte unwinnbar (siehe oben). Inhaltlich stimmt sie außerdem: Du bist ein Mann in einer Linie, nicht der Held.
 
-### Tödlichkeit (`src/kampf.js`)
+### Tödlichkeit: Lebenspunkte (`src/kampf.js`, `lebenMax()` in `src/mechanik.js`)
 
 ```js
-const schwere = Math.random()*100 - (wert('konstitution')-40)/3;
-if(schwere > 94)      → Tod
-else if(schwere > 72) → schwere Wunde (Abzug 14)
-else                  → Streifschuss (Abzug 5)
+lebenMax = 40 + Konstitution·0,6          // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+Treffer:  25 % → 15–25 Schaden + schwere Wunde (Abzug 14) + Atem −20
+          75 % →  5–11 Schaden + Streifschuss  (Abzug  5) + Atem  −8
+Leben ≤ 0 → Tod
 ```
 
-- Wundenobergrenze **5**, dann Verbluten.
-- **Nach jedem Gefecht heilt die leichteste Wunde** („Der Feldscher flickt dich zusammen"). Ohne das häufen sich über fünf Gefechte so viele Wunden an, dass die Obergrenze allein tötet.
+**Konstitution bestimmt, wie viel man aushält, nicht ob eine Kugel überhaupt töten kann.** Das ist der ganze Umbau. Vorher senkte Konstitution die Todeschance je Treffer, und ab 58 war sie rechnerisch null — ein Mann, den keine Kugel tötet (Exploit 1 unten). Eine Klammer auf den Schutz hat das notdürftig geflickt, aber die Kurve blieb falsch: Konstitution kaufte Unverwundbarkeit statt Zähigkeit. Jetzt ist sie monoton — mehr Konstitution heißt mehr Treffer, die man wegsteckt, aber genug Treffer töten jeden. **Deshalb darf die Herkunft die 70 der Poolverteilung überschreiten**, und deshalb ist die Deckelung aus Exploit 2 wieder aufgehoben.
+
+`lebenMax()` rechnet vom **rohen** Attribut, nicht von `wert()`. Sonst schrumpfte die Obergrenze mitten im Gefecht, weil Wunden die Konstitution senken — das wäre die alte Todesspirale in neuer Form.
+
+> **Die Zahl, an der alles hängt, ist neun.** So oft wird ein Mann in beiden Feldzügen zusammen getroffen — gemessen über 20 Läufe: 8,9 Treffer bei 10 Gefechten und 57 Kampfrunden, also rund 16 % je Runde. Ein Vorrat, den neun Treffer nicht leeren, tötet niemanden. Die erste Eichung auf 6 Schaden je Treffer (plus Feldscher-Heilung nach jedem Gefecht) ergab gemessen **100 % Überlebende bei 60 Läufen** — kein einziger Toter. Ein Treffer muss also teuer sein: im Mittel 11 Punkte, damit ein Mann mit Konstitution 40 am sechsten stirbt, einer mit 20 am fünften, einer mit 70 am achten. Das ist auch inhaltlich richtig: Wer 1796 vier Mal getroffen wird, steht nicht mehr.
+
+**Genesung ist eine Entscheidung, kein Geschenk** — dieselbe Regel wie beim Atem, und aus demselben Grund. Der Feldscher gibt nach dem Gefecht **keine** Lebenspunkte zurück, nur die leichteste Wunde näht er zu. Wieder auf die Beine kommt man nur hier:
+
+| Wo | Wieviel |
+|---|---|
+| Lagerabend „Schlafen und liegen bleiben" | +25 % |
+| Winterwoche „Schlafen, essen, nichts tun" | +60 % |
+| Ein Jahr Garnison beim `uebergang` | voll |
+
+- **Der Streifschuss kostet zweierlei, und das ist Absicht:** Blut (bleibt) und eine Wunde, die der Feldscher nach dem Gefecht zunäht (bleibt nicht). Ohne die Wunde stimmte zwar die Todesrechnung, aber ein Mann schoss den ganzen Feldzug wie am ersten Tag — gemessen stieg der Caporal-Anteil auf 57 %, weil bessere Gefechte mehr Ruf bringen und Ruf die Beförderungsschwelle ist. Der Kratzer soll den Rest des Gefechts wehtun, nicht den Rest des Krieges.
+- **Eine Wunde aus einer Szene kostet 10 Lebenspunkte**, tötet aber nie unmittelbar (`anwenden()` klemmt bei 1). Der Tod gehört ins Gefecht, wo er einen Text und einen Ort hat; Ruhr und das Fieber aus Jaffa lassen einen bloß so geschwächt hineingehen, dass die nächste Kugel reicht.
+- **Die Wundenobergrenze 5 mit Verbluten ist ersatzlos weg.** Sie war der zweite Todespfad und wird von den Lebenspunkten mit erledigt.
 - **Wunden schlagen voll auf körperliche Werte** (Konstitution, Geschick, Muskete, Bajonett, Reiten), **nur zu einem Drittel auf geistige**. Vorher zogen sie von *allem* ab — das erzeugte eine Todesspirale: eine Wunde senkte Konstitution, das erhöhte die Todeschance, die nächste Wunde senkte sie weiter.
+
+> **Was der Umbau nebenbei abschafft: den frühen Tod.** Unter dem alten Wurf konnte man bei Montenotte in der zweiten Runde fallen. Jetzt braucht der Tod fünf bis acht Treffer, also mehrere Gefechte — niemand stirbt mehr vor Castiglione. Das ist die Kehrseite der Fairness und muss beim Lesen der Endrang-Zahlen mitgedacht werden (siehe „Zielwerte").
+
+> **Spielstand:** `LAUF_FASSUNG` steht deshalb auf **2**. Der Wandler gibt einem angefangenen Feldzug aus Fassung 1 den vollen Vorrat abzüglich dessen, was seine bleibenden Wunden gekostet haben, mindestens aber 30 %.
 
 ### Charaktererschaffung (`src/oberflaeche.js`, `src/daten/grundwerte.js`)
 
@@ -251,15 +270,17 @@ else                  → Streifschuss (Abzug 5)
 - **Bildung ist vom Pool ausgenommen** und bleibt bei 20 — man kann nicht lesen.
 - Alle neun Fertigkeiten starten bei **10**.
 - **Jede Herkunft verteilt exakt 50 Punkte netto**, nur anders gewichtet, teils mit Abzügen. Keine ist stärker. Wer eine neue Herkunft hinzufügt, hält die 50 ein.
-- **Die Obergrenze gilt auch nach der Herkunft**: Attribute höchstens 70, Fertigkeiten höchstens 60 (`neuerCharakter()` in `src/mechanik.js`).
+- **Die Obergrenze 70 gilt für den Pool und für den Veteranenpunkte-Kauf, nicht für die Herkunft.** Ein Bauernsohn darf mit Konstitution 90 anfangen — seit den Lebenspunkten ist das kein Exploit mehr, sondern zwölf Prozent mehr Zähigkeit (Exploit 2 unten).
 
 #### Drei Exploits, die dort steckten
 
 **1. Konstitution ≥ 58 machte den Tod unmöglich.** Die Tödlichkeitsformel lautete `Math.random()*100 - (Konstitution-40)/3 > 94`. Bei Konstitution 58 ist der Abzug 6, die Schwelle also 100 — nicht erreichbar. Man konnte einen Mann bauen, der von einer Kugel *nie* stirbt, sondern nur Wunden sammelt, und Wunden heilen nach jedem Gefecht. Das hebelt Invariante 1 aus, ohne dass es jemand merkt.
 
-> Behoben durch eine Klammer: `schutz = clamp((Konstitution−40)/3, −10, +5)`. Damit liegt die Todeschance je Treffer zwischen **1 % und 16 %** — Konstitution bleibt der wichtigste Schutz, macht aber niemanden unverwundbar. Ein Schwächling stirbt nicht mehr zu 19 %, ein Hüne nicht mehr zu 0 %.
+> Zuerst behoben durch eine Klammer (`schutz = clamp((Konstitution−40)/3, −10, +5)`), also Todeschance je Treffer zwischen 1 % und 16 %. Das war ein Pflaster: Es nahm die Unsterblichkeit weg, ließ aber die falsche Kurve stehen — Konstitution kaufte weiterhin Unverwundbarkeit. **Endgültig behoben durch die Lebenspunkte** (siehe „Tödlichkeit"): Konstitution kauft jetzt Zähigkeit, und die Kurve ist monoton.
 
-**2. Die Herkunft wurde ungedeckelt addiert.** Der Pool war auf 70 begrenzt, die Herkunft kam obendrauf: Ein Bauernsohn mit 70 Konstitution stand nach der Herkunft bei **90** — und war damit über der Schwelle aus Exploit 1. Die beiden Fehler zusammen ergaben einen unsterblichen Charakter, den man in dreißig Sekunden bauen konnte. Jetzt deckelt `neuerCharakter()` auf 70 beziehungsweise 60; der Vorteil der Herkunft ist, dass sie die Grenze **billiger** erreicht (der Bauer braucht dafür 30 Poolpunkte statt 50), nicht dass sie darüber hinausgeht.
+**2. Die Herkunft wurde ungedeckelt addiert.** Der Pool war auf 70 begrenzt, die Herkunft kam obendrauf: Ein Bauernsohn mit 70 Konstitution stand nach der Herkunft bei **90** — und war damit über der Schwelle aus Exploit 1. Die beiden Fehler zusammen ergaben einen unsterblichen Charakter, den man in dreißig Sekunden bauen konnte.
+
+> Zwischenzeitlich deckelte `neuerCharakter()` deshalb auch nach der Herkunft auf 70 beziehungsweise 60. **Diese Deckelung ist wieder aufgehoben** — sie war nur nötig, solange Konstitution Unverwundbarkeit kaufte. Seit den Lebenspunkten ist eine Konstitution von 90 kein Exploit mehr, sondern 94 statt 82 Lebenspunkte: zwölf Prozent mehr Treffer, die man wegsteckt, für eine Herkunft, die dafür anderswo zahlt. Die Herkunft ist das, was man mitbringt, nicht das, was man sich aussucht; die 70 begrenzt weiterhin die Poolverteilung und den Veteranenpunkte-Kauf.
 
 **3. Zwei Herkünfte zahlten in tote Währung.** Netto verteilen alle sechs genau 50 Punkte, aber Reiten und Kartenkunde tun in den gebauten Kapiteln **nichts**. Gemessen an dem, was wirkt:
 
@@ -354,12 +375,12 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 | Größe | Soll | Gemessen (60 Läufe, mit Kapitel 2) |
 |---|---|---|
-| **Italien überstanden** (Testskript) | 45–55 % | **45 %** |
-| **Beide Feldzüge überstanden** | noch kein Sollwert | 13–30 %, stark schwankend |
+| **Italien überstanden** (Testskript) | 45–55 % | **55 %** (80 Läufe, mit Lebenspunkten) |
+| **Beide Feldzüge überstanden** | noch kein Sollwert | 33–48 %, stark schwankend |
 | Kapitel 1 überstanden (Mensch, geschätzt) | ~60 % | — |
-| Erster Lauf ohne jede Beförderung | ~40 % | 60 % |
-| Caporal am Ende | ~30 % | 40 % |
-| Punkte, Median | — | 45 · Spitze **230** |
+| Erster Lauf ohne jede Beförderung | ~40 % | 38 % |
+| Caporal am Ende | ~30 % | **58 %** — siehe „Offener Punkt" |
+| Punkte, Median | — | 107 · Spitze **230** |
 
 **Seit Kapitel 2 misst `test/balance.js` zwei Quoten.** „Italien überstanden" ist der alte Zielwert und bleibt bei 45–55 %; „beide Feldzüge" ist neu und hat noch keinen Sollwert — der Bot muss dafür 32 statt 16 Stationen überleben. Ohne diese Trennung wäre der alte Zielwert nach dem Anbau bedeutungslos geworden. Der Punkte-Median fällt von 91 auf 45, weil Stationen nur noch 2 statt 3 Punkte zählen und die meisten Läufe jetzt vor dem Ende sterben; die Spitze steigt dafür von 162 auf 230.
 
@@ -378,13 +399,21 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | zusätzlicher Lagerabend ab Caporal | 80 | 49 % | 39 % | 95 |
 | derselbe Stand am selben Nachmittag noch einmal | 80 | 43 % | 30 % | 91 |
 | Anerkennung im Gefecht · nur Kapitel 1 | 120 | 43 % | 34 % | 91 |
-| **mit Kapitel 2 · Spalte zeigt „Italien überstanden" (gültig)** | **60** | **45 %** | **40 %** | **45** |
+| mit Kapitel 2 · Spalte zeigt „Italien überstanden" (gültig) | 60 | 45 % | 40 % | 45 |
+| Lebenspunkte, erste Eichung (6 Schaden, Feldscher heilt) | 60 | **100 %** | 93 % | 207 |
+| Lebenspunkte, 12 Schaden, Streifschuss ohne Wunde | 60 / 80 / 80 | 48 / 64 / 51 % | 57 % | 77–183 |
+| dieselbe Eichung, Streifschuss mit Wunde | 80 | 41 % | 55 % | 89 |
+| **11 Schaden, Streifschuss mit Wunde (gültig)** | **80** | **55 %** | **58 %** | **107** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 
+**Seit den Lebenspunkten streut das Skript stärker.** Derselbe unveränderte Stand lieferte bei 60/80/80 Läufen 48 %, 64 % und 51 % — sechzehn Punkte Spannweite, wo die Faustregel elf erwarten ließe. Zusammengefasst über alle 220 Läufe: 55 %. Grund ist die Bauart des Modells: Der Tod ist jetzt eine Schwelle (Summe des Schadens gegen den Vorrat) statt eines Wurfs je Treffer, und wie nah ein Lauf an dieser Schwelle landet, hängt fast ganz an der ausgewürfelten Konstitution. **Einzelmessungen unter 80 Läufen sind damit noch weniger aussagekräftig als vorher; wer eine Zahl braucht, fasst mehrere Durchgänge zusammen.**
+
 Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang von 43 % oder 57 % sagt für sich genommen nichts. **Bei Zweifeln 80 Läufe messen**, wie hier geschehen.
 
-**Offener Punkt:** Der Caporal-Anteil steht mit 34 % vier Punkte über dem Sollwert von 30 % — gerade noch innerhalb der Zehn-Punkte-Regel, aber am oberen Rand. Der Weg dorthin ist mittelbar und war beabsichtigt: Der zusätzliche Lagerabend ab Caporal lässt mehr Beförderte den Feldzug überleben, und gezählt wird der Rang am Ende. Wer das senken will, hat zwei Hebel — die Caporal-Schwelle (`CAPORAL_RUF` / `CAPORAL_GUNST`) oder den Abend selbst. **Nicht empfohlen ist der Abend:** Er ist der Grund, warum der Rang sich nicht wie eine Strafe anfühlt.
+**Offener Punkt seit den Lebenspunkten: Der Caporal-Anteil steht bei 58 %, fast doppelt so hoch wie der Sollwert von 30 %.** Die Ursache ist verstanden und folgt unmittelbar aus dem Umbau: **Die Endrang-Zahl zählt den Rang beim Tod mit, und der Tod kommt jetzt später.** Unter dem alten Wurf starb ein guter Teil der Männer vor der Beförderungsstation und ging als Fusilier in die Statistik; unter den Lebenspunkten braucht der Tod fünf bis acht Treffer, also stirbt niemand mehr vor Castiglione — wer fällt, ist meist schon Caporal. Der Sollwert von 30 % war gegen ein Modell geeicht, in dem ein Viertel der Männer die Beförderung nie erlebte, und ist mit dem neuen nicht unmittelbar vergleichbar. Zwei Hebel, falls er trotzdem gesenkt werden soll: die Schwelle (`CAPORAL_RUF` / `CAPORAL_GUNST`) oder der Ruf-Zuschlag `RUHM_JE_GEFECHT`. **Beides ist ungemessen** — wer daran dreht, misst beide Zahlen neu.
+
+**Älterer offener Punkt (Stand vor den Lebenspunkten):** Der Caporal-Anteil stand mit 34 % vier Punkte über dem Sollwert von 30 % — gerade noch innerhalb der Zehn-Punkte-Regel, aber am oberen Rand. Der Weg dorthin ist mittelbar und war beabsichtigt: Der zusätzliche Lagerabend ab Caporal lässt mehr Beförderte den Feldzug überleben, und gezählt wird der Rang am Ende. Wer das senken will, hat zwei Hebel — die Caporal-Schwelle (`CAPORAL_RUF` / `CAPORAL_GUNST`) oder den Abend selbst. **Nicht empfohlen ist der Abend:** Er ist der Grund, warum der Rang sich nicht wie eine Strafe anfühlt.
 
 Die Überlebensquote liegt mit 43 % zwei Punkte unter dem Band 45–55 % — innerhalb des Rauschens, aber am unteren Rand. Der Anteil ohne jede Beförderung ist mit 58 % wieder weit über dem Sollwert von 40 %, und nur 8 % erreichen die Elitekompanie; der Engpass bleibt die Schwelle von 55 in Konstitution beziehungsweise Geschick, an der die meisten schon bei der Erschaffung scheitern. Wer daran etwas ändern will, senkt diese 55.
 
@@ -436,7 +465,7 @@ Zwei Dinge werden gespeichert, und sie haben nichts miteinander zu tun:
 
 **Stationen schließen sich ab, bevor der „Weiter"-Knopf kommt.** `stationErledigt()` setzt `LAUF.node` schon hoch, während der Ergebnisbildschirm noch steht. Sonst könnte man eine Szenenwahl rückgängig machen, indem man auf dem Ergebnis das Spiel beendet. Wer eine neue Stationsart baut, muss sie aufrufen — vergisst man es, hängt das Spiel in einer Schleife (genau das ist beim Bau der Beförderung passiert und wurde vom Testskript gefunden).
 
-**Fassungen.** `CHRONIK_FASSUNG` und `LAUF_FASSUNG` in `src/spielstand.js`. Wer das Format ändert, **erhöht die Zahl und hängt einen Wandler an** — jeder Wandler hebt genau eine Fassung auf die nächste, nie zwei auf einmal. Ein Spielstand aus einer neueren Fassung wird abgewiesen, nicht geraten. Die alte Chronik ohne Fassungsnummer ist Fassung 0 und wird weiterhin gelesen.
+**Fassungen.** `CHRONIK_FASSUNG` (1) und `LAUF_FASSUNG` (2, seit den Lebenspunkten) in `src/spielstand.js`. Wer das Format ändert, **erhöht die Zahl und hängt einen Wandler an** — jeder Wandler hebt genau eine Fassung auf die nächste, nie zwei auf einmal. Ein Spielstand aus einer neueren Fassung wird abgewiesen, nicht geraten. Die alte Chronik ohne Fassungsnummer ist Fassung 0 und wird weiterhin gelesen.
 
 **`localStorage` ist nur die bequeme Ablage** (Invariante 6). Die Datei bleibt maßgeblich: `speichern()` schreibt Chronik *und* laufenden Feldzug in eine JSON-Datei, `laden()` liest beides zurück. Wo `localStorage` fehlt — mancher Browser über `file://`, privater Modus —, läuft alles weiter, nur ohne Absturzsicherung; der Titelbildschirm sagt das dann auch.
 

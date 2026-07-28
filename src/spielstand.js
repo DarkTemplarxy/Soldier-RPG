@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 1;
+const LAUF_FASSUNG    = 2;   // 2: Lebenspunkte statt Todeswurf je Treffer
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -72,7 +72,21 @@ const CHRONIK_WANDLER = {
   0: alt => ({fassung:1, vp:alt.vp|0, chronik:alt.chronik||[], bestKapitel:alt.bestKapitel||{},
               laeufe:(alt.chronik||[]).length, zuletzt:null})
 };
-const LAUF_WANDLER = {};
+/* Fassung 1 kannte keine Lebenspunkte — der Tod war ein Wurf je Treffer. Ein
+   angefangener Feldzug von damals bekommt sie voll, abzüglich dessen, was seine
+   bleibenden Wunden ohnehin schon gekostet haben. Wer mit vier Wunden aus der
+   alten Fassung kommt, steht also angeschlagen da, aber nicht tot. */
+const LAUF_WANDLER = {
+  1: alt => {
+    const m = alt.mann;
+    if(m && m.leben === undefined){
+      const max = 40 + Math.round((m.attr && m.attr.konstitution || 20) * 0.6);
+      const gezahlt = (m.wunden||[]).reduce((s,w)=> s + (w.abzug||0), 0);
+      m.leben = Math.max(Math.round(max*0.3), max - gezahlt);
+    }
+    return Object.assign({}, alt, {fassung:2});
+  }
+};
 
 function wandle(d, wandler, ziel){
   if(!d || typeof d !== 'object') return null;

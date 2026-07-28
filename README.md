@@ -29,6 +29,7 @@ Dazu ein paar Regeln, die das Spiel zusammenhalten:
 - **Nur der beste Lauf zählt.** Veteranenpunkte sind das Maximum über alle Läufe, nie die Summe — es gibt nichts zu grinden, nur zu übertreffen.
 - **Beförderung braucht eine Vakanz.** Ruf und Fürsprache reichen nicht; die Stelle muss frei sein. Frei wird sie, weil jemand gestorben ist. Das Spiel sagt das nie, es zeigt es nur.
 - **Ausrüstung ist ein Zustand, kein Besitz.** Schuhe halten einen Feldzug, keine zwei.
+- **Konstitution kauft Zähigkeit, nicht Unverwundbarkeit.** Sie bestimmt, wie viele Treffer du wegsteckst — fünf bis acht, dann ist es vorbei. Und sie erholt sich nur, wenn du einen Abend darauf verwendest.
 
 Historische Fixpunkte, dazwischen freies Spiel: Montenotte, die Brücke von Lodi, Mantua, Castiglione, Arcole, Rivoli, Leoben — dann Alexandria, die Pyramiden, der Kairoer Aufstand, Akkon, Abukir und die Nacht, in der Bonaparte ohne seine Armee nach Frankreich segelt.
 
@@ -44,7 +45,7 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000
 
 Entworfen, aber noch nicht gebaut: die Kapitel 3 bis 11 (Garnison, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
 
-Gemessen über automatisierte Durchläufe: **rund 45 % überstehen Italien**, etwa jeder vierte auch Ägypten. Wer beides schafft, hat zweiunddreißig Stationen hinter sich — und immer noch neun Feldzüge vor sich.
+Gemessen über automatisierte Durchläufe: **rund die Hälfte übersteht Italien**, gut vier von zehn auch Ägypten. Wer beides schafft, hat zweiunddreißig Stationen hinter sich — und immer noch neun Feldzüge vor sich.
 
 ---
 

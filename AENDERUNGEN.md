@@ -5,6 +5,35 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Lebenspunkte statt Todeswurf je Treffer
+
+**Konstitution bestimmt jetzt, wie viel ein Mann aushält, statt ob eine Kugel ihn überhaupt töten kann.** Damit ist der letzte Rest des größten Erschaffungs-Exploits weg. Die alte Formel senkte die Todeschance je Treffer, und ab Konstitution 58 war sie rechnerisch null — eine Klammer hat das notdürftig geflickt, aber die Kurve blieb falsch. Neu: `lebenMax = 40 + Konstitution·0,6` (52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90), Schaden statt Todeswurf, Tod bei Leben ≤ 0. Die Kurve ist monoton — mehr Konstitution heißt mehr Treffer, die man wegsteckt, aber genug Treffer töten jeden.
+
+**Deshalb darf die Herkunft die 70 wieder überschreiten.** Die zwischenzeitliche Deckelung von `neuerCharakter()` auf 70/60 war nur nötig, solange Konstitution Unverwundbarkeit kaufte. Konstitution 90 heißt jetzt 94 statt 82 Lebenspunkte: zwölf Prozent mehr Zähigkeit für eine Herkunft, die dafür anderswo zahlt. Die 70 begrenzt weiterhin Poolverteilung und Veteranenpunkte-Kauf.
+
+**Getroffen wird ein Mann im ganzen Spiel nur rund neun Mal** — gemessen 8,9 bei 10 Gefechten und 57 Kampfrunden. An dieser Zahl hängt die ganze Eichung, und die erste Fassung hat sie verfehlt: 6 Schaden je Treffer plus ein Viertel Heilung nach jedem Gefecht ergab **100 % Überlebende bei 60 Läufen**, keinen einzigen Toten. Ein Treffer muss teuer sein.
+
+| Fassung | Schaden je Treffer | Streifschuss | Heilung nach Gefecht | Italien überstanden |
+|---|---|---|---|---|
+| erste Eichung | ⌀ 6 | ohne Wunde | +25 % | **100 %** (60 Läufe) |
+| zweite | ⌀ 12 | ohne Wunde | keine | 48 / 64 / 51 % (220 Läufe: 55 %) |
+| dritte | ⌀ 12 | mit Wunde | keine | 41 % (80 Läufe) |
+| **gültig** | **⌀ 11** (5–11 / 15–25) | **mit Wunde** | **keine** | **55 %** (80 Läufe) |
+
+**Genesung ist eine Entscheidung, kein Geschenk** — dieselbe Regel wie beim Atem und aus demselben Grund. Der Feldscher näht nach dem Gefecht die leichteste Wunde zu, gibt aber keine Lebenspunkte zurück. Wieder auf die Beine kommt man im Lager („Schlafen und liegen bleiben", +25 %), im Winterquartier („Schlafen, essen, nichts tun", +60 %) und beim Jahr Garnison zwischen den Feldzügen (voll).
+
+**Der Streifschuss kostet zweierlei, und das ist Absicht:** Blut (bleibt) und eine Wunde, die der Feldscher zunäht (bleibt nicht). Ohne die Wunde stimmte die Todesrechnung, aber ein Mann schoss den ganzen Feldzug wie am ersten Tag — der Caporal-Anteil stieg auf 57 %. Der Kratzer soll den Rest des Gefechts wehtun, nicht den Rest des Krieges.
+
+**Die Wundenobergrenze 5 mit Verbluten ist ersatzlos weg**, sie war der zweite Todespfad. Eine Wunde aus einer Szene kostet 10 Lebenspunkte, tötet aber nie unmittelbar (`anwenden()` klemmt bei 1) — der Tod gehört ins Gefecht, wo er einen Text und einen Ort hat.
+
+**Was der Umbau nebenbei abschafft: den frühen Tod.** Der Tod braucht jetzt fünf bis acht Treffer, also mehrere Gefechte; niemand fällt mehr in der zweiten Runde bei Montenotte. Kehrseite: Der gemessene Caporal-Anteil steigt auf 58 %, weil die Endrang-Zahl den Rang beim Tod mitzählt und kaum noch jemand vor der Beförderungsstation stirbt. Der alte Sollwert von 30 % war gegen ein Modell geeicht, in dem ein Viertel der Männer die Beförderung nie erlebte, und ist nicht unmittelbar vergleichbar. Als offener Punkt in `CLAUDE.md` vermerkt, mit den beiden ungemessenen Hebeln.
+
+**Das Skript streut seitdem stärker:** derselbe Stand lieferte 48 %, 64 % und 51 %. Der Tod ist jetzt eine Schwelle statt eines Wurfs je Treffer, und wie nah ein Lauf an sie herankommt, hängt fast ganz an der ausgewürfelten Konstitution. Einzelmessungen unter 80 Läufen sagen noch weniger als vorher.
+
+**`LAUF_FASSUNG` 1 → 2.** Ein angefangener Feldzug aus Fassung 1 bekommt den vollen Vorrat abzüglich dessen, was seine bleibenden Wunden gekostet haben, mindestens 30 %. Die Lebenspunkte stehen als eigener Balken in der Seitenleiste (grün, ab einem Drittel rot mit Warnung), im Lagebild vor dem Gefecht und auf dem Chronikblatt.
+
+---
+
 ## 2026-07-27 — Chronikblatt und Anerkennung im Gefecht
 
 **Die Namen in der Chronik sind anklickbar.** Dahinter steht der ganze Feldzug: Rangabzeichen, Herkunft, woran er gestorben ist, jede Entscheidung mit Ort, die Wertung und sein Zustand am Ende. `eintragen()` legt dafür ein `chronikblatt` an — die vier alten Felder stehen vorn, damit die Tabelle unverändert läuft, alles Übrige ist Zusatz. **Kein Fassungswechsel nötig:** Ältere Einträge ohne diese Felder bleiben lesbar und sagen es selbst („Von diesem Mann ist nur die Zeile geblieben").

@@ -74,9 +74,10 @@ const LAGER_TUN = {
       return 'Vier Stunden auf nassen Feldwegen. Die Höfe sind leer, die Leute sind in den Bergen, und ihr Vieh ist bei ihnen. <span class="fein">Belastung +3</span>'; }},
 
   ruhe:{label:'Schlafen und liegen bleiben',
-    cost:'Belastung −10 · Atem +18',
+    cost:'Leben, Belastung −10 · Atem +18',
     tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
-      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Belastung −10 · Atem +18</span>'; }},
+      lebenAuffuellen(0.25);
+      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>'; }},
 
   /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
   korporalschaft:{label:'Deine acht Mann drillen',
@@ -164,7 +165,7 @@ function zeigeWinter(n){
     {id:'drill',label:'Drillen und schießen üben',cost:'Muskete und Drill steigen'},
     {id:'lesen',label:'Lesen und Schreiben üben',cost:'Bildung und Verwaltung · kostet 6 Francs'},
     {id:'leute',label:'Zeit mit Martel und den Männern verbringen',cost:'Gunst und Kameradschaft'},
-    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Belastung sinkt stark, Wunden heilen'}
+    {id:'ruhe',label:'Schlafen, essen, nichts tun',cost:'Leben und Belastung erholen sich, Wunden heilen'}
   ];
   const opt = tun.map(t=>`<button class="ord" onclick="winterTun('${t.id}')" ${W.wochen<=0?'disabled':''}>
     ${t.label}<span class="cost">${t.cost}</span></button>`).join('');
@@ -204,9 +205,13 @@ function winterTun(id){
     W.log.push('Karten, Wein und Geschichten, die jedes Mal besser werden. Martel erzählt vom Rhein, und du hörst zu. <span style="color:var(--faint)">Gunst +2 · Kameradschaft +10</span>');
   }
   if(id==='ruhe'){
-    S.belastung=Math.max(0,S.belastung-16); S.atem=100;
-    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Belastung −16 · Wunde geheilt</span>`); }
-    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Belastung −16</span>');
+    /* Die einzige Handlung, die den Lebensvorrat wirklich wieder auffüllt —
+       und sie kostet eine der drei Wochen. Wer verwundet aus dem Feldzug kommt,
+       muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
+       Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
+    S.belastung=Math.max(0,S.belastung-16); S.atem=100; lebenAuffuellen(0.6);
+    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · Wunde geheilt</span>`); }
+    else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
   laufSichern();
@@ -245,6 +250,7 @@ function chronikblatt(endeText, p){
                                       verschleiss:S.ausr[k].verschleiss})),
     wunden:S.wunden.map(w=>w.name), ruf:S.ruf, gunst:S.gunst,
     kameradschaft:S.kameradschaft, belastung:S.belastung, atem:S.atem,
+    leben:S.leben, lebenMax:lebenMax(),
     nennungen:S.nennungen, geld:S.geld, gekniffen:!!S.gekniffen,
     kaeufe:(S.kaeufe||[]).slice(), gekauft:Object.assign({},S.gekauft||{}),
     log:(S.log||[]).slice(), wertung:p
