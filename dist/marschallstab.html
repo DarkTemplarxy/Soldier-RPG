@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Der Marschallstab — Italien 1796/97</title>
+<title>Der Marschallstab — Italien 1796/97 · Ägypten 1798/99</title>
 <style>
 :root{
     --bg:#121110; --panel:#1a1816; --panel2:#252119; --line:#3a342c;
@@ -270,7 +270,7 @@
 <div id="app"></div>
 
 <footer>
-  <span>Prototyp · Meilenstein 1 · Ränge 1–3</span>
+  <span>Prototyp · zwei Feldzüge · Ränge 1–3</span>
   <span id="fusszeile"></span>
 </footer>
 </div>
@@ -429,7 +429,7 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
 const LADEN = [
   {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:40},
   {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},
-  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant',vp:24},
+  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:24},
   {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:20},
   {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:30},
   {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
@@ -1120,7 +1120,10 @@ function huelle(nutzlast){
 function auspacken(text){
   const d = JSON.parse(text);
   if(d && typeof d === 'object' && d.inhalt !== undefined){
-    const heil = typeof d.pruef !== 'number' || d.pruef === pruefsumme(JSON.stringify(d.inhalt));
+    /* Fehlt die Prüfsumme oder ist sie keine Zahl, gilt die Datei als **kaputt**,
+       nicht als heil — sonst genügte das Löschen einer Zeile, um sie zu umgehen,
+       und genau das passiert bei einem verschluckten Cloud-Abgleich. */
+    const heil = typeof d.pruef === 'number' && d.pruef === pruefsumme(JSON.stringify(d.inhalt));
     return {inhalt:d.inhalt, heil};
   }
   return {inhalt:d, heil:true};        // Fassung 0: nackte Nutzlast, ohne Hülle
@@ -1157,7 +1160,10 @@ function wandle(d, wandler, ziel){
   while(f < ziel){
     const w = wandler[f];
     if(!w) return null;
+    const vorher = f;
     d = w(d); f = d.fassung;
+    // Ein Wandler, der die Fassung nicht erhöht, hinge sonst für immer.
+    if(!(typeof f === 'number' && f > vorher)) return null;
   }
   return f === ziel ? d : null;        // aus der Zukunft: lieber nichts als Trümmer
 }
@@ -1168,7 +1174,18 @@ function neueChronik(){
 
 /* ══════════════════ CHRONIK ══════════════════ */
 
+/* **Der Riegel gegen die schlimmste Datenvernichtung des Spiels.** Schlägt das
+   Laden fehl, obwohl eine Datei da war (Prüfsumme kaputt, Fassung aus der
+   Zukunft), bleibt `META` die leere Neuchronik. Ohne Riegel überschrieb das
+   erste `chronikSichern()` — und das läuft an *jeder* Station — die gute Datei
+   mit der leeren, das zweite auch noch die `.bak`-Generation. Nach zwei
+   Stationen waren alle Veteranenpunkte weg, und der Schutz in `wandle()`
+   („aus der Zukunft: lieber nichts als Trümmer") war für nichts.
+   Gelöst wird der Riegel nur, wenn der Spieler ausdrücklich verwirft. */
+let CHRONIK_GESPERRT = false;
+
 function chronikSichern(){
+  if(CHRONIK_GESPERRT) return;
   META.fassung = CHRONIK_FASSUNG;
   META.zuletzt = new Date().toISOString();
   const alt = Ablage.lies(ORT_CHRONIK);
@@ -1177,9 +1194,11 @@ function chronikSichern(){
 }
 
 function chronikLaden(){
+  let gabEsWas = false;
   for(const ort of [ORT_CHRONIK, ORT_SICHERUNG]){
     const t = Ablage.lies(ort);
     if(!t) continue;
+    gabEsWas = true;
     try{
       const {inhalt, heil} = auspacken(t);
       const d = wandle(inhalt, CHRONIK_WANDLER, CHRONIK_FASSUNG);
@@ -1187,8 +1206,15 @@ function chronikLaden(){
       if(d && !heil) continue;                     // beschädigt: Sicherung versuchen
     }catch(e){ /* nächster Ort */ }
   }
+  // Es lag etwas da, war aber nicht lesbar: nichts überschreiben, bis der
+  // Spieler entscheidet. Sonst frisst die leere Chronik beide Generationen.
+  if(gabEsWas) CHRONIK_GESPERRT = true;
   return false;
 }
+
+/* „Trotzdem neu anfangen" auf dem Titelbildschirm: Der Spieler verwirft die
+   unlesbare Chronik ausdrücklich, erst dann darf wieder geschrieben werden. */
+function chronikFreigeben(){ CHRONIK_GESPERRT = false; chronikSichern(); }
 
 /* Die Chronik wächst mit jedem Lauf. Alle zählen, aber nur die jüngsten
    werden einzeln behalten — und der beste immer, denn er ist der Vorrat. */
@@ -1238,7 +1264,13 @@ function dateiEinlesen(text){
     ? inhalt.chronik : inhalt;
   const c = wandle(rohChronik, CHRONIK_WANDLER, CHRONIK_FASSUNG);
   if(!c) return {ok:false, grund:'Diese Datei ist kein Spielstand oder stammt aus einer neueren Fassung des Spiels.'};
+  /* Zusammenführen statt ersetzen: `vp` ist das Maximum über alle Läufe
+     (Invariante 2), also darf das Einlesen einer älteren Datei den Vorrat nicht
+     senken. Vorher tat es genau das. `laeufe` zählt Läufe, addiert sich also. */
+  c.vp = Math.max(c.vp|0, META.vp|0);
+  c.laeufe = Math.max(c.laeufe|0, META.laeufe|0);
   META = c;
+  CHRONIK_GESPERRT = false;    // eine gültige Datei hebt den Riegel auf
   chronikSichern();
   const l = inhalt && inhalt.lauf ? wandle(inhalt.lauf, LAUF_WANDLER, LAUF_FASSUNG) : null;
   if(l && l.mann && l.mann.lebt) Ablage.schreibe(ORT_LAUF, huelle(l));
@@ -1284,9 +1316,20 @@ function stationErledigt(){
      Genesung; das hier ist nur der Lauf der Zeit.
      Erste Fassung war 8 % — damit fraß die Zeit den Blutzoll des Rückzugs
      wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen).
-     Krankheiten zehren **vorher**, sonst hebt sich beides auf. */
-  S.wunden.forEach(w=>{ if(w.zehrt) S.leben = Math.max(1, S.leben - w.zehrt); });
-  lebenAuffuellen(0.05);
+     **Wer krank ist, erholt sich gar nicht.** Die erste Fassung zog die
+     Zehrung ab und heilte danach trotzdem die 5 % — beides sind Summanden, die
+     Reihenfolge ändert nichts, und der Kommentar „zehrt vorher, sonst hebt sich
+     beides auf" war schlicht falsch gerechnet. Bei Konstitution 70 mit
+     Sumpffieber standen +4 Heilung gegen −3 Zehrung: Ein Kranker **gewann**
+     einen Punkt je Station, und das ganze System „Krankheit gefährlicher als
+     Kugeln" lief leer.
+
+     Auch die Klemme lag falsch — je Wunde einzeln bei 1 gekappt, verschluckte
+     sie bei zwei Krankheiten die Hälfte der Summe. Jetzt: eine Summe, eine
+     Klemme, und Genesung erst, wenn das Fieber weg ist. */
+  const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
+  if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
+  else lebenAuffuellen(0.05);
   atemKlemmen();
   laufSichern();
 }
@@ -1307,11 +1350,17 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     if(attr[k] !== undefined) attr[k] = Math.min(100, attr[k] + punkte[k]);
     else if(fert[k] !== undefined) fert[k] = Math.min(100, fert[k] + punkte[k]);
   }
+  /* **Ausrüstung wird bewusst nach den Kaufgrenzen addiert.** Muskete +8 und
+     Bajonett +5 dürfen die 60 der Fertigkeitsgrenze überschreiten — sich mit
+     Veteranenpunkten über den Startdeckel zu schieben, ist ein gewollter Weg,
+     sie auszugeben (Entscheidung vom 28.07.2026). Geklemmt wird nur die
+     absolute 100, weil `nutzen()` darüber aussteigt. */
   const ausr = AUSRUESTUNG_START();
+  const hoch = (k,n)=>{ fert[k] = Math.min(100, fert[k] + n); };
   let geld = 4;
   (kaeufe||[]).forEach(id=>{
-    if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; fert.muskete+=8; }
-    if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; fert.bajonett+=5; }
+    if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+    if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; hoch('bajonett',5); }
     if(id==='schuhe_gut'){ ausr.schuhe={name:'Doppelt besohlte Schuhe',zustand:100,verschleiss:12}; }
     if(id==='tornister_gut'){ ausr.tornister={name:'Verstärkter Tornister',zustand:100,verschleiss:8}; }
     if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
@@ -1343,11 +1392,16 @@ function wert(k){
   return Math.max(1, Math.round(v));
 }
 
-function probe(k, schwierigkeit){
+/* `ohneUebung` für Würfe, die keine Handlung sind, sondern ein Zustand — die
+   Konstitutions-Probe gegen ein Fieber etwa. Ohne den Schalter trainierte
+   ausgerechnet der Kranke bei jedem Ruhe-Abend seine Konstitution und damit
+   seinen Lebensvorrat, während der Gesunde beim selben Knopf nichts bekam:
+   Krankheit wäre auf Dauer ein Vorteil gewesen. */
+function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
   const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
   const wurf = 1 + Math.floor(Math.random()*100);
-  nutzen(k, 1);
+  if(!ohneUebung) nutzen(k, 1);
   return {wurf, ziel, wertRoh:w, erfolg: wurf <= ziel};
 }
 
@@ -1403,7 +1457,8 @@ const VORRAT_BODEN     = 0.4;    // so viel bleibt einem Zerschossenen mindesten
 
 function lebenMax(mann){
   const m = mann || S;
-  const grund = 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+  const roh = m.attr && typeof m.attr.konstitution === 'number' ? m.attr.konstitution : 20;
+  const grund = 40 + Math.round(roh * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
   /* Offene Wunden verkleinern den Mann. Das ist der Hebel, der die Lücke
      schließt, durch die ein kundiger Spieler bisher unbeschadet kam: Leben
      heilt schnell nach (Zeit, Lagerabend, Winterwoche), Wunden wird man nur
@@ -1417,7 +1472,8 @@ function lebenMax(mann){
 }
 function lebenAuffuellen(anteil){
   const max = lebenMax();
-  S.leben = Math.max(0, Math.min(max, S.leben + Math.round(max*anteil)));
+  // Klemme bei 1: Sterben darf man nur im Gefecht, nie durch Buchhaltung.
+  S.leben = Math.max(1, Math.min(max, S.leben + Math.round(max*anteil)));
 }
 
 /* Der Atem steigt nie über die Lebenspunkte. Das ist die eine Regel, die einen
@@ -1465,7 +1521,13 @@ const kopf = document.getElementById('kopfrechts');
 const fuss = document.getElementById('fusszeile');
 const untertitel = document.getElementById('untertitel');
 
-function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* Auch `"` und `'` — sonst bricht ein Name mit Anführungszeichen im Namensfeld
+   (`value="…"`) aus dem Attribut aus, und „Jean \"le Brave\" Duval" wird beim
+   Neuzeichnen still abgeschnitten. Das ist die einzige Stelle im Spiel, an der
+   Spielertext in einem Attribut landet; die Funktion muss trotzdem vollständig
+   sein, weil überall angenommen wird, dass sie es ist. */
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function balken(klasse, v, max){ return `<div class="bar ${klasse}"><i style="width:${Math.max(0,Math.min(100,100*v/max))}%"></i></div>`; }
 
 /* Ortswechsel über der Station: woher, wohin, wie weit, wie lange.
@@ -1563,8 +1625,10 @@ function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
 function angeschlagen(){ return S && S.leben <= lebenMax()/3; }
 
 /* Der ungeschmälerte Vorrat. Steht blass hinter dem aktuellen, sobald offene
-   Wunden ihn drücken — sonst wüsste niemand, warum die Obergrenze wandert. */
-function lebenGrund(){ return 40 + Math.round((S.attr.konstitution||20)*0.6); }
+   Wunden ihn drücken — sonst wüsste niemand, warum die Obergrenze wandert.
+   Rechnet über `lebenMax()` mit einem wundenlosen Mann, statt die Formel ein
+   drittes Mal zu schreiben. */
+function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
 
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
@@ -1622,11 +1686,18 @@ function zeigeTitel(){
     : '<tr><td class="d" colspan="4">Noch kein Eintrag. Der erste Mann wartet.</td></tr>';
 
   app.innerHTML = `
-  <div class="card"><div class="ch"><span>Der Marschallstab</span><span>Prototyp · Italien 1796/97</span></div>
+  <div class="card"><div class="ch"><span>Der Marschallstab</span><span>Prototyp · Italien 1796/97 · Ägypten 1798/99</span></div>
    <div class="cb">
     <div class="zit">Du beginnst 1796 als Rekrut mit einer Muskete, die dir nicht gehört.<br>
     Wenn du dieses Kapitel überlebst, bist du vielleicht Caporal.<br>
     Wahrscheinlicher liegst du im April in einem Graben bei Montenotte.</div>
+    ${CHRONIK_GESPERRT ? `<div class="ergebnis schlecht" style="margin-bottom:14px">
+      <b>Deine Chronik ist nicht lesbar.</b> Es lag ein Spielstand vor, aber er ist beschädigt oder
+      stammt aus einer neueren Fassung des Spiels. Solange das so ist, wird <b>nichts überschrieben</b> —
+      deine Veteranenpunkte sind noch da, dieses Spiel sieht sie nur nicht.
+      <p style="margin:10px 0 0">Lade die Datei über „Spielstand laden", oder verwirf die alte Chronik und fang bei null an.</p>
+      <p style="margin:10px 0 0"><button class="plain" onclick="if(confirm('Die alte Chronik wird überschrieben. Sicher?')){chronikFreigeben();zeigeTitel();}">Alte Chronik verwerfen</button></p>
+    </div>` : ''}
     ${offen ? `<div class="wirkung" style="margin-bottom:14px"><span>Unterbrochener Feldzug</span>
       ${esc(offen.mann.name)} · ${esc(rangNameVon(offen.mann))} · ${esc((KAPITEL[Math.min(offen.node,KAPITEL.length-1)].datum||'').split(' · ')[0])}</div>` : ''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
@@ -1862,7 +1933,7 @@ function zeigeErschaffung(neu){
   <div class="stage">${verlauf()}
     <div>
       <div class="card"><div class="ch"><span>Erster Schritt · Wer bist du</span></div><div class="cb">
-        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value">
+        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value;aktualisiereErschaffung()">
       </div></div>
       <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
         <div class="cb">${zeilen}
@@ -2149,9 +2220,12 @@ function zeigeMarschEreignis(e, n){
 }
 
 function marschWaehlen(i){
+  // Wächter gegen den zweiten Klick, bevor der Bildschirm ausgetauscht ist
   const e = MARSCH_EREIGNISSE.find(x=>x.id===LAUF.marsch);
+  if(!e){ LAUF.marsch = null; naechster(); return; }
   const n = KAPITEL[LAUF.node];
   const o = marschOffen(e)[i];
+  if(!o) return;
   let w, klasse='gut', probeText='';
   if(o.probe){
     const p = probe(o.probe.wert, o.probe.schw);
@@ -2180,8 +2254,13 @@ function naechster(){
   const n = KAPITEL[LAUF.node];
   if(n.datum && n.id && LAUF.gezaehlt !== n.id){
     LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
-    const b = META.bestKapitel[n.id] || {mal:0,rang:''};
-    b.mal++; if(!b.rang || S.rang>=RANG.findIndex(r=>r.name===b.rang)+1) b.rang = rangName(S.rang);
+    const b = META.bestKapitel[n.id] || {mal:0,rangN:0,rang:''};
+    b.mal++;
+    /* Die Rangzahl mitschreiben statt sie aus dem Namen zurückzurechnen:
+       `rangName(2)` liefert für den Voltigeur „Voltigeur", das in RANG nicht
+       vorkommt — `findIndex` gab −1, und damit überschrieb jeder Füsilier den
+       Eintrag eines Voltigeurs. */
+    if(S.rang >= (b.rangN|0)){ b.rangN = S.rang; b.rang = rangName(S.rang); }
     META.bestKapitel[n.id]=b;
     chronikSichern();
   }
@@ -2212,6 +2291,7 @@ function naechster(){
     // Hing der Lauf mitten in einer Ereignis-Frage, steht sie wieder da —
     // sonst ließe sich die Wahl durch Beenden und Fortsetzen umgehen.
     const e = K && K.ereignis && GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
+    if(K && K.ereignis && !e) K.ereignis = null;   // unbekannte ID nicht ewig mitschleppen
     if(e) zeigeEreignis(e);
     else if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.');
     else starteKampf(n);
@@ -2237,10 +2317,12 @@ function zeigeUebergang(n){
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
+    // Erst die Wunden weg, dann auffüllen: `lebenMax()` schrumpft mit offenen
+    // Wunden, sonst rückt der Mann mit 68 statt 82 ein, obwohl „voll" dasteht.
+    S.wunden = [];
     S.leben = lebenMax();
     S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
-    S.wunden = [];
     laufSichern();
   }
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -2395,7 +2477,12 @@ function starteKampf(n){
     // Der Weg dorthin kostet — in Ägypten mehr als in Italien (anmarschKosten in den Daten)
     const ak = n.anmarschKosten || {verschleiss:0.15, atem:4, belastung:1};
     verschleiss(ak.verschleiss);
-    S.atem = Math.max(0, S.atem-ak.atem);
+    /* „Mehr Patronen und zwei Tage Proviant": Der verstärkte Tornister halbiert,
+       was der Anmarsch an Luft kostet. Bis dahin war er der einzige Kauf im
+       Laden ohne jede Wirkung — 24 Veteranenpunkte für eine Zahl, die niemand
+       abfragte. Wer bei Akkon 8 Atem verliert statt 4, merkt den Unterschied. */
+    const tornister = S.kaeufe.includes('tornister_gut') ? 0.5 : 1;
+    S.atem = Math.max(0, S.atem - Math.round(ak.atem*tornister));
     S.belastung = Math.min(100, S.belastung+ak.belastung);
     atemKlemmen();
     laufSichern();
@@ -2940,6 +3027,7 @@ function ereignisWirkung(w){
 function ereignisWaehlen(i){
   const n = KAPITEL[LAUF.node];
   const e = GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
+  if(!e){ K.ereignis = null; zeigeKampf('Das Gefecht geht weiter.'); return; }
   const o = e.optionen[i];
   K.ereignis = null;
   S.log.push(n.id+': '+o.label);   // steht auf dem Chronikblatt unter der Station
@@ -2965,9 +3053,9 @@ function ereignisWaehlen(i){
         ` <span class="fein">${NAMEN[st.wert]} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
       K.protokoll.push(st.name + (p.erfolg?' — gelungen':' — misslungen'));
       if(S.leben <= 0){
-        kampfEnde(false, zeilen.join(' ') + ' ' + (o.tod||''));
-        toetlich(o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
-        zeigeTod(); return;
+        gefallen(zeilen.join(' ') + ' ' + (o.tod||''),
+                 o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
+        return;
       }
     }
     w = (treffer*2 > o.kette.length) ? o.erfolg : (o.misserfolg || o.erfolg);
@@ -2979,11 +3067,16 @@ function ereignisWaehlen(i){
     K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
   }
   ereignisWirkung(w);
+  /* Eine Ereignisrunde ist eine Runde: Wer vorgetreten ist, hat nicht gekniet.
+     Ohne diesen Reset galt „dritte Runde auf dem Knie" (Ruf −2) auch für einen
+     Mann, der dazwischen mit dem Bajonett vorgegangen war. `deckung` fällt aus
+     demselben Grund — sonst zeigt das Sichtfeld ihn weiter kniend. */
+  K.duckFolge = 0; K.deckung = false;
 
   if(S.leben <= 0){
-    kampfEnde(false, text + ' Du setzt dich hin, weil du nicht anders kannst, und stehst nicht wieder auf.');
-    toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
-    zeigeTod(); return;
+    gefallen(text + ' Du setzt dich hin, weil du nicht anders kannst, und stehst nicht wieder auf.',
+             'Gefallen bei '+n.datum.split(' · ')[1]);
+    return;
   }
   if(w.ende==='sieg' || K.feindMoral <= 0){ kampfEnde(true, text); return; }
   K.runde++;
@@ -3078,7 +3171,8 @@ function kampfAktion(id){
     if(p.erfolg){ schaden = 30+Math.random()*14;
       text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'
          + anerkennung(2,'Mit dem Bajonett vorgegangen'); }
-    else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.'; S.belastung+=7; }
+    else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.';
+      S.belastung=Math.min(100,S.belastung+7); }   // die einzige Stelle, der die Klemme fehlte
   }
   else if(id==='salve'){
     const p = probe('autoritaet', 40);
@@ -3208,9 +3302,9 @@ function kampfAktion(id){
     S.leben = Math.max(0, S.leben - schaden);
     K.protokoll.push('Du wirst getroffen.');
     if(S.leben <= 0){
-      kampfEnde(false, text + treffer + ' Du willst dich abstützen und findest den Boden nicht, wo er sein müsste. Jemand ruft deinen Namen, weit weg.');
-      toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
-      zeigeTod(); return;
+      gefallen(text + treffer + ' Du willst dich abstützen und findest den Boden nicht, wo er sein müsste. Jemand ruft deinen Namen, weit weg.',
+               'Gefallen bei '+n.datum.split(' · ')[1]);
+      return;
     }
     if(S.leben <= lebenMax()*0.3) treffer += ' Du bist noch auf den Beinen, aber nicht mehr lange.';
     atemKlemmen();
@@ -3238,6 +3332,29 @@ function kampfAktion(id){
 
   laufSichern();
   zeigeKampf(text + treffer);
+}
+
+/* ── Der Tod im Gefecht ──
+   **Ein Toter durchläuft keinen Stationsabschluss.** Vorher lief jeder
+   Treffertod über `kampfEnde()`, und das ist der Abschluss einer *bestandenen*
+   Station: Der Gefallene bekam noch die Niederlagen-Wirkung (Ruf −4 bis −6,
+   was über `5·floor(ruf/10)` echte Veteranenpunkte kostete), der Feldscher
+   nähte ihm eine Wunde zu, `stationErledigt()` heilte ihn um 5 % (er stand
+   danach mit „Leben 4 von 64" im Chronikblatt), zählte die **nächste** Station
+   als erreicht (+2 VP, die der Rückzugstod nicht bekam) und schrieb sogar noch
+   einen Spielstand des Toten, weil `S.lebt` erst eine Anweisung später falsch
+   wurde. Dass der Rückzugstod all das nicht tat, war der Beweis, dass es ein
+   Versehen war und keine Absicht.
+
+   Jetzt endet ein Gefechtstod hier und nirgends sonst: Kampfzustand weg,
+   `toetlich()` (löscht den Spielstand im selben Augenblick, Invariante 1),
+   dann der Todesbildschirm — mit dem letzten Absatz und den Taten dieses
+   Gefechts, die vorher niemand zu sehen bekam. */
+function gefallen(letzterText, todesart){
+  const kk = K;
+  setzeKampf(null);
+  toetlich(todesart);
+  zeigeTod(letzterText, kk);
 }
 
 function kampfEnde(sieg, letzterText){
@@ -3273,9 +3390,9 @@ function kampfEnde(sieg, letzterText){
     K.rueckzug = Math.round((5 + 13*rest) * (1 + feindGuete(n)*0.2));
     S.leben = Math.max(0, S.leben - K.rueckzug);
     if(S.leben <= 0){
-      setzeKampf(null);
-      toetlich('Gefallen auf dem Rückzug bei '+n.datum.split(' · ')[1]);
-      zeigeTod(); return;
+      gefallen(letzterText + ' Ihr geht rückwärts aus dem Feuer, und das Feuer geht mit. Dich trägt niemand.',
+               'Gefallen auf dem Rückzug bei '+n.datum.split(' · ')[1]);
+      return;
     }
   }
   anwenden(erg);
@@ -3291,7 +3408,7 @@ function kampfEnde(sieg, letzterText){
      will, verbringt einen Lagerabend oder eine Winterwoche damit. */
   // Krankheiten kann er nicht: eine Ruhr näht man nicht zu (`!w.zehrt`)
   const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
-  if(leicht>=0) S.wunden.splice(leicht,1);
+  if(leicht>=0){ S.wunden.splice(leicht,1); atemKlemmen(); }   // der Vorrat wächst wieder
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);
   stationErledigt();
@@ -3487,9 +3604,8 @@ const LAGER_TUN = {
       return 'Vier Stunden auf nassen Feldwegen. Die Höfe sind leer, die Leute sind in den Bergen, und ihr Vieh ist bei ihnen. <span class="fein">Belastung +3</span>'; }},
 
   ruhe:{label:'Schlafen und liegen bleiben',
-    cost:'Leben, Belastung −10 · Atem +18',
-    tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
-      lebenAuffuellen(0.25);
+    cost:'Leben, Belastung −10 · Atem +18 · bricht vielleicht ein Fieber',
+    tu(){ S.belastung=Math.max(0,S.belastung-10);
       /* Ein Abend im Trockenen kann ein Fieber brechen — muss aber nicht. Das
          ist der einzige Ausweg aus einer Krankheit vor dem Winterquartier, und
          er ist absichtlich ein Wurf: Wer die Ruhr aus dem Sinai mitschleppt,
@@ -3497,11 +3613,13 @@ const LAGER_TUN = {
       const krank = S.wunden.findIndex(w=>w.zehrt);
       let zusatz = '';
       if(krank>=0){
-        const p = probe('konstitution', 35);
+        const p = probe('konstitution', 35, true);   // ohne Übungseffekt, siehe probe()
         if(p.erfolg){ const w=S.wunden.splice(krank,1)[0]; atemKlemmen();
           zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden</span>`; }
         else zusatz = ' Das Fieber bleibt. Es wird bei Dunkelheit stärker, und es wird jede Nacht bei Dunkelheit stärker. <span class="fein">Krankheit hält an</span>';
       }
+      // Erst die Krankheit weg, dann heilen — sonst heilt man gegen den kleineren Vorrat.
+      lebenAuffuellen(0.25); S.atem=Math.min(100,S.atem+18); atemKlemmen();
       return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>' + zusatz; }},
 
   /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
@@ -3635,12 +3753,16 @@ function winterTun(id){
        und sie kostet eine der drei Wochen. Wer verwundet aus dem Feldzug kommt,
        muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
        Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
-    S.belastung=Math.max(0,S.belastung-16); lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
+    /* Reihenfolge: **erst die Wunde heraus, dann heilen.** Andersherum rechnete
+       `lebenAuffuellen` noch gegen den wundenverkleinerten Vorrat, und die
+       teuerste Woche des Spiels verschenkte einen Teil ihrer Wirkung. */
+    S.belastung=Math.max(0,S.belastung-16);
     // Krankheiten zuerst — sie sind das, was einen Mann über Wochen aufzehrt
     const krank = S.wunden.findIndex(w=>w.zehrt);
     if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
-    if(S.wunden.length){ const w=S.wunden.shift(); atemKlemmen();
-      W.log.push(`${w.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(w.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(w.name)}" überstanden</span>`); }
+    const weg = S.wunden.length ? S.wunden.shift() : null;
+    lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
+    if(weg) W.log.push(`${weg.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(weg.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(weg.name)}" überstanden</span>`);
     else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
@@ -3689,6 +3811,11 @@ function chronikblatt(endeText, p){
 
 function eintragen(endeText){
   const p = wertung();
+  /* Der Vergleich muss **vor** dem Anheben stehen. Vorher prüfte der
+     Bildschirm `p.summe >= META.vp`, nachdem `META.vp` schon angehoben war —
+     ein Lauf, der den bisherigen Bestwert nur einstellte, meldete „Neuer
+     Rekord" und einen Vorrat, der sich gar nicht bewegt hatte. */
+  p.rekord = p.summe > META.vp;
   META.chronik.push(chronikblatt(endeText, p));
   META.laeufe = (META.laeufe|0) + 1;
   META.vp = Math.max(META.vp, p.summe);
@@ -3715,17 +3842,26 @@ function wertungsTabelleAus(c){
   </table>`;
 }
 
-function zeigeTod(){
+/* `letzterText` und `kk` reicht `gefallen()` aus dem Gefecht herein: der letzte
+   Absatz vor dem Umfallen und die Taten dieses Gefechts. Vorher baute
+   `kampfEnde()` beides in einen Bildschirm, den `zeigeTod()` eine Anweisung
+   später vollständig überschrieb — **sämtliche Todestexte der Sondermissionen
+   („Auf dem Schutt der Rampe bleibst du liegen") waren unerreichbar.** */
+function zeigeTod(letzterText, kk){
   const grund = S.todesart || 'Gefallen';
   laufVerwerfen();
   const p = eintragen(grund);
-  const neu = p.summe >= META.vp;
+  const neu = p.rekord;
   app.innerHTML = `<div class="card"><div class="ch"><span class="tot">Ende</span><span>${esc(grund)}</span></div>
     <div class="cb">
       <div class="prose">
+        ${letzterText?`<p>${letzterText}</p>`:''}
         <p><b>${esc(S.name)}</b>, ${rangName(S.rang)} der 32. Halbbrigade, ${esc(grund.toLowerCase())}.</p>
         <p>${todesText()}</p>
       </div>
+      ${kk && kk.taten && kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
+        ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
+      </div>`:''}
       <div class="grid2" style="margin-top:18px">
         <div>${wertungsTabelle(p)}</div>
         <div class="note ${neu?'green':'red'}">
@@ -3756,7 +3892,7 @@ function todesText(){
 function zeigeKapitelende(n){
   n = n || KAPITEL[KAPITEL.length-1] || {};
   const p = eintragen('Feldzüge überstanden · '+rangName(S.rang));
-  const neu = p.summe >= META.vp;
+  const neu = p.rekord;
   const rangSatz = S.rang>=3 ? 'Acht Mann sehen dich morgens an und warten, was du sagst.'
     : (S.rang===2 ? 'Du stehst nicht mehr in der Mitte des Bataillons, sondern dort, wo sie die Leute hinstellen, auf die es ankommt.'
                   : 'Du stehst noch in der Reihe wie am ersten Tag — aber du stehst.');

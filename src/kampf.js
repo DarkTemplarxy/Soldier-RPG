@@ -82,7 +82,12 @@ function starteKampf(n){
     // Der Weg dorthin kostet — in Ägypten mehr als in Italien (anmarschKosten in den Daten)
     const ak = n.anmarschKosten || {verschleiss:0.15, atem:4, belastung:1};
     verschleiss(ak.verschleiss);
-    S.atem = Math.max(0, S.atem-ak.atem);
+    /* „Mehr Patronen und zwei Tage Proviant": Der verstärkte Tornister halbiert,
+       was der Anmarsch an Luft kostet. Bis dahin war er der einzige Kauf im
+       Laden ohne jede Wirkung — 24 Veteranenpunkte für eine Zahl, die niemand
+       abfragte. Wer bei Akkon 8 Atem verliert statt 4, merkt den Unterschied. */
+    const tornister = S.kaeufe.includes('tornister_gut') ? 0.5 : 1;
+    S.atem = Math.max(0, S.atem - Math.round(ak.atem*tornister));
     S.belastung = Math.min(100, S.belastung+ak.belastung);
     atemKlemmen();
     laufSichern();
@@ -627,6 +632,7 @@ function ereignisWirkung(w){
 function ereignisWaehlen(i){
   const n = KAPITEL[LAUF.node];
   const e = GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
+  if(!e){ K.ereignis = null; zeigeKampf('Das Gefecht geht weiter.'); return; }
   const o = e.optionen[i];
   K.ereignis = null;
   S.log.push(n.id+': '+o.label);   // steht auf dem Chronikblatt unter der Station
@@ -652,9 +658,9 @@ function ereignisWaehlen(i){
         ` <span class="fein">${NAMEN[st.wert]} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
       K.protokoll.push(st.name + (p.erfolg?' — gelungen':' — misslungen'));
       if(S.leben <= 0){
-        kampfEnde(false, zeilen.join(' ') + ' ' + (o.tod||''));
-        toetlich(o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
-        zeigeTod(); return;
+        gefallen(zeilen.join(' ') + ' ' + (o.tod||''),
+                 o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
+        return;
       }
     }
     w = (treffer*2 > o.kette.length) ? o.erfolg : (o.misserfolg || o.erfolg);
@@ -666,11 +672,16 @@ function ereignisWaehlen(i){
     K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
   }
   ereignisWirkung(w);
+  /* Eine Ereignisrunde ist eine Runde: Wer vorgetreten ist, hat nicht gekniet.
+     Ohne diesen Reset galt „dritte Runde auf dem Knie" (Ruf −2) auch für einen
+     Mann, der dazwischen mit dem Bajonett vorgegangen war. `deckung` fällt aus
+     demselben Grund — sonst zeigt das Sichtfeld ihn weiter kniend. */
+  K.duckFolge = 0; K.deckung = false;
 
   if(S.leben <= 0){
-    kampfEnde(false, text + ' Du setzt dich hin, weil du nicht anders kannst, und stehst nicht wieder auf.');
-    toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
-    zeigeTod(); return;
+    gefallen(text + ' Du setzt dich hin, weil du nicht anders kannst, und stehst nicht wieder auf.',
+             'Gefallen bei '+n.datum.split(' · ')[1]);
+    return;
   }
   if(w.ende==='sieg' || K.feindMoral <= 0){ kampfEnde(true, text); return; }
   K.runde++;
@@ -765,7 +776,8 @@ function kampfAktion(id){
     if(p.erfolg){ schaden = 30+Math.random()*14;
       text='Du gehst vor. Es ist laut und kurz und danach stehst du zehn Schritt weiter als vorher.'
          + anerkennung(2,'Mit dem Bajonett vorgegangen'); }
-    else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.'; S.belastung+=7; }
+    else { text='Du gehst vor, aber niemand geht mit. Nach fünf Schritten stehst du allein und kehrst um.';
+      S.belastung=Math.min(100,S.belastung+7); }   // die einzige Stelle, der die Klemme fehlte
   }
   else if(id==='salve'){
     const p = probe('autoritaet', 40);
@@ -895,9 +907,9 @@ function kampfAktion(id){
     S.leben = Math.max(0, S.leben - schaden);
     K.protokoll.push('Du wirst getroffen.');
     if(S.leben <= 0){
-      kampfEnde(false, text + treffer + ' Du willst dich abstützen und findest den Boden nicht, wo er sein müsste. Jemand ruft deinen Namen, weit weg.');
-      toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
-      zeigeTod(); return;
+      gefallen(text + treffer + ' Du willst dich abstützen und findest den Boden nicht, wo er sein müsste. Jemand ruft deinen Namen, weit weg.',
+               'Gefallen bei '+n.datum.split(' · ')[1]);
+      return;
     }
     if(S.leben <= lebenMax()*0.3) treffer += ' Du bist noch auf den Beinen, aber nicht mehr lange.';
     atemKlemmen();
@@ -925,6 +937,29 @@ function kampfAktion(id){
 
   laufSichern();
   zeigeKampf(text + treffer);
+}
+
+/* ── Der Tod im Gefecht ──
+   **Ein Toter durchläuft keinen Stationsabschluss.** Vorher lief jeder
+   Treffertod über `kampfEnde()`, und das ist der Abschluss einer *bestandenen*
+   Station: Der Gefallene bekam noch die Niederlagen-Wirkung (Ruf −4 bis −6,
+   was über `5·floor(ruf/10)` echte Veteranenpunkte kostete), der Feldscher
+   nähte ihm eine Wunde zu, `stationErledigt()` heilte ihn um 5 % (er stand
+   danach mit „Leben 4 von 64" im Chronikblatt), zählte die **nächste** Station
+   als erreicht (+2 VP, die der Rückzugstod nicht bekam) und schrieb sogar noch
+   einen Spielstand des Toten, weil `S.lebt` erst eine Anweisung später falsch
+   wurde. Dass der Rückzugstod all das nicht tat, war der Beweis, dass es ein
+   Versehen war und keine Absicht.
+
+   Jetzt endet ein Gefechtstod hier und nirgends sonst: Kampfzustand weg,
+   `toetlich()` (löscht den Spielstand im selben Augenblick, Invariante 1),
+   dann der Todesbildschirm — mit dem letzten Absatz und den Taten dieses
+   Gefechts, die vorher niemand zu sehen bekam. */
+function gefallen(letzterText, todesart){
+  const kk = K;
+  setzeKampf(null);
+  toetlich(todesart);
+  zeigeTod(letzterText, kk);
 }
 
 function kampfEnde(sieg, letzterText){
@@ -960,9 +995,9 @@ function kampfEnde(sieg, letzterText){
     K.rueckzug = Math.round((5 + 13*rest) * (1 + feindGuete(n)*0.2));
     S.leben = Math.max(0, S.leben - K.rueckzug);
     if(S.leben <= 0){
-      setzeKampf(null);
-      toetlich('Gefallen auf dem Rückzug bei '+n.datum.split(' · ')[1]);
-      zeigeTod(); return;
+      gefallen(letzterText + ' Ihr geht rückwärts aus dem Feuer, und das Feuer geht mit. Dich trägt niemand.',
+               'Gefallen auf dem Rückzug bei '+n.datum.split(' · ')[1]);
+      return;
     }
   }
   anwenden(erg);
@@ -978,7 +1013,7 @@ function kampfEnde(sieg, letzterText){
      will, verbringt einen Lagerabend oder eine Winterwoche damit. */
   // Krankheiten kann er nicht: eine Ruhr näht man nicht zu (`!w.zehrt`)
   const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
-  if(leicht>=0) S.wunden.splice(leicht,1);
+  if(leicht>=0){ S.wunden.splice(leicht,1); atemKlemmen(); }   // der Vorrat wächst wieder
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);
   stationErledigt();

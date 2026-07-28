@@ -36,9 +36,20 @@ function stationErledigt(){
      Genesung; das hier ist nur der Lauf der Zeit.
      Erste Fassung war 8 % — damit fraß die Zeit den Blutzoll des Rückzugs
      wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen).
-     Krankheiten zehren **vorher**, sonst hebt sich beides auf. */
-  S.wunden.forEach(w=>{ if(w.zehrt) S.leben = Math.max(1, S.leben - w.zehrt); });
-  lebenAuffuellen(0.05);
+     **Wer krank ist, erholt sich gar nicht.** Die erste Fassung zog die
+     Zehrung ab und heilte danach trotzdem die 5 % — beides sind Summanden, die
+     Reihenfolge ändert nichts, und der Kommentar „zehrt vorher, sonst hebt sich
+     beides auf" war schlicht falsch gerechnet. Bei Konstitution 70 mit
+     Sumpffieber standen +4 Heilung gegen −3 Zehrung: Ein Kranker **gewann**
+     einen Punkt je Station, und das ganze System „Krankheit gefährlicher als
+     Kugeln" lief leer.
+
+     Auch die Klemme lag falsch — je Wunde einzeln bei 1 gekappt, verschluckte
+     sie bei zwei Krankheiten die Hälfte der Summe. Jetzt: eine Summe, eine
+     Klemme, und Genesung erst, wenn das Fieber weg ist. */
+  const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
+  if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
+  else lebenAuffuellen(0.05);
   atemKlemmen();
   laufSichern();
 }
@@ -59,11 +70,17 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     if(attr[k] !== undefined) attr[k] = Math.min(100, attr[k] + punkte[k]);
     else if(fert[k] !== undefined) fert[k] = Math.min(100, fert[k] + punkte[k]);
   }
+  /* **Ausrüstung wird bewusst nach den Kaufgrenzen addiert.** Muskete +8 und
+     Bajonett +5 dürfen die 60 der Fertigkeitsgrenze überschreiten — sich mit
+     Veteranenpunkten über den Startdeckel zu schieben, ist ein gewollter Weg,
+     sie auszugeben (Entscheidung vom 28.07.2026). Geklemmt wird nur die
+     absolute 100, weil `nutzen()` darüber aussteigt. */
   const ausr = AUSRUESTUNG_START();
+  const hoch = (k,n)=>{ fert[k] = Math.min(100, fert[k] + n); };
   let geld = 4;
   (kaeufe||[]).forEach(id=>{
-    if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; fert.muskete+=8; }
-    if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; fert.bajonett+=5; }
+    if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+    if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; hoch('bajonett',5); }
     if(id==='schuhe_gut'){ ausr.schuhe={name:'Doppelt besohlte Schuhe',zustand:100,verschleiss:12}; }
     if(id==='tornister_gut'){ ausr.tornister={name:'Verstärkter Tornister',zustand:100,verschleiss:8}; }
     if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
@@ -95,11 +112,16 @@ function wert(k){
   return Math.max(1, Math.round(v));
 }
 
-function probe(k, schwierigkeit){
+/* `ohneUebung` für Würfe, die keine Handlung sind, sondern ein Zustand — die
+   Konstitutions-Probe gegen ein Fieber etwa. Ohne den Schalter trainierte
+   ausgerechnet der Kranke bei jedem Ruhe-Abend seine Konstitution und damit
+   seinen Lebensvorrat, während der Gesunde beim selben Knopf nichts bekam:
+   Krankheit wäre auf Dauer ein Vorteil gewesen. */
+function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
   const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
   const wurf = 1 + Math.floor(Math.random()*100);
-  nutzen(k, 1);
+  if(!ohneUebung) nutzen(k, 1);
   return {wurf, ziel, wertRoh:w, erfolg: wurf <= ziel};
 }
 
@@ -155,7 +177,8 @@ const VORRAT_BODEN     = 0.4;    // so viel bleibt einem Zerschossenen mindesten
 
 function lebenMax(mann){
   const m = mann || S;
-  const grund = 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+  const roh = m.attr && typeof m.attr.konstitution === 'number' ? m.attr.konstitution : 20;
+  const grund = 40 + Math.round(roh * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
   /* Offene Wunden verkleinern den Mann. Das ist der Hebel, der die Lücke
      schließt, durch die ein kundiger Spieler bisher unbeschadet kam: Leben
      heilt schnell nach (Zeit, Lagerabend, Winterwoche), Wunden wird man nur
@@ -169,7 +192,8 @@ function lebenMax(mann){
 }
 function lebenAuffuellen(anteil){
   const max = lebenMax();
-  S.leben = Math.max(0, Math.min(max, S.leben + Math.round(max*anteil)));
+  // Klemme bei 1: Sterben darf man nur im Gefecht, nie durch Buchhaltung.
+  S.leben = Math.max(1, Math.min(max, S.leben + Math.round(max*anteil)));
 }
 
 /* Der Atem steigt nie über die Lebenspunkte. Das ist die eine Regel, die einen

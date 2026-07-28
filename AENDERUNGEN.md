@@ -5,6 +5,34 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Fehlerdurchsicht: siebzehn Funde, vier davon schwer
+
+Drei unabhängige Durchsichten über den ganzen Baum, jeder Fund am Code belegt und vor der Reparatur im Browser nachgestellt.
+
+**1 — Ein Toter durchlief den kompletten Stationsabschluss.** Jeder Gefechtstod ging über `kampfEnde()`, den Abschluss einer *bestandenen* Station: Der Gefallene bekam die Niederlagen-Wirkung (Ruf −4 bis −6, kostete echte Veteranenpunkte), der Feldscher nähte ihm eine Wunde, `stationErledigt()` heilte ihn um 5 % (er stand mit „Leben 4 von 64" im Chronikblatt), zählte die **nächste** Station (+2 VP, die der Rückzugstod nicht bekam), trug das Datum der Folgestation ein und schrieb noch einen Spielstand des Toten. Neu: `gefallen()`, das nichts davon tut. **Dass der Rückzugstod all das nie tat, war der Beweis, dass es ein Versehen war.** Nebenbei behoben: `zeigeTod()` überschrieb den gerade gebauten Bildschirm — **sämtliche Todestexte der Sondermissionen waren unerreichbar** und sind es jetzt nicht mehr.
+
+**2 — Die Krankheit war wirkungslos.** Zehrung und Zeitheilung sind Summanden in derselben Funktion; der Kommentar „zehrt vorher, sonst hebt sich beides auf" war falsch gerechnet. Bei Konstitution 70 mit Sumpffieber standen +4 gegen −3: Ein Kranker **gewann** einen Punkt je Station. Jetzt bekommt ein Kranker keine Zeitheilung, und die Klemme sitzt auf der Summe statt je Wunde (bei zwei Krankheiten verschluckte sie die Hälfte). Dazu würfelt die Konstitutions-Probe im Lager ohne Übungseffekt — vorher trainierte ausgerechnet der Kranke seinen Lebensvorrat.
+
+**3 — Ein fehlgeschlagenes Chronikladen vernichtete die Chronik.** Blieb `META` leer, überschrieb das erste `chronikSichern()` (läuft an jeder Station) die gute Datei, das zweite die `.bak`-Generation: nach zwei Stationen alle Veteranenpunkte weg. Neu: `CHRONIK_GESPERRT` schreibt nichts, bis der Spieler ausdrücklich verwirft; der Titelbildschirm erklärt es. Außerdem führt `dateiEinlesen` `vp` und `laeufe` per `Math.max` zusammen, statt sie zu ersetzen — eine alte Datei senkte den Vorrat.
+
+**4 — `esc()` maskierte keine Anführungszeichen.** Das Namensfeld ist die einzige Stelle mit Spielertext in einem Attribut; ein Name mit `"` brach es auf.
+
+**Reihenfolge-Regel, an drei Stellen falsch:** erst die Wunde entfernen, dann auffüllen — `lebenMax()` schrumpft mit offenen Wunden. Das Jahr Garnison lieferte 68 statt 82 Leben, obwohl „voll" dastand; Winterwoche und Lagerabend ebenso.
+
+**Weitere Reparaturen:** Kniegrenze zählte über Ereignisrunden hinweg falsch (wer im Ereignis vorging, galt danach als kniend) · `S.belastung += 7` beim Bajonett-Fehlschlag ungeklemmt (bis 126 möglich) · Namensfeld hielt den Weiter-Knopf nicht aktuell (Mann ohne Namen möglich) · „Neuer Rekord" schon bei Gleichstand, weil gegen das bereits angehobene Maximum verglichen wurde · Doppelklick-Wächter in `marschWaehlen` und `ereignisWaehlen` · unbekannte Ereignis-ID wurde beim Fortsetzen ewig mitgeschleppt · `RANG.findIndex('Voltigeur')` = −1 überschrieb Voltigeur-Einträge mit „Fusilier" · Prüfsumme galt ohne Feld als heil · `wandle()` konnte bei einem fehlerhaften Wandler endlos laufen · `lebenGrund()` rechnet über `lebenMax()` statt die Formel ein drittes Mal zu schreiben · Konstitution 0 wurde als 20 gelesen · Seitentitel nannte nur Italien.
+
+**`tornister_gut` (24 VP) hatte keine Wirkung** — der einzige Kauf ohne Anbindung. Neu: halbiert, was der Anmarsch an Atem kostet („zwei Tage Proviant"). Bei Akkon sind das 4 statt 8.
+
+**Testfehler behoben:** `test/spielstand.js` schlug seit dem Einbau der Marsch-Zwischenfälle mit 35 % Wahrscheinlichkeit fehl, weil auch die erste Station einen Marschweg hat und dort ein Zwischenfall vor dem Lager stehen kann. Der Test räumt ihn jetzt ab.
+
+**Bewusst nicht geändert:** Ausrüstungskäufe (Muskete +8, Bajonett +5) werden weiterhin **nach** der 60er-Fertigkeitsgrenze addiert und dürfen sie überschreiten — sich mit Veteranenpunkten über den Startdeckel zu schieben, ist ein gewollter Weg, sie auszugeben. Geklemmt wird nur die absolute 100, weil `nutzen()` darüber aussteigt.
+
+**Offen und dokumentiert, keine Reparatur:** Der Datei-Export ist ein Rücksetzpunkt (im Lager sichern → sterben → Datei laden). Mit einer maßgeblichen Datei ist das prinzipiell nicht zu verhindern, und CLAUDE.md hält Schummelschutz auf dem eigenen Rechner ohnehin für aussichtslos.
+
+**Gemessen nach allen Reparaturen (je 40 Läufe, beide Feldzüge überstanden):** Erstlauf vorsichtig 50 %, Erstlauf mutig 18 %, Veteran 160 VP 68 %, Veteran 260 VP 68 %. Die Progression steht unverändert; Ägypten ist durch die reparierte Krankheit für den Mutigen etwas härter geworden (18 statt 20 %).
+
+---
+
 ## 2026-07-28 — Progression über Läufe: Pool 60, Feindgüte, drei Messungen
 
 **Das Ziel:** Der erste Mann soll Ägypten mit hoher Wahrscheinlichkeit nicht überleben, und Gegner, gegen die man am Anfang chancenlos ist, sollen im dritten oder vierten Lauf zu schlagen sein. Umgesetzt in drei Teilen, in dieser Reihenfolge gebaut und je einzeln gemessen.

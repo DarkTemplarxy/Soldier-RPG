@@ -74,9 +74,8 @@ const LAGER_TUN = {
       return 'Vier Stunden auf nassen Feldwegen. Die Höfe sind leer, die Leute sind in den Bergen, und ihr Vieh ist bei ihnen. <span class="fein">Belastung +3</span>'; }},
 
   ruhe:{label:'Schlafen und liegen bleiben',
-    cost:'Leben, Belastung −10 · Atem +18',
-    tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
-      lebenAuffuellen(0.25);
+    cost:'Leben, Belastung −10 · Atem +18 · bricht vielleicht ein Fieber',
+    tu(){ S.belastung=Math.max(0,S.belastung-10);
       /* Ein Abend im Trockenen kann ein Fieber brechen — muss aber nicht. Das
          ist der einzige Ausweg aus einer Krankheit vor dem Winterquartier, und
          er ist absichtlich ein Wurf: Wer die Ruhr aus dem Sinai mitschleppt,
@@ -84,11 +83,13 @@ const LAGER_TUN = {
       const krank = S.wunden.findIndex(w=>w.zehrt);
       let zusatz = '';
       if(krank>=0){
-        const p = probe('konstitution', 35);
+        const p = probe('konstitution', 35, true);   // ohne Übungseffekt, siehe probe()
         if(p.erfolg){ const w=S.wunden.splice(krank,1)[0]; atemKlemmen();
           zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden</span>`; }
         else zusatz = ' Das Fieber bleibt. Es wird bei Dunkelheit stärker, und es wird jede Nacht bei Dunkelheit stärker. <span class="fein">Krankheit hält an</span>';
       }
+      // Erst die Krankheit weg, dann heilen — sonst heilt man gegen den kleineren Vorrat.
+      lebenAuffuellen(0.25); S.atem=Math.min(100,S.atem+18); atemKlemmen();
       return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>' + zusatz; }},
 
   /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
@@ -222,12 +223,16 @@ function winterTun(id){
        und sie kostet eine der drei Wochen. Wer verwundet aus dem Feldzug kommt,
        muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
        Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
-    S.belastung=Math.max(0,S.belastung-16); lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
+    /* Reihenfolge: **erst die Wunde heraus, dann heilen.** Andersherum rechnete
+       `lebenAuffuellen` noch gegen den wundenverkleinerten Vorrat, und die
+       teuerste Woche des Spiels verschenkte einen Teil ihrer Wirkung. */
+    S.belastung=Math.max(0,S.belastung-16);
     // Krankheiten zuerst — sie sind das, was einen Mann über Wochen aufzehrt
     const krank = S.wunden.findIndex(w=>w.zehrt);
     if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
-    if(S.wunden.length){ const w=S.wunden.shift(); atemKlemmen();
-      W.log.push(`${w.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(w.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(w.name)}" überstanden</span>`); }
+    const weg = S.wunden.length ? S.wunden.shift() : null;
+    lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
+    if(weg) W.log.push(`${weg.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(weg.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(weg.name)}" überstanden</span>`);
     else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);
@@ -276,6 +281,11 @@ function chronikblatt(endeText, p){
 
 function eintragen(endeText){
   const p = wertung();
+  /* Der Vergleich muss **vor** dem Anheben stehen. Vorher prüfte der
+     Bildschirm `p.summe >= META.vp`, nachdem `META.vp` schon angehoben war —
+     ein Lauf, der den bisherigen Bestwert nur einstellte, meldete „Neuer
+     Rekord" und einen Vorrat, der sich gar nicht bewegt hatte. */
+  p.rekord = p.summe > META.vp;
   META.chronik.push(chronikblatt(endeText, p));
   META.laeufe = (META.laeufe|0) + 1;
   META.vp = Math.max(META.vp, p.summe);
@@ -302,17 +312,26 @@ function wertungsTabelleAus(c){
   </table>`;
 }
 
-function zeigeTod(){
+/* `letzterText` und `kk` reicht `gefallen()` aus dem Gefecht herein: der letzte
+   Absatz vor dem Umfallen und die Taten dieses Gefechts. Vorher baute
+   `kampfEnde()` beides in einen Bildschirm, den `zeigeTod()` eine Anweisung
+   später vollständig überschrieb — **sämtliche Todestexte der Sondermissionen
+   („Auf dem Schutt der Rampe bleibst du liegen") waren unerreichbar.** */
+function zeigeTod(letzterText, kk){
   const grund = S.todesart || 'Gefallen';
   laufVerwerfen();
   const p = eintragen(grund);
-  const neu = p.summe >= META.vp;
+  const neu = p.rekord;
   app.innerHTML = `<div class="card"><div class="ch"><span class="tot">Ende</span><span>${esc(grund)}</span></div>
     <div class="cb">
       <div class="prose">
+        ${letzterText?`<p>${letzterText}</p>`:''}
         <p><b>${esc(S.name)}</b>, ${rangName(S.rang)} der 32. Halbbrigade, ${esc(grund.toLowerCase())}.</p>
         <p>${todesText()}</p>
       </div>
+      ${kk && kk.taten && kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
+        ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
+      </div>`:''}
       <div class="grid2" style="margin-top:18px">
         <div>${wertungsTabelle(p)}</div>
         <div class="note ${neu?'green':'red'}">
@@ -343,7 +362,7 @@ function todesText(){
 function zeigeKapitelende(n){
   n = n || KAPITEL[KAPITEL.length-1] || {};
   const p = eintragen('Feldzüge überstanden · '+rangName(S.rang));
-  const neu = p.summe >= META.vp;
+  const neu = p.rekord;
   const rangSatz = S.rang>=3 ? 'Acht Mann sehen dich morgens an und warten, was du sagst.'
     : (S.rang===2 ? 'Du stehst nicht mehr in der Mitte des Bataillons, sondern dort, wo sie die Leute hinstellen, auf die es ankommt.'
                   : 'Du stehst noch in der Reihe wie am ersten Tag — aber du stehst.');

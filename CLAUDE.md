@@ -257,12 +257,20 @@ Leben ≤ 0 → Tod
 | Winterwoche „Schlafen, essen, nichts tun" | +60 % |
 | Ein Jahr Garnison beim `uebergang` | voll |
 
+**Reihenfolge-Regel für jede Heilung: erst die Wunde entfernen, dann auffüllen.** `lebenMax()` schrumpft mit offenen Wunden, also rechnet ein `lebenAuffuellen()` davor gegen den zu kleinen Vorrat. An drei Stellen lag es falsch — Winterwoche, Lagerabend und das Jahr Garnison; letzteres lieferte einen Mann mit 68 statt 82 Leben nach Ägypten, obwohl „Leben und Atem voll" dastand.
+
 **Der Atem-Deckel ist die Kehrseite:** Mit 25 Leben stehen einem höchstens 25 Atem zu — unter der Warnschwelle 35, nahe am Malus bei 30. Ein Schwerverwundeter kommt also von allein wieder hoch, aber bis dahin kämpft, marschiert und übt er als der, der er gerade ist. `atemKlemmen()` wird nach **jeder** Änderung an Atem oder Leben gerufen — wer eine neue Stelle baut, die daran dreht, ruft sie ebenfalls, sonst leckt der Deckel. Nebenwirkung, die Absicht ist: Auch ein Gesunder mit Konstitution 70 hat höchstens 82 Atem — Konstitution kauft jetzt auch Luft.
 
 - **Der Streifschuss kostet zweierlei, und das ist Absicht:** Blut (bleibt) und eine Wunde, die der Feldscher nach dem Gefecht zunäht (bleibt nicht). Ohne die Wunde stimmte zwar die Todesrechnung, aber ein Mann schoss den ganzen Feldzug wie am ersten Tag — gemessen stieg der Caporal-Anteil auf 57 %, weil bessere Gefechte mehr Ruf bringen und Ruf die Beförderungsschwelle ist. Der Kratzer soll den Rest des Gefechts wehtun, nicht den Rest des Krieges.
 - **Eine Wunde aus einer Szene kostet 10 Lebenspunkte**, tötet aber nie unmittelbar (`anwenden()` klemmt bei 1). Der Tod gehört ins Gefecht, wo er einen Text und einen Ort hat; Ruhr und das Fieber aus Jaffa lassen einen bloß so geschwächt hineingehen, dass die nächste Kugel reicht.
 - **Die Wundenobergrenze 5 mit Verbluten ist ersatzlos weg.** Sie war der zweite Todespfad und wird von den Lebenspunkten mit erledigt.
 - **Wunden schlagen voll auf körperliche Werte** (Konstitution, Geschick, Muskete, Bajonett, Reiten), **nur zu einem Drittel auf geistige**. Vorher zogen sie von *allem* ab — das erzeugte eine Todesspirale: eine Wunde senkte Konstitution, das erhöhte die Todeschance, die nächste Wunde senkte sie weiter.
+
+**Ein Toter durchläuft keinen Stationsabschluss** (`gefallen()` in `src/kampf.js`). Jeder Gefechtstod endet dort und nirgends sonst: Kampfzustand weg, `toetlich()`, Todesbildschirm — mit dem letzten Absatz und den Taten dieses Gefechts.
+
+> **Warum das eine eigene Funktion braucht.** Vorher lief jeder Treffertod über `kampfEnde()`, und das ist der Abschluss einer *bestandenen* Station. Der Gefallene bekam dadurch noch die Niederlagen-Wirkung (Ruf −4 bis −6, was über `5·floor(ruf/10)` echte Veteranenpunkte kostete), der Feldscher nähte ihm eine Wunde zu, `stationErledigt()` heilte ihn um 5 % — er stand mit „Leben 4 von 64" im Chronikblatt —, zählte die **nächste** Station als erreicht (+2 VP, die der Rückzugstod nicht bekam) und schrieb sogar einen Spielstand des Toten, weil `S.lebt` erst eine Anweisung später falsch wurde. Das Chronikblatt trug außerdem das Datum der Folgestation. **Dass der Rückzugstod nichts davon tat, war der Beweis, dass es ein Versehen war.**
+>
+> Nebenwirkung, die niemand bemerkt hatte: `zeigeTod()` überschrieb den von `kampfEnde()` gebauten Bildschirm sofort — **sämtliche Todestexte der Sondermissionen waren unerreichbar.** „Auf dem Schutt der Rampe bleibst du liegen" hat vor dieser Reparatur nie jemand gelesen.
 
 > **Was der Umbau nebenbei abschafft: den frühen Tod.** Unter dem alten Wurf konnte man bei Montenotte in der zweiten Runde fallen. Jetzt braucht der Tod fünf bis acht Treffer, also mehrere Gefechte — niemand stirbt mehr vor Castiglione. Das ist die Kehrseite der Fairness und muss beim Lesen der Endrang-Zahlen mitgedacht werden (siehe „Zielwerte").
 
@@ -403,7 +411,7 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 
 **1 — Wunden verkleinern den Mann.** Das schließt die Lücke, durch die ein kundiger Spieler bisher kam: Leben heilt schnell nach (Zeit, Lagerabend, Winterwoche), Wunden wird man nur langsam los — der Feldscher näht je Gefecht die *leichteste*, der Rest wartet auf die Winterwoche oder das Jahr Garnison. Wer mit zwei alten Wunden nach Arcole geht, hat 66 statt 82 Punkte und über den Atem-Deckel entsprechend weniger Luft. **Der Boden bei 40 % ist die Sicherung gegen die Todesspirale:** Wunden machen einen kleiner, nie tot.
 
-**2 — Krankheit ist die Einlösung von „gefährlicher als Kugeln" (KONZEPT.md).** Sumpffieber (3), Hitzschlag (3), Ruhr (4), Fieber aus Jaffa (4) kosten an *jeder* Station weiter. Sie töten nie selbst (`anwenden()` und `stationErledigt()` klemmen bei 1), aber sie liefern einen Mann mit leerem Vorrat und keiner Luft am nächsten Gefecht ab. **Heilbar nur an zwei Stellen:** Lagerabend „Schlafen" gegen eine Konstitutions-Probe 35, oder eine Winterwoche (die Krankheit rückt dort vor). Der Feldscher kann sie nicht — eine Ruhr näht man nicht zu.
+**2 — Krankheit ist die Einlösung von „gefährlicher als Kugeln" (KONZEPT.md).** Sumpffieber (3), Hitzschlag (3), Ruhr (4), Fieber aus Jaffa (4) kosten an *jeder* Station weiter, **und wer krank ist, bekommt die 5 % Zeitheilung nicht** — sonst hebt sich beides auf. Genau das ist zwei Tage lang passiert: Die erste Fassung zog die Zehrung ab und heilte danach trotzdem; bei Konstitution 70 mit Sumpffieber standen +4 Heilung gegen −3 Zehrung, ein Kranker **gewann** also einen Punkt je Station. Der Kommentar „zehrt vorher, sonst hebt sich beides auf" war falsch gerechnet — beides sind Summanden, die Reihenfolge ändert nichts. Auch die Klemme lag falsch (je Wunde einzeln bei 1 statt auf die Summe), was bei zwei Krankheiten die Hälfte verschluckte. **Die Konstitutions-Probe im Lager würfelt mit `probe(k, schw, true)`, also ohne Übungseffekt** — sonst trainierte ausgerechnet der Kranke bei jedem Ruhe-Abend seine Konstitution und damit seinen Lebensvorrat. Sie töten nie selbst (`anwenden()` und `stationErledigt()` klemmen bei 1), aber sie liefern einen Mann mit leerem Vorrat und keiner Luft am nächsten Gefecht ab. **Heilbar nur an zwei Stellen:** Lagerabend „Schlafen" gegen eine Konstitutions-Probe 35, oder eine Winterwoche (die Krankheit rückt dort vor). Der Feldscher kann sie nicht — eine Ruhr näht man nicht zu.
 
 **3 — Wer gesehen wurde, wird geholt.** Der Adjutant sucht keine Unbekannten. Trifft gezielt den Aufsteiger und lässt den Vorsichtigen in Ruhe: Ehrgeiz koppelt sich an Blut, ohne dass jemand gezwungen wird.
 
@@ -481,12 +489,12 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **Italien überstanden** | 95 % | 100 % | 100 % | 100 % |
-| **Beide Feldzüge überstanden** | **43 %** | **20 %** | **68 %** | **75 %** |
-| Gestorben | 23 von 40 | **32 von 40** | 13 von 40 | 10 von 40 |
-| **Elitekompanie erreicht** | 48 % | 55 % | 93 % | 95 % |
-| **Caporal erreicht** | 45 % | 45 % | 88 % | **100 %** |
-| Punkte, Median | 106 | 115 | 185 | 188 |
+| **Italien überstanden** | 100 % | 98 % | 100 % | 95 % |
+| **Beide Feldzüge überstanden** | **50 %** | **18 %** | **68 %** | **68 %** |
+| Gestorben | 20 von 40 | **33 von 40** | 13 von 40 | 13 von 40 |
+| **Elitekompanie erreicht** | 55 % | 48 % | 93 % | 95 % |
+| **Caporal erreicht** | 50 % | 45 % | 90 % | **98 %** |
+| Punkte, Median | 121 | 109 | 186 | 188 |
 
 > **Das ist die Kurve, um die es geht.** Italien ist das Lehrstück und lässt fast jeden durch; **Ägypten tötet den ersten Mann** — vorsichtig sehen 43 % das Ende, wer aufsteigen will, nur 20 %. Mit dem Vorrat eines guten ersten Laufs (160 VP) steigt es auf 68 %, im dritten oder vierten Lauf (260 VP) auf 75 %, und der Caporal wird von einer Glückssache (45 %) zur Selbstverständlichkeit (100 %).
 >
@@ -547,7 +555,9 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | **Güte wirksam (gültig) · Erstlauf vorsichtig** | **40** | **95 %** | **45 %** | **106** |
 | **dieselbe Fassung · Erstlauf mutig** | **40** | **100 %** | **45 %** | **115** |
 | **dieselbe Fassung · Veteran 160 VP** | **40** | **100 %** | **88 %** | **185** |
-| **dieselbe Fassung · Veteran 260 VP** | **40** | **100 %** | **100 %** | **188** |
+| dieselbe Fassung · Veteran 260 VP | 40 | 100 % | 100 % | 188 |
+| **+ Fehlerbereinigung (Todespfad, Krankheit, Heilreihenfolge) · Erstlauf v / m** | **40 / 40** | **100 / 98 %** | **50 / 45 %** | **121 / 109** |
+| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 95 %** | **90 / 98 %** | **186 / 188** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
 
@@ -635,6 +645,10 @@ Zwei Dinge werden gespeichert, und sie haben nichts miteinander zu tun:
 **Fassungen.** `CHRONIK_FASSUNG` (1) und `LAUF_FASSUNG` (2, seit den Lebenspunkten) in `src/spielstand.js`. Wer das Format ändert, **erhöht die Zahl und hängt einen Wandler an** — jeder Wandler hebt genau eine Fassung auf die nächste, nie zwei auf einmal. Ein Spielstand aus einer neueren Fassung wird abgewiesen, nicht geraten. Die alte Chronik ohne Fassungsnummer ist Fassung 0 und wird weiterhin gelesen.
 
 **`localStorage` ist nur die bequeme Ablage** (Invariante 6). Die Datei bleibt maßgeblich: `speichern()` schreibt Chronik *und* laufenden Feldzug in eine JSON-Datei, `laden()` liest beides zurück. Wo `localStorage` fehlt — mancher Browser über `file://`, privater Modus —, läuft alles weiter, nur ohne Absturzsicherung; der Titelbildschirm sagt das dann auch.
+
+**Der Riegel gegen die schlimmste Datenvernichtung des Spiels** (`CHRONIK_GESPERRT`). Schlägt das Laden fehl, obwohl eine Datei da war — kaputte Prüfsumme, Fassung aus der Zukunft —, wird **nichts mehr geschrieben**, bis der Spieler ausdrücklich verwirft. Ohne den Riegel überschrieb das erste `chronikSichern()` (und das läuft an *jeder* Station) die gute Datei mit der leeren Neuchronik, das zweite auch noch die `.bak`-Generation: **nach zwei Stationen waren alle Veteranenpunkte weg**, und der sorgfältige Schutz in `wandle()` („aus der Zukunft: lieber nichts als Trümmer") war für nichts. Der Titelbildschirm sagt es und bietet „Alte Chronik verwerfen" an.
+
+**`dateiEinlesen` führt zusammen, statt zu ersetzen:** `vp` per `Math.max`, `laeufe` ebenso. Vorher senkte das Einspielen einer alten Datei den Vorrat — ein Verstoß gegen Invariante 2 in der Funktion, die ihn am wenigsten erwarten lässt.
 
 **Prüfsumme, keine Sicherung gegen Betrug.** Auf dem eigenen Rechner ist das aussichtslos, und weil nur der beste Lauf zählt (Invariante 2), lohnt Schummeln ohnehin nicht. Die Prüfsumme fängt halb geschriebene Dateien und kaputte Cloud-Abgleiche ab. Von der Chronik bleibt eine Generation als `.bak` stehen.
 

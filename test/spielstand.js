@@ -37,6 +37,14 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
   await p.click('#h_schmied'); await klick('Weiter zu den Veteranenpunkten');
   await p.click('#startbtn');
   const name = await p.evaluate(() => LAUF.mann.name);
+  /* Auch die erste Station hat einen Marschweg, dort kann also mit 35 % ein
+     Zwischenfall vor dem Lager stehen. Der Test hat das seit dem Einbau der
+     Zwischenfälle sporadisch als Fehler gemeldet — er muss ihn abräumen,
+     statt an ihm zu scheitern. */
+  if(await p.evaluate(()=> !!LAUF.marsch)){
+    await p.evaluate(()=>{ const b=document.querySelector('.ord:not([disabled])'); if(b) b.click(); });
+    const w = await p.$('.ord.weiter'); if(w) await w.click();
+  }
   pruef((await text()).includes('VERBLEIBENDE ABENDE'), 'Depot Savona ist die erste Station');
   pruef(await p.evaluate(()=>!!Ablage.lies('marschallstab.lauf')), 'Spielstand liegt beim Betreten des Lagers vor');
   pruef((await text()).includes('FELDZUG GESICHERT'), 'Das Lager sagt, dass gesichert wurde');

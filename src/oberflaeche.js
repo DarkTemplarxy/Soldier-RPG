@@ -8,7 +8,13 @@ const kopf = document.getElementById('kopfrechts');
 const fuss = document.getElementById('fusszeile');
 const untertitel = document.getElementById('untertitel');
 
-function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* Auch `"` und `'` — sonst bricht ein Name mit Anführungszeichen im Namensfeld
+   (`value="…"`) aus dem Attribut aus, und „Jean \"le Brave\" Duval" wird beim
+   Neuzeichnen still abgeschnitten. Das ist die einzige Stelle im Spiel, an der
+   Spielertext in einem Attribut landet; die Funktion muss trotzdem vollständig
+   sein, weil überall angenommen wird, dass sie es ist. */
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function balken(klasse, v, max){ return `<div class="bar ${klasse}"><i style="width:${Math.max(0,Math.min(100,100*v/max))}%"></i></div>`; }
 
 /* Ortswechsel über der Station: woher, wohin, wie weit, wie lange.
@@ -106,8 +112,10 @@ function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
 function angeschlagen(){ return S && S.leben <= lebenMax()/3; }
 
 /* Der ungeschmälerte Vorrat. Steht blass hinter dem aktuellen, sobald offene
-   Wunden ihn drücken — sonst wüsste niemand, warum die Obergrenze wandert. */
-function lebenGrund(){ return 40 + Math.round((S.attr.konstitution||20)*0.6); }
+   Wunden ihn drücken — sonst wüsste niemand, warum die Obergrenze wandert.
+   Rechnet über `lebenMax()` mit einem wundenlosen Mann, statt die Formel ein
+   drittes Mal zu schreiben. */
+function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
 
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
@@ -165,11 +173,18 @@ function zeigeTitel(){
     : '<tr><td class="d" colspan="4">Noch kein Eintrag. Der erste Mann wartet.</td></tr>';
 
   app.innerHTML = `
-  <div class="card"><div class="ch"><span>Der Marschallstab</span><span>Prototyp · Italien 1796/97</span></div>
+  <div class="card"><div class="ch"><span>Der Marschallstab</span><span>Prototyp · Italien 1796/97 · Ägypten 1798/99</span></div>
    <div class="cb">
     <div class="zit">Du beginnst 1796 als Rekrut mit einer Muskete, die dir nicht gehört.<br>
     Wenn du dieses Kapitel überlebst, bist du vielleicht Caporal.<br>
     Wahrscheinlicher liegst du im April in einem Graben bei Montenotte.</div>
+    ${CHRONIK_GESPERRT ? `<div class="ergebnis schlecht" style="margin-bottom:14px">
+      <b>Deine Chronik ist nicht lesbar.</b> Es lag ein Spielstand vor, aber er ist beschädigt oder
+      stammt aus einer neueren Fassung des Spiels. Solange das so ist, wird <b>nichts überschrieben</b> —
+      deine Veteranenpunkte sind noch da, dieses Spiel sieht sie nur nicht.
+      <p style="margin:10px 0 0">Lade die Datei über „Spielstand laden", oder verwirf die alte Chronik und fang bei null an.</p>
+      <p style="margin:10px 0 0"><button class="plain" onclick="if(confirm('Die alte Chronik wird überschrieben. Sicher?')){chronikFreigeben();zeigeTitel();}">Alte Chronik verwerfen</button></p>
+    </div>` : ''}
     ${offen ? `<div class="wirkung" style="margin-bottom:14px"><span>Unterbrochener Feldzug</span>
       ${esc(offen.mann.name)} · ${esc(rangNameVon(offen.mann))} · ${esc((KAPITEL[Math.min(offen.node,KAPITEL.length-1)].datum||'').split(' · ')[0])}</div>` : ''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
@@ -405,7 +420,7 @@ function zeigeErschaffung(neu){
   <div class="stage">${verlauf()}
     <div>
       <div class="card"><div class="ch"><span>Erster Schritt · Wer bist du</span></div><div class="cb">
-        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value">
+        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value;aktualisiereErschaffung()">
       </div></div>
       <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
         <div class="cb">${zeilen}
@@ -692,9 +707,12 @@ function zeigeMarschEreignis(e, n){
 }
 
 function marschWaehlen(i){
+  // Wächter gegen den zweiten Klick, bevor der Bildschirm ausgetauscht ist
   const e = MARSCH_EREIGNISSE.find(x=>x.id===LAUF.marsch);
+  if(!e){ LAUF.marsch = null; naechster(); return; }
   const n = KAPITEL[LAUF.node];
   const o = marschOffen(e)[i];
+  if(!o) return;
   let w, klasse='gut', probeText='';
   if(o.probe){
     const p = probe(o.probe.wert, o.probe.schw);
@@ -723,8 +741,13 @@ function naechster(){
   const n = KAPITEL[LAUF.node];
   if(n.datum && n.id && LAUF.gezaehlt !== n.id){
     LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
-    const b = META.bestKapitel[n.id] || {mal:0,rang:''};
-    b.mal++; if(!b.rang || S.rang>=RANG.findIndex(r=>r.name===b.rang)+1) b.rang = rangName(S.rang);
+    const b = META.bestKapitel[n.id] || {mal:0,rangN:0,rang:''};
+    b.mal++;
+    /* Die Rangzahl mitschreiben statt sie aus dem Namen zurückzurechnen:
+       `rangName(2)` liefert für den Voltigeur „Voltigeur", das in RANG nicht
+       vorkommt — `findIndex` gab −1, und damit überschrieb jeder Füsilier den
+       Eintrag eines Voltigeurs. */
+    if(S.rang >= (b.rangN|0)){ b.rangN = S.rang; b.rang = rangName(S.rang); }
     META.bestKapitel[n.id]=b;
     chronikSichern();
   }
@@ -755,6 +778,7 @@ function naechster(){
     // Hing der Lauf mitten in einer Ereignis-Frage, steht sie wieder da —
     // sonst ließe sich die Wahl durch Beenden und Fortsetzen umgehen.
     const e = K && K.ereignis && GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
+    if(K && K.ereignis && !e) K.ereignis = null;   // unbekannte ID nicht ewig mitschleppen
     if(e) zeigeEreignis(e);
     else if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.');
     else starteKampf(n);
@@ -780,10 +804,12 @@ function zeigeUebergang(n){
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
+    // Erst die Wunden weg, dann auffüllen: `lebenMax()` schrumpft mit offenen
+    // Wunden, sonst rückt der Mann mit 68 statt 82 ein, obwohl „voll" dasteht.
+    S.wunden = [];
     S.leben = lebenMax();
     S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
-    S.wunden = [];
     laufSichern();
   }
   app.innerHTML = `<div class="stage">${verlauf()}
