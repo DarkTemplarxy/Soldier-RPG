@@ -14,10 +14,18 @@
    sie fehlt, und schießt sonst. Gemessen wird damit, wie hart das Spiel für
    einen kundigen Spieler ist, nicht für einen blinden.
 
-   Aufruf:  node test/balance.js [anzahl]  */
+   Zwei Gemüter, weil das Spiel seit den Gefechts-Ereignissen zwei Antworten
+   hat: Vorsichtig (Vorgabe) tritt nur vor, wo seine Werte es klar tragen.
+   MUT=1 tritt immer vor, außer es steht um sein Leben. Der Abstand zwischen
+   beiden Messungen *ist* die Balance der Ereignisse — vorsichtig soll
+   überleben und wenig erreichen, mutig soll erreichen und öfter fallen.
+
+   Aufruf:  node test/balance.js [anzahl]
+            MUT=1 node test/balance.js [anzahl]  */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const N = parseInt(process.argv[2] || '40', 10);
+const MUT = process.env.MUT === '1';
 const ziel = path.resolve(__dirname, '../index.html');
 
 /* ── Die Punkteverteilung ──
@@ -66,14 +74,27 @@ const VERTEILUNG = { konstitution: 70, geschick: 60, kaltbluetigkeit: 40, autori
       if (t.includes('Nächster Mann')) { res.tot++; break; }
       if (t.includes('Noch einmal, besser')) { res.ende++; break; }
       const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
-      const zug = await p.evaluate(() => {
+      const zug = await p.evaluate((MUT) => {
         const btn = [...document.querySelectorAll('.ord:not([disabled])')];
         const f = re => btn.find(e => re.test(e.textContent));
         const txt = document.body.innerText;
         const anteil = S.leben / lebenMax();
         let z = null;
 
-        if (K) {
+        if (K && K.ereignis) {
+          /* Ereignis-Frage: wie eine Szene behandeln — größter Abstand zwischen
+             Wert und Schwierigkeit, Risiko mit Abschlag, bei wenig Blut gar
+             nicht. Der kundige Spieler tritt vor, wenn seine Werte es tragen. */
+          const eng = anteil <= 0.4;
+          const bewertet = btn.map(e => {
+            const m = e.textContent.match(/(\d+)\s+gegen\s+(\d+)/);
+            const risk = e.classList.contains('risk');
+            return { e, punkte: (m ? +m[1] - +m[2] : 5) - (risk ? (eng ? 90 : (MUT ? -10 : 20)) : 0) };
+          }).sort((a, x) => x.punkte - a.punkte);
+          z = bewertet.length ? bewertet[0].e : null;
+        }
+
+        else if (K) {
           /* Gefecht. Die Reihenfolge ist die Rangfolge:
              1. Die Lücke einmal je Gefecht — Ruf +1 und drei Runden weniger Verluste.
              2. Hinknien, wenn Blut oder Luft fehlen: −22 Gefahr und +10 Atem
@@ -132,7 +153,7 @@ const VERTEILUNG = { konstitution: 70, geschick: 60, kaltbluetigkeit: 40, autori
           const bewertet = btn.map(e => {
             const m = e.textContent.match(/(\d+)\s+gegen\s+(\d+)/);
             const risk = e.classList.contains('risk');
-            return { e, punkte: (m ? +m[1] - +m[2] : 5) - (risk ? (eng ? 90 : 20) : 0) };
+            return { e, punkte: (m ? +m[1] - +m[2] : 5) - (risk ? (eng ? 90 : (MUT ? -10 : 20)) : 0) };
           }).sort((a, x) => x.punkte - a.punkte);
           z = bewertet.length ? bewertet[0].e : null;
         }
@@ -140,7 +161,7 @@ const VERTEILUNG = { konstitution: 70, geschick: 60, kaltbluetigkeit: 40, autori
         if (!z) z = btn[0];
         if (z) z.click();
         return { ok: !!z, rang: S ? S.rang : 0, zweig: S ? S.zweig : null };
-      });
+      }, MUT);
       if (zug.rang > hoechster) hoechster = zug.rang;
       if (zug.zweig) zweig = zug.zweig;
       if (!zug.ok) break;

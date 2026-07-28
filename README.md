@@ -21,6 +21,8 @@ Als **Voltigeur** kämpfst du allein vor der Linie: zielen, Deckung wechseln, fr
 
 Als **Caporal** kommen acht Männer dazu, und mit ihnen Befehle: Salve schießen lassen, die Lücke schließen.
 
+Und mitten im Gefecht kommen Fragen, die keine Handgriffe sind. Der Adjutant sucht acht Mann für die Geschütze auf dem Hügel und sagt nicht, wofür. Der Adlerträger fällt, und der Adler steht schräg im Dreck, sechs Schritt vor der Linie, wo niemand steht. Vier Schritt weiter liegt einer und ruft, und hat keine Luft für laut. **Du kannst jedes Mal stehen bleiben.** Es kostet nichts und bringt nichts, und niemand sagt etwas dazu — weder jetzt noch später.
+
 Weiter oben — im Konzept entworfen, noch nicht gebaut — wird daraus eine Kompanie, ein Regiment, eine Division. Der General sieht dann eine Operationskarte und Meldungen, die vierzig Minuten alt und teilweise falsch sind. **Er sieht mehr und weiß weniger als der Fusilier.**
 
 Dazu ein paar Regeln, die das Spiel zusammenhalten:

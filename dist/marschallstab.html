@@ -1847,7 +1847,14 @@ function naechster(){
   kopfzeile();
   if(n.typ==='szene') zeigeSzene(n);
   else if(n.typ==='lager') zeigeLager(n);
-  else if(n.typ==='kampf'){ if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.'); else starteKampf(n); }
+  else if(n.typ==='kampf'){
+    // Hing der Lauf mitten in einer Ereignis-Frage, steht sie wieder da —
+    // sonst ließe sich die Wahl durch Beenden und Fortsetzen umgehen.
+    const e = K && K.ereignis && GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
+    if(e) zeigeEreignis(e);
+    else if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.');
+    else starteKampf(n);
+  }
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
@@ -2026,6 +2033,7 @@ function starteKampf(n){
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
               ruhm:0, taten:[],
+              ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -2216,6 +2224,209 @@ function sichtfeld(){
     <rect width="640" height="200" fill="url(#vg)"/></svg>`;
 }
 
+/* ══════════════════ EREIGNISSE IM GEFECHT ══════════════════
+
+   Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine
+   Frage, sie kosten nur Zeit. Ereignisse stellen die Frage, um die es in einem
+   Gefecht wirklich geht — **wie weit gehst du**. Jedes hat einen Weg, der
+   nichts kostet und nichts bringt, und einen, der Ruf, Nennungen und ein
+   kürzeres Gefecht bringt und dich umbringen kann.
+
+   Das ist der Ersatz für das Drehen an Schadenszahlen. Ein kundiger Spieler war
+   bis dahin nicht zu töten (40 von 40 Läufen überlebten beide Feldzüge), weil
+   optimales Spiel keine Frage mehr offenließ: Salve befehlen, knien, wenn es
+   eng wird, fertig. Die Härte darf nicht daher kommen, dass die Kugeln mehr
+   wehtun, sondern daher, dass der Weg nach oben durch Stellen führt, an denen
+   man auch bleiben kann. Wer nie vortritt, überlebt eher — und verzichtet auf
+   Ruf, Nennungen und die Abkürzungen, die ein Gefecht früh entscheiden. (Den
+   Caporal gibt Mut allein nicht: Dort ist die Gunst der Engpass, und die holt
+   man am Feuer. Mut kauft die Wertung, nicht den Rang.)
+
+   Aufbau wie eine Szene: `probe`, `erfolg`, `misserfolg`. Zusätzlich kennen die
+   Wirkungen hier `moral` (Widerstand des Feindes), `leben`, `eigen` (die eigene
+   Linie), `gefahr` (für den Rest des Gefechts) und `ende:'sieg'`.
+
+   `wenn(n)` entscheidet, ob ein Ereignis zur Lage passt — die Verfolgung gibt
+   es nur, wenn der Feind schon wankt, den Sturm nur, wenn er noch steht. */
+
+const GEFECHTS_EREIGNISSE = [
+
+  {id:'freiwillige', frage:'Der Adjutant sucht acht Mann',
+   wenn:(n)=> K.runde<=4 && K.feindMoral > n.feindMoral*0.5,
+   text:['Ein Adjutant kommt von rechts durch den Rauch, zu Fuß, ohne Hut. Auf dem Hügel drüben stehen zwei Geschütze, die eure Linie der Länge nach bestreichen, und solange sie stehen, geht hier niemand vor.',
+         'Er sagt, er braucht acht Mann. Er sagt nicht, wofür, aber alle wissen es. Neben dir sieht keiner auf.'],
+   optionen:[
+     {label:'Vortreten', hint:'Die Geschütze vernageln · Bajonett', risk:true,
+      probe:{wert:'bajonett', schw:45},
+      erfolg:{text:'Ihr geht seitlich den Hang hinauf, durch einen Graben, in dem Wasser steht. Es dauert acht Minuten und ist dann in vierzig Sekunden vorbei. Zwei von euch kommen nicht zurück, und der Adjutant schreibt sich Namen auf.',
+              moral:-22, ruf:5, nennung:true, leben:-8, atem:-18, belastung:6,
+              tat:'Sich freiwillig zu den Geschützen gemeldet'},
+      misserfolg:{text:'Ihr kommt bis auf dreißig Schritt. Dann drehen sie das rechte Geschütz, und es ist mit Kartätschen geladen. Du liegst hinterher im Graben und weißt nicht, wie lange. Die Geschütze stehen noch.',
+              leben:-30, atem:-25, belastung:12}},
+     {label:'Stehenbleiben', hint:'Es meldet sich schon jemand',
+      erfolg:{text:'Du siehst geradeaus. Acht andere treten vor, darunter zwei aus deiner Korporalschaft. Der Adjutant zählt sie ab und geht. Niemand sagt etwas zu dir, weder jetzt noch später.'}}]},
+
+  {id:'linie', frage:'Die Linie wankt',
+   wenn:(n)=> K.eigen < 72 && K.feindMoral > n.feindMoral*0.3,
+   text:['Rechts von dir geht ein Glied nach hinten. Nicht gelaufen, nur zwei Schritte, aber zwei Schritte sind der Anfang. Ein Sergent brüllt etwas, das im Lärm nicht ankommt.',
+         'Wenn die Linie hier aufgeht, schießt sie von der Seite hinein, und dann ist es kein Gefecht mehr, sondern ein Auflauf.'],
+   optionen:[
+     {label:'Stehen bleiben und es die anderen sehen lassen', hint:'Kaltblütigkeit', risk:true,
+      probe:{wert:'kaltbluetigkeit', schw:40},
+      erfolg:{text:'Du bleibst, wo du stehst, und lädst weiter, als wäre nichts. Der Mann links von dir bleibt auch. Dann der nächste. In zwanzig Sekunden steht die Linie wieder da, wo sie stand.',
+              moral:-8, ruf:3, eigen:6, tat:'Die Linie gehalten, als sie wankte'},
+      misserfolg:{text:'Du bleibst stehen, und du bleibst allein stehen. Zwanzig Schritt vor der Linie, die inzwischen hinter dir ist. Es dauert lange, bis du das merkst, und länger, bis du zurück bist.',
+              leben:-22, atem:-15, belastung:10, gefahr:6}},
+     {label:'Zwei Schritte mit zurück', hint:'Alle tun es',
+      erfolg:{text:'Du gehst mit. Es sind wirklich nur zwei Schritte, und danach steht ihr wieder. Aber ihr steht zehn Schritt weiter hinten als vorher, und drüben haben sie es gesehen.',
+              moral:6, ruf:-1, gefahr:-4}}]},
+
+  {id:'sturm', frage:'Sie kommen',
+   wenn:(n)=> K.runde>=3 && K.feindMoral > n.feindMoral*0.4,
+   text:['Drüben hört das Feuer auf, und das ist schlimmer als das Feuer. Dann kommen sie: zwei Glieder im Laufschritt, das Bajonett vorn, und sie schreien dabei, weil man ohne Schreien nicht auf eine Linie zulaufen kann.',
+         'Vierzig Schritt. Für einen Schuss reicht es noch, für zwei nicht.'],
+   optionen:[
+     {label:'Stehen und sie auf zwanzig Schritt herankommen lassen', hint:'Kaltblütigkeit · dann schießt es sich nicht mehr daneben', risk:true,
+      probe:{wert:'kaltbluetigkeit', schw:45},
+      erfolg:{text:'Du hältst die Muskete unten und zählst mit. Auf zwanzig Schritt geht die Salve los, und was danach noch steht, dreht um. So nah trifft jeder, auch die, die sonst nichts treffen.',
+              moral:-26, ruf:4, tat:'Auf zwanzig Schritt stehen geblieben'},
+      misserfolg:{text:'Die Nerven halten bis dreißig Schritt. Dann geht die Salve zu früh und zu hoch los, und sie sind trotzdem da. Was danach kommt, sind Kolben und Bajonette, und es dauert vier Minuten.',
+              leben:-28, atem:-22, belastung:12}},
+     {label:'Bajonett fällen und ihnen entgegen', hint:'Bajonett · zwei Linien, die aufeinander zulaufen', risk:true,
+      probe:{wert:'bajonett', schw:40},
+      erfolg:{text:'Ihr geht ihnen entgegen, und das erwarten sie nicht. Auf halbem Weg treffen sich die Linien, und die ihre bleibt stehen, bevor sie euch erreicht. Danach ist der Boden dazwischen belegt.',
+              moral:-30, ruf:4, leben:-10, atem:-20, vorn:true,
+              tat:'Dem Sturm entgegengegangen'},
+      misserfolg:{text:'Du gehst vor, und die Linie geht nicht mit. Was dann passiert, siehst du hinterher an deinem Ärmel und an dem, was von deinem Tornistergurt übrig ist.',
+              leben:-34, atem:-25, belastung:14}},
+     {label:'Ins zweite Glied und laden', hint:'Andere stehen vorn',
+      erfolg:{text:'Du gehst ein Glied zurück und lädst. Vor dir steht jemand, der jetzt das abbekommt, was sonst dich träfe. Die Linie hält auch ohne dich, gerade so.',
+              moral:-6, ruf:-1, gefahr:-6}}]},
+
+  {id:'fahne', frage:'Der Adlerträger fällt',
+   wenn:(n)=> K.eigen < 85 && K.feindMoral > n.feindMoral*0.25,
+   text:['Der Träger geht nach vorn weg, ohne Zwischenschritt, wie ein Sack. Der Adler kippt und bleibt schräg im Dreck stehen, sechs Schritt vor der Linie, wo niemand steht.',
+         'Ein Adler, den die anderen mitnehmen, ist das Ende einer Halbbrigade. Alle sehen hin, und keiner geht.'],
+   optionen:[
+     {label:'Ihn holen', hint:'Kaltblütigkeit · sechs Schritt ins Freie', risk:true,
+      probe:{wert:'kaltbluetigkeit', schw:50},
+      erfolg:{text:'Sechs Schritte hin, der Schaft ist warm und klebrig, sechs Schritte zurück. Es geht schneller, als du dachtest. Die Linie brüllt, als du wieder drin stehst, und brüllt weiter, als es längst nichts mehr zu brüllen gibt.',
+              moral:-14, ruf:6, nennung:true, eigen:8, leben:-6, atem:-12, gefahr:5,
+              tat:'Den Adler aus dem Dreck geholt'},
+      misserfolg:{text:'Du kommst bis auf zwei Schritte heran. Was dich trifft, wirft dich über den Schaft, und du liegst mit dem Gesicht in derselben Pfütze wie der Träger. Jemand zieht dich am Kragen zurück; den Adler holt ein anderer.',
+              leben:-30, atem:-20, belastung:12}},
+     {label:'Weiterladen', hint:'Es ist ein Stück Messing an einem Stock',
+      erfolg:{text:'Du lädst. Nach einer halben Minute geht ein Sergent hin und holt ihn, und über den Sergent wird abends geredet. Über dich nicht.'}}]},
+
+  {id:'verwundeter', frage:'Jemand ruft',
+   wenn:(n)=> K.eigen < 88,
+   text:['Vier Schritt vor der Linie liegt einer und ruft. Nicht laut — er hat keine Luft für laut. Es ist Guérin, oder es ist jemand, der so aussieht wie Guérin, und beides ist im Rauch dasselbe.',
+         'Er wird dort liegen bleiben, bis das Gefecht vorbei ist. Danach räumen sie das Feld ab, aber danach ist ein langes Wort.'],
+   optionen:[
+     {label:'Ihn hereinziehen', hint:'Konstitution · du hast beide Hände voll und keine an der Muskete', risk:true,
+      probe:{wert:'konstitution', schw:40},
+      erfolg:{text:'Du packst ihn an den Achselriemen und ziehst rückwärts, und er ist schwerer als ein Mann sein sollte. Hinter der Linie lässt du ihn los und deine Arme zittern. Er lebt noch am Abend, und er weiß, wer ihn geholt hat.',
+              ruf:2, kameradschaft:12, gunst:1, atem:-16, leben:-4,
+              tat:'Einen Verwundeten aus dem Feuer geholt'},
+      misserfolg:{text:'Du kommst hin und bekommst ihn hoch, und dann trifft es einen von euch beiden. Du kriechst zurück, allein, und hörst hinter dir, wie das Rufen aufhört.',
+              leben:-24, atem:-20, belastung:14, kameradschaft:-4}},
+     {label:'Weiterschießen', hint:'Dafür ist nach dem Gefecht Zeit',
+      erfolg:{text:'Du legst an und feuerst über ihn hinweg. Das Rufen hört irgendwann von allein auf, und du weißt nicht, woran es liegt. Das Spiel sagt es dir auch nicht.'}}]},
+
+  {id:'verfolgung', frage:'Sie gehen',
+   wenn:(n)=> K.feindMoral > 0 && K.feindMoral < n.feindMoral*0.32,
+   text:['Es kippt nicht, es reißt. Erst gehen zwanzig, dann geht alles, und was eben noch eine Linie war, ist ein Feld voller Rücken.',
+         'Ein Bataillon, das man laufen lässt, steht morgen wieder da. Aber wer nachsetzt, hat keine Linie mehr um sich, und drüben stehen noch Reserven, die niemand gesehen hat.'],
+   optionen:[
+     {label:'Nachsetzen', hint:'Konstitution · das Gefecht sofort entscheiden', risk:true,
+      probe:{wert:'konstitution', schw:45},
+      erfolg:{text:'Ihr geht hinterher, so schnell es mit sechzig Pfund geht, und nehmt zweihundert Mann und vier Karren. Danach steht ihr keuchend auf einem Acker, und drüben ist niemand mehr, der etwas dagegen hätte.',
+              ende:'sieg', ruf:5, nennung:true, atem:-28, belastung:6,
+              tat:'Nachgesetzt, bis nichts mehr stand'},
+      misserfolg:{text:'Zweihundert Schritt weit geht es gut. Dann kommt aus dem Wäldchen rechts eine Schwadron, die dort die ganze Zeit gestanden hat, und ihr steht ohne Linie und ohne Ordnung im Freien. Der Rückweg kostet mehr als der Hinweg.',
+              leben:-30, atem:-30, belastung:14, eigen:-14}},
+     {label:'Stehenbleiben und die Ordnung halten', hint:'Sie sind weg, das reicht',
+      erfolg:{text:'Der Sergent lässt halten und richten. Drüben verschwinden sie hinter der Kuppe, und ihr steht in Reih und Glied auf einem Feld, auf dem sonst nichts mehr steht.',
+              moral:-10}}]}
+];
+
+/* Höchstens zwei je Gefecht, frühestens ab der zweiten Runde, und jedes nur
+   einmal. Ohne die Obergrenze würde ein langes Gefecht (Akkon: neun Runden) zu
+   einer Ereigniskette, und die Frage „wie weit gehst du" nutzt sich ab, wenn
+   sie fünfmal hintereinander kommt. */
+function ereignisWuerfeln(n){
+  if(K.ereignisZahl >= 2 || K.runde < 2) return null;
+  if(Math.random() > 0.45) return null;
+  const moeglich = GEFECHTS_EREIGNISSE.filter(e => !K.gesehen.includes(e.id) && e.wenn(n));
+  if(!moeglich.length) return null;
+  return moeglich[Math.floor(Math.random()*moeglich.length)];
+}
+
+function zeigeEreignis(e){
+  const n = KAPITEL[LAUF.node];
+  const opt = e.optionen.map((o,i)=>`<button class="ord ${o.risk?'risk':''}" onclick="ereignisWaehlen(${i})">
+    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`).join('');
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>${esc(e.frage)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb">${sichtfeld()}
+        <div class="prose" style="margin-top:15px">${e.text.map(t=>`<p>${t}</p>`).join('')}</div>
+        <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden}
+          · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
+          · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}</div>
+        ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
+      </div></div>
+      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+/* Die Wirkung eines Ereignisses. Ruf kommt hier an `anerkennung()` vorbei und
+   damit an der Obergrenze von drei je Gefecht: Die gilt für Handlungen, die man
+   jede Runde wiederholen kann, und soll das Einsammeln verhindern. Ein Ereignis
+   kommt höchstens einmal und stellt eine Frage, die etwas kostet — es ist genau
+   das, wofür „besondere Dinge am Gefechtsende" gedacht war. */
+function ereignisWirkung(w){
+  if(w.moral) K.feindMoral += w.moral;
+  if(w.eigen) K.eigen = Math.max(0, Math.min(100, K.eigen + w.eigen));
+  if(w.gefahr) K.gefahrPlus = (K.gefahrPlus||0) + w.gefahr;
+  if(w.leben) S.leben = Math.max(0, S.leben + w.leben);
+  if(w.atem) S.atem = Math.max(0, Math.min(100, S.atem + w.atem));
+  if(w.belastung) S.belastung = Math.max(0, Math.min(100, S.belastung + w.belastung));
+  if(w.kameradschaft) S.kameradschaft = Math.max(0, Math.min(100, S.kameradschaft + w.kameradschaft));
+  if(w.gunst) S.gunst = Math.max(0, S.gunst + w.gunst);
+  if(w.ruf) S.ruf = Math.max(0, S.ruf + w.ruf);
+  if(w.nennung) S.nennungen++;
+  if(w.vorn) K.vorn = true;
+  if(w.tat && w.ruf > 0) K.taten.push({was:w.tat, ruf:w.ruf});
+}
+
+function ereignisWaehlen(i){
+  const n = KAPITEL[LAUF.node];
+  const e = GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
+  const o = e.optionen[i];
+  const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
+  const w = p.erfolg ? o.erfolg : (o.misserfolg || o.erfolg);
+  K.ereignis = null;
+  ereignisWirkung(w);
+  K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
+  S.log.push(n.id+': '+o.label);   // steht auf dem Chronikblatt unter der Station
+
+  if(S.leben <= 0){
+    kampfEnde(false, w.text + ' Du setzt dich hin, weil du nicht anders kannst, und stehst nicht wieder auf.');
+    toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
+    zeigeTod(); return;
+  }
+  if(w.ende==='sieg' || K.feindMoral <= 0){ kampfEnde(true, w.text); return; }
+  K.runde++;
+  if(K.runde > n.runden){
+    const knapp = K.feindMoral < n.feindMoral*0.35;
+    kampfEnde(knapp, w.text + (knapp?' Und dann ist es plötzlich vorbei.':' Es wird dunkel, und nichts ist entschieden.'));
+    return;
+  }
+  laufSichern();
+  zeigeKampf(w.text);
+}
+
 function zeigeKampf(text){
   const n = KAPITEL[LAUF.node];
   const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
@@ -2332,7 +2543,7 @@ function kampfAktion(id){
   K.protokoll.push(text);
 
   // Feindliche Wirkung
-  let gefahr = n.gefahr + gefahrMod;
+  let gefahr = n.gefahr + gefahrMod + (K.gefahrPlus||0);
   if(K.deckung && id!=='ducken' && id!=='deckung') K.deckung=false;
   if(S.belastung>60) gefahr += 6;
   if(S.atem<30) gefahr += 5;
@@ -2397,6 +2608,19 @@ function kampfAktion(id){
     kampfEnde(knapp, text+treffer+(knapp?' Und dann ist es plötzlich vorbei.':' Es wird dunkel, und nichts ist entschieden.'));
     return;
   }
+
+  /* Ereignis vor der nächsten Runde: Es unterbricht die Handgriffe mit einer
+     Frage. Der Text der eben abgeschlossenen Runde steht dabei nicht mehr da —
+     er kommt ins Protokoll, damit die Frage die Seite für sich hat. */
+  const e = ereignisWuerfeln(n);
+  if(e){
+    K.ereignis = e.id; K.ereignisZahl++; K.gesehen.push(e.id);
+    K.protokoll.push(text + treffer);
+    laufSichern();
+    zeigeEreignis(e);
+    return;
+  }
+
   laufSichern();
   zeigeKampf(text + treffer);
 }
@@ -2404,6 +2628,27 @@ function kampfAktion(id){
 function kampfEnde(sieg, letzterText){
   const n = KAPITEL[LAUF.node];
   const erg = sieg ? n.sieg : n.niederlage;
+
+  /* Der Rückzug kostet Blut — je mehr vom Feind noch steht, desto mehr.
+     Ohne diese Zeilen war Verlieren gratis: Wer unter 40 % Leben fiel, kniete
+     sich hin (−22 Gefahr, Rest ~4 %), ließ die Runden auslaufen und schlief
+     sich im Lager wieder hoch. Gemessen: null Tote in 80 Läufen, mutig wie
+     vorsichtig. Ein Gefecht, das man nicht gewinnt, muss man verlassen — und
+     eine Linie, die rückwärts durchs Feuer geht, lässt Männer liegen. Das ist
+     auch die historische Wahrheit: Gefallen wird beim Weichen, nicht im Stehen.
+     5–18 Leben je nach Restwiderstand; wen es unter null drückt, der stirbt
+     auf dem Rückzug. Damit ist Aussitzen keine Antwort mehr, sondern eine
+     Wette darauf, dass die eigene Seite auch ohne dich gewinnt. */
+  if(!sieg && S.lebt && S.leben > 0){
+    const rest = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
+    K.rueckzug = Math.round(5 + 13*rest);
+    S.leben = Math.max(0, S.leben - K.rueckzug);
+    if(S.leben <= 0){
+      setzeKampf(null);
+      toetlich('Gefallen auf dem Rückzug bei '+n.datum.split(' · ')[1]);
+      zeigeTod(); return;
+    }
+  }
   anwenden(erg);
   verschleiss(0.9);
   /* Der Feldscher näht die leichteste Wunde zu — in der Regel den Streifschuss
@@ -2424,6 +2669,7 @@ function kampfEnde(sieg, letzterText){
     <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
+        ${kk.rueckzug?`<div class="wirkung"><span>Der Rückzug</span>Ihr geht rückwärts aus dem Feuer, und das Feuer geht mit. Wer fällt, bleibt liegen. <b>Leben −${kk.rueckzug}</b></div>`:''}
         ${kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
           ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
           ${kk.ruhm>=RUHM_JE_GEFECHT?'<p class="hinweis" style="margin:9px 0 0">Mehr sieht in diesem Rauch niemand.</p>':''}

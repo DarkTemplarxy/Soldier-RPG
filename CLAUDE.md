@@ -331,6 +331,37 @@ Beides sind Handlungen, die es für den Füsilier nicht gibt — sie sind der ei
 
 > **Warum „Lücke schließen" umgebaut wurde.** Vorher gab es −14 Gefahr und Kameradschaft +4 — und damit war die Handlung sinnlos: „Hinknien" gibt −22 Gefahr *und* +10 Atem und steht jedem offen. Ein Rangbefehl, der schlechter ist als die Grundhandlung, ist kein Rangbefehl. Jetzt schützt Hinknien **dich**, die Lücke schützt **deine Leute** — zwei verschiedene Fragen, und die zweite ist die, die einen Caporal von einem Füsilier unterscheidet. Der Ruf-Punkt gibt es nur einmal je Gefecht (`K.lueckeGelobt`), sonst ließe er sich in acht Runden achtmal einsammeln.
 
+### Ereignisse im Gefecht (`GEFECHTS_EREIGNISSE` in `src/kampf.js`)
+
+Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage, sie kosten nur Zeit. **Ereignisse stellen die Frage, um die es in einem Gefecht wirklich geht — wie weit gehst du.** Jedes hat einen Weg, der nichts kostet und nichts bringt, und einen, der Ruf, Nennungen und ein kürzeres Gefecht bringt und dich umbringen kann.
+
+> **Warum sie gebaut wurden.** Ein kundiger Spieler war nicht zu töten — 40 von 40 Läufen überlebten beide Feldzüge. Optimales Spiel ließ keine Frage mehr offen: Salve befehlen, knien, wenn es eng wird, fertig. Die naheliegende Antwort wäre gewesen, an Schaden und Gefahr zu drehen; die bessere ist, dass der Weg nach oben durch Stellen führt, an denen man auch bleiben kann. **Ereignisse machen Mut zu einer Entscheidung mit Preis, statt Feigheit zu einer Zahl.**
+
+| Ereignis | Wann | Der Weg, der etwas kostet | Gewinn | Preis bei Misserfolg |
+|---|---|---|---|---|
+| **Der Adjutant sucht acht Mann** | Runde ≤ 4, Feind über 50 % | Geschütze vernageln · Bajonett 45 | Moral −22 · Ruf +5 · Nennung | Leben −30 · Atem −25 |
+| **Die Linie wankt** | eigene Linie < 72 | Stehen bleiben · Kaltblütigkeit 40 | Moral −8 · Ruf +3 · Linie +6 | Leben −22 · Gefahr +6 für den Rest |
+| **Sie kommen** | ab Runde 3, Feind über 40 % | Auf zwanzig Schritt halten · Kaltblütigkeit 45 | Moral −26 · Ruf +4 | Leben −28 |
+| | | *oder* entgegengehen · Bajonett 40 | Moral −30 · Ruf +4 | Leben −34 |
+| **Der Adlerträger fällt** | eigene Linie < 85 | Ihn holen · Kaltblütigkeit 50 | Moral −14 · Ruf +6 · Nennung | Leben −30 |
+| **Jemand ruft** | eigene Linie < 88 | Hereinziehen · Konstitution 40 | Kameradschaft +12 · Gunst +1 · Ruf +2 | Leben −24 |
+| **Sie gehen** | Feind unter 32 % | Nachsetzen · Konstitution 45 | **Gefecht sofort gewonnen** · Ruf +5 · Nennung | Leben −30 · Linie −14 |
+
+**Höchstens zwei je Gefecht, frühestens ab Runde 2, jedes nur einmal, Wurf 45 % je Runde.** Ohne die Obergrenze würde Akkon mit seinen neun Runden zur Ereigniskette, und die Frage nutzt sich ab, wenn sie fünfmal hintereinander kommt.
+
+- **Ruf aus Ereignissen geht an `anerkennung()` vorbei** und damit an der Obergrenze von drei je Gefecht. Die gilt für Handlungen, die man jede Runde wiederholen kann, und soll das Einsammeln verhindern; ein Ereignis kommt höchstens einmal und kostet etwas. Es ist genau das, wofür „besondere Dinge am Gefechtsende" gedacht war.
+- **Die Wahl steht auf dem Chronikblatt** (`S.log`) und in „Was gesehen wurde" am Gefechtsende.
+- **Wer mitten in der Frage aufhört, steht wieder vor ihr.** `fortsetzen()` prüft `K.ereignis` — sonst ließe sich eine Mutprobe durch Beenden und Fortsetzen umgehen, und das wäre dieselbe Lücke wie ein Rücksetzpunkt im Lager.
+- **Mut kauft die Wertung, nicht den Rang.** Zum Caporal fehlt fast nie der Ruf, sondern die Gunst — und die holt man am Feuer, nicht vor der Linie.
+
+### Ein verlorenes Gefecht kostet Blut (`kampfEnde` in `src/kampf.js`)
+
+```js
+if(!sieg) S.leben -= 5 + 13·(Restwiderstand des Feindes / Anfangswert)
+```
+
+**Verlieren war gratis, und das machte alle Ereignisse zahnlos.** Wer unter 40 % Leben fiel, kniete sich hin (−22 Gefahr, Restgefahr etwa 4 %), ließ die Runden auslaufen und schlief sich im Lager wieder hoch — gemessen null Tote in 80 Läufen, mutig wie vorsichtig. Ein Gefecht, das man nicht gewinnt, muss man verlassen, und eine Linie, die rückwärts durchs Feuer geht, lässt Männer liegen. Historisch ist das dieselbe Wahrheit: Gefallen wird beim Weichen, nicht im Stehen. Wen es unter null drückt, den trägt es auf dem Rückzug — `todesart` sagt das dann auch.
+
 ### Wertung Kapitel 1 (`src/abschluss.js`)
 
 ```
@@ -375,13 +406,16 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 **Achtung: Der Testbot misst seit dem 28.07.2026 etwas anderes als vorher.** Er würfelt seine Attribute nicht mehr aus, sondern verteilt sie bewusst, ruht, wenn er verwundet ist, und befiehlt als Caporal die Salve. Gemessen wird damit, wie hart das Spiel für einen **kundigen** Spieler ist — vorher, wie hart es für einen blinden war. Alle Zahlen vor diesem Datum sind mit den neuen nicht vergleichbar.
 
-| Größe | Soll | Gemessen (40 Läufe, kundiger Bot) |
-|---|---|---|
-| **Italien überstanden** | Sollwert ungültig, siehe unten | **100 %** |
-| **Beide Feldzüge überstanden** | noch keiner | **100 %** |
-| **Elitekompanie erreicht** | noch keiner | 90 % |
-| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | **93 %** |
-| Punkte, Median | — | 210 · Spitze **230** |
+**`balance.js` misst seit den Gefechts-Ereignissen zwei Gemüter**, weil das Spiel zwei Antworten hat. `node test/balance.js 40` ist der vorsichtige Bot: Er tritt nur vor, wo seine Werte es klar tragen. `MUT=1 node test/balance.js 40` tritt immer vor, außer es steht um sein Leben. **Der Abstand zwischen beiden Zahlen ist die Balance der Ereignisse.**
+
+| Größe | Soll | vorsichtig | mutig |
+|---|---|---|---|
+| **Italien überstanden** | Sollwert ungültig, siehe unten | **100 %** | **95 %** |
+| **Beide Feldzüge überstanden** | noch keiner | 98 % | 90 % |
+| Gestorben | — | 1 von 40 | 4 von 40 |
+| **Elitekompanie erreicht** | noch keiner | 88 % | 75 % |
+| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | 88 % | 85 % |
+| Punkte, Median | — | 204 | 211 · Spitze **230** |
 
 > **Erreicht, nicht überlebt.** Gezählt wird seit dem 28.07.2026 der höchste Rang, den ein Mann je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das Skript den Rang *am Ende* — und das maß nach den Lebenspunkten vor allem, wann gestorben wird: Weil kaum noch jemand vor der Beförderungsstation stirbt, stieg die Endrang-Zahl auf 58 %, ohne dass die Beförderung leichter geworden wäre. Die neue Zahl misst die Schwelle selbst.
 
@@ -393,7 +427,13 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 > 2. **Kürzere Gefechte.** Die Salve des Caporals bringt 26–36 Schaden je Runde und lässt die eigene Muskete geladen; der Voltigeur zielt für 22–32 statt für 12–20 zu feuern. Wer das nutzt, ist nach drei Runden fertig statt nach acht — und Treffer kommen je Runde, nicht je Gefecht.
 > 3. **Ruhen im Lager.** Ein Abend gibt 25 % zurück, eine Winterwoche 60 %. Wer bei 60 % ruht, kommt nie in die Nähe von null.
 >
-> **Der Sollwert 45–55 % ist damit hinfällig und muss neu gesetzt werden** — für einen kundigen Spieler gehört er höher als für einen blinden (gutes Spiel *soll* sich lohnen), aber sicher nicht auf 100 %. Ein vernünftiges Band wäre 60–75 %. Die Hebel, ungemessen und nach erwarteter Wirkung geordnet: der Schaden je Treffer (5–11 / 15–25), die Gefahr-Werte der Gefechte (9–15), die Heilung im Lager (25 %) und der Salven-Schaden (26–36). **Wer daran dreht, misst danach beide Zahlen** — Überleben und erreichte Ränge.
+> **Die Gefechts-Ereignisse haben die Achse gebaut, aber die Quote kaum gesenkt** — 100 % gegen 95 %, ein Toter gegen vier. Das ist der richtige *Abstand* bei der falschen *Höhe*. Nach zwei Messrunden ist der Grund klar, und er liegt nicht im Gefecht:
+>
+> **Die Heilung ist um eine Größenordnung größer als der Schaden.** Kapitel 1 bietet 7 bis 10 Lagerabende (je 25 % ≈ 20 Leben) und drei Winterwochen (je 60 % ≈ 49 Leben) — zusammen über 200 Punkte Genesung. Dagegen stehen rund 4,5 Treffer à 11 Punkten plus ein bis zwei Ereignisse: **etwa 70**. Der `uebergang` setzt danach ohnehin alles auf voll. Solange das so ist, kann kein Gefecht töten, das man überlebt hat — man schläft es weg.
+>
+> **Der wirksamste Hebel ist deshalb die Zahl der Abende, nicht der Schaden.** Wenn ein Lagerabend zwischen Genesung *und* Ausbildung entscheiden muss, wird Ruhen teuer, und dann kostet jedes Ereignis wirklich etwas. Das ist auch der Hebel, der zur Erzählung passt: Es soll in jedem Lager mehr zu tun geben als Zeit da ist — genau das steht schon unter „Lager", nur trägt es die Zahlen nicht mehr, seit es Lebenspunkte zu heilen gibt.
+>
+> Weitere Hebel, ungemessen, nach erwarteter Wirkung: die Heilung je Abend (25 %), der Schaden je Treffer (5–11 / 15–25), die Gefahr-Werte (9–15), der Salven-Schaden (26–36). **Wer daran dreht, misst danach vier Zahlen** — Überleben und erreichte Ränge, je vorsichtig und mutig.
 
 **Seit Kapitel 2 misst `test/balance.js` zwei Quoten.** „Italien überstanden" ist der alte Zielwert und bleibt bei 45–55 %; „beide Feldzüge" ist neu und hat noch keinen Sollwert — der Bot muss dafür 32 statt 16 Stationen überleben. Ohne diese Trennung wäre der alte Zielwert nach dem Anbau bedeutungslos geworden. Der Punkte-Median fällt von 91 auf 45, weil Stationen nur noch 2 statt 3 Punkte zählen und die meisten Läufe jetzt vor dem Ende sterben; die Spitze steigt dafür von 162 auf 230.
 
@@ -417,7 +457,12 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | Lebenspunkte, 12 Schaden, Streifschuss ohne Wunde | 60 / 80 / 80 | 48 / 64 / 51 % | 57 % | 77–183 |
 | dieselbe Eichung, Streifschuss mit Wunde | 80 | 41 % | 55 % | 89 |
 | 11 Schaden, Streifschuss mit Wunde · **blinder Bot** | 80 | 55 % | 58 % (am Ende) | 107 |
-| **derselbe Stand · kundiger Bot (gültig)** | **40** | **100 %** | **93 % (erreicht)** | **210** |
+| derselbe Stand · kundiger Bot | 40 | 100 % | 93 % (erreicht) | 210 |
+| Gefechts-Ereignisse · vorsichtig | 40 | 100 % | 88 % | 204 |
+| Gefechts-Ereignisse · mutig | 40 | 100 % | 90 % | 212 |
+| + höhere Misserfolgskosten, 45 % Wurf · vorsichtig / mutig | 40 / 40 | 100 / 100 % | 80 / 93 % | 201 / 210 |
+| **+ Blutzoll beim Rückzug (gültig) · vorsichtig** | **40** | **100 %** | **88 %** | **204** |
+| **dieselbe Fassung · mutig** | **40** | **95 %** | **85 %** | **211** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 
@@ -450,6 +495,7 @@ Die Überlebensquote liegt mit 43 % zwei Punkte unter dem Band 45–55 % — inn
 | Lager | ruhen unter 60 % Leben · Fürsprache, solange Gunst < 4 · Muskete ölen · Schuster · scharf schießen · exerzieren |
 | Winterquartier | ruhen unter 80 % Leben oder bei einer Wunde · sonst Fürsprache, Ausrüstung, Drill |
 | Szenen | der Knopf mit dem größten Abstand zwischen Wert und Schwierigkeit; riskante mit Abschlag, bei wenig Blut gar nicht |
+| Gefechts-Ereignisse | dieselbe Rechnung. **`MUT=1` sucht das Risiko** statt es zu meiden — außer es steht um sein Leben. |
 | Veteranenpunkte | **kauft nichts.** Sonst wanderte die Messung: Der Vorrat ist der beste Lauf bisher, also spielte Lauf 40 ein anderes Spiel als Lauf 1. |
 
 **Warum die feste Verteilung wichtiger ist, als sie aussieht.** „Auswürfeln" maß vor allem den Zufallsgenerator: Weil der Tod seit den Lebenspunkten eine Schwelle ist und der Vorrat an der Konstitution hängt, entschied der Wurf über den Lauf, bevor er begann — derselbe Stand lieferte 48 %, 64 % und 51 %. Mit fester Verteilung ist die Streuung weg, und 40 Läufe sagen mehr als vorher 80.

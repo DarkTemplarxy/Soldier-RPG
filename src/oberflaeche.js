@@ -473,7 +473,14 @@ function naechster(){
   kopfzeile();
   if(n.typ==='szene') zeigeSzene(n);
   else if(n.typ==='lager') zeigeLager(n);
-  else if(n.typ==='kampf'){ if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.'); else starteKampf(n); }
+  else if(n.typ==='kampf'){
+    // Hing der Lauf mitten in einer Ereignis-Frage, steht sie wieder da —
+    // sonst ließe sich die Wahl durch Beenden und Fortsetzen umgehen.
+    const e = K && K.ereignis && GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
+    if(e) zeigeEreignis(e);
+    else if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.');
+    else starteKampf(n);
+  }
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);

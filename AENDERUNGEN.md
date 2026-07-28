@@ -5,6 +5,29 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Ereignisse im Gefecht: wie weit gehst du
+
+**Sechs Ereignisse unterbrechen die Rundenaktionen mit einer Frage.** Der Adjutant sucht acht Mann für die Geschütze auf dem Hügel. Die Linie wankt. Sie kommen im Laufschritt, vierzig Schritt, für einen Schuss reicht es noch. Der Adlerträger fällt und der Adler steht schräg im Dreck, sechs Schritt vor der Linie. Jemand ruft, vier Schritt vor der Linie, und hat keine Luft für laut. Sie gehen, und ein Bataillon, das man laufen lässt, steht morgen wieder da.
+
+Jedes hat einen Weg, der nichts kostet und nichts bringt, und einen, der Moral, Ruf und Nennungen bringt — und bei Misserfolg 22 bis 34 Lebenspunkte, also ein Viertel bis ein Drittel des Vorrats. Die Verfolgung entscheidet das Gefecht bei Erfolg sofort. Höchstens zwei je Gefecht, ab Runde 2, jedes nur einmal, Wurf 45 % je Runde.
+
+**Warum das statt an Schadenszahlen zu drehen:** Ein kundiger Spieler war nicht zu töten, weil optimales Spiel keine Frage mehr offenließ — Salve befehlen, knien, wenn es eng wird, fertig. Die Härte soll nicht daher kommen, dass Kugeln mehr wehtun, sondern daher, dass der Weg nach oben durch Stellen führt, an denen man auch bleiben kann.
+
+**Ein verlorenes Gefecht kostet jetzt Blut** — 5 bis 18 Punkte, je nachdem, wieviel vom Feind noch steht. Ohne das waren die Ereignisse zahnlos: Wer unter 40 % fiel, kniete sich hin (Restgefahr etwa 4 %), ließ die Runden auslaufen und schlief sich im Lager wieder hoch. Gemessen null Tote in 80 Läufen, mutig wie vorsichtig. Wen es unter null drückt, den trägt es auf dem Rückzug.
+
+**`balance.js` misst deshalb zwei Gemüter**, `MUT=1` sucht das Risiko statt es zu meiden. Der Abstand zwischen beiden Zahlen ist die Balance der Ereignisse. Gemessen über je 40 Läufe:
+
+| | Italien | beide Feldzüge | gestorben | Caporal erreicht | Punkte-Median |
+|---|---|---|---|---|---|
+| vorsichtig | 100 % | 98 % | 1 | 88 % | 204 |
+| mutig | 95 % | 90 % | 4 | 85 % | 211 |
+
+**Der Abstand stimmt, die Höhe nicht — und der Grund liegt nicht im Gefecht.** Kapitel 1 bietet 7 bis 10 Lagerabende (je ≈20 Leben) und drei Winterwochen (je ≈49), zusammen über 200 Punkte Genesung, gegen rund 70 Punkte Schaden. Solange das so ist, kann kein Gefecht töten, das man überlebt hat — man schläft es weg. Der wirksamste Hebel ist damit die Zahl der Abende, nicht der Schaden; als offener Punkt in `CLAUDE.md` vermerkt, samt Reihenfolge der übrigen Hebel.
+
+**Kleinkram:** Die Wahl steht auf dem Chronikblatt und in „Was gesehen wurde". Wer mitten in der Frage aufhört, steht beim Fortsetzen wieder vor ihr — sonst ließe sich eine Mutprobe durch Beenden und Fortsetzen umgehen, und das wäre dieselbe Lücke wie ein Rücksetzpunkt im Lager. Ruf aus Ereignissen geht an der Obergrenze von drei je Gefecht vorbei; die gilt für Handlungen, die man jede Runde wiederholen kann.
+
+---
+
 ## 2026-07-28 — Der Testbot spielt jetzt gut, und das deckt etwas auf
 
 **Gezählt wird der Rang, der *erreicht* wurde, nicht der, mit dem gestorben wird.** Die alte Zahl maß nach den Lebenspunkten vor allem, wann gestorben wird: Weil kaum noch jemand vor der Beförderungsstation stirbt, stieg der Endrang-Anteil auf 58 %, ohne dass die Beförderung leichter geworden wäre. `balance.js` merkt sich jetzt den höchsten Rang je Lauf und weist zusätzlich aus, wie viele die Elitekompanie erreicht haben.
