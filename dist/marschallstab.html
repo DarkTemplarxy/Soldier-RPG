@@ -6,25 +6,76 @@
 <title>Der Marschallstab — Italien 1796/97 · Ägypten 1798/99</title>
 <style>
 :root{
-    --bg:#121110; --panel:#1a1816; --panel2:#252119; --line:#3a342c;
-    --text:#ded5c4; --dim:#aca192; --faint:#948a79;
-    --blood:#c2483a; --brass:#d0a75e; --steel:#8b9aa3; --green:#8b9a68;
-    /* Papier: für alles, was im Spiel ein Schriftstück *ist* */
-    --papier:#e6dcc2; --papier2:#dbd0b4; --tinte:#2a2420; --tinte2:#584c3c;
+    /* ══════════════════ PERGAMENT ══════════════════
+
+       Die Leitmetapher ist **der Feldtisch**: Alles, was man sieht, sind
+       Papiere auf dem Tisch eines Capitaine — das Livret, die Meldungen, die
+       Schlachtskizze, das Wertungsblatt. Der Grund dahinter ist dunkles Holz
+       und nur an den Rändern zu sehen, damit die Bögen als Bögen lesbar sind.
+
+       **Warum das die frühere Nacht ablöst:** Die alte Begründung war „das
+       Dunkel ist die Nacht im Feldlager, und Papier ist den amtlichen Momenten
+       vorbehalten". Der Wechsel dunkel → hell machte den Beförderungsbescheid
+       von allein feierlich. Wird alles hell, stirbt dieser Effekt — deshalb
+       wird er ersetzt: Der Alltag steht auf **Feldpapier** (fleckig, gebräunt),
+       das Amtliche auf **Kanzleipapier** (heller, glatter, mit Doppellinie,
+       Vordruckkopf und Lacksiegel). Aus „dunkel → hell" wird
+       „Feldpapier → Kanzleipapier". */
+
+    --holz:#241c14;              /* der Tisch, nur an den Rändern sichtbar */
+    --bg:#241c14;
+    --panel:#e9dfc6;             /* Feldpapier — der Alltag */
+    --panel2:#e0d4b4;            /* zweiter Bogen, Tabellenzeilen, Knöpfe */
+    --line:#b3a382;              /* Kante eines Bogens */
+    --line2:#c9bb9c;             /* feinere Trennlinie im Bogen */
+
+    /* Tinte. Eisengallustinte wird mit den Jahren bräunlich — genau das ist
+       der Ton, in dem 1800 geschrieben wurde. Kontraste auf --panel: */
+    --text:#2a2420;              /* 11,4 : 1 */
+    --dim:#584c3c;               /*  6,2 : 1 */
+    --faint:#6d5f4b;             /*  4,8 : 1 */
+
+    /* Die drei Bedeutungsfarben behalten ihre Bedeutung und wechseln nur den
+       Ton: Auf hellem Grund muss Farbe dunkel sein, sonst verschwindet sie.
+       Grün ist Zugewinn, Rot ist Kosten, Bronze gliedert. Wer eine vierte
+       Bedeutung einführt, nimmt den dreien ihre. */
+    --blood:#8f2a1e;             /* Siegellack       ~6,0 : 1 */
+    --brass:#6e5320;             /* Bronze statt Gold ~5,3 : 1 */
+    --green:#3e5a2c;             /* Jägergrün        ~5,4 : 1 */
+    --steel:#3f5670;             /* Uniformblau */
+
+    /* Kanzleipapier — für alles, was ein amtliches Schriftstück *ist* */
+    --papier:#f2ebda; --papier2:#e8dfc9; --tinte:#241f1a; --tinte2:#4e4335;
+
     /* Didone — die Schriftform der französischen Zeit um 1800: hohe
        Strichkontraste, senkrechte Achse. Nur Systemschriften, kein Download:
        Das Spiel bleibt eine Datei ohne Abhängigkeiten. Wo keine da ist,
        fällt es auf Georgia zurück, und das ist kein Verlust. */
     --didone:'Didot','Bodoni 72','Bodoni MT','Playfair Display',Georgia,serif;
+
+    /* ── Papierkorn, prozedural ──
+       Zwei SVG-Filter als data-URI: feines Faserrauschen und große
+       Vergilbungswolken. **Keine einzige Bilddatei** — das hält `file://`,
+       die Einzeldatei-Weitergabe und die Ladezeit intakt, genau wie beim
+       Sichtfeld und den Rangabzeichen. */
+    /* `feTurbulence` rauscht in **Farbe** — ohne `feColorMatrix saturate 0`
+       liegen grüne und rosa Flecken auf dem Papier statt Faserkorn. Der
+       zweite Filterschritt zieht die Sättigung heraus, der dritte hebt den
+       Kontrast so weit an, dass ein feines Grau übrig bleibt. */
+    --korn:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.16' intercept='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+    --wolken:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.09' intercept='0.02'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='480' height='480' filter='url(%23w)'/%3E%3C/svg%3E");
   }
+
   /* Kapitälchen statt Versalien: Um 1800 wurden Überschriften gesperrt
      gesetzt, nicht geschrien. `font-variant` erhält die Wortgestalt. */
   h1,.ch,.mini,th{ font-family:var(--didone); }
   h1{ font-variant:small-caps; text-transform:none !important; letter-spacing:.2em; }
   .prose,.ergebnis,.note{ font-variant-numeric:oldstyle-nums; }
-  /* Kontrast: --dim und --faint waren #877e71 und #5c554b — auf dem Braun der
-     Karten ergab das 2,2:1 bei den Beschriftungen. Jetzt 4,7:1 und 6,6:1.
-     Wer hier abdunkelt, macht die Hälfte der Oberfläche wieder unlesbar. */
+
+  /* Kontrast: Alle Werte oben sind gegen --panel (#e9dfc6) gerechnet und
+     liegen über 4,5:1. **Wer die Papierfarbe abdunkelt oder die Tinte
+     aufhellt, rechnet beide Spalten nach.** */
+
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{background:var(--bg);color:var(--text);
@@ -32,16 +83,34 @@
     -webkit-font-smoothing:antialiased}
   .wrap{max-width:1460px;margin:0 auto;padding:24px 20px 70px}
 
-  header.top{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:20px;
+  /* ── Der Seitenkopf liegt auf dem Tisch, nicht auf einem Bogen ──
+     Das ist die einzige Stelle der Oberfläche, an der die Tinte hell sein muss:
+     Über dem dunklen Holz wäre Eisengallustinte unlesbar. Die Werte sind gegen
+     --holz (#241c14) gerechnet, nicht gegen das Papier. */
+  header.top{border-bottom:1px solid #4a3a28;padding-bottom:14px;margin-bottom:20px;
     display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
-  h1{font-size:19px;font-weight:normal;letter-spacing:.14em;text-transform:uppercase;margin:0}
-  .sub{color:var(--dim);font-size:12.5px;font-style:italic;margin:3px 0 0}
+  h1{font-size:19px;font-weight:normal;letter-spacing:.14em;text-transform:uppercase;margin:0;
+    color:#e4d7ba}                                  /* 11,9 : 1 auf dem Holz */
+  .sub{color:#b0a084;font-size:12.5px;font-style:italic;margin:3px 0 0}   /* 6,3 : 1 */
   .hdrright{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
-    color:var(--dim);letter-spacing:.1em;text-align:right}
+    color:#b0a084;letter-spacing:.1em;text-align:right}      /* auf dem Holz */
 
-  .card{background:var(--panel);border:1px solid var(--line);margin-bottom:18px}
+  /* ── Der Bogen ──
+     Grundton, darüber die Vergilbungswolken und das feine Faserkorn, dazu eine
+     Vignette, die die Ränder minimal abdunkelt: Papier, das lange in einer
+     Tasche lag. Alles prozedural, keine einzige Bilddatei.
+
+     `background-blend-mode:multiply` legt die Muster *in* das Papier statt
+     darüber — sonst grauen sie die Farbe aus, statt sie zu tönen. */
+  .card{background:
+      radial-gradient(120% 90% at 50% 40%, rgba(0,0,0,0) 55%, rgba(90,70,40,.13) 100%),
+      var(--korn), var(--wolken), var(--panel);
+    background-blend-mode:normal, multiply, multiply, normal;
+    background-size:auto, 150px 150px, 480px 480px, auto;
+    border:1px solid var(--line);margin-bottom:18px;
+    box-shadow:0 1px 3px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.18) inset}
   .ch{padding:8px 15px;border-bottom:1px solid var(--line);background:var(--panel2);
-    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c7bdab;
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);
     display:flex;justify-content:space-between;gap:12px}
   .cb{padding:17px}
 
@@ -52,9 +121,9 @@
 
   .prose p{margin:0 0 12px}
   .prose p:last-child{margin-bottom:0}
-  .prose em{color:#e0d8c8}
+  .prose em{color:var(--text)}
   .said{color:var(--dim)}
-  .ergebnis{border-left:2px solid var(--brass);background:#1c1915;padding:12px 15px;margin:14px 0 0;font-size:15px}
+  .ergebnis{border-left:2px solid var(--brass);background:rgba(120,100,70,.10);padding:12px 15px;margin:14px 0 0;font-size:15px}
   .ergebnis.gut{border-left-color:var(--green)}
   .ergebnis.schlecht{border-left-color:var(--blood)}
   .probe{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
@@ -67,7 +136,7 @@
   .stat{margin-bottom:9px}
   .statlab{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);
     margin-bottom:3px;font-family:ui-monospace,Menlo,Consolas,monospace}
-  .bar{height:5px;background:#0c0b0a;border:1px solid #2a2621}
+  .bar{height:5px;background:rgba(90,76,58,.22);border:1px solid var(--line)}
   .bar i{display:block;height:100%;transition:width .3s}
   .b-red i{background:var(--blood)} .b-brass i{background:var(--brass)}
   .b-steel i{background:var(--steel)} .b-green i{background:var(--green)}
@@ -75,25 +144,25 @@
   .rule{height:1px;background:var(--line);margin:14px 0}
   .kv{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;gap:10px;
     font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--dim)}
-  .kv b{font-weight:normal;color:#f0e7d5}
+  .kv b{font-weight:normal;color:var(--text)}
   .kv .warn{color:var(--blood)} .kv .ok{color:#8b9a68}
   .mini{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);margin:0 0 7px}
 
   .orders{margin-top:18px;border:1px solid var(--line);background:var(--panel)}
   .ordbody{display:flex;flex-direction:column;gap:8px;padding:14px 15px}
-  .ord{background:#100f0d;border:1px solid #443d33;color:var(--text);
+  .ord{background:var(--panel2);border:1px solid var(--line);color:var(--text);
     font-family:inherit;font-size:15px;padding:10px 14px;cursor:pointer;text-align:left;
     transition:border-color .15s,color .15s;line-height:1.45}
-  .ord:hover:not(:disabled){border-color:var(--brass);color:#efe6d4}
+  .ord:hover:not(:disabled){border-color:var(--brass);color:var(--brass)}
   .ord.risk:hover:not(:disabled){border-color:var(--blood)}
   .ord:disabled{opacity:.32;cursor:not-allowed}
   .ord .cost{display:block;font-size:11.5px;color:var(--faint);letter-spacing:.05em;
     font-family:ui-monospace,Menlo,Consolas,monospace;margin-top:4px}
-  .ord.weiter{border-color:var(--brass);color:#efe6d4}
+  .ord.weiter{border-color:var(--brass);color:var(--brass)}
 
-  button.plain{background:#100f0d;border:1px solid #443d33;color:var(--text);
+  button.plain{background:var(--panel2);border:1px solid var(--line);color:var(--text);
     font-family:inherit;font-size:14px;padding:8px 16px;cursor:pointer}
-  button.plain:hover{border-color:var(--brass);color:#efe6d4}
+  button.plain:hover{border-color:var(--brass);color:var(--brass)}
   button.plain:disabled{opacity:.3;cursor:not-allowed}
 
   table{width:100%;border-collapse:collapse;font-size:14px}
@@ -101,22 +170,22 @@
     letter-spacing:.13em;text-transform:uppercase;padding:0 9px 7px 0;
     border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,Consolas,monospace}
   th.n,td.n{text-align:right;white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace}
-  td{padding:6px 9px 6px 0;border-bottom:1px solid #232019;vertical-align:top}
+  td{padding:6px 9px 6px 0;border-bottom:1px solid var(--line2);vertical-align:top}
   tr:last-child td{border-bottom:none}
   td.k{color:var(--brass);white-space:nowrap}
-  td.d{color:#c2b8a6}
-  tr.hi td{background:#201d17}
+  td.d{color:var(--dim)}
+  tr.hi td{background:rgba(120,100,70,.14)}
   /* Grün heißt: hier ist etwas dazugekommen */
-  tr.gewaehlt td{background:#1a2016}
-  tr.gewaehlt td.k{color:#a9bb7d}
+  tr.gewaehlt td{background:rgba(62,90,44,.13)}
+  tr.gewaehlt td.k{color:var(--green)}
   button.plain.gewaehlt{border-color:var(--green);color:#b6c48d}
-  button.plain.haupt{border-color:var(--brass);color:#efe6d4}
+  button.plain.haupt{border-color:var(--brass);color:var(--brass)}
 
-  .note{border-left:2px solid var(--brass);background:#1c1915;padding:13px 16px;
-    color:#c9bfad;font-size:14.5px}
+  .note{border-left:2px solid var(--brass);background:rgba(120,100,70,.10);padding:13px 16px;
+    color:var(--text);font-size:14.5px}
   .note.red{border-left-color:var(--blood)}
   .note.green{border-left-color:var(--green)}
-  .note b{color:#e6ddcb;font-weight:normal}
+  .note b{color:var(--text);font-weight:normal}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media(max-width:800px){.grid2{grid-template-columns:1fr}}
@@ -127,32 +196,32 @@
   .attrrow{display:grid;grid-template-columns:118px 1fr 46px 78px;gap:10px;align-items:center;
     margin-bottom:9px}
   .attrname{font-size:14px}
-  .attrval{font-family:ui-monospace,monospace;font-size:14px;text-align:right;color:#e6ddcb}
-  .pmbtn{background:#100f0d;border:1px solid #443d33;color:var(--text);width:32px;height:26px;
+  .attrval{font-family:ui-monospace,monospace;font-size:14px;text-align:right;color:var(--text)}
+  .pmbtn{background:var(--panel2);border:1px solid var(--line);color:var(--text);width:32px;height:26px;
     cursor:pointer;font-family:ui-monospace,monospace;font-size:14px;line-height:1}
   .pmbtn:hover:not(:disabled){border-color:var(--brass)}
   .pmbtn:disabled{opacity:.25;cursor:not-allowed}
-  input[type=text]{background:#100f0d;border:1px solid #443d33;color:var(--text);
+  input[type=text]{background:var(--panel2);border:1px solid var(--line);color:var(--text);
     font-family:inherit;font-size:15px;padding:8px 11px;width:100%}
   input[type=text]:focus{outline:none;border-color:var(--brass)}
   .herkwahl{display:flex;flex-direction:column;gap:7px}
-  .herk{background:#100f0d;border:1px solid #443d33;padding:10px 13px;cursor:pointer;
+  .herk{background:var(--panel2);border:1px solid var(--line);padding:10px 13px;cursor:pointer;
     font-size:14px;transition:border-color .15s}
   .herk:hover{border-color:#5b4f3a}
-  .herk.on{border-color:var(--brass);background:#1c1913}
+  .herk.on{border-color:var(--brass);background:rgba(120,100,70,.14)}
   .herk .hn{color:var(--brass);font-size:14.5px}
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
 
   /* Ausbildung vorwegnehmen — Veteranenpunkte in Werte umsetzen */
   .punktzeile{display:grid;grid-template-columns:1fr 96px 62px 68px;gap:10px;align-items:center;
-    padding:5px 6px;border-bottom:1px solid #232019;font-size:14px}
+    padding:5px 6px;border-bottom:1px solid var(--line2);font-size:14px}
   .punktzeile:last-child{border-bottom:none}
-  .punktzeile.gewaehlt{background:#1a2016;box-shadow:inset 2px 0 0 var(--green)}
-  .punktwert b{font-weight:normal;color:#a9bb7d}
+  .punktzeile.gewaehlt{background:rgba(62,90,44,.13);box-shadow:inset 2px 0 0 var(--green)}
+  .punktwert b{font-weight:normal;color:var(--green)}
   .punktzeile.gewaehlt .punktwert i{color:var(--green)}
   .punktwert{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;
-    text-align:right;color:#f0e7d5;white-space:nowrap}
+    text-align:right;color:var(--text);white-space:nowrap}
   .punktwert i{color:var(--brass);font-style:normal;padding:0 3px}
   .hinweis{color:var(--faint);font-size:13px;margin:0 0 14px}
   .punktvp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
@@ -161,17 +230,17 @@
 
   /* Chronikblatt: der Name ist ein Knopf, dahinter steht der ganze Feldzug */
   .namebtn{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;
-    font-size:14px;color:#c2b8a6;text-align:left;border-bottom:1px dotted var(--faint)}
+    font-size:14px;color:var(--dim);text-align:left;border-bottom:1px dotted var(--faint)}
   .namebtn:hover{color:var(--brass);border-bottom-color:var(--brass)}
   .blattzeile{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:baseline;
-    padding:5px 0;border-bottom:1px solid #232019;font-size:14px;color:#c2b8a6}
+    padding:5px 0;border-bottom:1px solid var(--line2);font-size:14px;color:var(--dim)}
   .blattzeile:last-child{border-bottom:none}
   .blattort{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
     letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
   .tat{display:flex;justify-content:space-between;gap:12px;padding:4px 0;
-    border-bottom:1px solid #232019;font-size:14px;color:#c2b8a6}
+    border-bottom:1px solid var(--line2);font-size:14px;color:var(--dim)}
   .tat:last-child{border-bottom:none}
-  .tat b{font-weight:normal;color:#a9bb7d;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+  .tat b{font-weight:normal;color:var(--green);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
 
   /* Kampagnenverlauf links — was man gesehen hat, sieht man; sonst nichts */
   .verlauf .cb{padding:8px 9px}
@@ -180,7 +249,7 @@
   .kmpkopf{display:grid;grid-template-columns:14px 18px 1fr auto;gap:6px;align-items:baseline;
     width:100%;background:none;border:none;padding:8px 6px;cursor:pointer;text-align:left;
     font-family:inherit;color:var(--dim);font-size:14px}
-  .kmpkopf:hover{color:#f0e7d5}
+  .kmpkopf:hover{color:var(--text)}
   .kmppfeil{color:var(--brass);font-size:10px;line-height:1}
   .kmpnr{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--faint)}
   .kmpname{color:inherit}
@@ -193,41 +262,41 @@
   .kmpst{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;
     padding:5px 6px 5px 10px;border-left:1px solid #3a342c;font-size:13.5px;color:var(--dim)}
   .kmpst.gefecht{border-left-color:var(--blood)}
-  .kmpst.jetzt{border-left-color:var(--brass);background:#221e18}
-  .kmpst.jetzt .kmpst-ort{color:#f0e7d5}
+  .kmpst.jetzt{border-left-color:var(--brass);background:rgba(120,100,70,.10)}
+  .kmpst.jetzt .kmpst-ort{color:var(--text)}
   .kmpst-ort{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .kmpst-art{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;
     letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
     border:1px solid #322c25;padding:1px 5px;white-space:nowrap}
-  .kmpst.gefecht .kmpst-art{color:#d99184;border-color:#5a2a24}
+  .kmpst.gefecht .kmpst-art{color:var(--blood);border-color:#c09a90}
   .kmpst.jetzt .kmpst-art{color:var(--brass);border-color:#5a4526}
   .kmpleer{padding:5px 0 5px 11px;font-size:12.5px;font-style:italic;color:var(--faint)}
 
   /* Warnung — nur da, wo es wirklich gleich etwas kostet */
-  .warnung{margin:7px 0 0;padding:8px 11px;background:#2a1815;
-    border-left:2px solid var(--blood);color:#eab5ab;font-size:13px;line-height:1.5}
-  .warnung b{color:#f3d0c8;font-weight:normal;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .warnung{margin:7px 0 0;padding:8px 11px;background:rgba(143,42,30,.09);
+    border-left:2px solid var(--blood);color:var(--blood);font-size:13px;line-height:1.5}
+  .warnung b{color:var(--blood);font-weight:normal;font-family:ui-monospace,Menlo,Consolas,monospace}
   .statlab .warn{color:var(--blood)}
 
   /* Erklärung beim Überfahren — reines CSS, keine Abhängigkeit */
   .hilfe{position:relative;cursor:help;border-bottom:1px dotted var(--faint)}
-  .hilfe:hover{color:#f0e7d5;border-bottom-color:var(--brass)}
+  .hilfe:hover{color:var(--text);border-bottom-color:var(--brass)}
   .hilfe:hover::after{content:attr(data-hilfe);position:absolute;z-index:30;
     left:0;top:calc(100% + 7px);width:265px;padding:10px 13px;
-    background:#221e18;border:1px solid var(--line);border-left:2px solid var(--brass);
-    color:#ded5c4;font-family:Georgia,'Iowan Old Style',serif;font-size:13.5px;
+    background:rgba(120,100,70,.10);border:1px solid var(--line);border-left:2px solid var(--brass);
+    color:var(--text);font-family:Georgia,'Iowan Old Style',serif;font-size:13.5px;
     line-height:1.55;letter-spacing:0;text-transform:none;font-style:normal;
     box-shadow:0 8px 24px rgba(0,0,0,.65)}
   /* In der schmalen Seitenleiste nach links ausklappen, sonst steht es draußen */
   aside .hilfe:hover::after{left:auto;right:0}
 
   /* Ortswechsel — das Band über der Station */
-  .weg{border:1px solid var(--line);border-left:2px solid var(--brass);background:#171512;
+  .weg{border:1px solid var(--line);border-left:2px solid var(--brass);background:rgba(120,100,70,.09);
     padding:9px 15px;margin-bottom:14px}
   .wegorte{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
-    letter-spacing:.13em;text-transform:uppercase;color:#ded5c4}
+    letter-spacing:.13em;text-transform:uppercase;color:var(--text)}
   .wegorte i{color:var(--brass);font-style:normal;padding:0 9px}
-  .wegtext{color:#c2b8a6;font-size:13.5px;font-style:italic;margin-top:3px}
+  .wegtext{color:var(--dim);font-size:13.5px;font-style:italic;margin-top:3px}
 
   /* Lagebild vor dem Gefecht */
   .lage{border-top:1px solid var(--line);margin-top:16px;padding-top:13px}
@@ -242,13 +311,13 @@
   .pruefung{display:block;width:fit-content;margin-top:12px;padding:2px 8px;
     font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
     letter-spacing:.1em;text-transform:uppercase;
-    border:1px solid var(--line);background:#100f0d;color:var(--dim)}
+    border:1px solid var(--line);background:var(--panel2);color:var(--dim)}
   .pruefung.gut{border-color:var(--green);color:#b6c48d}
-  .pruefung.schlecht{border-color:var(--blood);color:#e08a7e}
+  .pruefung.schlecht{border-color:var(--blood);color:var(--blood)}
 
   /* Was sich dadurch geändert hat — die wichtigste Zeile nach jeder Wahl */
-  .wirkung{margin-top:13px;padding:9px 14px;background:#221e18;
-    border-left:2px solid var(--brass);color:#e2d9c7;font-size:13.5px;
+  .wirkung{margin-top:13px;padding:9px 14px;background:rgba(120,100,70,.10);
+    border-left:2px solid var(--brass);color:var(--text);font-size:13.5px;
     font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}
   .wirkung span{display:block;font-size:10.5px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--brass);margin-bottom:3px}
@@ -257,7 +326,7 @@
   .log div{padding:3px 0;border-bottom:1px solid #221f1a}
   .log div:last-child{border-bottom:none}
   .tot{color:var(--blood)}
-  .zit{font-style:italic;color:#c2b8a6;border-left:2px solid var(--brass);padding-left:14px;margin:14px 0}
+  .zit{font-style:italic;color:var(--dim);border-left:2px solid var(--brass);padding-left:14px;margin:14px 0}
   footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
     color:var(--faint);font-size:12px;font-style:italic;display:flex;
     justify-content:space-between;gap:14px;flex-wrap:wrap}
@@ -282,12 +351,39 @@
    #584c3c noch 6,2 : 1 — beides über der 4,5er-Schwelle des Projekts. Wer die
    Papierfarbe abdunkelt, prüft beide nach. */
 
-.papier{ background:var(--papier); color:var(--tinte); border:1px solid #9c8f76;
-  box-shadow:0 2px 16px rgba(0,0,0,.55); position:relative;
+/* ══════════════════ KANZLEIPAPIER ══════════════════
+
+   **Der Amtsmoment, seit die ganze Oberfläche hell ist.**
+
+   Früher war der Effekt „dunkel → hell": Ein Beförderungsbescheid auf Papier
+   inmitten einer nächtlichen Oberfläche wurde von allein feierlich. Diese
+   Wirkung ist mit dem Umstieg auf Pergament verloren gegangen — also wurde sie
+   ersetzt. Der Alltag steht auf **Feldpapier** (`.card`: gebräunt, fleckig,
+   mit Korn), das Amtliche auf **Kanzleipapier**: heller, glatter, sauberer.
+   Aus „dunkel → hell" wird **„Feldpapier → Kanzleipapier"**.
+
+   Drei Dinge tragen den Unterschied, und alle drei sind historisch:
+   das hellere, glattere Blatt · die **Doppellinie** als Vordruckrahmen ·
+   das **Lacksiegel** unten rechts (siehe `.papier::after`). */
+.papier{ background:var(--papier); color:var(--tinte); border:1px solid #a89a7e;
+  box-shadow:0 3px 20px rgba(0,0,0,.30), 0 0 0 1px rgba(255,255,255,.5) inset;
+  position:relative;
   background-image:
-    linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 38%),
-    radial-gradient(circle at 12% 8%, rgba(140,120,86,.16), transparent 42%),
-    radial-gradient(circle at 88% 92%, rgba(140,120,86,.13), transparent 46%); }
+    linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 34%),
+    radial-gradient(circle at 12% 8%, rgba(140,120,86,.10), transparent 42%),
+    radial-gradient(circle at 88% 92%, rgba(140,120,86,.09), transparent 46%); }
+
+/* Das Lacksiegel. Rein aus CSS — kein Bild, keine Datei: ein roter Klecks mit
+   unregelmäßigem Rand, darauf ein geprägtes N. Es sitzt außerhalb des
+   Doppelrahmens unten rechts, wo ein Siegel auf einem Vordruck sitzt. */
+.papier::after{ content:'N'; position:absolute; right:22px; bottom:18px;
+  width:44px; height:44px; border-radius:47% 53% 51% 49% / 52% 48% 52% 48%;
+  background:radial-gradient(circle at 36% 32%, #b8402c, #7e1f16 68%, #5e150e);
+  box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35),
+             inset 0 2px 3px rgba(255,255,255,.18);
+  color:rgba(255,225,210,.42); font-family:var(--didone); font-size:22px;
+  display:flex; align-items:center; justify-content:center;
+  text-shadow:0 1px 0 rgba(0,0,0,.5); pointer-events:none; }
 
 /* Die Doppellinie am Rand — so wurden militärische Vordrucke gerahmt. */
 .papier::before{ content:''; position:absolute; inset:6px; pointer-events:none;
@@ -374,7 +470,7 @@ a.plain:hover{ color:var(--brass) }
 <div id="app"></div>
 
 <footer>
-  <span>Prototyp · zwei Feldzüge · Ränge 1–3</span>
+  <span id="fussstand">Prototyp</span>
   <span id="fusszeile"></span>
 </footer>
 </div>
@@ -2313,6 +2409,11 @@ function wegband(n){
 
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
+  /* Die Fußzeile nannte „Prototyp · zwei Feldzüge · Ränge 1–3" — fest in
+     index.html, und damit derselbe Fehler wie im Titelkopf. Auch sie kommt
+     jetzt aus den Daten. */
+  const fussStand = document.getElementById('fussstand');
+  if(fussStand) fussStand.textContent = `${gebauteKapitel(true)} · Ränge 1–${RANG[RANG.length-1].n}`;
   if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`;
     untertitel.textContent = gebauteKapitel(true); return; }
   kopf.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;justify-content:flex-end">
@@ -3614,35 +3715,82 @@ function zeigeAnmarsch(n){
    vorhandenen Brauntönen, alles deterministisch — hier wird nie gewürfelt. */
 function gelaendeBild(art){
   if(art==='bruecke') return `
-    <rect x="0" y="150" width="640" height="50" fill="#15171c"/>
-    <rect x="0" y="150" width="640" height="2" fill="#232830"/>
-    <rect x="150" y="120" width="340" height="34" fill="#241f19"/>
-    <rect x="150" y="118" width="340" height="4" fill="#2f281f"/>
-    ${[0,1,2,3,4,5,6,7,8].map(i=>`<rect x="${152+i*42}" y="100" width="3" height="20" fill="#2f281f"/>`).join('')}
-    <rect x="150" y="100" width="340" height="3" fill="#2f281f"/>`;
+    <rect x="0" y="150" width="640" height="50" fill="${STICH.WASSER}"/>
+    <rect x="0" y="150" width="640" height="2" fill="${STICH.WASSER_LI}"/>
+    <rect x="150" y="120" width="340" height="34" fill="${STICH.HOLZ}"/>
+    <rect x="150" y="118" width="340" height="4" fill="${STICH.HOLZ_HELL}"/>
+    ${[0,1,2,3,4,5,6,7,8].map(i=>`<rect x="${152+i*42}" y="100" width="3" height="20" fill="${STICH.HOLZ_HELL}"/>`).join('')}
+    <rect x="150" y="100" width="340" height="3" fill="${STICH.HOLZ_HELL}"/>`;
   if(art==='damm') return `
-    <rect x="0" y="128" width="640" height="72" fill="#1b1f1c"/>
-    <rect x="0" y="140" width="640" height="46" fill="#20241f"/>
-    <rect x="0" y="120" width="640" height="26" fill="#26221b"/>
-    ${[40,120,300,470,560].map((x,i)=>`<ellipse cx="${x}" cy="${168+i*4}" rx="${22+i*6}" ry="3" fill="#2b312a" opacity=".6"/>`).join('')}
-    ${[70,210,420,540].map(x=>`<rect x="${x}" y="150" width="2" height="14" fill="#2f3a2c"/>`).join('')}`;
+    <rect x="0" y="128" width="640" height="72" fill="${STICH.SCHILF_D}"/>
+    <rect x="0" y="140" width="640" height="46" fill="${STICH.SCHILF_M}"/>
+    <rect x="0" y="120" width="640" height="26" fill="${STICH.SCHILF_H}"/>
+    ${[40,120,300,470,560].map((x,i)=>`<ellipse cx="${x}" cy="${168+i*4}" rx="${22+i*6}" ry="3" fill="${STICH.BUSCH}" opacity=".6"/>`).join('')}
+    ${[70,210,420,540].map(x=>`<rect x="${x}" y="150" width="2" height="14" fill="${STICH.HALM}"/>`).join('')}`;
   if(art==='mauer') return `
-    <rect x="0" y="0" width="640" height="92" fill="#191715"/>
-    <rect x="0" y="24" width="640" height="68" fill="#2a251d"/>
-    <rect x="0" y="24" width="640" height="3" fill="#3a332708"/>
-    ${Array.from({length:22},(_,i)=>`<rect x="${i*30}" y="24" width="26" height="9" fill="#332c22" opacity="${i%2?.5:.75}"/>`).join('')}
-    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92 Z" fill="#191715"/>
-    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92" fill="none" stroke="#3d352a" stroke-width="1.5"/>
-    ${[[262,78],[300,84],[352,80],[380,88]].map(([x,y])=>`<rect x="${x}" y="${y}" width="12" height="5" rx="2" fill="#2f2921"/>`).join('')}`;
+    <rect x="0" y="0" width="640" height="92" fill="${STICH.HIMMEL}"/>
+    <rect x="0" y="24" width="640" height="68" fill="${STICH.MAUER}"/>
+    <rect x="0" y="24" width="640" height="3" fill="${STICH.MAUER_FUGE}08"/>
+    ${Array.from({length:22},(_,i)=>`<rect x="${i*30}" y="24" width="26" height="9" fill="${STICH.MAUER_STEIN}" opacity="${i%2?.5:.75}"/>`).join('')}
+    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92 Z" fill="${STICH.HIMMEL}"/>
+    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92" fill="none" stroke="${STICH.BRESCHE_K}" stroke-width="1.5"/>
+    ${[[262,78],[300,84],[352,80],[380,88]].map(([x,y])=>`<rect x="${x}" y="${y}" width="12" height="5" rx="2" fill="${STICH.BRESCHE_S}"/>`).join('')}`;
   if(art==='wueste') return `
-    <rect x="0" y="0" width="640" height="200" fill="#1d1a15"/>
-    <path d="M470 84 L520 22 L570 84 Z" fill="#241f18"/>
-    <path d="M556 84 L592 40 L628 84 Z" fill="#221d16"/>
-    ${[40,92,140].map((x,i)=>`<g fill="#232019"><rect x="${x+5}" y="${44-i*3}" width="2.5" height="40"/>
+    <rect x="0" y="0" width="640" height="200" fill="${STICH.SAND}"/>
+    <path d="M470 84 L520 22 L570 84 Z" fill="${STICH.PYRAMIDE}"/>
+    <path d="M556 84 L592 40 L628 84 Z" fill="${STICH.PYRAMIDE_2}"/>
+    ${[40,92,140].map((x,i)=>`<g fill="${STICH.PALME}"><rect x="${x+5}" y="${44-i*3}" width="2.5" height="40"/>
       ${[-1,1].map(d=>`<ellipse cx="${x+5+d*9}" cy="${44-i*3}" rx="10" ry="3" transform="rotate(${d*18} ${x+5} ${44-i*3})"/>`).join('')}</g>`).join('')}
-    <rect x="0" y="84" width="640" height="116" fill="#211d16"/>`;
+    <rect x="0" y="84" width="640" height="116" fill="${STICH.SAND_UNTEN}"/>`;
   return '';
 }
+
+/* ══════════════════ DIE PALETTE DES SICHTFELDS ══════════════════
+
+   Jede Farbe des Gefechtsbildes steht hier und nirgends sonst. Vorher lagen
+   vierundvierzig Hexwerte über die Zeichenfunktionen verstreut — ein
+   Farbwechsel hieß vierundvierzig Einzelfunde, und genau daran scheitert jeder
+   Umbau der Gestaltung.
+
+   **Die Namen sind Rollen, keine Farben.** `WASSER` bleibt `WASSER`, ob es
+   nachtschwarz oder als Sepialavierung gezeichnet wird — deshalb überlebt diese
+   Tabelle den Wechsel von der Nacht zum Kupferstich. */
+const STICH = {
+  /* ── Kupferstich statt Nacht (28.07.2026) ──
+     Gefechtsdarstellungen der Epoche *sind* Stiche und lavierte Skizzen: Sepia
+     auf Papier, die Truppen koloriert. Das Sichtfeld ist damit kein Fenster in
+     eine dunkle Welt mehr, sondern **die Schlachtskizze auf dem Feldtisch** —
+     dieselbe Metapher wie die ganze Oberfläche.
+
+     Praktischer Nebeneffekt: Pulverdampf als graue Lavierung auf hellem Grund
+     funktioniert besser als heller Nebel auf dunklem. */
+  PAPIER:   '#e4d9bd',   /* der Bogen, auf dem die Skizze steht */
+  HIMMEL:   '#e4d9bd',   GRUND:     '#cbbb95',   HORIZONT:  '#8a7a58',
+  WASSER:   '#aeb5ab',   WASSER_LI: '#93a09b',
+  HOLZ:     '#a68a5e',   HOLZ_HELL: '#8c6f45',
+  SCHILF_D: '#b3ae86',   SCHILF_M:  '#c0ba91',   SCHILF_H:  '#cbbb95',
+  BUSCH:    '#9aa177',   HALM:      '#7d8759',
+  MAUER:    '#c3b491',   MAUER_FUGE:'#8a7a58',   MAUER_STEIN:'#b0a081',
+  BRESCHE:  '#7a6b4c',   BRESCHE_K: '#6b5c3f',   BRESCHE_S: '#8a7a58',
+  SAND:     '#ddd0ac',   SAND_UNTEN:'#d3c49f',
+  PYRAMIDE: '#c4b48e',   PYRAMIDE_2:'#b8a882',   PALME:     '#7d6f4c',
+  ZINNE:    '#9d8d6b',   ZINNE_ROT: '#a8503f',
+
+  /* Die drei kolorierten Farben — wie auf einer Uniformtafel. Rot und Blau
+     müssen auf dem hellen Bogen kräftiger sein als auf der Nacht, sonst
+     verschwinden sie im Papier. */
+  ROT:      '#9c3125',   ROT_TOT:   '#c39a90',
+  BLAU:     '#27415f',   BLAU_TOT:  '#9aa8b8',   BLAU_WAAGE:'#27415f',
+  MESSING:  '#8a6410',   /* du selbst — Bronze, dunkel genug fürs Papier */
+
+  WANKEND:  '#7a6a52',   WAAGE:     '#6d5f4b',   BESCHRIFT: '#584c3c',
+  BLITZ:    '#c8901f',   BLITZ_HOF: '#d8b060',
+
+  /* Pulverdampf: graue Lavierung, wie mit dem Pinsel über den Stich gelegt */
+  DAMPF:    '#6f6754',   DAMPF_BAND:'#8a8271',   DAMPF_RAND:'#e4d9bd',
+  DUNKEL:   '#3a3020'    /* die Vignette am Rand des Bogens */
+};
+
 
 /* ── Das Appell-Bild ──
    Die Abrechnung des Sergenten als Bild statt als Zahl: zwanzig Silhouetten,
@@ -3653,9 +3801,9 @@ function appellBild(uebrig){
   for(let i=0;i<20;i++){
     const x = 16 + i*26;
     R.push(i < uebrig
-      ? `<g fill="#4a4136"><rect x="${x-3}" y="14" width="6" height="18" rx="2.4"/><circle cx="${x}" cy="10" r="2.6"/>
+      ? `<g fill="${STICH.ZINNE}"><rect x="${x-3}" y="14" width="6" height="18" rx="2.4"/><circle cx="${x}" cy="10" r="2.6"/>
          <ellipse cx="${x}" cy="7" rx="5.4" ry="2" transform="rotate(-7 ${x} 7)"/></g>`
-      : `<rect x="${x-7}" y="30" width="14" height="2.6" rx="1.3" fill="#7a3229" opacity=".8"/>`);
+      : `<rect x="${x-7}" y="30" width="14" height="2.6" rx="1.3" fill="${STICH.ZINNE_ROT}" opacity=".8"/>`);
   }
   return `<svg viewBox="0 0 540 40" class="appell" role="img" aria-label="Appell: ${uebrig} von 20 stehen">${R.join('')}</svg>`;
 }
@@ -3679,12 +3827,12 @@ function sichtfeld(){
   const feindWeg = gefallene(FEIND, Math.round(FEIND*feindTeil), 7);
   const eigenWeg = gefallene(EIGEN, Math.round(EIGEN*eigenTeil), 13);
 
-  const ROT = '#c2483a', ROT_TOT = '#5e2a24', BLAU = '#7d93ad', BLAU_TOT = '#3a4655';
-  const MESSING = '#d0a75e';
+  const ROT = STICH.ROT, ROT_TOT = STICH.ROT_TOT, BLAU = STICH.BLAU, BLAU_TOT = STICH.BLAU_TOT;
+  const MESSING = STICH.MESSING;
 
   const kopfbedeckung = (x,y,b,f,art)=>{
     if(art==='baer') return `<rect x="${(x-4.6*b).toFixed(1)}" y="${(y-15.5*b).toFixed(1)}" width="${(9.2*b).toFixed(1)}" height="${(11*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}"/>`+
-      `<rect x="${(x+2.6*b).toFixed(1)}" y="${(y-19*b).toFixed(1)}" width="${(1.8*b).toFixed(1)}" height="${(5*b).toFixed(1)}" rx="${(0.9*b).toFixed(1)}" fill="#c2483a"/>`;
+      `<rect x="${(x+2.6*b).toFixed(1)}" y="${(y-19*b).toFixed(1)}" width="${(1.8*b).toFixed(1)}" height="${(5*b).toFixed(1)}" rx="${(0.9*b).toFixed(1)}" fill="${STICH.ROT}"/>`;
     if(art==='kasket') return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.4*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}" ry="${(3.4*b).toFixed(1)}"/>`;
     if(art==='turban') return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.8*b).toFixed(1)}" rx="${(5.4*b).toFixed(1)}" ry="${(4.4*b).toFixed(1)}"/>`;
     // Zweispitz: breit und flach, quer über dem Kopf getragen
@@ -3783,8 +3931,8 @@ function sichtfeld(){
   let wankend = '';
   if(fuehrt==='sektion' && sektTeil < 0.7){
     const wx = 8 + (meinPlatz-3)*schritt + schritt/2;
-    wankend = mann(wx, 168, 24, '#9a7f6a', .95, meinHut) +
-      `<text x="${wx}" y="196" text-anchor="middle" fill="#9a7f6a" font-size="8.5"
+    wankend = mann(wx, 168, 24, STICH.WANKEND, .95, meinHut) +
+      `<text x="${wx}" y="196" text-anchor="middle" fill="${STICH.WANKEND}" font-size="8.5"
         font-family="ui-monospace,monospace" letter-spacing=".5">WANKT</text>`;
   }
 
@@ -3824,8 +3972,8 @@ function sichtfeld(){
     const von = fuehrt ? meinPlatz-meineBreite : 0, bis = fuehrt ? meinPlatz+meineBreite : EIGEN_JE-1;
     for(let i=Math.max(0,von); i<=Math.min(EIGEN_JE-1,bis); i++){
       const x = 8 + i*schritt, y = 132;
-      blitze += `<ellipse cx="${x.toFixed(0)}" cy="${y}" rx="7" ry="3.4" fill="#e8c98a" opacity=".55"/>
-                 <ellipse cx="${x.toFixed(0)}" cy="${y}" rx="15" ry="6" fill="#c9a86a" opacity=".18"/>`;
+      blitze += `<ellipse cx="${x.toFixed(0)}" cy="${y}" rx="7" ry="3.4" fill="${STICH.BLITZ}" opacity=".55"/>
+                 <ellipse cx="${x.toFixed(0)}" cy="${y}" rx="15" ry="6" fill="${STICH.BLITZ_HOF}" opacity=".18"/>`;
     }
   }
 
@@ -3836,12 +3984,12 @@ function sichtfeld(){
     const x = 40 + streu(i,17)*560, y = 86 + streu(i,23)*32;
     const r = 16 + streu(i,29)*28;
     qualm += `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${r.toFixed(0)}" ry="${(r*0.42).toFixed(0)}"`+
-             ` fill="#3a352e" opacity="${(0.10+0.12*streu(i,31)).toFixed(2)}"/>`;
+             ` fill="${STICH.DAMPF}" opacity="${(0.10+0.12*streu(i,31)).toFixed(2)}"/>`;
   }
   // Ab Runde 5 legt sich der Dampf über das hintere Feindglied — die
   // Unsicherheit, von der die Texte reden, wird sichtbar.
   const schleier = K.runde>=5
-    ? `<rect x="0" y="40" width="640" height="34" fill="#2b2723" opacity="${Math.min(0.5,(K.runde-4)*0.12).toFixed(2)}"/>` : '';
+    ? `<rect x="0" y="40" width="640" height="34" fill="${STICH.DAMPF_BAND}" opacity="${Math.min(0.5,(K.runde-4)*0.12).toFixed(2)}"/>` : '';
 
   const uebergewicht = eigenTeil + feindTeil > 0 ? eigenTeil/(eigenTeil+feindTeil) : 0.5;
   const lage = K.deckung
@@ -3855,20 +4003,20 @@ function sichtfeld(){
     aria-label="Aufstellung: ${Math.round(EIGEN*eigenTeil)} eigene Männer gegen ${Math.round(FEIND*feindTeil)} feindliche">
     <defs>
       <linearGradient id="sm" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#1a1816" stop-opacity="0"/>
-        <stop offset="45%" stop-color="#2b2723" stop-opacity="${(0.35+0.4*rauch).toFixed(2)}"/>
-        <stop offset="100%" stop-color="#1a1816" stop-opacity="0"/></linearGradient>
+        <stop offset="0%" stop-color="${STICH.DAMPF_RAND}" stop-opacity="0"/>
+        <stop offset="45%" stop-color="${STICH.DAMPF_BAND}" stop-opacity="${(0.35+0.4*rauch).toFixed(2)}"/>
+        <stop offset="100%" stop-color="${STICH.DAMPF_RAND}" stop-opacity="0"/></linearGradient>
       <radialGradient id="vg" cx="50%" cy="88%" r="62%">
-        <stop offset="0%" stop-color="#000" stop-opacity="0"/>
-        <stop offset="100%" stop-color="#000" stop-opacity=".7"/></radialGradient>
+        <stop offset="0%" stop-color="${STICH.DUNKEL}" stop-opacity="0"/>
+        <stop offset="100%" stop-color="${STICH.DUNKEL}" stop-opacity=".7"/></radialGradient>
     </defs>
-    <rect width="640" height="200" fill="#191715"/>
+    <rect width="640" height="200" fill="${STICH.HIMMEL}"/>
     ${gelaendeBild(n.gelaende)}
-    <rect x="0" y="84" width="640" height="1" fill="#2a2621"/>
+    <rect x="0" y="84" width="640" height="1" fill="${STICH.HORIZONT}"/>
     ${feind}${schleier}
     <rect x="0" y="66" width="640" height="74" fill="url(#sm)"/>
     ${qualm}
-    <text x="320" y="26" text-anchor="middle" fill="#8d8371" font-family="Georgia,serif" font-size="11.5"
+    <text x="320" y="26" text-anchor="middle" fill="${STICH.BESCHRIFT}" font-family="Georgia,serif" font-size="11.5"
       font-style="italic">${lage}</text>
     ${plaenkler}${fanion}${eigen}${wankend}${blitze}
     ${mann(meinX, meinY, meinH, MESSING, 1, meinHut, !K.deckung)}
@@ -3876,8 +4024,8 @@ function sichtfeld(){
       text-anchor="middle" fill="${MESSING}" font-size="9.5"
       font-family="ui-monospace,monospace" letter-spacing="1">DU</text>
     <rect x="0" y="192" width="640" height="4" fill="${ROT_TOT}"/>
-    <rect x="0" y="192" width="${(640*uebergewicht).toFixed(0)}" height="4" fill="#56718f"/>
-    <rect x="319" y="189" width="2" height="10" fill="#948a79"/>
+    <rect x="0" y="192" width="${(640*uebergewicht).toFixed(0)}" height="4" fill="${STICH.BLAU_WAAGE}"/>
+    <rect x="319" y="189" width="2" height="10" fill="${STICH.WAAGE}"/>
     <rect width="640" height="200" fill="url(#vg)"/></svg>`;
 }
 

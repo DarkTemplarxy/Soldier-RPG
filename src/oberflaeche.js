@@ -87,6 +87,11 @@ function wegband(n){
 
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
+  /* Die Fußzeile nannte „Prototyp · zwei Feldzüge · Ränge 1–3" — fest in
+     index.html, und damit derselbe Fehler wie im Titelkopf. Auch sie kommt
+     jetzt aus den Daten. */
+  const fussStand = document.getElementById('fussstand');
+  if(fussStand) fussStand.textContent = `${gebauteKapitel(true)} · Ränge 1–${RANG[RANG.length-1].n}`;
   if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`;
     untertitel.textContent = gebauteKapitel(true); return; }
   kopf.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;justify-content:flex-end">

@@ -5,6 +5,36 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Pergament statt Nacht
+
+**Die Oberfläche ist von einem dunklen UI auf einen Feldtisch umgestellt.** Alles, was man sieht, sind Papiere: das Livret, die Meldungen, die Schlachtskizze, das Wertungsblatt. Der Grund dahinter ist dunkles Holz und nur an den Rändern sichtbar.
+
+### Was dabei zu retten war
+
+Die alte Gestalt hatte eine Begründung: Das Dunkel war die Nacht im Feldlager, und Papier war den amtlichen Momenten vorbehalten — der Wechsel dunkel → hell machte den Beförderungsbescheid von allein feierlich. **Wird alles hell, stirbt dieser Effekt.** Er ist deshalb ersetzt worden: Alltag auf **Feldpapier** (gebräunt, gekörnt), Amtliches auf **Kanzleipapier** (heller, glatter, Doppellinie, Vordruckkopf, **Lacksiegel**). Aus „dunkel → hell" wurde **„Feldpapier → Kanzleipapier"**.
+
+### Der unsichtbare Schritt zuerst
+
+Die vierundvierzig Festfarben des Sichtfelds wurden in **eine Tabelle `STICH`** gezogen — **die Namen sind Rollen, keine Farben**, damit `WASSER` `WASSER` bleibt, ob nachtschwarz oder als Lavierung. Dieser Schritt änderte nichts Sichtbares und wurde **pixelgleich gegengeprüft** (fünf Bildschirme, identische Prüfsummen), bevor eine einzige Farbe wechselte. Ohne ihn hätte jeder Farbwechsel vierundvierzig Einzelfunde bedeutet.
+
+### Das Sichtfeld ist jetzt ein Kupferstich
+
+Gefechtsdarstellungen der Epoche *sind* Stiche und lavierte Skizzen. Sepia-Gelände auf Papierton, eigene Linie in Uniformblau, Feind in Siegellackrot, du in Bronze, Pulverdampf als graue Lavierung — auf hellem Grund funktioniert das besser als heller Nebel auf dunklem.
+
+### Textur ohne eine einzige Bilddatei
+
+Zwei `feTurbulence`-Filter als data-URI im CSS: feines Faserkorn und große Vergilbungswolken, dazu eine Vignette. **Zwei Fallen, beide bezahlt:** `feTurbulence` rauscht in *Farbe* — ohne `feColorMatrix saturate 0` liegen grüne und rosa Flecken auf dem Papier. Und `feFuncA intercept` ist die *Deckkraft*: Ein hoher Wert macht die Lage dunkler, nicht heller; die erste Fassung sah aus wie Schmutz.
+
+### Kontraste neu gerechnet
+
+Alles gegen das Feldpapier `#e9dfc6`, Schwelle 4,5 : 1 unverändert: Text 11,4 · Beschriftungen 6,2 · Probenzeilen 4,8 · Rot 6,0 · Grün 5,4 · Bronze 5,3. **Die Bedeutungsregel bleibt** — Grün ist Zugewinn, Rot ist Kosten, Bronze gliedert; nur die Töne wechseln, weil Farbe auf hellem Grund dunkel sein muss. **Gold wurde zu Bronze**, sonst wäre es unsichtbar.
+
+**Eine Ausnahme:** Der Seitenkopf liegt auf dem Holz, nicht auf einem Bogen — dort ist die Tinte hell (11,9 : 1 gegen das Holz).
+
+Nebenbei gefunden und behoben: Die Fußzeile nannte fest verdrahtet „Prototyp · zwei Feldzüge · Ränge 1–3" — derselbe Fehler wie im Titelkopf, jetzt ebenfalls aus den Daten. `wiki.html` trägt dieselbe Palette.
+
+---
+
 ## 2026-07-28 — Der Titelbildschirm bewarb zwei Kapitel, während drei liefen
 
 **Ein Fehler durch Unterlassung, gemeldet von der veröffentlichten Seite.** Der Satz „Prototyp · Italien 1796/97 · Ägypten 1798/99" stand wörtlich im Code — an zwei Stellen, im Kartenkopf und im Untertitel. Beim Bau von Kapitel 3 wurde er nicht mitgezogen: Die Startseite warb für zwei Kapitel, während `index.html` drei lud.

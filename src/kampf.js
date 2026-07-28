@@ -203,35 +203,82 @@ function zeigeAnmarsch(n){
    vorhandenen Brauntönen, alles deterministisch — hier wird nie gewürfelt. */
 function gelaendeBild(art){
   if(art==='bruecke') return `
-    <rect x="0" y="150" width="640" height="50" fill="#15171c"/>
-    <rect x="0" y="150" width="640" height="2" fill="#232830"/>
-    <rect x="150" y="120" width="340" height="34" fill="#241f19"/>
-    <rect x="150" y="118" width="340" height="4" fill="#2f281f"/>
-    ${[0,1,2,3,4,5,6,7,8].map(i=>`<rect x="${152+i*42}" y="100" width="3" height="20" fill="#2f281f"/>`).join('')}
-    <rect x="150" y="100" width="340" height="3" fill="#2f281f"/>`;
+    <rect x="0" y="150" width="640" height="50" fill="${STICH.WASSER}"/>
+    <rect x="0" y="150" width="640" height="2" fill="${STICH.WASSER_LI}"/>
+    <rect x="150" y="120" width="340" height="34" fill="${STICH.HOLZ}"/>
+    <rect x="150" y="118" width="340" height="4" fill="${STICH.HOLZ_HELL}"/>
+    ${[0,1,2,3,4,5,6,7,8].map(i=>`<rect x="${152+i*42}" y="100" width="3" height="20" fill="${STICH.HOLZ_HELL}"/>`).join('')}
+    <rect x="150" y="100" width="340" height="3" fill="${STICH.HOLZ_HELL}"/>`;
   if(art==='damm') return `
-    <rect x="0" y="128" width="640" height="72" fill="#1b1f1c"/>
-    <rect x="0" y="140" width="640" height="46" fill="#20241f"/>
-    <rect x="0" y="120" width="640" height="26" fill="#26221b"/>
-    ${[40,120,300,470,560].map((x,i)=>`<ellipse cx="${x}" cy="${168+i*4}" rx="${22+i*6}" ry="3" fill="#2b312a" opacity=".6"/>`).join('')}
-    ${[70,210,420,540].map(x=>`<rect x="${x}" y="150" width="2" height="14" fill="#2f3a2c"/>`).join('')}`;
+    <rect x="0" y="128" width="640" height="72" fill="${STICH.SCHILF_D}"/>
+    <rect x="0" y="140" width="640" height="46" fill="${STICH.SCHILF_M}"/>
+    <rect x="0" y="120" width="640" height="26" fill="${STICH.SCHILF_H}"/>
+    ${[40,120,300,470,560].map((x,i)=>`<ellipse cx="${x}" cy="${168+i*4}" rx="${22+i*6}" ry="3" fill="${STICH.BUSCH}" opacity=".6"/>`).join('')}
+    ${[70,210,420,540].map(x=>`<rect x="${x}" y="150" width="2" height="14" fill="${STICH.HALM}"/>`).join('')}`;
   if(art==='mauer') return `
-    <rect x="0" y="0" width="640" height="92" fill="#191715"/>
-    <rect x="0" y="24" width="640" height="68" fill="#2a251d"/>
-    <rect x="0" y="24" width="640" height="3" fill="#3a332708"/>
-    ${Array.from({length:22},(_,i)=>`<rect x="${i*30}" y="24" width="26" height="9" fill="#332c22" opacity="${i%2?.5:.75}"/>`).join('')}
-    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92 Z" fill="#191715"/>
-    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92" fill="none" stroke="#3d352a" stroke-width="1.5"/>
-    ${[[262,78],[300,84],[352,80],[380,88]].map(([x,y])=>`<rect x="${x}" y="${y}" width="12" height="5" rx="2" fill="#2f2921"/>`).join('')}`;
+    <rect x="0" y="0" width="640" height="92" fill="${STICH.HIMMEL}"/>
+    <rect x="0" y="24" width="640" height="68" fill="${STICH.MAUER}"/>
+    <rect x="0" y="24" width="640" height="3" fill="${STICH.MAUER_FUGE}08"/>
+    ${Array.from({length:22},(_,i)=>`<rect x="${i*30}" y="24" width="26" height="9" fill="${STICH.MAUER_STEIN}" opacity="${i%2?.5:.75}"/>`).join('')}
+    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92 Z" fill="${STICH.HIMMEL}"/>
+    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92" fill="none" stroke="${STICH.BRESCHE_K}" stroke-width="1.5"/>
+    ${[[262,78],[300,84],[352,80],[380,88]].map(([x,y])=>`<rect x="${x}" y="${y}" width="12" height="5" rx="2" fill="${STICH.BRESCHE_S}"/>`).join('')}`;
   if(art==='wueste') return `
-    <rect x="0" y="0" width="640" height="200" fill="#1d1a15"/>
-    <path d="M470 84 L520 22 L570 84 Z" fill="#241f18"/>
-    <path d="M556 84 L592 40 L628 84 Z" fill="#221d16"/>
-    ${[40,92,140].map((x,i)=>`<g fill="#232019"><rect x="${x+5}" y="${44-i*3}" width="2.5" height="40"/>
+    <rect x="0" y="0" width="640" height="200" fill="${STICH.SAND}"/>
+    <path d="M470 84 L520 22 L570 84 Z" fill="${STICH.PYRAMIDE}"/>
+    <path d="M556 84 L592 40 L628 84 Z" fill="${STICH.PYRAMIDE_2}"/>
+    ${[40,92,140].map((x,i)=>`<g fill="${STICH.PALME}"><rect x="${x+5}" y="${44-i*3}" width="2.5" height="40"/>
       ${[-1,1].map(d=>`<ellipse cx="${x+5+d*9}" cy="${44-i*3}" rx="10" ry="3" transform="rotate(${d*18} ${x+5} ${44-i*3})"/>`).join('')}</g>`).join('')}
-    <rect x="0" y="84" width="640" height="116" fill="#211d16"/>`;
+    <rect x="0" y="84" width="640" height="116" fill="${STICH.SAND_UNTEN}"/>`;
   return '';
 }
+
+/* ══════════════════ DIE PALETTE DES SICHTFELDS ══════════════════
+
+   Jede Farbe des Gefechtsbildes steht hier und nirgends sonst. Vorher lagen
+   vierundvierzig Hexwerte über die Zeichenfunktionen verstreut — ein
+   Farbwechsel hieß vierundvierzig Einzelfunde, und genau daran scheitert jeder
+   Umbau der Gestaltung.
+
+   **Die Namen sind Rollen, keine Farben.** `WASSER` bleibt `WASSER`, ob es
+   nachtschwarz oder als Sepialavierung gezeichnet wird — deshalb überlebt diese
+   Tabelle den Wechsel von der Nacht zum Kupferstich. */
+const STICH = {
+  /* ── Kupferstich statt Nacht (28.07.2026) ──
+     Gefechtsdarstellungen der Epoche *sind* Stiche und lavierte Skizzen: Sepia
+     auf Papier, die Truppen koloriert. Das Sichtfeld ist damit kein Fenster in
+     eine dunkle Welt mehr, sondern **die Schlachtskizze auf dem Feldtisch** —
+     dieselbe Metapher wie die ganze Oberfläche.
+
+     Praktischer Nebeneffekt: Pulverdampf als graue Lavierung auf hellem Grund
+     funktioniert besser als heller Nebel auf dunklem. */
+  PAPIER:   '#e4d9bd',   /* der Bogen, auf dem die Skizze steht */
+  HIMMEL:   '#e4d9bd',   GRUND:     '#cbbb95',   HORIZONT:  '#8a7a58',
+  WASSER:   '#aeb5ab',   WASSER_LI: '#93a09b',
+  HOLZ:     '#a68a5e',   HOLZ_HELL: '#8c6f45',
+  SCHILF_D: '#b3ae86',   SCHILF_M:  '#c0ba91',   SCHILF_H:  '#cbbb95',
+  BUSCH:    '#9aa177',   HALM:      '#7d8759',
+  MAUER:    '#c3b491',   MAUER_FUGE:'#8a7a58',   MAUER_STEIN:'#b0a081',
+  BRESCHE:  '#7a6b4c',   BRESCHE_K: '#6b5c3f',   BRESCHE_S: '#8a7a58',
+  SAND:     '#ddd0ac',   SAND_UNTEN:'#d3c49f',
+  PYRAMIDE: '#c4b48e',   PYRAMIDE_2:'#b8a882',   PALME:     '#7d6f4c',
+  ZINNE:    '#9d8d6b',   ZINNE_ROT: '#a8503f',
+
+  /* Die drei kolorierten Farben — wie auf einer Uniformtafel. Rot und Blau
+     müssen auf dem hellen Bogen kräftiger sein als auf der Nacht, sonst
+     verschwinden sie im Papier. */
+  ROT:      '#9c3125',   ROT_TOT:   '#c39a90',
+  BLAU:     '#27415f',   BLAU_TOT:  '#9aa8b8',   BLAU_WAAGE:'#27415f',
+  MESSING:  '#8a6410',   /* du selbst — Bronze, dunkel genug fürs Papier */
+
+  WANKEND:  '#7a6a52',   WAAGE:     '#6d5f4b',   BESCHRIFT: '#584c3c',
+  BLITZ:    '#c8901f',   BLITZ_HOF: '#d8b060',
+
+  /* Pulverdampf: graue Lavierung, wie mit dem Pinsel über den Stich gelegt */
+  DAMPF:    '#6f6754',   DAMPF_BAND:'#8a8271',   DAMPF_RAND:'#e4d9bd',
+  DUNKEL:   '#3a3020'    /* die Vignette am Rand des Bogens */
+};
+
 
 /* ── Das Appell-Bild ──
    Die Abrechnung des Sergenten als Bild statt als Zahl: zwanzig Silhouetten,
@@ -242,9 +289,9 @@ function appellBild(uebrig){
   for(let i=0;i<20;i++){
     const x = 16 + i*26;
     R.push(i < uebrig
-      ? `<g fill="#4a4136"><rect x="${x-3}" y="14" width="6" height="18" rx="2.4"/><circle cx="${x}" cy="10" r="2.6"/>
+      ? `<g fill="${STICH.ZINNE}"><rect x="${x-3}" y="14" width="6" height="18" rx="2.4"/><circle cx="${x}" cy="10" r="2.6"/>
          <ellipse cx="${x}" cy="7" rx="5.4" ry="2" transform="rotate(-7 ${x} 7)"/></g>`
-      : `<rect x="${x-7}" y="30" width="14" height="2.6" rx="1.3" fill="#7a3229" opacity=".8"/>`);
+      : `<rect x="${x-7}" y="30" width="14" height="2.6" rx="1.3" fill="${STICH.ZINNE_ROT}" opacity=".8"/>`);
   }
   return `<svg viewBox="0 0 540 40" class="appell" role="img" aria-label="Appell: ${uebrig} von 20 stehen">${R.join('')}</svg>`;
 }
@@ -268,12 +315,12 @@ function sichtfeld(){
   const feindWeg = gefallene(FEIND, Math.round(FEIND*feindTeil), 7);
   const eigenWeg = gefallene(EIGEN, Math.round(EIGEN*eigenTeil), 13);
 
-  const ROT = '#c2483a', ROT_TOT = '#5e2a24', BLAU = '#7d93ad', BLAU_TOT = '#3a4655';
-  const MESSING = '#d0a75e';
+  const ROT = STICH.ROT, ROT_TOT = STICH.ROT_TOT, BLAU = STICH.BLAU, BLAU_TOT = STICH.BLAU_TOT;
+  const MESSING = STICH.MESSING;
 
   const kopfbedeckung = (x,y,b,f,art)=>{
     if(art==='baer') return `<rect x="${(x-4.6*b).toFixed(1)}" y="${(y-15.5*b).toFixed(1)}" width="${(9.2*b).toFixed(1)}" height="${(11*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}"/>`+
-      `<rect x="${(x+2.6*b).toFixed(1)}" y="${(y-19*b).toFixed(1)}" width="${(1.8*b).toFixed(1)}" height="${(5*b).toFixed(1)}" rx="${(0.9*b).toFixed(1)}" fill="#c2483a"/>`;
+      `<rect x="${(x+2.6*b).toFixed(1)}" y="${(y-19*b).toFixed(1)}" width="${(1.8*b).toFixed(1)}" height="${(5*b).toFixed(1)}" rx="${(0.9*b).toFixed(1)}" fill="${STICH.ROT}"/>`;
     if(art==='kasket') return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.4*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}" ry="${(3.4*b).toFixed(1)}"/>`;
     if(art==='turban') return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.8*b).toFixed(1)}" rx="${(5.4*b).toFixed(1)}" ry="${(4.4*b).toFixed(1)}"/>`;
     // Zweispitz: breit und flach, quer über dem Kopf getragen
@@ -372,8 +419,8 @@ function sichtfeld(){
   let wankend = '';
   if(fuehrt==='sektion' && sektTeil < 0.7){
     const wx = 8 + (meinPlatz-3)*schritt + schritt/2;
-    wankend = mann(wx, 168, 24, '#9a7f6a', .95, meinHut) +
-      `<text x="${wx}" y="196" text-anchor="middle" fill="#9a7f6a" font-size="8.5"
+    wankend = mann(wx, 168, 24, STICH.WANKEND, .95, meinHut) +
+      `<text x="${wx}" y="196" text-anchor="middle" fill="${STICH.WANKEND}" font-size="8.5"
         font-family="ui-monospace,monospace" letter-spacing=".5">WANKT</text>`;
   }
 
@@ -413,8 +460,8 @@ function sichtfeld(){
     const von = fuehrt ? meinPlatz-meineBreite : 0, bis = fuehrt ? meinPlatz+meineBreite : EIGEN_JE-1;
     for(let i=Math.max(0,von); i<=Math.min(EIGEN_JE-1,bis); i++){
       const x = 8 + i*schritt, y = 132;
-      blitze += `<ellipse cx="${x.toFixed(0)}" cy="${y}" rx="7" ry="3.4" fill="#e8c98a" opacity=".55"/>
-                 <ellipse cx="${x.toFixed(0)}" cy="${y}" rx="15" ry="6" fill="#c9a86a" opacity=".18"/>`;
+      blitze += `<ellipse cx="${x.toFixed(0)}" cy="${y}" rx="7" ry="3.4" fill="${STICH.BLITZ}" opacity=".55"/>
+                 <ellipse cx="${x.toFixed(0)}" cy="${y}" rx="15" ry="6" fill="${STICH.BLITZ_HOF}" opacity=".18"/>`;
     }
   }
 
@@ -425,12 +472,12 @@ function sichtfeld(){
     const x = 40 + streu(i,17)*560, y = 86 + streu(i,23)*32;
     const r = 16 + streu(i,29)*28;
     qualm += `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${r.toFixed(0)}" ry="${(r*0.42).toFixed(0)}"`+
-             ` fill="#3a352e" opacity="${(0.10+0.12*streu(i,31)).toFixed(2)}"/>`;
+             ` fill="${STICH.DAMPF}" opacity="${(0.10+0.12*streu(i,31)).toFixed(2)}"/>`;
   }
   // Ab Runde 5 legt sich der Dampf über das hintere Feindglied — die
   // Unsicherheit, von der die Texte reden, wird sichtbar.
   const schleier = K.runde>=5
-    ? `<rect x="0" y="40" width="640" height="34" fill="#2b2723" opacity="${Math.min(0.5,(K.runde-4)*0.12).toFixed(2)}"/>` : '';
+    ? `<rect x="0" y="40" width="640" height="34" fill="${STICH.DAMPF_BAND}" opacity="${Math.min(0.5,(K.runde-4)*0.12).toFixed(2)}"/>` : '';
 
   const uebergewicht = eigenTeil + feindTeil > 0 ? eigenTeil/(eigenTeil+feindTeil) : 0.5;
   const lage = K.deckung
@@ -444,20 +491,20 @@ function sichtfeld(){
     aria-label="Aufstellung: ${Math.round(EIGEN*eigenTeil)} eigene Männer gegen ${Math.round(FEIND*feindTeil)} feindliche">
     <defs>
       <linearGradient id="sm" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#1a1816" stop-opacity="0"/>
-        <stop offset="45%" stop-color="#2b2723" stop-opacity="${(0.35+0.4*rauch).toFixed(2)}"/>
-        <stop offset="100%" stop-color="#1a1816" stop-opacity="0"/></linearGradient>
+        <stop offset="0%" stop-color="${STICH.DAMPF_RAND}" stop-opacity="0"/>
+        <stop offset="45%" stop-color="${STICH.DAMPF_BAND}" stop-opacity="${(0.35+0.4*rauch).toFixed(2)}"/>
+        <stop offset="100%" stop-color="${STICH.DAMPF_RAND}" stop-opacity="0"/></linearGradient>
       <radialGradient id="vg" cx="50%" cy="88%" r="62%">
-        <stop offset="0%" stop-color="#000" stop-opacity="0"/>
-        <stop offset="100%" stop-color="#000" stop-opacity=".7"/></radialGradient>
+        <stop offset="0%" stop-color="${STICH.DUNKEL}" stop-opacity="0"/>
+        <stop offset="100%" stop-color="${STICH.DUNKEL}" stop-opacity=".7"/></radialGradient>
     </defs>
-    <rect width="640" height="200" fill="#191715"/>
+    <rect width="640" height="200" fill="${STICH.HIMMEL}"/>
     ${gelaendeBild(n.gelaende)}
-    <rect x="0" y="84" width="640" height="1" fill="#2a2621"/>
+    <rect x="0" y="84" width="640" height="1" fill="${STICH.HORIZONT}"/>
     ${feind}${schleier}
     <rect x="0" y="66" width="640" height="74" fill="url(#sm)"/>
     ${qualm}
-    <text x="320" y="26" text-anchor="middle" fill="#8d8371" font-family="Georgia,serif" font-size="11.5"
+    <text x="320" y="26" text-anchor="middle" fill="${STICH.BESCHRIFT}" font-family="Georgia,serif" font-size="11.5"
       font-style="italic">${lage}</text>
     ${plaenkler}${fanion}${eigen}${wankend}${blitze}
     ${mann(meinX, meinY, meinH, MESSING, 1, meinHut, !K.deckung)}
@@ -465,8 +512,8 @@ function sichtfeld(){
       text-anchor="middle" fill="${MESSING}" font-size="9.5"
       font-family="ui-monospace,monospace" letter-spacing="1">DU</text>
     <rect x="0" y="192" width="640" height="4" fill="${ROT_TOT}"/>
-    <rect x="0" y="192" width="${(640*uebergewicht).toFixed(0)}" height="4" fill="#56718f"/>
-    <rect x="319" y="189" width="2" height="10" fill="#948a79"/>
+    <rect x="0" y="192" width="${(640*uebergewicht).toFixed(0)}" height="4" fill="${STICH.BLAU_WAAGE}"/>
+    <rect x="319" y="189" width="2" height="10" fill="${STICH.WAAGE}"/>
     <rect width="640" height="200" fill="url(#vg)"/></svg>`;
 }
 

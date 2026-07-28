@@ -842,6 +842,43 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 
 ---
 
+## Pergament: die Gestalt seit dem 28.07.2026 (`src/stil.css`)
+
+**Die Leitmetapher ist der Feldtisch.** Alles, was man sieht, sind Papiere auf dem Tisch eines Capitaine — das Livret, die Meldungen, die Schlachtskizze, das Wertungsblatt. Der Grund dahinter ist dunkles Holz (`--holz`) und nur an den Rändern sichtbar, damit die Bögen als Bögen lesbar sind.
+
+> **Warum das die frühere Nacht abgelöst hat, und was dabei zu retten war.** Die alte Begründung lautete: „Das Dunkel ist die Nacht im Feldlager, und Papier ist den amtlichen Momenten vorbehalten" — der Wechsel dunkel → hell machte den Beförderungsbescheid von allein feierlich. **Wird alles hell, stirbt dieser Effekt.** Er ist deshalb nicht verloren gegangen, sondern ersetzt worden: Der Alltag steht auf **Feldpapier** (`.card` — gebräunt, gekörnt, fleckig), das Amtliche auf **Kanzleipapier** (`.papier` — heller, glatter, mit Doppellinie, Vordruckkopf und **Lacksiegel**). Aus „dunkel → hell" wurde **„Feldpapier → Kanzleipapier"**.
+
+**Die Textur ist prozedural, keine einzige Bilddatei.** Zwei `feTurbulence`-Filter als data-URI im CSS: feines Faserkorn (`--korn`, 150 px) und große Vergilbungswolken (`--wolken`, 480 px), dazu eine Vignette. Das hält `file://`, die Einzeldatei-Weitergabe und die Ladezeit intakt — dieselbe Regel wie beim Sichtfeld und den Rangabzeichen.
+
+> **Zwei Fallen dabei, beide bezahlt:** `feTurbulence` rauscht in **Farbe** — ohne `feColorMatrix saturate 0` liegen grüne und rosa Flecken auf dem Papier. Und `feFuncA intercept` ist die *Deckkraft*: Ein hoher Wert macht die Lage dunkler, nicht heller. Erst `slope 0.16 / intercept 0.04` (Korn) und `0.09 / 0.02` (Wolken) sahen nach Papier aus statt nach Schmutz.
+
+### Das Sichtfeld ist ein Kupferstich (`STICH` in `src/kampf.js`)
+
+**Gefechtsdarstellungen der Epoche *sind* Stiche und lavierte Skizzen.** Das Sichtfeld ist deshalb kein Fenster in eine dunkle Welt mehr, sondern die **Schlachtskizze auf dem Feldtisch**: Sepia-Gelände auf Papierton, eigene Linie in Uniformblau `#27415f`, Feind in Siegellackrot `#9c3125`, du selbst in Bronze. Pulverdampf ist eine graue Lavierung — auf hellem Grund funktioniert das sogar besser als heller Nebel auf dunklem.
+
+**Voraussetzung war ein Schritt, der für sich nichts sichtbar machte:** Die vierundvierzig Festfarben der Zeichenfunktionen liegen jetzt in **einer Tabelle `STICH`**, und **die Namen sind Rollen, keine Farben** — `WASSER` bleibt `WASSER`, ob es nachtschwarz oder als Lavierung gezeichnet wird. Vorher hieß ein Farbwechsel vierundvierzig Einzelfunde; genau daran scheitert jeder Umbau der Gestaltung. Der Umbau wurde **pixelgleich gegengeprüft**, bevor eine einzige Farbe wechselte.
+
+**Die alte Regel gilt unverändert: In `sichtfeld()` wird nichts gewürfelt.**
+
+### Kontraste, neu gerechnet
+
+Alle Werte gegen das Feldpapier `#e9dfc6`; die Schwelle 4,5 : 1 gilt weiter.
+
+| Rolle | Farbe | Kontrast |
+|---|---|---|
+| `--text` Fließtext | `#2a2420` | 11,4 : 1 |
+| `--dim` Beschriftungen | `#584c3c` | 6,2 : 1 |
+| `--faint` Probenzeilen | `#6d5f4b` | 4,8 : 1 |
+| `--blood` Kosten (Siegellack) | `#8f2a1e` | ~6,0 : 1 |
+| `--green` Zugewinn (Jägergrün) | `#3e5a2c` | ~5,4 : 1 |
+| `--brass` Gliederung (Bronze) | `#6e5320` | ~5,3 : 1 |
+
+**Die Bedeutungsregel ist unverändert:** Grün ist Zugewinn, Rot ist Kosten, Bronze gliedert. Nur die Töne wechseln — auf hellem Grund muss Farbe *dunkel* sein, sonst verschwindet sie. **Gold wird zu Bronze**, sonst ist es unsichtbar.
+
+**Eine Ausnahme, und nur eine:** Der Seitenkopf liegt auf dem Holz, nicht auf einem Bogen. Dort ist die Tinte hell (`#e4d7ba`, 11,9 : 1 gegen `--holz`) — Eisengallustinte wäre dort unlesbar. Wer eine neue Fläche außerhalb der Bögen baut, rechnet gegen `--holz`.
+
+**`wiki.html` trägt dieselbe Palette.** Das Handbuch ist vom Titelbildschirm verlinkt und darf nicht aus einer anderen Welt kommen; wer die Farben im Spiel ändert, ändert sie dort mit.
+
 ## Das Bild der Epoche (`src/stil.css`, `sichtfeld()` in `src/kampf.js`)
 
 Die Oberfläche soll nach 1796 aussehen, nicht nach „dunkles UI". Vier Mittel, alle ohne Abhängigkeit und `file://`-tauglich:
