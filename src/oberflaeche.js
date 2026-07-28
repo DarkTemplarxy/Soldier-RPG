@@ -42,6 +42,35 @@ function emblem(){
     <circle cx="13" cy="13" r="3.4" fill="#3d5a80"/></svg>`;
 }
 
+/* Welche Kapitel gebaut sind — **aus den Daten, nicht aus einem festen Satz.**
+
+   Diese Zeile stand zweimal wörtlich im Code („Prototyp · Italien 1796/97 ·
+   Ägypten 1798/99") und wurde beim Bau von Kapitel 3 nicht mitgezogen: Die
+   Startseite bewarb monatelang zwei Kapitel, während drei geladen wurden. Das
+   ist genau die Sorte Fehler, die niemand im Test findet, weil kein Test einen
+   Werbetext prüft — deshalb steht die Zahl jetzt nirgends mehr geschrieben.
+
+   `kurz` liefert die Fassung für den Untertitel unter dem Haupttitel. */
+function gebauteKapitel(kurz){
+  const g = KAMPAGNEN.filter(k=>k.gebaut);
+  if(!g.length) return 'Prototyp';
+  if(kurz){
+    if(g.length === 1) return `Erstes Kapitel · ${g[0].name} ${g[0].jahre}`;
+    /* Die Jahre der Kampagnen stehen verkürzt da („1796–97"). Für die Spanne
+       über alle Kapitel wird das Endjahr wieder ausgeschrieben — „1796–04"
+       liest sich wie ein Zahlendreher. */
+    const von = g[0].jahre.split('–')[0];
+    const letzte = g[g.length-1].jahre.split('–');
+    const bis = letzte.pop();
+    /* Das Jahrhundert kommt vom **Anfangsjahr des letzten Kapitels**, nicht vom
+       des ersten: Garnison ist „1801–04", also 1804. Mit dem Jahrhundert von
+       1796 wäre daraus 1704 geworden. */
+    const bisVoll = bis.length === 2 ? letzte[0].slice(0,2) + bis : bis;
+    return `${g.length} Kapitel · ${von}–${bisVoll}`;
+  }
+  return 'Prototyp · ' + g.map(k=>`${k.name} ${k.jahre}`).join(' · ');
+}
+
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function balken(klasse, v, max){ return `<div class="bar ${klasse}"><i style="width:${Math.max(0,Math.min(100,100*v/max))}%"></i></div>`; }
@@ -58,7 +87,8 @@ function wegband(n){
 
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
-  if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
+  if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`;
+    untertitel.textContent = gebauteKapitel(true); return; }
   kopf.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;justify-content:flex-end">
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span></span>`;
   const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
@@ -221,7 +251,7 @@ function zeigeTitel(){
     : '<tr><td class="d" colspan="4">Noch kein Eintrag. Der erste Mann wartet.</td></tr>';
 
   app.innerHTML = `
-  <div class="card"><div class="ch"><span>Der Marschallstab</span><span>Prototyp · Italien 1796/97 · Ägypten 1798/99</span></div>
+  <div class="card"><div class="ch"><span>${emblem()} Der Marschallstab</span><span>${gebauteKapitel()}</span></div>
    <div class="cb">
     <div class="zit">Du beginnst 1796 als Rekrut mit einer Muskete, die dir nicht gehört.<br>
     Wenn du dieses Kapitel überlebst, bist du vielleicht Caporal.<br>

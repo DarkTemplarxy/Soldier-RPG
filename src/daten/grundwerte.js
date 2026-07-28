@@ -167,7 +167,7 @@ const HERKUENFTE = [
 const KAMPAGNEN = [
   {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
   {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1800–04', guete:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
   {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, kurz:'Die perfekte Schlacht.'},
   {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
   {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},

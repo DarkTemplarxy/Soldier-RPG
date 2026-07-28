@@ -5,6 +5,20 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Der Titelbildschirm bewarb zwei Kapitel, während drei liefen
+
+**Ein Fehler durch Unterlassung, gemeldet von der veröffentlichten Seite.** Der Satz „Prototyp · Italien 1796/97 · Ägypten 1798/99" stand wörtlich im Code — an zwei Stellen, im Kartenkopf und im Untertitel. Beim Bau von Kapitel 3 wurde er nicht mitgezogen: Die Startseite warb für zwei Kapitel, während `index.html` drei lud.
+
+**Deshalb steht die Zahl jetzt nirgends mehr geschrieben** (`gebauteKapitel()`) — sie kommt aus `KAMPAGNEN.filter(k=>k.gebaut)`. Das ist genau die Sorte Fehler, die kein Test findet, weil kein Test einen Werbetext prüft; die einzige Abhilfe ist, den Text nicht zu schreiben.
+
+Drei Kleinigkeiten dabei mitgenommen:
+
+- **Die Kokarde sitzt jetzt auch auf dem Titelbildschirm.** Sie war nur zu sehen, wenn ein Feldzug lief — ausgerechnet auf der Seite, die Fremde als Erstes sehen, fehlte das Epochenzeichen. Im Kartenkopf steht sie inline (`.ch .emblem`); `.emblem` selbst bleibt auf `display:block`, weil es in der Seitenleiste allein in seiner Zelle sitzt.
+- **Der Handbuch-Link sah aus wie ein Link**, blau und unterstrichen, zwischen drei Knöpfen. Jetzt trägt `a.plain` dieselbe Prägung wie `button.plain`.
+- **Garnison lief in `KAMPAGNEN` unter „1800–04"**, das Kapitel beginnt aber im Oktober 1801. Korrigiert; die Jahresspanne im Untertitel schreibt das Endjahr wieder aus („1796–1804" statt „1796–04"), und das Jahrhundert kommt vom Anfangsjahr des *letzten* Kapitels — mit dem des ersten wäre aus 04 die Zahl 1704 geworden.
+
+---
+
 ## 2026-07-28 — Die Leiter der Sichtbarkeit, der Ehrensäbel, die Kompanie-Ebene im Entwurf
 
 **Die Nennung im Tagesbefehl war ein Würfelwurf am Gefechtsende.** Jetzt ist sie die mittlere von drei Stufen, und alle drei werden verdient.
