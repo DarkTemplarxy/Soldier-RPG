@@ -721,12 +721,22 @@ am Feuer.</div>
 stationen  = 2 * stationen();           // max. 32 Stationen = 64
 ruf        = 5 * Math.floor(S.ruf/10);
 nennungen  = 3 * Math.min(10, S.nennungen);
-ueberleben = S.lebt ? 25 : 0;
-sauber     = (!S.gekniffen &amp;&amp; S.lebt) ? 10 : 0;</code></pre>
-<p>Der Stationswert wurde von 4 über 3 auf 2 gesenkt. Die Regel dahinter:
-<b>Das bloße Durchkommen darf nie mehr wert sein als etwa die Hälfte der
-Ladensumme.</b> Bei 32 Stationen hätte allein das Durchkommen sonst 96 Punkte
-gebracht — mehr als der gesamte bisherige Spitzenlauf.</p>
+ueberleben = S.lebt ? 25 : 0;          // Platzhalter für 70/120/180
+sauber     = (!S.gekniffen &amp;&amp; S.lebt) ? 20 : 0;</code></pre>
+<p><b>Kapitel statt Stationen.</b> Bis zum 28. Juli 2026 zahlte die Wertung 2 VP
+je erreichter Station — und belohnte damit den, der auf Station 30 von 32 fiel,
+fast wie den, der ankam. Jetzt zählt der Feldzug: ein halber ist keiner.</p>
+
+<div class="warn"><b>Die alte Faustregel ist für die Prototypphase ausgesetzt</b>
+<i>(Entscheidung des Entwicklers, 28. Juli 2026)</i>. Sie lautete: „Das bloße
+Durchkommen darf nie mehr wert sein als etwa die Hälfte der Ladensumme“ — und
+setzte einen Laden voraus, der ungefähr fertig ist. Der ist er nicht: Es fehlen
+neun Kapitel und der ganze Ausrüstungsteil ab Rang 7 (Pferd, Fernrohr, Uhr,
+Schreibzeug, Offizierspatente). KONZEPT §5 rechnet für die volle Wunschliste mit
+<b>1.010 VP</b> — die 196 von heute sind ein Achtel davon. <b>Dass ein
+Spitzenlauf den Laden theoretisch leerkaufen kann, ist vorerst in Ordnung; die
+Antwort darauf sind mehr Posten, nicht eine kleinere Wertung.</b> Maßstab sind
+bis dahin die zwei Leitzahlen.</div>
 
 <h3>Nur der beste Lauf zählt</h3>
 <pre><code>p.rekord = p.summe &gt; META.vp;        // Vergleich VOR dem Anheben
@@ -789,8 +799,11 @@ für Caporal-fourrier und Sergent standen schon immer in dieser Tabelle; solange
 diese Ränge unerreichbar waren, fiel es nicht auf. Seit sie erreichbar sind,
 rechneten Rang und Zuschläge in <b>zwei verschiedenen Skalen</b> — der Rang in
 der vollen, die Stationen (×2) in der des Prototyps. Ein Sergentenlauf bekam
-dadurch überproportional viel: gemessener Spitzenwert 273 bei einer Ladensumme
-von 196. Jetzt zieht die ganze Wertung in einer Skala.</div>
+dadurch überproportional viel. Jetzt zieht die ganze Wertung in einer Skala.
+<br><br>Der Vergleich mit der Ladensumme (Spitzenwert 273 gegen 196) war der
+<i>Anlass</i>, an dem es auffiel — nicht die Rechtfertigung. Die trägt sich
+selbst: zwei Skalen in einer Formel sind ein Fehler, unabhängig davon, was der
+Laden kostet.</div>
 
 <p><b>Ein Kapitel statt einer Station.</b> Die Prototypskala zahlte 2 VP je
 erreichter Station und belohnte damit den, der auf Station 30 von 32 fiel, fast
@@ -1390,6 +1403,9 @@ const AUFGABEN = [
  q:'KONZEPT.md Z. 216–223 gegen grundwerte.js Z. 88–93'},
 
 /* ---------- später ---------- */
+{n:45,d:'später',k:'Balance',t:'Den Kaufladen mitwachsen lassen',
+ x:'Acht Posten für 196 VP, ein Spitzenlauf bringt 223 — theoretisch leerkaufbar. Das ist für den Prototyp ausdrücklich in Ordnung (Entscheidung 28.07.2026): Die Antwort sind mehr Posten, nicht eine kleinere Wertung. KONZEPT §5 rechnet für die volle Wunschliste mit 1.010 VP. Es fehlen vor allem die Ausrüstung ab Rang 7 — Pferd, Fernrohr, Uhr, Schreibzeug — und die Offizierspatente. Erst wenn der Laden ungefähr steht, wird die Faustregel „Durchkommen höchstens halbe Ladensumme“ wieder scharf.',
+ q:'grundwerte.js LADEN · KONZEPT.md §5'},
 {n:1,d:'später',k:'Mechanik',t:'Datei-Export ist ein Rücksetzpunkt',
  x:'Im Lager sichern, sterben, Datei laden — das hebelt den Permadeath aus. Bewusst nicht repariert, weil es mit einer maßgeblichen Datei prinzipiell nicht verhinderbar ist. Wenn es je stören soll, braucht es eine Entscheidung: Export erst beim Tod, oder eine Einmal-Marke im Lauf-Teil.',
  q:'AENDERUNGEN.md Z. 30'},

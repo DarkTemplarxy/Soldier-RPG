@@ -451,7 +451,9 @@ Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 20
 
 **Seit dem 28.07.2026 rechnet die ganze Wertung in der vollen Skala aus KONZEPT §5** (Maximum 918). Rangwerte 0 / 12 / 26 / 42 / 62 — die standen dort schon immer, auch die 42 und die 62.
 
-> **Warum die Umstellung nötig war.** Solange die Ränge 4 und 5 unerreichbar waren, fiel nicht auf, dass `rangWert()` die volle Skala benutzt, während die Zuschläge die des Prototyps benutzten. Seit sie erreichbar sind, **rechneten Rang und Zuschläge in zwei verschiedenen Skalen**: Ein Sergentenlauf bekam überproportional viel, gemessener Spitzenwert **273 bei einer Ladensumme von 196** — ein einziger guter Lauf kaufte alles und noch etwas dazu. Genau das verbietet die Regel „Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein".
+> **Warum die Umstellung nötig war — und warum nicht.** Solange die Ränge 4 und 5 unerreichbar waren, fiel nicht auf, dass `rangWert()` die volle Skala benutzt, während die Zuschläge die des Prototyps benutzten. Seit sie erreichbar sind, **rechneten Rang und Zuschläge in zwei verschiedenen Skalen** — das ist der Grund, und er steht für sich. Dazu kommt die inhaltliche Hälfte: **Ein halber Feldzug ist kein Feldzug**, also zahlt man je Kapitel und nicht je Bildschirm.
+>
+> **Nicht der Grund war die Ladensumme.** Der Spitzenwert von 273 gegen einen Laden von 196 war der *Anlass*, an dem die Sache auffiel, nicht die Rechtfertigung — siehe den nächsten Absatz.
 
 **Ein Kapitel statt einer Station.** Die Prototypskala zahlte 2 VP je erreichter Station und belohnte damit den, der auf Station 30 von 32 fiel, fast wie den, der ankam. Die volle Skala zahlt **je überlebtem Kapitel** (`kapitelUeberlebt()`): Ein Feldzug ist ein Feldzug, und ein halber ist keiner. Das ist der Grund, warum der Punkte-Median so deutlich fällt — ein abgebrochener Lauf ist jetzt sichtbar weniger wert als ein vollendeter, und das war der Sinn.
 
@@ -465,9 +467,15 @@ Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 20
 | Punkte-Median Veteran 160 | 218 | **192** |
 | Höchster gemessener Lauf | 273 | **223** |
 
-Kaufladen kostet 12–40 VP je Posten, alles zusammen 196 — **jetzt wieder mehr, als ein Spitzenlauf einbringt.**
+Kaufladen kostet 12–40 VP je Posten, alles zusammen 196; ein Spitzenlauf bringt 223.
 
-> **Stationen von 3 auf 2 Punkte gesenkt**, weil es mit Kapitel 2 jetzt 32 statt 16 Stationen sind. Bei 3 Punkten hätte allein das Durchkommen 96 Punkte gebracht — mehr als der ganze bisherige Spitzenlauf. Die Reihe der Anpassungen (4 → 3 → 2) folgt derselben Regel: **Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein**, sonst kauft ein einziger guter Lauf alles.
+> **Die Ladensumme ist im Prototyp kein Maßstab, und die alte Faustregel ist ausgesetzt** *(Entscheidung des Entwicklers, 28.07.2026)*. „Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein" hat einen Laden vorausgesetzt, der ungefähr fertig ist. Der ist er nicht: Es fehlen **neun Kapitel und der ganze Ausrüstungsteil ab Rang 7** — Pferd, Fernrohr, Uhr, Schreibzeug, Offizierspatente. KONZEPT §5 rechnet für die volle Wunschliste mit **1.010 VP** bei einem Punktemaximum von 918; die 196 von heute sind ein Achtel davon.
+>
+> **Dass man den Laden theoretisch leerkaufen kann, ist deshalb vorerst in Ordnung.** Die Antwort darauf ist, Posten hinzuzufügen — nicht, die Wertung kleinzurechnen. Wer die nächste Zahl an dieser Regel ausrichtet, optimiert gegen einen Zwischenstand.
+>
+> **Wieder scharf wird die Regel**, sobald der Laden ungefähr vollständig ist (Ausrüstung ab Rang 7, Patente, Pferd). Bis dahin sind die beiden Leitzahlen der Maßstab, nicht das Verhältnis von Spitzenlauf zu Ladensumme.
+
+> **Historisch:** Die Stationspunkte wurden zweimal gesenkt (4 → 3 → 2), jedes Mal nach der Regel „Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein". Mit dem Wechsel auf Kapitelpunkte ist die Frage gegenstandslos — und die Regel selbst ist für die Prototypphase ausgesetzt, siehe oben.
 
 > Diese Wertung gilt nur für den Prototyp mit zwei Kapiteln. Die Skala des vollen Spiels (Maximum 918, Rangwerte bis 580) steht in KONZEPT.md und wird übernommen, sobald mehrere Kapitel existieren.
 

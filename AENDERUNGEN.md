@@ -16,7 +16,7 @@ vorher:  Rangwert + 2×Stationen + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 10
 jetzt:   Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 20 (sauber)
 ```
 
-**Der Anlass war ein Fehler, der erst mit den neuen Rängen sichtbar wurde.** `rangWert()` benutzte schon immer die volle Skala aus KONZEPT §5 — die Werte 0/12/26/42/62 stehen dort so —, die Zuschläge dagegen die des Prototyps. Solange die Ränge 4 und 5 unerreichbar waren, fiel das nicht auf. Seit sie erreichbar sind, **rechneten Rang und Zuschläge in zwei verschiedenen Skalen**: gemessener Spitzenwert **273 bei einer Ladensumme von 196**, ein einziger guter Lauf kaufte also alles und noch etwas dazu. Das verletzt die Regel „Das Durchkommen darf nie mehr als etwa die Hälfte der Ladensumme wert sein".
+**Der Anlass war ein Fehler, der erst mit den neuen Rängen sichtbar wurde.** `rangWert()` benutzte schon immer die volle Skala aus KONZEPT §5 — die Werte 0/12/26/42/62 stehen dort so —, die Zuschläge dagegen die des Prototyps. Solange die Ränge 4 und 5 unerreichbar waren, fiel das nicht auf. Seit sie erreichbar sind, **rechneten Rang und Zuschläge in zwei verschiedenen Skalen**: gemessener Spitzenwert **273 bei einer Ladensumme von 196**. Das war der *Anlass*, an dem es auffiel — die Rechtfertigung trägt sich selbst: **Zwei Skalen in einer Formel sind ein Fehler**, unabhängig davon, was der Laden kostet.
 
 **Entschieden wurde, die Rangwerte zu behalten und die Zuschläge nachzuziehen** statt umgekehrt. Damit steht die ganze Wertung in einer Skala, und die vier noch fehlenden Posten (Ehrenlegion, fremde Orden, gestaffelter Überlebensbonus) haben ihren Platz schon frei.
 
@@ -30,7 +30,9 @@ jetzt:   Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (leb
 | Punkte-Median Veteran 160 | 218 | **192** |
 | Höchster gemessener Lauf | 273 | **223** |
 
-Der Laden kostet weiterhin 196 — **jetzt wieder mehr, als ein Spitzenlauf einbringt.** Alte Chronikeinträge bleiben lesbar: `wertungsTabelleAus()` zeigt für sie weiterhin die Stationszeile.
+Der Laden kostet weiterhin 196, ein Spitzenlauf bringt 223. Alte Chronikeinträge bleiben lesbar: `wertungsTabelleAus()` zeigt für sie weiterhin die Stationszeile.
+
+**Die Faustregel „Durchkommen ≤ halbe Ladensumme" ist für die Prototypphase ausgesetzt** *(Entscheidung des Entwicklers)*. Sie setzt einen ungefähr fertigen Laden voraus; es fehlen neun Kapitel und die ganze Ausrüstung ab Rang 7. KONZEPT §5 rechnet für die volle Wunschliste mit 1.010 VP — die 196 von heute sind ein Achtel davon. **Dass ein Spitzenlauf den Laden theoretisch leerkaufen kann, ist vorerst in Ordnung; die Antwort darauf sind mehr Posten, nicht eine kleinere Wertung.** Maßstab bleiben bis dahin die zwei Leitzahlen.
 
 ### Zwei Leitzahlen statt vier Zahlen ohne Maßstab
 
