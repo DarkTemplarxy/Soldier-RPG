@@ -728,6 +728,17 @@ Ohne diese vier Schritte ist das Wissen bei der nächsten Sitzung verloren, und 
 
 ---
 
+## Geplant und entschieden, noch nicht gebaut (28.07.2026)
+
+**Die Kette über dir, Rang 4 und 5.** Vollständiger Plan in der Sitzung vom 28.07. entworfen, vier Phasen: (1) Personenkartei `S.leute` — vier benannte Vorgesetzte (Sergent Martel, Fourier Collot, Lieutenant Berthaud, Capitaine Vernet) mit Gunst je Person (−5…+5, wie KONZEPT §7/8), Migration von `S.gunst`, `LAUF_FASSUNG` 3; (2) Fürsprecher können fallen, Gunst kann negativ werden; (3) Caporal-fourrier; (4) Sergent mit Sektion. Entscheidungen dazu:
+
+- **Die Kette rückt mit:** Vorgesetzte steigen selbst auf und bleiben über dir — man lernt in einer Karriere vier Gesichter kennen, nicht vierzehn. Neue Figuren nur durch Tod, Nachfolger starten bei Gunst 0.
+- **Sergent-Vakanz:** Bei erreichter Schwelle fällt der Sergent-major **im nächsten Gefecht** (nicht sofort — die Naht darf man nicht sehen), Martel rückt auf, seine Stelle wird deine. Invariante 5 versetzt: Am Anfang der Kette steht weiter ein Toter. Der Sergent-major wird vorher zweimal als Randfigur gezeigt. Fällt er, bevor man qualifiziert ist, bekommt ein Fremder die Stelle.
+- **Der Fourrier ist überspringbar** — ein Seitenweg wie die Elitekompanie. Feldweg: Caporal → Sergent bei Ruf ≥ 50, Berthaud ≥ 4. Listenweg: Fourrier (Ruf ≥ 25, **Bildung ≥ 35**, Collot ≥ 3) → Sergent bei Ruf ≥ **40**, Berthaud ≥ 3 — die Listen sind Fürsprache. Übersprungene Stufen kosten keine Wertung (gezählt wird der höchste Rang).
+- **Prototyp-Fenster:** Fourrier ab dem Übergang, **Sergent nach Akkon — Abukir ist das erste Sektionsgefecht.** Soll: ~30–40 % der Veteranenläufe erreichen ihn, Erstläufe praktisch nie.
+
+> **REVIEW-VORBEHALT (ausdrücklich vom Entwickler):** Sergent in zwei Kapiteln staucht die Leiter — das Konzept sah ihn für Kapitel 6–7 vor. **Sobald Kapitel 3 (Garnison) gebaut wird, die Schwellen und Fenster neu eichen** — anheben oder strecken, gemessen an den vier Zahlen. Nicht stillschweigend so lassen.
+
 ## Was als Nächstes ansteht
 
 1. **Kapitel 2, Ägypten 1798/99** — als eigene Datendatei. Eigener Charakter: Hitze, Krankheit, Karrees gegen Mamluken, Isolation. Krankheit sollte hier gefährlicher sein als Kugeln.
