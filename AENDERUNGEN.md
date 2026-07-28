@@ -5,6 +5,16 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Sondermissionen sind Ketten: Proben, die sofort bluten
+
+**Der riskante Weg der vier Sondermissionen ist jetzt ein Gang aus zwei bis drei Proben** (`kette:` statt `probe:`), und jeder Fehlschlag kostet sofort 12–20 Leben — Akkon: Rampe (Geschick 40) → Bresche (Bajonett 45) → Rückweg (Kaltblütigkeit 45), Worst Case rund 50 Punkte in einem Zug. Wer unterwegs auf null fällt, fällt dort, mit eigenem Todestext („Gefallen in der Bresche von Akkon", „Im Sumpf von Arcole geblieben", „Im Karree bei Embabeh gefallen", „Gefallen auf der Brücke von Lodi"). Zurück gibt es ab der ersten Stufe nicht.
+
+Die Wirkung am Ende braucht die Mehrheit der Stufen. Auch der Misserfolg gibt Ruf +2 und eine Tat — hingegangen ist hingegangen; die großen Belohnungen (Nennung, Ruf +6/+7) gibt es nur für den ganzen Gang. Auf dem Knopf stehen alle Stufen mit Wert und Schwierigkeit.
+
+**Damit trägt die Risiko-Achse zum ersten Mal messbar:** je 40 Läufe — vorsichtig 100 % überstanden, 0 Tote, Caporal erreicht 85 % · mutig 90 % beide Feldzüge, **4 Tote**, Caporal erreicht **95 %**. Mut kostet Leben und kauft Rang. Das ist auch die erste Stelle, an der das Spiel einen kundigen Spieler töten kann.
+
+---
+
 ## 2026-07-28 — Zeit heilt, Atem folgt dem Leben, Knien hat eine Grenze, vier Sondermissionen
 
 **Geheilt wird jetzt von allein, mit der Zeit:** +5 % des Vorrats je Station (`stationErledigt()`). Die Lagerabende bleiben unverändert — Entscheidung: Die Härte soll aus Entscheidungen kommen, nicht aus Verwaltungsknappheit. Erste Fassung war 8 %; damit fraß die Zeit den Blutzoll des Rückzugs wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen), auf 5 % gesenkt.

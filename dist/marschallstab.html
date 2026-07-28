@@ -2393,12 +2393,21 @@ GEFECHTS_EREIGNISSE.push(
          'Am Brückenkopf steigen Offiziere von den Pferden und stellen sich an die Spitze, als wäre das ihr Platz. Einer davon ist klein und wird nach heute einen Beinamen haben. Es heißt, fünfzig Schritt flussab sei eine Furt.'],
    optionen:[
      {label:'Mit in die Spitze der Kolonne drängen', hint:'Wo die Offiziere stehen', risk:true,
-      probe:{wert:'kaltbluetigkeit', schw:45},
-      erfolg:{text:'Du schiebst dich nach vorn, zwischen die Bärenfellmützen, und dann läuft die Kolonne, weil Stehen auf der Brücke schlimmer ist als Laufen. Die letzten fünfzig Schritt sind die längsten deines Lebens. Dann bist du drüben, und hinter dir kommt die ganze Armee.',
+      kette:[
+        {name:'Der Lauf', wert:'kaltbluetigkeit', schw:45, schaden:14,
+         gut:'Die Kolonne läuft an, und du läufst in der zweiten Reihe, wo man nicht denken muss, nur Schritt halten. Das Holz unter den Füßen zittert von den Einschlägen.',
+         schlecht:'Auf der Brückenmitte fegt es die Reihe vor dir weg, und du gehst über Männer, die noch warm sind. Etwas wirft dich gegen das Geländer und nimmt ein Stück von dir mit.'},
+        {name:'Der Brückenkopf', wert:'bajonett', schw:40, schaden:14,
+         gut:'Drüben stehen die Kanoniere mit Wischern und Handspaken gegen Bajonette. Es ist kurz und hässlich, und dann gehören die Geschütze euch.',
+         schlecht:'Am Brückenkopf steht noch eine Reihe, und ihr Feuer geht auf zehn Schritt in euch hinein.'}],
+      tod:'Du bleibst auf den Balken liegen, das Gesicht zur Adda. Die Kolonne geht über dich hinweg, weil die Brücke schmal ist und der Sieg drüben liegt.',
+      todesart:'Gefallen auf der Brücke von Lodi',
+      erfolg:{text:'Drüben stehst du zwischen den erbeuteten Geschützen und hörst dein eigenes Blut in den Ohren. Hinter dir kommt die ganze Armee über die Brücke, und der kleine General sieht sich die Männer der Spitze einzeln an.',
               moral:-24, ruf:6, nennung:true, atem:-20, belastung:6,
               tat:'In der Spitze über die Brücke von Lodi'},
-      misserfolg:{text:'Auf der Brückenmitte fegt es die erste Reihe weg, und du bist auf einmal die erste Reihe. Etwas wirft dich gegen das Geländer, und du hältst dich daran fest, bis dich jemand nach vorn weiterzieht. Drüben bist du trotzdem — als einer von denen, die getragen wurden.',
-              leben:-30, atem:-22, belastung:12}},
+      misserfolg:{text:'Drüben bist du trotzdem — als einer von denen, die getragen wurden. Gesehen hat man dich in der Spitze, und das zählt; was es gekostet hat, trägst du selbst.',
+              ruf:2, atem:-22, belastung:12,
+              tat:'Mit der Spitze auf die Brücke von Lodi'}},
      {label:'Durch die Furt unterhalb der Brücke', hint:'Bis zur Brust in der Adda', risk:true,
       probe:{wert:'geschick', schw:40},
       erfolg:{text:'Zu zwanzig steigt ihr in den Fluss, die Patronentasche über dem Kopf. Die Adda zieht an den Beinen, aber sie trägt euch nicht weg, und ihr kommt schräg unter dem Ufer heraus, wo die Geschütze nicht hinsehen. Von der Flanke her ist eine Batterie nur eine Reihe Männer mit Wischern.',
@@ -2416,12 +2425,21 @@ GEFECHTS_EREIGNISSE.push(
          'Die Kroaten sind sechzig Schritt entfernt und laden. Zwei Adjutanten springen hinterher. Es reicht nicht.'],
    optionen:[
      {label:'Hinunter und mit anfassen', hint:'Der Sumpf will euch beide', risk:true,
-      probe:{wert:'konstitution', schw:45},
-      erfolg:{text:'Du springst vom Damm und stehst bis zu den Hüften im Schlamm, der nicht loslässt. Zu dritt zerrt ihr ihn heraus, Zug um Zug, während es über euch wegschlägt. Oben sitzt er einen Atemzug lang im Dreck, sieht dich an, und dann ist er wieder General. Jemand hat deinen Namen gefragt.',
-              ruf:6, nennung:true, atem:-25, leben:-4,
+      kette:[
+        {name:'Hinunter', wert:'konstitution', schw:45, schaden:12,
+         gut:'Du springst vom Damm und stehst bis zu den Hüften im Schlamm, der nicht loslässt, aber trägt. Zwei Schritte, dann hast du seinen Arm.',
+         schlecht:'Der Sumpf nimmt dich sofort bis zur Brust, und die erste Minute geht dafür drauf, nicht selbst zu versinken.'},
+        {name:'Heraus, unter Feuer', wert:'kaltbluetigkeit', schw:40, schaden:14,
+         gut:'Zu dritt zerrt ihr ihn heraus, Zug um Zug, während es flach über das Wasser wegschlägt. Oben sitzt er einen Atemzug lang im Dreck, dann ist er wieder General.',
+         schlecht:'Die Kroaten haben euch im Wasser, und Wasser ist keine Deckung. Neben dir hört ein Adjutant auf zu ziehen.'}],
+      tod:'Der Sumpf von Arcole gibt nicht alles zurück. Den General ziehen sie heraus; nach dir wird morgen gesucht, wenn Zeit ist.',
+      todesart:'Im Sumpf von Arcole geblieben',
+      erfolg:{text:'Auf dem Damm sieht er dich an, einen Atemzug lang, Schlamm bis zum Kinn. Jemand hat deinen Namen gefragt und aufgeschrieben. Mehr passiert nicht, und mehr braucht es nicht.',
+              ruf:6, nennung:true, atem:-25,
               tat:'Den General aus dem Sumpf von Arcole gezogen'},
-      misserfolg:{text:'Der Sumpf nimmt dich sofort bis zur Brust. Du bekommst seinen Arm zu fassen und verlierst ihn wieder, und dann musst du dich selbst herausarbeiten, Handbreit um Handbreit, während neben dir ein Adjutant stirbt. Herausgezogen haben ihn andere.',
-              leben:-24, atem:-30, belastung:10}},
+      misserfolg:{text:'Herausgezogen haben ihn andere — und dich auch. Aber du warst im Wasser, als es darauf ankam, und die auf dem Damm haben es gesehen.',
+              ruf:2, atem:-30, belastung:10,
+              tat:'In den Sumpf von Arcole gesprungen'}},
      {label:'Auf dem Damm bleiben und Deckung schießen', hint:'Muskete · die Kroaten kurz ducken lassen',
       probe:{wert:'muskete', schw:40},
       erfolg:{text:'Du kniest an der Dammkante und feuerst auf alles, was drüben den Kopf hebt. Es sind die längsten zwei Minuten des Tages, aber die Kroaten schießen auf dich statt auf die Männer im Sumpf. Das war der Zweck.',
@@ -2437,12 +2455,21 @@ GEFECHTS_EREIGNISSE.push(
          'Hinter ihm wenden dreißig Reiter. Sie haben es gesehen.'],
    optionen:[
      {label:'Mit dem Bajonett in die Lücke', hint:'Du bist der Nächste am Loch', risk:true,
-      probe:{wert:'bajonett', schw:40},
-      erfolg:{text:'Du stehst im Loch, bevor du dich entschieden hast. Der Reiter geht über dir hoch, du stößt zu, wohin der Sergent es dich gelehrt hat — ins Pferd, nicht in den Mann —, und dann sind links und rechts wieder Schultern, und das Karree ist zu, und draußen dreht die Welle ab.',
+      kette:[
+        {name:'In die Lücke', wert:'bajonett', schw:40, schaden:14,
+         gut:'Du stehst im Loch, bevor du dich entschieden hast. Der Reiter geht über dir hoch, und du stößt zu, wohin der Sergent es dich gelehrt hat — ins Pferd, nicht in den Mann.',
+         schlecht:'Der Krummsäbel kommt von oben, wo dein Bajonett nicht ist, und reißt dich halb um.'},
+        {name:'Standhalten', wert:'konstitution', schw:40, schaden:14,
+         gut:'Drei Atemzüge stehst du allein in der Lücke, gegen alles, was hineinwill. Dann sind links und rechts wieder Schultern, und das Karree ist zu.',
+         schlecht:'Das stürzende Pferd drückt dich nieder, und was über dich wegsteigt, fragt nicht, wo du hingehörst.'}],
+      tod:'Das Karree schließt sich wieder — über dir. Von außen sieht es aus, als wäre nichts gewesen, und genau das ist der Sinn eines Karrees.',
+      todesart:'Im Karree bei Embabeh gefallen',
+      erfolg:{text:'Draußen dreht die Welle ab, dreißig Reiter auf einmal, weil das Loch zu ist, bevor sie da sind. Der Capitaine hat es gesehen. Das Karree hat es gesehen. Das reicht für einen Abend, an dem niemand fragt, warum du zitterst.',
               moral:-20, ruf:4, eigen:8,
               tat:'Das Karree bei Embabeh geschlossen'},
-      misserfolg:{text:'Der Krummsäbel kommt von oben, wo dein Bajonett nicht ist. Es reißt dich um, und über dich hinweg schließen andere die Lücke. Du liegst zwischen den Beinen des zweiten Glieds und siehst den Himmel zwischen dreißig Hüten.',
-              leben:-28, atem:-15, belastung:10}},
+      misserfolg:{text:'Über dich hinweg schließen andere die Lücke. Du liegst zwischen den Beinen des zweiten Glieds und siehst den Himmel zwischen dreißig Hüten — aber gesprungen bist du, und das haben sie gesehen.',
+              ruf:2, eigen:-4, atem:-15, belastung:10,
+              tat:'In die Lücke des Karrees gesprungen'}},
      {label:'Das zweite Glied hineinziehen', hint:'Drill · Männer schieben statt selbst stehen',
       probe:{wert:'drill', schw:35},
       erfolg:{text:'Du packst zwei Mann an den Riemen und stellst sie in das Loch, wie man Steine in eine Mauer setzt. Es ist nicht tapfer, es ist Handwerk, und es macht das Karree zu, bevor die dreißig da sind.',
@@ -2459,12 +2486,24 @@ GEFECHTS_EREIGNISSE.push(
          'Die letzten zwei Kolonnen sind nicht zurückgekommen. Der Branntwein wird vorab ausgegeben, das sagt alles.'],
    optionen:[
      {label:'Sich melden', hint:'Doppelter Sold, wenn es einen Abend danach gibt', risk:true,
-      probe:{wert:'kaltbluetigkeit', schw:50},
-      erfolg:{text:'Ihr lauft die Schuttrampe hinauf, über das, was von den letzten Kolonnen übrig ist. Oben stehst du eine halbe Minute in der Bresche und siehst die zweite Mauer, von der keiner gesprochen hat, der es nicht gesehen hat. Dann kommt der Rückzugsbefehl. Du bist einer von neun, die ihn noch hören.',
-              moral:-22, ruf:7, nennung:true, geld:6, leben:-8, atem:-22, belastung:8,
+      kette:[
+        {name:'Die Rampe', wert:'geschick', schw:40, schaden:14,
+         gut:'Die Schuttrampe nimmst du im Zickzack, immer dorthin, wo es gerade eingeschlagen hat — dort schlägt es so schnell nicht wieder ein.',
+         schlecht:'Auf der Rampe reißt es dich von den Beinen, und du rutschst ein Stück zurück, über Schutt, der aus Mauer und Männern besteht.'},
+        {name:'Die Bresche', wert:'bajonett', schw:45, schaden:16,
+         gut:'Oben ist die Bresche eng, und was darin steht, will sie halten. Du stößt zu, zweimal, und dann stehst du in der Öffnung — und siehst die zweite Mauer, von der keiner gesprochen hat, der sie nicht gesehen hat.',
+         schlecht:'In der Bresche kommt es von zwei Seiten zugleich. Du wehrst ab, was du siehst, und was du nicht siehst, trifft dich an der Schulter.'},
+        {name:'Der Rückweg', wert:'kaltbluetigkeit', schw:45, schaden:14,
+         gut:'Der Rückzugsbefehl kommt, und du gehst rückwärts die Rampe hinunter, das Gesicht zur Mauer, Schritt für Schritt. Wer rennt, fällt.',
+         schlecht:'Beim Rückzug rennst du, wie fast alle rennen, und die Mauer schießt euch in die Rücken.'}],
+      tod:'Auf dem Schutt der Rampe bleibst du liegen, zwischen denen von gestern und vorgestern. Akkon fällt nicht — und du drei Wochen vor allen anderen.',
+      todesart:'Gefallen in der Bresche von Akkon',
+      erfolg:{text:'Du bist einer von neun, die zurückkommen. Der Adjutant, der die Namen aufschreibt, fragt zweimal nach, weil deine Stimme nicht mehr trägt. Doppelter Sold, ein Satz im Tagesbefehl — und das Wissen, dass hinter der Bresche eine zweite Mauer steht.',
+              moral:-22, ruf:7, nennung:true, geld:6, atem:-22, belastung:8,
               tat:'Mit der Sturmkolonne in der Bresche von Akkon'},
-      misserfolg:{text:'Auf der Rampe zerlegt es die Kolonne von zwei Seiten. Du kommst bis an den Fuß der Bresche und dann rückwärts wieder herunter, gezogen von einem, dessen Gesicht du nie gesehen hast. Vom Branntwein spürst du nichts mehr.',
-              leben:-34, atem:-25, belastung:14}},
+      misserfolg:{text:'Du kommst zurück, gezogen von einem, dessen Gesicht du nie gesehen hast. Der doppelte Sold wird trotzdem gezahlt. Vom Branntwein spürst du nichts mehr.',
+              ruf:2, geld:6, atem:-25, belastung:14,
+              tat:'Mit der Sturmkolonne vor der Bresche von Akkon'}},
      {label:'Die Leitern bis an den Graben tragen', hint:'Konstitution · nicht hinein, nur hin',
       probe:{wert:'konstitution', schw:40},
       erfolg:{text:'Vier Mann je Leiter, im Laufschritt durch das Vorfeld, ablegen, zurück. Es ist Trägerarbeit unter Feuer, und niemand nennt sie im Tagesbefehl — aber ohne die Leitern läuft niemand irgendwo hinauf.',
@@ -2494,8 +2533,13 @@ function ereignisWuerfeln(n){
 
 function zeigeEreignis(e){
   const n = KAPITEL[LAUF.node];
-  const opt = e.optionen.map((o,i)=>`<button class="ord ${o.risk?'risk':''}" onclick="ereignisWaehlen(${i})">
-    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`).join('');
+  const opt = e.optionen.map((o,i)=>{
+    const proben = o.kette
+      ? ' · ' + o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw).join(' · ')
+      : (o.probe ? ' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw : '');
+    return `<button class="ord ${o.risk?'risk':''}" onclick="ereignisWaehlen(${i})">
+    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${proben}</span></button>`;
+  }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>${esc(e.frage)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
@@ -2535,27 +2579,59 @@ function ereignisWaehlen(i){
   const n = KAPITEL[LAUF.node];
   const e = GEFECHTS_EREIGNISSE.find(x=>x.id===K.ereignis);
   const o = e.optionen[i];
-  const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
-  const w = p.erfolg ? o.erfolg : (o.misserfolg || o.erfolg);
   K.ereignis = null;
-  ereignisWirkung(w);
-  K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
   S.log.push(n.id+': '+o.label);   // steht auf dem Chronikblatt unter der Station
 
+  let text, w;
+  if(o.kette){
+    /* Eine Sondermission ist keine einzelne Probe, sondern ein Gang: zwei oder
+       drei Stufen, jede mit eigener Probe, und jeder Fehlschlag kostet sofort
+       Blut (Stufenschaden 12–20). Wer unterwegs auf null fällt, fällt dort —
+       mit dem Todestext der Mission, nicht dem allgemeinen. Zurück gibt es ab
+       der ersten Stufe nicht mehr; genau das unterscheidet den Gang vom
+       Rundengeschäft, aus dem man sich jede Runde neu entscheiden kann.
+       Die Wirkung am Ende braucht die Mehrheit der Stufen; auch der
+       Misserfolg gibt Ruf +2 — hingegangen ist hingegangen. */
+    const zeilen = []; let treffer = 0;
+    for(const st of o.kette){
+      const p = probe(st.wert, st.schw);
+      let schaden = 0;
+      if(p.erfolg) treffer++;
+      else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
+      atemKlemmen();
+      zeilen.push((p.erfolg?st.gut:st.schlecht) +
+        ` <span class="fein">${NAMEN[st.wert]} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+      K.protokoll.push(st.name + (p.erfolg?' — gelungen':' — misslungen'));
+      if(S.leben <= 0){
+        kampfEnde(false, zeilen.join(' ') + ' ' + (o.tod||''));
+        toetlich(o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
+        zeigeTod(); return;
+      }
+    }
+    w = (treffer*2 > o.kette.length) ? o.erfolg : (o.misserfolg || o.erfolg);
+    text = zeilen.join(' ') + '<br><br>' + w.text;
+  } else {
+    const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
+    w = p.erfolg ? o.erfolg : (o.misserfolg || o.erfolg);
+    text = w.text;
+    K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
+  }
+  ereignisWirkung(w);
+
   if(S.leben <= 0){
-    kampfEnde(false, w.text + ' Du setzt dich hin, weil du nicht anders kannst, und stehst nicht wieder auf.');
+    kampfEnde(false, text + ' Du setzt dich hin, weil du nicht anders kannst, und stehst nicht wieder auf.');
     toetlich('Gefallen bei '+n.datum.split(' · ')[1]);
     zeigeTod(); return;
   }
-  if(w.ende==='sieg' || K.feindMoral <= 0){ kampfEnde(true, w.text); return; }
+  if(w.ende==='sieg' || K.feindMoral <= 0){ kampfEnde(true, text); return; }
   K.runde++;
   if(K.runde > n.runden){
     const knapp = K.feindMoral < n.feindMoral*0.35;
-    kampfEnde(knapp, w.text + (knapp?' Und dann ist es plötzlich vorbei.':' Es wird dunkel, und nichts ist entschieden.'));
+    kampfEnde(knapp, text + (knapp?' Und dann ist es plötzlich vorbei.':' Es wird dunkel, und nichts ist entschieden.'));
     return;
   }
   laufSichern();
-  zeigeKampf(w.text);
+  zeigeKampf(text);
 }
 
 function zeigeKampf(text){

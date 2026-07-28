@@ -359,6 +359,8 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 
 **Vier Gefechte haben eine Sondermission** (`nur:` trägt die Stations-ID) — der Moment, für den das Gefecht berühmt ist, aus der Höhe eines Mannes im zweiten Glied: die **Brücke von Lodi** (Spitze der Kolonne oder Furt), der **General im Sumpf von Arcole**, der **Riss im Karree von Embabeh**, die **Sturmkolonne von Akkon**. Beim Würfeln haben sie Vorrang und 60 % je Runde statt 45 — eine Sondermission, die fast nie stattfindet, wäre keine. Akkon fällt trotzdem nicht (Invariante 8): Auch wer die Bresche überlebt, sieht nur die zweite Mauer.
 
+**Der riskante Weg einer Sondermission ist eine Kette** (`kette:` statt `probe:`): zwei bis drei Proben hintereinander — Akkon: die Rampe (Geschick 40), die Bresche (Bajonett 45), der Rückweg (Kaltblütigkeit 45) —, und **jeder Fehlschlag kostet sofort 12–20 Leben**. Wer unterwegs auf null fällt, fällt dort, mit dem Todestext der Mission („Gefallen in der Bresche von Akkon"). Zurück gibt es ab der ersten Stufe nicht; genau das unterscheidet den Gang vom Rundengeschäft, aus dem man sich jede Runde neu entscheiden kann. Die Wirkung am Ende braucht die **Mehrheit der Stufen**; auch der Misserfolg gibt Ruf +2 und eine Tat — hingegangen ist hingegangen. Auf dem Knopf stehen alle Stufen mit Wert und Schwierigkeit, damit die Entscheidung eine ist. **Das ist die Stelle, an der das Spiel einen kundigen Spieler töten kann:** Worst Case Akkon sind rund 50 Punkte in einem einzigen Zug — wer angeschlagen vortritt, kann liegen bleiben.
+
 **Knien ist begrenzt: höchstens drei Runden am Stück** (`K.duckFolge`). Zwei Runden fragt niemand, die dritte kostet Ruf −2, eine vierte gibt es nicht — der Knopf ist gesperrt, bis man eine Runde etwas anderes getan hat. Ohne die Grenze war Knien ein Panzer (−22 Gefahr, Restrisiko ~4 %), hinter dem sich jedes Gefecht aussitzen ließ; der Blutzoll des Rückzugs machte das Aussitzen teuer, die Kniegrenze macht es unmöglich.
 
 ### Ein verlorenes Gefecht kostet Blut (`kampfEnde` in `src/kampf.js`)
@@ -418,11 +420,13 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 | Größe | Soll | vorsichtig | mutig |
 |---|---|---|---|
 | **Italien überstanden** | Sollwert ungültig, siehe unten | **100 %** | **95 %** |
-| **Beide Feldzüge überstanden** | noch keiner | 98 % | 90 % |
-| Gestorben | — | 1 von 40 | 4 von 40 |
-| **Elitekompanie erreicht** | noch keiner | 88 % | 75 % |
-| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | 88 % | 85 % |
-| Punkte, Median | — | 204 | 211 · Spitze **230** |
+| **Beide Feldzüge überstanden** | noch keiner | **100 %** | **90 %** |
+| Gestorben | — | 0 von 40 | 4 von 40 |
+| **Elitekompanie erreicht** | noch keiner | 88 % | 85 % |
+| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | 85 % | **95 %** |
+| Punkte, Median | — | 202 | 202 · Spitze **230** |
+
+> **Die Achse trägt jetzt:** Mut kostet Leben (4 Tote gegen 0) und kauft Rang (Caporal 95 % gegen 85 %) — seit den Sondermissions-Ketten ist beides messbar. Wer an den Ereignissen dreht, muss diesen Abstand erhalten: vorsichtig überlebt, mutig steigt auf.
 
 > **Erreicht, nicht überlebt.** Gezählt wird seit dem 28.07.2026 der höchste Rang, den ein Mann je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das Skript den Rang *am Ende* — und das maß nach den Lebenspunkten vor allem, wann gestorben wird: Weil kaum noch jemand vor der Beförderungsstation stirbt, stieg die Endrang-Zahl auf 58 %, ohne dass die Beförderung leichter geworden wäre. Die neue Zahl misst die Schwelle selbst.
 
@@ -467,8 +471,10 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | + Blutzoll beim Rückzug · vorsichtig | 40 | 100 % | 88 % | 204 |
 | dieselbe Fassung · mutig | 40 | 95 % | 85 % | 211 |
 | + Selbstheilung 8 %, Atem-Deckel, Kniegrenze, Sondermissionen · v / m | 40 / 40 | 100 / 98 % | 93 / 93 % | 206 / 215 |
-| **Selbstheilung auf 5 % (gültig) · vorsichtig** | **40** | **100 %** | **85 %** | **202** |
-| **dieselbe Fassung · mutig** | **40** | **98 %** | **88 %** | **215** |
+| Selbstheilung auf 5 % · vorsichtig | 40 | 100 % | 85 % | 202 |
+| dieselbe Fassung · mutig | 40 | 98 % | 88 % | 215 |
+| **+ Sondermissions-Ketten, Stufenschaden 12–20 (gültig) · vorsichtig** | **40** | **100 %** | **85 %** | **202** |
+| **dieselbe Fassung · mutig** | **40** | **95 %** | **95 %** | **202** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 
