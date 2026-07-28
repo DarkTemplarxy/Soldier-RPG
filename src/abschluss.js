@@ -77,7 +77,19 @@ const LAGER_TUN = {
     cost:'Leben, Belastung −10 · Atem +18',
     tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
       lebenAuffuellen(0.25);
-      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>'; }},
+      /* Ein Abend im Trockenen kann ein Fieber brechen — muss aber nicht. Das
+         ist der einzige Ausweg aus einer Krankheit vor dem Winterquartier, und
+         er ist absichtlich ein Wurf: Wer die Ruhr aus dem Sinai mitschleppt,
+         verliert Abende, bis sie geht. */
+      const krank = S.wunden.findIndex(w=>w.zehrt);
+      let zusatz = '';
+      if(krank>=0){
+        const p = probe('konstitution', 35);
+        if(p.erfolg){ const w=S.wunden.splice(krank,1)[0]; atemKlemmen();
+          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden</span>`; }
+        else zusatz = ' Das Fieber bleibt. Es wird bei Dunkelheit stärker, und es wird jede Nacht bei Dunkelheit stärker. <span class="fein">Krankheit hält an</span>';
+      }
+      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>' + zusatz; }},
 
   /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
   korporalschaft:{label:'Deine acht Mann drillen',
@@ -211,7 +223,11 @@ function winterTun(id){
        muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
        Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
     S.belastung=Math.max(0,S.belastung-16); lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
-    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · Wunde geheilt</span>`); }
+    // Krankheiten zuerst — sie sind das, was einen Mann über Wochen aufzehrt
+    const krank = S.wunden.findIndex(w=>w.zehrt);
+    if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
+    if(S.wunden.length){ const w=S.wunden.shift(); atemKlemmen();
+      W.log.push(`${w.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(w.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(w.name)}" überstanden</span>`); }
     else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);

@@ -5,6 +5,20 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Fünf Hebel gegen die Unsterblichkeit
+
+Ein kundiger Spieler war nicht zu töten (40 von 40 überlebten beide Feldzüge). Der Grund war eine Bilanz, keine Einzelzahl: über 200 Punkte Genesung je Lauf gegen rund 70 Punkte Schaden. Fünf Hebel, die ineinandergreifen, statt am Schaden zu drehen:
+
+1. **Offene Wunden verkleinern den Vorrat** (`lebenMax()`): je Abzugspunkt 0,6 Leben weniger, Boden bei 40 %. Das schließt die eigentliche Lücke — Leben heilt schnell nach, Wunden wird man nur langsam los. Zwei alte Wunden heißen 66 statt 82 Punkte und über den Atem-Deckel entsprechend weniger Luft. Der Boden verhindert die Todesspirale: Wunden machen kleiner, nie tot.
+2. **Krankheit zehrt** (`zehrt:` in den Kapiteldaten): Sumpffieber 3, Hitzschlag 3, Ruhr 4, Fieber aus Jaffa 4 — je Station, bis sie behandelt ist. Tötet nie selbst (Klemme bei 1), liefert aber einen leeren Mann am nächsten Gefecht ab. Heilbar nur im Lager (Konstitutions-Probe 35) oder in einer Winterwoche; der Feldscher kann es nicht — eine Ruhr näht man nicht zu. Das ist die Einlösung von „Krankheit gefährlicher als Kugeln" aus KONZEPT.md.
+3. **Ruf zieht Ereignisse an**: 45 % + Ruf/400, gedeckelt 65 %, und ab Ruf 30 ein drittes Ereignis je Gefecht. Wer gesehen wurde, wird geholt — der Adjutant sucht keine Unbekannten. Trifft den Aufsteiger, lässt den Vorsichtigen in Ruhe.
+4. **Der Platz des Toten**: ab Caporal +2 Gefahr je Runde. Er steht außen am Glied, wo sein Vorgänger stand, und die Stelle wurde frei, weil der fiel. Invariante 4 bleibt gewahrt — die Zahl ist der Preis des Rangs, nicht seine Macht.
+5. **Höhepunkte** (`haerte:1.4`): ein bis zwei Gefechte je Feldzug mit +40 % Schaden **und** +3 Gefahr — Lodi (15→18), Arcole (14→17), Embabeh (12→15), Akkon (14→17). Es sind dieselben vier, die eine Sondermission tragen: Das Gefecht, für das man berühmt wird, ist das, an dem man stirbt. Angesagt im Lagebild, überrascht wird niemand. Die +3 Gefahr sind der einzige Hebel, der auch den Vorsichtigen trifft.
+
+Gemessen (je 40 Läufe): **vorsichtig 98 % / 1 Toter / Caporal 83 % / Median 199 · mutig 93 % Italien, 78 % beide Feldzüge / 9 Tote / Caporal 85 % / Median 192, Spitze 240.** Zwischenmessung ohne die Höhepunkt-Gefahr: 100 % / 100 %, 0 gegen 8 Tote — die +3 Gefahr sind das, was den Vorsichtigen erreicht.
+
+---
+
 ## 2026-07-28 — Elf Zwischenfälle auf dem Marsch, mit Sperr-Sätzen
 
 **Zwischen den Stationen kann jetzt etwas passieren** (`MARSCH_EREIGNISSE`, 35 % je Station mit Marschweg, jeder einmal je Lauf, nie vor Gefechten): der Verbandsplatz nach dem Gefecht, Briefe für die Kameraden, die durchgehende Protze, die Nachtwache, Karten um Sold, Requisition mit Quittung, der kranke Nebenmann — und in Ägypten der halbe Brunnen, das reiterlose Mamlukenpferd, die Karte des Ingenieurs, der Basar von Kairo. Ein Zwischenfall tötet nie (Leben klemmt bei 1); er kostet Blut, Atem, Geld oder Ruf und gibt Kameradschaft, Gunst und Fertigkeiten.

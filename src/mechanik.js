@@ -35,7 +35,9 @@ function stationErledigt(){
      unten. Das Lager („Schlafen und liegen bleiben") bleibt die schnelle
      Genesung; das hier ist nur der Lauf der Zeit.
      Erste Fassung war 8 % — damit fraß die Zeit den Blutzoll des Rückzugs
-     wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen). */
+     wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen).
+     Krankheiten zehren **vorher**, sonst hebt sich beides auf. */
+  S.wunden.forEach(w=>{ if(w.zehrt) S.leben = Math.max(1, S.leben - w.zehrt); });
   lebenAuffuellen(0.05);
   atemKlemmen();
   laufSichern();
@@ -129,7 +131,12 @@ function anwenden(e){
      an derselben Zahl sehen. Sie tötet nie unmittelbar: Der Tod gehört ins
      Gefecht, wo er einen Text und einen Ort hat. Sie lässt einen aber so
      geschwächt hineingehen, dass die nächste Kugel reicht. */
-  if(e.wunde){ wundeGeben(e.wunde, 8); S.leben = Math.max(1, S.leben - 10); }
+  /* `zehrt` macht aus einer Wunde eine Krankheit: Sie kostet nicht einmal,
+     sondern an jeder Station weiter, bis sie behandelt ist. Das ist die
+     Umsetzung von „Krankheit sollte gefährlicher sein als Kugeln" (KONZEPT.md)
+     — Ruhr und das Fieber aus Jaffa liefern einen Mann beim nächsten Gefecht
+     mit leerem Vorrat und keiner Luft ab, ohne ihn je selbst zu töten. */
+  if(e.wunde){ wundeGeben(e.wunde, 8, e.zehrt); S.leben = Math.max(1, S.leben - 10); }
   atemKlemmen();
 }
 
@@ -143,9 +150,22 @@ function anwenden(e){
 
    Gerechnet wird vom **rohen** Attribut, nicht von wert(): Sonst schrumpfte
    die Obergrenze mitten im Gefecht, weil Wunden die Konstitution senken. */
+const WUNDE_JE_PUNKT = 0.6;    // Abzug 5/8/14 → 3/5/8 Punkte weniger Vorrat
+const VORRAT_BODEN     = 0.4;    // so viel bleibt einem Zerschossenen mindestens
+
 function lebenMax(mann){
   const m = mann || S;
-  return 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+  const grund = 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+  /* Offene Wunden verkleinern den Mann. Das ist der Hebel, der die Lücke
+     schließt, durch die ein kundiger Spieler bisher unbeschadet kam: Leben
+     heilt schnell nach (Zeit, Lagerabend, Winterwoche), Wunden wird man nur
+     langsam los — der Feldscher näht je Gefecht nur die leichteste. Wer mit
+     zwei alten Wunden nach Arcole geht, hat 66 statt 82 Punkte, und über den
+     Atem-Deckel entsprechend weniger Luft.
+     Der Boden bei 40 % verhindert, dass Wunden allein töten: Sie machen einen
+     kleiner, nie tot — der Tod gehört ins Gefecht. */
+  const offen = (m.wunden||[]).reduce((sum,w)=> sum + (w.abzug||0), 0);
+  return Math.max(Math.round(grund*VORRAT_BODEN), grund - Math.round(offen*WUNDE_JE_PUNKT));
 }
 function lebenAuffuellen(anteil){
   const max = lebenMax();
@@ -158,11 +178,18 @@ function lebenAuffuellen(anteil){
    kann ins Gefecht, aber er geht als der hinein, der er gerade ist. Erst
    heilen, dann verschnaufen. Aufgerufen nach jeder Änderung an Atem oder
    Leben; wer eine neue Stelle baut, die daran dreht, ruft sie ebenfalls. */
-function atemKlemmen(){ if(S) S.atem = Math.max(0, Math.min(S.atem, S.leben)); }
+function atemKlemmen(){
+  if(!S) return;
+  S.leben = Math.max(0, Math.min(S.leben, lebenMax()));
+  S.atem  = Math.max(0, Math.min(S.atem, S.leben));
+}
 
-function wundeGeben(name, abzug){
-  S.wunden.push({name, abzug});
+function wundeGeben(name, abzug, zehrt){
+  const w = {name, abzug};
+  if(zehrt) w.zehrt = zehrt;          // Krankheit: zehrt je Station weiter
+  S.wunden.push(w);
   S.belastung = Math.min(100, S.belastung + 6);
+  atemKlemmen();                       // der Vorrat ist gerade kleiner geworden
 }
 
 function verschleiss(faktor){

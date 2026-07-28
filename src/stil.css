@@ -242,3 +242,7 @@
   footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
     color:var(--faint);font-size:12px;font-style:italic;display:flex;
     justify-content:space-between;gap:14px;flex-wrap:wrap}
+
+/* Krankheit: zehrt an jeder Station weiter — rot, weil sie Kosten ist. */
+.kv .zehrt{ font-style:normal; font-size:10.5px; color:var(--blood); letter-spacing:.4px; }
+.statlab .fein{ font-style:normal; color:var(--faint); font-weight:400; }

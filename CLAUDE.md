@@ -134,9 +134,9 @@ Diese acht Regeln nicht brechen. Wenn eine Änderung eine davon verletzt, ist di
 | Gefecht | Runden | Feindmoral | Gefahr |
 |---|---|---|---|
 | Montenotte | 6 | 45 | 10 |
-| Lodi | 9 | 78 | 15 |
+| Lodi **(Höhepunkt)** | 9 | 78 | 15 → 18 |
 | Castiglione | 7 | 58 | 12 |
-| Arcole | 9 | 74 | 14 |
+| Arcole **(Höhepunkt)** | 9 | 74 | 14 → 17 |
 | Rivoli | 8 | 66 | 13 |
 
 ### Gefechte Kapitel 2 (`src/daten/kapitel02_aegypten.js`)
@@ -144,12 +144,12 @@ Diese acht Regeln nicht brechen. Wenn eine Änderung eine davon verletzt, ist di
 | Gefecht | Runden | Feindmoral | Gefahr | Anmarsch kostet |
 |---|---|---|---|---|
 | Alexandria | 5 | 40 | 9 | 0,10 · Atem 5 |
-| Pyramiden (Embabeh) | 7 | 60 | 12 | 0,25 · Atem 9 |
+| Pyramiden (Embabeh) **(Höhepunkt)** | 7 | 60 | 12 → 15 | 0,25 · Atem 9 |
 | Kairoer Aufstand | 6 | 50 | 11 | 0,05 · Atem 2 |
-| Akkon | 9 | 85 | **14** | 0,30 · Atem 8 |
+| Akkon **(Höhepunkt)** | 9 | 85 | **14 → 17** | 0,30 · Atem 8 |
 | Abukir | 8 | 62 | 12 | 0,20 · Atem 7 |
 
-**Gefahr** ist die Trefferchance in Prozent pro Runde, bevor Deckung sie verändert.
+**Gefahr** ist die Trefferchance in Prozent pro Runde, bevor Deckung sie verändert. Der zweite Wert gilt für die vier **Höhepunkte** (`haerte:1.4`): +3 Gefahr und +40 % Schaden je Treffer.
 
 > **Ägypten ist nicht gefährlicher im Gefecht, sondern auf dem Weg dorthin.** Die Gefahr-Werte liegen im selben Band wie in Italien (9–14); was das Kapitel härter macht, sind der Anmarsch (`anmarschKosten` je Gefecht statt der italienischen Pauschale 0,15/4/1) und die Szenen: Hitzschlag im Wüstenmarsch, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Das ist die Umsetzung von „Krankheit sollte hier gefährlicher sein als Kugeln" aus KONZEPT.md — sie steht in den Szenen, nicht in den Gefahr-Zahlen.
 >
@@ -364,6 +364,28 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 
 **Knien ist begrenzt: höchstens drei Runden am Stück** (`K.duckFolge`). Zwei Runden fragt niemand, die dritte kostet Ruf −2, eine vierte gibt es nicht — der Knopf ist gesperrt, bis man eine Runde etwas anderes getan hat. Ohne die Grenze war Knien ein Panzer (−22 Gefahr, Restrisiko ~4 %), hinter dem sich jedes Gefecht aussitzen ließ; der Blutzoll des Rückzugs machte das Aussitzen teuer, die Kniegrenze macht es unmöglich.
 
+### Fünf Hebel, die das Spiel gefährlich machen (28.07.2026)
+
+Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide Feldzüge. Der Grund war eine Bilanz, keine Einzelzahl — über 200 Punkte Genesung je Lauf gegen rund 70 Punkte Schaden. Diese fünf greifen ineinander, statt am Schaden zu drehen:
+
+| # | Hebel | Wo | Was |
+|---|---|---|---|
+| 1 | **Offene Wunden verkleinern den Vorrat** | `lebenMax()` | je Abzugspunkt 0,6 Leben weniger, Boden bei 40 % |
+| 2 | **Krankheit zehrt** | `zehrt:` in Kapiteldaten | 3–4 Leben je Station, bis sie behandelt ist |
+| 3 | **Ruf zieht Ereignisse an** | `ereignisWuerfeln()` | 45 % + Ruf/400, gedeckelt 65 %; ab Ruf 30 ein drittes je Gefecht |
+| 4 | **Der Platz des Toten** | `kampfAktion()` | ab Caporal +2 Gefahr je Runde |
+| 5 | **Höhepunkte** | `haerte:` in Kapiteldaten | +40 % Schaden **und** +3 Gefahr |
+
+**1 — Wunden verkleinern den Mann.** Das schließt die Lücke, durch die ein kundiger Spieler bisher kam: Leben heilt schnell nach (Zeit, Lagerabend, Winterwoche), Wunden wird man nur langsam los — der Feldscher näht je Gefecht die *leichteste*, der Rest wartet auf die Winterwoche oder das Jahr Garnison. Wer mit zwei alten Wunden nach Arcole geht, hat 66 statt 82 Punkte und über den Atem-Deckel entsprechend weniger Luft. **Der Boden bei 40 % ist die Sicherung gegen die Todesspirale:** Wunden machen einen kleiner, nie tot.
+
+**2 — Krankheit ist die Einlösung von „gefährlicher als Kugeln" (KONZEPT.md).** Sumpffieber (3), Hitzschlag (3), Ruhr (4), Fieber aus Jaffa (4) kosten an *jeder* Station weiter. Sie töten nie selbst (`anwenden()` und `stationErledigt()` klemmen bei 1), aber sie liefern einen Mann mit leerem Vorrat und keiner Luft am nächsten Gefecht ab. **Heilbar nur an zwei Stellen:** Lagerabend „Schlafen" gegen eine Konstitutions-Probe 35, oder eine Winterwoche (die Krankheit rückt dort vor). Der Feldscher kann sie nicht — eine Ruhr näht man nicht zu.
+
+**3 — Wer gesehen wurde, wird geholt.** Der Adjutant sucht keine Unbekannten. Trifft gezielt den Aufsteiger und lässt den Vorsichtigen in Ruhe: Ehrgeiz koppelt sich an Blut, ohne dass jemand gezwungen wird.
+
+**4 — Der Caporal steht außen am Glied**, dort, wo sein Vorgänger stand, und die Stelle wurde frei, weil er fiel. Invariante 5 von der anderen Seite, und Invariante 4 bleibt gewahrt: Der Rang gibt weiter Knöpfe, die Zahl hier ist sein *Preis*, nicht seine Macht.
+
+**5 — Ein bis zwei Höhepunkte je Feldzug.** Es sind dieselben vier, die eine Sondermission tragen — **Lodi, Arcole, Embabeh, Akkon** —, und das ist kein Zufall, sondern der Entwurf: Das Gefecht, für das man berühmt wird, ist das, an dem man stirbt. Montenotte und Alexandria bleiben Lehrgefechte. `haerte` schaltet Schaden *und* Gefahr zusammen, damit ein Feld genügt; angesagt wird es im Lagebild („Das hier wird kein gewöhnliches Gefecht"), überrascht wird niemand. **Die +3 Gefahr sind der einzige der fünf Hebel, der auch den Vorsichtigen trifft** — beschossen wird man, ob man vortritt oder nicht.
+
 ### Zwischenfälle auf dem Marsch (`MARSCH_EREIGNISSE` in `src/oberflaeche.js`)
 
 **Elf kleine Szenen zwischen den Stationen** — sieben allgemeine (Verbandsplatz, Briefe, Protze, Nachtwache, Kartenspiel, Requisition, der kranke Nebenmann), vier ägyptische (Brunnen, Beutepferd, Ingenieurkarte, Basar). Gewürfelt beim ersten Betreten einer Station mit Marschweg (35 %, jeder Zwischenfall einmal je Lauf, nie vor Gefechten — dort trägt der Anmarsch die Last). Ein Zwischenfall tötet nie: `anwenden()` klemmt das Leben bei 1, der Tod gehört ins Gefecht.
@@ -430,30 +452,26 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 | Größe | Soll | vorsichtig | mutig |
 |---|---|---|---|
-| **Italien überstanden** | Sollwert ungültig, siehe unten | **100 %** | **95 %** |
-| **Beide Feldzüge überstanden** | noch keiner | **100 %** | **90 %** |
-| Gestorben | — | 0 von 40 | 4 von 40 |
-| **Elitekompanie erreicht** | noch keiner | 88 % | 85 % |
-| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | 85 % | **95 %** |
-| Punkte, Median | — | 202 | 202 · Spitze **230** |
+| **Italien überstanden** | Sollwert wird neu gesetzt, siehe unten | **98 %** | **93 %** |
+| **Beide Feldzüge überstanden** | noch keiner | **98 %** | **78 %** |
+| Gestorben | — | 1 von 40 | **9 von 40** |
+| **Elitekompanie erreicht** | noch keiner | 85 % | 85 % |
+| **Caporal erreicht** | ~30 % (galt für den blinden Bot) | 83 % | 85 % |
+| Punkte, Median | — | 199 | 192 · Spitze **240** |
 
-> **Die Achse trägt jetzt:** Mut kostet Leben (4 Tote gegen 0) und kauft Rang (Caporal 95 % gegen 85 %) — seit den Sondermissions-Ketten ist beides messbar. Wer an den Ereignissen dreht, muss diesen Abstand erhalten: vorsichtig überlebt, mutig steigt auf.
+> **Die Achse trägt, und zwar deutlich:** Mut kostet neunmal so viele Männer wie Vorsicht (9 Tote gegen 1), und der mutige Lauf holt trotzdem die Spitzenwertung (240 gegen 227). Wer an den Ereignissen oder den fünf Hebeln dreht, muss diesen Abstand erhalten — **vorsichtig überlebt, mutig steigt auf und stirbt öfter.**
 
 > **Erreicht, nicht überlebt.** Gezählt wird seit dem 28.07.2026 der höchste Rang, den ein Mann je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das Skript den Rang *am Ende* — und das maß nach den Lebenspunkten vor allem, wann gestorben wird: Weil kaum noch jemand vor der Beförderungsstation stirbt, stieg die Endrang-Zahl auf 58 %, ohne dass die Beförderung leichter geworden wäre. Die neue Zahl misst die Schwelle selbst.
 
-> ### Der offene Punkt, der jetzt alles überlagert
+> ### Wo die Härte jetzt steht
 >
-> **Für einen Spieler, der weiß, was er tut, hat das Spiel derzeit keine Zähne: 40 von 40 Läufen überstehen beide Feldzüge, keiner stirbt.** Die alten 45–55 % waren nie die Härte des Spiels, sondern die Härte für einen Bot, der seine Attribute auswürfelte und sich nie ausruhte. Drei Dinge tragen den Unterschied, in dieser Reihenfolge:
+> **Der Weg dorthin, zum Nachlesen:** Ein kundiger Spieler war lange nicht zu töten — 40 von 40 überlebten beide Feldzüge. Die alten 45–55 % waren nie die Härte des Spiels, sondern die Härte für einen Bot, der seine Attribute auswürfelte und sich nie ausruhte. Drei Dinge trugen den Unterschied: Konstitution 70 statt Zufall (82 statt 64 Lebenspunkte), kürzere Gefechte durch Salve und gezieltes Feuer (drei Runden statt acht, und Treffer kommen je Runde), und Ruhen im Lager.
 >
-> 1. **Konstitution 70 statt ausgewürfelt** — 82 statt 64 Lebenspunkte, mit Herkunft bis 94.
-> 2. **Kürzere Gefechte.** Die Salve des Caporals bringt 26–36 Schaden je Runde und lässt die eigene Muskete geladen; der Voltigeur zielt für 22–32 statt für 12–20 zu feuern. Wer das nutzt, ist nach drei Runden fertig statt nach acht — und Treffer kommen je Runde, nicht je Gefecht.
-> 3. **Ruhen im Lager.** Ein Abend gibt 25 % zurück, eine Winterwoche 60 %. Wer bei 60 % ruht, kommt nie in die Nähe von null.
+> **Gebaut wurde daraufhin nicht am Schaden, sondern an den Entscheidungen** — Gefechts-Ereignisse, Sondermissions-Ketten, Blutzoll beim Rückzug, Kniegrenze, Atem-Deckel, Marsch-Zwischenfälle — und zuletzt die fünf Hebel oben. **Ergebnis: mutig 9 Tote von 40, vorsichtig 1.**
 >
-> **Die Gefechts-Ereignisse und der Blutzoll beim Rückzug haben die Achse gebaut** — mutig stirbt öfter als vorsichtig, Aussitzen ist unmöglich geworden (Kniegrenze), und ein Schwerverwundeter kämpft als Schwerverwundeter (Atem-Deckel). **Die Höhe steht weiter aus:** vorsichtig 100 %, mutig 98 %. Der Grund ist unverändert die Heilungsbilanz — über 200 Punkte Genesung (Lagerabende, Winterwochen, jetzt auch +5 % je Station) gegen rund 70 Punkte Schaden je Lauf. Solange die Bilanz so steht, kann kein Gefecht töten, das man überlebt hat.
->
-> **Entschieden ist (28.07.2026): Die Lagerabende bleiben, wie sie sind, und geheilt wird von allein** — die Härte soll aus Entscheidungen kommen (Ereignisse, Kniegrenze, Atem-Deckel), nicht aus Verwaltungsknappheit. Die verbleibenden Hebel, ungemessen, nach erwarteter Wirkung: die Selbstheilung je Station (5 %), die Heilung je Lagerabend (25 %), der Schaden je Treffer (5–11 / 15–25), die Misserfolgskosten der Ereignisse (22–34), der Blutzoll des Rückzugs (5–18). **Wer daran dreht, misst danach vier Zahlen** — Überleben und erreichte Ränge, je vorsichtig und mutig.
+> **Was offen bleibt und eine Entwurfsfrage ist, keine Zahlenfrage:** Ein Spieler, der nie vortritt und im Lager schläft, kommt weiterhin fast sicher durch (98 %). Das ist vertretbar — ein Feigling *soll* überleben; er wird nur nie Caporal und bleibt in der Wertung unter dem, der vortritt. Wer die Höhe trotzdem senken will, dreht am ehesten an der Selbstheilung je Station (5 %) oder an der Heilung je Lagerabend (25 %). **Entschieden bleibt (28.07.2026): Die Lagerabende bleiben, wie sie sind** — die Härte kommt aus Entscheidungen, nicht aus Verwaltungsknappheit. **Wer daran dreht, misst danach vier Zahlen** — Überleben und erreichte Ränge, je vorsichtig und mutig.
 
-**Seit Kapitel 2 misst `test/balance.js` zwei Quoten.** „Italien überstanden" ist der alte Zielwert und bleibt bei 45–55 %; „beide Feldzüge" ist neu und hat noch keinen Sollwert — der Bot muss dafür 32 statt 16 Stationen überleben. Ohne diese Trennung wäre der alte Zielwert nach dem Anbau bedeutungslos geworden. Der Punkte-Median fällt von 91 auf 45, weil Stationen nur noch 2 statt 3 Punkte zählen und die meisten Läufe jetzt vor dem Ende sterben; die Spitze steigt dafür von 162 auf 230.
+**Seit Kapitel 2 misst `test/balance.js` zwei Quoten.** „Italien überstanden" war der alte Zielwert von 45–55 %; „beide Feldzüge" ist neu und hat noch keinen Sollwert — der Bot muss dafür 32 statt 16 Stationen überleben. Ohne diese Trennung wäre der alte Zielwert nach dem Anbau bedeutungslos geworden. Der Punkte-Median fällt von 91 auf 45, weil Stationen nur noch 2 statt 3 Punkte zählen und die meisten Läufe jetzt vor dem Ende sterben; die Spitze steigt dafür von 162 auf 230.
 
 > **Ein Stolperstein beim Messen, zum zweiten Mal:** Die Erkennung von „Italien überstanden" prüft `/vorfrieden/i` **ohne Rücksicht auf Groß- und Kleinschreibung**. Kartenköpfe setzt das CSS in Großbuchstaben, und `innerText` liefert die gerenderte Fassung — eine Prüfung auf `'Vorfrieden mit Österreich'` meldete 0 %, während im selben Lauf acht Männer ganz Ägypten überlebten.
 
@@ -486,8 +504,11 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | dieselbe Fassung · mutig | 40 | 98 % | 88 % | 215 |
 | + Sondermissions-Ketten, Stufenschaden 12–20 · vorsichtig | 40 | 100 % | 85 % | 202 |
 | dieselbe Fassung · mutig | 40 | 95 % | 95 % | 202 |
-| **+ Marsch-Zwischenfälle (gültig) · vorsichtig** | **40** | **100 %** | **78 %** | **196** |
-| **dieselbe Fassung · mutig** | **40** | **98 %** | **88 %** | **202** |
+| + Marsch-Zwischenfälle · vorsichtig | 40 | 100 % | 78 % | 196 |
+| dieselbe Fassung · mutig | 40 | 98 % | 88 % | 202 |
+| + fünf Hebel ohne die Höhepunkt-Gefahr · v / m | 40 / 40 | 100 / 100 % | 83 / 88 % | 199 / 202 |
+| **+ Höhepunkte auch +3 Gefahr (gültig) · vorsichtig** | **40** | **98 %** | **83 %** | **199** |
+| **dieselbe Fassung · mutig** | **40** | **93 %** | **85 %** | **192** |
 
 **Der Testbot kauft nichts.** Alle Zahlen gelten für einen Lauf ohne Veteranenpunkte. Wer Ausrüstung oder Ausbildung kauft, spielt leichter — das ist der Sinn der Punkte und keine Verzerrung der Messung.
 

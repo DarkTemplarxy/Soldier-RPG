@@ -250,6 +250,10 @@
     color:var(--faint);font-size:12px;font-style:italic;display:flex;
     justify-content:space-between;gap:14px;flex-wrap:wrap}
 
+/* Krankheit: zehrt an jeder Station weiter — rot, weil sie Kosten ist. */
+.kv .zehrt{ font-style:normal; font-size:10.5px; color:var(--blood); letter-spacing:.4px; }
+.statlab .fein{ font-style:normal; color:var(--faint); font-weight:400; }
+
 </style>
 </head>
 <body>
@@ -552,7 +556,7 @@ const KAPITEL = [
         gelaende:'Holzbrücke, 200 Schritt, keine Deckung, kein Ausweichen',
         stellung:'Viertes Glied der Sturmkolonne'},
   intro:'Die Brücke ist zweihundert Schritt lang, aus Holz, und am anderen Ende stehen dreißig österreichische Geschütze. Die Kolonne steht darauf und kommt nicht vor und nicht zurück. Vor dir ist Rauch, und in dem Rauch schlägt Geschützfeuer ins Holz und wirft Splitter, so lang wie dein Unterarm.',
-  runden:9,feindMoral:78,gefahr:15,ruhm:true,
+  runden:9,feindMoral:78,gefahr:15,haerte:1.4,ruhm:true,
   sieg:{text:'Ihr kommt hinüber. Wie, weiß hinterher niemand genau zu sagen. Auf der Brücke liegen mehr Männer, als darauf gestanden haben, so kommt es dir vor. Am Abend nennt jemand den Oberbefehlshaber zum ersten Mal beim Spitznamen: le petit caporal.',
     ruf:16,belastung:14,nennung:true},
   niederlage:{text:'Die Kolonne weicht von der Brücke zurück. Es dauert eine Stunde, bis sie es noch einmal versuchen — ohne dich.',ruf:-6,belastung:16}},
@@ -595,7 +599,7 @@ const KAPITEL = [
      erfolg:{text:'Aale aus den Gräben, ein Sack Mais aus einer Mühle. Die Korporalschaft isst drei Tage besser als das halbe Bataillon.',
        kameradschaft:12,atem:10,geld:5},
      misserfolg:{text:'Du stehst vier Stunden bis zu den Knien im Wasser und bringst nichts mit außer dem Fieber, das in diesem Wasser wohnt.',
-       wunde:'Sumpffieber',atem:-15,belastung:6}},
+       wunde:'Sumpffieber',zehrt:3,atem:-15,belastung:6}},
     {label:'Schreiben lernen',hint:'Bildung · ein Sergent bringt es dir bei, gegen Schnaps',
      kosten:'Kostet Geld und jeden Abend',
      erfolg:{text:'Es ist mühsamer als Grabenschaufeln. Nach sechs Wochen kannst du deinen Namen schreiben und eine Liste lesen. In dieser Armee ist das mehr wert, als es klingt.',
@@ -653,7 +657,7 @@ const KAPITEL = [
         gelaende:'Damm, drei Mann breit, beidseitig Sumpf · dritter Versuch',
         stellung:'In der Kolonne auf dem Damm, hinter den Grenadieren'},
   intro:'Der Damm ist so schmal, dass drei Mann nebeneinander gehen. Rechts und links Sumpf. Am anderen Ende Kroaten, die seit zwei Tagen wissen, dass ihr kommt. Es ist der dritte Versuch.',
-  runden:9,feindMoral:74,gefahr:14,ruhm:true,
+  runden:9,feindMoral:74,gefahr:14,haerte:1.4,ruhm:true,
   sieg:{text:'Am dritten Tag geht es. Nicht, weil jemand tapferer geworden wäre, sondern weil jemand endlich auf die Idee kam, dass man den Sumpf auch umgehen kann. Auf dem Damm liegen die Männer der ersten beiden Tage.',
     ruf:14,belastung:16,nennung:true},
   niederlage:{text:'Der Damm bleibt österreichisch, und du liegst im Schilf, bis es dunkel wird.',ruf:-5,belastung:14}},
@@ -774,7 +778,7 @@ const KAPITEL2 = [
      probe:{wert:'kaltbluetigkeit',schw:40},kosten:'Kaltblütigkeit',
      erfolg:{text:'Ein Schluck jede Stunde, nicht mehr, auch wenn die Zunge am Gaumen klebt. Am vierten Tag ist noch ein Rest im Schlauch, und du gehst noch aufrecht.',atem:-4},
      misserfolg:{text:'Am Mittag des zweiten Tages ist der Schlauch leer, und die Sonne steht noch sechs Stunden hoch. Den Rest des Tages weißt du hinterher nicht mehr genau.',
-       wunde:'Hitzschlag',atem:-12}},
+       wunde:'Hitzschlag',zehrt:3,atem:-12}},
     {label:'Einen Brunnen abseits der Route suchen',hint:'Fouragieren · allein in der Wüste',
      probe:{wert:'fouragieren',schw:45},
      erfolg:{text:'Hinter einem Dünenzug ein Loch mit einem Rest brackigem Wasser. Du füllst deinen Schlauch und zwei fremde und holst die Kolonne wieder ein, bevor dich jemand als Nachzügler meldet.',
@@ -812,7 +816,7 @@ const KAPITEL2 = [
         gelaende:'Ebene, Staub, Melonenfelder, der Nil im Rücken',
         stellung:'Nordkante des Karrees, zweites Glied'},
   intro:'Sie reiten Wellen, wie Wasser gegen eine Mauer, und die Mauer bist du. Zwischen den Angriffen hört man drüben die Verwundeten und die Pferde.',
-  runden:7,feindMoral:60,gefahr:12,ruhm:true,
+  runden:7,feindMoral:60,gefahr:12,haerte:1.4,ruhm:true,
   sieg:{text:'Gegen Abend brennt Embabeh, und im Nil treiben Mamluken, die mit Gold in den Gürteln schwimmen wollten. Männer waten hinein und fischen Leichen nach Münzen. Es ist ein Sieg, wie ihn noch keiner gesehen hat, und er fühlt sich an wie ein Schlachthof.',
     ruf:13,belastung:10,nennung:true,geld:6},
   niederlage:{text:'Die Südkante bricht, heißt es später, und für eine Viertelstunde ist alles Staub und Schreie. Dass es am Ende doch gehalten hat, war nicht dein Verdienst und nicht deine Schuld — aber du warst am Boden, als es entschieden wurde.',
@@ -885,7 +889,7 @@ const KAPITEL2 = [
      erfolg:{text:'Du hebst, wäschst und hältst Köpfe, elf Tage lang. Zwei von den Männern auf deinem Karren erreichen El-Arisch lebend, und einer davon sagt es dem Sergent-major.',
        kameradschaft:10,gunst:1,fert:{feldchirurgie:8}},
      misserfolg:{text:'Am siebten Tag krümmst du dich selbst. Die Ruhr fragt nicht, wer hilft und wer nicht.',
-       wunde:'Ruhr',kameradschaft:4}},
+       wunde:'Ruhr',zehrt:4,kameradschaft:4}},
     {label:'Die Wasserwache übernehmen',hint:'Autorität · nachts an den Ziegenhäuten stehen',
      probe:{wert:'autoritaet',schw:40},
      erfolg:{text:'Zwei Nächte stehst du an den Wasserkarren und schickst Männer weg, die dreimal so lange dienen wie du. Es macht dich nicht beliebt. Es macht dich bekannt.',
@@ -927,7 +931,7 @@ const KAPITEL2 = [
         gelaende:'Trockengraben voller Toter, dahinter die Bresche · neunter Versuch',
         stellung:'Zweite Sturmwelle'},
   intro:'Die Bresche ist zwanzig Schritt breit und dahinter haben sie eine zweite Mauer gebaut, während ihr die erste beschossen habt. Von See her feuern die Engländer der Länge nach durch den Graben.',
-  runden:9,feindMoral:85,gefahr:14,ruhm:true,
+  runden:9,feindMoral:85,gefahr:14,haerte:1.4,ruhm:true,
   sieg:{text:'Ihr kommt bis hinter die Bresche und haltet euch dort einen halben Tag. Dann kommt der Befehl zurückzugehen — was ihr genommen habt, ist eine zweite Mauer, und dahinter steht eine dritte. Aber ihr wart drin, und alle haben es gesehen.',
     ruf:15,belastung:16,nennung:true},
   niederlage:{text:'Am 20. Mai bricht die Armee die Belagerung ab. Nachts, damit die Stadt es nicht sieht, mit vergrabenen Geschützen und Karren voller Kranker. Akkon war der erste Ort, der nicht gefallen ist, und jeder in der Kolonne weiß, dass das etwas bedeutet.',
@@ -952,7 +956,7 @@ const KAPITEL2 = [
      erfolg:{text:'Du packst ihn unter den Achseln, und niemand hilft dir. Er stirbt zwei Tage später trotzdem — aber auf einem Karren, nicht im Sand. Die Kompanie hat zugesehen und nichts gesagt. Das ist hier die höchste Form von Respekt.',
        kameradschaft:12,ruf:3,belastung:6},
      misserfolg:{text:'Drei Tage später hast du Fieber und einen Knoten in der Achsel. Der Feldscher sieht dich lange an, sagt „vielleicht nur das Lagerfieber" und geht schnell weiter.',
-       wunde:'Fieber aus Jaffa',belastung:10}},
+       wunde:'Fieber aus Jaffa',zehrt:4,belastung:10}},
     {label:'Das Zählen der Kolonne übernehmen',hint:'Verwaltung · abends fehlt immer jemand',
      probe:{wert:'verwaltung',schw:35},
      erfolg:{text:'Du führst die Abendliste deiner Kompanie: wer geht, wer fährt, wer fehlt. Es ist Schreibarbeit über Sterbende, aber sie sorgt dafür, dass morgens nach den Fehlenden gesucht wird.',
@@ -1250,7 +1254,9 @@ function stationErledigt(){
      unten. Das Lager („Schlafen und liegen bleiben") bleibt die schnelle
      Genesung; das hier ist nur der Lauf der Zeit.
      Erste Fassung war 8 % — damit fraß die Zeit den Blutzoll des Rückzugs
-     wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen). */
+     wieder auf (gemessen: mutig 1 Toter statt 4 bei 40 Läufen).
+     Krankheiten zehren **vorher**, sonst hebt sich beides auf. */
+  S.wunden.forEach(w=>{ if(w.zehrt) S.leben = Math.max(1, S.leben - w.zehrt); });
   lebenAuffuellen(0.05);
   atemKlemmen();
   laufSichern();
@@ -1344,7 +1350,12 @@ function anwenden(e){
      an derselben Zahl sehen. Sie tötet nie unmittelbar: Der Tod gehört ins
      Gefecht, wo er einen Text und einen Ort hat. Sie lässt einen aber so
      geschwächt hineingehen, dass die nächste Kugel reicht. */
-  if(e.wunde){ wundeGeben(e.wunde, 8); S.leben = Math.max(1, S.leben - 10); }
+  /* `zehrt` macht aus einer Wunde eine Krankheit: Sie kostet nicht einmal,
+     sondern an jeder Station weiter, bis sie behandelt ist. Das ist die
+     Umsetzung von „Krankheit sollte gefährlicher sein als Kugeln" (KONZEPT.md)
+     — Ruhr und das Fieber aus Jaffa liefern einen Mann beim nächsten Gefecht
+     mit leerem Vorrat und keiner Luft ab, ohne ihn je selbst zu töten. */
+  if(e.wunde){ wundeGeben(e.wunde, 8, e.zehrt); S.leben = Math.max(1, S.leben - 10); }
   atemKlemmen();
 }
 
@@ -1358,9 +1369,22 @@ function anwenden(e){
 
    Gerechnet wird vom **rohen** Attribut, nicht von wert(): Sonst schrumpfte
    die Obergrenze mitten im Gefecht, weil Wunden die Konstitution senken. */
+const WUNDE_JE_PUNKT = 0.6;    // Abzug 5/8/14 → 3/5/8 Punkte weniger Vorrat
+const VORRAT_BODEN     = 0.4;    // so viel bleibt einem Zerschossenen mindestens
+
 function lebenMax(mann){
   const m = mann || S;
-  return 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+  const grund = 40 + Math.round((m.attr.konstitution || 20) * 0.6);   // 52 bei 20 · 64 bei 40 · 82 bei 70 · 94 bei 90
+  /* Offene Wunden verkleinern den Mann. Das ist der Hebel, der die Lücke
+     schließt, durch die ein kundiger Spieler bisher unbeschadet kam: Leben
+     heilt schnell nach (Zeit, Lagerabend, Winterwoche), Wunden wird man nur
+     langsam los — der Feldscher näht je Gefecht nur die leichteste. Wer mit
+     zwei alten Wunden nach Arcole geht, hat 66 statt 82 Punkte, und über den
+     Atem-Deckel entsprechend weniger Luft.
+     Der Boden bei 40 % verhindert, dass Wunden allein töten: Sie machen einen
+     kleiner, nie tot — der Tod gehört ins Gefecht. */
+  const offen = (m.wunden||[]).reduce((sum,w)=> sum + (w.abzug||0), 0);
+  return Math.max(Math.round(grund*VORRAT_BODEN), grund - Math.round(offen*WUNDE_JE_PUNKT));
 }
 function lebenAuffuellen(anteil){
   const max = lebenMax();
@@ -1373,11 +1397,18 @@ function lebenAuffuellen(anteil){
    kann ins Gefecht, aber er geht als der hinein, der er gerade ist. Erst
    heilen, dann verschnaufen. Aufgerufen nach jeder Änderung an Atem oder
    Leben; wer eine neue Stelle baut, die daran dreht, ruft sie ebenfalls. */
-function atemKlemmen(){ if(S) S.atem = Math.max(0, Math.min(S.atem, S.leben)); }
+function atemKlemmen(){
+  if(!S) return;
+  S.leben = Math.max(0, Math.min(S.leben, lebenMax()));
+  S.atem  = Math.max(0, Math.min(S.atem, S.leben));
+}
 
-function wundeGeben(name, abzug){
-  S.wunden.push({name, abzug});
+function wundeGeben(name, abzug, zehrt){
+  const w = {name, abzug};
+  if(zehrt) w.zehrt = zehrt;          // Krankheit: zehrt je Station weiter
+  S.wunden.push(w);
   S.belastung = Math.min(100, S.belastung + 6);
+  atemKlemmen();                       // der Vorrat ist gerade kleiner geworden
 }
 
 function verschleiss(faktor){
@@ -1502,9 +1533,16 @@ function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
    liegen bleiben" wählen, statt scharf zu schießen. */
 function angeschlagen(){ return S && S.leben <= lebenMax()/3; }
 
+/* Der ungeschmälerte Vorrat. Steht blass hinter dem aktuellen, sobald offene
+   Wunden ihn drücken — sonst wüsste niemand, warum die Obergrenze wandert. */
+function lebenGrund(){ return 40 + Math.round((S.attr.konstitution||20)*0.6); }
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
-  const w = S.wunden.length ? S.wunden.map(x=>esc(x.name)).join(', ') : 'keine';
+  // Krankheiten werden ausgewiesen: Sie zehren an jeder Station weiter, Wunden nicht.
+  const w = S.wunden.length
+    ? S.wunden.map(x=>esc(x.name) + (x.zehrt?' <i class="zehrt">zehrt</i>':'')).join(', ')
+    : 'keine';
   const zust = k => { const a=S.ausr[k]; const c = a.zustand<20?'warn':(a.zustand<40?'':'ok');
     return `<div class="kv"><span>${esc(a.name)}</span><b class="${a.zustand<20?'warn':''}">${a.zustand}</b></div>`; };
   return `<aside class="card">
@@ -1513,7 +1551,7 @@ function seitenleiste(){
       <p class="who">${esc(S.name)}</p>
       <div class="rangzeile">${rangabzeichen(S)}
         <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p></div>
-      <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}</span></div>
+      <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}${lebenMax()<lebenGrund()?` <i class="fein">von ${lebenGrund()}</i>`:''}</span></div>
         ${balken(angeschlagen()?'b-red':'b-green',S.leben,lebenMax())}
         ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}</div>
       <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
@@ -2328,6 +2366,9 @@ function gefechtsbereitschaft(){
   else if(sch<50) z.push('Die Schuhe halten. Noch.');
   if(S.wunden.length) z.push('Du trägst ' + (S.wunden.length===1?'eine alte Wunde':S.wunden.length+' alte Wunden') +
     ' mit dir: ' + S.wunden.map(w=>esc(w.name)).join(', ') + '.');
+  const seuche = S.wunden.filter(x=>x.zehrt);
+  if(seuche.length) z.push('Du gehst krank in dieses Gefecht — ' + seuche.map(x=>esc(x.name)).join(' und ') +
+    '. Es nimmt dir jeden Tag etwas, und heute ist ein schlechter Tag dafür.');
   if(angeschlagen()) z.push(S.leben <= lebenMax()*0.15
     ? 'Du hast zu viel Blut verloren, um hier zu stehen. Wenn dich heute etwas trifft, war es das.'
     : 'Du bist nicht wiederhergestellt. Was noch nicht zu ist, wird gleich wieder aufgehen.');
@@ -2344,6 +2385,7 @@ function gefechtsbereitschaft(){
 
 function zeigeAnmarsch(n){
   const l = n.lage || {};
+  const hoehepunkt = n.haerte > 1;
   const zeilen = [['Gegner',l.gegner],['Auftrag',l.auftrag],['Gelände',l.gelaende],['Dein Platz',l.stellung]]
     .filter(([,v])=>v).map(([k,v])=>`<tr><td class="k">${k}</td><td class="d">${esc(v)}</td></tr>`).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -2351,6 +2393,7 @@ function zeigeAnmarsch(n){
       <div class="card"><div class="ch"><span>Anmarsch · ${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
         <div class="cb">
           <div class="prose">${n.anmarsch.map(t=>`<p>${t}</p>`).join('')}</div>
+          ${hoehepunkt?`<div class="ergebnis schlecht">Das hier wird kein gewöhnliches Gefecht. Was heute trifft, trifft härter — die Alten reden anders als sonst, und der Feldscher hat seine Karren schon vorn.</div>`:''}
           ${zeilen?`<div class="lage"><div class="lagekopf">Was man weiß</div>
             <table>${zeilen}</table></div>`:''}
           <div class="lage"><div class="lagekopf">Womit du dastehst</div>
@@ -2771,13 +2814,23 @@ GEFECHTS_EREIGNISSE.push(
    einer Ereigniskette, und die Frage „wie weit gehst du" nutzt sich ab, wenn
    sie fünfmal hintereinander kommt. Sondermissionen (`nur`) kommen zuerst und
    öfter; die allgemeinen Ereignisse füllen auf. */
+/* Wer gesehen wurde, wird geholt: Ruf zieht Ereignisse an. Der Adjutant sucht
+   keine Unbekannten, und die Lücke im Glied schließt der, dessen Name schon
+   einmal gefallen ist. Ab Ruf 30 — derselben Schwelle, an der der Caporal
+   hängt — kommt sogar ein drittes Ereignis in Frage.
+
+   Das trifft gezielt den Aufsteiger und lässt den Vorsichtigen in Ruhe, und
+   genau so soll es sein: Ehrgeiz koppelt sich an Blut, ohne dass jemand
+   gezwungen wird. */
 function ereignisWuerfeln(n){
   const gesehen = K.gesehen || (K.gesehen = []);   // Läufe aus Fassung 2 kennen das Feld noch nicht
   K.ereignisZahl = K.ereignisZahl || 0;
-  if(K.ereignisZahl >= 2 || K.runde < 2) return null;
+  const hoechstens = S.ruf >= CAPORAL_RUF ? 3 : 2;
+  if(K.ereignisZahl >= hoechstens || K.runde < 2) return null;
+  const zieht = Math.min(0.65, 0.45 + S.ruf/400);
   const sonder = GEFECHTS_EREIGNISSE.find(e => e.nur === n.id && !gesehen.includes(e.id) && e.wenn(n));
   if(sonder && Math.random() < 0.6) return sonder;
-  if(Math.random() > 0.45) return null;
+  if(Math.random() > zieht) return null;
   const moeglich = GEFECHTS_EREIGNISSE.filter(e => !e.nur && !gesehen.includes(e.id) && e.wenn(n));
   if(!moeglich.length) return null;
   return moeglich[Math.floor(Math.random()*moeglich.length)];
@@ -3020,6 +3073,18 @@ function kampfAktion(id){
   if(K.deckung && id!=='ducken' && id!=='deckung') K.deckung=false;
   if(S.belastung>60) gefahr += 6;
   if(S.atem<30) gefahr += 5;
+  /* Der Platz des Toten. Ein Caporal steht außen am Glied — dort, wo sein
+     Vorgänger stand, und die Stelle wurde frei, weil er fiel (Invariante 5,
+     von der anderen Seite gesehen). Das wird nie ausgesprochen, nur gespürt.
+     Historisch fielen Unteroffiziere überproportional; im Entwurf ist das der
+     Preis des Rangs, nicht seine Macht — Invariante 4 bleibt gewahrt, weil
+     der Rang weiterhin Knöpfe gibt und hier nur Deckung kostet. */
+  if(S.rang>=3) gefahr += 2;
+  /* Ein Höhepunkt ist nicht nur teurer, sondern auch dichter: +3 Trefferchance
+     je Runde. Das ist der Teil, der auch den Vorsichtigen trifft — beschossen
+     wird man, ob man vortritt oder nicht. `haerte` schaltet beides zusammen,
+     damit ein Gefecht mit einem einzigen Feld zum Höhepunkt wird. */
+  if(n.haerte > 1) gefahr += 3;
   gefahr = Math.max(4, gefahr);
   let treffer = '';
   if(Math.random()*100 < gefahr){
@@ -3045,6 +3110,14 @@ function kampfAktion(id){
        im Mittel 11 Punkte, also stirbt ein Mann mit Konstitution 40 am
        sechsten, einer mit 20 am fünften, einer mit 70 am achten. Das ist auch
        inhaltlich richtig — wer 1796 vier Mal getroffen wird, steht nicht mehr. */
+    /* Höhepunkte schlagen härter (`haerte` in den Kapiteldaten): ein bis zwei
+       Gefechte je Feldzug, an denen ein Treffer 40 % mehr kostet. Es sind
+       dieselben vier, die eine Sondermission tragen — Lodi, Arcole, Embabeh,
+       Akkon —, und das ist kein Zufall, sondern der Entwurf: Das Gefecht, für
+       das man berühmt wird, ist das, an dem man stirbt. Die Lehrgefechte
+       (Montenotte, Alexandria) bleiben Lehrgefechte. Angesagt wird es im
+       Lagebild vor dem Anmarsch — überrascht wird niemand. */
+    const haerte = n.haerte || 1;
     let schaden;
     if(Math.random()*100 > 75){
       schaden = 15 + Math.floor(Math.random()*11);            // 15–25
@@ -3064,6 +3137,7 @@ function kampfAktion(id){
       treffer = ' Etwas reißt dir den Ärmel auf und brennt. Nicht schlimm. Noch nicht.';
       S.atem = Math.max(0,S.atem-8);
     }
+    schaden = Math.round(schaden * haerte);
     S.leben = Math.max(0, S.leben - schaden);
     K.protokoll.push('Du wirst getroffen.');
     if(S.leben <= 0){
@@ -3134,7 +3208,8 @@ function kampfEnde(sieg, letzterText){
      Läufe beide Feldzüge — bei rund neun Treffern im ganzen Spiel wiegt jede
      geschenkte Genesung schwerer als der Schaden. Wer wieder auf die Beine
      will, verbringt einen Lagerabend oder eine Winterwoche damit. */
-  const leicht = S.wunden.findIndex(w=>w.abzug<=8);
+  // Krankheiten kann er nicht: eine Ruhr näht man nicht zu (`!w.zehrt`)
+  const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
   if(leicht>=0) S.wunden.splice(leicht,1);
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);
@@ -3334,7 +3409,19 @@ const LAGER_TUN = {
     cost:'Leben, Belastung −10 · Atem +18',
     tu(){ S.belastung=Math.max(0,S.belastung-10); S.atem=Math.min(100,S.atem+18);
       lebenAuffuellen(0.25);
-      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>'; }},
+      /* Ein Abend im Trockenen kann ein Fieber brechen — muss aber nicht. Das
+         ist der einzige Ausweg aus einer Krankheit vor dem Winterquartier, und
+         er ist absichtlich ein Wurf: Wer die Ruhr aus dem Sinai mitschleppt,
+         verliert Abende, bis sie geht. */
+      const krank = S.wunden.findIndex(w=>w.zehrt);
+      let zusatz = '';
+      if(krank>=0){
+        const p = probe('konstitution', 35);
+        if(p.erfolg){ const w=S.wunden.splice(krank,1)[0]; atemKlemmen();
+          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden</span>`; }
+        else zusatz = ' Das Fieber bleibt. Es wird bei Dunkelheit stärker, und es wird jede Nacht bei Dunkelheit stärker. <span class="fein">Krankheit hält an</span>';
+      }
+      return 'Du legst dich hin, sobald es dunkel wird, und stehst auf, als man dich tritt. Dazwischen war nichts, und nichts ist genau das, was du gebraucht hast. <span class="fein">Leben +25 % · Belastung −10 · Atem +18</span>' + zusatz; }},
 
   /* Ab Rang 3: nicht mehr üben, sondern üben lassen. */
   korporalschaft:{label:'Deine acht Mann drillen',
@@ -3468,7 +3555,11 @@ function winterTun(id){
        muss sich zwischen Genesung und Ausbildung entscheiden; das ist dieselbe
        Knappheit wie im Lager, nur eine Größenordnung wirksamer. */
     S.belastung=Math.max(0,S.belastung-16); lebenAuffuellen(0.6); S.atem=100; atemKlemmen();
-    if(S.wunden.length){ const w=S.wunden.shift(); W.log.push(`Die Wunde („${w.name}") schließt sich endlich. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · Wunde geheilt</span>`); }
+    // Krankheiten zuerst — sie sind das, was einen Mann über Wochen aufzehrt
+    const krank = S.wunden.findIndex(w=>w.zehrt);
+    if(krank>=0) S.wunden.unshift(S.wunden.splice(krank,1)[0]);
+    if(S.wunden.length){ const w=S.wunden.shift(); atemKlemmen();
+      W.log.push(`${w.zehrt?'Das Fieber geht in der zweiten Woche':'Die Wunde („'+esc(w.name)+'") schließt sich endlich'}. <span style="color:var(--faint)">Leben +60 % · Belastung −16 · „${esc(w.name)}" überstanden</span>`); }
     else W.log.push('Du schläfst, isst zweimal am Tag und tust drei Wochen lang nichts Nützliches. Es hilft mehr als alles andere. <span style="color:var(--faint)">Leben +60 % · Belastung −16</span>');
   }
   if(S.kaeufe.includes('flasche')) S.belastung=Math.max(0,S.belastung-2);

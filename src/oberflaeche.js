@@ -105,9 +105,16 @@ function ausserAtem(){ return S && S.atem <= ATEM_WARNUNG; }
    liegen bleiben" wählen, statt scharf zu schießen. */
 function angeschlagen(){ return S && S.leben <= lebenMax()/3; }
 
+/* Der ungeschmälerte Vorrat. Steht blass hinter dem aktuellen, sobald offene
+   Wunden ihn drücken — sonst wüsste niemand, warum die Obergrenze wandert. */
+function lebenGrund(){ return 40 + Math.round((S.attr.konstitution||20)*0.6); }
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
-  const w = S.wunden.length ? S.wunden.map(x=>esc(x.name)).join(', ') : 'keine';
+  // Krankheiten werden ausgewiesen: Sie zehren an jeder Station weiter, Wunden nicht.
+  const w = S.wunden.length
+    ? S.wunden.map(x=>esc(x.name) + (x.zehrt?' <i class="zehrt">zehrt</i>':'')).join(', ')
+    : 'keine';
   const zust = k => { const a=S.ausr[k]; const c = a.zustand<20?'warn':(a.zustand<40?'':'ok');
     return `<div class="kv"><span>${esc(a.name)}</span><b class="${a.zustand<20?'warn':''}">${a.zustand}</b></div>`; };
   return `<aside class="card">
@@ -116,7 +123,7 @@ function seitenleiste(){
       <p class="who">${esc(S.name)}</p>
       <div class="rangzeile">${rangabzeichen(S)}
         <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p></div>
-      <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}</span></div>
+      <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}${lebenMax()<lebenGrund()?` <i class="fein">von ${lebenGrund()}</i>`:''}</span></div>
         ${balken(angeschlagen()?'b-red':'b-green',S.leben,lebenMax())}
         ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}</div>
       <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>

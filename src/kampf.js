@@ -101,6 +101,9 @@ function gefechtsbereitschaft(){
   else if(sch<50) z.push('Die Schuhe halten. Noch.');
   if(S.wunden.length) z.push('Du trägst ' + (S.wunden.length===1?'eine alte Wunde':S.wunden.length+' alte Wunden') +
     ' mit dir: ' + S.wunden.map(w=>esc(w.name)).join(', ') + '.');
+  const seuche = S.wunden.filter(x=>x.zehrt);
+  if(seuche.length) z.push('Du gehst krank in dieses Gefecht — ' + seuche.map(x=>esc(x.name)).join(' und ') +
+    '. Es nimmt dir jeden Tag etwas, und heute ist ein schlechter Tag dafür.');
   if(angeschlagen()) z.push(S.leben <= lebenMax()*0.15
     ? 'Du hast zu viel Blut verloren, um hier zu stehen. Wenn dich heute etwas trifft, war es das.'
     : 'Du bist nicht wiederhergestellt. Was noch nicht zu ist, wird gleich wieder aufgehen.');
@@ -117,6 +120,7 @@ function gefechtsbereitschaft(){
 
 function zeigeAnmarsch(n){
   const l = n.lage || {};
+  const hoehepunkt = n.haerte > 1;
   const zeilen = [['Gegner',l.gegner],['Auftrag',l.auftrag],['Gelände',l.gelaende],['Dein Platz',l.stellung]]
     .filter(([,v])=>v).map(([k,v])=>`<tr><td class="k">${k}</td><td class="d">${esc(v)}</td></tr>`).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -124,6 +128,7 @@ function zeigeAnmarsch(n){
       <div class="card"><div class="ch"><span>Anmarsch · ${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
         <div class="cb">
           <div class="prose">${n.anmarsch.map(t=>`<p>${t}</p>`).join('')}</div>
+          ${hoehepunkt?`<div class="ergebnis schlecht">Das hier wird kein gewöhnliches Gefecht. Was heute trifft, trifft härter — die Alten reden anders als sonst, und der Feldscher hat seine Karren schon vorn.</div>`:''}
           ${zeilen?`<div class="lage"><div class="lagekopf">Was man weiß</div>
             <table>${zeilen}</table></div>`:''}
           <div class="lage"><div class="lagekopf">Womit du dastehst</div>
@@ -544,13 +549,23 @@ GEFECHTS_EREIGNISSE.push(
    einer Ereigniskette, und die Frage „wie weit gehst du" nutzt sich ab, wenn
    sie fünfmal hintereinander kommt. Sondermissionen (`nur`) kommen zuerst und
    öfter; die allgemeinen Ereignisse füllen auf. */
+/* Wer gesehen wurde, wird geholt: Ruf zieht Ereignisse an. Der Adjutant sucht
+   keine Unbekannten, und die Lücke im Glied schließt der, dessen Name schon
+   einmal gefallen ist. Ab Ruf 30 — derselben Schwelle, an der der Caporal
+   hängt — kommt sogar ein drittes Ereignis in Frage.
+
+   Das trifft gezielt den Aufsteiger und lässt den Vorsichtigen in Ruhe, und
+   genau so soll es sein: Ehrgeiz koppelt sich an Blut, ohne dass jemand
+   gezwungen wird. */
 function ereignisWuerfeln(n){
   const gesehen = K.gesehen || (K.gesehen = []);   // Läufe aus Fassung 2 kennen das Feld noch nicht
   K.ereignisZahl = K.ereignisZahl || 0;
-  if(K.ereignisZahl >= 2 || K.runde < 2) return null;
+  const hoechstens = S.ruf >= CAPORAL_RUF ? 3 : 2;
+  if(K.ereignisZahl >= hoechstens || K.runde < 2) return null;
+  const zieht = Math.min(0.65, 0.45 + S.ruf/400);
   const sonder = GEFECHTS_EREIGNISSE.find(e => e.nur === n.id && !gesehen.includes(e.id) && e.wenn(n));
   if(sonder && Math.random() < 0.6) return sonder;
-  if(Math.random() > 0.45) return null;
+  if(Math.random() > zieht) return null;
   const moeglich = GEFECHTS_EREIGNISSE.filter(e => !e.nur && !gesehen.includes(e.id) && e.wenn(n));
   if(!moeglich.length) return null;
   return moeglich[Math.floor(Math.random()*moeglich.length)];
@@ -793,6 +808,18 @@ function kampfAktion(id){
   if(K.deckung && id!=='ducken' && id!=='deckung') K.deckung=false;
   if(S.belastung>60) gefahr += 6;
   if(S.atem<30) gefahr += 5;
+  /* Der Platz des Toten. Ein Caporal steht außen am Glied — dort, wo sein
+     Vorgänger stand, und die Stelle wurde frei, weil er fiel (Invariante 5,
+     von der anderen Seite gesehen). Das wird nie ausgesprochen, nur gespürt.
+     Historisch fielen Unteroffiziere überproportional; im Entwurf ist das der
+     Preis des Rangs, nicht seine Macht — Invariante 4 bleibt gewahrt, weil
+     der Rang weiterhin Knöpfe gibt und hier nur Deckung kostet. */
+  if(S.rang>=3) gefahr += 2;
+  /* Ein Höhepunkt ist nicht nur teurer, sondern auch dichter: +3 Trefferchance
+     je Runde. Das ist der Teil, der auch den Vorsichtigen trifft — beschossen
+     wird man, ob man vortritt oder nicht. `haerte` schaltet beides zusammen,
+     damit ein Gefecht mit einem einzigen Feld zum Höhepunkt wird. */
+  if(n.haerte > 1) gefahr += 3;
   gefahr = Math.max(4, gefahr);
   let treffer = '';
   if(Math.random()*100 < gefahr){
@@ -818,6 +845,14 @@ function kampfAktion(id){
        im Mittel 11 Punkte, also stirbt ein Mann mit Konstitution 40 am
        sechsten, einer mit 20 am fünften, einer mit 70 am achten. Das ist auch
        inhaltlich richtig — wer 1796 vier Mal getroffen wird, steht nicht mehr. */
+    /* Höhepunkte schlagen härter (`haerte` in den Kapiteldaten): ein bis zwei
+       Gefechte je Feldzug, an denen ein Treffer 40 % mehr kostet. Es sind
+       dieselben vier, die eine Sondermission tragen — Lodi, Arcole, Embabeh,
+       Akkon —, und das ist kein Zufall, sondern der Entwurf: Das Gefecht, für
+       das man berühmt wird, ist das, an dem man stirbt. Die Lehrgefechte
+       (Montenotte, Alexandria) bleiben Lehrgefechte. Angesagt wird es im
+       Lagebild vor dem Anmarsch — überrascht wird niemand. */
+    const haerte = n.haerte || 1;
     let schaden;
     if(Math.random()*100 > 75){
       schaden = 15 + Math.floor(Math.random()*11);            // 15–25
@@ -837,6 +872,7 @@ function kampfAktion(id){
       treffer = ' Etwas reißt dir den Ärmel auf und brennt. Nicht schlimm. Noch nicht.';
       S.atem = Math.max(0,S.atem-8);
     }
+    schaden = Math.round(schaden * haerte);
     S.leben = Math.max(0, S.leben - schaden);
     K.protokoll.push('Du wirst getroffen.');
     if(S.leben <= 0){
@@ -907,7 +943,8 @@ function kampfEnde(sieg, letzterText){
      Läufe beide Feldzüge — bei rund neun Treffern im ganzen Spiel wiegt jede
      geschenkte Genesung schwerer als der Schaden. Wer wieder auf die Beine
      will, verbringt einen Lagerabend oder eine Winterwoche damit. */
-  const leicht = S.wunden.findIndex(w=>w.abzug<=8);
+  // Krankheiten kann er nicht: eine Ruhr näht man nicht zu (`!w.zehrt`)
+  const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
   if(leicht>=0) S.wunden.splice(leicht,1);
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
   const kk = K; setzeKampf(null);
