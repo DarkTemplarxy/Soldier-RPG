@@ -13,6 +13,35 @@ const untertitel = document.getElementById('untertitel');
    Neuzeichnen still abgeschnitten. Das ist die einzige Stelle im Spiel, an der
    Spielertext in einem Attribut landet; die Funktion muss trotzdem vollständig
    sein, weil überall angenommen wird, dass sie es ist. */
+/* ── Kopf eines Vordrucks ──
+   Republik bis 1804, Kaiserreich danach. Der Kopf steht auf jedem Papier, das
+   die Armee ausstellt — und er wechselt mit dem Kapitel, ohne dass ein Wort
+   dazu nötig wäre. */
+function kaiserreich(){
+  const n = LAUF ? KAPITEL[Math.min(LAUF.node, KAPITEL.length-1)] : null;
+  const jahr = n && n.datum ? parseInt((n.datum.match(/1[78]\d\d/)||[0])[0],10) : 1796;
+  return jahr >= 1804;
+}
+function vordruck(n){
+  return `<div class="vordruck">
+    <div class="rf">${kaiserreich() ? 'Empire Français' : 'République Française'}</div>
+    <div class="einheit">32.&thinsp;Demi-brigade de bataille</div>
+    <div class="wann">${esc((n && n.datum) || '')}</div>
+  </div>`;
+}
+
+/* Kokarde (Republik) und Adler (Kaiserreich) als reines SVG — 1796 gab es
+   keine Adler, die Halbbrigaden trugen Fahnen. */
+function emblem(){
+  if(kaiserreich()) return `<svg class="emblem" viewBox="0 0 26 26" role="img" aria-label="Adler">
+    <path d="M13 4 L16 8 L22 9 L18 12 L20 19 L13 15 L6 19 L8 12 L4 9 L10 8 Z" fill="#d0a75e" opacity=".85"/>
+    <rect x="12" y="14" width="2" height="8" fill="#d0a75e" opacity=".6"/></svg>`;
+  return `<svg class="emblem" viewBox="0 0 26 26" role="img" aria-label="Kokarde">
+    <circle cx="13" cy="13" r="10.5" fill="#c2483a"/>
+    <circle cx="13" cy="13" r="7" fill="#e8e0cd"/>
+    <circle cx="13" cy="13" r="3.4" fill="#3d5a80"/></svg>`;
+}
+
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function balken(klasse, v, max){ return `<div class="bar ${klasse}"><i style="width:${Math.max(0,Math.min(100,100*v/max))}%"></i></div>`; }
@@ -30,7 +59,8 @@ function wegband(n){
 function kopfzeile(){
   fuss.textContent = `Veteranenpunkte: ${META.vp}`;
   if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`; untertitel.textContent='Erstes Kapitel · Italien 1796/97'; return; }
-  kopf.innerHTML = `${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}`;
+  kopf.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;justify-content:flex-end">
+    ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span></span>`;
   const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
 }
@@ -141,7 +171,7 @@ function seitenleiste(){
   const zust = k => { const a=S.ausr[k]; const c = a.zustand<20?'warn':(a.zustand<40?'':'ok');
     return `<div class="kv"><span>${esc(a.name)}</span><b class="${a.zustand<20?'warn':''}">${a.zustand}</b></div>`; };
   return `<aside class="card">
-    <div class="ch"><span>${K?'Dein Zustand':'Charakterbogen'}</span></div>
+    <div class="ch"><span>${K?'Dein Zustand':'Livret militaire'}</span><span>32.&thinsp;DB</span></div>
     <div class="cb">
       <p class="who">${esc(S.name)}</p>
       <div class="rangzeile">${rangabzeichen(S)}
@@ -206,6 +236,8 @@ function zeigeTitel(){
       ${offen ? '<button class="plain" onclick="fortsetzen()">Feldzug fortsetzen</button>' : ''}
       <button class="plain" onclick="zeigeErschaffung(true)">Neuen Mann aufstellen</button>
       <button class="plain" onclick="speichern()">Spielstand sichern</button>
+      <a class="plain" href="wiki.html" target="_blank" rel="noopener"
+         style="text-decoration:none;display:inline-block">Handbuch</a>
       <button class="plain" onclick="document.getElementById('ladefeld').click()">Spielstand laden</button>
       <input type="file" id="ladefeld" accept=".json" class="hidden" onchange="laden(event)">
     </div>
@@ -233,7 +265,7 @@ function zeigeBlatt(i){
   const zeile = (k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;
 
   if(!c.attr){
-    app.innerHTML = `<div class="card"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ende)}</span></div>
+    app.innerHTML = `<div class="card papier"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ende)}</span></div>
       <div class="cb"><div class="note">Von diesem Mann ist nur die Zeile geblieben — er stammt aus einer Fassung,
       die noch kein Blatt geführt hat. ${esc(c.rang)}, ${c.punkte} Punkte.</div>
       <div style="margin-top:16px"><button class="plain" onclick="zeigeTitel()">Zurück zur Chronik</button></div>
@@ -250,7 +282,7 @@ function zeigeBlatt(i){
   const fert = FERTIGKEITEN.filter(([k])=>c.fert[k]>10);
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>
-      <div class="card"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ort||'')}</span></div>
+      <div class="card papier"><div class="ch"><span>${esc(c.name)}</span><span>${esc(c.ort||'')}</span></div>
         <div class="cb">
           <div class="rangzeile">${rangabzeichen({rang:c.rangN||1, zweig:c.zweig})}
             <p class="whorank">${esc(c.rang)} · ${esc(c.herkunft||'')} · 32. Halbbrigade</p></div>
@@ -259,7 +291,7 @@ function zeigeBlatt(i){
             : esc(c.ende)+'. Er hat den Feldzug überstanden — '+c.stationen+' Stationen.'}</div>
           <div class="lage"><div class="lagekopf">Was er unterwegs entschieden hat</div>${taten}</div>
         </div></div>
-      <div class="card"><div class="ch"><span>Wertung</span><span>${c.punkte} Veteranenpunkte</span></div>
+      <div class="card papier"><div class="ch"><span>Wertung</span><span>${c.punkte} Veteranenpunkte</span></div>
         <div class="cb">${wertungsTabelleAus(c)}
         <div style="margin-top:16px"><button class="plain" onclick="zeigeTitel()">Zurück zur Chronik</button></div>
         </div></div>

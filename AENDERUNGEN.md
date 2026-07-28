@@ -5,6 +5,22 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Das Bild der Epoche, das Gefechtsfeld nach Rang, ein Handbuch
+
+**Reine Darstellung — keine Balance-Zahl angefasst.** Gegengemessen: Erstlauf 50 %, Veteran 160 78 % (vorher 48/83) — im Rauschen.
+
+**Napoleonisch statt „dunkles UI".** Ein Didone-Schriftstack für Überschriften und Kartenköpfe (nur Systemschriften, kein Download — das Spiel bleibt eine Datei), Kapitälchen statt Versalien im Titel, Mediävalziffern im Fließtext. **Alles, was im Spiel ein Schriftstück *ist*, sieht jetzt aus wie eines:** Chronikblatt, Wertung, Beförderungsbescheid und Todesblatt stehen auf gebrochenem Papierweiß mit Eisengallustinte, Doppellinienrahmen und einem Vordruckkopf („République Française · 32. Demi-brigade de bataille"). Kontrast geprüft: 11,4 : 1 und 6,2 : 1, beide über der Projektschwelle. Dazu die **Trikolore-Kokarde** im Seitenkopf, die ab 1804 zum **Adler** wird — das UI erzählt den Epochenwechsel selbst —, und die Seitenleiste heißt jetzt *Livret militaire*.
+
+**Das Gefechtsbild richtet sich nach dem Rang.** Ein Füsilier sieht eine Linie; ein Caporal sieht seine acht heller als den Rest, mit einem Fanion darüber; ein **Sergent steht hinter dem Glied** (dort stand der serre-file), und vor ihm stehen seine zwanzig als eigener Block, während die übrige Linie ins Dunkel fällt. **`K.sektion` wird als stehende Männer gezeichnet, nicht als Balken** — von zwanzig stehen vierzehn heißt, dass sechs vor dir liegen. Sinkt die Sektion unter 70 %, tritt ein **Wankender** sichtbar aus dem Glied, und der Knopf „Den Wankenden herausziehen" zeigt auf etwas, das man sieht. Die Abrechnung nach dem Gefecht ist ein **Appell-Bild**: zwanzig Silhouetten, die Gefallenen liegend.
+
+**Gelände und Formation je Gefecht** (`gelaende`, `formation` in den Kapiteldaten): die Brücke von Lodi mit Pfeilern und Fluss, der Damm von Arcole zwischen Wasser, die Zinnenmauer mit Bresche bei Akkon und Alexandria, Palmen und Pyramidenkegel in der Wüste. **Embabeh wird ein Karree von innen** — vier Fronten, kein Rücken, und der Feind sind Reiter, die außen vorbeiziehen. Dazu Mündungsblitze nach einer Salve und ein Schleier, der ab Runde 5 das hintere Feindglied verdeckt. Alles zustandsgesteuert: **In `sichtfeld()` wird weiterhin nichts gewürfelt.**
+
+**Zwei Anachronismen behoben.** Das Gefechts-Ereignis heißt jetzt „Der Fahnenträger fällt" — die Halbbrigaden von 1796 trugen Fahnen, die Adler kamen 1804. Und der Erklärtext der Feldchirurgie behauptete „in diesem Kapitel noch ohne Verwendung", obwohl sie längst an zwei Stellen geprüft wird; das war eine Falschauskunft an genau der Stelle, an der man entscheidet.
+
+**Das Handbuch liegt jetzt im Repo** (`wiki.html`) und ist vom Titelbildschirm aus erreichbar. Inhaltlich nachgezogen: die Kette über dir, die Ränge 4 und 5 mit beiden Wegen, die Sektion, die neuen Messwerte. **Zehn der zweiundvierzig offenen Punkte sind erledigt und herausgenommen** (Ränge 4/5, Personenkartei, Fürsprecher-Tod, Sergent-Vakanz, Feldchirurgie-Text, README-Hinweis, vier Dokumentationsfehler), **zwei neue sind durch den Bau entstanden** — die gemischten Punkteskalen und die drei Leitzahlen ohne Sollwert.
+
+---
+
 ## 2026-07-28 — Die Kette über dir, Rang 4 und Rang 5
 
 **Gunst ist keine Zahl mehr, sondern eine Beziehung je Person** (−5…+5, wie KONZEPT §8 es immer vorsah, aber nie gebaut war). Vier Männer, die ganze Laufbahn lang dieselben: Sergent Martel, Fourier Collot, Lieutenant Berthaud, Capitaine Vernet — jeder mit eigener Gunst, eigenem Erklärtext und einem Block „Über dir" in der Seitenleiste.

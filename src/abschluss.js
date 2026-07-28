@@ -363,7 +363,7 @@ function zeigeTod(letzterText, kk){
   laufVerwerfen();
   const p = eintragen(grund);
   const neu = p.rekord;
-  app.innerHTML = `<div class="card"><div class="ch"><span class="tot">Ende</span><span>${esc(grund)}</span></div>
+  app.innerHTML = `<div class="card papier"><div class="ch"><span class="tot">Ende</span><span>${esc(grund)}</span></div>
     <div class="cb">
       <div class="prose">
         ${letzterText?`<p>${letzterText}</p>`:''}

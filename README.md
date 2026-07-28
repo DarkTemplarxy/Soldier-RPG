@@ -5,7 +5,6 @@
 Du beginnst als analphabetischer Rekrut mit einer Muskete, die dir nicht gehört. Wenn du zwanzig Jahre und sechs Feldzüge überlebst, hältst du vielleicht einen Marschallstab. Wahrscheinlicher liegst du 1796 in einem Graben bei Montenotte.
 
 > ▶ **[Im Browser spielen](https://darktemplarxy.github.io/Soldier-RPG/)** — kein Download, keine Installation.
-> *(Link funktioniert, sobald GitHub Pages aktiviert ist — siehe unten.)*
 
 ![Gefecht auf der Brücke von Lodi](entwurf/bild_gefecht.png)
 

@@ -2,7 +2,19 @@
     --bg:#121110; --panel:#1a1816; --panel2:#252119; --line:#3a342c;
     --text:#ded5c4; --dim:#aca192; --faint:#948a79;
     --blood:#c2483a; --brass:#d0a75e; --steel:#8b9aa3; --green:#8b9a68;
+    /* Papier: für alles, was im Spiel ein Schriftstück *ist* */
+    --papier:#e6dcc2; --papier2:#dbd0b4; --tinte:#2a2420; --tinte2:#584c3c;
+    /* Didone — die Schriftform der französischen Zeit um 1800: hohe
+       Strichkontraste, senkrechte Achse. Nur Systemschriften, kein Download:
+       Das Spiel bleibt eine Datei ohne Abhängigkeiten. Wo keine da ist,
+       fällt es auf Georgia zurück, und das ist kein Verlust. */
+    --didone:'Didot','Bodoni 72','Bodoni MT','Playfair Display',Georgia,serif;
   }
+  /* Kapitälchen statt Versalien: Um 1800 wurden Überschriften gesperrt
+     gesetzt, nicht geschrien. `font-variant` erhält die Wortgestalt. */
+  h1,.ch,.mini,th{ font-family:var(--didone); }
+  h1{ font-variant:small-caps; text-transform:none !important; letter-spacing:.2em; }
+  .prose,.ergebnis,.note{ font-variant-numeric:oldstyle-nums; }
   /* Kontrast: --dim und --faint waren #877e71 und #5c554b — auf dem Braun der
      Karten ergab das 2,2:1 bei den Beschriftungen. Jetzt 4,7:1 und 6,6:1.
      Wer hier abdunkelt, macht die Hälfte der Oberfläche wieder unlesbar. */
@@ -246,3 +258,86 @@
 /* Krankheit: zehrt an jeder Station weiter — rot, weil sie Kosten ist. */
 .kv .zehrt{ font-style:normal; font-size:10.5px; color:var(--blood); letter-spacing:.4px; }
 .statlab .fein{ font-style:normal; color:var(--faint); font-weight:400; }
+
+/* Das Appell-Bild des Sergenten: zwanzig Silhouetten, die Gefallenen liegend. */
+.appell{ display:block; width:100%; max-width:540px; margin:2px 0 8px; }
+
+
+/* ══════════════════ PAPIER ══════════════════
+
+   Nicht die ganze Oberfläche wird hell — das Dunkel ist die Nacht im
+   Feldlager, und die Kontrastregeln oben stehen zu Recht. Aber **alles, was im
+   Spiel ein Schriftstück ist**, sieht jetzt aus wie eines: das Chronikblatt,
+   die Wertung, der Beförderungsbescheid. Der Wechsel dunkel → hell macht diese
+   Augenblicke von allein amtlich, ohne dass ein Wort dazu nötig wäre.
+
+   Kontrast: Tinte #2a2420 auf Papier #e6dcc2 ergibt 11,4 : 1, die blasse Tinte
+   #584c3c noch 6,2 : 1 — beides über der 4,5er-Schwelle des Projekts. Wer die
+   Papierfarbe abdunkelt, prüft beide nach. */
+
+.papier{ background:var(--papier); color:var(--tinte); border:1px solid #9c8f76;
+  box-shadow:0 2px 16px rgba(0,0,0,.55); position:relative;
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 38%),
+    radial-gradient(circle at 12% 8%, rgba(140,120,86,.16), transparent 42%),
+    radial-gradient(circle at 88% 92%, rgba(140,120,86,.13), transparent 46%); }
+
+/* Die Doppellinie am Rand — so wurden militärische Vordrucke gerahmt. */
+.papier::before{ content:''; position:absolute; inset:6px; pointer-events:none;
+  border:1px solid rgba(90,76,58,.55); box-shadow:inset 0 0 0 3px var(--papier), inset 0 0 0 4px rgba(90,76,58,.3); }
+.papier > *{ position:relative }
+
+.papier .ch{ background:transparent; color:#4a3f31; border-bottom:1px solid rgba(90,76,58,.4);
+  font-family:var(--didone); letter-spacing:.2em; }
+.papier .cb{ color:var(--tinte) }
+.papier .prose em, .papier b{ color:#1d1814 }
+.papier .said{ color:var(--tinte2) }
+.papier table th{ color:#6a5a44; border-bottom-color:rgba(90,76,58,.45) }
+.papier table td{ border-bottom-color:rgba(90,76,58,.22) }
+.papier td.d{ color:#3a3128 } .papier td.k{ color:#6b4f22 }
+.papier tr.hi td{ background:rgba(120,100,70,.13) }
+.papier .probe{ color:var(--tinte2) }
+.papier .kv{ color:var(--tinte2) } .papier .kv b{ color:var(--tinte) }
+.papier .mini{ color:#6b4f22 }
+.papier .rule{ background:rgba(90,76,58,.3) }
+.papier .note{ background:rgba(120,100,70,.10); border-left-color:#8a6a2c; color:#3a3128 }
+.papier .note b{ color:#1d1814 }
+.papier .ergebnis{ background:rgba(120,100,70,.10); border-left-color:#8a6a2c; color:#2a2420 }
+.papier .wirkung{ background:rgba(120,100,70,.12); border-left-color:#8a6a2c; color:#3a3128 }
+.papier .wirkung span{ color:#6b4f22 }
+.papier .hinweis, .papier .fein{ color:var(--tinte2) }
+.papier button.plain{ background:#dcd0b2; border-color:#9c8f76; color:#2a2420 }
+.papier button.plain:hover{ border-color:#6b4f22; color:#120f0c }
+.papier .lage{ background:rgba(120,100,70,.10); border-color:rgba(90,76,58,.35) }
+.papier .lagekopf{ color:#6b4f22 }
+.papier .tat{ border-bottom-color:rgba(90,76,58,.22); color:#3a3128 }
+.papier .namebtn{ color:#6b4f22 }
+.papier .namebtn:hover{ color:#3d2c12 }
+.papier s{ color:#7a6a55 }
+
+/* Der Kopf eines Vordrucks: Republik/Kaiserreich, Einheit, Datum. */
+.vordruck{ text-align:center; font-family:var(--didone); color:#4a3f31;
+  border-bottom:1px solid rgba(90,76,58,.4); padding-bottom:10px; margin-bottom:14px }
+.vordruck .rf{ font-variant:small-caps; letter-spacing:.32em; font-size:12.5px; color:#6b4f22 }
+.vordruck .einheit{ font-size:15px; letter-spacing:.08em; margin-top:2px }
+.vordruck .wann{ font-size:11.5px; color:var(--tinte2); letter-spacing:.1em; margin-top:2px }
+
+/* ══════════════════ KOKARDE UND ADLER ══════════════════
+   1796 ist Republik: Die Trikolore-Kokarde sitzt am Hut, der Adler kommt erst
+   1804. Das Emblem im Kopf wechselt deshalb mit dem Kapitel — das UI selbst
+   erzählt den Epochenwechsel, ohne ein Wort dazu. */
+.emblem{ width:26px; height:26px; flex:0 0 auto; display:block }
+
+/* Knöpfe wie geprägt statt flach — ein Hauch Tiefe, kein Skeuomorphismus. */
+.ord, button.plain{ text-shadow:0 1px 0 rgba(0,0,0,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.35) }
+.papier button.plain{ text-shadow:0 1px 0 rgba(255,255,255,.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.12) }
+
+/* Das Appell-Bild des Sergenten: zwanzig Silhouetten, die Gefallenen liegend. */
+.appell{ display:block; width:100%; max-width:540px; margin:2px 0 8px }
+.papier .appell rect[fill="#4a4136"]{ fill:#4a4136 }
+
+/* Der Handbuch-Link sieht aus wie ein Knopf, ist aber ein Link — er führt aus
+   dem Spiel heraus und soll das auch dürfen (target=_blank). */
+a.plain{ font-family:inherit; font-size:14px; padding:8px 16px; line-height:1.45 }

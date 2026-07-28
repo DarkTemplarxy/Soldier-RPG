@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Der Marschallstab — Handbuch und offene Punkte</title>
+<style>
+:root{
+  --bg:#121110; --panel:#1a1816; --panel2:#252119; --line:#3a342c;
+  --text:#ded5c4; --dim:#aca192; --faint:#948a79;
+  --blood:#c2483a; --brass:#d0a75e; --steel:#8b9aa3; --green:#8b9a68;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);
+  font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.65;
+  -webkit-font-smoothing:antialiased}
+a{color:var(--brass)}
+a:hover{color:#f0e0b8}
+
+.layout{display:grid;grid-template-columns:264px 1fr;gap:0;max-width:1500px;margin:0 auto}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Navigation ---------- */
+nav{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  border-right:1px solid var(--line);padding:22px 16px 40px;background:#100f0d}
+@media(max-width:1000px){nav{position:static;max-height:none;border-right:none;
+  border-bottom:1px solid var(--line)}}
+nav h2{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);
+  margin:22px 0 8px;font-weight:normal}
+nav h2:first-child{margin-top:0}
+nav a{display:block;text-decoration:none;color:var(--dim);font-size:13.5px;
+  padding:3px 0 3px 10px;border-left:1px solid transparent}
+nav a:hover{color:var(--text);border-left-color:var(--brass)}
+.navmark{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+  color:var(--faint);padding:10px 0 0 10px;letter-spacing:.06em}
+
+main{padding:30px 34px 90px;min-width:0}
+@media(max-width:640px){main{padding:22px 16px 60px}}
+
+header.top{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px}
+header.top h1{font-size:21px;font-weight:normal;letter-spacing:.14em;
+  text-transform:uppercase;margin:0}
+header.top .sub{color:var(--dim);font-size:13px;font-style:italic;margin:6px 0 0}
+.links{margin-top:14px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;letter-spacing:.04em;display:flex;gap:18px;flex-wrap:wrap}
+
+section{margin-bottom:44px;scroll-margin-top:20px}
+section > h2{font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--brass);border-bottom:1px solid var(--line);padding-bottom:7px;
+  margin:0 0 16px;font-weight:normal}
+h3{font-size:15px;font-weight:normal;color:#f0e7d5;margin:26px 0 8px;
+  letter-spacing:.02em}
+h3:first-of-type{margin-top:0}
+h4{font-size:12.5px;font-weight:normal;color:var(--brass);letter-spacing:.1em;
+  text-transform:uppercase;margin:20px 0 6px}
+p{margin:0 0 12px;max-width:74ch}
+ul,ol{max-width:74ch;padding-left:22px}
+li{margin-bottom:5px}
+.lead{color:var(--dim);font-style:italic;max-width:70ch}
+
+.card{background:var(--panel);border:1px solid var(--line);margin:0 0 18px}
+.ch{padding:8px 15px;border-bottom:1px solid var(--line);background:var(--panel2);
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c7bdab;
+  display:flex;justify-content:space-between;gap:12px;align-items:center}
+.cb{padding:16px 17px}
+.cb > *:last-child{margin-bottom:0}
+
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:0 0 16px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid #2b261f;vertical-align:top}
+th{color:var(--brass);font-weight:normal;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;border-bottom:1px solid var(--line)}
+tr:hover td{background:#1c1a17}
+td.num,th.num{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+  white-space:nowrap}
+.scroll{overflow-x:auto}
+
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+  background:#100f0d;border:1px solid #2b261f;padding:1px 5px;color:#e6dcc8}
+pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+  background:#100f0d;border:1px solid #2b261f;border-left:2px solid var(--brass);
+  padding:12px 14px;overflow-x:auto;line-height:1.55;margin:0 0 14px;color:#e6dcc8}
+pre code{background:none;border:none;padding:0}
+
+blockquote{border-left:2px solid var(--brass);background:#1c1915;margin:0 0 14px;
+  padding:12px 16px;color:#e0d8c8;max-width:72ch}
+blockquote p:last-child{margin-bottom:0}
+blockquote.bad{border-left-color:var(--blood);color:var(--dim)}
+
+.note{border-left:2px solid var(--steel);background:#171b1d;padding:11px 15px;
+  margin:0 0 14px;font-size:14.5px;max-width:74ch}
+.warn{border-left:2px solid var(--blood);background:#1e1614;padding:11px 15px;
+  margin:0 0 14px;font-size:14.5px;max-width:74ch}
+.ok{border-left:2px solid var(--green);background:#161a14;padding:11px 15px;
+  margin:0 0 14px;font-size:14.5px;max-width:74ch}
+
+.tag{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:1px 7px;
+  border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.tag.b{border-color:#6b3129;color:#d4796c}
+.tag.w{border-color:#6d5a2c;color:var(--brass)}
+.tag.s{border-color:#3a4245;color:var(--steel)}
+
+/* ---------- Aufgabenliste ---------- */
+.werkzeug{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:0 0 18px}
+button{background:#100f0d;border:1px solid #443d33;color:var(--text);
+  font-family:inherit;font-size:13px;padding:6px 13px;cursor:pointer;
+  transition:border-color .15s,color .15s}
+button:hover{border-color:var(--brass);color:#efe6d4}
+button.an{border-color:var(--brass);color:var(--brass)}
+.zaehler{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+  color:var(--dim);letter-spacing:.06em;margin-left:auto}
+
+.balken{height:3px;background:#2b261f;margin:0 0 20px;position:relative}
+.balken i{display:block;height:100%;background:var(--brass);width:0;
+  transition:width .25s}
+
+.gruppe{margin-bottom:26px}
+.gruppe > h3{display:flex;align-items:baseline;gap:10px;margin-top:0}
+
+.auf{display:grid;grid-template-columns:26px 1fr;gap:0 10px;
+  border:1px solid var(--line);background:var(--panel);margin-bottom:9px;
+  padding:11px 13px}
+.auf.fertig{opacity:.42}
+.auf.fertig .auftitel{text-decoration:line-through}
+.auf input{appearance:none;width:15px;height:15px;border:1px solid #5a5044;
+  background:#100f0d;cursor:pointer;margin:5px 0 0;position:relative}
+.auf input:hover{border-color:var(--brass)}
+.auf input:checked{border-color:var(--brass);background:var(--brass)}
+.auf input:checked::after{content:"";position:absolute;left:4px;top:1px;width:4px;
+  height:8px;border:solid #12100c;border-width:0 2px 2px 0;transform:rotate(43deg)}
+.auftitel{font-size:14.5px;color:#f0e7d5;margin:0 0 3px;display:flex;
+  gap:9px;align-items:baseline;flex-wrap:wrap}
+.auftext{font-size:13.5px;color:var(--dim);margin:0 0 5px;max-width:76ch}
+.aufquelle{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+  color:var(--faint);letter-spacing:.03em}
+
+footer{border-top:1px solid var(--line);margin-top:50px;padding-top:16px;
+  font-size:12px;color:var(--faint);display:flex;justify-content:space-between;
+  gap:16px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<nav>
+  <h2>Arbeit</h2>
+  <a href="#stand">Wo das Projekt steht</a>
+  <a href="#offen">Offene Punkte</a>
+  <a href="#werkstatt">Werkstatt: Dateien, Befehle</a>
+
+  <h2>Das Spiel verstehen</h2>
+  <a href="#idee">Die Idee</a>
+  <a href="#invarianten">Die acht Invarianten</a>
+  <a href="#ablauf">Ablauf einer Partie</a>
+  <a href="#werte">Werte und Erschaffung</a>
+  <a href="#probe">Die Probe</a>
+  <a href="#gefecht">Das Gefecht</a>
+  <a href="#leben">Leben, Wunden, Krankheit</a>
+  <a href="#befoerderung">Beförderung</a>
+  <a href="#punkte">Wertung und Veteranenpunkte</a>
+  <a href="#spielstand">Der Spielstand</a>
+
+  <h2>Der Inhalt</h2>
+  <a href="#kapitel12">Kapitel 1 und 2, Station für Station</a>
+  <a href="#raenge">Die vierzehn Ränge</a>
+  <a href="#kapitelalle">Die elf Kapitel</a>
+  <a href="#enden">Schranken und die vier Enden</a>
+  <a href="#ausruestung">Ausrüstung, Orden, Pferd</a>
+  <a href="#massstab">Der Maßstabswechsel</a>
+
+  <h2>Nachschlagen</h2>
+  <a href="#balance">Balance-Konstanten</a>
+  <a href="#zielwerte">Gemessene Zielwerte</a>
+  <a href="#ton">Ton und Sprache</a>
+  <a href="#historie">Historische Belege</a>
+
+  <div class="navmark">Stand 28. Juli 2026</div>
+</nav>
+
+<main>
+
+<header class="top">
+  <h1>Der Marschallstab</h1>
+  <p class="sub">Handbuch und offene Punkte — dein Nachschlagewerk zum Projekt.</p>
+  <div class="links">
+    <a href="https://darktemplarxy.github.io/Soldier-RPG/" target="_blank">▶ Spielen</a>
+    <a href="https://github.com/DarkTemplarxy/Soldier-RPG" target="_blank">Quelltext</a>
+    <span style="color:var(--faint)">Stand: 28. Juli 2026 · nach dem Bau der Kette und der Ränge 4/5</span>
+  </div>
+</header>
+
+<!-- ============================== STAND ============================== -->
+<section id="stand">
+<h2>Wo das Projekt steht</h2>
+
+<div class="ok">
+<b>Die veröffentlichte Fassung läuft.</b> Der Link liefert das Spiel mit beiden
+Feldzügen aus — der Titel der Seite lautet inzwischen „Italien 1796/97 · Ägypten
+1798/99“. Der Vermerk in der README, der Link funktioniere erst, sobald GitHub
+Pages aktiviert sei, ist überholt und kann weg.
+</div>
+
+<p>Seit der letzten Sitzung sind drei größere Dinge dazugekommen:</p>
+
+<table>
+<tr><th style="width:34%">Was</th><th>Bedeutung</th></tr>
+<tr><td><b>Kapitel 2 — Ägypten 1798/99</b></td><td>Sechzehn weitere Stationen, fünf Gefechte, eigene Feindgüte, Krankheit als eigenständige Bedrohung. Der Feldzug ist damit doppelt so lang wie zuvor.</td></tr>
+<tr><td><b>Der Spielstand</b></td><td><code>src/spielstand.js</code> existiert. Invariante 6 wurde gelockert: <code>localStorage</code> ist jetzt die bequeme Ablage, die Datei bleibt das maßgebliche Format. Gesichert wird bei <i>jedem</i> Schritt, gelöscht wird beim Tod sofort.</td></tr>
+<tr><td><b>Lebenspunkte statt Todeswurf</b></td><td>Der Tod ist keine eigene Probe mehr. <code>lebenMax = 40 + Konstitution·0,6</code>, Treffer ziehen davon ab. Damit ist der alte Exploit weg, bei dem ab Konstitution 58 praktisch nichts mehr tödlich war.</td></tr>
+</table>
+
+<p>Dazu kamen: elf Marsch-Zwischenfälle, vier Sondermissions-Ketten (Brücke von
+Lodi, Sumpf von Arcole, Riss im Karree von Embabeh, Bresche von Akkon), fünf
+Hebel gegen die Unsterblichkeit, eine Fehlerdurchsicht mit siebzehn Funden
+(alle repariert), und ein Vier-Phasen-Plan für die Ränge 4 und 5, der noch
+nicht umgesetzt ist.</p>
+
+<h3>Was spielbar ist</h3>
+<p>Zweiunddreißig Stationen, zehn Gefechte, fünf Lager, zwei Winterquartiere,
+Ränge 1 bis 3. Sechs Herkünfte, sechs Attribute, neun Fertigkeiten, ein
+Kaufladen mit acht Posten.</p>
+
+<h3>Was entworfen, aber nicht gebaut ist</h3>
+<p>Kapitel 3 bis 11, Ränge 4 bis 14, Orden und Ehrenlegion, das Pferd, die
+Kompaniekasse, der Einheitszustand mit Inspektionen, die Rangschranken und die
+vier Enden, die Offizierspatente, die Generalskampagnen. Alles davon steht
+ausformuliert in <code>KONZEPT.md</code> — es fehlt der Code, nicht der Entwurf.</p>
+</section>
+
+<!-- ============================== OFFENE PUNKTE ============================== -->
+<section id="offen">
+<h2>Offene Punkte</h2>
+<p class="lead">Aus Quelltext, CLAUDE.md, AENDERUNGEN.md und KONZEPT.md zusammengetragen.
+Zehn Punkte der ursprünglichen Liste sind inzwischen gebaut und herausgenommen, zwei neue sind
+durch den Bau entstanden. Abhaken verändert nur diese Seite — sichere
+den Stand als Datei, wenn er erhalten bleiben soll.</p>
+
+<div class="werkzeug">
+  <button data-f="alle" class="an">Alle</button>
+  <button data-f="Fehler">Fehler</button>
+  <button data-f="Balance">Balance</button>
+  <button data-f="Inhalt">Inhalt</button>
+  <button data-f="Mechanik">Mechanik</button>
+  <button data-f="Technik">Technik</button>
+  <button data-f="Dokumentation">Dokumentation</button>
+  <button id="offenNur">Nur Offene</button>
+  <span class="zaehler" id="zaehler"></span>
+</div>
+<div class="balken"><i id="balken"></i></div>
+
+<div id="liste"></div>
+
+<div class="werkzeug" style="margin-top:22px">
+  <button id="sichern">Fortschritt als Datei sichern</button>
+  <button id="ladenKnopf">Fortschritt laden</button>
+  <input type="file" id="datei" accept=".json" hidden>
+  <button id="zuruecksetzen">Alle Haken entfernen</button>
+</div>
+</section>
+
+<!-- ============================== WERKSTATT ============================== -->
+<section id="werkstatt">
+<h2>Werkstatt: Dateien und Befehle</h2>
+
+<div class="card"><div class="ch"><span>Dateien</span></div><div class="cb">
+<table>
+<tr><td class="num">index.html</td><td>Lädt die Skripte in fester Reihenfolge — klassische Skripte, keine Module, damit ein Doppelklick über <code>file://</code> funktioniert.</td></tr>
+<tr><td class="num">src/daten/grundwerte.js</td><td>Attribute, Fertigkeiten, Ränge, Herkünfte, Startausrüstung, Preistreppe, Kaufladen, Feindgüte je Kapitel</td></tr>
+<tr><td class="num">src/daten/kapitel01_italien.js</td><td>Kapitel 1 als reine Daten, keine Logik</td></tr>
+<tr><td class="num">src/daten/kapitel02_aegypten.js</td><td>Kapitel 2, ebenso</td></tr>
+<tr><td class="num">src/spielstand.js</td><td>Ablage, Prüfsumme, Fassungen und Wandler, Chronik-Riegel</td></tr>
+<tr><td class="num">src/mechanik.js</td><td>Probe, Wachstum, Verschleiß, Wunden, Lebenspunkte</td></tr>
+<tr><td class="num">src/oberflaeche.js</td><td>Titel, Erschaffung, Stationsschleife, Szenen, Marsch-Zwischenfälle</td></tr>
+<tr><td class="num">src/kampf.js</td><td>Gefecht, Ereignisse, Sondermissionen, Elitewahl, Beförderung — die größte Datei</td></tr>
+<tr><td class="num">src/abschluss.js</td><td>Lager, Winterquartier, Wertung, Tod, Chronik, Datei-Export</td></tr>
+<tr><td class="num">src/start.js</td><td>Sechs Zeilen: Chronik laden, Titel zeigen</td></tr>
+</table>
+</div></div>
+
+<div class="card"><div class="ch"><span>Befehle</span></div><div class="cb">
+<pre><code>npm install playwright &amp;&amp; npx playwright install chromium
+
+node test/durchspielen.js     spielt einen Lauf durch, meldet Konsolenfehler
+node test/balance.js 40       40 Läufe, misst Überleben und Beförderung
+node test/spielstand.js       prüft Speichern, Laden, Wandler
+node werkzeug/bauen.js        baut dist/marschallstab.html</code></pre>
+<p style="font-size:13.5px;color:var(--dim);margin-bottom:0">Findet Playwright den
+Browser nicht: <code>CHROMIUM=/pfad/zu/chrome node test/…</code></p>
+</div></div>
+
+<div class="warn">
+<b>Zwei Regeln, die Zeit sparen.</b> Erstens: <code>dist/marschallstab.html</code>
+niemals lesen — die Datei ist die Verkettung aller Quelldateien und verdoppelt
+alles im Kontextfenster. Zweitens: wer eine Balance-Zahl ändert, trägt sie in
+<code>CLAUDE.md</code> und <code>AENDERUNGEN.md</code> nach und lässt
+<code>node test/balance.js 40</code> laufen. Ohne das verliert die nächste
+Sitzung den Faden.
+</div>
+</section>
+
+<!-- ============================== IDEE ============================== -->
+<section id="idee">
+<h2>Die Idee</h2>
+
+<blockquote>
+<p>Du beginnst 1796 als analphabetischer Rekrut mit einer Muskete, die du kaum
+halten kannst. Wenn du zwanzig Jahre und sechs Feldzüge überlebst, hältst du
+1815 vielleicht einen Marschallstab. Wahrscheinlicher liegst du 1799 in einem
+Graben bei Mantua.</p>
+</blockquote>
+
+<p>Der Kern ist nicht die Zahl neben dem Rang, sondern dass <b>jeder Rang andere
+Knöpfe gibt statt größerer Zahlen</b>. Als Fusilier steuerst du deinen eigenen
+Körper. Als Caporal acht Männer. Als Colonel ein Regiment. Als Général schiebst
+du Brigaden über eine Karte und liest Meldungen, die vierzig Minuten alt und
+teilweise falsch sind. Der General sieht mehr und weiß weniger als der Fusilier.</p>
+
+<h3>Die Marktlücke</h3>
+<p><i>A Legionary's Life</i> hat die richtige Struktur, spielt aber in der Antike
+und endet früh. <i>Whiskey &amp; Lemons</i> beginnt bereits als Offizier. Alle
+napoleonischen Titel setzen bei der Armee an, nicht bei der Person. Es gibt kein
+Napoleon-Spiel, das dich als <i>eine Person</i> durch die gesamte Rangleiter
+führt.</p>
+
+<h3>Warum das Setting die Mechanik ist</h3>
+<p>Die Revolution schaffte den Adelsvorbehalt für Offiziersstellen ab. Ney war
+Husaren-Unteroffizier, Murat Sohn eines Gastwirts, Lannes Färberlehrling — alle
+drei starben als Marschälle. „Jeder Soldat trägt den Marschallstab im Tornister“
+ist exakt die Fantasie, die das Spiel verkauft, und sie ist historisch gedeckt.</p>
+</section>
+
+<!-- ============================== INVARIANTEN ============================== -->
+<section id="invarianten">
+<h2>Die acht Invarianten</h2>
+<p class="lead">Aus CLAUDE.md: „Diese acht Regeln nicht brechen. Wenn eine
+Änderung eine davon verletzt, ist die Änderung falsch — nicht die Regel.“</p>
+
+<div class="scroll"><table>
+<tr><th class="num">#</th><th style="width:30%">Regel</th><th>Begründung</th></tr>
+<tr><td class="num">1</td><td><b>Der Tod ist endgültig.</b></td><td>Kein Weiterspielen, kein Nachfolger, kein Zurücksetzen. Abschlusstext, Chronikeintrag, Titelbildschirm.</td></tr>
+<tr><td class="num">2</td><td><b>Nur der beste Lauf zählt.</b></td><td>Der Veteranenpunkte-Vorrat ist das Maximum über alle Läufe, nie die Summe. Ein schlechter Lauf kostet nichts und bringt nichts. Es darf nichts zu grinden geben.</td></tr>
+<tr><td class="num">3</td><td><b>Veteranenpunkte kaufen den Ausgangspunkt, nie den Aufstieg.</b></td><td>Rang, Ruf, Gunst und Orden sind unkäuflich. Einzige geplante Ausnahme: die Offizierspatente, die dafür Wertungspunkte kosten.</td></tr>
+<tr><td class="num">4</td><td><b>Ein höherer Rang gibt neue Knöpfe, nicht größere Zahlen.</b></td><td>Wenn ein neuer Rang keine neue Handlungsmöglichkeit bringt, ist er falsch entworfen.</td></tr>
+<tr><td class="num">5</td><td><b>Beförderung braucht eine Vakanz.</b></td><td>Ruf und Fürsprache allein reichen nicht — die Stelle muss frei sein, und frei wird sie, weil jemand gestorben ist. Das wird nie ausgesprochen, nur gezeigt.</td></tr>
+<tr><td class="num">6</td><td><b>Kein Server, keine Abhängigkeiten. Die Datei ist das maßgebliche Format.</b></td><td><code>localStorage</code> ist ausschließlich die bequeme Ablage, nie die einzige Quelle; das Spiel muss ohne sie vollständig funktionieren. <i>Geändert am 27.07.2026 — vorher war Browser-Ablage ganz verboten, dann konnte ein Absturz keinen Feldzug retten.</i></td></tr>
+<tr><td class="num">7</td><td><b>Ton: nüchtern-brutal.</b></td><td>Kein Heldenpathos, keine Musik im Text. Kurze Sätze, konkrete Details, keine Wertung. Der Aufstieg wird nie gefeiert, er wird protokolliert.</td></tr>
+<tr><td class="num">8</td><td><b>Historische Fixpunkte sind fix.</b></td><td>Lodi ist am 10. Mai 1796, Arcole im November, Rivoli am 14. Januar 1797. Dazwischen ist alles frei erfunden.</td></tr>
+</table></div>
+
+<div class="note">Die Invarianten sind kein Zierrat. Der Konstitutions-Exploit
+wurde als Verstoß gegen Invariante 1 gefixt; „nur im Lager speichern“ wurde
+verworfen, weil es ein Rücksetzpunkt gewesen wäre; beim Zusammenführen zweier
+Spielstände wird <code>vp</code> per <code>Math.max</code> genommen, weil alles
+andere Invariante 2 verletzt; und die Lagerdichte („eins je zwei Gefechte“)
+folgt aus Invariante 2, weil mehr Lager Grinding wären.</div>
+</section>
+
+<!-- ============================== ABLAUF ============================== -->
+<section id="ablauf">
+<h2>Ablauf einer Partie</h2>
+
+<table>
+<tr><th class="num">#</th><th style="width:22%">Bildschirm</th><th>Was dort passiert</th></tr>
+<tr><td class="num">1</td><td><b>Titel</b></td><td>Chronik-Tabelle (Name, Endrang, Ende, Punkte, bester Lauf mit ★), Verlaufsspalte mit elf Feldzügen. Knöpfe: Feldzug fortsetzen (nur wenn einer offen ist), Neuen Mann aufstellen, Spielstand sichern und laden.</td></tr>
+<tr><td class="num">2</td><td><b>Erschaffung, erster Schritt</b></td><td>Name (Zufallsvorschlag aus zehn mal zehn Namen), 60 Poolpunkte auf sechs Attribute in Zehnerschritten, Herkunftswahl. Weiter erst, wenn Name, Herkunft und exakt 60 verteilte Punkte da sind.</td></tr>
+<tr><td class="num">3</td><td><b>Erschaffung, zweiter Schritt</b></td><td>Veteranenpunkte ausgeben: Attribute bis 70, Fertigkeiten bis 60, Ausrüstungskäufe.</td></tr>
+<tr><td class="num">4</td><td><b>Stationsschleife</b></td><td>Je Station: Zählung, Chronik sichern, Lauf sichern, mit 35 % ein Marsch-Zwischenfall, dann je nach Stationstyp Szene, Lager, Gefecht, Elitewahl, Musterung, Winterquartier, Übergang oder Ende.</td></tr>
+<tr><td class="num">5</td><td><b>Ende</b></td><td>Tod oder Kapitelende: Wertung, Chronikeintrag, Rekordmeldung, zurück zum Titel.</td></tr>
+</table>
+
+<h3>Was an einer Station passieren kann</h3>
+<ul>
+<li><b>Szene</b> — Text, drei bis fünf Knöpfe mit sichtbarer Probe („Muskete 34 gegen 40“). Der Zug wird gewürfelt, angewendet, protokolliert, und die Station gilt als erledigt, <i>bevor</i> der Ergebnisbildschirm kommt — damit ein Beenden auf dem Ergebnis die Wahl nicht rückgängig macht.</li>
+<li><b>Lager</b> — zwei bis drei Abende, je Abend eine Handlung: exerzieren, Bajonett fechten, scharf schießen, instand setzen, unter Leuten sein, schlafen. Ab Caporal ein Abend mehr.</li>
+<li><b>Gefecht</b> — erst der Anmarsch (kostet Verschleiß, Atem, Belastung), dann die Rundenschleife.</li>
+<li><b>Elitewahl</b> — genau einmal, Mailand, Mai 1796.</li>
+<li><b>Musterung</b> — zweimal: Verona September 1796, Kairo September 1798.</li>
+<li><b>Winterquartier</b> — drei Wochen, je Woche eine Handlung.</li>
+<li><b>Übergang</b> — Leoben: heilt alles, wertet nichts.</li>
+</ul>
+
+<h3>Marsch-Zwischenfälle</h3>
+<p>Elf Stück, sieben allgemeine und vier ägyptische. Sie werden beim ersten
+Betreten einer Marschstation mit 35 % gewürfelt, jeder höchstens einmal je Lauf.
+Wer eine Probe erkennbar nicht schaffen kann, bekommt keinen Knopf, sondern
+einen Satz. Vier von ihnen geben toten Fertigkeiten ihre erste Verwendung:
+Feldchirurgie, Reiten, Kartenkunde, Bildung.</p>
+</section>
+
+<!-- ============================== WERTE ============================== -->
+<section id="werte">
+<h2>Werte und Erschaffung</h2>
+
+<p>Alles läuft auf einer Skala von 0 bis 100. Wunden, Belastung und Ausrüstung
+wirken erst beim Nachschlagen, nicht auf den gespeicherten Wert.</p>
+
+<h4>Sechs Attribute</h4>
+<p>Konstitution · Geschick · Kaltblütigkeit · Autorität · Bildung · Menschenkenntnis</p>
+
+<h4>Neun Fertigkeiten</h4>
+<p>Muskete · Bajonett · Reiten · Drill · Taktik · Kartenkunde · Verwaltung ·
+Fouragieren · Feldchirurgie</p>
+
+<h3>Die Startverteilung</h3>
+<pre><code>const POOL = 60, SOCKEL = 20, MAXE = 70;</code></pre>
+<ul>
+<li>Sockel <b>20</b> auf allen Attributen, <b>60</b> Punkte frei zu verteilen in Zehnerschritten, Deckel 70.</li>
+<li><b>Bildung ist vom Pool ausgenommen</b> und bleibt bei 20 — sie muss im Spiel erarbeitet werden.</li>
+<li>Alle neun Fertigkeiten starten bei 10.</li>
+<li>Reihenfolge: Pool → Herkunft → Kauf mit Veteranenpunkten → Ausrüstungsboni. Die Ausrüstungsboni kommen <i>nach</i> allen Kaufgrenzen und dürfen die 60 überschreiten.</li>
+<li>Startgeld 4 Francs, Rang 1, Kameradschaft 20, Atem 100, Ruf 0, Gunst 0, Belastung 0.</li>
+</ul>
+
+<div class="note">Der Pool lag bis zum 28. Juli bei 120. Gesenkt auf 60, weil ein
+Erstlauf-Mann sonst so gut war wie ein Veteran und die Veteranenpunkte reine
+Zierde blieben. Nach der Senkung trennt der Kauf 43 % von 68 % Überlebenden.</div>
+
+<h3>Die sechs Herkünfte</h3>
+<p>Jede verteilt netto exakt <b>+50</b> — nur die Gewichtung unterscheidet sich.</p>
+<div class="scroll"><table>
+<tr><th>Herkunft</th><th>Attribute</th><th>Fertigkeiten</th></tr>
+<tr><td><b>Bauernsohn</b></td><td>Konstitution +20, Bildung −10</td><td>Fouragieren +25, Bajonett +15</td></tr>
+<tr><td><b>Schmiedsgeselle</b></td><td>Geschick +20, Menschenkenntnis −10</td><td>Muskete +25, Bajonett +15</td></tr>
+<tr><td><b>Wilderer</b></td><td>Geschick +15, Autorität −15</td><td>Muskete +30, Fouragieren +20</td></tr>
+<tr><td><b>Fuhrmannssohn</b></td><td>Konstitution +15, Kaltblütigkeit −5</td><td>Reiten +20, Verwaltung +20</td></tr>
+<tr><td><b>Schreibergehilfe</b></td><td>Bildung +25, Konstitution −10</td><td>Verwaltung +25, Kartenkunde +10</td></tr>
+<tr><td><b>Straßenjunge aus Paris</b></td><td>Menschenkenntnis +25, Kaltblütigkeit +20, Bildung −15</td><td>Fouragieren +20</td></tr>
+</table></div>
+
+<h3>Startausrüstung</h3>
+<p>Muskete Charleville 1777 (Zustand 70, Verschleiß 15) · Bajonett (80/8) ·
+Schuhe (55/25) · <i>kein Mantel</i> · Tornister (65/10).</p>
+</section>
+
+<!-- ============================== PROBE ============================== -->
+<section id="probe">
+<h2>Die Probe</h2>
+
+<pre><code>function probe(k, schwierigkeit, ohneUebung){
+  const w = wert(k);
+  const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
+  const wurf = 1 + Math.floor(Math.random()*100);
+  if(!ohneUebung) nutzen(k, 1);
+  return {wurf, ziel, wertRoh:w, erfolg: wurf &lt;= ziel};
+}</code></pre>
+
+<p>Die Erfolgschance in Prozent ist <code>Wert − Schwierigkeit + 50</code>, hart
+geklemmt auf 5 bis 95. Nichts ist je sicher, nichts je aussichtslos. Die
+Schwierigkeit ist so geeicht, dass Wert gleich Schwierigkeit ein Münzwurf ist.
+Im Spiel liegen die Schwierigkeiten zwischen 25 (Verbandsplatz) und 55 (bei
+Mondovì mitmachen).</p>
+
+<h3>Was zwischen Blatt und Wurf steht</h3>
+<pre><code>const koerperlich = ['konstitution','geschick','muskete','bajonett','reiten'];
+if(koerperlich.includes(k)) S.wunden.forEach(w=&gt;{ v -= w.abzug || 0; });
+else                        S.wunden.forEach(w=&gt;{ v -= Math.round((w.abzug||0)/3); });
+v -= Math.floor(S.belastung/12);
+if(k==='muskete'      &amp;&amp; S.ausr.muskete.zustand &lt; 35) v -= 15;
+if(k==='konstitution' &amp;&amp; S.ausr.schuhe.zustand  &lt; 25) v -= 18;</code></pre>
+
+<p>Wunden wirken <b>voll auf körperliche</b> und <b>zu einem Drittel auf
+geistige</b> Werte. Vorher zogen sie von allem ab — das erzeugte eine
+Todesspirale: Wunde, Konstitution runter, Todeschance rauf, nächste Wunde.</p>
+
+<h3>Wachstum durch Benutzung</h3>
+<pre><code>const zuwachs = (1.7 * intens * (100-ist)/100) * (0.5 + Math.random());
+if(Math.random() &lt; 0.75){ ist + Math.max(1, Math.round(zuwachs)) }</code></pre>
+<p>Jede Probe trainiert ihren Wert. Der abnehmende Ertrag ist Absicht: von 12 auf
+40 geht schnell, von 80 auf 90 dauert. Nebeneffekt: gekaufte hohe Startwerte
+wachsen langsamer, der Vorsprung schaukelt sich nicht auf, er schrumpft.</p>
+<p>Intensitäten: exerzieren 2 (Muskete und Drill), Bajonettfechten 2,5, scharf
+schießen 3,5; Winterwoche drillen 3/3/2.</p>
+<p><code>ohneUebung</code> gibt es genau einmal — die Konstitutionsprobe gegen
+Fieber beim Ruhe-Abend. Sonst trainierte ausgerechnet der Kranke jede Nacht seine
+Konstitution.</p>
+</section>
+
+<!-- ============================== GEFECHT ============================== -->
+<section id="gefecht">
+<h2>Das Gefecht</h2>
+
+<p>Runde für Runde: Aktion wählen → eigener Schaden an der Feindmoral →
+Linienbeschuss → eigene Verluste → Feindwirkung (Trefferwurf) → Siegprüfung →
+nächste Runde. Sinkt die Feindmoral auf null, ist das Gefecht gewonnen. Läuft
+das Rundenlimit ab, gilt es als knapp gewonnen, wenn weniger als 35 % der
+Feindmoral übrig sind.</p>
+
+<h3>Die Aktionen</h3>
+<div class="scroll"><table>
+<tr><th>Aktion</th><th>Probe</th><th>Wirkung</th></tr>
+<tr><td>Laden</td><td class="num">Geschick 30</td><td>Atem −8, bei Fehlschlag weitere −4</td></tr>
+<tr><td>Anlegen und feuern</td><td class="num">Muskete 35</td><td>Schaden 12–20, Atem −5, Muskete −2 Zustand, Ruf +1</td></tr>
+<tr><td>Sorgfältig zielen <span class="tag">Voltigeur</span></td><td class="num">Muskete 20</td><td>Schaden 22–32, Atem −10, Ruf +2</td></tr>
+<tr><td>Hinknien / flach hinlegen</td><td class="num">—</td><td>Atem +10, Belastung −2, <b>Gefahr −22</b>. Höchstens drei Runden am Stück, die dritte kostet Ruf −2</td></tr>
+<tr><td>Deckung wechseln <span class="tag">Voltigeur</span></td><td class="num">Geschick 35</td><td>Gefahr −20, bei Fehlschlag +10</td></tr>
+<tr><td>Linie halten</td><td class="num">Kaltblütigkeit 40</td><td>Schaden 6, Belastung −3, Drill wächst, Ruf +1</td></tr>
+<tr><td>Bajonett vor</td><td class="num">Bajonett 30/45</td><td>Schaden 30–44, Atem −18, <b>Gefahr +26</b></td></tr>
+<tr><td>Salve befehlen <span class="tag">ab Rang 3</span></td><td class="num">Autorität 40</td><td>Schaden 26–36 (Fehlschlag 6), die eigene Muskete bleibt geladen</td></tr>
+<tr><td>Lücke schließen <span class="tag">ab Rang 3</span></td><td class="num">Drill 35</td><td>Gefahr −8, die eigene Linie verliert drei Runden lang halb so viel, Kameradschaft +4</td></tr>
+<tr><td>Zurückweichen</td><td class="num">—</td><td>Ruf −8, Belastung +10, gilt als gekniffen, Gefecht vorbei</td></tr>
+</table></div>
+
+<h3>Die wichtigste Zeile im Kampfsystem</h3>
+<pre><code>const guete = feindGuete(n);
+const linie = (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
+K.feindMoral -= schaden + linie;</code></pre>
+<div class="warn"><b>Ohne diese Zeile sind alle Gefechte rechnerisch unmöglich zu
+gewinnen.</b> Man feuert nur jede zweite Runde (laden, feuern, laden), kommt in
+neun Runden auf vier Schuss zu je 12–32 Schaden und damit nie an eine Feindmoral
+von 78 heran. Die erste Fassung des Spiels hatte sie nicht: <b>100 % Tod, kein
+einziger Sieg über 40 Testläufe.</b> Zweihundert andere Männer schießen ebenfalls
+— das macht die Gefechte gewinnbar und stimmt inhaltlich. Du bist ein Mann in
+einer Linie, kein Held.</div>
+
+<h3>Die Trefferwahrscheinlichkeit</h3>
+<pre><code>let gefahr = n.gefahr + gefahrMod + (K.gefahrPlus||0);
+if(S.belastung &gt; 60) gefahr += 6;
+if(S.atem &lt; 30)      gefahr += 5;
+if(S.rang &gt;= 3)      gefahr += 2;     // der Platz des Toten
+if(n.haerte &gt; 1)     gefahr += 3;     // Höhepunkt
+gefahr += feindGuete(n);              // bessere Truppen treffen öfter</code></pre>
+<p>Beispiel Akkon: 14 + 3 + 5 = <b>22 %</b> je Runde. Über einen ganzen Lauf
+gemessen: 8,9 Treffer bei zehn Gefechten und 57 Kampfrunden, also rund 16 % je
+Runde.</p>
+
+<h3>Die zehn Gefechte</h3>
+<div class="scroll"><table>
+<tr><th>Gefecht</th><th class="num">Runden</th><th class="num">Feindmoral</th><th class="num">Gefahr</th><th class="num">mit Güte</th></tr>
+<tr><td>Montenotte</td><td class="num">6</td><td class="num">45</td><td class="num">10</td><td class="num">10</td></tr>
+<tr><td>Lodi ★</td><td class="num">9</td><td class="num">78</td><td class="num">15→18</td><td class="num">18</td></tr>
+<tr><td>Castiglione</td><td class="num">7</td><td class="num">58</td><td class="num">12</td><td class="num">12</td></tr>
+<tr><td>Arcole ★</td><td class="num">9</td><td class="num">74</td><td class="num">14→17</td><td class="num">17</td></tr>
+<tr><td>Rivoli</td><td class="num">8</td><td class="num">66</td><td class="num">13</td><td class="num">13</td></tr>
+<tr><td>Alexandria</td><td class="num">5</td><td class="num">40</td><td class="num">9</td><td class="num">14</td></tr>
+<tr><td>Embabeh ★</td><td class="num">7</td><td class="num">60</td><td class="num">12→15</td><td class="num">20</td></tr>
+<tr><td>Kairoer Aufstand</td><td class="num">6</td><td class="num">50</td><td class="num">11</td><td class="num">16</td></tr>
+<tr><td>Akkon ★</td><td class="num">9</td><td class="num">85</td><td class="num">14→17</td><td class="num">22</td></tr>
+<tr><td>Abukir</td><td class="num">8</td><td class="num">62</td><td class="num">12</td><td class="num">17</td></tr>
+</table></div>
+<p style="font-size:13.5px;color:var(--dim)">★ = Höhepunkt (<code>haerte 1,4</code>):
+drei Punkte mehr Gefahr <i>und</i> 40 % mehr Schaden je Treffer. Das Gefecht, für
+das man berühmt wird, ist das, an dem man stirbt.</p>
+
+<h3>Ereignisse und Sondermissionen</h3>
+<pre><code>const hoechstens = S.ruf &gt;= CAPORAL_RUF ? 3 : 2;
+const zieht = Math.min(0.65, 0.45 + S.ruf/400);</code></pre>
+<p>Sechs allgemeine Ereignisse, dazu vier Sondermissionen mit eigener
+Probenkette: die Brücke von Lodi, der General im Sumpf von Arcole, der Riss im
+Karree von Embabeh, die Sturmkolonne durch die Bresche von Akkon. Jeder
+Fehlschlag in einer Kette kostet sofort 12 bis 20 Lebenspunkte; die Mehrheit der
+Stufen entscheidet über Erfolg. Der schlimmste Fall bei Akkon sind rund fünfzig
+Punkte in einem Zug — das ist die Stelle, an der das Spiel auch einen kundigen
+Spieler töten kann.</p>
+<p>Der Ruf zieht Ereignisse an. Das ist Absicht: Die Härte soll nicht daher
+kommen, dass Kugeln mehr wehtun, sondern dass der Weg nach oben durch Stellen
+führt, an denen man auch bleiben kann.</p>
+
+<h3>Verlieren kostet Blut</h3>
+<pre><code>rueckzug = round((5 + 13*Restwiderstand) * (1 + guete*0.2));</code></pre>
+<p>Italien 5–18, Ägypten 10–36 Punkte. Vorher war Verlieren gratis: hinknien,
+Runden auslaufen lassen, im Lager hochschlafen — <b>null Tote in achtzig
+Läufen</b>. Historisch ist es dieselbe Wahrheit: gefallen wird beim Weichen,
+nicht im Stehen.</p>
+</section>
+
+<!-- ============================== LEBEN ============================== -->
+<section id="leben">
+<h2>Leben, Wunden, Krankheit</h2>
+
+<p>Der Tod ist keine eigene Probe. Es gibt einen Lebensvorrat, und wenn er leer
+ist, ist der Mann tot.</p>
+<pre><code>lebenMax = 40 + Konstitution*0.6   // 52 bei Kon 20 · 64 bei 40 · 82 bei 70 · 94 bei 90</code></pre>
+<p>Gerechnet vom <b>rohen</b> Attribut, damit Wunden nicht die Obergrenze senken.</p>
+
+<h3>Ein Treffer</h3>
+<ul>
+<li><b>25 %</b> schwere Wunde: 15–25 Schaden, Abzug 14, Atem −20</li>
+<li><b>75 %</b> Streifschuss: 5–11 Schaden, Abzug 5, Atem −8</li>
+<li>Bei einem Höhepunkt wird der Schaden mit 1,4 multipliziert</li>
+<li>Jede Wunde gibt zusätzlich Belastung +6</li>
+</ul>
+<p>Bei durchschnittlich elf Schaden stirbt ein Mann mit Konstitution 20 am
+fünften Treffer, mit 40 am sechsten, mit 70 am achten.</p>
+
+<h3>Wunden verkleinern, sie töten nicht</h3>
+<pre><code>WUNDE_JE_PUNKT = 0.6;   VORRAT_BODEN = 0.4;</code></pre>
+<p>Offene Wunden senken den Lebensvorrat um 0,6 je Abzugspunkt, mit einem Boden
+bei 40 % des Maximums. Zwei alte Wunden vor Arcole bedeuten 66 statt 82 Punkte.
+Der Boden ist die Sicherung gegen die Todesspirale: <b>Wunden machen kleiner,
+nie tot — der Tod gehört ins Gefecht.</b></p>
+<p>Zweiter Deckel: der Atem steigt nie über die Lebenspunkte. Fünfundzwanzig
+Leben heißt höchstens fünfundzwanzig Atem, also dauerhaft unter der Warnschwelle.
+Ein Schwerverwundeter spielt sich wirklich verwundet.</p>
+
+<h3>Krankheiten</h3>
+<p>Sumpffieber 3 · Hitzschlag 3 · Ruhr 4 · das Fieber aus Jaffa 4 Lebenspunkte
+<b>je Station</b>. Wer krank ist, bekommt die 5-%-Zeitheilung gar nicht erst. Der
+Feldscher kann Krankheiten nicht behandeln — nur ein Lagerabend (Konstitutionsprobe
+gegen 35) oder eine Winterwoche. Das ist die Einlösung von „Krankheit ist
+gefährlicher als Kugeln“.</p>
+
+<h3>Heilung</h3>
+<table>
+<tr><td class="num">+5 %</td><td>je Station, automatisch — außer bei Krankheit</td></tr>
+<tr><td class="num">+25 %</td><td>Lagerabend „Schlafen“</td></tr>
+<tr><td class="num">+60 %</td><td>Winterwoche, entfernt zusätzlich eine Wunde (Krankheit zuerst)</td></tr>
+<tr><td class="num">voll</td><td>Übergang Leoben: alle Wunden weg, Leben und Atem voll</td></tr>
+<tr><td class="num">Feldscher</td><td>nach jedem Gefecht die <i>leichteste</i> Wunde mit Abzug ≤ 8, keine Krankheit</td></tr>
+</table>
+<p>Regel überall: erst die Wunde raus, dann auffüllen.</p>
+</section>
+
+<!-- ============================== BEFÖRDERUNG ============================== -->
+<section id="befoerderung">
+<h2>Beförderung</h2>
+
+<h3>Rang 2 — die Elitekompanie</h3>
+<p>Mailand, 15. Mai 1796. Keine Beförderung, eine Auswahl: <b>Grenadier</b> ab
+Konstitution 55, <b>Voltigeur</b> ab Geschick 55, sonst bleibt man Fusilier. Der
+Voltigeur bekommt ein anderes Minispiel — zielen, Deckung wechseln, frei bewegen
+— keine besseren Zahlen.</p>
+
+<h3>Rang 3 — Caporal</h3>
+<pre><code>const CAPORAL_RUF = 30, CAPORAL_GUNST = 4;
+const bekommt = ruf &gt;= CAPORAL_RUF &amp;&amp; gunst &gt;= CAPORAL_GUNST;</code></pre>
+<p>Dazu die Vakanz, die im Prototyp gesetzt ist und erzählt wird: <i>„Der Mann,
+dessen Stelle du bekommst, heißt Guérin. Er ist bei Castiglione geblieben.“</i>
+Der Stand wird beim ersten Betreten je Station eingefroren, damit die zweite
+Musterung von jetzt prüft und nicht von Verona.</p>
+<p>Zwei Musterungen: <b>Verona, September 1796</b> und <b>Kairo, September
+1798</b>.</p>
+
+<h3>Ruf</h3>
+<p>Aus Siegen (Montenotte +5, Lodi +16, Castiglione +8, Arcole +14, Rivoli +15,
+Alexandria +4, Embabeh +13, Aufstand +6, Akkon +15, Abukir +13), Niederlagen −3
+bis −6, Ereignissen +2 bis +7, Szenen — und im Gefecht selbst mit
+<b>höchstens drei je Gefecht</b>. Über fünf Gefechte sind das 15 auf eine
+Schwelle von 30, und das ist schon viel.</p>
+<p>Verluste: Zurückweichen −8, dritte Knierunde −2.</p>
+
+<h3>Die Kette über dir</h3>
+<p><b>Gunst ist keine Zahl mehr, sondern eine Beziehung je Person</b> (−5 bis +5,
+wie KONZEPT §8 es immer vorsah). Vier Männer, die ganze Laufbahn lang dieselben:</p>
+
+<table>
+<tr><th>Person</th><th>Posten</th><th>steigt auf zu</th><th>Wofür er zuständig ist</th></tr>
+<tr><td class="k">Martel</td><td>Sergent</td><td>Sergent-major</td><td>Der Caporal. Abende am Feuer, Tornister tragen, die Linie halten.</td></tr>
+<tr><td class="k">Collot</td><td>Fourier</td><td>Sergent-fourrier</td><td>Der Fourrier. Listen führen, Requisition, Verwaltung.</td></tr>
+<tr><td class="k">Berthaud</td><td>Lieutenant</td><td>Capitaine</td><td>Der Sergent. Er führt die Liste der Namen — jede Anerkennung im Gefecht zählt bei ihm.</td></tr>
+<tr><td class="k">Vernet</td><td>Capitaine</td><td>Chef de bataillon</td><td>Noch ohne Schwelle; für die Offiziersränge vorgesehen.</td></tr>
+</table>
+
+<p><b>Die Kette rückt mit.</b> Wer über dir steht, bleibt über dir, weil er selbst
+aufsteigt — man lernt in einer Karriere vier Gesichter kennen, nicht vierzehn.
+Ein neues gibt es nur, wenn eines fällt: In Höhepunktgefechten stirbt mit 22 %
+einer aus der Kette, der Nachfolger tritt an der nächsten Station an und
+<b>fängt bei Gunst 0 an</b>. Genau deshalb pflegt man zwei Beziehungen.</p>
+
+<h3>Rang 4 — Caporal-fourrier</h3>
+<p>Ruf 35 · Fürsprache Collot 3 · <b>Bildung 35</b> · Vakanz (Collot rückt selbst auf).
+Keine neuen Kampfknöpfe — seine Arbeit liegt im Lager: „Die Listen der Kompanie
+führen“ (Verwaltung, Fürsprache bei Collot und Berthaud, bei Misserfolg ein
+Rüffel) und „Die Ausgabe verteilen“ (Kameradschaft gegen Fürsprache — die erste
+Handlung, die beide Währungen gegeneinanderstellt).</p>
+<p class="lead">Der Fourrier ist ein <b>Seitenweg, kein Pflichtglied</b>.
+Überspringen kostet keine Wertung, weil der höchste erreichte Rang zählt und
+nicht die Summe der Stufen.</p>
+
+<h3>Rang 5 — Sergent</h3>
+<table>
+<tr><th>Weg</th><th class="num">Ruf</th><th class="num">Berthaud</th><th>Vorbedingung</th></tr>
+<tr><td class="k">Feldweg</td><td class="num">62</td><td class="num">5</td><td>Caporal</td></tr>
+<tr><td class="k">Listenweg</td><td class="num">52</td><td class="num">4</td><td>Caporal-fourrier — die Listen sind Fürsprache</td></tr>
+</table>
+<p><b>Die Vakanz wird angesagt, nicht geschenkt.</b> Sobald Ruf und Fürsprache
+stimmen, fällt der Sergent-major <b>im nächsten Gefecht</b> — nicht auf dem
+Bildschirm, auf dem die Zahlen stimmen. Danach rückt Martel auf seinen Posten,
+und Martels alte Stelle ist die, die du bekommst. Invariante 5 wandert damit
+eine Stufe nach oben, bleibt aber intakt: Am Anfang der Kette steht ein Toter.</p>
+
+<h4>Die Sektion</h4>
+<p>Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus
+KONZEPT §3, nicht größere Zahlen, ein anderes Spiel:</p>
+<table>
+<tr><th>Knopf</th><th>Probe</th><th>Wirkung</th></tr>
+<tr><td class="k">Salve auf Kommando</td><td class="num">Autorität 45</td><td>34–48 Schaden, skaliert mit der Sektionsstärke · Muskete bleibt geladen</td></tr>
+<tr><td class="k">Die Glieder wechseln</td><td class="num">Drill 40</td><td>drei Runden halbe Verluste</td></tr>
+<tr><td class="k">Den Wankenden herausziehen</td><td class="num">Menschenkenntnis 40</td><td>Sektion +6, Kameradschaft +4 · <b>+10 Gefahr</b>, du stehst dabei im Freien</td></tr>
+<tr><td class="k">Schließen und halten</td><td class="num">Drill 40</td><td>Gefahr −6, Sektion +4, Ruf beim ersten Mal</td></tr>
+</table>
+<p><b>Die Abrechnung ist der eigentliche Rangunterschied.</b> Nach jedem Gefecht
+wird gezählt: unter neun Verlusten von zwanzig gibt es Fürsprache, ab neun
+kostet es welche. Zum ersten Mal kann man ein Gefecht gewinnen und trotzdem
+verlieren.</p>
+
+<div class="warn"><b>Henne und Ei, gemessen gefunden.</b> Die erste fertige
+Fassung erreichte in 120 Läufen <b>0 % Fourrier und 0 % Sergent</b>: Alle
+bestehenden Gunst-Quellen liefen ohne Zuordnung an Martel, und Collot und
+Berthaud bekamen Fürsprache nur aus Handlungen, die es erst <i>ab</i> Rang 4
+gibt. Behoben durch Zuordnung nach Inhalt und eine systematische Quelle —
+<code>anerkennung()</code> gibt einmal je Gefecht Berthaud +1.</div>
+
+<h3>Gunst — die Fürsprache Martels</h3>
+<p>Bewusst kleinteilig; keine Einzeltat trägt sie allein. Am Feuer sitzen bleiben
++1, Winterwoche mit Martel +2, in Savona zuhören +2, in Dego den Tornister tragen
++1, bei Mondovì melden +2, in Mantua Fourier +3, Wüstenmarsch und Sinai je +1.</p>
+<div class="note">Vorher kamen <b>alle 42 Überlebenden mit exakt Gunst 3</b> an —
+eine einzige Szenenwahl trug die Schwelle. Deshalb die Anhebung auf 4 und die
+Senkung der großen Quellen. Nötig sind jetzt eine sichtbare Tat <i>und</i> Abende
+am Feuer.</div>
+</section>
+
+<!-- ============================== PUNKTE ============================== -->
+<section id="punkte">
+<h2>Wertung und Veteranenpunkte</h2>
+
+<h3>Die Wertung im Prototyp</h3>
+<pre><code>rang       = rangWert(S.rang);          // 0 / 12 / 26
+stationen  = 2 * stationen();           // max. 32 Stationen = 64
+ruf        = 5 * Math.floor(S.ruf/10);
+nennungen  = 3 * Math.min(10, S.nennungen);
+ueberleben = S.lebt ? 25 : 0;
+sauber     = (!S.gekniffen &amp;&amp; S.lebt) ? 10 : 0;</code></pre>
+<p>Der Stationswert wurde von 4 über 3 auf 2 gesenkt. Die Regel dahinter:
+<b>Das bloße Durchkommen darf nie mehr wert sein als etwa die Hälfte der
+Ladensumme.</b> Bei 32 Stationen hätte allein das Durchkommen sonst 96 Punkte
+gebracht — mehr als der gesamte bisherige Spitzenlauf.</p>
+
+<h3>Nur der beste Lauf zählt</h3>
+<pre><code>p.rekord = p.summe &gt; META.vp;        // Vergleich VOR dem Anheben
+META.vp  = Math.max(META.vp, p.summe);</code></pre>
+<p>Der Vorrat ist das Maximum über alle Läufe, nie die Summe. Er wird nicht
+verbraucht, sondern bei jedem Neustart neu verteilt. Ein schlechter Lauf kostet
+nichts und bringt nichts — es gibt nichts zu grinden, nur den eigenen Rekord zu
+schlagen.</p>
+
+<h3>Die Preistreppe</h3>
+<pre><code>const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];   // VP je Punkt nach Zehnerbereich</code></pre>
+<div class="scroll"><table>
+<tr><th>Bereich</th><th class="num">VP je Punkt</th><th class="num">ganzer Zehner</th><th class="num">ab 0 kumuliert</th></tr>
+<tr><td>0–19</td><td class="num">1</td><td class="num">10</td><td class="num">20</td></tr>
+<tr><td>20–39</td><td class="num">2</td><td class="num">20</td><td class="num">60</td></tr>
+<tr><td>40–49</td><td class="num">3</td><td class="num">30</td><td class="num">90</td></tr>
+<tr><td>50–59</td><td class="num">4</td><td class="num">40</td><td class="num">130</td></tr>
+<tr><td>60–69</td><td class="num">6</td><td class="num">60</td><td class="num">190</td></tr>
+<tr><td>70–79</td><td class="num">8</td><td class="num">80</td><td class="num">270</td></tr>
+<tr><td>80–89</td><td class="num">11</td><td class="num">110</td><td class="num">380</td></tr>
+<tr><td>90–99</td><td class="num">15</td><td class="num">150</td><td class="num">530</td></tr>
+</table></div>
+<p>Spezialisierung wird teuer, Breite bezahlbar. Die rund 160 Punkte eines
+Spitzenlaufs reichen für Breite <b>oder</b> eine Spitze, nie für beides. Eine
+Fertigkeit von 10 auf 100 kostet 520.</p>
+
+<h3>Der Kaufladen (196 VP insgesamt)</h3>
+<div class="scroll"><table>
+<tr><th>Kauf</th><th>Wirkung</th><th class="num">VP</th></tr>
+<tr><td>Sorgfältig eingeschossene Muskete</td><td>+8 Muskete, Zustand 95, Verschleiß 12 statt 15</td><td class="num">40</td></tr>
+<tr><td>Doppelt besohlte Schuhe</td><td>Zustand 100, Verschleiß 12 statt 25</td><td class="num">40</td></tr>
+<tr><td>Beutemantel, gewachst</td><td>Überhaupt ein Mantel (90/8)</td><td class="num">30</td></tr>
+<tr><td>Verstärkter Tornister</td><td>Der Anmarsch kostet halben Atem</td><td class="num">24</td></tr>
+<tr><td>Geschliffenes Bajonett</td><td>+5 Bajonett, Zustand 95/8</td><td class="num">20</td></tr>
+<tr><td>Feldflasche mit Schnapsvorrat</td><td>Belastung −2 je Winterwoche</td><td class="num">15</td></tr>
+<tr><td>50 Francs Startgeld</td><td>Geld 4 → 54</td><td class="num">15</td></tr>
+<tr><td>Amulett</td><td>+5 Kaltblütigkeit — wirkt, weil du glaubst, dass es wirkt</td><td class="num">12</td></tr>
+</table></div>
+
+<h3>Die volle Skala (entworfen, noch nicht in Betrieb)</h3>
+<p>Gezählt wird der <i>Aufstieg</i>, nicht der Standort:
+<code>Rangpunkte = Wert des Endrangs − Wert des Startrangs</code>. Die Rangwerte
+reichen von 0 (Fusilier) bis 580 (Marschall). Dazu je überlebtem Kapitel +8, je
+volle 10 Ruf +5, je Nennung +3 (max. 10), je Grad der Ehrenlegion +12, je fremdem
+Orden +10 (max. 2), Überlebensbonus 70 bis 180, und +20 für „nie vor Zeugen
+gekniffen, nie desertiert“. <b>Maximum: 918 Punkte.</b> Als gekaufter Leutnant
+760.</p>
+</section>
+
+<!-- ============================== SPIELSTAND ============================== -->
+<section id="spielstand">
+<h2>Der Spielstand</h2>
+
+<p>Beides: <code>localStorage</code> als bequeme Ablage, die Datei als
+maßgebliches Format. Ohne Browser-Ablage läuft alles weiter, nur ohne
+Absturzsicherung — und der Titelbildschirm sagt das.</p>
+
+<h3>Drei Schlüssel</h3>
+<table>
+<tr><td class="num">marschallstab.chronik</td><td>Veteranenpunkte, Chronik, beste Kapitel, Anzahl Läufe. Lebt für immer.</td></tr>
+<tr><td class="num">marschallstab.chronik.bak</td><td>Eine Generation zurück, geschrieben vor jedem Überschreiben.</td></tr>
+<tr><td class="num">marschallstab.lauf</td><td>Der eine angefangene Feldzug. Ein Platz, keine Slots.</td></tr>
+</table>
+
+<h3>Wann gesichert wird</h3>
+<p>Bei <b>jedem</b> Schritt — nach jeder Kampfrunde, jeder Lagerhandlung, jedem
+Stationswechsel. Ein Halt, der ein Gefecht überdauern würde, wäre ein
+Rücksetzpunkt: Wer sieht, dass es schiefgeht, schlösse den Reiter. Ein
+Spielstand, der immer „jetzt“ bedeutet, lässt sich nicht zum Zurückspulen
+benutzen.</p>
+
+<h3>Wann gelöscht wird</h3>
+<ul>
+<li><b>Beim Tod sofort</b> — an drei Stellen absichtlich, damit Invariante 1 an keinem Pfad durchrutscht.</li>
+<li><b>Beim Aufstellen eines neuen Mannes</b> — ein Platz, kein zweiter.</li>
+<li><b>Am Kapitelende</b> — der Lauf ist zu Ende, in jedem Fall.</li>
+</ul>
+
+<h3>Schutzvorrichtungen</h3>
+<p><b>Prüfsumme</b> — nicht gegen Betrüger, gegen halb geschriebene Dateien und
+kaputte Cloud-Abgleiche. Fehlt sie, gilt die Datei als kaputt, nicht als heil.</p>
+<p><b>Fassungen und Wandler</b> — <code>wandle()</code> hebt Fassung um Fassung,
+nie raten, nie überspringen. Eine Datei aus der Zukunft wird abgelehnt statt
+falsch gelesen.</p>
+<p><b>Zusammenführen statt Ersetzen</b> — beim Einlesen wird
+<code>vp = Math.max(vp, META.vp)</code> genommen, sonst senkte eine alte Datei
+den Vorrat und verletzte Invariante 2.</p>
+<p><b>Der Chronik-Riegel</b> — schlägt das Laden fehl, obwohl eine Datei da war,
+wird gar nichts mehr geschrieben, bis der Spieler ausdrücklich „Alte Chronik
+verwerfen“ drückt. Ohne ihn überschrieb das erste automatische Sichern die gute
+Datei mit der leeren, das zweite auch die Sicherungskopie: nach zwei Stationen
+waren alle Veteranenpunkte weg.</p>
+
+<div class="warn"><b>Ein bewusst offenes Loch:</b> Datei sichern → sterben →
+Datei laden hebelt den Permadeath aus. Das ist dokumentiert und nicht repariert,
+weil es mit einer maßgeblichen Datei prinzipiell nicht verhinderbar ist. Wenn es
+je stören soll, braucht es eine Entscheidung — etwa Export erst beim Tod, oder
+eine Einmal-Marke im Lauf-Teil der Datei.</div>
+</section>
+
+<!-- ============================== KAPITEL 1+2 ============================== -->
+<section id="kapitel12">
+<h2>Kapitel 1 und 2, Station für Station</h2>
+
+<h3>Italien 1796/97 — Stationen 1 bis 16</h3>
+<div class="scroll"><table>
+<tr><th class="num">#</th><th>Ort</th><th>Datum</th><th>Art</th><th>Inhalt</th></tr>
+<tr><td class="num">1</td><td>Rekrutendepot, Savona</td><td>1.–11. April 1796</td><td>Lager</td><td>Drei Abende</td></tr>
+<tr><td class="num">2</td><td>Lager der Italienarmee, Savona</td><td>12. April</td><td>Szene</td><td>Die Schuhe eines Toten — oder Martel zuhören (Gunst +2)</td></tr>
+<tr><td class="num">3</td><td>Höhenzug, Montenotte</td><td>12. April</td><td>Gefecht</td><td>Lehrgefecht, Sieg Ruf +5</td></tr>
+<tr><td class="num">4</td><td>Ligurische Alpen, Dego</td><td>15. April</td><td>Szene</td><td>Plündern, teilen, oder den Tornister eines Erschöpften tragen (Ruf +4, Gunst +1)</td></tr>
+<tr><td class="num">5</td><td>Piemont, Mondovì</td><td>22. April</td><td>Szene</td><td>Plünderer melden (Ruf +8, Kameradschaft −22) oder mitmachen</td></tr>
+<tr><td class="num">6</td><td>Brücke von Lodi</td><td>10. Mai</td><td>Gefecht ★</td><td>Sondermission „Die Brücke“, Sieg Ruf +16 und Nennung</td></tr>
+<tr><td class="num">7</td><td>Einzug in Mailand</td><td>15. Mai</td><td>Auswahl</td><td>Grenadier (Kon 55) / Voltigeur (Ges 55) / Fusilier bleiben</td></tr>
+<tr><td class="num">8</td><td>Kantonierung, Corsico</td><td>Ende Mai</td><td>Lager</td><td>Zwei Abende, erster Sold</td></tr>
+<tr><td class="num">9</td><td>Belagerung, Mantua</td><td>Juli</td><td>Szene</td><td>Fourier werden (Bildung 40 → Gunst +3) oder im Sumpf fouragieren (Sumpffieber)</td></tr>
+<tr><td class="num">10</td><td>Hügel bei Solferino, Castiglione</td><td>5. August</td><td>Gefecht</td><td>Sieg Ruf +8</td></tr>
+<tr><td class="num">11</td><td>Neuaufstellung, Verona</td><td>September</td><td>Musterung</td><td><b>Erste Caporal-Prüfung</b></td></tr>
+<tr><td class="num">12</td><td>Feldlager an der Etsch</td><td>Oktober</td><td>Lager</td><td>Zwei Abende</td></tr>
+<tr><td class="num">13</td><td>Damm im Sumpf, Arcole</td><td>15.–17. Nov.</td><td>Gefecht ★</td><td>Sondermission „Der General im Sumpf“, Sieg Ruf +14</td></tr>
+<tr><td class="num">14</td><td>Winterquartier, Verona</td><td>Dezember</td><td>Winter</td><td>Drei Wochen</td></tr>
+<tr><td class="num">15</td><td>Hochebene, Rivoli</td><td>14. Januar 1797</td><td>Gefecht</td><td>Sieg Ruf +15 und Nennung</td></tr>
+<tr><td class="num">16</td><td>Vorfrieden, Leoben</td><td>18. April 1797</td><td>Übergang</td><td>Ein Jahr Garnison: alles heilt, nichts wird gewertet</td></tr>
+</table></div>
+
+<h3>Ägypten 1798/99 — Stationen 17 bis 32 <span class="tag w">Feindgüte 5</span></h3>
+<div class="scroll"><table>
+<tr><th class="num">#</th><th>Ort</th><th>Datum</th><th>Art</th><th>Inhalt</th></tr>
+<tr><td class="num">17</td><td>An Bord der Flotte</td><td>19. Mai – 1. Juli 1798</td><td>Szene</td><td>Offizieren zuhören (Taktik +4, Gunst +1)</td></tr>
+<tr><td class="num">18</td><td>Stadtmauer, Alexandria</td><td>2. Juli</td><td>Gefecht</td><td>Kurz und billig, Sieg Ruf +4</td></tr>
+<tr><td class="num">19</td><td>Quartier in Alexandria</td><td>3.–9. Juli</td><td>Lager</td><td>Zwei Abende</td></tr>
+<tr><td class="num">20</td><td>Wüste vor Damanhur</td><td>10.–20. Juli</td><td>Szene</td><td>Wasser einteilen (Fehlschlag: Hitzschlag) oder die Karte lesen</td></tr>
+<tr><td class="num">21</td><td>Karree am Nil, Embabeh</td><td>21. Juli</td><td>Gefecht ★</td><td>Sondermission „Der Riss im Karree“, Sieg Ruf +13</td></tr>
+<tr><td class="num">22</td><td>Kairo, eroberte Stadt</td><td>August</td><td>Szene</td><td>Listen führen (Gunst +2), Basar, Arabisch lernen, versaufen</td></tr>
+<tr><td class="num">23</td><td>Zitadelle, Kairo</td><td>September</td><td>Musterung</td><td><b>Zweite Caporal-Prüfung</b></td></tr>
+<tr><td class="num">24</td><td>Straßenkampf, Kairo</td><td>21.–22. Okt.</td><td>Gefecht</td><td>Sieg Ruf +6, Belastung +8</td></tr>
+<tr><td class="num">25</td><td>Winterquartier, Kairo</td><td>Dezember</td><td>Winter</td><td>Drei Wochen</td></tr>
+<tr><td class="num">26</td><td>Sinai, El-Arisch</td><td>Februar 1799</td><td>Szene</td><td>Kranke pflegen (Feldchirurgie 30; Fehlschlag: Ruhr)</td></tr>
+<tr><td class="num">27</td><td>Belagerungslager vor Akkon</td><td>März</td><td>Lager</td><td>Zwei Abende</td></tr>
+<tr><td class="num">28</td><td>Bresche, Saint-Jean-d’Acre</td><td>März – Mai</td><td>Gefecht ★</td><td>Feindmoral <b>85</b>, härtestes Gefecht im Spiel. Dreistufige Sondermission. Akkon fällt nicht</td></tr>
+<tr><td class="num">29</td><td>Rückzug durch den Sinai</td><td>Mai – Juni</td><td>Szene</td><td>Pestkranke heben (Fehlschlag: das Fieber aus Jaffa) oder wegsehen</td></tr>
+<tr><td class="num">30</td><td>Halbinsel von Abukir</td><td>25. Juli</td><td>Gefecht</td><td>Sieg Ruf +13 und Nennung</td></tr>
+<tr><td class="num">31</td><td>Die Armee erfährt es zuletzt</td><td>24. August</td><td>Szene</td><td>Bonaparte ist weg</td></tr>
+<tr><td class="num">32</td><td>Die Armee des Orients bleibt</td><td>Herbst 1799</td><td>Ende</td><td>Wertung, Ausblick auf Kapitel 3</td></tr>
+</table></div>
+</section>
+
+<!-- ============================== RÄNGE ============================== -->
+<section id="raenge">
+<h2>Die vierzehn Ränge</h2>
+
+<div class="scroll"><table>
+<tr><th class="num">#</th><th>Französisch</th><th>Deutsch</th><th class="num">Kommando</th><th>Was neu dazukommt</th></tr>
+<tr><td class="num">1</td><td>Fusilier</td><td>Füsilier</td><td class="num">—</td><td>Der eigene Körper, sieben Ausrüstungsplätze <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">2</td><td>Grenadier / Voltigeur</td><td>Grenadier / Plänkler</td><td class="num">—</td><td>Auswahl statt Beförderung. Der Voltigeur bekommt eine zweite Kampfart <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">3</td><td>Caporal</td><td>Korporal</td><td class="num">8</td><td>Kleine Befehle, Wachdienst, haftet für Fehlbestände <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">4</td><td>Caporal-fourrier</td><td>Korporal-Furier</td><td class="num">8 + Listen</td><td>Schwelle Bildung 35. Bestandslisten, Verpflegung — erste Verwaltung</td></tr>
+<tr><td class="num">5</td><td>Sergent</td><td>Sergeant</td><td class="num">20</td><td>Sektion in der Linie halten, Drill, Rekrutenauswahl</td></tr>
+<tr><td class="num">6</td><td>Sergent-major</td><td>Feldwebel</td><td class="num">60</td><td>Zug, Feuerdisziplin, Fourage, erste Korruptionschancen</td></tr>
+<tr><td class="num">7</td><td>Sous-Lieutenant</td><td>Unterleutnant</td><td class="num">Zug</td><td><b>Bildung 50</b> — die schärfste Kante im Spiel. Degen, Pferd erlaubt, erste Karte</td></tr>
+<tr><td class="num">8</td><td>Lieutenant</td><td>Leutnant</td><td class="num">Zug</td><td>Zug frei bewegen, Adjutantenaufträge beim Stab</td></tr>
+<tr><td class="num">9</td><td>Capitaine</td><td>Hauptmann</td><td class="num">~120</td><td><b>Die Kompaniekasse</b>, eigene Personalpolitik</td></tr>
+<tr><td class="num">10</td><td>Chef de bataillon</td><td>Major</td><td class="num">~800</td><td>Pferd wird gestellt, mehrere Kompanien</td></tr>
+<tr><td class="num">11</td><td>Colonel</td><td>Oberst</td><td class="num">~2.000</td><td>Regimentsehre, Adlerträger, Lieferantenverträge</td></tr>
+<tr><td class="num">12</td><td>Général de brigade</td><td>Brigadegeneral</td><td class="num">Brigade</td><td>Operationskarte. <b>Schaltet die Generalskampagnen frei</b></td></tr>
+<tr><td class="num">13</td><td>Général de division</td><td>Divisionsgeneral</td><td class="num">Division</td><td>Zeitachse in Tagen, kaiserlicher Kontakt, Adelstitel, Dotation</td></tr>
+<tr><td class="num">14</td><td>Maréchal d’Empire</td><td>Marschall</td><td class="num">Korps</td><td>Die Legende. Praktisch nie</td></tr>
+</table></div>
+
+<h3>Warum Rang 4 mehr ist als eine Zwischenstufe</h3>
+<p>Vier Gründe: Bildung zahlt sich zum ersten Mal aus, lange vor der Schwelle 50.
+Die Verwaltungsschicht wird fünf Ränge vor der Kompaniekasse behutsam
+eingeführt. Es ist ein Weg nach oben <b>für schlechte Kämpfer</b> — wer Muskete
+20 hat, aber lesen kann, ist nicht chancenlos. Und es ist die Stelle, an der ein
+Spieler ohne Tutorial begreift, dass Bildung der eigentliche Flaschenhals ist.</p>
+
+<div class="note"><b>Bewusst nicht ergänzt:</b> Conscrit als eigener Rang (reine
+Verzögerung), Sergent-fourrier (doppelt sich mit Caporal-fourrier), Adjudant
+(würde die Offiziersschwelle verwässern, und die soll die schärfste Kante im
+Spiel bleiben). Vierzehn ist die Obergrenze — mehr Stufen verwässern jede
+einzelne Beförderung, und oben muss es dünn bleiben.</div>
+</section>
+
+<!-- ============================== KAPITEL ALLE ============================== -->
+<section id="kapitelalle">
+<h2>Die elf Kapitel</h2>
+<div class="scroll"><table>
+<tr><th class="num">#</th><th>Feldzug</th><th class="num">Jahr</th><th>Charakter des Kapitels</th></tr>
+<tr><td class="num">1</td><td>Italien</td><td class="num">1796–97</td><td>Tutorial im Elend. Barfuß, hungrig, siegreich <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">2</td><td>Ägypten</td><td class="num">1798–99</td><td>Hitze und Krankheit, Karrees gegen Mamluken, Isolation. Nach Abukir liegt die Flotte auf dem Grund — es gibt keinen Weg nach Hause <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">3</td><td>Garnison</td><td class="num">1800–04</td><td><b>Management-Kapitel.</b> Bildung nachholen, heiraten, Beziehungen. Rangstillstand als Druckmittel</td></tr>
+<tr><td class="num">4</td><td>Austerlitz</td><td class="num">1805</td><td>Die perfekte Schlacht. Erste große Bewährung als Offizier</td></tr>
+<tr><td class="num">5</td><td>Jena–Auerstedt</td><td class="num">1806</td><td>Tempo, Verfolgung, Marschstrapazen</td></tr>
+<tr><td class="num">6</td><td>Eylau &amp; Friedland</td><td class="num">1807</td><td>Schnee und Massenverluste. Viele Vakanzen, viele Beförderungen</td></tr>
+<tr><td class="num">7</td><td>Spanien</td><td class="num">1808–12</td><td><b>Moral-Kapitel.</b> Guerilla, andere Regeln: kein Ruhm, nur Repressalien</td></tr>
+<tr><td class="num">8</td><td>Russland</td><td class="num">1812</td><td><b>Ressourcen-Überleben</b>, kein Feldzug. Hier sterben die meisten Charaktere. Ausrüstung verschleißt doppelt, nichts wird ersetzt, das Pferd wird gegessen</td></tr>
+<tr><td class="num">9</td><td>Deutschland</td><td class="num">1813</td><td>Wiederaufbau aus Rekruten. Leipzig. Beginn der Vakanzwelle</td></tr>
+<tr><td class="num">10</td><td>Frankreich</td><td class="num">1814</td><td>Verteidigung der Heimat, Abdankung. Loyalitätsfrage</td></tr>
+<tr><td class="num">11</td><td>Hundert Tage</td><td class="num">1815</td><td>Waterloo, 18. Juni. Epilog je nach Rang und Entscheidung</td></tr>
+</table></div>
+<p><i>„Jedes Kapitel hat eigene Regeln, nicht nur eigene Gegner. Das hält die
+neunzehn Spieljahre frisch.“</i></p>
+</section>
+
+<!-- ============================== ENDEN ============================== -->
+<section id="enden">
+<h2>Schranken und die vier Enden <span class="tag s">entworfen</span></h2>
+
+<p><b>Dein Rang entscheidet, wie viel vom Krieg du überhaupt zu sehen
+bekommst.</b></p>
+
+<table>
+<tr><th>Schranke</th><th>Wann</th><th>Bedingung</th><th>Sonst</th></tr>
+<tr><td>Nach Russland</td><td>Dezember 1812</td><td><b>Rang ≥ 7</b></td><td>Ruhestand, die Kampagne endet hier</td></tr>
+<tr><td>Vor Waterloo</td><td>April 1814</td><td><b>Rang ≥ 10</b></td><td>Halbsold; du erlebst die Hundert Tage vom Fenster aus</td></tr>
+</table>
+
+<p>Historisch gedeckt: Nach 1812 wurden Mannschaften und Unteroffiziere in Massen
+ausgemustert, während erfahrene Offiziere gebraucht wurden. 1815 rief Napoleon
+von Elba gezielt <b>Offiziersveteranen</b> zurück — keine Feldwebel.</p>
+
+<h3>Die vier Enden</h3>
+<table>
+<tr><th>Ende</th><th>Bedingung</th><th class="num">VP-Bonus</th></tr>
+<tr><td><b>Tod</b></td><td>jederzeit</td><td class="num">0</td></tr>
+<tr><td><b>Ruhestand nach Russland</b></td><td>Kapitel 8 überlebt, Rang &lt; 7</td><td class="num">+180</td></tr>
+<tr><td><b>Ruhestand 1814</b></td><td>Kapitel 10 überlebt, Rang &lt; 10</td><td class="num">+120</td></tr>
+<tr><td><b>Waterloo</b></td><td>Rang ≥ 10 bei Kriegsende 1814</td><td class="num">+70</td></tr>
+</table>
+
+<div class="note"><b>Das Ruhestands-Ende nach Russland ist kein Verlieren.</b> Es
+ist die häufigste Art, wie ein guter Lauf endet, und der Text behandelt es auch
+so: „Du hast alles gesehen, was ein Mensch sehen kann, und gehst nach Hause. Kein
+Ruhm, aber du lebst.“</div>
+
+<h3>Warum der Bonus rückwärts gestaffelt ist</h3>
+<p>Je früher du gehst, desto größer der Bonus. Das klingt verkehrt, ist aber
+genau die Regel, die den freiwilligen Ausstieg zu einer echten Entscheidung macht
+statt zu einer immer falschen. Der Erwartungswert des Weitermachens:</p>
+<table>
+<tr><th>Vorrat</th><th class="num">Weitermachen nach Russland</th><th class="num">Weitermachen vor Waterloo</th></tr>
+<tr><td>0 VP</td><td class="num">+19</td><td class="num">+3</td></tr>
+<tr><td>300 VP</td><td class="num">+66</td><td class="num">+19</td></tr>
+<tr><td>650 VP</td><td class="num">+101</td><td class="num">+30</td></tr>
+</table>
+<blockquote><p>Vor Waterloo ist es fast ein Münzwurf. Die vernünftige Wahl 1814
+ist, die Pension zu nehmen und nach Hause zu gehen. Nach Waterloo zu reiten ist
+die loyale, romantische, mathematisch kaum begründbare Wahl. <b>Man geht
+trotzdem.</b></p></blockquote>
+
+<h3>Die Vakanzwelle 1813–15</h3>
+<p>Ab Kapitel 9 beschleunigt sich die Beförderung deutlich. Keine Belohnung,
+sondern eine Buchhaltung: die Offizierskorps von 1812 lagen in Russland. Die
+Kurve ist damit zweigeteilt — bis Russland zäh, danach steil.</p>
+
+<h3>Generalskampagnen</h3>
+<p>Rang 12 schaltet zwei bis drei eigenständige Szenarien frei: <b>Wagram</b>
+(5.–6. Juli 1809, eine Division auf dem Marchfeld), <b>Leipzig</b> (16.–19.
+Oktober 1813, ein Korps in der Völkerschlacht — man weiß, wie es ausgeht),
+<b>Waterloo</b> (18. Juni 1815). Je 30 bis 60 Minuten, reine Operationsebene mit
+Meldungen und Befehlslaufzeiten, eigene Wertung, eigener Chronikeintrag. Ohne
+diese Freischaltung würden 96 % der Spieler die aufwendigste Darstellungsstufe
+nie zu sehen bekommen.</p>
+
+<h3>Die simulierte Schwierigkeitskurve</h3>
+<p class="lead">Simuliert, nicht geschätzt: 6.000 virtuelle Spieler mit je 50
+Durchläufen, angegeben ist der Median.</p>
+<div class="scroll"><table>
+<tr><th>Stufe</th><th class="num">Vorrat</th><th class="num">Tod</th><th class="num">Ruhestand 1812</th><th class="num">Ruhestand 1814</th><th class="num">Waterloo</th><th class="num">General</th></tr>
+<tr><td>Erster Lauf</td><td class="num">0</td><td class="num">97 %</td><td class="num">2,1 %</td><td class="num">0,4 %</td><td class="num">0,6 %</td><td class="num">0,3 %</td></tr>
+<tr><td>Nach 3 Läufen</td><td class="num">214</td><td class="num">70 %</td><td class="num">10,5 %</td><td class="num">4,5 %</td><td class="num">14,9 %</td><td class="num">10,0 %</td></tr>
+<tr><td>Nach 8 Läufen</td><td class="num">692</td><td class="num">33 %</td><td class="num">4,8 %</td><td class="num">4,3 %</td><td class="num">58,1 %</td><td class="num">47,3 %</td></tr>
+<tr><td><b>An der Decke</b></td><td class="num">774</td><td class="num">30 %</td><td class="num">4,2 %</td><td class="num">3,8 %</td><td class="num"><b>61,5 %</b></td><td class="num"><b>50,0 %</b></td></tr>
+</table></div>
+<p>Die Zielaussage: <b>An der Decke wird der Generalsrang zuverlässig.</b> 50 %
+je Lauf heißt 75 % in zwei Läufen, 88 % in drei, 97 % in fünf. Beim ersten Lauf
+dagegen erreichen 62 % keine einzige Beförderung.</p>
+<blockquote><p>Beim ersten Lauf liegt deine Fertigkeitskurve die halbe Kampagne
+lang <i>unter</i> der Anforderungslinie. Du bist nicht schlecht gespielt — du
+bist unfertig.</p></blockquote>
+</section>
+
+<!-- ============================== AUSRÜSTUNG ============================== -->
+<section id="ausruestung">
+<h2>Ausrüstung, Orden, Pferd, Kompaniekasse</h2>
+
+<h3>Ausrüstung ist ein Zustand, kein Besitz</h3>
+<p>Jedes Stück hat einen Zustand von 0 bis 100, und der Wert sinkt. Schuhe halten
+einen Feldzug, keine zwei. Eine Muskete, die niemand putzt, zündet irgendwann
+nicht mehr. Damit bekommen drei Dinge einen Zweck: das Winterquartier
+(Instandsetzung kostet Zeit), das Geld (Handwerker kosten Francs) und das
+Fouragieren (Ersatz beschaffen).</p>
+<p><b>Sieben Plätze, keine Inventarliste:</b> Waffe · Seitenwaffe · Schuhwerk ·
+Mantel · Tornister · Kleinkram · Pferd.</p>
+<table>
+<tr><td class="num">100–70</td><td>tadellos</td></tr>
+<tr><td class="num">69–40</td><td>gebraucht, leichte Abzüge</td></tr>
+<tr><td class="num">39–20</td><td>schadhaft, Versager häufen sich</td></tr>
+<tr><td class="num">19–0</td><td><b>unbrauchbar</b> — barfuß, unbewaffnet, ohne Mantel</td></tr>
+</table>
+<p>In Russland verschleißt alles doppelt, und nichts lässt sich instand setzen.</p>
+
+<h3>Verantwortung skaliert mit dem Rang</h3>
+<p>Der zweite Maßstab, der mit dem Rang wandert — nur leiser. Rang 1–2: dich
+selbst. Rang 3: die acht Mann deiner Korporalschaft, Mängel melden, für
+Fehlbestände haften. Rang 4: die Listen der Kompanie, 120 Mann auf Papier. Rang
+5–6: „Wer barfuß marschiert, ist dein Versäumnis.“ Rang 7–8: ab jetzt haftest du
+für fremde Zahlen. Rang 9: die Kompaniekasse. Rang 12–14: „Du siehst keine Schuhe
+mehr, nur Bestandsmeldungen.“</p>
+
+<h3>Der Einheitszustand <span class="tag s">entworfen</span></h3>
+<p>Ein Wert von 0 bis 100 über die Ausrüstung deiner Männer. 80–100 Moral +10,
+die Inspektion lobt · 40–59 Moral −10, die Krankheitsrate steigt · 20–39 jeder
+Marsch kostet Männer · 0–19 die Einheit löst sich auf dem Marsch auf. Der
+<i>Inspecteur aux revues</i> meldet das Ergebnis als Gunst oder Rüffel an deinen
+Fürsprecher.</p>
+<blockquote><p>Ohne Fürsprecher keine Beförderung. Wer seine Männer verkommen
+lässt, steigt nicht auf, egal wie tapfer er persönlich war.</p></blockquote>
+
+<h3>Die Kompaniekasse <span class="tag s">entworfen, ab Rang 9</span></h3>
+<p>Historisch die <i>masses</i>, die Einheitskassen für Wäsche und Schuhwerk,
+verwaltet vom Capitaine.</p>
+<table>
+<tr><th>Entscheidung je Quartal</th><th class="num">für dich</th><th class="num">Einheitszustand</th><th class="num">Risiko</th></tr>
+<tr><td>Alles ausgeben, wie vorgesehen</td><td class="num">0 F</td><td class="num">+25</td><td class="num">keines</td></tr>
+<tr><td>Das Übliche abzweigen</td><td class="num">+150 F</td><td class="num">+10</td><td class="num">15 %</td></tr>
+<tr><td>Kräftig zulangen</td><td class="num">+400 F</td><td class="num">−10</td><td class="num">40 %</td></tr>
+</table>
+<blockquote><p>Du hast Veteranenpunkte für deine eigene Manufakturmuskete
+ausgegeben. Du weißt genau, was gute Ausrüstung wert ist — <i>weil du dafür
+bezahlt hast</i>. Und jetzt sitzt du auf dem Geld, mit dem hundertzwanzig andere
+Männer Schuhe bekommen sollen. <b>Das Spiel kommentiert das nie.</b></p></blockquote>
+
+<h3>Das Pferd <span class="tag s">entworfen, ab Rang 7</span></h3>
+<p>Landpferd (Marschermüdung −40 %, 15 F je Kapitel, 40 VP) · Kavalleriepferd
+(−60 %, ruhig unter Feuer, 30 F, 75 VP ab Rang 9) · Vollblut (dazu Ruf, 60 F,
+120 VP ab Rang 11). Ab Rang 10 wird es gestellt — ein Stabsoffizier zu Fuß ist
+undenkbar.</p>
+<p>Zweischneidig: <b>Ein Pferd macht dich sichtbar — in beide Richtungen.</b>
+Ruf-Gewinne steigen, aber Berittene ziehen gezieltes Feuer, und das Tier kostet
+jedes Kapitel Geld, ob man es benutzt oder nicht. <i>Und in Russland wird dein
+Pferd gegessen. Nicht vom Feind — von deinen eigenen Männern, und irgendwann von
+dir.</i></p>
+
+<h3>Orden <span class="tag s">entworfen</span></h3>
+<p><b>Nennung im Tagesbefehl</b> — beliebig oft, für eine sichtbare Tat vor einem
+Zeugen. Manche Männer wurden ein Dutzend Mal genannt. Im Charakterbogen steht
+dann <code>7× im Tagesbefehl genannt</code>. Wird bereits gezählt, hat aber noch
+keine Folge außer Wertungspunkten.</p>
+<p><b>Ehrenwaffen 1799–1802</b> — wer eine besaß, wurde 1804 automatisch in die
+Ehrenlegion aufgenommen. Wer 1796 in Italien etwas Verrücktes getan hat, bekommt
+acht Jahre später einen Brief.</p>
+<table>
+<tr><th>Grad der Ehrenlegion</th><th>Bedingung</th><th class="num">Pension</th></tr>
+<tr><td>Légionnaire</td><td>3 Nennungen oder eine Ehrenwaffe</td><td class="num">250 F/Jahr</td></tr>
+<tr><td>Officier</td><td>Rang ≥ 8 und 5 Nennungen</td><td class="num">1.000 F</td></tr>
+<tr><td>Commandeur</td><td>Rang ≥ 10</td><td class="num">2.000 F</td></tr>
+<tr><td>Grand Officier</td><td>Rang ≥ 12</td><td class="num">5.000 F</td></tr>
+<tr><td>Grand Aigle (ab 1805)</td><td>Rang ≥ 13</td><td class="num">5.000 F</td></tr>
+</table>
+<blockquote><p>Ein Fusilier verdient 1 Franc am Tag, also rund 365 im Jahr. Die
+250 Francs eines einfachen Légionnaire sind fast eine Verdopplung seines
+Einkommens — jedes Jahr, lebenslang. <b>Der Orden zahlt für die nächste
+Beförderung.</b></p></blockquote>
+</section>
+
+<!-- ============================== MASSSTAB ============================== -->
+<section id="massstab">
+<h2>Der Maßstabswechsel</h2>
+<p class="lead">Der stärkste Aufstiegs-Effekt, den ein Spiel haben kann: das
+Kampf-Minispiel selbst verwandelt sich.</p>
+
+<div class="scroll"><table>
+<tr><th class="num">Rang</th><th>Was der Bildschirm zeigt</th><th>Was er nicht zeigt</th></tr>
+<tr><td class="num">1–4</td><td>Vier Männer, Rauch, dein Körper. Leisten für Atem, Nerven, Ladezustand</td><td>Keine Karte. Keine Feindstärke. Kein Schlachtausgang</td></tr>
+<tr><td class="num">5–7</td><td>Handgezeichnete Gefechtsskizze. Der Feind gestrichelt und mit Fragezeichen</td><td>Alles jenseits der Sichtweite. Was die Nachbarkompanie tut</td></tr>
+<tr><td class="num">8–9</td><td>Regimentskarte mit Formationen, Munitions- und Moralwerten</td><td>Absichten des Gegners. Der Zustand der eigenen Flügel in Echtzeit</td></tr>
+<tr><td class="num">10–12</td><td>Operationskarte, Einheitensymbole, Meldungen mit Uhrzeit und Verlässlichkeit</td><td>Die Wirklichkeit. Alles ist vierzig Minuten alt, manches falsch</td></tr>
+</table></div>
+
+<blockquote><p>Als Fusilier lag zwischen Entscheidung und Folge nichts. Als
+General entscheidest du über eine Lage, die es nicht mehr gibt.</p></blockquote>
+
+<p>Verworfen wurden: reiner Fließtext (der Unterschied im Sichtfeld wäre „ein
+Unterschied zwischen zwei Absätzen — man liest ihn, aber man spürt ihn nicht“)
+und eine Ich-Perspektive in 3D („Ein General <i>erlebt</i> seine Schlacht nicht
+mit den Augen. Er sitzt an einem Tisch und liest Zettel.“).</p>
+
+<h3>Sieben weitere Hebel, die mit dem Rang wandern</h3>
+<ul>
+<li><b>Die Anrede</b> — „He, du da“ → „Caporal“ → „Sergent Duval“ → „mon Capitaine“ → „Monsieur le Général“</li>
+<li><b>Die Bedeutung des Scheiterns</b> — Fusilier: du stirbst. Capitaine: dreißig Mann sterben, und du schreibst dreißig Briefe. Général: eine Division ist weg, und der Kaiser hat eine Frage</li>
+<li><b>Die Zeitauflösung</b> — Minuten werden zu Tagen und Wochen</li>
+<li><b>Der Verweigerungsspielraum</b> — ein Rekrut kann nichts; ein Sergent kann langsam ausführen; ein Colonel kann widersprechen; ein Général kann einen Marschall vor dem Kaiser blamieren</li>
+<li><b>Das Leben außerhalb der Armee</b> — 1 Franc am Tag → Beute → Offizierskasse → Dotation → Landgut</li>
+<li><b>Der Charakterbogen</b>, der sichtbar wächst</li>
+<li><b>Die Ausrüstungsverantwortung</b> — von sieben Plätzen bis zu Bestandsmeldungen für 10.000 Mann</li>
+</ul>
+</section>
+
+<!-- ============================== BALANCE ============================== -->
+<section id="balance">
+<h2>Balance-Konstanten und warum sie so sind</h2>
+<p class="lead">Jede Zahl ist erspielt, nicht geraten. Wer eine ändert, ändert
+mit ihr die Begründung — und misst nach.</p>
+
+<div class="scroll"><table>
+<tr><th>Konstante</th><th class="num">Wert</th><th>Begründung</th><th>Gemessen</th></tr>
+<tr><td>Verteilungspool</td><td class="num">60</td><td>Mit 120 war ein Erstlauf-Mann so gut wie ein Veteran und die Veteranenpunkte reine Zierde</td><td>trennt 43 % von 68 % Überlebenden</td></tr>
+<tr><td>Lebensvorrat</td><td class="num">40 + Kon·0,6</td><td>Konstitution bestimmt, wie viel man aushält, nicht ob eine Kugel töten kann — die alte Formel machte ab Kon 58 unsterblich</td><td>8,9 Treffer je Lauf</td></tr>
+<tr><td>Schaden je Treffer</td><td class="num">25 % → 15–25<br>75 % → 5–11</td><td>Ein Vorrat, den neun Treffer nicht leeren, tötet niemanden</td><td>Eichung auf 6 ergab 100 % Überlebende bei 60 Läufen</td></tr>
+<tr><td>Wundenabzug je Punkt</td><td class="num">0,6</td><td>Leben heilt schnell, Wunden nicht — offene Wunden verkleinern den Mann</td><td>zwei alte Wunden: 66 statt 82 Punkte</td></tr>
+<tr><td>Vorratsboden</td><td class="num">0,4</td><td>Sicherung gegen die Todesspirale: Wunden machen kleiner, nie tot</td><td>—</td></tr>
+<tr><td>Selbstheilung je Station</td><td class="num">5 %</td><td>Acht Prozent fraßen den Blutzoll des Rückzugs wieder auf</td><td>1 statt 4 Tote bei 40 Läufen</td></tr>
+<tr><td>Krankheit blockiert Heilung</td><td class="num">ja</td><td>Vorher gewann ein Kranker mit Konstitution 70 pro Station sogar einen Punkt</td><td>—</td></tr>
+<tr><td>Heilung Lager / Winter</td><td class="num">25 % / 60 %</td><td>Genesung muss eine Entscheidung im Lager bleiben</td><td>ein Viertel je Gefecht geschenkt: 60 von 60 überlebten</td></tr>
+<tr><td>Atem-Deckel</td><td class="num">Atem ≤ Leben</td><td>Lässt einen Schwerverwundeten wirklich verwundet spielen</td><td>44 % / 30 % / Median 86 (80 Läufe)</td></tr>
+<tr><td>Anmarsch</td><td class="num">0,15 / −4 / +1</td><td>Der Weg zum Gefecht muss etwas kosten, sonst wären Lager reiner Zugewinn</td><td>erste Fassung 0,3: 35 statt 50 % Überleben</td></tr>
+<tr><td>Linienbeschuss</td><td class="num">2 + Zufall·4</td><td>Die wichtigste Zeile: ohne sie sind alle Gefechte rechnerisch unwinnbar</td><td>ohne sie 100 % Tod</td></tr>
+<tr><td>Feindgüte</td><td class="num">Italien 0<br>Ägypten 5</td><td>Eine Zahl je Kampagne schaltet Trefferchance, Linienhilfe und eigene Verluste — sonst wird das Spiel mit jedem Lauf leichter statt anders</td><td>nur 0 und 5 gemessen</td></tr>
+<tr><td>Höhepunkt</td><td class="num">1,4</td><td>Das Gefecht, für das man berühmt wird, ist das, an dem man stirbt</td><td>vorsichtig 100 → 98 %, mutig 100 → 93 %</td></tr>
+<tr><td>Rückzugszoll</td><td class="num">(5+13·Rest)·(1+Güte·0,2)</td><td>Verlieren war gratis: hinknien, Runden auslaufen lassen, hochschlafen</td><td>vorher null Tote in 80 Läufen</td></tr>
+<tr><td>Kniegrenze</td><td class="num">3 Runden</td><td>Knien war ein Panzer mit 4 % Restrisiko, hinter dem sich jedes Gefecht aussitzen ließ</td><td>—</td></tr>
+<tr><td>Ruf je Gefecht</td><td class="num">3</td><td>Ruf ist die Beförderungswährung; über fünf Gefechte sind das 15 auf eine Schwelle von 30</td><td>Umverteilung: Caporal 39 → 21 %</td></tr>
+<tr><td>Caporal-Schwellen</td><td class="num">Ruf 30<br>Gunst 4</td><td>Der Ruf war beim Testbot zweigipflig (19–25 und 36–41), 30 schneidet die Lücke. Gunst 4, weil vorher alle 42 Überlebenden mit exakt 3 ankamen</td><td>60 Läufe</td></tr>
+<tr><td>Elite-Schwelle</td><td class="num">55</td><td>Mit Pool 60 wird die Elitekompanie zur Entscheidung statt zur Selbstverständlichkeit</td><td>Erstlauf 55/48 %, Veteran 93/95 %</td></tr>
+<tr><td>„Platz des Toten“</td><td class="num">+2 Gefahr ab Rang 3</td><td>Historisch fielen Unteroffiziere überproportional; der Rang gibt weiter Knöpfe, die Zahl ist sein Preis</td><td>—</td></tr>
+<tr><td>Zusätzlicher Lagerabend</td><td class="num">+1 ab Caporal</td><td>Ohne ihn verdrängt „deine acht Mann drillen“ die eigene Ausbildung, und der Rang fühlt sich wie eine Strafe an</td><td>49 % / 39 % / Median 95</td></tr>
+<tr><td>Wertung je Station</td><td class="num">2</td><td>Bei 32 Stationen hätte allein das Durchkommen 96 Punkte gebracht — mehr als der ganze bisherige Spitzenlauf</td><td>Median fiel von 91 auf 45</td></tr>
+<tr><td>Marsch-Zwischenfälle</td><td class="num">35 %</td><td>Vier von ihnen geben toten Fertigkeiten ihre erste Verwendung</td><td>kosten auch den Vorsichtigen: 95 statt 100 %</td></tr>
+<tr><td>Chronikgrenze</td><td class="num">200</td><td>Alle Läufe zählen, aber nur die jüngsten einzeln — der beste ist der Vorrat und bleibt immer</td><td>—</td></tr>
+</table></div>
+</section>
+
+<!-- ============================== ZIELWERTE ============================== -->
+<section id="zielwerte">
+<h2>Gemessene Zielwerte</h2>
+<p class="lead">Je 40 Läufe, Stand 28. Juli 2026 nach dem Bau der Ränge 4 und 5.
+Vier simulierte Spielweisen. Der Bot kauft ohne <code>VP=</code> nichts und
+<i>ist</i> damit genau der Erstlauf-Spieler.</p>
+
+<div class="scroll"><table>
+<tr><th>Größe</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160</th><th class="num">Veteran 260</th></tr>
+<tr><td>Italien überstanden</td><td class="num">98 %</td><td class="num">90 %</td><td class="num">100 %</td><td class="num">95 %</td></tr>
+<tr class="hi"><td><b>Beide Feldzüge überstanden</b></td><td class="num">48 %</td><td class="num">23 %</td><td class="num">83 %</td><td class="num">73 %</td></tr>
+<tr><td>Elitekompanie erreicht</td><td class="num">50 %</td><td class="num">55 %</td><td class="num">90 %</td><td class="num">93 %</td></tr>
+<tr><td>Caporal erreicht</td><td class="num">48 %</td><td class="num">48 %</td><td class="num">88 %</td><td class="num">95 %</td></tr>
+<tr class="hi"><td><b>Caporal-fourrier erreicht</b></td><td class="num">20 %</td><td class="num">33 %</td><td class="num">65 %</td><td class="num">68 %</td></tr>
+<tr class="hi"><td><b>Sergent erreicht</b></td><td class="num">20 %</td><td class="num">33 %</td><td class="num">65 %</td><td class="num">68 %</td></tr>
+<tr><td>Punkte, Median</td><td class="num">106</td><td class="num">112</td><td class="num">207</td><td class="num">226</td></tr>
+</table></div>
+
+<p><b>Das ist die Kurve, um die es geht.</b> Italien ist das Lehrstück und lässt
+fast jeden durch; Ägypten tötet den ersten Mann. Mit dem Vorrat eines guten
+ersten Laufs steigt das Überleben auf 83 %, und der Sergent wird von einer
+Ausnahme (20 %) zum Regelfall (65 %). Fourrier und Sergent sind im Prototyp
+faktisch gekoppelt — wer in Kairo die Listen bekommt, hat bis Katia den Ruf
+ohnehin zusammen.</p>
+
+<div class="scroll"><table>
+<tr><th>Größe</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160 VP</th><th class="num">Veteran 260 VP</th></tr>
+<tr><td>Italien überstanden</td><td class="num">100 %</td><td class="num">98 %</td><td class="num">100 %</td><td class="num">95 %</td></tr>
+<tr><td><b>Beide Feldzüge überstanden</b></td><td class="num"><b>50 %</b></td><td class="num"><b>18 %</b></td><td class="num"><b>68 %</b></td><td class="num"><b>68 %</b></td></tr>
+<tr><td>Gestorben</td><td class="num">20/40</td><td class="num">33/40</td><td class="num">13/40</td><td class="num">13/40</td></tr>
+<tr><td>Elitekompanie erreicht</td><td class="num">55 %</td><td class="num">48 %</td><td class="num">93 %</td><td class="num">95 %</td></tr>
+<tr><td>Caporal erreicht</td><td class="num">50 %</td><td class="num">45 %</td><td class="num">90 %</td><td class="num">98 %</td></tr>
+<tr><td>Punkte-Median</td><td class="num">121</td><td class="num">109</td><td class="num">186</td><td class="num">188</td></tr>
+</table></div>
+
+<blockquote><p>Mut kostet neunmal so viele Männer wie Vorsicht — neun Tote gegen
+einen — und der mutige Lauf holt trotzdem die Spitzenwertung. <b>Vorsichtig
+überlebt, mutig steigt auf und stirbt öfter.</b></p></blockquote>
+
+<div class="warn"><b>Zwei Vorbehalte beim Lesen dieser Tabelle.</b> Der
+Streubereich bei 40 Läufen liegt bei ±8 Punkten — wer einen Unterschied von unter
+zehn Punkten deutet, deutet Rauschen. Und der Punkte-Median ist bei rund 50 %
+Überlebensquote unbrauchbar, weil überstandene Läufe pauschal 25 und 10 Punkte
+bekommen.</div>
+
+<div class="note">Zwei dieser Zahlen haben derzeit <b>keinen Sollwert</b>:
+„Italien überstanden“ verfehlt das alte Zielband 45–55 % um das Doppelte, und die
+neue Leitgröße „beide Feldzüge überstanden“ wurde ausdrücklich ohne Zielband
+eingeführt. Ohne Sollwert ist nicht entscheidbar, ob eine künftige Änderung die
+Balance verbessert oder verschlechtert. Das sind die beiden ersten Punkte in der
+Liste oben.</div>
+</section>
+
+<!-- ============================== TON ============================== -->
+<section id="ton">
+<h2>Ton und Sprache</h2>
+
+<blockquote><p><b>Gut:</b> „Guérin, der links neben dir stand, liegt seit einer
+Minute an den Brückenbalken und macht ein Geräusch, das aufhören wird.“</p></blockquote>
+<blockquote class="bad"><p><b>Falsch:</b> „Tapfer stürmst du voran, das Herz
+voller Mut für Frankreich!“</p></blockquote>
+
+<ul>
+<li>Zweite Person, Präsens. Immer „du“.</li>
+<li>Konkrete Zahlen und Gegenstände statt Adjektive. „Elf Tage, zwei Sous, vierzig Schritt.“</li>
+<li>Das Spiel wertet nicht. Es zeigt, was passiert, und schweigt darüber, ob es richtig war.</li>
+<li><b>Keine Rückmeldung darüber, ob eine moralische Entscheidung die richtige war. Nie.</b></li>
+<li>Nebenfiguren wiederkehren lassen. Wenn Guérin stirbt, wird seine Stelle frei — und genau die bekommst du.</li>
+</ul>
+
+<p>Der Ton ist an mehreren Stellen als Regel durchgezogen: Die Vakanz-Regel wird
+nie ausgesprochen, nur gezeigt. Die Kompaniekasse zeigt zwei Zahlen und ein
+halbes Jahr später einen Satz darüber, wie viele auf dem Marsch zurückblieben.
+Die geplante Sergent-Vakanz lässt den Vorgänger absichtlich erst im
+<i>nächsten</i> Gefecht fallen — die Naht darf man nicht sehen. Und im Gefecht
+gilt: Du kannst jedes Mal stehen bleiben. Es kostet nichts und bringt nichts, und
+niemand sagt etwas dazu, weder jetzt noch später.</p>
+
+<h3>Belastung als zweite Hauptlinie</h3>
+<p>Ein Wert von 0 bis 100, der sich bei Gemetzel, Kälte und Todesnähe sammelt und
+durch Winterquartier, Alkohol (mit Preis) und Heimaturlaub sinkt. <b>Sie ist
+nicht heilbar, nur verwaltbar.</b> Der Aufstieg hat einen Preis, und das Spiel
+führt Buch.</p>
+
+<div class="note">Auch das Gestaltungsprinzip folgt dem Ton, aber nicht wörtlich:
+<b>Der nüchterne Ton entsteht aus den Texten, nicht aus schwachem Kontrast.</b>
+Die Beschriftungen lagen einmal bei 2,2:1 und waren damit kaum lesbar; jetzt sind
+es 4,7:1 und 6,6:1. Wer hier abdunkelt, macht die halbe Oberfläche wieder
+unlesbar.</div>
+</section>
+
+<!-- ============================== HISTORIE ============================== -->
+<section id="historie">
+<h2>Historische Belege</h2>
+
+<ul>
+<li><b>Die fünf Pensionsstufen der Ehrenlegion</b> — 250 / 1.000 / 2.000 / 5.000 / 5.000 Francs jährlich. Historisch exakt: so stehen sie im <i>Gesetz vom 29. Floréal des Jahres X</i>. Stiftung der Ehrenlegion am 19. Mai 1802, Grand Aigle ab 1805.</li>
+<li><b>Ehrenwaffen 1799–1802</b> und die automatische Aufnahme ihrer Träger in die Ehrenlegion 1804.</li>
+<li><b>Die <i>masses</i></b> — Einheitskassen für Wäsche und Schuhwerk, verwaltet vom Capitaine, gespeist aus einem festen Quartalssatz je Mann. Dazu der <i>Inspecteur aux revues</i> als kontrollierende Instanz.</li>
+<li><b>Karrierebelege für die Kernfantasie</b> — Michel Ney (Husaren-Unteroffizier), Joachim Murat (Sohn eines Gastwirts), Jean Lannes (Färberlehrling); alle drei starben als Marschälle. Der Adelsvorbehalt für Offiziersstellen fiel mit der Revolution, ab 1793 wurde über Bewährung befördert.</li>
+<li><b>Bataillonsgliederung</b> — jedes Bataillon hatte eine Grenadier- und eine Voltigeurkompanie, besetzt nach Körperbau und Eignung. Daraus die Verzweigung auf Rang 2.</li>
+<li><b>Der Caporal-fourrier</b> wurde nach Schreibkundigkeit ausgewählt und führte Bestandslisten und Verpflegung.</li>
+<li><b>Waffen</b> — Charleville Modell 1777 als Ausgabewaffe, Modell 1777 An IX, das ausgemusterte Modell 1763; die Capote als Ausgabemantel ab 1806.</li>
+<li><b>Feuergeschwindigkeit</b> — vier Schuss je Minute als historischer Bestwert. Die Skala 12 → 90 bildet etwa 34 bis 15 Sekunden Ladezeit ab.</li>
+<li><b>Sold</b> — ein Fusilier verdient 1 Franc am Tag, rund 365 im Jahr. Das ist die Bezugsgröße für die Ordenspensionen.</li>
+<li><b>Strukturhistorische Begründung der Rangschranken</b> — Massenausmusterung von Mannschaften nach 1812 bei gleichzeitigem Offiziersmangel; 1815 rief Napoleon gezielt Offiziersveteranen zurück.</li>
+<li><b>Datierte Fixpunkte</b> — Lodi 10. Mai 1796 · Arcole November 1796 · Rivoli 14. Januar 1797 · Pyramiden 21. Juli 1798 · Kairoer Aufstand Oktober 1798 · Akkon März–Mai 1799 (fällt nicht) · Abukir 25. Juli 1799 · Bonapartes Abreise in der Nacht des 24. August 1799 · Wagram 5.–6. Juli 1809 · Leipzig 16.–19. Oktober 1813 · Waterloo 18. Juni 1815.</li>
+</ul>
+
+<h3>Marktrecherche</h3>
+<p>Geprüft auf Steam: <i>Veterans: Napoleonic Wars</i>, <i>Holdfast: Nations At
+War</i>, <i>Grand Tactician: Napoleonic Wars</i> mit dem DLC <i>Whiskey &amp;
+Lemons</i>, <i>A Legionary's Life</i> (86 % positiv bei rund 2.200 Rezensionen,
+8 $). Keiner davon führt eine Person durch die gesamte Rangleiter.</p>
+</section>
+
+<footer>
+  <span>Der Marschallstab · Handbuch, Stand 28. Juli 2026</span>
+  <span>Code MIT · Inhalte CC BY-NC-SA 4.0</span>
+</footer>
+
+</main>
+</div>
+
+<script>
+const AUFGABEN = [
+/* ---------- blockierend ---------- */
+{n:43,d:'blockierend',k:'Balance',t:'Zwei Punkteskalen mischen sich, seit Rang 4 und 5 erreichbar sind',
+ x:'rangWert() liefert für Caporal-fourrier 42 und Sergent 62 — Zahlen aus der vollen Skala (Maximum 918). Stationen (×2), Ruf (5 je volle 10) und der Kaufladen (196 VP) rechnen weiter in der Prototypskala. Ein Sergentenlauf bekommt dadurch überproportional viele Veteranenpunkte: gemessener Spitzenwert 268 statt bisher 230. Entweder die volle Skala übernehmen oder die Rangwerte 4/5 vorläufig auf die Prototypskala setzen.',
+ q:'grundwerte.js Z. 38–41 · abschluss.js wertung()'},
+{n:44,d:'blockierend',k:'Balance',t:'Drei Leitzahlen haben keinen Sollwert mehr',
+ x:'„Italien überstanden“ (Band 45–55 %, gemessen 90–100 %), „beide Feldzüge“ (nie ein Band) und der Caporal-Anteil (Sollwert 30 %, gemessen 48–98 %). Alle drei sind gegen ein anderes Todesmodell geeicht worden. Solange kein neuer Maßstab steht, ist nach jeder Änderung nicht entscheidbar, ob sie gut war.',
+ q:'CLAUDE.md Zielwerte'},
+{n:11,d:'blockierend',k:'Balance',t:'Sergent-Schwellen neu eichen, bevor Kapitel 3 kommt',
+ x:'Ausdrücklicher Vorbehalt aus der Planungsnotiz: Der Sergent in nur zwei Kapiteln staucht die Rangleiter — das Konzept sah ihn für die Kapitel 6 bis 7 vor. Anheben oder strecken, gemessen an den vier Leitzahlen. Nicht stillschweigend so lassen.',
+ q:'CLAUDE.md Z. 740'},
+{n:8,d:'blockierend',k:'Balance',t:'Feindgüte jedes neuen Kapitels selbst messen',
+ x:'Die Werte 6 bis 12 für die Kapitel 3 bis 11 sind entworfen, nie gemessen. Nur Italien (0) und Ägypten (5) sind geeicht. Wer der Tabelle glaubt, statt zu messen, wiederholt den Fehler, gegen ein totes System zu balancieren.',
+ q:'CLAUDE.md Z. 387–396 · grundwerte.js Z. 122–135'},
+{n:13,d:'blockierend',k:'Inhalt',t:'Kapitel 3 — Garnison 1800–04',
+ x:'Das nächste Kapitel, und zugleich ein Management-Kapitel mit eigenen Regeln: Bildung nachholen, heiraten, Beziehungen pflegen, Rangstillstand als Druckmittel. Der Ausblick am Ende von Kapitel 2 kündigt es bereits an. Feindgüte 0.',
+ q:'KONZEPT.md §9 · kapitel02_aegypten.js Z. 323'},
+
+/* ---------- wichtig ---------- */
+{n:4,d:'wichtig',k:'Balance',t:'„Italien überstanden“ hat keinen gültigen Sollwert mehr',
+ x:'Gemessen 100 / 98 / 100 / 95 % — das alte Zielband von 45 bis 55 % wird um das Doppelte verfehlt und ist faktisch gegenstandslos. Ein neuer Sollwert wurde nie festgelegt. Damit hat die am häufigsten gemessene Zahl des Projekts keinen Maßstab.',
+ q:'CLAUDE.md Z. 490–493, 517'},
+{n:5,d:'wichtig',k:'Balance',t:'Zielband für „beide Feldzüge überstanden“ festlegen',
+ x:'Die neue Leitgröße (50 / 18 / 68 / 68 %) wurde ausdrücklich ohne Zielband eingeführt. Ohne Sollwert ist nicht entscheidbar, ob eine künftige Änderung die Balance verbessert oder verschlechtert.',
+ q:'CLAUDE.md Z. 517'},
+{n:6,d:'wichtig',k:'Balance',t:'Caporal-Anteil liegt weit über dem Sollwert',
+ x:'Aktuell 50 % (Erstlauf vorsichtig) bis 98 % (Veteran mit 260 VP) gegen einen alten Sollwert von 30 %. Die Ursache ist dokumentiert — gezählt wird der höchste je getragene Rang, und der Tod kommt später —, ein neuer Sollwert fehlt. Zwei Hebel stünden bereit (CAPORAL_RUF/CAPORAL_GUNST und RUHM_JE_GEFECHT), beide ungemessen.',
+ q:'CLAUDE.md Z. 496, 576'},
+{n:7,d:'wichtig',k:'Dokumentation',t:'Elitekompanie-Absatz widerspricht der Messung daneben',
+ x:'Der Absatz „nur 8 % erreichen die Elitekompanie, der Engpass bleibt die Schwelle von 55“ steht unmarkiert neben einer Tabelle, die 48 bis 95 % ausweist. Entweder die Empfehlung streichen oder als historisch kennzeichnen.',
+ q:'CLAUDE.md Z. 580 gegen Z. 495'},
+{n:12,d:'wichtig',k:'Balance',t:'Punkteskala des Prototyps auf die volle Skala umstellen',
+ x:'Aktuell Rangwerte 0/12/26, Stationen mal 2, Ladensumme 196. Die volle Skala (Maximum 918, Rangwerte bis 580, +8 je Kapitel, Überlebensbonus) soll übernommen werden, sobald mehrere Kapitel stehen. Achtung: rangWert() zieht schon jetzt 42 und 62 aus der vollen Skala — sobald Rang 4 und 5 erreichbar sind, mischen sich zwei Skalen.',
+ q:'CLAUDE.md Z. 445–449 · abschluss.js Z. 247–256'},
+{n:21,d:'wichtig',k:'Mechanik',t:'Orden und Ehrenlegion einbauen',
+ x:'Nennungen im Tagesbefehl werden gezählt, haben aber keine Folge außer drei Wertungspunkten. Es fehlen: fünf Grade mit den historischen Pensionen (250 bis 5.000 Francs), Ehrenwaffen 1799–1802 mit automatischer Aufnahme 1804, fremde Orden (je +10, höchstens zwei). Orden sollen Einkommen sein, nicht Deko.',
+ q:'KONZEPT.md §6 · CLAUDE.md Z. 747'},
+{n:22,d:'wichtig',k:'Mechanik',t:'Ausrüstungskauf im Spiel — Geld hat zu wenig Verwendung',
+ x:'Ausrüstung kommt heute nur über Veteranenpunkte und Szenen. Geld wird an genau vier Stellen ausgegeben (scharf schießen 4 F, Schuster 6 F, Buchstaben lernen 5 F, Winterwoche 6 F). Ein Marketender im Lager wäre die naheliegende Anbindung.',
+ q:'CLAUDE.md Z. 745 · abschluss.js Z. 30/47/58/212'},
+{n:28,d:'wichtig',k:'Mechanik',t:'Kaufladen deckt nur acht von rund zwanzig entworfenen Posten',
+ x:'Es fehlen Manufakturmuskete, gezogener Stutzen, Sabre briquet, Offiziersdegen, Reitstiefel, pelzgefütterter Mantel, Taschenuhr, Schreibzeug, Fernrohr, Empfehlungsschreiben, 200 Francs Startgeld. Von den sieben Ausrüstungsplätzen sind Seitenwaffe und Pferd gar nicht belegt.',
+ q:'grundwerte.js Z. 151–163 gegen KONZEPT.md §6'},
+{n:38,d:'wichtig',k:'Dokumentation',t:'KONZEPT.md widerspricht sich bei der Erschaffung',
+ x:'Die Tabelle nennt „Verteilungspool 120, frei in 1er-Schritten“ und eine Attributsumme von 240; der Absatz direkt darunter nennt 60. Richtig ist Pool 60 in Zehnerschritten, Summe 180.',
+ q:'KONZEPT.md Z. 190–199 gegen CLAUDE.md Z. 281'},
+{n:39,d:'wichtig',k:'Dokumentation',t:'Herkunftstabelle im Konzept ist überholt',
+ x:'Der Fuhrmannssohn steht dort mit Reiten +30 / Konstitution +10 / Kaltblütigkeit −10, der Schreibergehilfe mit Kartenkunde +20 / Konstitution −20. Der Code hat die umgebuchten Werte (20/15/−5 bzw. 10/−10), CLAUDE.md dokumentiert die Umbuchung.',
+ q:'KONZEPT.md Z. 216–223 gegen grundwerte.js Z. 88–93'},
+
+/* ---------- später ---------- */
+{n:1,d:'später',k:'Mechanik',t:'Datei-Export ist ein Rücksetzpunkt',
+ x:'Im Lager sichern, sterben, Datei laden — das hebelt den Permadeath aus. Bewusst nicht repariert, weil es mit einer maßgeblichen Datei prinzipiell nicht verhinderbar ist. Wenn es je stören soll, braucht es eine Entscheidung: Export erst beim Tod, oder eine Einmal-Marke im Lauf-Teil.',
+ q:'AENDERUNGEN.md Z. 30'},
+{n:2,d:'später',k:'Balance',t:'Ausrüstungskäufe überschreiten die 60er-Grenze',
+ x:'Muskete +8 und Bajonett +5 werden nach der Startgrenze addiert, geklemmt wird erst bei 100. Als gewollter Weg deklariert, ist aber die einzige Stelle, an der ein dokumentierter Deckel nicht gilt. Bei neuen Käufen mitdenken.',
+ q:'AENDERUNGEN.md Z. 28'},
+{n:9,d:'später',k:'Balance',t:'Der vorsichtige Spieler kommt fast sicher durch (98 %)',
+ x:'Als Entwurfsfrage offengelassen, nicht als Zahlenfrage. Entschieden ist nur, dass die Lagerabende bleiben. Hebel wären die Selbstheilung je Station (5 %) oder die Heilung je Lagerabend (25 %); jede Änderung verlangt vier Neumessungen.',
+ q:'CLAUDE.md Z. 515'},
+{n:10,d:'später',k:'Technik',t:'Leitzahlen auf 80 Läufe hochziehen',
+ x:'Alle vier Leitzahlen beruhen auf je 40 Läufen bei ±8 Punkten Rauschen. Die eigene Regel im Dokument lautet „bei Zweifeln 80 Läufe“. Die aktuelle Zielwerttabelle erfüllt sie nicht.',
+ q:'CLAUDE.md Z. 572–574, 588–589'},
+{n:14,d:'später',k:'Inhalt',t:'Kapitel 4 bis 11 — Austerlitz bis Waterloo',
+ x:'Acht weitere Datendateien, je mit eigenem Charakter (Spanien Moral, Russland Ressourcen-Überleben, 1813 Wiederaufbau). Jede braucht: einen Übergang oder ein Ende, eine Beförderung, ein Winterquartier mit eigenem Text, ein Lager je zwei Gefechte, höchstens vier.',
+ q:'KONZEPT.md §9 · CLAUDE.md Z. 87–95'},
+{n:19,d:'später',k:'Inhalt',t:'Ränge 6 bis 14 samt Maßstabswechseln',
+ x:'Sergent-major (Zug), Sous-Lieutenant (erste Karte, Bildung 50), Lieutenant, Capitaine, Chef de bataillon, Colonel, drei Generalsränge. Jeder muss neue Knöpfe bringen, nicht größere Zahlen: Regimentskarte, Operationskarte, verzögerte Meldungen.',
+ q:'KONZEPT.md §4, §12'},
+{n:20,d:'später',k:'Inhalt',t:'Generalskampagnen als Freischaltung',
+ x:'Wagram 1809, Leipzig 1813, Waterloo 1815 — je 30 bis 60 Minuten, reine Operationsebene mit Meldungen und Befehlslaufzeiten, eigene Wertung und eigener Chronikeintrag. Freischaltung ab einmal Rang 12, sonst sähen 96 % der Spieler die aufwendigste Darstellungsstufe nie.',
+ q:'KONZEPT.md §9'},
+{n:23,d:'später',k:'Mechanik',t:'Das Pferd ab Rang 7',
+ x:'Drei Stufen (Landpferd 40 VP, Kavalleriepferd 75, Vollblut 120), Unterhalt je Kapitel, Marschermüdung −40 bis −60 %, dafür zieht ein Berittener gezieltes Feuer. Dazu die Russland-Szene, in der das Pferd gegessen wird.',
+ q:'KONZEPT.md §6'},
+{n:24,d:'später',k:'Mechanik',t:'Kompaniekasse ab Rang 9',
+ x:'Drei Quartalsentscheidungen (korrekt / das Übliche abzweigen +150 F / kräftig zulangen +400 F) mit 0, 15 und 40 % Inspektionsrisiko; bei Entdeckung sind Rang und Fürsprecher weg. Ausdrücklich als schärfste Entscheidung im Spiel entworfen.',
+ q:'KONZEPT.md §6'},
+{n:25,d:'später',k:'Mechanik',t:'Einheitszustand und Inspektion',
+ x:'Ein Wert 0–100 über die Ausrüstung deiner Männer, fünf Stufen mit Wirkung auf Moral und Verluste. Der Inspecteur aux revues meldet das Ergebnis als Gunst oder Rüffel an den Fürsprecher. Ohne dieses System hängt die Verantwortungsschicht ab Caporal in der Luft.',
+ q:'KONZEPT.md §6'},
+{n:26,d:'später',k:'Mechanik',t:'Rangschranken, vier Enden, Überlebensbonus',
+ x:'Schranke nach Russland (Rang 7) und vor Waterloo (Rang 10), vier Enden, freiwilliger Ausstieg an beiden Schranken, Bonus rückwärts gestaffelt 180 / 120 / 70. Dazu die Vakanzwelle 1813–15.',
+ q:'KONZEPT.md §9'},
+{n:27,d:'später',k:'Mechanik',t:'Offizierspatente als Startpakete',
+ x:'Sous-Lieutenant 110 VP, Lieutenant 145 VP, freigeschaltet ab einmal Rang 9. Die einzige zugelassene Ausnahme von Invariante 3 — ausgeglichen durch 158 Punkte Wertungsabzug, fehlenden Fürsprecher und acht Punkte höhere Anforderung in den Kapiteln 1 bis 4.',
+ q:'KONZEPT.md §10'},
+{n:29,d:'später',k:'Inhalt',t:'Ehe als Beiwerk im Garnisonskapitel',
+ x:'Kostet Geld und Zeit, bringt Briefe von zu Hause (senken die Belastung), eine Mitgift und einen Epilogsatz. Ausdrücklich kein System, keine Kinder, kein Erbe.',
+ q:'KONZEPT.md §10'},
+{n:30,d:'später',k:'Technik',t:'Nation als Datensatz, Gattungs-Schalter im Kampf',
+ x:'Getroffene Entscheidung: Rangnamen, Feldzugsliste, Ereignistexte und Beförderungsregeln sollen von Anfang an getrennt liegen, und das Kampfsystem soll gleich einen Gattungs-Schalter für Kavallerie und Artillerie bekommen. Im Code ist beides nicht angelegt — je später, desto teurer.',
+ q:'KONZEPT.md §15'},
+{n:31,d:'später',k:'Technik',t:'Texte über Schlüssel statt fest im Code',
+ x:'Für eine spätere englische Fassung entschieden: „Alle Texte laufen von Beginn an über eine Textdatei mit Schlüsseln.“ Tatsächlich stehen alle Texte fest in den Kapiteldateien und in oberflaeche.js und kampf.js.',
+ q:'KONZEPT.md §15'},
+{n:32,d:'später',k:'Technik',t:'Dateisystem-Ablage und Steam-Cloud',
+ x:'Vier Schritte: Ablage bekommt eine Dateisystem-Rückseite über Electron oder Tauri (nach tmp schreiben und umbenennen); Steam-Auto-Cloud auf den Benutzerordner; nur die Chronik synchronisieren, nie den laufenden Feldzug; bei Cloud-Konflikt Chroniken zusammenführen statt auswählen.',
+ q:'CLAUDE.md Z. 655–660'},
+{n:40,d:'später',k:'Dokumentation',t:'Empfehlungsschreiben hat zwei Preise',
+ x:'Im Kaufladen 65 VP, drei Absätze weiter im Abschnitt „Die Sperre“ 30 VP. Muss vor dem Bau entschieden werden.',
+ q:'KONZEPT.md Z. 611 gegen Z. 643'},
+{n:41,d:'später',k:'Dokumentation',t:'Meilenstein 2 und 3 nennen beide „Ränge bis 9“',
+ x:'Damit ist unklar, welche Ränge in welchen Meilenstein gehören. Bei Meilenstein 2 (Kapitel 2 bis 4) sind Ränge bis 9 auch nicht mit der Rangleiter vereinbar, die den Capitaine für Kapitel 10 vorsieht.',
+ q:'KONZEPT.md Z. 767–768'},
+{n:42,d:'später',k:'Dokumentation',t:'Drei ungeklärte Designfragen',
+ x:'Erstens das Startjahr: immer 1796, oder ein späterer Einstieg mit höherem Startrang und kürzerem Durchlauf? Zweitens die Sitzungslänge: 30 bis 45 Minuten je Kapitel als Grenze, oder darf Russland zwei Stunden dauern? Drittens ein Schwierigkeitsmodus, oder zusätzlich ein „Eiserner Lauf“ ohne Zwischenspeichern? Keine blockiert den Prototyp, alle drei werden ab Kapitel 3 relevant.',
+ q:'KONZEPT.md §15'}
+];
+
+const GRUPPEN = [
+  {d:'blockierend', titel:'Blockierend', hin:'Steht vor oder im Bau von Kapitel 3.'},
+  {d:'wichtig',     titel:'Wichtig',     hin:'Bald fällig, unabhängig von neuem Inhalt.'},
+  {d:'später',      titel:'Später',      hin:'Entworfen und festgehalten, kein Zeitdruck.'}
+];
+const KLASSE = {blockierend:'b', wichtig:'w', 'später':'s'};
+
+let haken = {};
+let filter = 'alle';
+let nurOffene = false;
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function zeichnen(){
+  const ziel = document.getElementById('liste');
+  let html = '';
+  GRUPPEN.forEach(g => {
+    const posten = AUFGABEN.filter(a => a.d === g.d)
+      .filter(a => filter === 'alle' || a.k === filter)
+      .filter(a => !nurOffene || !haken[a.n]);
+    if(!posten.length) return;
+    html += '<div class="gruppe"><h3><span class="tag ' + KLASSE[g.d] + '">' + g.titel +
+            '</span> <span style="color:var(--dim);font-size:13px">' + g.hin + '</span></h3>';
+    posten.forEach(a => {
+      html += '<div class="auf' + (haken[a.n] ? ' fertig' : '') + '">' +
+        '<input type="checkbox" data-n="' + a.n + '"' + (haken[a.n] ? ' checked' : '') + '>' +
+        '<div><p class="auftitel">' + esc(a.t) + ' <span class="tag">' + a.k + '</span></p>' +
+        '<p class="auftext">' + esc(a.x) + '</p>' +
+        '<p class="aufquelle">' + esc(a.q) + '</p></div></div>';
+    });
+    html += '</div>';
+  });
+  if(!html) html = '<p style="color:var(--dim)">Nichts in dieser Auswahl.</p>';
+  ziel.innerHTML = html;
+  ziel.querySelectorAll('input').forEach(el => {
+    el.addEventListener('change', () => { haken[el.dataset.n] = el.checked; zeichnen(); });
+  });
+  const fertig = AUFGABEN.filter(a => haken[a.n]).length;
+  document.getElementById('zaehler').textContent = fertig + ' von ' + AUFGABEN.length + ' erledigt';
+  document.getElementById('balken').style.width = (100 * fertig / AUFGABEN.length) + '%';
+}
+
+document.querySelectorAll('[data-f]').forEach(b => {
+  b.addEventListener('click', () => {
+    filter = b.dataset.f;
+    document.querySelectorAll('[data-f]').forEach(x => x.classList.remove('an'));
+    b.classList.add('an');
+    zeichnen();
+  });
+});
+document.getElementById('offenNur').addEventListener('click', function(){
+  nurOffene = !nurOffene;
+  this.classList.toggle('an', nurOffene);
+  zeichnen();
+});
+document.getElementById('zuruecksetzen').addEventListener('click', () => {
+  if(confirm('Alle Haken entfernen?')){ haken = {}; zeichnen(); }
+});
+document.getElementById('sichern').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({stand:'marschallstab-aufgaben', haken:haken}, null, 1)],
+                        {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'marschallstab-aufgaben.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+document.getElementById('ladenKnopf').addEventListener('click', () => document.getElementById('datei').click());
+document.getElementById('datei').addEventListener('change', ev => {
+  const f = ev.target.files[0];
+  if(!f) return;
+  const leser = new FileReader();
+  leser.onload = () => {
+    try {
+      const o = JSON.parse(leser.result);
+      if(o && o.haken){ haken = o.haken; zeichnen(); }
+      else alert('Das sieht nicht nach einem Fortschrittsstand aus.');
+    } catch(e){ alert('Datei nicht lesbar.'); }
+  };
+  leser.readAsText(f);
+  ev.target.value = '';
+});
+
+zeichnen();
+</script>
+</body>
+</html>

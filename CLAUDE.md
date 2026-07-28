@@ -39,6 +39,8 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)** und **Kapitel 2 (Ägypten 1798/99)**
 | Elf Marsch-Zwischenfälle mit Sperr-Sätzen | |
 | Die Kette über dir: vier Vorgesetzte mit Gunst und Mitaufstieg | |
 | Ränge 4 und 5 mit zwei Wegen, Sektion und Abrechnung | |
+| Napoleonische Gestaltung: Papier, Kokarde, Livret, Gelände | |
+| Handbuch als eigene Seite (`wiki.html`), aus dem Spiel verlinkt | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -71,6 +73,7 @@ KONZEPT.md                      vollständiges Design, auch das Ungebaute
 AENDERUNGEN.md                  Protokoll aller Balance-Änderungen
 LICENSE / LICENSE-INHALTE       MIT für Code, CC BY-NC-SA für Inhalte
 entwurf/                        Konzeptgrafiken, Bildschirmfotos, GITHUB.md
+wiki.html                       Handbuch und offene Punkte, eigenständige Seite
 index.html                      Gerüst, lädt die Skripte in fester Reihenfolge
 src/stil.css                    Gesamte Gestaltung
 src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kaufladen
@@ -585,7 +588,9 @@ Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang 
 
 **Älterer offener Punkt (Stand vor den Lebenspunkten):** Der Caporal-Anteil stand mit 34 % vier Punkte über dem Sollwert von 30 % — gerade noch innerhalb der Zehn-Punkte-Regel, aber am oberen Rand. Der Weg dorthin ist mittelbar und war beabsichtigt: Der zusätzliche Lagerabend ab Caporal lässt mehr Beförderte den Feldzug überleben, und gezählt wird der Rang am Ende. Wer das senken will, hat zwei Hebel — die Caporal-Schwelle (`CAPORAL_RUF` / `CAPORAL_GUNST`) oder den Abend selbst. **Nicht empfohlen ist der Abend:** Er ist der Grund, warum der Rang sich nicht wie eine Strafe anfühlt.
 
-Die Überlebensquote liegt mit 43 % zwei Punkte unter dem Band 45–55 % — innerhalb des Rauschens, aber am unteren Rand. Der Anteil ohne jede Beförderung ist mit 58 % wieder weit über dem Sollwert von 40 %, und nur 8 % erreichen die Elitekompanie; der Engpass bleibt die Schwelle von 55 in Konstitution beziehungsweise Geschick, an der die meisten schon bei der Erschaffung scheitern. Wer daran etwas ändern will, senkt diese 55.
+> **Historisch, nicht mehr gültig:** Der folgende Absatz stammt aus der Messreihe vor den Lebenspunkten und widerspricht der Tabelle oben. Er bleibt stehen, weil die Begründung zur Elitegrenze weiterhin stimmt.
+>
+> *Die Überlebensquote liegt mit 43 % zwei Punkte unter dem Band 45–55 %. Der Anteil ohne jede Beförderung ist mit 58 % weit über dem Sollwert von 40 %, und nur 8 % erreichen die Elitekompanie; der Engpass bleibt die Schwelle von 55 in Konstitution beziehungsweise Geschick, an der die meisten schon bei der Erschaffung scheitern. Wer daran etwas ändern will, senkt diese 55.*
 
 **Gelernte Regel aus dieser Sitzung:** Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Caporal-Anteil. Wer an Atem, Wunden oder Gefahr dreht, misst beide Zahlen — nicht nur die Überlebensquote. Und: **Ein einziger Erholungspunkt an der richtigen Stelle schlägt eine Erholung an jeder Station.**
 
@@ -698,6 +703,49 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 
 ---
 
+## Das Bild der Epoche (`src/stil.css`, `sichtfeld()` in `src/kampf.js`)
+
+Die Oberfläche soll nach 1796 aussehen, nicht nach „dunkles UI". Vier Mittel, alle ohne Abhängigkeit und `file://`-tauglich:
+
+**1. Didone-Schriftstack** (`--didone`) für Überschriften, Kartenköpfe und Tabellenspalten — hohe Strichkontraste und senkrechte Achse sind die französische Buchform um 1800. **Nur Systemschriften, kein Download**: Wo keine Didot-Verwandte liegt, fällt es auf Georgia zurück, und das ist kein Verlust. Der Haupttitel steht in **Kapitälchen** statt in Versalien — um 1800 wurde gesperrt gesetzt, nicht geschrien. Fließtext bekommt Mediävalziffern (`oldstyle-nums`).
+
+**2. Papier für alles, was ein Schriftstück *ist*** (`.papier`). Nicht die ganze Oberfläche wird hell — das Dunkel ist die Nacht im Feldlager. Aber Chronikblatt, Wertung, Beförderungsbescheid und Todesblatt bekommen gebrochenes Papierweiß, Eisengallustinte, eine Doppellinie als Rahmen (`::before`) und einen **Vordruckkopf** („République Française · 32. Demi-brigade de bataille · Datum"). Der Wechsel dunkel → hell macht diese Augenblicke von allein amtlich.
+
+> **Kontrast geprüft:** Tinte `#2a2420` auf Papier `#e6dcc2` = 11,4 : 1, blasse Tinte `#584c3c` = 6,2 : 1. Beide über der 4,5er-Schwelle. **Wer die Papierfarbe abdunkelt, rechnet beide nach.**
+
+**3. Kokarde und Adler** (`emblem()`). 1796 ist Republik: Die Trikolore-Kokarde sitzt im Kopf der Seite, der Adler kommt erst 1804 — `kaiserreich()` liest die Jahreszahl aus dem Stationsdatum und schaltet um. Das UI erzählt den Epochenwechsel selbst. *(Aus demselben Grund heißt das Gefechts-Ereignis jetzt „Der Fahnenträger fällt": Die Halbbrigaden von 1796 trugen Fahnen, keine Adler.)*
+
+**4. Die Seitenleiste ist das Livret militaire** — das Heftchen, das jeder Soldat trug.
+
+### Das Gefechtsbild nach Rang
+
+**Der Rang bestimmt, was hell ist.** Das ist die Regel, aus der alles Übrige folgt:
+
+| Rang | Was man sieht |
+|---|---|
+| Fusilier, Grenadier | die Linie, du im zweiten Glied — unverändert |
+| Voltigeur | vor der Linie, fünf Plänkler, keine Ordnung |
+| **Caporal** | deine acht heller als der Rest, ein **Fanion** darüber („DEINE KORPORALSCHAFT") |
+| **Sergent** | du stehst **hinter** dem Glied (dort stand der serre-file), davor deine zwanzig als eigener Block; die übrige Linie fällt ins Dunkel. Der Fanion zählt mit: „DEINE SEKTION · 14 VON 20" |
+
+**`K.sektion` wird als stehende Männer gezeichnet, nicht als Balken.** Von zwanzig stehen vierzehn heißt: sechs liegen, und sie liegen vor dir. Sinkt die Sektion unter 70 %, tritt ein **Wankender** sichtbar einen halben Schritt aus dem Glied — der Knopf „Den Wankenden herausziehen" zeigt dann auf etwas, das man sieht. Nach dem Gefecht steht die Abrechnung als **Appell-Bild** (`appellBild()`): zwanzig Silhouetten, die Gefallenen liegend.
+
+### Gelände und Formation
+
+`gelaende` und `formation` in den Kapiteldaten legen eine Silhouette hinter die Linien — man erkennt das Gefecht am Bild, bevor man den Namen liest:
+
+| Feld | Gefechte | Was man sieht |
+|---|---|---|
+| `bruecke` | Lodi | Geländer, Pfeiler, der Fluss als dunkles Band |
+| `damm` | Arcole | schmaler Streifen, Wasser beidseits, Schilf |
+| `mauer` | Akkon, Alexandria | Zinnenmauer mit **Bresche** — der Feind steht *oben* |
+| `wueste` | Embabeh, Abukir | Palmen, Pyramidenkegel am Horizont |
+| `formation:'karree'` | Embabeh | eigene Aufstellung als **Viereck von innen**, der Feind sind **Reiter**, die außen vorbeiziehen |
+
+Dazu **Mündungsblitze** nach einer Salve und ein Schleier, der ab Runde 5 das hintere Feindglied verdeckt — die Unsicherheit, von der die Texte reden, wird sichtbar.
+
+> **Die alte Regel gilt weiter und ist jetzt wichtiger denn je: In `sichtfeld()` wird nichts gewürfelt.** Das Bild wird bei jedem Zug neu gezeichnet; ein `Math.random()` darin ließe Gelände, Blitze und Aufstellung bei jedem Klick springen. Blitze hängen an `K.blitz` (gesetzt in `kampfAktion`), Streuung an `streu(i,a)`.
+
 ## Lesbarkeit
 
 Die Oberfläche ist dunkelbraun, und genau deshalb sind Beschriftungen die Schwachstelle. Die erste Fassung hatte `--faint: #5c554b` auf `#211e1b` — **2,2 : 1**, also unter jeder brauchbaren Schwelle. Attributnamen, Kartenköpfe, Probenzeilen und Kostenhinweise waren kaum zu sehen.
@@ -787,8 +835,8 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 ## Was als Nächstes ansteht
 
-1. **Kapitel 2, Ägypten 1798/99** — als eigene Datendatei. Eigener Charakter: Hitze, Krankheit, Karrees gegen Mamluken, Isolation. Krankheit sollte hier gefährlicher sein als Kugeln.
-2. **Ausrüstungskauf im Spiel** — bisher gibt es Ausrüstung nur über Veteranenpunkte und Szenen. Geld hat noch zu wenig Verwendung.
-3. **Ränge 4 und 5** (Caporal-fourrier mit Bildungsschwelle 35, Sergent) samt der Verwaltungsschicht.
+1. **Kapitel 3, Garnison 1800–04** — das nächste Kapitel und zugleich ein Verwaltungskapitel: Bildung nachholen, Beziehungen pflegen, Rangstillstand als Druckmittel. Feindgüte 0. Der Ausblick am Ende von Kapitel 2 kündigt es an.
+2. **Sollwerte neu setzen.** „Italien überstanden" hat mit 45–55 % kein gültiges Band mehr (gemessen 90–100 %), „beide Feldzüge" hatte nie eines, und der Caporal-Sollwert von 30 % stammt aus einem anderen Todesmodell. **Drei Zahlen ohne Maßstab — das ist der teuerste offene Punkt des Projekts.**
+3. **Die volle Punkteskala übernehmen.** Dringend geworden: `rangWert()` liefert für die jetzt erreichbaren Ränge 4 und 5 bereits 42 und 62 aus der vollen Skala, während Stationen und Laden noch in der Prototypskala rechnen. **Zwei Skalen mischen sich.**
 4. **Orden** — Nennung im Tagesbefehl wird schon gezählt, hat aber noch keine Folge.
-5. **Übernahme der vollen Punkteskala**, sobald drei Kapitel stehen.
+5. **Ausrüstungskauf im Spiel** — Geld hat weiterhin zu wenig Verwendung; ein Marketender im Lager wäre die naheliegende Anbindung.

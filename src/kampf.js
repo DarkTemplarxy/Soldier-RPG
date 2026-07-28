@@ -120,7 +120,7 @@ function starteKampf(n){
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
               ruhm:0, taten:[],
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
-              sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false,
+              sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -192,11 +192,65 @@ function zeigeAnmarsch(n){
    Alles wird bei jedem Zug neu gezeichnet, deshalb darf hier nichts gewürfelt
    werden: `streu()` ist ein fester Wert je Platz, kein Zufall. */
 
+/* ── Gelände ──
+   Ohne das sieht jedes Gefecht gleich aus: zwei Linien in einer Ebene. Ein
+   Feld `gelaende` in den Kapiteldaten legt eine Silhouette dahinter, und man
+   erkennt das Gefecht am Bild, bevor man den Namen liest. Alles in den
+   vorhandenen Brauntönen, alles deterministisch — hier wird nie gewürfelt. */
+function gelaendeBild(art){
+  if(art==='bruecke') return `
+    <rect x="0" y="150" width="640" height="50" fill="#15171c"/>
+    <rect x="0" y="150" width="640" height="2" fill="#232830"/>
+    <rect x="150" y="120" width="340" height="34" fill="#241f19"/>
+    <rect x="150" y="118" width="340" height="4" fill="#2f281f"/>
+    ${[0,1,2,3,4,5,6,7,8].map(i=>`<rect x="${152+i*42}" y="100" width="3" height="20" fill="#2f281f"/>`).join('')}
+    <rect x="150" y="100" width="340" height="3" fill="#2f281f"/>`;
+  if(art==='damm') return `
+    <rect x="0" y="128" width="640" height="72" fill="#1b1f1c"/>
+    <rect x="0" y="140" width="640" height="46" fill="#20241f"/>
+    <rect x="0" y="120" width="640" height="26" fill="#26221b"/>
+    ${[40,120,300,470,560].map((x,i)=>`<ellipse cx="${x}" cy="${168+i*4}" rx="${22+i*6}" ry="3" fill="#2b312a" opacity=".6"/>`).join('')}
+    ${[70,210,420,540].map(x=>`<rect x="${x}" y="150" width="2" height="14" fill="#2f3a2c"/>`).join('')}`;
+  if(art==='mauer') return `
+    <rect x="0" y="0" width="640" height="92" fill="#191715"/>
+    <rect x="0" y="24" width="640" height="68" fill="#2a251d"/>
+    <rect x="0" y="24" width="640" height="3" fill="#3a332708"/>
+    ${Array.from({length:22},(_,i)=>`<rect x="${i*30}" y="24" width="26" height="9" fill="#332c22" opacity="${i%2?.5:.75}"/>`).join('')}
+    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92 Z" fill="#191715"/>
+    <path d="M250 92 L272 34 L300 26 L340 30 L368 40 L392 92" fill="none" stroke="#3d352a" stroke-width="1.5"/>
+    ${[[262,78],[300,84],[352,80],[380,88]].map(([x,y])=>`<rect x="${x}" y="${y}" width="12" height="5" rx="2" fill="#2f2921"/>`).join('')}`;
+  if(art==='wueste') return `
+    <rect x="0" y="0" width="640" height="200" fill="#1d1a15"/>
+    <path d="M470 84 L520 22 L570 84 Z" fill="#241f18"/>
+    <path d="M556 84 L592 40 L628 84 Z" fill="#221d16"/>
+    ${[40,92,140].map((x,i)=>`<g fill="#232019"><rect x="${x+5}" y="${44-i*3}" width="2.5" height="40"/>
+      ${[-1,1].map(d=>`<ellipse cx="${x+5+d*9}" cy="${44-i*3}" rx="10" ry="3" transform="rotate(${d*18} ${x+5} ${44-i*3})"/>`).join('')}</g>`).join('')}
+    <rect x="0" y="84" width="640" height="116" fill="#211d16"/>`;
+  return '';
+}
+
+/* ── Das Appell-Bild ──
+   Die Abrechnung des Sergenten als Bild statt als Zahl: zwanzig Silhouetten,
+   die Gefallenen liegend. Dieselbe Information wie „von zwanzig stehen
+   vierzehn", aber man sieht die sechs. */
+function appellBild(uebrig){
+  const R = [];
+  for(let i=0;i<20;i++){
+    const x = 16 + i*26;
+    R.push(i < uebrig
+      ? `<g fill="#4a4136"><rect x="${x-3}" y="14" width="6" height="18" rx="2.4"/><circle cx="${x}" cy="10" r="2.6"/>
+         <ellipse cx="${x}" cy="7" rx="5.4" ry="2" transform="rotate(-7 ${x} 7)"/></g>`
+      : `<rect x="${x-7}" y="30" width="14" height="2.6" rx="1.3" fill="#7a3229" opacity=".8"/>`);
+  }
+  return `<svg viewBox="0 0 540 40" class="appell" role="img" aria-label="Appell: ${uebrig} von 20 stehen">${R.join('')}</svg>`;
+}
+
 function sichtfeld(){
   const n = KAPITEL[LAUF.node], zw = S.zweig;
   const rauch = Math.min(1, K.runde/6);
   const feindTeil = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
   const eigenTeil = Math.max(0, Math.min(1, (K.eigen==null?100:K.eigen) / 100));
+  const karree = n.formation === 'karree';
 
   const streu = (i,a)=>{ const x = Math.sin(i*127.1 + a*311.7)*43758.5453; return x - Math.floor(x); };
   const gefallene = (anz,steht,a)=> new Set(
@@ -204,23 +258,20 @@ function sichtfeld(){
 
   /* Geschlossene Ordnung: Die Glieder stehen um eine halbe Teilung versetzt,
      sodass das hintere Glied die Lücken des vorderen füllt — zusammen ergibt
-     das die dichte Wand, die eine Linie ausmacht. Einzeln gezählt sind es
-     wenige Männer je Glied, im Bild steht eine Linie. */
+     das die dichte Wand, die eine Linie ausmacht. */
   const FEIND_JE = 15, EIGEN_JE = 20, PLAENKLER = 5;
   const FEIND = FEIND_JE*2, EIGEN = EIGEN_JE*2;
   const feindWeg = gefallene(FEIND, Math.round(FEIND*feindTeil), 7);
   const eigenWeg = gefallene(EIGEN, Math.round(EIGEN*eigenTeil), 13);
 
   const ROT = '#c2483a', ROT_TOT = '#5e2a24', BLAU = '#7d93ad', BLAU_TOT = '#3a4655';
+  const MESSING = '#d0a75e';
 
-  /* Die Kopfbedeckung sagt, wer da steht. 1796 trägt die Linie den Zweispitz,
-     die Grenadierkompanie die Bärenfellmütze mit rotem Stutz, der Voltigeur
-     denselben Zweispitz wie die Linie. Der Feind trägt den österreichischen
-     Kasket. */
   const kopfbedeckung = (x,y,b,f,art)=>{
     if(art==='baer') return `<rect x="${(x-4.6*b).toFixed(1)}" y="${(y-15.5*b).toFixed(1)}" width="${(9.2*b).toFixed(1)}" height="${(11*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}"/>`+
       `<rect x="${(x+2.6*b).toFixed(1)}" y="${(y-19*b).toFixed(1)}" width="${(1.8*b).toFixed(1)}" height="${(5*b).toFixed(1)}" rx="${(0.9*b).toFixed(1)}" fill="#c2483a"/>`;
     if(art==='kasket') return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.4*b).toFixed(1)}" rx="${(4.4*b).toFixed(1)}" ry="${(3.4*b).toFixed(1)}"/>`;
+    if(art==='turban') return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.8*b).toFixed(1)}" rx="${(5.4*b).toFixed(1)}" ry="${(4.4*b).toFixed(1)}"/>`;
     // Zweispitz: breit und flach, quer über dem Kopf getragen
     return `<ellipse cx="${x.toFixed(1)}" cy="${(y-8.6*b).toFixed(1)}" rx="${(7.6*b).toFixed(1)}" ry="${(2.9*b).toFixed(1)}"`+
            ` transform="rotate(-7 ${x.toFixed(1)} ${(y-8.6*b).toFixed(1)})"/>`;
@@ -236,28 +287,90 @@ function sichtfeld(){
       `</g>`;
   };
   const toter = (x,y,f)=>`<rect x="${(x-7).toFixed(1)}" y="${y.toFixed(1)}" width="14" height="2.6" rx="1.3" fill="${f}" opacity=".55"/>`;
+  // Mamlukenreiter: Pferdeleib, Reiter darüber, Säbel schräg
+  const reiter = (x,y,o)=>`<g fill="${ROT}" opacity="${o}">
+    <rect x="${x-13}" y="${y}" width="26" height="9" rx="4"/>
+    <rect x="${x-10}" y="${y+8}" width="2.4" height="9"/><rect x="${x+8}" y="${y+8}" width="2.4" height="9"/>
+    <rect x="${x+11}" y="${y-5}" width="7" height="6" rx="2.4"/>
+    <rect x="${x-3}" y="${y-13}" width="6.4" height="14" rx="2.6"/><circle cx="${x}" cy="${y-16}" r="2.8"/>
+    <ellipse cx="${x}" cy="${y-19}" rx="4.6" ry="3.6"/>
+    <rect x="${x+3}" y="${y-24}" width="1.6" height="13" rx=".8" transform="rotate(28 ${x+3} ${y-24})" opacity=".7"/></g>`;
 
-  /* Hinter jedem Glied ein schwacher Streifen: die Masse, aus der die
-     Einzelnen ragen — die Linie hört nicht am Bildrand auf. */
   const masse = (y,h,f,o)=>`<rect x="0" y="${(y+h*0.3).toFixed(0)}" width="640" height="${(h*0.7).toFixed(0)}" fill="${f}" opacity="${o}"/>`;
 
-  // Feind: zwei versetzte Glieder, weiter weg und deshalb kleiner
-  let feind = masse(48, 15, ROT, .08) + masse(56, 15, ROT, .06);
-  for(let g=0;g<2;g++) for(let i=0;i<FEIND_JE;i++){
-    const idx = g*FEIND_JE+i, schritt = 640/FEIND_JE;
-    const x = 14 + i*schritt + g*schritt/2, y = 48 + g*8;
-    feind += feindWeg.has(idx) ? toter(x, y+15, ROT_TOT) : mann(x, y, 15, ROT, g ? 0.5 : 0.9, 'kasket');
+  /* ── Der Feind ── */
+  let feind = '';
+  if(karree){
+    // Mamluken umreiten das Karree: keine Ordnung, Reiter statt Glieder
+    for(let i=0;i<7;i++){
+      const idx = i, x = 46 + i*88 + (streu(i,3)-0.5)*30, y = 40 + streu(i,11)*26;
+      if(i/7 > feindTeil) { feind += toter(x, y+16, ROT_TOT); continue; }
+      feind += reiter(x, y, 0.55 + streu(i,19)*0.4);
+    }
+  } else {
+    feind = masse(48, 15, ROT, .08) + masse(56, 15, ROT, .06);
+    const feindHut = (n.gelaende==='mauer'||n.gelaende==='wueste') ? 'turban' : 'kasket';
+    for(let g=0;g<2;g++) for(let i=0;i<FEIND_JE;i++){
+      const idx = g*FEIND_JE+i, schritt = 640/FEIND_JE;
+      const x = 14 + i*schritt + g*schritt/2, y = 48 + g*8;
+      feind += feindWeg.has(idx) ? toter(x, y+15, ROT_TOT) : mann(x, y, 15, ROT, g ? 0.5 : 0.9, feindHut);
+    }
   }
 
-  // Eigene Linie: erstes Glied weiter vorn und darum höher, deins darunter
-  const meinX = 320, meinGlied = 1;
+  /* ── Deine Leute ──
+     **Der Rang bestimmt, was hell ist.** Ein Füsilier sieht eine Linie; ein
+     Caporal sieht seine acht heller als den Rest; ein Sergent steht *hinter*
+     dem Glied (dort stand der serre-file), und vor ihm stehen seine zwanzig
+     als eigener Block, während die übrige Linie in den Rändern verschwindet.
+     Man sieht, was man verantwortet — und man sieht, wie viel davon liegt. */
+  const meinX = 320;
   const meinHut = S.zweig==='grenadier' ? 'baer' : 'zwei';
+  const fuehrt = S.rang>=5 ? 'sektion' : (S.rang>=3 ? 'korporalschaft' : null);
+  const meineBreite = fuehrt==='sektion' ? 5 : (fuehrt==='korporalschaft' ? 2 : 0);   // Plätze je Seite
+  const schritt = 640/EIGEN_JE;
+  const meinPlatz = Math.round((meinX-8)/schritt);
+  const meins = i => meineBreite>0 && Math.abs(i-meinPlatz) <= meineBreite;
+
+  // Anteil der eigenen Sektion, der noch steht (nur ab Rang 5)
+  const sektTeil = (fuehrt==='sektion' && K.sektion!=null) ? Math.max(0,Math.min(1,K.sektion/100)) : 1;
+  const sektWeg = gefallene(EIGEN_JE, Math.round(EIGEN_JE*sektTeil), 23);
+
+  const meinGlied = fuehrt==='sektion' ? -1 : 1;    // der Sergent steht dahinter
   let eigen = masse(130, 22, BLAU, .07) + masse(146, 26, BLAU, .10);
-  for(let g=0;g<2;g++) for(let i=0;i<EIGEN_JE;i++){
-    const idx = g*EIGEN_JE+i, schritt = 640/EIGEN_JE;
-    const x = 8 + i*schritt + (g?0:schritt/2), y = g ? 146 : 130, h = g ? 26 : 22;
-    if(zw!=='voltigeur' && g===meinGlied && Math.abs(x-meinX)<schritt*0.6) continue;   // dein Platz
-    eigen += eigenWeg.has(idx) ? toter(x, y+h, BLAU_TOT) : mann(x, y, h, BLAU, g ? 1 : 0.6, meinHut);
+
+  if(karree){
+    /* Das Karree von innen: vordere Front quer, zwei Flanken schräg nach
+       hinten. Du stehst im Inneren — deshalb siehst du deine Leute von hinten. */
+    for(let i=0;i<14;i++){
+      const x = 60 + i*38, y = 128;
+      eigen += eigenWeg.has(i) ? toter(x, y+24, BLAU_TOT) : mann(x, y, 24, BLAU, meins(i)?1:0.55, meinHut);
+    }
+    for(let i=0;i<4;i++){
+      const l = 30 - i*4, r = 610 + i*4, y = 150 + i*12;
+      eigen += mann(l, y, 22-i*2, BLAU, .4, meinHut) + mann(r, y, 22-i*2, BLAU, .4, meinHut);
+    }
+  } else {
+    for(let g=0;g<2;g++) for(let i=0;i<EIGEN_JE;i++){
+      const idx = g*EIGEN_JE+i;
+      const x = 8 + i*schritt + (g?0:schritt/2), y = g ? 146 : 130, h = g ? 26 : 22;
+      if(zw!=='voltigeur' && g===meinGlied && Math.abs(x-meinX)<schritt*0.6) continue;   // dein Platz
+      const meiner = meins(i);
+      // Ab Sergent zählt die Sektion getrennt: deine Leute fallen nach K.sektion
+      const gefallen = meiner && fuehrt==='sektion' ? sektWeg.has(i) : eigenWeg.has(idx);
+      const deckkraft = meineBreite>0 ? (meiner ? (g?1:0.75) : (g?0.42:0.26)) : (g?1:0.6);
+      eigen += gefallen ? toter(x, y+h, BLAU_TOT) : mann(x, y, h, BLAU, deckkraft, meinHut);
+    }
+  }
+
+  /* Der Wankende: Sinkt die Sektion, tritt einer sichtbar einen halben Schritt
+     aus dem Glied — der Knopf „Den Wankenden herausziehen" zeigt dann auf
+     etwas, das man sieht. */
+  let wankend = '';
+  if(fuehrt==='sektion' && sektTeil < 0.7){
+    const wx = 8 + (meinPlatz-3)*schritt + schritt/2;
+    wankend = mann(wx, 168, 24, '#9a7f6a', .95, meinHut) +
+      `<text x="${wx}" y="196" text-anchor="middle" fill="#9a7f6a" font-size="8.5"
+        font-family="ui-monospace,monospace" letter-spacing=".5">WANKT</text>`;
   }
 
   // Voltigeure schwärmen aus: wenige, weit auseinander, ohne Ordnung
@@ -268,10 +381,38 @@ function sichtfeld(){
     plaenkler += mann(x, 92 + streu(i,9)*16, 20, BLAU, 0.85, 'zwei');
   }
 
+  /* Der Fanion markiert deinen Abschnitt — ab Caporal die acht, ab Sergent die
+     zwanzig. Eine Messinglinie über deinen Leuten, mehr braucht es nicht. */
+  let fanion = '';
+  if(meineBreite>0 && !karree){
+    const l = 8 + (meinPlatz-meineBreite)*schritt, r = 8 + (meinPlatz+meineBreite)*schritt;
+    fanion = `<rect x="${l.toFixed(0)}" y="118" width="${(r-l).toFixed(0)}" height="1.4" fill="${MESSING}" opacity=".5"/>
+      <rect x="${(meinX-0.8).toFixed(0)}" y="104" width="1.6" height="15" fill="${MESSING}" opacity=".7"/>
+      <path d="M${meinX+1} 104 L${meinX+17} 108 L${meinX+1} 112 Z" fill="${MESSING}" opacity=".8"/>
+      <text x="${l.toFixed(0)}" y="114" fill="${MESSING}" font-size="8.5" opacity=".75"
+        font-family="ui-monospace,monospace" letter-spacing=".6">${fuehrt==='sektion'
+          ? 'DEINE SEKTION · '+Math.max(0,Math.round((K.sektion==null?100:K.sektion)/5))+' VON 20'
+          : 'DEINE KORPORALSCHAFT'}</text>`;
+  }
+
   // Du, dort wo du hingehörst
-  let meinY = zw==='voltigeur' ? 100 : 146, meinH = zw==='voltigeur' ? 20 : 26;
+  let meinY = zw==='voltigeur' ? 100 : (fuehrt==='sektion' ? 172 : 146);
+  let meinH = zw==='voltigeur' ? 20 : (fuehrt==='sektion' ? 25 : 26);
+  if(karree){ meinY = 160; meinH = 25; }
   if(K.vorn){ meinY = 86; meinH = 18; }             // mit dem Bajonett vorgegangen
   if(K.deckung){ meinY += meinH-10; meinH = 10; }   // kniend oder liegend
+
+  /* Mündungsblitze nach einer Salve — zustandsgesteuert über die letzte
+     Aktion, nicht gewürfelt (siehe die Regel unten). */
+  let blitze = '';
+  if(K.blitz){
+    const von = fuehrt ? meinPlatz-meineBreite : 0, bis = fuehrt ? meinPlatz+meineBreite : EIGEN_JE-1;
+    for(let i=Math.max(0,von); i<=Math.min(EIGEN_JE-1,bis); i++){
+      const x = 8 + i*schritt, y = 132;
+      blitze += `<ellipse cx="${x.toFixed(0)}" cy="${y}" rx="7" ry="3.4" fill="#e8c98a" opacity=".55"/>
+                 <ellipse cx="${x.toFixed(0)}" cy="${y}" rx="15" ry="6" fill="#c9a86a" opacity=".18"/>`;
+    }
+  }
 
   /* Pulverdampf steht zwischen den Linien und wird mit jeder Runde dichter —
      feste Plätze, nur die Zahl wächst. */
@@ -282,8 +423,18 @@ function sichtfeld(){
     qualm += `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${r.toFixed(0)}" ry="${(r*0.42).toFixed(0)}"`+
              ` fill="#3a352e" opacity="${(0.10+0.12*streu(i,31)).toFixed(2)}"/>`;
   }
+  // Ab Runde 5 legt sich der Dampf über das hintere Feindglied — die
+  // Unsicherheit, von der die Texte reden, wird sichtbar.
+  const schleier = K.runde>=5
+    ? `<rect x="0" y="40" width="640" height="34" fill="#2b2723" opacity="${Math.min(0.5,(K.runde-4)*0.12).toFixed(2)}"/>` : '';
 
   const uebergewicht = eigenTeil + feindTeil > 0 ? eigenTeil/(eigenTeil+feindTeil) : 0.5;
+  const lage = K.deckung
+    ? (zw==='voltigeur'?'Du liegst. Über dir geht es hinweg.':'Du kniest. Über dir geht es hinweg.')
+    : (K.vorn ? 'Du bist zehn Schritt vor der Linie.'
+      : (fuehrt==='sektion' ? 'Du stehst hinter dem Glied. Von hier siehst du, wer fehlt.'
+        : (karree ? 'Vier Fronten, kein Rücken. Innen ist es eng.'
+          : 'Rauch. Du siehst keine dreißig Schritt weit.')));
 
   return `<svg viewBox="0 0 640 200" role="img"
     aria-label="Aufstellung: ${Math.round(EIGEN*eigenTeil)} eigene Männer gegen ${Math.round(FEIND*feindTeil)} feindliche">
@@ -297,18 +448,17 @@ function sichtfeld(){
         <stop offset="100%" stop-color="#000" stop-opacity=".7"/></radialGradient>
     </defs>
     <rect width="640" height="200" fill="#191715"/>
+    ${gelaendeBild(n.gelaende)}
     <rect x="0" y="84" width="640" height="1" fill="#2a2621"/>
-    ${feind}
+    ${feind}${schleier}
     <rect x="0" y="66" width="640" height="74" fill="url(#sm)"/>
     ${qualm}
     <text x="320" y="26" text-anchor="middle" fill="#8d8371" font-family="Georgia,serif" font-size="11.5"
-      font-style="italic">${K.deckung
-        ? (zw==='voltigeur'?'Du liegst. Über dir geht es hinweg.':'Du kniest. Über dir geht es hinweg.')
-        : (K.vorn?'Du bist zehn Schritt vor der Linie.':'Rauch. Du siehst keine dreißig Schritt weit.')}</text>
-    ${plaenkler}${eigen}
-    ${mann(meinX, meinY, meinH, '#d0a75e', 1, meinHut, !K.deckung)}
+      font-style="italic">${lage}</text>
+    ${plaenkler}${fanion}${eigen}${wankend}${blitze}
+    ${mann(meinX, meinY, meinH, MESSING, 1, meinHut, !K.deckung)}
     <text x="${meinX}" y="${meinY < 130 ? (meinY-13).toFixed(0) : (meinY+meinH+11).toFixed(0)}"
-      text-anchor="middle" fill="#d0a75e" font-size="9.5"
+      text-anchor="middle" fill="${MESSING}" font-size="9.5"
       font-family="ui-monospace,monospace" letter-spacing="1">DU</text>
     <rect x="0" y="192" width="640" height="4" fill="${ROT_TOT}"/>
     <rect x="0" y="192" width="${(640*uebergewicht).toFixed(0)}" height="4" fill="#56718f"/>
@@ -395,19 +545,19 @@ const GEFECHTS_EREIGNISSE = [
       erfolg:{text:'Du gehst ein Glied zurück und lädst. Vor dir steht jemand, der jetzt das abbekommt, was sonst dich träfe. Die Linie hält auch ohne dich, gerade so.',
               moral:-6, ruf:-1, gefahr:-6}}]},
 
-  {id:'fahne', frage:'Der Adlerträger fällt',
+  {id:'fahne', frage:'Der Fahnenträger fällt',
    wenn:(n)=> K.eigen < 85 && K.feindMoral > n.feindMoral*0.25,
-   text:['Der Träger geht nach vorn weg, ohne Zwischenschritt, wie ein Sack. Der Adler kippt und bleibt schräg im Dreck stehen, sechs Schritt vor der Linie, wo niemand steht.',
-         'Ein Adler, den die anderen mitnehmen, ist das Ende einer Halbbrigade. Alle sehen hin, und keiner geht.'],
+   text:['Der Träger geht nach vorn weg, ohne Zwischenschritt, wie ein Sack. Die Fahnenstange kippt und bleibt schräg im Dreck stehen, sechs Schritt vor der Linie, wo niemand steht.',
+         'Eine Fahne, die die anderen mitnehmen, ist das Ende einer Halbbrigade. Alle sehen hin, und keiner geht.'],
    optionen:[
      {label:'Ihn holen', hint:'Kaltblütigkeit · sechs Schritt ins Freie', risk:true,
       probe:{wert:'kaltbluetigkeit', schw:50},
       erfolg:{text:'Sechs Schritte hin, der Schaft ist warm und klebrig, sechs Schritte zurück. Es geht schneller, als du dachtest. Die Linie brüllt, als du wieder drin stehst, und brüllt weiter, als es längst nichts mehr zu brüllen gibt.',
               moral:-14, ruf:6, nennung:true, eigen:8, leben:-6, atem:-12, gefahr:5,
-              tat:'Den Adler aus dem Dreck geholt'},
-      misserfolg:{text:'Du kommst bis auf zwei Schritte heran. Was dich trifft, wirft dich über den Schaft, und du liegst mit dem Gesicht in derselben Pfütze wie der Träger. Jemand zieht dich am Kragen zurück; den Adler holt ein anderer.',
+              tat:'Die Fahne aus dem Dreck geholt'},
+      misserfolg:{text:'Du kommst bis auf zwei Schritte heran. Was dich trifft, wirft dich über den Schaft, und du liegst mit dem Gesicht in derselben Pfütze wie der Träger. Jemand zieht dich am Kragen zurück; die Fahne holt ein anderer.',
               leben:-30, atem:-20, belastung:12}},
-     {label:'Weiterladen', hint:'Es ist ein Stück Messing an einem Stock',
+     {label:'Weiterladen', hint:'Es ist ein Stück Tuch an einem Stock',
       erfolg:{text:'Du lädst. Nach einer halben Minute geht ein Sergent hin und holt ihn, und über den Sergent wird abends geredet. Über dich nicht.'}}]},
 
   {id:'verwundeter', frage:'Jemand ruft',
@@ -868,6 +1018,9 @@ function kampfAktion(id){
     return;
   }
 
+  // Mündungsblitze zeichnet das Sichtfeld nur, wenn gerade gefeuert wurde —
+  // zustandsgesteuert, nie gewürfelt (siehe die Regel unter `sichtfeld`).
+  K.blitz = (id==='salve' || id==='sektionsalve');
   if(id!=='ducken') K.duckFolge = 0;
   if(id!=='bajonett') K.vorn = false;
 
@@ -1179,6 +1332,7 @@ function kampfEnde(sieg, letzterText){
         <b>Fürsprache ${esc(personKurz('berthaud'))} +1 · Kameradschaft +5</b></div>`; }
     else abrechnung = `<div class="wirkung"><span>Appell nach dem Gefecht</span>
         Von zwanzig stehen ${uebrig}. Der Lieutenant schreibt die Zahl auf und geht zur nächsten Sektion.</div>`;
+    abrechnung = appellBild(uebrig) + abrechnung;
   }
 
   vakanzPruefen();                    // stimmen die Zahlen, ist der Tod angesagt
@@ -1377,8 +1531,8 @@ function zeigeBefoerderung(n){
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
+    <div class="card papier"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb">${vordruck(n)}<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
       <div class="rangzeile" style="margin-top:12px">${bekommt?rangabzeichen(S):''}
         <span class="probe" style="margin:0">${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</span></div>
