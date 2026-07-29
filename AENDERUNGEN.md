@@ -21,6 +21,10 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **Kapitel 5 endet jetzt auf `uebergang` statt auf `ende`.**
 
+**Gemessen** *(die Erstläufe je 80 Läufe, die Veteranen je 40)*: überlebt **19 / 0 / 15 / 25 %**, höchster Rang (Cpt) **9 / 1 / 33 / 38 %**. **Der Veteran wird ab jetzt mit `VP=400` gemessen** — ein Spitzenlauf bringt über 500 Punkte, und 160 ist nicht mehr der Veteran, den das Spiel hervorbringt.
+
+> **⚠ Die Überlebensprogression ist flach geworden.** 19 % (Erstlauf) gegen 25 % (Veteran 400) sind sechs Punkte, wo die eigene Regel 25 verlangt. Es ist keine Umkehrung wie in Kapitel 5 und liegt im Rauschen — aber es ist auch keine Progression mehr. **Der Mechanismus steht in der Rangverteilung und ist gemessen, nicht geraten:** Vom Veteranen mit 160 VP sind 53 % Offiziere, vom Erstläufer 20 % — und die Offiziersränge tragen +4 bis +5 Gefahr je Runde, dazu zieht der höhere Ruf mehr Gefechts-Ereignisse an. „Wer aufsteigt, kauft sich nicht in Sicherheit ein" ist der Entwurf; mit sechs Kapiteln ist er stark genug, die Progression aufzufressen. Zwei Hebel stehen in CLAUDE.md, keiner ist gemessen — und **am Frost wird nichts gedreht, bevor der Bot einen Mantel kaufen kann.**
+
 > **⚠ Ein echter Fehler, gefunden vom Kapitelprüfstand: Der Nahkampf hörte bei Rang 14 auf statt bei Rang 9.** `nahkampfPruefen()` prüfte nur `rang < 7`. Ein Général de brigade zog auf der Operationskarte den Säbel, weil ein Karree, das er nie gesehen hat, an einer Seite nachgab — `K.sektion` ist ab Rang 10 leer, also griff der `bestand`-Auslöser nicht, die drei anderen schon. Das widersprach dem Entwurf der Stabsränge an der empfindlichsten Stelle: Ab Rang 10 ist der Gefahrzuschlag null, und an seiner Stelle steht das Stabsereignis mit 8 %. Daneben gehört keine zweite Gefahr. Jetzt `rang >= 7 && rang < 10`.
 
 ## 2026-07-29 — Kapitel 5: Jena–Auerstedt 1806

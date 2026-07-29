@@ -992,23 +992,39 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 >
 > **Damit sind alle Zahlen vor dem 29.07.2026 nicht mehr unmittelbar vergleichbar.** Sie bleiben in der Verlaufstabelle stehen und sind dort als Sergent-major-Zahlen zu lesen.
 
-**Bänder für fünf Kapitel** *(neu gesetzt am 29.07.2026 mit Kapitel 5)*:
+**Bänder für sechs Kapitel** *(neu gesetzt am 29.07.2026 mit Kapitel 6)*:
 
-| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 |
+| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | **Veteran 400** |
 |---|---|---|---|
-| **überlebt** | **18–32 %** | **2–10 %** | **45–60 %** |
-| **höchster Rang (Cpt)** | **3–12 %** | **1–8 %** | **20–35 %** |
+| **überlebt** | **12–25 %** | **0–5 %** | **20–35 %** |
+| **höchster Rang (Cpt)** | **5–15 %** | **0–5 %** | **30–45 %** |
 
-Gemessen mit Kapitel 5 *(die Erstläufe je 80, der Veteran 40)*:
+> **Der Veteran wird ab jetzt mit `VP=400` gemessen, nicht mehr mit 160.** Ein Spitzenlauf bringt mit sechs Kapiteln über 500 Punkte; ein Bot mit 160 ist nicht mehr der Veteran, den das Spiel hervorbringt, sondern der aus dem zweiten Lauf. `VP=160` bleibt als dritte Messung stehen, trägt aber kein Band mehr.
 
-| | überlebt | höchster Rang (Cpt) | gestorben in Jena |
+Gemessen mit Kapitel 6 *(die Erstläufe je 80, die Veteranen je 40)*:
+
+| | überlebt | höchster Rang (Cpt) | Eylau tötet |
 |---|---|---|---|
-| Erstlauf vorsichtig | **24 %** | **6 %** | 9 von 80 |
-| Erstlauf mutig | **5 %** | **4 %** | 7 von 80 |
-| Veteran 160 | **53 %** | **28 %** | 7 von 40 |
-| *Veteran 400* | *23 %* | *25 %* | *16 von 40* |
+| Erstlauf vorsichtig | **19 %** | **9 %** | 11 von 26, die dort ankamen |
+| Erstlauf mutig | **0 %** | **1 %** | 1 von 1 |
+| *Veteran 160* | *15 %* | *33 %* | *10 von 16* |
+| **Veteran 400** | **25 %** | **38 %** | 3 von 13 |
 
-**Der Abstand trägt wieder:** 29 Punkte beim Überleben (24 → 53), 22 beim Rang (6 → 28). Der erste liegt über der selbstgesetzten Grenze von 25, der zweite knapp darunter — **mit dem nächsten Kapitel mitprüfen.**
+**Der Abstand beim Rang trägt deutlich:** 29 Punkte (9 → 38). **Beim Überleben trägt er nicht mehr:** 19 → 25 sind sechs Punkte, und der Veteran mit 160 liegt mit 15 % sogar darunter. Siehe den Kasten.
+
+> ### ⚠ Die Überlebensprogression ist flach geworden — und der Verdächtige steht fest
+>
+> 19 % (Erstlauf) gegen 15 % (Veteran 160) gegen 25 % (Veteran 400). Bei n=80 und n=40 liegt das **innerhalb des Rauschens** — es ist keine Umkehrung wie in Kapitel 5, aber es ist auch keine Progression mehr. Der Abstand von 25 Punkten, den die eigene Regel verlangt, ist auf sechs geschrumpft.
+>
+> **Der Mechanismus ist gemessen, nicht geraten, und er steht in der Rangverteilung:** Vom Veteranen mit 160 VP sind **53 % Offiziere** (Rang 7–9), vom Erstläufer **20 %**. Und die Offiziersränge sind die gefährlichsten des Spiels — **+4 bis +5 Gefahr je Runde**, dazu zieht der höhere Ruf mehr Gefechts-Ereignisse an (`45 % + Ruf/400`, ab Ruf 30 ein drittes je Gefecht). **Wer aufsteigt, kauft sich nicht in Sicherheit ein** — das ist der Entwurf. Mit sechs Kapiteln ist er stark genug geworden, um die Progression aufzufressen, auf der das ganze Spiel beruht.
+>
+> **Zwei Hebel, beide dokumentiert, keiner gemessen:**
+> 1. **Der Rangzuschlag** (+4/+5, RANGLEITER §8). Wer ihn senkt, misst gegen genau diese vier Zahlen.
+> 2. **Die Ereignis-Schwelle Ruf 30** für das dritte Ereignis je Gefecht. Sie stammt aus einer Zeit, in der der Sergent die Decke war; heute liegt **jeder** Offizier weit darüber, also hat jedes Veteranengefecht drei Ereignisse. Dieselbe Alterung wie bei der Leitzahl „höchster Rang" — eine Schwelle, die einmal getrennt hat und jetzt nur noch durchlässt.
+>
+> **Nicht am Frost drehen, bevor der Mantel gemessen ist.** Eylau tötet den 160er-Veteranen zu 63 % und den 400er zu 23 % — der Unterschied ist Konstitution gegen eine flache Zehrung. **Der Bot kauft aber nie einen Mantel** (seine Einkaufsliste kennt nur Attribute), und die einzige Quelle vor Eylau ist eine `risk`-Wahl, die ein vorsichtiger Bot grundsätzlich meidet. Gemessen ist damit durchweg der Mann **ohne** Mantel — der Fall, für den die Regel gebaut ist, aber nicht der Normalfall eines Menschen. **Wer hier etwas ändert, bringt dem Bot zuerst das Kaufen bei.**
+
+*(Zahlen von fünf Kapiteln, gegen dieselbe Leitzahl gerechnet: 24 / 5 / 53 % und 6 / 4 / 28 %. Von vier Kapiteln, gegen Rang 6 gerechnet und deshalb nicht vergleichbar: 44 / 19 / 68 % und 19 / 16 / 66 %.)*
 
 *(Zahlen von vier Kapiteln, gegen Rang 6 gerechnet und deshalb nicht vergleichbar: nach Phase E 44 / 19 / 68 % und 19 / 16 / 66 %; nach Phase D 43 / 19 / 70 % und 23 / 16 / 55 %.)*
 
