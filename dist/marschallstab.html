@@ -906,6 +906,51 @@ const AUSRUESTUNG_START = () => ({
 const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];
 function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,Math.floor(x/10))]; return t; }
 
+/* ══════════════════ DIE OFFIZIERSPATENTE ══════════════════
+
+   **Die einzige zugelassene Ausnahme von Invariante 3** („Veteranenpunkte
+   kaufen den Ausgangspunkt, nie den Aufstieg"). Sie ist es deshalb, weil sie
+   den Ausgangspunkt kauft und nicht den Aufstieg: Wer ein Patent hat, *fängt*
+   als Offizier an — er steigt deswegen keinen Schritt weiter auf.
+
+   **Und sie ist die Antwort auf ein gemessenes Problem.** Mit vier Kapiteln
+   erreicht kein Lauf Rang 10; die halbe Rangleiter war gebaut und für den
+   Spieler unsichtbar. Die Patente lösen das ohne ein einziges neues Kapitel:
+   Wer eines kauft, startet 1796 in Savona als Sous-Lieutenant und spielt die
+   Offiziershälfte vom ersten Tag an.
+
+   **Freigeschaltet wird durch Leistung, nicht durch Geld** (`frei`): Man muss
+   den Rang einmal *erreicht* haben, ehe man einen darüber kaufen darf. Damit
+   bleibt der erste Weg nach oben der verdiente.
+
+   **Der Ausgleich ist dreifach und beißt:**
+     1. **Wertungsabzug** (`abzug`) — der gekaufte Rang zählt nicht, und die
+        Stufe darüber auch nicht. Ein Marschall mit Patent ist weniger wert als
+        einer ohne.
+     2. **Keine Kette über dir.** Martel, Collot, Berthaud und Vernet stehen bei
+        Gunst 0, und die Quellen, aus denen sich Gunst sonst speist — Abende am
+        Feuer, Listen führen, den Tornister eines Erschöpften tragen —, sind für
+        ihn geschlossen. Er ist mechanisch stärker und **sozial nackt**.
+     3. **Die ersten vier Kapitel werden härter** (`guetePlus`): +8 auf die
+        Feindgüte. Ein Offizier kommt nicht in dieselben Gefechte wie ein
+        Fusilier; er kommt in die, die man einem Offizier gibt.
+
+   Erzählt wird es als das, was es historisch war: der Sohn eines
+   zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
+   der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
+const PATENTE = [
+  {id:'patent_sl', rang:7, vp:110, frei:6, abzug:158,
+   label:'Patent als Sous-Lieutenant',
+   beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
+  {id:'patent_lt', rang:8, vp:145, frei:8, abzug:205,
+   label:'Patent als Lieutenant',
+   beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
+];
+function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
+/* Freigeschaltet ist, wer den Rang einmal getragen hat. `META.bestRang` läuft
+   über alle Läufe mit und ist damit dauerhaft — wie die Generalskampagnen. */
+function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
+
 const LADEN = [
   {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:40},
   {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},
@@ -2265,7 +2310,7 @@ STATIONEN.austerlitz = KAPITEL4.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 8;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab
+const LAUF_FASSUNG    = 9;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -2407,6 +2452,14 @@ const LAUF_WANDLER = {
       if(m.dotation === undefined) m.dotation = (m.rang>=13 ? 8 : 0);
     }
     return Object.assign({}, alt, {fassung:8});
+  },
+  /* Fassung 8 kannte keine Patente. **Ein alter Feldzug hat keines** — er ist
+     ehrlich erspielt, und das darf ihm nicht nachträglich weggenommen werden:
+     Ein Patent kostet Wertung, macht die Kapitel härter und sperrt zwei
+     Fürsprecher. Rückwirkend eines einzutragen wäre eine Bestrafung für nichts. */
+  8: alt => {
+    if(alt.mann && alt.mann.patent === undefined) alt.mann.patent = null;
+    return Object.assign({}, alt, {fassung:9});
   }
 };
 
@@ -2430,7 +2483,7 @@ function neueChronik(){
      schlicht `undefined` und damit falsch; es braucht deshalb keinen Wandler
      und keine neue Chronikfassung. */
   return {fassung:CHRONIK_FASSUNG, vp:0, chronik:[], bestKapitel:{}, laeufe:0,
-          generalskampagnen:false, zuletzt:null};
+          generalskampagnen:false, bestRang:0, zuletzt:null};
 }
 
 /* ══════════════════ CHRONIK ══════════════════ */
@@ -2533,6 +2586,7 @@ function dateiEinlesen(text){
   /* Dieselbe Logik für die Freischaltung: Wer sie einmal hatte, behält sie.
      Eine ältere Datei darf sie nicht wieder wegnehmen. */
   c.generalskampagnen = !!(c.generalskampagnen || META.generalskampagnen);
+  c.bestRang = Math.max(c.bestRang|0, META.bestRang|0);
   META = c;
   CHRONIK_GESPERRT = false;    // eine gültige Datei hebt den Riegel auf
   chronikSichern();
@@ -2752,8 +2806,41 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     /* Der Stab: der Adler kommt mit dem Regiment (Rang 11), die Dotation mit
        dem Divisionsgeneral (Rang 13). Bis dahin gibt es beides nicht. */
     adler:null, dotation:0,
+    /* Das gekaufte Patent, falls eines dabei war. Es steht als eigenes Feld und
+       nicht bloß in `kaeufe`, weil vier verschiedene Stellen es fragen: die
+       Wertung, die Feindgüte, die Gunst und die Erschaffung selbst. */
+    patent:null,
     kapitel:0, lebt:true, ende:null, log:[]
   };
+  /* ── Der gekaufte Offizier ──
+     **Er rückt 1796 in Savona ein wie jeder andere** — nur trägt er Epauletten,
+     hat nie eine Muskete abgefeuert, und niemand in der Kompanie kennt ihn.
+
+     Deshalb steht hier nur der Rang. Was ihm fehlt, steht an drei anderen
+     Stellen: `wertung()` zieht ab, `feindGuete()` legt zu, und `gunstGeben()`
+     lässt Martel und Collot nichts geben. Er ist mechanisch stärker und
+     **sozial nackt** — und das ist der ganze Handel. */
+  const pat = (kaeufe||[]).map(patentVon).find(Boolean);
+  if(pat){
+    mann.patent = pat.id;
+    mann.rang = pat.rang;
+    /* Ein Offizier bekommt keine Ausgabemuskete — er hat einen Degen, den er
+       selbst bezahlt hat, und der ist teurer als alles, was ein Fusilier trägt. */
+    mann.ausr.muskete = {name:'Keine Muskete mehr', zustand:0, verschleiss:0};
+    mann.ausr.seitenwaffe = {name:'Degen, selbst bezahlt', zustand:95, verschleiss:6};
+    mann.geld = Math.max(0, mann.geld - 2);   // das Patent kostete Stempelgebühr
+    /* **Der Preis des Patents, vierter Teil: Seine Leute folgen ihm schlechter.**
+       Ein Zug tut, was sein Lieutenant sagt, weil er weiß, wer der Lieutenant
+       ist. Bei diesem weiß es niemand. `sektionGuete` startet deshalb bei −25
+       und wirkt auf alles, was mit der Einheit zusammenhängt: Salven, Verluste,
+       die Abrechnung nach dem Gefecht.
+
+       **Das ist der bessere Malus als jede Gefahrzahl**, weil er den Rang an
+       der Stelle trifft, an der der Rang stattfindet — bei anderen Leuten —
+       und weil er sich abarbeiten lässt: Wer im Lager seinen Zug antreten
+       lässt, holt ihn in zwei Kapiteln auf. */
+    mann.sektionGuete = -25;
+  }
   mann.leben = lebenMax(mann);
   /* **Der Atem-Deckel gilt ab der ersten Sekunde.** `atemKlemmen()` lief bisher
      erst bei der ersten Handlung — bis dahin stand in der Seitenleiste „Atem
@@ -2777,6 +2864,17 @@ function gunst(id){ const p = person(id); return p ? p.gunst : 0; }
 function gunstGeben(id, n){
   const p = person(id);
   if(!p || !p.lebt) return;        // einem Toten kann man nicht mehr gefallen
+  /* ── Der gekaufte Offizier hat keine Kette über sich ──
+     **Martel und Collot geben ihm nichts, und zwar in beide Richtungen.** Sie
+     sind der Sergent und der Fourier seiner Kompanie; er ist der Mann mit den
+     Epauletten, der gestern noch nicht da war. Man lernt einander in Abenden am
+     Feuer kennen, und an diesen Abenden sitzt kein Offizier.
+
+     **Berthaud, Vernet und Grandmaison bleiben erreichbar** — sonst wäre er
+     gesperrt statt nackt, und gesperrt ist etwas anderes als allein. Er muss
+     sich ihre Fürsprache im Gefecht verdienen wie jeder andere auch, nur ohne
+     die zehn Jahre Vorlauf, die ein aufgestiegener Mann mitbringt. */
+  if(S.patent && (id==='martel' || id==='collot')) return;
   p.gunst = Math.max(-5, Math.min(5, p.gunst + n));
 }
 
@@ -3252,6 +3350,9 @@ function seitenleiste(){
       ${/* Der Adler steht in der Seitenleiste, sobald es einen gibt — als Wort,
            nicht als Balken. Ein Gegenstand hat keinen Prozentsatz; er ist da,
            er ist vorn, oder er ist weg, und das Letzte kostet den Rang. */''}
+      ${/* Das Patent steht in der Seitenleiste, solange es etwas erklärt: dass
+           dieser Mann von oben angefangen hat und dass Martel ihn nicht kennt. */''}
+      ${S.patent?`<div class="kv"><span>Patent</span><b>gekauft</b></div>`:''}
       ${S.adler?`<div class="kv"><span>Der Adler</span><b class="${S.adler==='verloren'?'warn':''}">${
         S.adler==='verloren'?'verloren':S.adler==='gerettet'?'gerettet':'getragen'}</b></div>`:''}
       ${(S.rang>=13&&S.dotation)?`<div class="kv"><span>Dotation</span><b>${S.dotation} F je Station</b></div>`:''}
@@ -3432,7 +3533,10 @@ function istWert(k){
 function punktGrenze(k){ return istAttribut(k) ? 70 : 60; }   // darüber nur noch im Feld
 function punktKosten(k){ const b = istWert(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
 function gesamtKosten(){
-  return AUSWAHL.reduce((s,id)=>s+LADEN.find(p=>p.id===id).vp,0)
+  return AUSWAHL.reduce((s,id)=>{
+           const p = LADEN.find(x=>x.id===id) || patentVon(id);
+           return s + (p ? p.vp : 0);
+         },0)
        + Object.keys(PUNKTE).reduce((s,k)=>s+punktKosten(k),0);
 }
 
@@ -3445,6 +3549,30 @@ function punktZeile(k,n){
     <span><button class="pmbtn" onclick="stellePunkt('${k}',-PUNKT_SCHRITT)" id="pm_${k}">−</button>
     <button class="pmbtn" onclick="stellePunkt('${k}',PUNKT_SCHRITT)" id="pa_${k}">+</button></span>
   </div>`;
+}
+
+/* ══════════════════ DIE PATENTKARTE ══════════════════
+
+   **Sie erscheint erst, wenn eines der beiden Patente freigeschaltet ist** —
+   und für die meisten Spieler heißt das: gar nicht, jedenfalls nicht in den
+   ersten Läufen. Das ist Absicht. Ein Kaufladen, der einem beim ersten Mann
+   anbietet, Offizier zu werden, macht aus dem verdienten Aufstieg eine
+   Kaufentscheidung, und genau das darf er nicht.
+
+   **Höchstens eins.** Zwei Patente nebeneinander ergeben keinen Sinn, und die
+   Grenze ist billiger als jede Erklärung. */
+function patentKarte(){
+  const offen = PATENTE.filter(patentFrei);
+  if(!offen.length) return '';
+  const zeilen = offen.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td>
+    <td class="d">${p.beschr}<br><span class="fein">Wertung −${p.abzug} · keine Fürsprecher · Kapitel 1 bis 4 werden härter</span></td>
+    <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
+    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
+  return `<div class="card"><div class="ch"><span>Offizierspatent</span><span>höchstens eines</span></div>
+   <div class="cb">
+    <p class="hinweis">Ein Patent unterschreibt der Kaiser, und es kommt auf Papier. Wer eines hat, rückt 1796 als Offizier ein — mit allem, was das an Knöpfen gibt, und ohne alles, was ein Mann sich in zehn Jahren an Bekanntschaften erwirbt. Martel, Collot, Berthaud und Vernet kennen dich nicht, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen.</p>
+    <table><tr><th>Kauf</th><th>Was es bedeutet</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+   </div></div>`;
 }
 
 /* Zweiter Schritt der Erschaffung: Was der Vorrat aus dem fertigen Mann macht. */
@@ -3475,6 +3603,8 @@ function zeigeLaden(){
     ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
+  ${patentKarte()}
+
   <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
    <div class="cb">
     <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
@@ -3487,7 +3617,11 @@ function zeigeLaden(){
 function waehle(id){
   const i = AUSWAHL.indexOf(id);
   if(i>=0) AUSWAHL.splice(i,1);
-  else { AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop(); }
+  else {
+    // Höchstens ein Patent: das zweite ersetzt das erste, statt danebenzustehen.
+    if(patentVon(id)) AUSWAHL = AUSWAHL.filter(x=>!patentVon(x));
+    AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop();
+  }
   aktualisiereLaden();
 }
 function stellePunkt(k,d){
@@ -3501,8 +3635,9 @@ function stellePunkt(k,d){
 function aktualisiereLaden(){
   const rest = META.vp - gesamtKosten();
   document.getElementById('vpanz').textContent = `${rest} von ${META.vp} übrig`;
-  LADEN.forEach(p=>{
+  LADEN.concat(PATENTE.filter(patentFrei)).forEach(p=>{
     const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
+    if(!b || !z) return;
     const drin = AUSWAHL.includes(p.id);
     b.textContent = drin?'gewählt':'wählen';
     b.disabled = !drin && p.vp>rest;
@@ -4131,6 +4266,12 @@ function naechster(){
        Eintrag eines Voltigeurs. */
     if(S.rang >= (b.rangN|0)){ b.rangN = S.rang; b.rang = rangName(S.rang); }
     META.bestKapitel[n.id]=b;
+    /* Der höchste je getragene Rang über **alle** Läufe. Er schaltet die
+       Patente frei und ist damit die zweite dauerhafte Freischaltung des
+       Spiels neben den Generalskampagnen. Ein gekaufter Rang zählt dabei
+       mit — wer als Sous-Lieutenant startet und Lieutenant wird, hat den
+       Lieutenant getragen, und das ist der Punkt der Staffelung. */
+    if(S.rang > (META.bestRang|0)) META.bestRang = S.rang;
     chronikSichern();
   }
   laufSichern();
@@ -6414,6 +6555,29 @@ function kampfAktion(id){
   else if(S.rang>=9) gefahr += 5;
   else if(S.rang>=7) gefahr += 4;
   else if(S.rang>=3) gefahr += 2;
+  /* ── Der Preis des Patents, dritter Teil ──
+     **Ein gekaufter Offizier steht falsch, und er steht zu lange falsch.** Er
+     hat zehn Jahre nicht im Glied gestanden und weiß deshalb nicht, was ein
+     Mann weiß, der es getan hat: wann man sich duckt, wo eine Batterie
+     hinschießt, wie lange eine Salve braucht. **+2 auf die Gefahr**, zusätzlich
+     zu dem, was der Rang ohnehin kostet.
+
+     **Die 2 ist gemessen, nicht geschätzt** — und zwar am Hebel, nicht am
+     Ergebnis: +4 lieferte 0 % Überlebende bei 40 Läufen, +0 lieferte 25 %.
+     Der Zuschlag allein trug also den ganzen Unterschied, und die Hälfte davon
+     ist der Preis, den der Kauf verträgt.
+
+     **Die erste Fassung war ein Güte-Zuschlag von +8 in den Kapiteln 1–4, und
+     der hat den Kauf umgebracht: 40 von 40 Läufen starben in Italien**, weil
+     `guete` nicht nur die Gefahr hebt, sondern auch die Hilfe der Linie
+     schrumpfen lässt — und die ist der Grund, warum ein Gefecht überhaupt
+     gewinnbar ist. Bei Güte 8 steht dieser Hebel am Boden (0,3), also endete
+     kein Gefecht mehr mit einem Sieg, und jedes verlorene kostet Blut.
+
+     Ein Gefahr-Zuschlag trifft nur den Mann, nicht die Gewinnbarkeit. Das ist
+     auch inhaltlich das Richtige: **Der Feind wird nicht besser, weil du ein
+     Patent gekauft hast. Du bist schlechter.** */
+  if(S.patent) gefahr += 2;
   /* Wer im Gelände liegt, wird schlechter getroffen — drei Runden lang. */
   if(K.gelaendeVorteil > 0) gefahr -= 12;
   /* Ein Höhepunkt ist nicht nur teurer, sondern auch dichter: +3 Trefferchance
@@ -8091,7 +8255,18 @@ function wertung(){
   p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
   p.ueberleben = S.lebt ? 25 : 0;              // Platzhalter, siehe oben
   p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
-  p.summe = p.rang+p.kapitel+p.ruf+p.nennungen+p.orden+p.ueberleben+p.sauber;
+  /* ── Der Preis des Patents, erster Teil ──
+     **Der gekaufte Rang zählt nicht, und die Stufe darüber auch nicht.** Ein
+     Sous-Lieutenant mit Patent zieht 158 ab — das ist der Rangwert des
+     Lieutenants —, ein Lieutenant 205, der des Capitaine.
+
+     Der Abzug ist absichtlich eine Stufe höher als der gekaufte Rang: Sonst
+     wäre das Patent bei gleichem Endrang wertungsneutral, und damit wäre es
+     ein reiner Vorteil. **Ein Marschall mit Patent ist weniger wert als einer
+     ohne** — die Wertung erinnert sich daran, wo einer angefangen hat. */
+  const pat = S.patent ? patentVon(S.patent) : null;
+  p.patent = pat ? -pat.abzug : 0;
+  p.summe = Math.max(0, p.rang+p.kapitel+p.ruf+p.nennungen+p.orden+p.ueberleben+p.sauber+p.patent);
   return p;
 }
 
@@ -8103,7 +8278,7 @@ function chronikblatt(endeText, p){
   const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
   return {
     name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe,
-    herkunft:S.herkunft, zweig:S.zweig, rangN:S.rang, gefallen:!S.lebt,
+    herkunft:S.herkunft, zweig:S.zweig, rangN:S.rang, gefallen:!S.lebt, patent:S.patent||null,
     ort:letzte.datum || '', stationen:stationen(),
     attr:Object.assign({},S.attr), fert:Object.assign({},S.fert),
     ausr:Object.keys(S.ausr).map(k=>({name:S.ausr[k].name, zustand:S.ausr[k].zustand,
@@ -8137,7 +8312,7 @@ function eintragen(endeText){
 
 function wertungsTabelle(p){ return wertungsTabelleAus({wertung:p, rang:rangName(S.rang),
   stationen:stationen(), kapitel:kapitelUeberlebt(), ruf:S.ruf, nennungen:S.nennungen,
-  orden:(S.orden||[]).slice()}); }
+  orden:(S.orden||[]).slice(), patent:S.patent||null}); }
 
 function wertungsTabelleAus(c){
   const p = c.wertung; if(!p) return '';
@@ -8152,6 +8327,7 @@ function wertungsTabelleAus(c){
     ${p.orden ? `<tr><td class="d">Orden — ${esc((c.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean).join(', '))}</td><td class="n">${p.orden}</td></tr>` : ''}
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
     <tr><td class="d">Nie vor Zeugen gekniffen</td><td class="n">${p.sauber}</td></tr>
+    ${p.patent ? `<tr><td class="d">Mit gekauftem Patent begonnen</td><td class="n">${p.patent}</td></tr>` : ''}
     <tr class="hi"><td class="d"><b>Summe</b></td><td class="n"><b>${p.summe}</b></td></tr>
   </table>`;
 }

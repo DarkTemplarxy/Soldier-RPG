@@ -274,6 +274,9 @@ function seitenleiste(){
       ${/* Der Adler steht in der Seitenleiste, sobald es einen gibt — als Wort,
            nicht als Balken. Ein Gegenstand hat keinen Prozentsatz; er ist da,
            er ist vorn, oder er ist weg, und das Letzte kostet den Rang. */''}
+      ${/* Das Patent steht in der Seitenleiste, solange es etwas erklärt: dass
+           dieser Mann von oben angefangen hat und dass Martel ihn nicht kennt. */''}
+      ${S.patent?`<div class="kv"><span>Patent</span><b>gekauft</b></div>`:''}
       ${S.adler?`<div class="kv"><span>Der Adler</span><b class="${S.adler==='verloren'?'warn':''}">${
         S.adler==='verloren'?'verloren':S.adler==='gerettet'?'gerettet':'getragen'}</b></div>`:''}
       ${(S.rang>=13&&S.dotation)?`<div class="kv"><span>Dotation</span><b>${S.dotation} F je Station</b></div>`:''}
@@ -454,7 +457,10 @@ function istWert(k){
 function punktGrenze(k){ return istAttribut(k) ? 70 : 60; }   // darüber nur noch im Feld
 function punktKosten(k){ const b = istWert(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
 function gesamtKosten(){
-  return AUSWAHL.reduce((s,id)=>s+LADEN.find(p=>p.id===id).vp,0)
+  return AUSWAHL.reduce((s,id)=>{
+           const p = LADEN.find(x=>x.id===id) || patentVon(id);
+           return s + (p ? p.vp : 0);
+         },0)
        + Object.keys(PUNKTE).reduce((s,k)=>s+punktKosten(k),0);
 }
 
@@ -467,6 +473,30 @@ function punktZeile(k,n){
     <span><button class="pmbtn" onclick="stellePunkt('${k}',-PUNKT_SCHRITT)" id="pm_${k}">−</button>
     <button class="pmbtn" onclick="stellePunkt('${k}',PUNKT_SCHRITT)" id="pa_${k}">+</button></span>
   </div>`;
+}
+
+/* ══════════════════ DIE PATENTKARTE ══════════════════
+
+   **Sie erscheint erst, wenn eines der beiden Patente freigeschaltet ist** —
+   und für die meisten Spieler heißt das: gar nicht, jedenfalls nicht in den
+   ersten Läufen. Das ist Absicht. Ein Kaufladen, der einem beim ersten Mann
+   anbietet, Offizier zu werden, macht aus dem verdienten Aufstieg eine
+   Kaufentscheidung, und genau das darf er nicht.
+
+   **Höchstens eins.** Zwei Patente nebeneinander ergeben keinen Sinn, und die
+   Grenze ist billiger als jede Erklärung. */
+function patentKarte(){
+  const offen = PATENTE.filter(patentFrei);
+  if(!offen.length) return '';
+  const zeilen = offen.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td>
+    <td class="d">${p.beschr}<br><span class="fein">Wertung −${p.abzug} · keine Fürsprecher · Kapitel 1 bis 4 werden härter</span></td>
+    <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
+    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
+  return `<div class="card"><div class="ch"><span>Offizierspatent</span><span>höchstens eines</span></div>
+   <div class="cb">
+    <p class="hinweis">Ein Patent unterschreibt der Kaiser, und es kommt auf Papier. Wer eines hat, rückt 1796 als Offizier ein — mit allem, was das an Knöpfen gibt, und ohne alles, was ein Mann sich in zehn Jahren an Bekanntschaften erwirbt. Martel, Collot, Berthaud und Vernet kennen dich nicht, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen.</p>
+    <table><tr><th>Kauf</th><th>Was es bedeutet</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+   </div></div>`;
 }
 
 /* Zweiter Schritt der Erschaffung: Was der Vorrat aus dem fertigen Mann macht. */
@@ -497,6 +527,8 @@ function zeigeLaden(){
     ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
+  ${patentKarte()}
+
   <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
    <div class="cb">
     <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
@@ -509,7 +541,11 @@ function zeigeLaden(){
 function waehle(id){
   const i = AUSWAHL.indexOf(id);
   if(i>=0) AUSWAHL.splice(i,1);
-  else { AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop(); }
+  else {
+    // Höchstens ein Patent: das zweite ersetzt das erste, statt danebenzustehen.
+    if(patentVon(id)) AUSWAHL = AUSWAHL.filter(x=>!patentVon(x));
+    AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop();
+  }
   aktualisiereLaden();
 }
 function stellePunkt(k,d){
@@ -523,8 +559,9 @@ function stellePunkt(k,d){
 function aktualisiereLaden(){
   const rest = META.vp - gesamtKosten();
   document.getElementById('vpanz').textContent = `${rest} von ${META.vp} übrig`;
-  LADEN.forEach(p=>{
+  LADEN.concat(PATENTE.filter(patentFrei)).forEach(p=>{
     const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
+    if(!b || !z) return;
     const drin = AUSWAHL.includes(p.id);
     b.textContent = drin?'gewählt':'wählen';
     b.disabled = !drin && p.vp>rest;
@@ -1153,6 +1190,12 @@ function naechster(){
        Eintrag eines Voltigeurs. */
     if(S.rang >= (b.rangN|0)){ b.rangN = S.rang; b.rang = rangName(S.rang); }
     META.bestKapitel[n.id]=b;
+    /* Der höchste je getragene Rang über **alle** Läufe. Er schaltet die
+       Patente frei und ist damit die zweite dauerhafte Freischaltung des
+       Spiels neben den Generalskampagnen. Ein gekaufter Rang zählt dabei
+       mit — wer als Sous-Lieutenant startet und Lieutenant wird, hat den
+       Lieutenant getragen, und das ist der Punkt der Staffelung. */
+    if(S.rang > (META.bestRang|0)) META.bestRang = S.rang;
     chronikSichern();
   }
   laufSichern();

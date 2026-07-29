@@ -2066,6 +2066,29 @@ function kampfAktion(id){
   else if(S.rang>=9) gefahr += 5;
   else if(S.rang>=7) gefahr += 4;
   else if(S.rang>=3) gefahr += 2;
+  /* ── Der Preis des Patents, dritter Teil ──
+     **Ein gekaufter Offizier steht falsch, und er steht zu lange falsch.** Er
+     hat zehn Jahre nicht im Glied gestanden und weiß deshalb nicht, was ein
+     Mann weiß, der es getan hat: wann man sich duckt, wo eine Batterie
+     hinschießt, wie lange eine Salve braucht. **+2 auf die Gefahr**, zusätzlich
+     zu dem, was der Rang ohnehin kostet.
+
+     **Die 2 ist gemessen, nicht geschätzt** — und zwar am Hebel, nicht am
+     Ergebnis: +4 lieferte 0 % Überlebende bei 40 Läufen, +0 lieferte 25 %.
+     Der Zuschlag allein trug also den ganzen Unterschied, und die Hälfte davon
+     ist der Preis, den der Kauf verträgt.
+
+     **Die erste Fassung war ein Güte-Zuschlag von +8 in den Kapiteln 1–4, und
+     der hat den Kauf umgebracht: 40 von 40 Läufen starben in Italien**, weil
+     `guete` nicht nur die Gefahr hebt, sondern auch die Hilfe der Linie
+     schrumpfen lässt — und die ist der Grund, warum ein Gefecht überhaupt
+     gewinnbar ist. Bei Güte 8 steht dieser Hebel am Boden (0,3), also endete
+     kein Gefecht mehr mit einem Sieg, und jedes verlorene kostet Blut.
+
+     Ein Gefahr-Zuschlag trifft nur den Mann, nicht die Gewinnbarkeit. Das ist
+     auch inhaltlich das Richtige: **Der Feind wird nicht besser, weil du ein
+     Patent gekauft hast. Du bist schlechter.** */
+  if(S.patent) gefahr += 2;
   /* Wer im Gelände liegt, wird schlechter getroffen — drei Runden lang. */
   if(K.gelaendeVorteil > 0) gefahr -= 12;
   /* Ein Höhepunkt ist nicht nur teurer, sondern auch dichter: +3 Trefferchance

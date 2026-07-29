@@ -667,7 +667,18 @@ function wertung(){
   p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
   p.ueberleben = S.lebt ? 25 : 0;              // Platzhalter, siehe oben
   p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
-  p.summe = p.rang+p.kapitel+p.ruf+p.nennungen+p.orden+p.ueberleben+p.sauber;
+  /* ── Der Preis des Patents, erster Teil ──
+     **Der gekaufte Rang zählt nicht, und die Stufe darüber auch nicht.** Ein
+     Sous-Lieutenant mit Patent zieht 158 ab — das ist der Rangwert des
+     Lieutenants —, ein Lieutenant 205, der des Capitaine.
+
+     Der Abzug ist absichtlich eine Stufe höher als der gekaufte Rang: Sonst
+     wäre das Patent bei gleichem Endrang wertungsneutral, und damit wäre es
+     ein reiner Vorteil. **Ein Marschall mit Patent ist weniger wert als einer
+     ohne** — die Wertung erinnert sich daran, wo einer angefangen hat. */
+  const pat = S.patent ? patentVon(S.patent) : null;
+  p.patent = pat ? -pat.abzug : 0;
+  p.summe = Math.max(0, p.rang+p.kapitel+p.ruf+p.nennungen+p.orden+p.ueberleben+p.sauber+p.patent);
   return p;
 }
 
@@ -679,7 +690,7 @@ function chronikblatt(endeText, p){
   const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
   return {
     name:S.name, rang:rangName(S.rang), ende:endeText, punkte:p.summe,
-    herkunft:S.herkunft, zweig:S.zweig, rangN:S.rang, gefallen:!S.lebt,
+    herkunft:S.herkunft, zweig:S.zweig, rangN:S.rang, gefallen:!S.lebt, patent:S.patent||null,
     ort:letzte.datum || '', stationen:stationen(),
     attr:Object.assign({},S.attr), fert:Object.assign({},S.fert),
     ausr:Object.keys(S.ausr).map(k=>({name:S.ausr[k].name, zustand:S.ausr[k].zustand,
@@ -713,7 +724,7 @@ function eintragen(endeText){
 
 function wertungsTabelle(p){ return wertungsTabelleAus({wertung:p, rang:rangName(S.rang),
   stationen:stationen(), kapitel:kapitelUeberlebt(), ruf:S.ruf, nennungen:S.nennungen,
-  orden:(S.orden||[]).slice()}); }
+  orden:(S.orden||[]).slice(), patent:S.patent||null}); }
 
 function wertungsTabelleAus(c){
   const p = c.wertung; if(!p) return '';
@@ -728,6 +739,7 @@ function wertungsTabelleAus(c){
     ${p.orden ? `<tr><td class="d">Orden — ${esc((c.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean).join(', '))}</td><td class="n">${p.orden}</td></tr>` : ''}
     <tr><td class="d">Kapitel lebend beendet</td><td class="n">${p.ueberleben}</td></tr>
     <tr><td class="d">Nie vor Zeugen gekniffen</td><td class="n">${p.sauber}</td></tr>
+    ${p.patent ? `<tr><td class="d">Mit gekauftem Patent begonnen</td><td class="n">${p.patent}</td></tr>` : ''}
     <tr class="hi"><td class="d"><b>Summe</b></td><td class="n"><b>${p.summe}</b></td></tr>
   </table>`;
 }

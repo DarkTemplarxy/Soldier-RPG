@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 8;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab
+const LAUF_FASSUNG    = 9;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -159,6 +159,14 @@ const LAUF_WANDLER = {
       if(m.dotation === undefined) m.dotation = (m.rang>=13 ? 8 : 0);
     }
     return Object.assign({}, alt, {fassung:8});
+  },
+  /* Fassung 8 kannte keine Patente. **Ein alter Feldzug hat keines** — er ist
+     ehrlich erspielt, und das darf ihm nicht nachträglich weggenommen werden:
+     Ein Patent kostet Wertung, macht die Kapitel härter und sperrt zwei
+     Fürsprecher. Rückwirkend eines einzutragen wäre eine Bestrafung für nichts. */
+  8: alt => {
+    if(alt.mann && alt.mann.patent === undefined) alt.mann.patent = null;
+    return Object.assign({}, alt, {fassung:9});
   }
 };
 
@@ -182,7 +190,7 @@ function neueChronik(){
      schlicht `undefined` und damit falsch; es braucht deshalb keinen Wandler
      und keine neue Chronikfassung. */
   return {fassung:CHRONIK_FASSUNG, vp:0, chronik:[], bestKapitel:{}, laeufe:0,
-          generalskampagnen:false, zuletzt:null};
+          generalskampagnen:false, bestRang:0, zuletzt:null};
 }
 
 /* ══════════════════ CHRONIK ══════════════════ */
@@ -285,6 +293,7 @@ function dateiEinlesen(text){
   /* Dieselbe Logik für die Freischaltung: Wer sie einmal hatte, behält sie.
      Eine ältere Datei darf sie nicht wieder wegnehmen. */
   c.generalskampagnen = !!(c.generalskampagnen || META.generalskampagnen);
+  c.bestRang = Math.max(c.bestRang|0, META.bestRang|0);
   META = c;
   CHRONIK_GESPERRT = false;    // eine gültige Datei hebt den Riegel auf
   chronikSichern();

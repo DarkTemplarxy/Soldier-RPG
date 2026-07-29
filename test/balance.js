@@ -40,14 +40,26 @@
    Rangfolge ausgegeben. Fest deshalb, weil ein mitwachsender Vorrat die
    Messung wandern ließe — Lauf 40 spielte sonst ein anderes Spiel als Lauf 1.
 
-   Aufruf:  node test/balance.js [anzahl]         erster Lauf, ohne Vorrat
-            MUT=1 node test/balance.js [anzahl]   derselbe Mann, aber mutig
-            VP=160 node test/balance.js [anzahl]  dritter Lauf, mit Vorrat  */
+   **Und seit Phase E eine vierte:** `PATENT=lt` kauft ein Offizierspatent und
+   misst damit die Offiziershälfte, die ein Lauf mit vier Kapiteln sonst nie
+   sieht — mit vier Kapiteln endet jeder Aufstieg spätestens bei Rang 8.
+
+   Aufruf:  node test/balance.js [anzahl]              erster Lauf, ohne Vorrat
+            MUT=1 node test/balance.js [anzahl]        derselbe Mann, aber mutig
+            VP=160 node test/balance.js [anzahl]       dritter Lauf, mit Vorrat
+            PATENT=lt VP=260 node test/balance.js 40   der gekaufte Leutnant  */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const N = parseInt(process.argv[2] || '40', 10);
 const MUT = process.env.MUT === '1';
 const VP  = parseInt(process.env.VP || '0', 10);   // Vorrat des Veteranen, 0 = erster Lauf
+/* ── Der gekaufte Offizier ──
+   `PATENT=sl` oder `PATENT=lt` kauft vor dem Einrücken ein Offizierspatent.
+   **Das ist die Messung, für die Phase E gebaut wurde:** Ohne sie sieht
+   `balance.js` die Offiziershälfte nie, weil kein Lauf mit vier Kapiteln über
+   Rang 8 hinauskommt. Der Vorrat wird dabei so gesetzt, dass er für das Patent
+   reicht — sonst misst man, ob der Bot sparen kann, und nicht das Spiel. */
+const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
 
 /* Wofür ein Veteran seinen Vorrat ausgibt, in dieser Reihenfolge. Konstitution
    zuerst, weil sie der Lebensvorrat *und* die Elitegrenze ist; dann Geschick
@@ -104,6 +116,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
        die Chronik im localStorage ihn über die Läufe hinweg anwachsen, und die
        Messung wanderte. */
     await p.evaluate(v => { META.vp = v; }, VP);
+    // Die Patente sind erst ab einem einmal getragenen Rang im Laden sichtbar.
+    if (PATENT) await p.evaluate(() => { META.bestRang = 8; });
     await p.click('text=Neuen Mann aufstellen');
     /* Die Abbruchbedingung prüft, ob sich etwas bewegt hat — `stelle()` weigert
        sich stumm, wenn der Pool leer ist, und eine Prüfung auf den Zielwert
@@ -119,6 +133,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     }, VERTEILUNG);
     await p.click('#h_' + ['bauer', 'schmied', 'wilderer', 'strasse', 'fuhrmann', 'schreiber'][r % 6]);
     await p.click('text=Weiter zu den Veteranenpunkten');
+    // Das Patent zuerst — es ist die teuerste Einzelentscheidung des Ladens.
+    if (PATENT) await p.evaluate(id => waehle(id), PATENT);
     // Der Veteran gibt seinen Vorrat nach fester Rangfolge aus; bei VP=0 nichts.
     if (VP > 0) await p.evaluate(ziele => {
       for (const [k, bis] of ziele){
@@ -340,7 +356,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   }
   const pu = res.punkte.sort((a, b) => a - b);
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
-  console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`);
+  console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`
+    + (PATENT ? ` · mit Patent (${PATENT === 'patent_lt' ? 'Lieutenant' : 'Sous-Lieutenant'})` : ''));
   /* Die beiden Leitzahlen zuerst und für sich — sie tragen die Sollwerte.
      Wer eine Änderung beurteilt, liest diese Zeile und sonst nichts. */
   console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   HÖCHSTER RANG ${q(res.major)}\n`);

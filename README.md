@@ -49,7 +49,9 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000
 
 **Vier Mal in einer Laufbahn wird der Bildschirm ein anderer, und drei Mal davon verliert man dabei etwas.** Als Chef de bataillon sind Männer nur noch vier Rechtecke — und die Atemleiste, auf die man zehn Ränge lang geschaut hat, ist weg. Ersatzlos, ohne Kommentar. Als Général de brigade ist der Feind keine Zahl mehr, sondern eine Meldung mit Uhrzeit und Verlässlichkeit, und was darin steht, ist vierzig Minuten alt. Der General sieht mehr und weiß weniger; der Fusilier sah vier Männer und Rauch, aber was er sah, war wahr.
 
-Entworfen, aber noch nicht gebaut: die Kapitel 5 bis 11 (Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Generalskampagnen als eigene Szenarien, die Offizierspatente und der freiwillige Ausstieg an den Rangschranken. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
+**Und du kommst dorthin.** Wer einmal Sergent-major war, kann sich beim nächsten Mann ein **Offizierspatent** kaufen: Er rückt 1796 in Savona mit Epauletten ein, hat nie eine Muskete abgefeuert, und niemand in der Kompanie kennt ihn. Martel, Collot, Berthaud und Vernet stehen bei null, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen. Er ist mechanisch stärker und sozial nackt — und er überlebt in acht von hundert Läufen. Der Kauf erhöht auch nie den Punktevorrat; er zeigt dir die andere Hälfte des Spiels, mehr nicht.
+
+Entworfen, aber noch nicht gebaut: die Kapitel 5 bis 11 (Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Generalskampagnen als eigene Szenarien und der freiwillige Ausstieg an den Rangschranken. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
 
 Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat dreiundsechzig Stationen hinter sich — und immer noch sieben Feldzüge vor sich.
 
@@ -73,7 +75,7 @@ Chronik und laufender Feldzug lassen sich über „Spielstand sichern" zusätzli
 npm install playwright && npx playwright install chromium
 
 node test/durchspielen.js     # spielt einen Lauf durch, meldet Konsolenfehler
-node test/offizier.js         # Ränge 7 bis 14: stimmen Knöpfe, Bild und das, was fehlt
+node test/raenge.js           # alle vierzehn Ränge: stimmen Knöpfe, Bild und das, was fehlt
 node test/spielstand.js       # sichern, fortsetzen, sterben, alte Fassungen
 node test/balance.js 40       # 40 Läufe, misst die Überlebensquote
 node werkzeug/bauen.js        # baut dist/marschallstab.html

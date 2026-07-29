@@ -381,6 +381,51 @@ const AUSRUESTUNG_START = () => ({
 const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];
 function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,Math.floor(x/10))]; return t; }
 
+/* ══════════════════ DIE OFFIZIERSPATENTE ══════════════════
+
+   **Die einzige zugelassene Ausnahme von Invariante 3** („Veteranenpunkte
+   kaufen den Ausgangspunkt, nie den Aufstieg"). Sie ist es deshalb, weil sie
+   den Ausgangspunkt kauft und nicht den Aufstieg: Wer ein Patent hat, *fängt*
+   als Offizier an — er steigt deswegen keinen Schritt weiter auf.
+
+   **Und sie ist die Antwort auf ein gemessenes Problem.** Mit vier Kapiteln
+   erreicht kein Lauf Rang 10; die halbe Rangleiter war gebaut und für den
+   Spieler unsichtbar. Die Patente lösen das ohne ein einziges neues Kapitel:
+   Wer eines kauft, startet 1796 in Savona als Sous-Lieutenant und spielt die
+   Offiziershälfte vom ersten Tag an.
+
+   **Freigeschaltet wird durch Leistung, nicht durch Geld** (`frei`): Man muss
+   den Rang einmal *erreicht* haben, ehe man einen darüber kaufen darf. Damit
+   bleibt der erste Weg nach oben der verdiente.
+
+   **Der Ausgleich ist dreifach und beißt:**
+     1. **Wertungsabzug** (`abzug`) — der gekaufte Rang zählt nicht, und die
+        Stufe darüber auch nicht. Ein Marschall mit Patent ist weniger wert als
+        einer ohne.
+     2. **Keine Kette über dir.** Martel, Collot, Berthaud und Vernet stehen bei
+        Gunst 0, und die Quellen, aus denen sich Gunst sonst speist — Abende am
+        Feuer, Listen führen, den Tornister eines Erschöpften tragen —, sind für
+        ihn geschlossen. Er ist mechanisch stärker und **sozial nackt**.
+     3. **Die ersten vier Kapitel werden härter** (`guetePlus`): +8 auf die
+        Feindgüte. Ein Offizier kommt nicht in dieselben Gefechte wie ein
+        Fusilier; er kommt in die, die man einem Offizier gibt.
+
+   Erzählt wird es als das, was es historisch war: der Sohn eines
+   zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
+   der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
+const PATENTE = [
+  {id:'patent_sl', rang:7, vp:110, frei:6, abzug:158,
+   label:'Patent als Sous-Lieutenant',
+   beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
+  {id:'patent_lt', rang:8, vp:145, frei:8, abzug:205,
+   label:'Patent als Lieutenant',
+   beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
+];
+function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
+/* Freigeschaltet ist, wer den Rang einmal getragen hat. `META.bestRang` läuft
+   über alle Läufe mit und ist damit dauerhaft — wie die Generalskampagnen. */
+function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
+
 const LADEN = [
   {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:40},
   {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},

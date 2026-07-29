@@ -208,8 +208,41 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     /* Der Stab: der Adler kommt mit dem Regiment (Rang 11), die Dotation mit
        dem Divisionsgeneral (Rang 13). Bis dahin gibt es beides nicht. */
     adler:null, dotation:0,
+    /* Das gekaufte Patent, falls eines dabei war. Es steht als eigenes Feld und
+       nicht bloß in `kaeufe`, weil vier verschiedene Stellen es fragen: die
+       Wertung, die Feindgüte, die Gunst und die Erschaffung selbst. */
+    patent:null,
     kapitel:0, lebt:true, ende:null, log:[]
   };
+  /* ── Der gekaufte Offizier ──
+     **Er rückt 1796 in Savona ein wie jeder andere** — nur trägt er Epauletten,
+     hat nie eine Muskete abgefeuert, und niemand in der Kompanie kennt ihn.
+
+     Deshalb steht hier nur der Rang. Was ihm fehlt, steht an drei anderen
+     Stellen: `wertung()` zieht ab, `feindGuete()` legt zu, und `gunstGeben()`
+     lässt Martel und Collot nichts geben. Er ist mechanisch stärker und
+     **sozial nackt** — und das ist der ganze Handel. */
+  const pat = (kaeufe||[]).map(patentVon).find(Boolean);
+  if(pat){
+    mann.patent = pat.id;
+    mann.rang = pat.rang;
+    /* Ein Offizier bekommt keine Ausgabemuskete — er hat einen Degen, den er
+       selbst bezahlt hat, und der ist teurer als alles, was ein Fusilier trägt. */
+    mann.ausr.muskete = {name:'Keine Muskete mehr', zustand:0, verschleiss:0};
+    mann.ausr.seitenwaffe = {name:'Degen, selbst bezahlt', zustand:95, verschleiss:6};
+    mann.geld = Math.max(0, mann.geld - 2);   // das Patent kostete Stempelgebühr
+    /* **Der Preis des Patents, vierter Teil: Seine Leute folgen ihm schlechter.**
+       Ein Zug tut, was sein Lieutenant sagt, weil er weiß, wer der Lieutenant
+       ist. Bei diesem weiß es niemand. `sektionGuete` startet deshalb bei −25
+       und wirkt auf alles, was mit der Einheit zusammenhängt: Salven, Verluste,
+       die Abrechnung nach dem Gefecht.
+
+       **Das ist der bessere Malus als jede Gefahrzahl**, weil er den Rang an
+       der Stelle trifft, an der der Rang stattfindet — bei anderen Leuten —
+       und weil er sich abarbeiten lässt: Wer im Lager seinen Zug antreten
+       lässt, holt ihn in zwei Kapiteln auf. */
+    mann.sektionGuete = -25;
+  }
   mann.leben = lebenMax(mann);
   /* **Der Atem-Deckel gilt ab der ersten Sekunde.** `atemKlemmen()` lief bisher
      erst bei der ersten Handlung — bis dahin stand in der Seitenleiste „Atem
@@ -233,6 +266,17 @@ function gunst(id){ const p = person(id); return p ? p.gunst : 0; }
 function gunstGeben(id, n){
   const p = person(id);
   if(!p || !p.lebt) return;        // einem Toten kann man nicht mehr gefallen
+  /* ── Der gekaufte Offizier hat keine Kette über sich ──
+     **Martel und Collot geben ihm nichts, und zwar in beide Richtungen.** Sie
+     sind der Sergent und der Fourier seiner Kompanie; er ist der Mann mit den
+     Epauletten, der gestern noch nicht da war. Man lernt einander in Abenden am
+     Feuer kennen, und an diesen Abenden sitzt kein Offizier.
+
+     **Berthaud, Vernet und Grandmaison bleiben erreichbar** — sonst wäre er
+     gesperrt statt nackt, und gesperrt ist etwas anderes als allein. Er muss
+     sich ihre Fürsprache im Gefecht verdienen wie jeder andere auch, nur ohne
+     die zehn Jahre Vorlauf, die ein aufgestiegener Mann mitbringt. */
+  if(S.patent && (id==='martel' || id==='collot')) return;
   p.gunst = Math.max(-5, Math.min(5, p.gunst + n));
 }
 

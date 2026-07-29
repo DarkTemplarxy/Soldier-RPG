@@ -5,6 +5,43 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Rangleiter Phase E: die Patente
+
+**Die einzige zugelassene Ausnahme von Invariante 3 — und die Antwort auf ein gemessenes Problem.** Mit vier Kapiteln erreichte kein Lauf Rang 10; die halbe Rangleiter war gebaut und für den Spieler unsichtbar. Die Patente lösen das ohne ein neues Kapitel: Wer eines kauft, startet 1796 in Savona als Offizier.
+
+| Patent | VP | frei ab | Wertungsabzug |
+|---|---|---|---|
+| Sous-Lieutenant (Rang 7) | 110 | einmal Rang 6 getragen | −158 |
+| Lieutenant (Rang 8) | 145 | einmal Rang 8 getragen | −205 |
+
+**Freigeschaltet wird durch Leistung** (`META.bestRang`, dauerhaft über alle Läufe wie die Generalskampagnen). Der erste Weg nach oben bleibt damit der verdiente. *(Abweichung von RANGLEITER §9, das „frei ab Rang 9 / 11" vorsah: Mit vier Kapiteln wäre die Freischaltung selbst unerreichbar, und Phase E verfehlte ihren Zweck vollständig.)*
+
+**Der Ausgleich ist vierfach:** Wertungsabzug eine Rangstufe über dem gekauften Rang · **keine Kette über dir** (Martel und Collot geben nichts, in beide Richtungen — Berthaud, Vernet und Grandmaison bleiben erreichbar, sonst wäre er gesperrt statt allein) · **Gefahr +2** zusätzlich zum Rangzuschlag · **Sektionsgüte −25**, weil seine Leute nicht wissen, wer er ist.
+
+> **Der Ausgleich wurde am Hebel kalibriert, nicht am Ergebnis — und die erste Fassung war kaputt.** Geplant war ein Güte-Zuschlag von +8 in den Kapiteln 1–4. Gemessen: **40 von 40 Läufen starben in Italien, 5 % kamen bis Leoben.** Der Grund steht seit Ägypten in CLAUDE.md und wurde beim Bauen übersehen: `guete` hebt nicht nur die Gefahr, sondern lässt auch die Hilfe der Linie schrumpfen — und die ist der Grund, warum ein Gefecht überhaupt gewinnbar ist. Bei Güte 8 steht dieser Hebel am Boden (0,3), also endete kein Gefecht mehr mit einem Sieg, und jedes verlorene kostet Blut.
+>
+> Die Reihenfolge der Diagnose war die aus dem Güte-0-Leck: **erst den Mechanismus messen, dann das Ergebnis.** Drei Messungen an derselben Zahl — Gefahr +4: 0 % überlebt · +2: **8 %** · +0: 25 %. Der Zuschlag allein trug den ganzen Unterschied; die Hälfte davon ist der Preis, den der Kauf verträgt.
+
+**Neuer Prüfmodus `test/raenge.js`** (aus `test/offizier.js` hervorgegangen): alle vierzehn Ränge, je Maßstab die richtigen Pflichtknöpfe und das richtige Bild — und, genauso wichtig, das Fehlen dessen, was fehlen muss: Muskete ab 7, Atemleiste ab 10, Widerstandswert ab 12. `balance.js` kennt `PATENT=sl|lt`.
+
+**`LAUF_FASSUNG` 8 → 9** mit Wandler (`patent: null`). **Ein alter Feldzug bekommt rückwirkend kein Patent** — er ist ehrlich erspielt, und das darf ihm nicht als Strafe angerechnet werden.
+
+**Gemessen:**
+
+| | überlebt | höchster Rang | Rang 7 oder 8 |
+|---|---|---|---|
+| Erstlauf vorsichtig *(80 Läufe)* | **44 %** | **19 %** | 5 % |
+| Veteran 160 *(80 Läufe)* | **68 %** | **66 %** | 33 % |
+| **Gekaufter Leutnant** *(260 VP, 40 Läufe)* | **8 %** | — | 100 % |
+
+Beide Überlebenszahlen im Band (30–45 / 60–75). **Der „höchste Rang" liegt beim Veteranen mit 66 % sechs Punkte über dem Band** — und das ist kein Rauschen, sondern der Beweis, dass die Leitzahl stumpf geworden ist: Ein Drittel der Veteranenläufe erreicht inzwischen ein Patent, und die Zahl misst weiterhin den Sergent-major.
+
+> **Beide 40er-Erstmessungen waren Ausreißer, beide wurden nachgemessen.** Erstlauf 57 % → 44 %, Veteran 50 % → 68 %. Zwei Ausreißer in entgegengesetzte Richtungen bei n=40, und keine der Phase-E-Änderungen greift unterhalb von Rang 7. **Die Regel „bei Zweifeln 80 Läufe" hat damit zum zweiten Mal in Folge eine Fehldeutung verhindert** — sie sollte ab jetzt der Normalfall sein, nicht die Ausnahme.
+
+**Der gekaufte Leutnant ist der härteste Weg durchs Spiel** (8 % gegen 68 % des regulären Veteranen) — und er kann den Punktevorrat nie erhöhen, weil der Abzug ihn unter jeden regulären Lauf drückt. Das ist Absicht: Wer ein Patent kauft, spielt die Offiziershälfte zum Anschauen. Der Vorrat bleibt, wo er war, und ein schlechter Lauf kostet nichts (Invariante 2).
+
+---
+
 ## 2026-07-29 — Rangleiter Phase D: der Stab (Ränge 10–14)
 
 **Der dritte und der vierte sichtbare Bruch stehen — und beide bestehen im Weglassen.**
@@ -27,7 +64,7 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **Rang 12 schaltet die Generalskampagnen dauerhaft frei** (`META.generalskampagnen`, über alle Läufe). **Rang 13** bringt die Dotation (8 F je Station, das erste Einkommen ohne Sold) und den Zwischenfall „Er fragt dich etwas" — der Kaiser, und Schweigen als eine der drei Optionen. **Rang 14** feiert nichts: Der Abschlusstext nennt die Namen, die vor deinem stehen, und stellt fest, dass die Liste nicht länger wird.
 
-**`LAUF_FASSUNG` 7 → 8** mit Wandler (`adler`, `dotation`). `test/offizier.js` prüft jetzt die Ränge 7 bis 14, inklusive der beiden Dinge, die im Weglassen bestehen: keine Atemleiste ab 10, kein Widerstandswert ab 12. Der Testbot in `balance.js` kennt Bataillon und Stab; `durchspielen.js` erkennt das Gefecht an `/RUNDE |PHASE |STUNDE |TAG /` statt an `RUNDE `.
+**`LAUF_FASSUNG` 7 → 8** mit Wandler (`adler`, `dotation`). `test/raenge.js` prüft jetzt die Ränge 7 bis 14, inklusive der beiden Dinge, die im Weglassen bestehen: keine Atemleiste ab 10, kein Widerstandswert ab 12. Der Testbot in `balance.js` kennt Bataillon und Stab; `durchspielen.js` erkennt das Gefecht an `/RUNDE |PHASE |STUNDE |TAG /` statt an `RUNDE `.
 
 **Gemessen, je 40 Läufe:**
 
@@ -42,7 +79,7 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 > **Der mutige Lauf wurde mit 80 Läufen nachgemessen, und das war nötig.** Die erste Messung mit 40 Läufen ergab **25 % überlebt** — fünf Punkte über dem Band und fünfzehn über Phase C. Die eigene Regel („bei Zweifeln 80 Läufe") hat sich bewährt: Mit der doppelten Stichprobe steht der Wert bei **19 %** und damit im Band. Es gab auch keinen mechanischen Grund für einen Sprung — sämtliche Änderungen dieser Phase greifen erst ab Rang 10, und **kein einziger der 200 gemessenen Läufe hat Rang 10 erreicht.**
 
-> **Die Stabsränge sind mit vier Kapiteln unerreichbar — anders als die Offiziersränge.** Rang 7 und 8 tauchen in jeder Messreihe auf (bis zu 20 % beim Veteranen), aber bei Rang 8 ist Schluss: Rang 9 verlangt die Ehrenlegion und Ruf 150, Rang 10 dazu Ruf 180 und Reiten 40. **Phase D ist damit vollständig gebaut und ausschließlich über `test/offizier.js` geprüft** — die Härte der Ränge 10 bis 14 ist ungemessen und bleibt es, bis Phase E die Patente bringt. Das ist kein Mangel dieser Phase, sondern genau die Lücke, die Phase E schließen soll.
+> **Die Stabsränge sind mit vier Kapiteln unerreichbar — anders als die Offiziersränge.** Rang 7 und 8 tauchen in jeder Messreihe auf (bis zu 20 % beim Veteranen), aber bei Rang 8 ist Schluss: Rang 9 verlangt die Ehrenlegion und Ruf 150, Rang 10 dazu Ruf 180 und Reiten 40. **Phase D ist damit vollständig gebaut und ausschließlich über `test/raenge.js` geprüft** — die Härte der Ränge 10 bis 14 ist ungemessen und bleibt es, bis Phase E die Patente bringt. Das ist kein Mangel dieser Phase, sondern genau die Lücke, die Phase E schließen soll.
 
 ---
 
@@ -76,7 +113,7 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **`LAUF_FASSUNG` 6 → 7** mit Wandler: `einheit` (70 ab Rang 9, sonst null), `kasseRisiko`, `auftraege`, `nahkampfKapitel`.
 
-**Neuer Prüfstand `test/offizier.js`.** `durchspielen.js` erreicht Rang 7 nicht zuverlässig — ohne diesen Test wären die Offiziersknöpfe gebaut und weitgehend ungetestet. Er setzt den Rang von Hand auf 7, 8 und 9 und prüft je ein Gefecht auf die vier Befehlsknöpfe, die verschwundene Muskete, die gezeichnete Skizze und Konsolenfehler.
+**Neuer Prüfstand (heute `test/raenge.js`).** `durchspielen.js` erreicht Rang 7 nicht zuverlässig — ohne diesen Test wären die Offiziersknöpfe gebaut und weitgehend ungetestet. Er setzt den Rang von Hand auf 7, 8 und 9 und prüft je ein Gefecht auf die vier Befehlsknöpfe, die verschwundene Muskete, die gezeichnete Skizze und Konsolenfehler.
 
 **`balance.js` druckt jetzt eine Rangverteilung** (RANGLEITER §10 verlangt sie nach jeder Phase), und der Testbot kennt die Offiziersknöpfe: Gelände lesen, Front verkürzen, Degen, sonst Feuerbefehl; im Lager Fechtboden, Adjutantenauftrag und die Kasse — **immer ehrlich**, weil ein Bot, der unterschlägt, das Strafsystem misst und nicht das Spiel.
 

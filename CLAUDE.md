@@ -21,7 +21,7 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | Fertig | Noch nicht |
 |---|---|
 | Charaktererschaffung mit Pool und sechs Herkünften | Kapitel 3–11 |
-| Attribute und Fertigkeiten 0–100 mit Wachstum | Offizierspatente (Phase E) |
+| Attribute und Fertigkeiten 0–100 mit Wachstum | Generalskampagnen als Szenarien |
 | Gefecht auf zwei Maßstäben (Körper / Sektion) | Ausrüstungskauf im Spiel |
 | Voltigeur- und Grenadierzweig mit eigenen Aktionen | Orden und Ehrenlegion |
 | Ausrüstung mit Zustandsverschleiß | Pferd, Kompaniekasse, Inspektionen |
@@ -53,6 +53,7 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | **Ränge 7–9**: Muskete weg, Skizze, Säbel, Auftrag, Kompaniekasse | höhere Ordensgrade |
 | **Ränge 10–14**: Rechtecke, Operationskarte, Adler, Dotation | freiwilliger Ausstieg an den Schranken |
 | **Alle vier sichtbaren Brüche** — Fanion, Skizze, Rechtecke, Karte | |
+| **Offizierspatente** — die Offiziershälfte ab Kapitel 1 spielbar | freiwilliger Ausstieg an den Schranken |
 | **Eiserne Krone** — der erste fremde Orden | zweiter fremder Orden |
 | Ehe als Beiwerk · Duell mit Todespfad · Übungsgefecht | |
 
@@ -68,14 +69,14 @@ Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nich
 npm install playwright && npx playwright install chromium   # einmalig
 
 node test/durchspielen.js         # ein Lauf, meldet Konsolenfehler
-node test/offizier.js             # Ränge 7, 8, 9 von Hand gesetzt: Knöpfe, Muskete weg, Skizze
+node test/raenge.js               # alle 14 Ränge von Hand gesetzt: Knöpfe, Bild, und was fehlen muss
 node test/spielstand.js           # sichern, fortsetzen, sterben, alte Fassungen
 node test/durchspielen.js dist    # dasselbe mit der gebauten Einzeldatei
 node test/balance.js 40           # 40 Läufe, misst die Überlebensquote
 node werkzeug/bauen.js            # baut dist/marschallstab.html zum Weitergeben
 ```
 
-**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 40`, nach jeder Änderung am Zustand `node test/spielstand.js`, nach jeder Änderung an den Offiziersrängen `node test/offizier.js`.
+**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 40`, nach jeder Änderung am Zustand `node test/spielstand.js`, nach jeder Änderung an einem Rang `node test/raenge.js`.
 
 ---
 
@@ -566,7 +567,7 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 
 > *Martel steht in der Reihe, in der du zehn Jahre gestanden hast. Als du vorbeigehst, salutiert er. Er ist zweiundvierzig, er hat dich im April 1796 über die Pässe gebracht, und er wird nie ein Patent bekommen, weil er nicht lesen kann. Er sagt nichts dazu. Du auch nicht.*
 
-**Geprüft mit `node test/offizier.js`** — setzt den Rang von Hand auf 7 bis 14 und prüft je ein Gefecht: Sind die Pflichtknöpfe des Maßstabs da, ist die Muskete weg, wird das richtige Bild gezeichnet, ist ab Rang 10 die Atemleiste weg und ab Rang 12 der Widerstandswert, gibt es Konsolenfehler? **Ohne diesen Prüfstand wären die Offiziersknöpfe gebaut und ungetestet**, weil `durchspielen.js` sie nicht zuverlässig erreicht — derselbe Fehler wie ein stummer Filter, nur eine Ebene höher.
+**Geprüft mit `node test/raenge.js`** — setzt den Rang von Hand auf 7 bis 14 und prüft je ein Gefecht: Sind die Pflichtknöpfe des Maßstabs da, ist die Muskete weg, wird das richtige Bild gezeichnet, ist ab Rang 10 die Atemleiste weg und ab Rang 12 der Widerstandswert, gibt es Konsolenfehler? **Ohne diesen Prüfstand wären die Offiziersknöpfe gebaut und ungetestet**, weil `durchspielen.js` sie nicht zuverlässig erreicht — derselbe Fehler wie ein stummer Filter, nur eine Ebene höher.
 
 ### Ränge 10–14 — der Stab (Phase D der Rangleiter)
 
@@ -624,6 +625,38 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 **Rang 14 feiert nichts.** Der Abschlusstext nennt die Namen, die vor deinem stehen — Lannes, bei Aspern gefallen; Bessières, bei Rippach gefallen; Ney, der noch lebt — und stellt fest, dass die Liste nicht länger wird. Der Marschallstab ist ausdrücklich **die Legende, nicht das Ziel**: sechsundzwanzig in zwölf Jahren, unter Hunderttausenden.
 
 **Lieferantenverträge ab Rang 11** ersetzen die Kompaniekasse: dieselbe Struktur, eine Größenordnung darüber (0 F / +600 F, Einheitszustand +30 / −15, Risiko 0 / +35 %), mit demselben Schweigen.
+
+### Die Offizierspatente (`PATENTE` in `grundwerte.js`, Phase E der Rangleiter)
+
+**Die einzige zugelassene Ausnahme von Invariante 3** — und sie ist es, weil sie den *Ausgangspunkt* kauft und nicht den Aufstieg: Wer ein Patent hat, fängt als Offizier an und steigt deswegen keinen Schritt weiter auf.
+
+| Patent | VP | frei ab | Wertungsabzug |
+|---|---|---|---|
+| Sous-Lieutenant (Rang 7) | 110 | einmal Rang 6 getragen | −158 |
+| Lieutenant (Rang 8) | 145 | einmal Rang 8 getragen | −205 |
+
+> **Warum es sie überhaupt gibt.** Mit vier Kapiteln erreichte kein einziger von 200 gemessenen Läufen Rang 10 — die halbe Rangleiter war gebaut und für den Spieler unsichtbar. Die Patente lösen das **ohne ein neues Kapitel:** Wer eines kauft, startet 1796 in Savona und spielt die Offiziershälfte vom ersten Tag an.
+
+> **Die Freischaltung weicht bewusst von RANGLEITER §9 ab** (dort: Rang 9 und 11). Mit vier Kapiteln wäre sie damit selbst unerreichbar, und Phase E verfehlte ihren Zweck vollständig. Gewählt sind **Rang 6 und Rang 8** — beide gemessen erreichbar. `META.bestRang` läuft dauerhaft über alle Läufe, wie die Generalskampagnen.
+
+**Der Ausgleich ist vierfach**, und drei Teile davon sind keine Zahlen:
+
+| Teil | Was |
+|---|---|
+| **Wertung** | −158 / −205, eine Rangstufe *über* dem gekauften Rang. Ein Marschall mit Patent ist weniger wert als einer ohne |
+| **Keine Kette** | Martel und Collot geben nichts, in beide Richtungen. Berthaud, Vernet und Grandmaison bleiben erreichbar — er ist **allein, nicht gesperrt** |
+| **Gefahr +2** | zusätzlich zum Rangzuschlag: Er hat zehn Jahre nicht im Glied gestanden und weiß nicht, was ein Mann weiß, der es getan hat |
+| **Sektionsgüte −25** | Seine Leute wissen nicht, wer er ist. Abarbeitbar im Lager — der einzige der vier, der es ist |
+
+> **⚠ Die erste Fassung des Ausgleichs war kaputt, und zwar aus einem Grund, der schon in diesem Dokument stand.** Geplant war ein **Güte-Zuschlag von +8** in den Kapiteln 1–4. Gemessen: **40 von 40 Läufen starben in Italien**, nur 5 % kamen bis Leoben.
+>
+> Der Grund steht seit Ägypten unter „Die Eskalation": `guete` hebt nicht nur die Gefahr, sondern lässt auch **die Hilfe der Linie schrumpfen** — und die ist der Grund, warum ein Gefecht überhaupt gewinnbar ist. Bei Güte 8 steht dieser Hebel am Boden (0,3), also endete kein Gefecht mehr mit einem Sieg, und ein verlorenes Gefecht kostet Blut.
+>
+> **Regel daraus:** `guete` ist kein Schwierigkeitsregler. Wer einen Malus braucht, der nur den Mann trifft und nicht die Gewinnbarkeit, nimmt die Gefahr — **der Feind wird nicht besser, weil du ein Patent gekauft hast; du bist schlechter.**
+
+**Die 2 ist am Hebel gemessen, nicht geschätzt:** Gefahr +4 → 0 % überlebt · **+2 → 8 %** · +0 → 25 %. Der Zuschlag allein trug den ganzen Unterschied.
+
+**Der gekaufte Leutnant ist der härteste Weg durchs Spiel** — 8 % gegen 68 % des regulären Veteranen — und **er kann den Punktevorrat nie erhöhen**, weil der Abzug ihn unter jeden regulären Lauf drückt. Das ist Absicht und kein Fehler: Wer ein Patent kauft, spielt die Offiziershälfte zum Anschauen. Der Vorrat bleibt, wo er war, und ein schlechter Lauf kostet nichts (Invariante 2).
 
 ### Der Sold (`SOLD` in `grundwerte.js`, `soldAuszahlen()` in `mechanik.js`)
 
@@ -825,8 +858,18 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 | **überlebt** | **30–45 %** | **8–20 %** | **60–75 %** |
 | **höchster Rang** | **12–25 %** | **3–15 %** | **45–60 %** |
 
-Gemessen nach Phase D: überlebt **43 / 19 / 70 %**, höchster Rang **23 / 16 / 55 %**. Alle sechs im Band (der mutige „höchster Rang" einen Punkt darüber, also im Rauschen). *(Nach Phase C: 45 / 10 / 60 % und 20 / 10 / 53 %. Mit Kapitel 4, vor den Rangleiter-Phasen: 35 / 8 / 65 % und 18 / 3 / 55 %.)*
+Gemessen nach Phase E, je 80 Läufe: überlebt **44 / 19 / 68 %**, höchster Rang **19 / 16 / 66 %**. Die drei Überlebenszahlen im Band; **der „höchste Rang" liegt beim Veteranen sechs Punkte darüber** — siehe den Kasten darunter. *(Nach Phase D: 43 / 19 / 70 % und 23 / 16 / 55 %. Nach Phase C: 45 / 10 / 60 % und 20 / 10 / 53 %.)*
 
+> ### ⚠ Die Leitzahl „höchster Rang" ist jetzt stumpf — und diesmal ist es kein Rauschen
+>
+> Sie misst weiterhin den **Sergent-major (6)**, während **ein Drittel der Veteranenläufe inzwischen ein Patent erreicht** (26 von 80). Die Zahl steht deshalb bei 66 % statt bei 55 % und wird mit jedem weiteren Ausbau weiter steigen, ohne dass sie noch etwas darüber sagt, ob die Leiter trägt.
+>
+> **Der Vorbehalt aus Phase C ist damit fällig.** Dort stand: „Wer Phase E misst, entscheidet das neu." Die Zahlen dafür liegen jetzt vor — **Rang 8 erreichen 5 % der Erstläufe und 33 % der Veteranen.** Wer die Leitzahl auf Rang 8 umstellt, setzt die Bänder mit; die bisherigen (12–25 / 3–15 / 45–60) sind gegen Rang 6 geeicht und gelten dann nicht mehr. **Das ist eine Entwurfsentscheidung und keine Rechnung** — deshalb steht sie hier und ist nicht getroffen.
+>
+> **Bis dahin ist `überlebt` die belastbarere der beiden Leitzahlen.**
+
+> **Seit Phase E werden alle Leitzahlen mit 80 Läufen gemessen.** Zweimal in Folge hat eine 40er-Messung einen Ausreißer geliefert, der sich bei 80 auflöste — nach Phase D der mutige Erstlauf (25 → 19 %), nach Phase E gleich zwei in entgegengesetzte Richtungen (Erstlauf 57 → 44 %, Veteran 50 → 68 %). **Vierzig Läufe reichen für eine Richtung, nicht für eine Zahl.**
+>
 > **Der mutige Erstlauf ist mit 80 Läufen gemessen, die übrigen mit 40 — und das war kein Luxus.** Die erste 40er-Messung nach Phase D lieferte **25 % überlebt**, fünf Punkte über dem Band. Es gab keinen mechanischen Grund dafür: Alles, was Phase D geändert hat, greift ab Rang 10, und **kein einziger der 200 gemessenen Läufe hat Rang 10 erreicht.** Mit 80 Läufen steht der Wert bei 19 %. Die eigene Regel „bei Zweifeln 80 Läufe" hat damit zum ersten Mal nachweisbar eine Fehldeutung verhindert.
 
 > **⚠ Die Leitzahl „höchster Rang" ist strenggenommen von 6 auf 8 gewandert — und wird trotzdem weiter gegen 6 gedruckt.** Sie meint den höchsten mit dem gebauten Inhalt *erreichbaren* Rang, und nach Phase C erreichen **28 % der Veteranenläufe mit 260 VP ein Patent** (Rang 7 oder 8), mit 160 VP noch 13 %, und selbst ein Erstlauf ohne Vorrat hat es einmal geschafft. Möglich machen das die Sprungeinträge der Leiter zusammen mit der Regimentsschule.
@@ -863,23 +906,26 @@ Gemessen nach Phase D: überlebt **43 / 19 / 70 %**, höchster Rang **23 / 16 / 
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **überlebt** *(Leitzahl)* | **43 %** | **19 %** | **70 %** | 75 % |
-| **höchster Rang: Sergent-major** *(Leitzahl)* | **23 %** | **16 %** | **55 %** | 70 % |
-| Sergent erreicht | 48 % | 38 % | 78 % | 90 % |
-| Gestorben | 23 von 40 | **65 von 80** | 12 von 40 | 10 von 40 |
-| Italien überstanden *(Lehrstück)* | 100 % | 98 % | 98 % | 98 % |
-| Elitekompanie erreicht | 45 % | 51 % | 85 % | 100 % |
-| Caporal erreicht | 53 % | 48 % | 88 % | 100 % |
-| Caporal-fourrier erreicht | 48 % | 38 % | 78 % | 90 % |
-| **Patent erreicht (Rang 7 oder 8)** | **5 %** | **4 %** | **20 %** | **20 %** |
+| **überlebt** *(Leitzahl)* | **44 %** | **19 %** | **68 %** | 8 % |
+| **höchster Rang: Sergent-major** *(Leitzahl)* | **19 %** | **16 %** | **66 %** | — |
+| Sergent erreicht | 34 % | 38 % | 90 % | 100 % |
+| Gestorben | 45 von 80 | 65 von 80 | 26 von 80 | **37 von 40** |
+| Italien überstanden *(Lehrstück)* | 95 % | 98 % | 100 % | **68 %** |
+| Elitekompanie erreicht | 53 % | 51 % | 96 % | 23 % |
+| Caporal erreicht | 44 % | 48 % | 99 % | 100 % |
+| **Patent erreicht (Rang 7 oder 8)** | **5 %** | **4 %** | **33 %** | **100 %** |
 | **Stab erreicht (Rang 10+)** | **0 %** | **0 %** | **0 %** | **0 %** |
-| Punkte, Median | 117 | 82 | 337 | 347 |
+| Punkte, Median | 81 | 82 | 332 | **0** |
 
-*(Vier Kapitel, Rangleiter bis Phase D, Stand 29.07.2026. Der mutige Lauf über 80 Läufe, die übrigen über 40. „überlebt" heißt: alle vier hinter sich gebracht.)*
+*(Vier Kapitel, Rangleiter vollständig, Stand 29.07.2026. Die ersten drei Spalten über 80 Läufe, der gekaufte Leutnant über 40. „überlebt" heißt: alle vier hinter sich gebracht.)*
+
+> **Die letzte Spalte ist der gekaufte Leutnant** (`PATENT=lt VP=260`) — der härteste Weg durchs Spiel und der einzige, der die Offiziershälfte von der ersten Station an zeigt. Er überlebt 8 %, kommt in 68 % der Läufe nicht einmal aus Italien heraus, und sein Punkte-Median ist **null**: Der Wertungsabzug drückt ihn unter jeden regulären Lauf. **Beides ist Absicht** — wer ein Patent kauft, spielt zum Anschauen, nicht zum Punktesammeln.
+
+> **Die Zeile „Stab erreicht" ist immer noch eine Null.** Auch mit Patent: Der gekaufte Lieutenant startet auf Rang 8, und Rang 9 verlangt die Ehrenlegion. **Die Ränge 10 bis 14 bleiben damit ungemessen** und sind weiterhin nur über `test/raenge.js` geprüft. Wer sie messen will, braucht die Kapitel 5 und 6 — oder ein drittes Patent, und das wäre die falsche Antwort.
 
 > **Die letzte Zeile ist eine Null, und sie ist der wichtigste Messwert dieser Phase.** Phase D hat die Ränge 10 bis 14 vollständig gebaut — zwei neue Gefechtsbilder, zwei verschwundene Anzeigen, ein anderes Zeitmaß —, und **kein einziger von 200 Läufen hat sie gesehen.** Bei Rang 8 ist Schluss, weil Rang 9 die Ehrenlegion und Ruf 150 verlangt.
 >
-> **Geprüft ist Phase D deshalb ausschließlich über `test/offizier.js`**: dass die Knöpfe da sind, dass die Muskete weg ist, dass die Atemleiste ab 10 und der Widerstandswert ab 12 verschwinden, dass nichts in die Konsole fällt. **Wie hart die Stabsränge sind, ist ungemessen** und bleibt es, bis Phase E die Patente bringt. Das ist kein Mangel dieser Phase, sondern genau die Lücke, die Phase E schließen soll.
+> **Geprüft ist Phase D deshalb ausschließlich über `test/raenge.js`**: dass die Knöpfe da sind, dass die Muskete weg ist, dass die Atemleiste ab 10 und der Widerstandswert ab 12 verschwinden, dass nichts in die Konsole fällt. **Wie hart die Stabsränge sind, ist ungemessen** und bleibt es, bis Phase E die Patente bringt. Das ist kein Mangel dieser Phase, sondern genau die Lücke, die Phase E schließen soll.
 
 > **Die letzte Zeile ist die neue.** Sie misst, was Phase C überhaupt erst sichtbar macht: Wie oft sieht ein Lauf die Offiziershälfte? Die Antwort — 3 % im Erstlauf, 28 % beim reichen Veteranen — ist zugleich die Rechtfertigung für Phase E: Ohne die Patente bleibt der zweite Bruch für die meisten Spieler eine Zahl in der Rangtabelle.
 
@@ -962,8 +1008,11 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | Rangleiter Phase B (alle 14 vergebbar) · Erstlauf vorsichtig | 40 | — | 40 % überlebt · 23 % höchster Rang | — |
 | Rangleiter Phase C (der Offizier) · Erstlauf v / m | 40 / 40 | 100 / 98 % | 48 / 48 % | 85 / 55 |
 | dieselbe Fassung · Veteran 160 / 260 | 40 / 40 | 98 / 98 % | 88 / 95 % | 284 / 342 |
-| **Rangleiter Phase D (der Stab, gültig) · Erstlauf v / m** | **40 / 80** | **100 / 98 %** | **53 / 48 %** | **117 / 82** |
-| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **98 / 98 %** | **88 / 100 %** | **337 / 347** |
+| Rangleiter Phase D (der Stab) · Erstlauf v / m | 40 / 80 | 100 / 98 % | 53 / 48 % | 117 / 82 |
+| dieselbe Fassung · Veteran 160 / 260 | 40 / 40 | 98 / 98 % | 88 / 100 % | 337 / 347 |
+| **Rangleiter Phase E (die Patente, gültig) · Erstlauf v / m** | **80 / 80** | **95 / 98 %** | **44 / 48 %** | **81 / 82** |
+| **dieselbe Fassung · Veteran 160** | **80** | **100 %** | **99 %** | **332** |
+| **dieselbe Fassung · gekaufter Leutnant (260 VP)** | **40** | **68 %** | **100 %** | **0** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
 
@@ -1006,6 +1055,9 @@ Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang 
 | Winterquartier | ruhen unter 80 % Leben oder bei einer Wunde · sonst Fürsprache, Ausrüstung, Drill |
 | **Gefecht ab Rang 7** | Säbel, wenn die Linie bricht · Gelände lesen, solange der Vorteil aus ist · Front verkürzen unter 70 % Zug · Degen unter 45 % · sonst **immer** der Feuerbefehl. **Den gelösten Zug drückt er nie** — der ist ein Handel, kein Handgriff, und ein Bot, der ihn immer nimmt, misst nicht, ob er sich lohnt. |
 | **Lager ab Rang 7** | Kasse ehrlich ausgeben · Adjutantenauftrag, solange Vernet < 4 · Fechtboden, Zug, Karten |
+| **Gefecht ab Rang 10** | die Kompanie mit der besten Haltung nach vorn · staffeln, ehe sie bricht · Gebrochene sammeln · ab 11 der Adler |
+| **Gefecht ab Rang 12** | erst aufklären (das verkleinert jeden späteren Fehler) · dann Befehle · Reserve erst, wenn der Feind wankt · sonst **warten** |
+| **Patente** | `PATENT=sl` oder `PATENT=lt` kauft eines vor dem Einrücken und setzt `META.bestRang` so, dass es im Laden erscheint. **Das ist die einzige Messung, die die Offiziershälfte überhaupt sieht.** |
 | Szenen | der Knopf mit dem größten Abstand zwischen Wert und Schwierigkeit; riskante mit Abschlag, bei wenig Blut gar nicht |
 | Gefechts-Ereignisse | dieselbe Rechnung. **`MUT=1` sucht das Risiko** statt es zu meiden — außer es steht um sein Leben. |
 | Erschaffung | Konstitution 60, Geschick 40 — die ganzen 60 Poolpunkte. Herkunft reihum durch alle sechs. |
@@ -1334,17 +1386,20 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 ## Was als Nächstes ansteht
 
-1. **Die Rangleiter, Phase E** — die Patente (Sous-Lieutenant 110 VP, Lieutenant 145 VP), der Prüfmodus über alle vierzehn Ränge, die Rangverteilung in `balance.js`. **Phase E trägt den Schlüssel:** Solange nur vier Kapitel stehen, erreicht niemand Ruf 230 — die oberen Ränge sind gebaut und unsichtbar. Wer ein Patent kauft, spielt die Offiziershälfte vom ersten Kapitel an.
-2. **Die höheren Ordensgrade** (Officier ab 1807, Commandeur ab 1809). Sie sind in KONZEPT §6 vollständig entworfen und hängen nur an Kapiteln, die es noch nicht gibt. *(Die Dotationen sind mit Phase D erledigt.)*
-3. **Kapitel 5 bis 11** — je Kapitel ein Rang als Wohnort (RANGLEITER §10, Phase F).
-4. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
+1. **Kapitel 5 und 6** (Jena–Auerstedt 1806, Eylau & Friedland 1807) — sie sind das, was jetzt am meisten fehlt: **Ohne sie bleiben die Ränge 10 bis 14 ungemessen**, weil auch der gekaufte Lieutenant bei Rang 8 anfängt und Rang 9 die Ehrenlegion verlangt.
+2. **Die Leitzahl „höchster Rang" neu setzen** — sie misst den Sergent-major, während ein Drittel der Veteranenläufe ein Patent erreicht. Die Zahlen für die Umstellung liegen vor (siehe „Die zwei Leitzahlen"); es fehlt die Entscheidung.
+3. **Die höheren Ordensgrade** (Officier ab 1807, Commandeur ab 1809). Sie sind in KONZEPT §6 vollständig entworfen und hängen nur an Kapiteln, die es noch nicht gibt. *(Die Dotationen sind mit Phase D erledigt.)*
+4. **Kapitel 7 bis 11** — je Kapitel ein Rang als Wohnort (RANGLEITER §10, Phase F).
+5. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
 
 > **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen, und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `höchster Rang` neu gesetzt. Beides steht oben unter „Balance-Konstanten".
 >
 > **Erledigt am 29.07.2026:** Rangleiter Phase C — die Ränge 7 bis 9 (siehe „Ränge 7–9 — der Offizier"). Damit ist auch die frühere Nummer 3 der Liste eingelöst: Die **zweite Gefechtsachse „Auftrag erfüllt"** steht, und die Auszeichnungen hängen ab Rang 9 daran statt am Sieg.
 >
 > **Ebenfalls am 29.07.2026:** Rangleiter Phase D — die Ränge 10 bis 14 (siehe „Ränge 10–14 — der Stab"). **Alle vier sichtbaren Brüche stehen damit**, und die Generalskampagnen sind freigeschaltet, sobald jemand Rang 12 erreicht. Die Dotationen sind mit erledigt.
+>
+> **Und Phase E:** die Offizierspatente (siehe dort). **Die Rangleiter ist damit vollständig — gebaut, vergebbar und zugänglich.** Was bleibt, sind Kapitel und die eine offene Entwurfsfrage oben unter Nummer 2.
 
 > **⚠ Offen und ausdrücklich nicht gemessen: die Härte der Offiziersränge.** RANGLEITER §11 fragt, ob der Spieler den Anschluss verliert, wenn die Muskete weg ist — „zu messen, nicht zu beschließen: Wenn nach Rang 7 die Sterblichkeit einbricht oder explodiert, stimmt die Umstellung der Proben nicht."
 >
-> **Diese Messung ist mit vier Kapiteln unmöglich**, weil kein Lauf Rang 7 erreicht; `balance.js` sieht die Offiziersknöpfe nie. Geprüft ist bisher nur, **dass** sie funktionieren (`test/offizier.js`), nicht **wie hart** sie sind. **Wer Phase E baut, misst als Erstes den gekauften Leutnant** — und zwar gegen die vier bekannten Zahlen, nicht gegen ein Gefühl. Zwei Verdächtige stehen dabei schon fest: der Gefahrzuschlag +4/+5 und der gelöste Zug, der die Linie ganz abschaltet.
+> **Diese Messung ist mit vier Kapiteln unmöglich**, weil kein Lauf Rang 7 erreicht; `balance.js` sieht die Offiziersknöpfe nie. Geprüft ist bisher nur, **dass** sie funktionieren (`test/raenge.js`), nicht **wie hart** sie sind. **Wer Phase E baut, misst als Erstes den gekauften Leutnant** — und zwar gegen die vier bekannten Zahlen, nicht gegen ein Gefühl. Zwei Verdächtige stehen dabei schon fest: der Gefahrzuschlag +4/+5 und der gelöste Zug, der die Linie ganz abschaltet.
