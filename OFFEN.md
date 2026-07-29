@@ -108,15 +108,23 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ## 8 · Die halbe Capitaine-Quote des Veteranen ist verschwunden, und zwar vor den Gestaltungsbündeln
 
-**Gemessen, gleicher Prüfstand, gleiche 157 Stationen, Veteran 400 VP, je 40 Läufe:**
+**Gemessen, gleicher Prüfstand, gleiche 157 Stationen:**
 
-| | Weite | Capitaine | Punkte-Median |
+| Veteran 400 VP · je 40 Läufe | Weite | Capitaine | Punkte-Median |
 |---|---|---|---|
 | Zielwert-Tabelle *(122 Stationen!)* | 75 | **45 %** | 369 |
 | `4c749d7` — alle elf Kapitel, **keine** Bündel | 70 | **25 %** | 307 |
 | HEAD — mit den Bündeln | 61 | 18 % | 233 |
 
-**Die Bündel erklären den Sprung nicht.** Zwischen den letzten beiden Zeilen liegt etwa ein Sigma (n = 40 → σ ≈ 6,8 Punkte auf 25 %). Zwischen den ersten beiden liegen **zwanzig Punkte**, und die sind vor jeder Gestaltungsarbeit entstanden.
+| Erstlauf ohne Vorrat · je 80 Läufe | Weite | Ägypten überstanden | Punkte-Median |
+|---|---|---|---|
+| Zielwert-Tabelle *(122 Stationen!)* | **58** | — | 44 |
+| `4c749d7` — **keine** Bündel | **31** | 43 % | 39 |
+| HEAD — mit den Bündeln | **31** | 34 % | 34 |
+
+**Die Bündel erklären den Sprung nicht, und beim Erstläufer erklären sie gar nichts:** Dessen beide Leitzahlen sind über die Bündel hinweg **identisch** (31 und 0 %). Beim Veteranen liegt zwischen den letzten zwei Zeilen etwa ein Sigma (n = 40 → σ ≈ 6,8 Punkte auf 25 %).
+
+**Der Bruch liegt in beiden Tabellen an derselben Stelle: zwischen Zeile 1 und Zeile 2.** Zwei unabhängig gemessene Männer, dieselbe Richtung, dasselbe Zeitfenster — das ist kein Rauschen. Und die Weite sagt konkret, was passiert ist: **Der mittlere Erstläufer kam bei der 122-Stationen-Messung durch Ägypten und stirbt heute darin** (Median 58 → 31, und Ägypten liegt bei den Stationen 17–32).
 
 **Der Verdächtige ist `52211b0` „Zwei Würfe statt einem".** Er liegt genau im Fenster, und seine Wirkung passt: Der Wurf ist jetzt der Mittelwert aus zwei Würfen, also ballen sich die Ergebnisse um die Mitte — **wer unter der Aufgabe steht, scheitert deutlich öfter als vorher** (Zielwert 35: 35 % → 24 %, Zielwert 20: 20 % → 8 %). Das trifft jeden, dessen Werte nicht schon hoch sind, und es trifft ihn an *jeder* Probe eines Laufs. Die Änderung ist mit ihrer Wahrscheinlichkeitstabelle dokumentiert, aber offenbar nie gegen die beiden Leitzahlen nachgemessen worden.
 

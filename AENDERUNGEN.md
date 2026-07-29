@@ -55,7 +55,14 @@ Format: `Datum · Bereich · was · warum · gemessen`
 | Ägypten überstanden | 56 % | 53 % |
 | Punkte-Median | 307 | **233** |
 
-**Bei n = 40 ist eine Standardabweichung auf eine 25-%-Quote rund 6,8 Punkte — 25 → 18 % ist damit etwa ein Sigma, und Ägypten liegt flach.** Die Gestaltungsbündel sind in dieser Stichprobengröße **keine messbare Balance-Änderung.** Auffällig bleiben zwei Zahlen: der Punkte-Median (307 → 233) und Jena (38 → 16 %) — letzteres mit Nachbarn, die aus zwei- bis achtläufigen Stichproben bestehen, also vorerst nicht deutbar.
+| Erstlauf ohne Vorrat · je 80 Läufe | vor den Bündeln | nach den Bündeln |
+|---|---|---|
+| Weite | 31 | **31** |
+| Capitaine | 0 % | **0 %** |
+| Caporal | 34 % | 26 % |
+| Ägypten überstanden | 43 % | 34 % |
+
+**Beim Erstläufer sind beide Leitzahlen identisch — 31 und 0 %.** Das ist das sauberste Ergebnis, das dieser Prüfstand liefern kann. Beim Veteranen ist 25 → 18 % etwa ein Sigma (n = 40 → σ ≈ 6,8). **Die Gestaltungsbündel sind keine Balance-Änderung.** Am Rand des Rauschens bewegen sich Caporal (34 → 26 %) und Ägypten (43 → 34 %), beides rund 1,5 σ bei n = 80; auffällig bleiben außerdem der Punkte-Median des Veteranen und Jena (38 → 16 %), letzteres mit Nachbarn aus zwei- bis achtläufigen Stichproben und damit vorerst nicht deutbar.
 
 > **⚠ Der Vergleich hat einen älteren, größeren Befund freigelegt — und er gehört nicht diesen Bündeln.** Die Zielwert-Tabelle nennt für den Veteranen 400 **75 / 45 %**. Der Stand *vor* den Bündeln liefert **70 / 25 %**. Die Hälfte der Capitaine-Quote ist also schon vorher verloren gegangen, irgendwo zwischen der Messung bei 122 Stationen und `4c749d7`. Die Kapitel 10 und 11 hängen nur Stationen an und können eine Rangquote nicht senken; der Verdächtige in diesem Fenster ist **`52211b0` „Zwei Würfe statt einem"**, dokumentiert mit seiner Wahrscheinlichkeitstabelle, aber offenbar nie gegen die beiden Leitzahlen nachgemessen. Steht als eigener Punkt in `OFFEN.md`.
 

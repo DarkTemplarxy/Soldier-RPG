@@ -1353,18 +1353,21 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 **Das ist der gültige Vergleichsmaßstab.** Beide Spalten mit demselben Prüfstand gemessen; die linke ist `4c749d7` (alle elf Kapitel, vor den Gestaltungsbündeln), die rechte der heutige Stand.
 
-| | **Weite** (von 157) | **höchster Rang (Cpt)** | Italien | Caporal | Punkte-Median |
-|---|---|---|---|---|---|
-| Erstlauf ohne Vorrat *(80 Läufe)* | **31** | **0 %** | 99 % | 26 % | 34 |
-| Veteran 400 · vor den Bündeln *(40)* | **70** | **25 %** | 98 % | 100 % | 307 |
-| Veteran 400 · heute *(40)* | **61** | **18 %** | 100 % | 100 % | 233 |
+| | **Weite** (von 157) | **höchster Rang (Cpt)** | Italien | Caporal | Ägypten | Punkte-Median |
+|---|---|---|---|---|---|---|
+| Erstlauf · vor den Bündeln *(80 Läufe)* | **31** | **0 %** | 100 % | 34 % | 43 % | 39 |
+| Erstlauf · heute *(80)* | **31** | **0 %** | 99 % | 26 % | 34 % | 34 |
+| Veteran 400 · vor den Bündeln *(40)* | **70** | **25 %** | 98 % | 100 % | 56 % | 307 |
+| Veteran 400 · heute *(40)* | **61** | **18 %** | 100 % | 100 % | 53 % | 233 |
+
+**Beim Erstläufer sind beide Leitzahlen über die Bündel hinweg identisch — 31 und 0 %.** Das ist ein saubereres Ergebnis als beim Veteranen, wo 25 → 18 % etwa ein Sigma ist (n = 40, σ ≈ 6,8): **Die Gestaltungsbündel sind keine Balance-Änderung.** Was sich beim Erstläufer bewegt, sind Caporal (34 → 26 %) und Ägypten (43 → 34 %), beides rund 1,5 σ bei n = 80 und damit am Rand des Rauschens.
 
 **Der Abstand trägt weiterhin, und er trägt deutlich:** Weite 31 → 61 (dreißig Stationen), Capitaine 0 → 18 %. Die eigene Regel („unter 25 Punkten beim Rang trägt die Leiter nicht") ist erfüllt.
 
 > **Zwei Dinge sind beim Lesen wichtig, und das zweite ist ein offener Befund:**
 >
 > 1. **Die Weite steht mit ihrem Nenner da, und das ist ab jetzt Pflicht.** 31 von 157 ist nicht schlechter als 58 von 122 — es ist eine andere Größe.
-> 2. **Der Veteran hat gegenüber der 122-Stationen-Messung zwanzig Punkte Capitaine-Quote verloren, und das ist *vor* den Gestaltungsbündeln passiert** (45 % → 25 % → 18 %, wobei der letzte Schritt etwa ein Sigma ist). Der Verdächtige ist die Zwei-Würfe-Probe, die Schwache an jeder Probe härter trifft. **Steht als Punkt 8 in `OFFEN.md`, mit dem Messweg.** Nicht daran drehen, ohne ihn zuerst zu messen.
+> 2. **Beide Männer haben gegenüber der 122-Stationen-Messung deutlich verloren, und zwar *vor* den Gestaltungsbündeln.** Der Veteran zwanzig Punkte Capitaine-Quote (45 → 25 %), der Erstläufer siebenundzwanzig Stationen Weite (58 → 31) — und weil die Weite absolut ist, heißt das konkret: **Der mittlere Erstläufer kam damals durch Ägypten und stirbt heute darin.** Zwei unabhängige Männer, dieselbe Richtung, dasselbe Zeitfenster. Der Verdächtige ist die Zwei-Würfe-Probe, die Schwache an *jeder* Probe härter trifft. **Steht als Punkt 8 in `OFFEN.md`, mit dem Messweg.** Nicht daran drehen, ohne ihn zuerst zu messen.
 
 > ### ✓ Eingelöst: Veteranenpunkte kaufen jetzt auch Strecke
 >
