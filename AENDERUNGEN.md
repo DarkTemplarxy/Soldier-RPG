@@ -5,6 +5,18 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Der Lieutenant schreibt deinen Namen auf
+
+**Eine Frage des Entwicklers, die eine falsche Einschätzung von mir korrigiert hat.** Ich hatte Berthauds automatische Fürsprache (+1 je Gefecht aus `anerkennung()`) als zu großzügig eingestuft und vorgeschlagen, sie bei +3 zu deckeln — Begründung: Beim Sergenten falle damit eine der drei Bedingungen aus.
+
+**Gemessen war das falsch.** `anerkennung()` feuert nur bei aktiven, gelungenen Taten. Wer sich ein ganzes Gefecht lang duckt, bekommt **0**; wer feuert und steht, bekommt **+1**. Die Fürsprache ist also verdient, nicht geschenkt — und sie bildet genau das ab, was inhaltlich stimmt: **Der Lieutenant ist der Zugführer, er sieht, was seine Leute tun, und er ist der Mann, der jemanden für den Sergenten vorschlägt.** Der Deckel-Vorschlag ist verworfen; er hätte eine funktionierende Fiktion durch eine Zahlenschranke ersetzt.
+
+Dass Ruf und Berthauds Fürsprache beide die Leistung im Gefecht messen, ist keine Dopplung, sondern Verstärkung. Die *unterscheidende* Bedingung des Sergenten ist die Vakanz.
+
+**Was tatsächlich fehlte, war die Sichtbarkeit im Augenblick.** In „Was gesehen wurde" stand nur „gesehen · Ruf +1"; dass der Lieutenant dabei eine Liste führt, erfuhr man erst bei der Musterung. Jetzt steht dort beim ersten Mal je Gefecht: **„Berthaud schreibt deinen Namen auf."** Keine Zahl geändert — die Ursache steht jetzt am Ort ihrer Wirkung.
+
+---
+
 ## 2026-07-28 — Rückweg zur Übersicht
 
 Aus dem laufenden Feldzug führte kein Weg zurück zu Chronik und Verlauf — man kam nur über einen Neustart des Reiters dorthin. Jetzt steht rechts oben in der Kopfzeile ein Knopf **„Übersicht"**.

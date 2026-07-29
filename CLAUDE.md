@@ -986,6 +986,12 @@ Ohne diese vier Schritte ist das Wissen bei der nächsten Sitzung verloren, und 
 
 > **Die Vakanz wird angesagt, nicht geschenkt.** Sobald Ruf und Fürsprache für den Sergenten stimmen, setzt `vakanzPruefen()` ein Flag — und der Sergent-major fällt **im nächsten Gefecht**, nicht auf dem Bildschirm, auf dem die Zahlen stimmen. Danach rückt Martel auf seinen Posten, und Martels alte Stelle ist die, die du bekommst. Invariante 5 bleibt intakt, sie wandert nur eine Stufe: Am Anfang der Kette steht weiterhin ein Toter. Wäre der Tod sofort, drehte sich die Welt sichtbar um den Spieler.
 
+> **Warum Berthauds Fürsprache aus dem Gefecht kommt, und warum das richtig ist.** Der Lieutenant ist der Zugführer — er sieht, was seine Leute im Gefecht tun, und er ist der Mann, der jemanden für den Sergenten vorschlägt. Genau das tut `anerkennung()`: **+1 einmal je Gefecht, aber nur bei einer aktiven, gelungenen Tat** — ein Treffer, der saß, Stehenbleiben unter Beschuss, ein Bajonettangriff, eine Salve, die Linie geschlossen halten, einen Wankenden herausziehen.
+>
+> **Sie ist damit nicht geschenkt, sondern verdient.** Gemessen: Wer sich ein ganzes Gefecht lang duckt, bekommt **0**; wer feuert und steht, bekommt **+1**. Die Kette ist von vorn bis hinten stimmig — im Gefecht schreibt er den Namen auf (sichtbar in „Was gesehen wurde"), bei der Musterung heißt es entweder „Er geht die Liste durch. Bei dir hält er nicht an." oder „Berthaud nennt deinen Namen."
+>
+> *(Ein Vorschlag, diese Quelle zu deckeln, wurde am 28.07.2026 geprüft und **verworfen**: Er hätte eine funktionierende Fiktion durch eine Zahlenschranke ersetzt. Dass Ruf und Berthauds Fürsprache beide die Leistung im Gefecht messen, ist keine Dopplung, sondern Verstärkung — die *unterscheidende* Bedingung des Sergenten ist die Vakanz.)*
+
 > **Ein Henne-Ei-Fehler, gemessen gefunden.** Die erste Fassung erreichte in 120 Läufen **0 % Fourrier und 0 % Sergent**. Grund: Alle bestehenden Gunst-Quellen liefen ohne `gunstVon` und damit an Martel; Collot und Berthaud bekamen Fürsprache nur aus Handlungen, die es erst *ab* Rang 4 gibt. Behoben durch zweierlei — die Szenen und Zwischenfälle wurden nach Inhalt zugeordnet (der Fourier-Szenen an Collot, die Offiziers-Szenen an Berthaud), und **`anerkennung()` gibt einmal je Gefecht Berthaud +1**: Der Lieutenant führt die Liste der Namen. Das ist die einzige Quelle seiner Fürsprache, die schon einem Füsilier offensteht, und sie muss es sein.
 
 ### Die Sektion des Sergenten (`K.sektion`)

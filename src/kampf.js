@@ -83,10 +83,20 @@ function anerkennung(betrag, was){
      gibt (Henne und Ei, gemessen mit 0 % Sergenten in 120 Läufen). Einmal je
      Gefecht, damit sie sich nicht einsammeln lässt; wer zehn Gefechte lang
      auffällt, kommt genau auf die vier, die der Feldweg verlangt. */
-  if(!K.offizierGesehen){ K.offizierGesehen = true; gunstGeben('berthaud', 1); }
+  /* Sichtbar gemacht, wenn es passiert: Bis dahin stand nur „gesehen · Ruf +1"
+     da, und der Spieler erfuhr erst bei der Musterung, dass der Lieutenant eine
+     Liste führt („Er geht die Liste durch. Bei dir hält er nicht an."). Die
+     Ursache gehört an den Ort der Wirkung — sonst wirkt die Fürsprache wie
+     eine Zahl, die von allein wächst, statt wie das, was sie ist: Er hat
+     zugesehen. Nur beim ersten Mal je Gefecht, weil sie nur einmal steigt. */
+  let notiert = '';
+  if(!K.offizierGesehen){
+    K.offizierGesehen = true; gunstGeben('berthaud', 1);
+    notiert = ` · <span class="fein">${esc(personKurz('berthaud'))} schreibt deinen Namen auf</span>`;
+  }
   K.taten.push({was, ruf:gibt});
   if(K.zaehlung) K.zaehlung.ereignisse++;
-  return ` <span class="fein">gesehen · Ruf +${gibt}</span>`;
+  return ` <span class="fein">gesehen · Ruf +${gibt}</span>${notiert}`;
 }
 
 /* Die Güte des Gegners in diesem Gefecht — aus der Kampagne, zu der die
