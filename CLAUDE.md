@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)**, **Kapitel 5 (Jena–Auerstedt 1806)**, **Kapitel 6 (Eylau und Friedland 1807)**, **Kapitel 7 (Spanien 1808–12)** und **Kapitel 8 (Russland 1812)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)** bis **Kapitel 9 (Deutschland 1813)** — neun Feldzüge, einhundertfünfunddreißig Stationen —, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -68,11 +68,15 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | **Der Überfall** (`ueberfall:true`) — keine Linie, keine Zeugen | |
 | **Der stumme Krieg** (`stumm:true`) — die Bulletins schweigen | |
 | **`OFFEN.md`** — ein Register für alles Gemessene, nicht Entschiedene | |
-| **Kapitel 8 (Russland 1812)**, 14 Stationen, Feindgüte 10 | Kapitel 9–11 |
+| **Kapitel 8 (Russland 1812)**, 14 Stationen, Feindgüte 10 | Kapitel 10–11 |
 | **Der Aderlass** (`aderlass:n`) — der Krieg tötet zwischen den Gefechten | |
 | **Die erste Rangschranke** und der freiwillige Ausstieg | die zweite vor Waterloo |
 | **Der gestaffelte Überlebensbonus** 180/120/70 statt des Platzhalters 25 | |
 | **Der Härtemodus** (`HAERTE=n`) — ein Kapitel für sich messen | |
+| **Kapitel 9 (Deutschland 1813)**, 13 Stationen, Feindgüte 10 | Kapitel 10–11 |
+| **Die Rekruten** (`rekruten:n`) — der Exerzierplatz wird das Spiel | |
+| **Was ein Mann behält** — fünf Gewohnheiten, die Strecke kaufen | Pferd, Fernrohr |
+| **Konstitution wächst im Lauf** und darf über 100 | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -155,6 +159,7 @@ src/daten/kapitel05_jena.js     Kapitel 5 — der Krieg mit den Beinen, Feindgü
 src/daten/kapitel06_eylau.js    Kapitel 6 — der Winter schießt mit, Feindgüte 8
 src/daten/kapitel07_spanien.js  Kapitel 7 — kein Ruhm, nur Entscheidungen, Feindgüte 8
 src/daten/kapitel08_russland.js Kapitel 8 — ein Vorrat, der kleiner wird, Feindgüte 10
+src/daten/kapitel09_deutschland.js Kapitel 9 — deine Armee ist achtzehn, Feindgüte 10
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -499,12 +504,12 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 |---|---|---|---|---|
 | Italien 1796/97 | **0** | | Spanien 1808–12 | **8** |
 | Ägypten 1798/99 | **5** | | Russland 1812 | **10** |
-| Garnison 1801–04 | **0** | | Deutschland | 10 |
+| Garnison 1801–04 | **0** | | Deutschland 1813 | **10** |
 | Austerlitz 1805 | **6** | | Frankreich | 11 |
 | Jena–Auerstedt 1806 | **7** | | Hundert Tage | 12 |
 | Eylau & Friedland 1807 | **8** | | | |
 
-**Gebaut und am Hebel ausgelesen sind alle Werte bis Russland (10)** — nicht am Ergebnis geraten, sondern `feindGuete()` je Gefecht in eine Tabelle geschrieben, weil das stumme Güte-0-Leck die teuerste Lektion des Projekts war. Deutschland bis Hundert Tage bleiben eine entworfene Kurve; wer eines dieser Kapitel baut, misst seine Güte neu, statt der Zahl zu glauben.
+**Gebaut und am Hebel ausgelesen sind alle Werte bis Deutschland (10)** — nicht am Ergebnis geraten, sondern `feindGuete()` je Gefecht in eine Tabelle geschrieben, weil das stumme Güte-0-Leck die teuerste Lektion des Projekts war. Frankreich und Hundert Tage bleiben eine entworfene Kurve; wer eines dieser Kapitel baut, misst seine Güte neu, statt der Zahl zu glauben.
 
 **Güte ist die Grundlinie einer Kampagne, `haerte` die Spitze eines einzelnen Gefechts.** Beide addieren sich: Akkon steht bei Gefahr 14 + 3 (Höhepunkt) + 5 (Güte) = **22**.
 
@@ -748,6 +753,42 @@ Die Leiter der Sichtbarkeit bleibt auf ihrer untersten Stufe stehen: **Lob vor d
 >
 > **Das ist derselbe Fehler wie damals bei der Krankheit** („Ein Kranker *gewann* einen Punkt je Station"), nur eine Ebene höher, und er ist erst aufgefallen, als der Härtemodus Spanien und Russland auf dieselbe Zahl legte. **Regel: Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert** — wer einen neuen einführt, rechnet ihn zuerst gegen die 5 %.
 
+### Kapitel 9 — Deutschland 1813 (`kapitel09_deutschland.js`)
+
+**Die eigene Regel: Deine Armee ist achtzehn Jahre alt.** Die alte liegt in Russland; was 1813 antritt, sind Konskribierte des Jahrgangs 1814, die *Marie-Louises*, benannt nach einer Kaiserin, die keiner von ihnen je gesehen hat. Dreizehn Stationen, sechs Gefechte, Feindgüte 10, Sold-Moral 0,4.
+
+| Gefecht | Runden | Feindmoral | Gefahr | Güte | wirksam |
+|---|---|---|---|---|---|
+| Lützen (Großgörschen) | 7 | 62 | 10 | +10 | 20 |
+| Bautzen | 7 | 64 | 10 | +10 | 20 |
+| Dresden | 8 | 70 | 11 | +10 | 21 |
+| **Leipzig, erster Tag (Höhepunkt)** | 9 | 85 | 9 → 12 | +10 | **22** |
+| **Die Elsterbrücke (Höhepunkt)** | 6 | 55 | 9 → 12 | +10 | **22** · Überfall |
+| Hanau | 6 | 58 | 10 | +10 | 20 |
+
+> **Zum dritten Mal stand ein Entwurf über der Decke** — 23, 23, 24, 28, 29, 24, weil die Zahlen vor der Güte gedacht waren. Am Hebel ausgelesen und gesenkt, bevor die erste Messung lief. **Die Regel hat sich damit selbst bestätigt: Wer ein Kapitel baut, rechnet die Güte nicht im Kopf dazu.**
+
+### Die Rekruten (`rekruten:n`, `rekrutenStart()` in `src/kampf.js`)
+
+`rekruten:25` an der **Kampagne** senkt den Startbestand der eigenen Einheit um 25 Prozent. Mehr nicht — und das ist der Punkt: **Es wird keine Gefahr-Zahl angefasst.** Der Feind schießt 1813 nicht besser als 1812; deine Leute halten schlechter.
+
+| Was es trifft | Weil |
+|---|---|
+| Schaden jedes Feuerbefehls (`anteil`) | Der skaliert seit Rang 5 mit dem Bestand |
+| Die Schwelle, ab der die Linie bricht | `nahkampfPruefen()` löst unter 40 % aus |
+| Die Haltung der vier Kompanien ab Rang 10 | Ein Bataillon aus Achtzehnjährigen ist vollzählig und hält trotzdem nicht |
+| Das Bild | Man sieht die Lücken |
+
+**Und es ist abarbeitbar, sonst wäre es eine Mautstelle** — dieselbe Überlegung wie beim Mantel im Frost, der von einem toten Russen zu nehmen ist. `S.sektionGuete` aus den Lagerabenden hebt den Startwert wieder an, und **der Drill zahlt in diesem Kapitel doppelt** (`guetePlus()` in `mechanik.js`, eine Stelle für alle vier Quellen). Gemessen: ohne Drill 75, mit Güte 16 dann 91, mit Güte 40 wieder 100.
+
+> **Damit wird der Exerzierplatz zum eigentlichen Spiel.** Es ist derselbe Drill wie in Savona 1796 — nur stehst du auf der anderen Seite, und die Gesichter vor dir sind das eigene von damals. **Das Kapitel sagt das genau einmal, in einem Nebensatz**, und danach nie wieder.
+
+### Eine Schranke am Kapitelende ist auch ein Übergang
+
+Russlands Schlussstation trägt jetzt `typ:'uebergang'` **und** `schranke:'russland'`. Die Dispatch-Reihenfolge in `naechster()` prüft `schranke` **vor** `typ`, also läuft `zeigeUebergang()` dort nie — die Erholung steht deshalb ein zweites Mal in `schrankeWeiter()`.
+
+> **Ohne sie überlebt niemand 1813, der aus Russland kommt.** Er käme mit vier Wunden und leerem Vorrat in ein Kapitel, das seine eigene Härte hat, und stürbe an Borodino statt an Leipzig. Die Konstitution +3 gibt es dort mit — wer Russland überlebt hat, hat sie sich verdient wie sonst nur einer, der einen ganzen Feldzug hinter sich hat.
+
 ### Rang 6 — Sergent-major und der Zug
 
 **Die Decke des Prototyps hatte seit Boulogne ein Gesicht.** Dort stand: *„Nichts frei. Auf dem Posten sitzt Martel, zweiundvierzig und gesund."* Jetzt kommt der Feldzug, in dem eine Vakanz entstehen kann.
@@ -950,6 +991,7 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 | Sergent-major | 2,00 | | Eylau & Friedland 1807 | **0,6** |
 | Sous-Lieutenant | 2,10 | | Spanien 1808–12 | **0,7** |
 | | | | Russland 1812 | **0,1** |
+| | | | Deutschland 1813 | **0,4** |
 
 > **Russlands 0,1 ist der niedrigste Wert des Spiels, und er ist keine Härteschraube.** Es gibt dort nichts zu kaufen (`ersatz:false`), also wäre jeder Sold ohnehin Zierde; die Zahl sagt nur, was sie sagt. Historisch war es genau so — der Sold der Großen Armee kam 1812 nicht mehr nach, und was ausgezahlt wurde, war Papier.
 
@@ -1196,25 +1238,41 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 >
 > **Damit sind alle Zahlen vor dem 29.07.2026 nicht mehr unmittelbar vergleichbar.** Sie bleiben in der Verlaufstabelle stehen und sind dort als Sergent-major-Zahlen zu lesen.
 
-**Gemessen mit Kapitel 8** *(Erstlauf 80 Läufe, die Veteranen je 40, alle vorsichtig)*:
+**Gemessen nach „früher sterben, länger leben"** *(Erstlauf 80 Läufe, die Veteranen je 40, alle vorsichtig)*:
 
-| | **Weite** (von 122) | **höchster Rang (Cpt)** | Punkte-Median |
-|---|---|---|---|
-| Erstlauf ohne Vorrat | **57,3** | **11 %** | 121 |
-| Veteran 160 | **61,9** | **30 %** | 284 |
-| Veteran 400 | **60,6** | **38 %** | 317 |
+| | **Weite** (von 122) | **höchster Rang (Cpt)** | Italien | Punkte-Median |
+|---|---|---|---|---|
+| Erstlauf ohne Vorrat | **58** | **8 %** | 100 % | 44 |
+| Veteran 160 | **70** | 15 % | 95 % | 261 |
+| Veteran 400 | **75** | **45 %** | 100 % | 369 |
 
-> ### ⚠ Der wichtigste Befund dieser Messreihe: Veteranenpunkte kaufen Rang, aber keine Strecke
+> ### ✓ Eingelöst: Veteranenpunkte kaufen jetzt auch Strecke
 >
-> **Der Rang trägt: 11 → 30 → 38, also 27 Punkte** — über der selbstgesetzten Grenze von 25, die Leiter hält also.
+> **Beide Leitzahlen tragen, und beide monoton:**
 >
-> **Die Weite trägt nicht: 57 → 62 → 61.** Vier Stationen von hundertzweiundzwanzig, und der Vierhunderter liegt unter dem Hundertsechziger. Das ist Rauschen, keine Progression.
+> | | vorher | jetzt |
+> |---|---|---|
+> | Weite Erstlauf → Veteran 400 | 57 → 61 (**4 Stationen**) | 58 → 75 (**17 Stationen**) |
+> | Rang Erstlauf → Veteran 400 | 11 → 38 % (27 Punkte) | 8 → 45 % (**37 Punkte**) |
 >
-> **Zusammen gelesen sagen die beiden Zeilen etwas Genaueres, als jede für sich könnte:** Wer mit Vorrat einrückt, kommt **nicht weiter**, sondern **höher** — und weil die Offiziersränge die gefährlichsten des Spiels sind (+4/+5 Gefahr je Runde gegen +2 beim Unteroffizier und 0 bei der Mannschaft), frisst der Aufstieg den Vorteil genau wieder auf. Der Veteran tauscht seine Punkte gegen Epauletten, und die Epauletten zahlt er mit dem Leben zurück.
+> Vorher war der Befund: *„Wer mit Vorrat einrückt, kommt nicht weiter, sondern höher"* — die Offiziersränge (+4/+5 Gefahr) fraßen den gekauften Vorteil genau wieder auf. Die Gegenmaßnahmen greifen an drei Stellen, und **keine davon läuft über den Rang**: die fünf Gewohnheiten (Zermürbung zwischen den Gefechten), die wachsende Konstitution (+3 je Übergang, belohnt Strecke) und der tiefere Sockel (der Erstläufer startet schwächer).
 >
-> **Das ist `OFFEN.md` Punkt 1, jetzt mit dem schärfsten Beleg, den es dafür gibt** — und es ist auch die Antwort darauf, warum „früher sterben, länger leben" (Sockel, wachsende Konstitution) genau die richtige Richtung ist: Es fehlt eine Progression, die **im Lauf** wirkt und nicht über den Rang läuft.
+> **Nebenbei ist auch der Ausreißer weg**, der seit Kapitel 5 in `OFFEN.md` stand: Der Veteran mit 400 VP liegt jetzt über dem mit 160, in beiden Zahlen.
 
-**Bänder: noch nicht gesetzt.** Die Weite ist eine Messung alt. Bevor daraus ein Sollwert wird, braucht es die drei Zahlen nach dem nächsten Eingriff (Aufgabe #31) — sonst eicht man ein Band gegen einen Zwischenstand. Bis dahin ist **der Abstand** der Maßstab, wie bisher: unter 25 Punkten beim Rang trägt die Leiter nicht.
+> ### ⚠ Was der tiefere Sockel gekostet hat — und es ist nicht das Überleben
+>
+> **Italien bleibt bei 100 %.** Der Sollwert des Entwicklers („darf töten, aber nicht mehr als 20 % im Erstlauf") ist nicht einmal berührt; der Sockel wirkt weiter hinten. Es wäre also noch Luft nach unten.
+>
+> **Bezahlt wird an zwei anderen Stellen, und beide sind gewollt, aber sichtbar:**
+>
+> 1. **Der Erstläufer bleibt jetzt meistens Füsilier** — 45 von 80 Läufen, vorher 24. Elitekompanie 23 % statt 50, Caporal 28 % statt 61. Der erste Mann sieht vom Spiel deutlich weniger als vorher.
+> 2. **Der Punkte-Median des Erstlaufs fällt von 121 auf 44.** Das ist die Zahl, die den *nächsten* Lauf finanziert — die Rampe von Lauf 1 zu Lauf 2 ist damit flacher geworden, obwohl der Bereich weiterhin bis 452 reicht.
+>
+> **Beides ist geprüft und ausdrücklich in Ordnung** *(Entscheidung des Entwicklers, 29.07.2026)*. Wer es zurücknehmen will, hebt den Sockel auf 20 und behält Schritt 5 und die wachsende Konstitution — dann bleibt die feinere Verteilung, ohne dass der erste Lauf so viel ärmer wird.
+
+**Bänder: noch nicht gesetzt.** Die Weite ist zwei Messungen alt, und die zweite kam nach einem Eingriff. Bis dahin ist **der Abstand** der Maßstab: unter 25 Punkten beim Rang trägt die Leiter nicht.
+
+*(Stand davor, gegen dieselben Leitzahlen: Erstlauf 57,3 / 11 %, Veteran 160 61,9 / 30 %, Veteran 400 60,6 / 38 %.)*
 
 > **Der Veteran wird mit `VP=400` gemessen, nicht mehr mit 160.** Ein Spitzenlauf bringt mit acht Kapiteln über 470 Punkte; ein Bot mit 160 ist nicht mehr der Veteran, den das Spiel hervorbringt, sondern der aus dem zweiten Lauf. `VP=160` bleibt als dritte Messung stehen, trägt aber kein Band.
 
@@ -1790,7 +1848,7 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 ## Was als Nächstes ansteht
 
-1. **Kapitel 9 bis 11** (Deutschland 1813, Frankreich 1814, Die Hundert Tage 1815). Die Datendateien liegen, eingehängt sind sie nicht — jedem fehlt noch ein System: **Rekruten und der Adler** (9), **die zweite Schranke mit dem Halbsold** (10), **der Rückruf mit einer echten Ablehnung und der Lebensepilog** (11).
+1. **Kapitel 10 und 11** (Frankreich 1814, Die Hundert Tage 1815). Die Datendateien liegen, eingehängt sind sie nicht — beiden fehlt noch ein System: **die zweite Schranke mit dem Halbsold** (10), **der Rückruf mit einer echten Ablehnung und der Lebensepilog** (11).
 2. **Die höheren Ordensgrade** (Commandeur ab 1809, Grand Officier). Sie sind in KONZEPT §6 vollständig entworfen; Rang 13 fordert bereits einen Grad, den es nicht gibt.
 3. **Die Layoutüberarbeitung** nach dem Entwurfspaket — Rangabzeichen für alle vierzehn Ränge, Beförderungsbescheide in zehn Graden, der Stationsbogen als ein Blatt. **Drei unverrückbare Regeln:** keine Bilddatei, keine Schriftdatei, klassische Skripte.
 4. **Alles, was in `OFFEN.md` steht** — allen voran die flache Überlebensprogression (Punkt 1).

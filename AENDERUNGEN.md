@@ -5,6 +5,18 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Kapitel 9: Deutschland 1813, und die Rekruten
+
+**Die eigene Regel: Deine Armee ist achtzehn Jahre alt.** Dreizehn Stationen, sechs Gefechte, Feindgüte 10, Sold-Moral 0,4.
+
+**`rekruten:25`** (`rekrutenStart()` in `src/kampf.js`): Der Startbestand der eigenen Einheit sinkt um ein Viertel. Das trifft den Schaden jedes Feuerbefehls, die Schwelle, ab der die Linie bricht (`nahkampfPruefen()` unter 40 %), die Haltung der vier Kompanien ab Rang 10 und das Bild. **Es hebt keine einzige Gefahr-Zahl** — der Feind schießt 1813 nicht besser als 1812, deine Leute halten schlechter.
+
+**Und es ist abarbeitbar, sonst wäre es eine Mautstelle** — dieselbe Überlegung wie beim Mantel im Frost. `S.sektionGuete` hebt den Startwert wieder, und der Drill zahlt in diesem Kapitel **doppelt** (`guetePlus()` in `mechanik.js`, eine Stelle für alle vier Quellen). Gemessen: ohne Drill 75, mit Güte 16 dann 91, mit Güte 40 wieder 100 — und Kapitel ohne `rekruten` bleiben bei 100.
+
+**Gefechtswerte gegen die Decke geeicht — zum dritten Mal stand der Entwurf darüber.** Am Hebel ausgelesen: 23, 23, 24, 28, 29, 24, weil die Zahlen vor der Güte gedacht waren. Jetzt 20 · 20 · 21 · 22 · 22 · 20. **Die Regel hat sich damit selbst bestätigt: Wer ein Kapitel baut, rechnet die Güte nicht im Kopf dazu, sondern liest `feindGuete()` aus.**
+
+**Russlands Schlussstation trägt jetzt `typ:'uebergang'` statt `typ:'ende'`** — und behält die Schranke. Weil die Dispatch-Reihenfolge `schranke` vor `typ` prüft, läuft `zeigeUebergang()` dort nie; die Erholung samt Konstitution +3 steht deshalb ein zweites Mal in `schrankeWeiter()`. **Ohne sie überlebt niemand 1813, der aus Russland kommt** — er käme mit vier Wunden und leerem Vorrat in ein Kapitel mit eigener Härte.
+
 ## 2026-07-29 — Früher sterben, länger leben: Sockel 15, Schritt 5, wachsende Konstitution
 
 Vier Änderungen, die dieselbe Lücke von zwei Seiten angehen — der Erstlauf wird verwundbarer, die Strecke des Veteranen länger. Zusammen gemessen, weil jede für sich im Rauschen von ±8 Punkten läge.

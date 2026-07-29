@@ -277,7 +277,16 @@ function starteKampf(n){
                  die Ruf-Ereignisse (Text), `zaehlung` sind die Zahlen dahinter. */
               zaehlung:{schaden:0, serie:0, bestSerie:0, ereignisse:0, vorn:false, gedeckt:0, offen:0},
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
-              sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
+              /* **`rekruten` — die eigene Regel von 1813.** Deine Leute treten
+                 nicht mit voller Zahl an, sondern mit dem, was von einem
+                 Verband übrig ist, den es vor sechs Wochen noch nicht gab.
+                 Das trifft alles, was am Bestand hängt: den Schaden der
+                 Feuerbefehle (`anteil`), die Schwelle, ab der die Linie
+                 bricht, und das Bild. **Es hebt keine einzige Gefahr-Zahl** —
+                 die Härte kommt aus dem eigenen Zustand, nicht aus einem
+                 besseren Feind. Abarbeitbar: Drill im Lager zahlt hier
+                 doppelt, und `S.sektionGuete` hebt den Startwert wieder. */
+              sektion:rekrutenStart(), sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
               rollend:0,
               /* Der Offizier: gelöster Zug, Geländevorteil, gezogener Degen —
                  und `nahkampf`, die Runden, in denen das alles nichts gilt. */
@@ -308,13 +317,41 @@ function starteKampf(n){
    Buchstaben. Genau darin liegt der Unterschied zu allen Rängen davor: Bis
    Rang 9 hast du entschieden, was **du** tust. Ab hier entscheidest du, wer
    stirbt. */
+/* ══════════════════ DIE REKRUTEN (1813) ══════════════════
+
+   **Deine Armee ist achtzehn Jahre alt.** Die alte liegt in Russland; was
+   1813 antritt, sind Konskribierte des Jahrgangs 1814, vorzeitig eingezogen,
+   und viele halten die Muskete zum ersten Mal, als man sie ihnen aushändigt.
+
+   `rekruten:n` an der **Kampagne** senkt den Startbestand deiner Einheit um n
+   Prozent. Mehr nicht — und das ist der Punkt: **Es wird keine Gefahr-Zahl
+   angefasst.** Der Feind schießt 1813 nicht besser als 1812; deine Leute
+   halten schlechter. Das trifft genau die Größen, die ohnehin am Bestand
+   hängen — den Schaden jedes Feuerbefehls, die Schwelle, ab der die Linie
+   bricht (`nahkampfPruefen()` bei unter 40), und das Bild.
+
+   **Und es ist abarbeitbar, sonst wäre es eine Mautstelle:** `S.sektionGuete`
+   aus den Lagerabenden hebt den Startwert wieder an, und der Drill zahlt in
+   diesem Kapitel doppelt. Damit wird der Exerzierplatz zum eigentlichen
+   Spiel — dasselbe Exerzieren wie in Savona 1796, nur stehst du jetzt auf
+   der anderen Seite. */
+function rekrutenStart(){
+  const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
+  const roh = (k && k.rekruten) | 0;
+  if(!roh) return 100;
+  return Math.max(40, 100 - roh + Math.min(roh, (S.sektionGuete||0)));
+}
+
 function kompanienStart(){
   /* Die Güte kommt aus dem Lager (`S.sektionGuete`), wie schon bei Sektion und
-     Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl. */
+     Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl.
+     Die Rekruten schlagen auf die Haltung, nicht auf den Bestand: Ein
+     Bataillon aus Achtzehnjährigen ist vollzählig und hält trotzdem nicht. */
   const g = Math.min(20, (S.sektionGuete||0)/2);
+  const roh = rekrutenStart();
   return ['1.','2.','3.','4.'].map((nm,i)=>({
     name: nm+' Kompanie', kurz: nm[0],
-    bestand: 100, haltung: 70 + Math.round(g) - i*3, vorn: false
+    bestand: 100, haltung: Math.max(25, 70 + Math.round(g) - i*3 - (100-roh)), vorn: false
   }));
 }
 

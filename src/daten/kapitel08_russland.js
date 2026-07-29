@@ -328,7 +328,7 @@ const KAPITEL8 = [
        belastung:8}}
   ]},
 
-/* 122 */ {typ:'ende',id:'ende_russland',datum:'Ende Dezember 1812 · Königsberg',ort:'Die Listen werden neu geschrieben',
+/* 122 */ {typ:'uebergang',id:'ende_russland',datum:'Ende Dezember 1812 · Königsberg',ort:'Die Listen werden neu geschrieben',
   schranke:'russland',
   text:[
     'In Königsberg wird gesammelt, gezählt und neu eingeteilt. Was von der Großen Armee übrig ist, füllt keine Division.',
@@ -336,7 +336,7 @@ const KAPITEL8 = [
     'Es wird eine neue Armee aufgestellt. Sie wird aus Konskribierten des Jahrgangs 1813 bestehen und aus denen, die man aus Spanien holt, und sie wird Offiziere brauchen — Offiziere, die wissen, wie eine Kolonne bei minus zwanzig Grad zusammenbleibt.',
     'Was man nicht mehr braucht, sind Unteroffiziere. Davon gibt es genug, und die meisten von ihnen wollen nach Hause.'
   ],
-  ausblick:'<b>Hier endet der gebaute Stand.</b> Im Frühjahr 1813 steht eine neue Armee am Rhein. Sie ist achtzehn Jahre alt, hat noch nie geschossen und wird nach dem Namen einer Kaiserin benannt, die keiner von ihnen je gesehen hat.'}
+  ausblick:'Im Frühjahr 1813 steht eine neue Armee am Rhein. Sie ist achtzehn Jahre alt, hat noch nie geschossen und wird nach dem Namen einer Kaiserin benannt, die keiner von ihnen je gesehen hat.'}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

@@ -87,7 +87,7 @@ const KAPITEL9 = [
         gelaende:'Vier Dörfer in einer Mulde, Gärten, Mauern, Teiche',
         stellung:'Erstes Treffen, im zweiten Dorf'},
   intro:'Es hängt nicht am Mut. Es hängt daran, ob drei Wochen Drill reichen.',
-  runden:7,feindMoral:62,gefahr:13,gelaende:'damm',
+  runden:7,feindMoral:62,gefahr:10,gelaende:'damm',
   sieg:{text:'Am Abend gehören euch die Dörfer. Es ist ein Sieg, und er hat zwanzigtausend Mann gekostet, und verfolgen kann ihn niemand, weil keine Kavallerie da ist.\\n\\nAm nächsten Tag reitet der Kaiser die Front ab und nennt die jungen Bataillone beim Namen. Es ist nicht üblich, und es ist an diesem Tag verdient.',ruf:8,ruhm:true},
   niederlage:{text:'Euer Dorf geht dreimal verloren und wird zweimal zurückgenommen, das dritte Mal von einem anderen Regiment. Am Abend ist die Schlacht gewonnen. Was in eurem Dorf liegt, ist zur Hälfte unter zwanzig.',ruf:-4,belastung:12}},
 
@@ -105,7 +105,7 @@ const KAPITEL9 = [
         gelaende:'Terrassen, Bachtäler, Feldschanzen',
         stellung:'Erstes Treffen, Mitte'},
   intro:'Man gewinnt und hat nichts davon. Zum zweiten Mal in drei Wochen.',
-  runden:7,feindMoral:64,gefahr:13,gelaende:'mauer',
+  runden:7,feindMoral:64,gefahr:10,gelaende:'mauer',
   sieg:{text:'Am Abend stehen die Höhen leer. Kein Gefangener, kein Geschütz, keine Fahne — sie sind abgezogen, wie man abzieht, wenn man weiß, dass niemand hinterherkommt.\\n\\nDer Kaiser sagt am Abend einen Satz, den ein Adjutant aufschreibt: Wie, nach einem solchen Gemetzel, kein Ergebnis? Es ist die erste Frage dieser Art, die er stellt.',ruf:6},
   niederlage:{text:'Euer Angriff bleibt auf der zweiten Terrasse liegen, bis die Stellung von rechts aufgerollt wird. Am Abend ist die Höhe genommen, der Feind abgezogen, und niemand hat etwas gewonnen.',ruf:-3,belastung:10}},
 
@@ -143,7 +143,7 @@ const KAPITEL9 = [
         gelaende:'Gärten, Weinberge, ein Bachtal · alles im Regen',
         stellung:'Erstes Treffen, linker Flügel'},
   intro:'Das Pulver ist nass. Was heute entscheidet, ist, wer näher herangeht.',
-  runden:8,feindMoral:70,gefahr:14,gelaende:'damm',
+  runden:8,feindMoral:70,gefahr:11,gelaende:'damm',
   sieg:{text:'Am Abend des 27. ziehen sie nach Böhmen ab und lassen fünfzehntausend Gefangene und alle Geschütze des linken Flügels zurück.\\n\\nEs ist der letzte große Sieg dieser Armee. In derselben Woche verliert sie an der Katzbach, bei Kulm und bei Dennewitz drei Schlachten, in denen der Kaiser nicht anwesend war, und die Summe dieser drei ist größer als Dresden.',ruf:10,ruhm:true},
   niederlage:{text:'Euer Angriff kommt im Schlamm nicht über den Weinberg. Was den Flügel aufrollt, ist zwei Stunden später die Kavallerie. Der Sieg ist vollständig, und drei andere Schlachten in derselben Woche sind es auch — nur andersherum.',ruf:-3,belastung:12}},
 
@@ -187,7 +187,7 @@ const KAPITEL9 = [
         gelaende:'Sanfte Höhen, Dörfer, Teiche, achtzehnhundert Geschütze auf acht Kilometern',
         stellung:'Erstes Treffen, vor Wachau'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Und der Sieg zählt nicht — die Stellung zählt.',
-  runden:9,feindMoral:85,gefahr:15,gelaende:'damm',
+  runden:9,feindMoral:85,gefahr:9,gelaende:'damm',
   sieg:{text:'Am Abend steht ihr, wo ihr am Morgen gestanden habt. Das ist der Auftrag, und er ist erfüllt.\\n\\nIn der Nacht rücken auf der anderen Seite hunderttausend Mann nach, die am Morgen noch nicht da waren. Auf eurer Seite rückt niemand nach.',ruf:10,ruhm:true},
   niederlage:{text:'Die Höhe geht am Nachmittag verloren und wird nicht zurückgenommen. In der Nacht wird die Stellung um zwei Kilometer zurückverlegt, und auf der anderen Seite rücken hunderttausend nach.',ruf:-4,belastung:14}},
 
@@ -206,7 +206,7 @@ const KAPITEL9 = [
         gelaende:'Gassen, Gärten, ein Fluss von vierzig Metern und keine Brücke',
         stellung:'Nachhut, diesseits'},
   intro:'Es gibt keine Brücke mehr. Es gibt einen Fluss, und was hinüber soll, muss hindurch.',
-  runden:6,feindMoral:55,gefahr:16,gelaende:'bruecke',
+  runden:6,feindMoral:55,gefahr:9,gelaende:'bruecke',
   sieg:{text:'Du kommst hinüber. Wie, wirst du später erzählen können, aber nicht gern.\\n\\nVon den dreißigtausend, die diesseits standen, kommen etwa zehntausend durch. Der Rest ist gefangen oder liegt in der Elster; darunter ein Marschall, der schwimmen wollte und es nicht konnte.',ruf:8,ruhm:true},
   niederlage:{text:'Du kommst hinüber, ohne etwas mitzubringen — keine Verwundeten, keine Wagen, keinen von denen, die dir am Morgen unterstanden. Am anderen Ufer setzt du dich hin und siehst zurück auf eine Stadt, die euch seit gestern nicht mehr gehört.',ruf:-4,belastung:18}},
 
@@ -232,7 +232,7 @@ const KAPITEL9 = [
         gelaende:'Wald, eine Lichtung, dahinter offenes Feld und die Kinzig',
         stellung:'Erstes Treffen, hinter den Gardegeschützen'},
   intro:'Kein Sieg. Ein Durchbruch. Der Unterschied ist, dass man danach weitergeht.',
-  runden:6,feindMoral:58,gefahr:14,gelaende:'damm',
+  runden:6,feindMoral:58,gefahr:10,gelaende:'damm',
   sieg:{text:'Am Abend ist die Straße frei. Neuntausend Bayern und Österreicher liegen auf dem Feld; von euch fünftausend.\\n\\nZwei Tage später steht ihr am Rhein. Es ist der 2. November 1813, und zum ersten Mal seit siebzehn Jahren steht diese Armee an der Grenze und nicht dahinter.',ruf:7,ruhm:true},
   niederlage:{text:'Euer Angriff bleibt in der Lichtung liegen. Was den Durchbruch macht, sind die Gardegeschütze und ein anderes Regiment. Die Straße ist frei, und ihr geht darauf, wie alle anderen auch.',ruf:-3,belastung:12}},
 

@@ -132,7 +132,7 @@ const LAGER_TUN = {
   rekruten:{label:'Die Rekruten für deine Sektion aussuchen',
     cost:'Menschenkenntnis · wer neben dir steht, entscheidet mit',
     tu(){ const p = probe('menschenkenntnis',40);
-      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 12 : -6);
+      guetePlus(p.erfolg ? 12 : -6);
       nutzen('autoritaet',1);
       return p.erfolg
         ? 'Du gehst die Neuen ab und siehst nicht auf die Schultern, sondern auf die Hände und auf die Augen. Zwei nimmst du, die niemand wollte, und einen Großen lässt du stehen. Man wird dich in vier Wochen dafür verstehen. <span class="fein">Deine Sektion wird besser</span>'
@@ -141,7 +141,7 @@ const LAGER_TUN = {
   sektion:{label:'Deine zwanzig Mann exerzieren lassen',
     cost:'Autorität und Drill · Ruf +1 · deine Sektion hält besser',
     tu(){ nutzen('autoritaet',2.5); nutzen('drill',2.5); S.ruf+=1;
-      S.sektionGuete = (S.sektionGuete||0) + 8;
+      guetePlus(8);
       return 'Zwanzig Mann in zwei Gliedern, Salve auf Kommando, vierzig Mal. Beim vierzigsten geht es gleichzeitig los, und das Geräusch ist ein einziges. Genau darum geht es: Zwanzig Musketen, die nacheinander knallen, sind Lärm. Zwanzig auf einmal sind eine Wand. <span class="fein">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'; }},
 
   tornister:{label:'Mit vollem Tornister auf den Hügel und zurück',
@@ -167,7 +167,7 @@ const LAGER_TUN = {
   zugfuehren:{label:'Deinen Zug selbst antreten lassen',
     cost:'Autorität und Taktik · dein Zug hält besser',
     tu(){ nutzen('autoritaet',2.5); nutzen('taktik',2);
-      S.sektionGuete = (S.sektionGuete||0) + 8;
+      guetePlus(8);
       S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+5);
       return 'Sechzig Mann, drei Sergenten, und die Sergenten machen die Arbeit. Deine besteht darin, dazustehen und an drei Stellen etwas zu sagen, das keiner der drei sagen könnte, ohne den anderen zu übergehen. <span class="fein">Autorität und Taktik steigen · dein Zug hält besser</span>'; }},
 
@@ -527,7 +527,7 @@ const WINTER_TUN = {
   ausbilden:{label:'Die Rekruten des Jahrgangs ausbilden', cost:'Autorität und Drill · deine Sektion wird besser',
     tu(){ const p = probe('autoritaet', 40);
       nutzen('autoritaet',3); nutzen('drill',3);
-      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 14 : 5);
+      guetePlus(p.erfolg ? 14 : 5);
       if(p.erfolg) S.ruf += 1;
       return p.erfolg
         ? 'Die Konskribierten des Jahrgangs XI sind achtzehn und haben noch nie einen Toten gesehen. Du hast vier Wochen, ihnen die zwölf Handgriffe beizubringen, und du nimmst dir acht. Danach laden sie im Schlaf. <span style="color:var(--faint)">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'
@@ -886,6 +886,25 @@ function zeigeSchranke(n){
 function schrankeWeiter(){
   const n = KAPITEL[LAUF.node];
   S.log.push((n.ort||'') + ': weitermarschiert');
+  /* **Eine Schranke am Kapitelende ist auch ein Übergang.** Wer weitergeht,
+     hat denselben Winter vor sich wie jeder andere zwischen zwei Feldzügen —
+     und ohne ihn überlebt niemand 1813, der aus Russland kommt: Er käme mit
+     vier Wunden und leerem Vorrat in ein Kapitel, das seine eigene Härte
+     hat, und stürbe an Borodino statt an Leipzig.
+
+     Die Dispatch-Reihenfolge in `naechster()` prüft `schranke` **vor**
+     `typ`, also läuft `zeigeUebergang()` hier nie. Deshalb steht die
+     Erholung an dieser Stelle noch einmal — mitsamt der Konstitution, denn
+     wer Russland überlebt hat, hat sie sich verdient wie sonst nur einer,
+     der einen ganzen Feldzug hinter sich hat. Reihenfolge wie dort: erst
+     der Zuwachs, dann auffüllen. */
+  if(n.typ === 'uebergang'){
+    S.attr.konstitution = (S.attr.konstitution|0) + 3;
+    S.wunden = [];
+    S.leben = lebenMax();
+    S.atem = 100; atemKlemmen();
+    S.belastung = Math.max(0, Math.floor(S.belastung/2));
+  }
   stationErledigt();
   naechster();
 }

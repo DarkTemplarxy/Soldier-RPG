@@ -136,6 +136,23 @@ function soldFaktor(){
    > einen Punkt je Station"), nur eine Ebene höher, und er fiel erst auf,
    > als der Härtemodus Spanien und Russland auf dieselbe Zahl legte.
    > **Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert.** */
+/* ── Der Drill zahlt doppelt, wo die Leute nichts können ──
+
+   **Sonst wäre `rekruten` eine Mautstelle statt einer Regel.** Ein Kapitel,
+   dessen eigene Schwierigkeit man nicht abarbeiten kann, ist keine
+   Entscheidung, sondern ein Abzug — dieselbe Überlegung wie beim Mantel im
+   Frost, der von einem toten Russen zu nehmen ist.
+
+   1813 heißt das: Der Exerzierplatz wird zum eigentlichen Spiel. Es ist
+   derselbe Drill wie in Savona 1796, nur stehst du auf der anderen Seite,
+   und die Gesichter vor dir sind das eigene von damals. */
+function guetePlus(n){
+  const k = kampagneVon(KAPITEL[LAUF?LAUF.node:0]);
+  const faktor = (k && k.rekruten) ? 2 : 1;
+  S.sektionGuete = (S.sektionGuete||0) + Math.round(n*faktor);
+  return S.sektionGuete;
+}
+
 function aderlass(n){
   const k = kampagneVon(n);
   let wert = k && k.aderlass ? k.aderlass : 0;
