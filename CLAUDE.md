@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)** und **Kapitel 4 (Austerlitz 1805)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)** und **Kapitel 5 (Jena–Auerstedt 1806)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -56,6 +56,10 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | **Offizierspatente** — die Offiziershälfte ab Kapitel 1 spielbar | freiwilliger Ausstieg an den Schranken |
 | **Eiserne Krone** — der erste fremde Orden | zweiter fremder Orden |
 | Ehe als Beiwerk · Duell mit Todespfad · Übungsgefecht | |
+| **Kapitel 5 (Jena–Auerstedt 1806)**, 17 Stationen, Feindgüte 7 | Kapitel 6–11 |
+| **Die Tempowahl** — drei Marschknöpfe, forciert überspringt eine Station | Überfall, Frost, Schranken |
+| **Rangfassungen in Szenen** (`rangText`, `rangOptionen`) | |
+| **Prüfstand `test/kapitel.js`** — ein Kapitel auf vier Rängen | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -70,13 +74,18 @@ npm install playwright && npx playwright install chromium   # einmalig
 
 node test/durchspielen.js         # ein Lauf, meldet Konsolenfehler
 node test/raenge.js               # alle 14 Ränge von Hand gesetzt: Knöpfe, Bild, und was fehlen muss
+node test/kapitel.js jena         # ein Kapitel mit vier künstlichen Rängen durchlaufen (Grundsatz 3)
 node test/spielstand.js           # sichern, fortsetzen, sterben, alte Fassungen
 node test/durchspielen.js dist    # dasselbe mit der gebauten Einzeldatei
-node test/balance.js 40           # 40 Läufe, misst die Überlebensquote
+node test/balance.js 80           # 80 Läufe, misst die beiden Leitzahlen
 node werkzeug/bauen.js            # baut dist/marschallstab.html zum Weitergeben
 ```
 
-**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 40`, nach jeder Änderung am Zustand `node test/spielstand.js`, nach jeder Änderung an einem Rang `node test/raenge.js`.
+**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 80`, nach jeder Änderung am Zustand `node test/spielstand.js`, nach jeder Änderung an einem Rang `node test/raenge.js`, **nach jedem neuen Kapitel `node test/kapitel.js <id>`**.
+
+> **`test/kapitel.js` ist der Prüfstand für Grundsatz 3** aus KAMPAGNEN §0: *„Jede Station trägt jeden Rang."* Er springt an den Anfang eines Kapitels, setzt den Rang von Hand auf 1, 5, 8 und 12 und klickt durch — wird jede Station erreicht, läuft jedes Gefecht auf dem Maßstab des Rangs (Sichtfeld · Skizze · Rechtecke · Karte), fällt etwas in die Konsole? Der Mann wird vor jedem Schritt geheilt: **gemessen wird Vollständigkeit, nicht Härte.** Die Härte misst `balance.js`, und ein Toter sieht die zweite Hälfte eines Kapitels nie.
+>
+> **Geheilt gehören auch die Wunden, nicht nur das Leben.** Die erste Fassung heilte nur `S.leben` und meldete daraufhin eine Endlosschleife, die keine war: `wert()` zieht Wunden ab, und ein Knopf unter Wert 5 wird gesperrt — es hing der Prüfstand, nicht das Kapitel. *(Die Suche danach hat trotzdem einen echten Fehler gefunden, siehe „Der Notausgang".)*
 
 ---
 
@@ -98,6 +107,7 @@ src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
 src/daten/kapitel02_aegypten.js Kapitel 2 als reine Daten, hängt sich selbst an
 src/daten/kapitel03_garnison.js Kapitel 3 — das Friedenskapitel, Saisons statt Lager
 src/daten/kapitel04_austerlitz.js Kapitel 4 — die Ernte von Boulogne, Feindgüte 6
+src/daten/kapitel05_jena.js     Kapitel 5 — der Krieg mit den Beinen, Feindgüte 7
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -489,6 +499,65 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 
 **Die Ehe bekommt ihren Nachklang** (KONZEPT §10, „Briefe von zu Hause"): In Wien geht zum ersten Mal seit Boulogne Post nach Frankreich — aber nur für den, der in Nîmes geheiratet hat. Wer nicht, bekommt keinen Knopf, sondern einen Satz.
 
+### Kapitel 5 — Jena–Auerstedt 1806 (`kapitel05_jena.js`)
+
+**Die eigene Regel: Der Krieg wird mit den Beinen gewonnen.** Zwischen dem 8. Oktober und dem 7. November verschwindet die preußische Armee — nicht geschlagen, eingeholt. Vierzehn Tage marschiert, zwei Tage geschossen. Das ist die Bilanz, und die Kapiteldaten bilden sie ab: **siebzehn Stationen, aber nur drei Gefechte**, dafür drei Marschentscheidungen.
+
+| Gefecht | Runden | Feindmoral | Gefahr | Güte | Gelände |
+|---|---|---|---|---|---|
+| Saalfeld | 5 | 48 | 10 | +7 | Brücke |
+| **Jena (Höhepunkt)** | 9 | 82 | 14 → 17 | +7 | Damm |
+| Prenzlau | 5 | 42 | 11 | +7 | Brücke |
+
+**Die Sondermission ist keine Waffentat**, und das ist Absicht: „Die Geschütze im Nebel" zieht sechs Achtpfünder an Seilen durch einen Hohlweg den Landgrafenberg hinauf — zwei Stufen, **Konstitution 40** und **Drill 45**. Es ist die einzige Kette im Spiel, in der niemand auf einen schießt und in der man trotzdem stirbt: Ein Geschütz, das an einer engen Stelle zurückrutscht, fragt nicht, wer dahintersteht. Wenn ein Kapitel seine eigene Regel hat, muss auch sein berühmtester Augenblick von ihr handeln.
+
+**Historische Fixpunkte:** Saalfeld 10. Oktober (Prinz Louis Ferdinand fällt) · Jena und Auerstedt am selben Tag, 14. Oktober · Prenzlau 28. Oktober · Berlin 27. Oktober · das Berliner Dekret 21. November. **Die Station in Berlin kommt bewusst nach Prenzlau** — der Einzug am 27. Oktober bleibt Fixpunkt und wird im Text als das erwähnt, was er für diese Kompanie war: etwas, das ohne sie stattgefunden hat.
+
+### Die Tempowahl (`TEMPO` in `src/oberflaeche.js`)
+
+**Das erste kapitelübergreifende System seit der Feindgüte**, und es steht deshalb in den Systemdateien, nicht in den Kapiteldaten — Russland und 1814 brauchen es wieder.
+
+| Knopf | Verschleiß | Atem | Belastung | dazu |
+|---|---|---|---|---|
+| Schonend | 0,08 | −2 | +1 | **Ruf −2** |
+| Nach Vorschrift | 0,15 | −6 | +2 | — |
+| **Forcieren** | **0,5** | **−25** | **+8** | **überspringt eine Station** |
+
+**Der forcierte Marsch ist der einzige Knopf im Spiel, der Spielzeit überspringt.** Welche Station er auslässt, steht in den Daten (`tempo.ueberspringt`) und nicht im Code: Ein Tempo, das wahllos die nächste Station verschluckt, träfe irgendwann ein Gefecht oder ein Lager. Übersprungen wird immer eine Szene, in der etwas zu holen gewesen wäre — **Zeit gegen Substanz**, und die übersprungene Station findet wirklich nicht statt (kein `stationErledigt()`, also keine Zeitheilung, kein Sold, kein Chronikeintrag).
+
+- **Ohne Probe, wie die Rechnung des Bataillonschefs.** Es gibt keine Fertigkeit, die einem abnimmt, ob man seine Leute schont oder verheizt.
+- **Die Schuhe zahlen mit:** Unter Zustand 40 kostet Forcieren zusätzlich Atem −8, Belastung +4 und wundgelaufene Füße. Dieselbe Idee wie später der Mantel im Frost — ein alter Ladenposten wird rückwirkend wichtig, statt dass ein System dazukommt.
+- **Der Bot nimmt „schonend" nie** (`balance.js`): Ruf −2 ist die Währung, in der die ganze Leiter rechnet. Er forciert, solange Blut und Luft da sind; `MUT=1` forciert fast immer.
+
+### Rangfassungen in Szenen (`rangText`, `rangOptionen`)
+
+KAMPAGNEN §0.3 verlangt, dass jede Station jeden Rang trägt. Beides ist **additiv**, nach dem Muster von `rangTun` im Lager: `rangText:{7:['…']}` hängt Absätze an, `rangOptionen:{9:[{…}]}` hängt Knöpfe an.
+
+> **Additiv und nicht ersetzend.** Ein ersetzter Text wäre eine zweite Szene unter demselben Namen, und dann hätte man zwei zu pflegen. Ein zusätzlicher Absatz sagt, was der Höhergestellte *mehr* sieht — und das ist ohnehin die Wahrheit über Ränge. Wer eine Wahl nur unten oder nur oben haben will, nimmt weiterhin `ab:{wert:'rang',min:n,sonst:'…'}`; das sperrt mit einem Satz statt mit einem grauen Knopf.
+
+### Der Notausgang: eine Szene ohne drückbaren Knopf
+
+**Gefunden beim Rangdurchlauf von Kapitel 5, und es war ein echter Fehler.** `wert()` zieht Wunden, Belastung und kaputte Schuhe ab — Konstitution verliert 18 Punkte, sobald die Schuhe unter Zustand 25 fallen —, und `zeigeSzene` sperrt jeden Knopf, dessen Wert unter 5 liegt. Trägt **jede** Wahl einer Szene eine Probe, bleibt für einen abgelaufenen Mann nichts übrig: Der Lauf steht, obwohl er lebt.
+
+**Zwei Antworten, beide nötig:**
+
+1. **Die Regel:** Jede Szene bekommt eine Wahl ohne Probe. In Kapitel 5 fehlte sie an der Verfolgung und am Marsch nach Osten; beide haben sie jetzt, und beide Male ist sie das, was die meisten wirklich getan haben. *(Audit: `marsch_rhein` und `donau` in Kapitel 4 haben sie ebenfalls nicht.)*
+2. **Die Sicherung:** `szeneAushalten()` — bleibt kein Knopf übrig, erscheint „Es aushalten": keine Probe, Belastung +2, kein Gewinn. Absichtlich das Kärglichste, was das Spiel anbieten kann.
+
+### Feindgüte: der Linien-Hebel steht seit Ägypten am Boden
+
+**Beim Eichen von Kapitel 5 am Hebel** (`feindGuete()` je Gefecht ausgelesen, nicht am Ergebnis geraten) fällt eine Rechnung auf, die vorher niemand gemacht hat:
+
+```
+linie = (2 + Zufall·4) · max(0,3 ; 1 − guete·0,15)
+```
+
+Der Boden 0,3 wird bei **Güte 4,67** erreicht. Das heißt: **Ägypten (5), Austerlitz (6) und Jena (7) haben denselben Linien-Hebel** — und alle künftigen Kapitel (8 bis 12) ebenfalls. Der als „wichtigster Hebel" beschriebene Teil der Güte trennt nur die Werte 0 bis 4.
+
+> **Was daraus folgt, ist keine Reparatur, sondern eine Bewusstseinsänderung.** Der Boden ist Absicht — er hält die späten Kapitel rechnerisch gewinnbar, und die einzige Alternative wäre, ihn zu senken und damit die zwei gemessenen Kapitel neu zu eichen. **Ab Güte 5 eskaliert die Güte also über Gefahr (+1 je Punkt) und eigene Verluste (+15 % je Punkt), nicht mehr über die Linie.** Der Unterschied zwischen Güte 7 und Güte 12 sind fünf Punkte Trefferchance und 75 % mehr Verluste — mehr nicht.
+>
+> **Für die Kapitel 6 bis 11 heißt das: Die Güte allein trägt die Eskalation nicht.** Was ein spätes Kapitel hart macht, muss aus seiner eigenen Regel kommen — der Frost, der Überfall, der doppelte Verschleiß ohne Ersatz. Genau so steht es in KAMPAGNEN, und genau deshalb steht es dort.
+
 ### Rang 6 — Sergent-major und der Zug
 
 **Die Decke des Prototyps hatte seit Boulogne ein Gesicht.** Dort stand: *„Nichts frei. Auf dem Posten sitzt Martel, zweiundvierzig und gesund."* Jetzt kommt der Feldzug, in dem eine Vakanz entstehen kann.
@@ -687,7 +756,7 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 | Grenadier/Voltigeur | 0,80 | | Ägypten 1798/99 | **0,5** |
 | Caporal | 1,00 | | Garnison 1801–04 | **1,0** |
 | Caporal-fourrier | 1,20 | | Austerlitz 1805 | **0,9** |
-| Sergent | 1,50 | | | |
+| Sergent | 1,50 | | Jena–Auerstedt 1806 | **0,8** |
 | Sergent-major | 2,00 | | | |
 
 > **Geeicht am Marketender, nicht am Geschichtsbuch.** Historisch bekam ein Fusilier fünf Sous am Tag — im Spiel wären das **1,4 Francs für den ganzen Italienfeldzug** gewesen: korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen: **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender kaufen** (8–18 F).
@@ -866,16 +935,47 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 | **überlebt** | Wie viele alle gebauten Kapitel hinter sich gebracht haben — *wie hart das Spiel ist.* |
 | **höchster Rang** | Wie viele den höchsten gebauten Rang bekommen haben — *ob die Leiter trägt.* |
 
-> **„Höchster Rang" ist eine Definition, kein fester Rang.** Mit Kapitel 4 ist es der **Sergent-major (6)**, vorher der Sergent (5). Die Zahl wandert mit dem Ausbaustand mit — genau deshalb veraltet sie nicht, anders als der frühere Caporal-Sollwert. *(Umbenannt am 28.07.2026 mit dem Bau von Rang 6.)*
+> **„Höchster Rang" ist eine Definition, kein fester Rang.** Gemeint ist der höchste Rang, den der *gebaute Inhalt* tatsächlich hergibt, und er wandert mit:
+>
+> | Ausbaustand | Leitrang |
+> |---|---|
+> | zwei Kapitel | 5 · Sergent |
+> | vier Kapitel | 6 · Sergent-major |
+> | **fünf Kapitel** | **9 · Capitaine** |
+>
+> **Mit Kapitel 5 ist die Umstellung fällig geworden, die seit Phase C als offene Entwurfsentscheidung dastand** („Wer Phase E misst, entscheidet das neu"). Der Grund ist gemessen: Ein Drittel der reichen Veteranenläufe erreicht den Capitaine, und eine Leitzahl, die den Sergent-major zählt, misst dann nur noch, wie viele überhaupt bis zur Mitte kommen. Der Rang steht als `LEITRANG` in `test/balance.js`; **wer ein Kapitel anbaut, prüft ihn mit.**
+>
+> **Damit sind alle Zahlen vor dem 29.07.2026 nicht mehr unmittelbar vergleichbar.** Sie bleiben in der Verlaufstabelle stehen und sind dort als Sergent-major-Zahlen zu lesen.
 
-**Bänder für vier Kapitel** *(neu gesetzt am 28.07.2026)*:
+**Bänder für fünf Kapitel** *(neu gesetzt am 29.07.2026 mit Kapitel 5)*:
 
-| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 |
+| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 | **Veteran 400** |
+|---|---|---|---|---|
+| **überlebt** | **15–30 %** | **3–12 %** | **25–40 %** | **35–55 %** |
+| **höchster Rang (Cpt)** | **2–10 %** | **1–8 %** | **15–30 %** | **28–45 %** |
+
+**Der Veteran hat vier Kapitel lang 160 VP gehabt und braucht jetzt mehr.** Ein Spitzenlauf bringt mit fünf Kapiteln über 440 Punkte statt 350; ein Testwert von 160 misst deshalb nicht mehr den Veteranen, den das Spiel hervorbringt, sondern einen armen Verwandten. **`VP=400` ist ab jetzt die Leitmessung**, 160 bleibt als dritter Lauf daneben stehen. Wer ein Kapitel anbaut, prüft auch diesen Wert mit — er wächst mit dem Punktemaximum.
+
+Gemessen mit Kapitel 5 *(vorsichtig und mutig je 80 Läufe, die Veteranen je 40)*:
+
+| | überlebt | höchster Rang (Cpt) | gestorben in Jena |
 |---|---|---|---|
-| **überlebt** | **30–45 %** | **8–20 %** | **60–75 %** |
-| **höchster Rang** | **12–25 %** | **3–15 %** | **45–60 %** |
+| Erstlauf vorsichtig | 23 % | 5 % | 13 von 80 |
+| Erstlauf mutig | 6 % | 4 % | 8 von 80 |
+| Veteran 160 | 13 % | 18 % | 20 von 40 |
+| Veteran 400 | 25 % | 30 % | 13 von 40 |
 
-Gemessen nach Phase E, je 80 Läufe: überlebt **44 / 19 / 68 %**, höchster Rang **19 / 16 / 66 %**. Die drei Überlebenszahlen im Band; **der „höchste Rang" liegt beim Veteranen sechs Punkte darüber** — siehe den Kasten darunter. *(Nach Phase D: 43 / 19 / 70 % und 23 / 16 / 55 %. Nach Phase C: 45 / 10 / 60 % und 20 / 10 / 53 %.)*
+*(Zahlen von vier Kapiteln, gegen Rang 6 gerechnet und deshalb nicht vergleichbar: nach Phase E 44 / 19 / 68 % und 19 / 16 / 66 %; nach Phase D 43 / 19 / 70 % und 23 / 16 / 55 %.)*
+
+> ### ⚠ Die Progression hat sich einmal umgedreht — und es lag am Bot
+>
+> In der Messreihe oben **überlebt der Veteran mit 160 VP seltener (13 %) als der Erstläufer ohne Vorrat (23 %)**. Das ist die eine Zahl, die niemals so stehen darf: Der ganze Aufbau des Spiels ist, dass ein Vorrat etwas nützt.
+>
+> **Die Ursache ist der forcierte Marsch, und gefunden wurde sie an der Sterbeort-Zeile:** Der Veteran stirbt in Jena (20 von 40), der Erstläufer in Ägypten. Der Bot forciert, sobald er über halbes Blut und mittleren Atem hat — und **nur der Veteran hat überhaupt genug Kraft, in die Falle zu laufen.** Der arme Mann marschiert nach Vorschrift, weil er sich nichts anderes leisten kann, und lebt deshalb länger.
+>
+> **Das ist keine Balance-Frage, sondern die Definition von „kundig".** Ein kundiger Spieler forciert frisch und gut beschuht, nicht angeschlagen und nicht vor einem Höhepunkt. Die Bedingung im Bot steht deshalb jetzt auf `anteil > 0,8 && Atem > 70 && Schuhe ≥ 40`. **Die Zahlen oben sind mit der alten, leichtfertigen Bedingung gemessen und werden nachgemessen.**
+>
+> **Regel daraus, allgemein:** Wer eine Wahl einbaut, die Kraft kostet und Ruf bringt, muss dem Bot beibringen, *wann* sie sich lohnt — sonst misst das Skript nicht die Wahl, sondern seine eigene Leichtfertigkeit. Dieselbe Lektion wie bei der Gunst, der Regimentsschule und dem stummen Filter, nur an einer neuen Stelle.
 
 > ### ⚠ Die Leitzahl „höchster Rang" ist jetzt stumpf — und diesmal ist es kein Rauschen
 >

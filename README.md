@@ -39,9 +39,11 @@ Historische Fixpunkte, dazwischen freies Spiel: Montenotte, die Brücke von Lodi
 
 ## Stand
 
-**Vier Feldzüge sind spielbar** — Italien 1796/97, Ägypten 1798/99, die Garnison von Nîmes 1801–04 und Austerlitz 1805, zusammen dreiundsechzig Stationen, dreizehn Gefechte, Lager, Winterquartiere und vier Garnisonssaisons.
+**Fünf Feldzüge sind spielbar** — Italien 1796/97, Ägypten 1798/99, die Garnison von Nîmes 1801–04, Austerlitz 1805 und Jena–Auerstedt 1806, zusammen einundachtzig Stationen, sechzehn Gefechte, Lager, Winterquartiere und vier Garnisonssaisons.
 
 Italien ist das Lehrstück: barfuß über die Pässe, die Brücke von Lodi, der Sumpf von Arcole. Ägypten ist etwas anderes — dort töten die Wege mehr Männer als die Gefechte. Hitzschlag im Marsch auf Damanhur, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Akkon fällt nicht, so wie es 1799 nicht gefallen ist, und nach Abukir liegt die Flotte auf dem Meeresgrund: Es gibt keinen Weg mehr nach Hause. Dann drei Jahre Frieden, in denen der Feind nicht die Kugel ist, sondern die Zeit — und danach Austerlitz, wo geprüft wird, was in diesen drei Jahren gelernt wurde.
+
+1806 wird daraus etwas anderes: **Der Krieg wird mit den Beinen gewonnen.** Zwischen dem 8. Oktober und dem 7. November verschwindet die preußische Armee — nicht geschlagen, eingeholt. Vierzehn Tage wird marschiert und zwei Tage geschossen, und deshalb bekommt der Marsch selbst eine Entscheidung: Vor jedem langen Weg wählst du das Tempo. Wer forciert, kommt an, bevor der Weg zu Ende ist, und lässt eine ganze Station hinter sich, in der etwas zu holen gewesen wäre — für doppelten Verschleiß, Atem und wunde Füße. Wer schont, hat abends alle beisammen, und ein Adjutant mit einer Uhr schreibt auf, wann sein Bataillon eingetroffen ist.
 
 Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000 km über See und durch die Wüste, jede Station mit Entfernung und Dauer. Vor jedem Gefecht steht der Anmarsch — der Nachtmarsch im Regen, die vier Stunden Warten in den Gassen von Lodi, die Lagemeldung und das, womit du dastehst. In den Lagern entscheidest du, was du mit den zwei oder drei Abenden anfängst: exerzieren, scharf schießen, die Schuhe zum Schuster tragen, die Muskete ölen, schlafen. Es ist immer mehr zu tun als Zeit da ist.
 
@@ -51,9 +53,9 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000
 
 **Und du kommst dorthin.** Wer einmal Sergent-major war, kann sich beim nächsten Mann ein **Offizierspatent** kaufen: Er rückt 1796 in Savona mit Epauletten ein, hat nie eine Muskete abgefeuert, und niemand in der Kompanie kennt ihn. Martel, Collot, Berthaud und Vernet stehen bei null, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen. Er ist mechanisch stärker und sozial nackt — und er überlebt in acht von hundert Läufen. Der Kauf erhöht auch nie den Punktevorrat; er zeigt dir die andere Hälfte des Spiels, mehr nicht.
 
-Entworfen, aber noch nicht gebaut: die Kapitel 5 bis 11 (Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Generalskampagnen als eigene Szenarien und der freiwillige Ausstieg an den Rangschranken. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
+Entworfen, aber noch nicht gebaut: die Kapitel 6 bis 11 (Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Generalskampagnen als eigene Szenarien und der freiwillige Ausstieg an den Rangschranken. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
 
-Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat dreiundsechzig Stationen hinter sich — und immer noch sieben Feldzüge vor sich.
+Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat einundachtzig Stationen hinter sich — und immer noch sechs Feldzüge vor sich.
 
 ---
 

@@ -66,7 +66,14 @@ const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
    für den Voltigeur; dann die Muskete, weil kürzere Gefechte weniger Treffer
    heißen. Was danach kommt, kauft nur ein reicher Lauf. */
 const VETERAN_ZIELE = [['konstitution',70],['geschick',70],['muskete',60],
-                       ['bildung',40],['kaltbluetigkeit',60],['autoritaet',50],['bajonett',40]];
+                       ['bildung',40],['kaltbluetigkeit',60],['autoritaet',50],['bajonett',40],
+                       /* Ab hier nur noch für die reichen Läufe. **Die Liste
+                          muss mit dem Inhalt wachsen:** Mit fünf Kapiteln
+                          bringt ein Spitzenlauf über 440 Punkte, und ein Bot,
+                          der sie nicht ausgeben kann, misst einen ärmeren
+                          Veteranen als den, den das Spiel tatsächlich
+                          hervorbringt. */
+                       ['drill',55],['taktik',50],['verwaltung',50],['menschenkenntnis',60]];
 /* Bildung 40 steht bewusst vor Kaltblütigkeit: Sie ist die Schwelle zum
    Caporal-fourrier (35) und damit der einzige Weg, den ein Veteran *kaufen*
    kann — im Feld kostet sie Lagerabende und Geld. KONZEPT nennt sie „den
@@ -78,6 +85,21 @@ const ziel = path.resolve(__dirname, '../index.html');
    eine Brücke zwischen beiden Welten. */
 const RANG_KURZ = ['', 'Fus', 'Elite', 'Cap', 'Four', 'Serg', 'S-maj', 'S-Lt',
                    'Lt', 'Cpt', 'Chef', 'Col', 'GdB', 'GdD', 'Mar'];
+
+/* ── Welcher Rang die zweite Leitzahl trägt ──
+   **Eine Definition, kein fester Rang** (so steht es oben): gemeint ist der
+   höchste Rang, den der *gebaute Inhalt* tatsächlich hergibt. Er wandert mit:
+
+     zwei Kapitel   → 5, Sergent
+     vier Kapitel   → 6, Sergent-major
+     fünf Kapitel   → 9, Capitaine
+
+   Mit Kapitel 5 erreicht ein Drittel der reichen Veteranenläufe den Capitaine;
+   eine Leitzahl, die weiterhin den Sergent-major zählt, misst dann nur noch,
+   wie viele überhaupt bis zur Mitte kommen. **Wer ein Kapitel anbaut, prüft
+   diese Zahl mit** — und trägt die alte in CLAUDE.md nach, sonst ist der
+   Vergleich mit den früheren Messreihen verloren. */
+const LEITRANG = 9;
 const rangKurz = r => RANG_KURZ[r] || ('R' + r);
 
 /* ── Die Punkteverteilung ──
@@ -108,7 +130,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
      ob die Leiter trägt — sie sagen nicht, **wo** sie trägt. Mit vierzehn
      Rängen und vier Kapiteln ist genau das die Frage: Sammelt sich alles bei
      Rang 6, oder sieht überhaupt jemand ein Patent? */
-  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0,
+  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0, leit: 0,
                 punkte: [], raenge: {},
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
@@ -117,6 +139,9 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
                    billig, weil das Chronikblatt Ort und Station ohnehin
                    mitschreibt. */
                 sterbeort: {}, sterbestation: [] };
+  /* Die Gesamtzahl der Stationen kommt aus dem Spiel, nicht aus dem Skript —
+     sie stand hier als „von 64" fest und war mit dem fünften Kapitel falsch. */
+  let STATIONSZAHL = 0;
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
     /* Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0. Sonst ließe
@@ -154,6 +179,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
       }
     }, VETERAN_ZIELE);
     await p.click('#startbtn');
+    if (!STATIONSZAHL) STATIONSZAHL = await p.evaluate(() => KAPITEL.length);
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
     while (s++ < 600) {
@@ -322,6 +348,37 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if (!z) z = f(/Drillen/) || f(/Fechtboden/) || f(/Schlafen, essen/);
         }
 
+        /* ── Die Tempowahl (ab Kapitel 5) ──
+           **Schonend nimmt der Bot nie.** Ruf −2 ist die Währung, in der die
+           ganze Leiter rechnet; ein Bot, der sie verschenkt, misst nicht das
+           Spiel, sondern seine eigene Vorsicht. Die Frage ist also nur, ob
+           forciert oder nach Vorschrift — und die entscheidet der Zustand:
+           Atem −25 und doppelter Verschleiß sind bezahlbar, solange Blut und
+           Luft da sind, und ruinös, wenn nicht.
+
+           Der mutige Bot forciert fast immer. Der Abstand zwischen beiden
+           Gemütern *ist* die Balance dieser Wahl. */
+        else if (f(/Forcieren/)) {
+          /* `^Forcieren` traf nie: `textContent` eines Knopfes beginnt mit dem
+             Zeilenumbruch aus dem Markup. Der Bot fiel deshalb in den
+             Szenen-Zweig und drückte immer den ersten Knopf — also „schonend",
+             die eine Wahl, die ein kundiger Spieler nie trifft. Zwei Messreihen
+             lang war das die Blindheit des Bots und nicht das Spiel. */
+          const fz = f(/Forcieren/);
+          const lohnt = fz.hasAttribute('data-gewinn');    // steht als Satz auf dem Knopf
+          /* **Der Vorsichtige forciert nur, wenn es billig ist.** Die erste
+             Fassung ließ ihn bei halbem Blut losmarschieren — gemessen
+             überlebte der Veteran mit 160 VP damit seltener (13 %) als der
+             Erstläufer ohne Vorrat (23 %), weil nur der Veteran überhaupt die
+             Kraft hat, in die Falle zu laufen. **Eine Progression, die sich
+             umdreht, misst nicht das Spiel, sondern die Leichtfertigkeit des
+             Bots.** Ein kundiger Spieler forciert frisch und gut beschuht,
+             nicht angeschlagen und nicht vor einem Höhepunkt. */
+          const frisch = anteil > 0.8 && S.atem > 70 && S.ausr.schuhe.zustand >= 40;
+          const tragfaehig = MUT ? anteil > 0.35 : (lohnt && frisch);
+          z = tragfaehig ? fz : f(/Nach Vorschrift/);
+        }
+
         else if (f(/Zu den Voltigeuren/) || f(/Zu den Grenadieren/)) {
           // Der Voltigeur zielt für 22–32 statt für 12–20 zu feuern — kürzere
           // Gefechte heißen weniger Runden heißt weniger Treffer.
@@ -357,6 +414,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     if (hoechster >= 4) res.fourrier++;
     if (hoechster >= 5) res.sergent++;
     if (hoechster >= 6) res.major++;
+    if (hoechster >= LEITRANG) res.leit++;
     res.raenge[hoechster] = (res.raenge[hoechster] || 0) + 1;
     const t = await p.$eval('#app', e => e.innerText);
     const m = t.match(/Summe\s+(\d+)/); if (m) res.punkte.push(+m[1]);
@@ -369,7 +427,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
          Station — und die Jahreszahl ist eindeutig. */
       const j = (d.ort.match(/1[78]\d\d/) || ['?'])[0];
       const kap = j <= '1797' ? 'Italien' : j <= '1799' ? 'Ägypten'
-                : j <= '1804' ? 'Garnison' : 'Austerlitz';
+                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : 'Jena';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
       res.sterbestation.push(d.stationen);
     }
@@ -380,7 +438,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     + (PATENT ? ` · mit Patent (${PATENT === 'patent_lt' ? 'Lieutenant' : 'Sous-Lieutenant'})` : ''));
   /* Die beiden Leitzahlen zuerst und für sich — sie tragen die Sollwerte.
      Wer eine Änderung beurteilt, liest diese Zeile und sonst nichts. */
-  console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   HÖCHSTER RANG ${q(res.major)}\n`);
+  console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   HÖCHSTER RANG (${rangKurz(LEITRANG)}) ${q(res.leit)}\n`);
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
   console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
@@ -390,7 +448,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   if (res.sterbestation.length) {
     const mittel = Math.round(res.sterbestation.reduce((a, x) => a + x, 0) / res.sterbestation.length * 10) / 10;
     console.log(`Gestorben in: ${Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`).join(' · ')}`
-      + ` · im Schnitt bei Station ${mittel} von 64`);
+      + ` · im Schnitt bei Station ${mittel} von ${STATIONSZAHL}`);
   }
   await b.close();
 })();

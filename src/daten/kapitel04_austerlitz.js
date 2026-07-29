@@ -309,7 +309,7 @@ const KAPITEL4 = [
     'Was hier zählt, ist, wer am 2. Dezember auf dem Berg gestanden hat und wer nicht.'
   ]},
 
-/* 64 */ {typ:'ende',id:'ende_austerlitz',datum:'26. Dezember 1805 · Preßburg',ort:'Der Friede',
+/* 64 */ {typ:'uebergang',id:'ende_austerlitz',datum:'26. Dezember 1805 · Preßburg',ort:'Der Friede',
   marsch:{von:'Brünn',nach:'Winterquartier in Mähren',weg:'Vier Wochen Ruhe in einem Land, das Frieden geschlossen hat'},
   text:[
     'Am 26. Dezember wird in Preßburg Friede geschlossen. Österreich verliert ein Sechstel seiner Bevölkerung und tritt aus dem Krieg aus; Russland zieht nach Osten ab, ohne etwas zu unterschreiben.',
@@ -317,7 +317,7 @@ const KAPITEL4 = [
     'Du bist bei Austerlitz gewesen. Das ist ein Satz, den du für den Rest deines Lebens sagen können wirst, und man wird ihn dir jedes Mal glauben.',
     'Von den Männern, die im August in Boulogne mit dir angetreten sind, ist einer von sechs nicht mehr da. Es war der kürzeste Feldzug, den diese Armee je geführt hat, und in vier Monaten hat sie zwei Armeen vernichtet.'
   ],
-  ausblick:'<b>Hier endet der Prototyp.</b> Im Oktober 1806 marschiert dieselbe Armee gegen Preußen — Jena und Auerstedt am selben Tag, und danach vierzehn Tage Verfolgung bis Berlin. Kapitel 5 steht im Konzept, aber noch nicht im Code.'}
+  }
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

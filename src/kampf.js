@@ -1022,7 +1022,75 @@ function sichtfeld(){
    `wenn(n)` entscheidet, ob ein Ereignis zur Lage passt — die Verfolgung gibt
    es nur, wenn der Feind schon wankt, den Sturm nur, wenn er noch steht. */
 
+/* ══════════════════ WIE DER FEIND DASTEHT ══════════════════
+
+   Drei Fassungen derselben Zeile, und der Unterschied zwischen ihnen ist das
+   ganze Spiel:
+
+     bis Rang 11   eine Zahl. Was du siehst, ist wahr.
+     `sturm:true`  eine Schätzung. Du siehst, aber du siehst nicht genug.
+     ab Rang 12    eine Meldung. Du siehst gar nichts, du bekommst gesagt.
+
+   **Der Sturm von Eylau ist der Vorgeschmack auf den vierten Bruch**, zehn
+   Ränge bevor er zum System wird — und er kommt von außen statt von oben.
+   Ein Fusilier in einem Schneetreiben, in dem beide Armeen einander verlieren,
+   hat dasselbe Problem wie ein General mit einer Meldung von vor vierzig
+   Minuten: **Er muss entscheiden, ohne zu wissen.** Dass es sich zwölf Jahre
+   später wiederholt, mit demselben Wortlaut in der Zeile, ist die Absicht.
+
+   Der Balken fällt bei Sturm mit weg. Ein Balken *ist* eine Zahl. */
+function schaetzung(ist, max){
+  const a = Math.max(0, ist) / Math.max(1, max);
+  return a > 0.85 ? 'STEHT, WIE ER STAND'
+       : a > 0.65 ? 'NICHT ERSCHÜTTERT, SOWEIT MAN SIEHT'
+       : a > 0.45 ? 'VIELLEICHT DIE HÄLFTE'
+       : a > 0.25 ? 'ER GIBT NACH, GLAUBT MAN'
+       : a > 0.08 ? 'KAUM NOCH ETWAS'
+                  : 'NICHTS MEHR, SOWEIT MAN SIEHT';
+}
+function feindAnzeige(n){
+  if(S.rang >= 12) return '· DER FEIND: SIEHE MELDUNG';
+  if(n && n.sturm) return '· DER FEIND: ' + schaetzung(K.feindMoral, n.feindMoral);
+  return '· WIDERSTAND DES FEINDES ' + Math.max(0, Math.round(K.feindMoral));
+}
+
 const GEFECHTS_EREIGNISSE = [
+
+  /* ── Sondermission Jena: die Geschütze im Nebel ──
+     Die eigene Regel von Kapitel 5 lautet, dass dieser Krieg mit den Beinen
+     gewonnen wird. Also ist auch die Sondermission des Höhepunktgefechts
+     **keine Waffentat**: Man zieht Geschütze an Seilen durch einen Hohlweg, in
+     dem zwei Männer nebeneinander nicht vorbeikommen, im Dunkeln, bergauf.
+
+     Zwei Stufen statt drei — Konstitution und Drill —, und beide sind
+     Arbeitsproben. Es ist die einzige Kette im Spiel, in der niemand auf
+     einen schießt und in der man trotzdem sterben kann: Ein Achtpfünder, der
+     an einer engen Stelle zurückrutscht, fragt nicht, wer dahintersteht. */
+  {id:'geschuetze', nur:'jena', frage:'Die Geschütze stehen im Hohlweg',
+   wenn:(n)=> K.runde <= 4 && K.feindMoral > n.feindMoral*0.5,
+   text:['Der Nebel steht so dicht, dass die Bataillone einander an den Trommeln finden müssten, und die Trommeln sind verboten. Aus dem Hohlweg hinter euch kommt kein Ton, der dorthin gehört — kein Rollen, kein Kommando, nichts.',
+         'Ein Artillerieoffizier kommt zu Fuß nach vorn und sucht Leute. Sechs Geschütze stecken auf halber Höhe fest, die Bespannung kommt nicht durch, und ohne sie steht die Division in einer Ebene, deren Breite niemand kennt.'],
+   optionen:[
+     {label:'Mit an die Seile', hint:'Zwei Stufen · im Dunkeln, bergauf, an nassem Hanf', risk:true,
+      kette:[
+        {name:'Der Hohlweg', wert:'konstitution', schw:40, schaden:14,
+         gut:'Zwanzig Mann an einem Seil, einer zählt, und bei jedem dritten Zug rollt der Achtpfünder eine Handbreit weiter. Der Karren schleift links und rechts an der Wand, und was an Farbe daran war, ist nach hundert Metern nicht mehr daran.',
+         schlecht:'An der engsten Stelle rutscht es zurück, und der Mann hinter dir bekommt die Deichsel gegen die Brust. Man zieht weiter, weil hinter euch fünf weitere stehen und der Weg nur in eine Richtung geht.'},
+        {name:'Die Kuppe', wert:'drill', schw:45, schaden:15,
+         gut:'Oben wird abgeprotzt, ausgerichtet und geladen, in einer Ordnung, die im Dunkeln nur geht, wenn die Handgriffe von allein gehen. Als es hell wird, stehen sechs Geschütze da, wo drüben niemand mit welchen rechnet.',
+         schlecht:'Oben wird es hell, bevor die Geschütze stehen, und in den ersten zwanzig Minuten steht ihr im Freien und richtet aus, während drüben jemand die Entfernung schätzt und dann nicht mehr schätzt.'}],
+      tod:'Im Hohlweg unterhalb des Landgrafenbergs, unter einem Achtpfünder, der in der Dunkelheit zurückgerutscht ist. Der Bericht wird das Geschütz erwähnen.',
+      todesart:'Erdrückt im Hohlweg von Jena',
+      erfolg:{text:'Um zehn reißt der Nebel auf, und die sechs Geschütze stehen richtig. Was sie zwei Stunden lang in eine Linie hineinschießen, die in vollkommener Ordnung stehen bleibt und wartet, wird später in keinem Bericht als Handwerk beschrieben, sondern als Sieg. Der Artillerieoffizier lässt sich die Namen der Mannschaft geben.',
+              moral:-26, ruf:7, nennung:true, atem:-20, belastung:8,
+              tat:'Die Geschütze auf den Landgrafenberg gebracht'},
+      misserfolg:{text:'Die Geschütze stehen, und sie stehen zu spät. Zwei Stunden lang war die Ebene offen, und was in diesen zwei Stunden vor dem Dorf gelegen hat, hat dort ohne Artillerie gelegen. Hinaufgebracht habt ihr sie trotzdem.',
+              moral:-10, ruf:3, atem:-20, belastung:12,
+              tat:'An den Seilen im Hohlweg gezogen'}},
+     {label:'In der Linie bleiben', hint:'Dafür ist die Artillerie da, und du bist es nicht',
+      erfolg:{text:'Du bleibst, wo du stehst, und schießt in eine Richtung, in der etwas sein könnte. Zwei Stunden später kommen die Geschütze doch noch die Höhe herauf, gezogen von anderen. Es ändert für dich nichts, außer dass deine Schultern es nicht waren.',
+              moral:-6}}
+   ]},
 
   /* ── Sondermission Austerlitz: der Pratzeberg ──
      Der Moment, für den die Schlacht berühmt ist, aus der Höhe eines Mannes im
@@ -1503,8 +1571,7 @@ function zeigeKampf(text){
           ${/* **Ab Rang 12 gibt es keinen Widerstandswert mehr.** Der Feind ist
                eine Vermutung, und eine Vermutung hat keinen Balken. Wer sie hier
                doch anzeigt, hat den Rang nicht gebaut. */''}
-          ${S.rang>=12 ? '· DER FEIND: SIEHE MELDUNG'
-            : '· WIDERSTAND DES FEINDES '+Math.max(0,Math.round(K.feindMoral))}
+          ${feindAnzeige(n)}
           ${S.rang>=10 ? '' : '· EURE LINIE '+Math.max(0,Math.round(K.eigen==null?100:K.eigen))}
           ${/* Der Kopf zählt in der Größe, die man führt: zwanzig, sechzig, hundertzwanzig. */''}
           ${S.rang>=12 ? '· '+(K.verbaende||[]).length+' VERBÄNDE'
@@ -1512,7 +1579,7 @@ function zeigeKampf(text){
             : S.rang>=9 && K.sektion!=null ? '· DEINE KOMPANIE '+Math.max(0,Math.round(K.sektion*1.2))+' VON 120'
             : S.rang>=6 && K.sektion!=null ? '· DEIN ZUG '+Math.max(0,Math.round(K.sektion*0.6))+' VON 60'+(K.rollend>0?' · ROLLENDES FEUER':'')
             : S.rang===5 && K.sektion!=null ? '· DEINE SEKTION '+Math.max(0,Math.round(K.sektion/5))+' VON 20' : ''}</div>
-        ${S.rang>=12 ? '' : balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
+        ${(S.rang>=12 || n.sturm) ? '' : balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         ${(S.rang>=5 && S.rang<10 && K.sektion!=null) ? balken('b-steel',Math.max(0,K.sektion),100) : ''}
         <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
       </div></div>
@@ -1904,7 +1971,7 @@ function kampfAktion(id){
      Mann, die auf eigene Rechnung schießen (Faktor 1,6 auf allen eigenen
      Schaden). Ein guter Zug gewinnt damit schneller als je zuvor; ein
      schlechter bekommt nichts geschenkt. */
-  const linie = K.geloest ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
+  let linie = K.geloest ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */
   if(K.gelaendeVorteil > 0) schaden *= 0.8;
@@ -1929,6 +1996,10 @@ function kampfAktion(id){
     rollend = (7 + Math.random()*5) * Math.max(0.35, (K.sektion||100)/100);
     K.rollend--;
   }
+  /* Die zweite Hälfte des Sturms: Wer nicht sieht, trifft nicht — auch du
+     nicht. Ohne diesen Abzug wäre der Schneesturm ein Vorteil, und ein
+     Vorteil ist keine eigene Regel (siehe den Gefahr-Abzug oben). */
+  if(n.sturm){ schaden *= 0.8; linie *= 0.8; }
   K.feindMoral -= schaden + linie + rollend;
 
   /* ══════════════════ DIE TATENZÄHLUNG ══════════════════
@@ -2097,6 +2168,13 @@ function kampfAktion(id){
      damit ein Gefecht mit einem einzigen Feld zum Höhepunkt wird. */
   if(n.haerte > 1) gefahr += 3;
   gefahr += feindGuete(n);      // bessere Truppen treffen öfter
+  /* ── Der Sturm senkt die Trefferchance beider Seiten ──
+     Bei Eylau schneite es waagerecht, und beide Armeen verloren einander. Wer
+     nicht sieht, trifft nicht — das gilt für die drüben und für dich, und
+     deshalb steht der Abzug hier (Gefahr) *und* unten beim eigenen Schaden.
+     **Ein Sturm, der nur den Feind blind macht, wäre ein Geschenk**, und ein
+     Geschenk ist keine eigene Regel. */
+  if(n.sturm) gefahr -= 4;
   gefahr = S.rang>=10 ? 0 : Math.max(4, gefahr);
   let treffer = '';
   /* Das Stabsereignis: einmal je Gefecht gewürfelt, ohne Ankündigung und ohne

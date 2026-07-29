@@ -1180,6 +1180,16 @@ function naechster(){
   if(!S.lebt){ zeigeTod(); return; }
   if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
   const n = KAPITEL[LAUF.node];
+  /* ── Der forcierte Marsch hat diese Station überholt ──
+     Übersprungen heißt: Sie findet nicht statt. Kein `stationErledigt()`, also
+     keine Zeitheilung, kein Sold, kein Chronikeintrag — man war nicht da. Das
+     ist der Preis auf der anderen Seite des Handels und der Grund, warum
+     Forcieren nicht immer richtig ist. */
+  if(LAUF.ueberspringen && n.id === LAUF.ueberspringen){
+    LAUF.ueberspringen = null;
+    LAUF.node++; laufSichern();
+    naechster(); return;
+  }
   if(n.datum && n.id && LAUF.gezaehlt !== n.id){
     LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
     const b = META.bestKapitel[n.id] || {mal:0,rangN:0,rang:''};
@@ -1233,6 +1243,9 @@ function naechster(){
     if(me){ zeigeMarschEreignis(me, n); return; }
     LAUF.marsch = null;
   }
+  /* Das Tempo wird vor dem Marsch gewählt, nicht auf ihm — also vor dem
+     Zwischenfall-Wurf, aber nach einer noch offenen Frage von vorhin. */
+  if(n.tempo && LAUF.tempo !== n.id){ zeigeTempo(n); return; }
   /* Gewürfelt wird auf Stationen mit Marschweg — und seit Kapitel 3 auch auf
      solchen, die es ausdrücklich anfordern (`zwischenfall:true`). In einer
      Garnison marschiert niemand, und ohne diese zweite Tür hätten die vier
@@ -1306,7 +1319,136 @@ function zeigeUebergang(n){
   kopfzeile();
 }
 
+/* ══════════════════ DIE TEMPOWAHL ══════════════════
+
+   **Der Krieg wird mit den Beinen gewonnen** — die eigene Regel von Kapitel 5
+   (KAMPAGNEN §1). Die Grande Armée schlägt Preußen in vier Wochen, und sie tut
+   es durch Marschleistung: Wer zuerst da ist, gewinnt, bevor geschossen wird.
+   Damit das nicht bloß im Text steht, bekommt der Marsch selbst eine
+   Entscheidung — drei Knöpfe an jeder Station, die `tempo` trägt.
+
+   **Der forcierte Marsch ist der einzige Knopf im Spiel, der Spielzeit
+   überspringt.** Welche Station er auslässt, sagen die Daten
+   (`tempo.ueberspringt`), nicht der Code: Ein Tempo, das wahllos die nächste
+   Station verschluckt, träfe irgendwann ein Gefecht oder ein Lager, und beides
+   wäre falsch. Was übersprungen wird, ist immer eine Szene — und eine, in der
+   etwas zu holen gewesen wäre. Das ist der Handel: **Zeit gegen Substanz.**
+
+   **Warum ohne Probe.** Wie die Rechnung des Bataillonschefs („welche Kompanie
+   geht zuerst hinein") ist das keine Frage des Könnens, sondern eine, für die
+   man bezahlt. Es gibt keine Fertigkeit, die einem abnimmt, ob man seine Leute
+   schont oder verheizt.
+
+   **Die Schuhe zahlen mit.** Wer forciert marschiert und schlechte Schuhe hat,
+   zahlt doppelt. Das ist die rückwirkende Aufwertung des unscheinbarsten
+   Ladenpostens — dieselbe Idee, mit der später der Mantel im Frost zum
+   wichtigsten Gegenstand des Spiels wird, ohne dass ein System dazukommt.
+
+   Datenformat an der Station:
+     tempo:{ ueberspringt:'stations-id',        // optional
+             forciert:{text:'…', ruf:6},        // optionale Zusatzwirkung
+             normal:{…}, schonend:{…} }                                     */
+const TEMPO = [
+  {id:'schonend', label:'Schonend marschieren',
+   hint:'Ruf −2 · es wird aufgeschrieben, wer wann eintrifft',
+   verschleiss:0.08, atem:-2, belastung:1, ruf:-2,
+   text:'Du lässt die Kolonne in ihrem Schritt. Am Abend steht, wer morgens angetreten ist, und am Straßenrand liegt keiner von euch. Am Etappenort steht ein Adjutant mit einer Uhr und schreibt auf, welches Bataillon wann eintrifft. Er schreibt es für jemanden auf, den du nie zu sehen bekommst.'},
+  {id:'normal', label:'Nach Vorschrift marschieren',
+   hint:'Dreißig Kilometer, zwei Rasten, abends Quartier',
+   verschleiss:0.15, atem:-6, belastung:2,
+   text:'Dreißig Kilometer, zwei Rasten, abends Quartier. Es ist die Leistung, für die dieses Heer gebaut worden ist, und sie fühlt sich nach nichts Besonderem an, solange man sie erbringt.'},
+  {id:'forciert', label:'Forcieren',
+   hint:'Doppelter Verschleiß · Atem −25 · du kommst an, bevor der Weg zu Ende ist',
+   verschleiss:0.5, atem:-25, belastung:8, forciert:true,
+   text:'Losgehen um drei, Rast im Stehen, weiter im Dunkeln. Die letzten Stunden geht die Kolonne, ohne dass jemand redet. Wer liegen bleibt, bleibt liegen; die Gendarmerie sammelt ihn ein, wenn sie kann, und wenn nicht, dann nicht.'}
+];
+
+function zeigeTempo(n){
+  const t = n.tempo || {};
+  const opt = TEMPO.map((x,i)=>{
+    const zusatz = t[x.id] || {};
+    const uebersprungen = (x.forciert && t.ueberspringt) ? ' · eine Station bleibt liegen' : '';
+    /* `data-gewinn` ist kein verstecktes Wissen — es steht als Satz auf dem
+       Knopf („ihr holt eine Kolonne ein, die aufgeben will"). Das Attribut
+       sagt dem Testbot dasselbe, was ein Spieler liest, und ohne es misst das
+       Skript wieder seine eigene Blindheit statt des Spiels. */
+    return `<button class="ord ${x.forciert?'risk':''}" onclick="waehleTempo(${i})"${
+      (x.forciert && zusatz.hint) ? ' data-gewinn="1"' : ''}>
+      ${esc(x.label)}<span class="cost">${esc(x.hint)}${uebersprungen}${zusatz.hint?' · '+esc(zusatz.hint):''}</span></button>`;
+  }).join('');
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}<div class="card"><div class="ch"><span>Das Tempo</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="prose">${(t.text||[
+        'Vor dem Abmarsch steht die Frage, die in diesem Feldzug jeden Tag gestellt wird und über die keine Vorschrift etwas sagt: wie schnell.'
+      ]).map(x=>`<p>${x}</p>`).join('')}</div></div></div>
+      <div class="orders"><div class="ch"><span>Wie marschiert ihr?</span></div><div class="ordbody">${opt}</div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+function waehleTempo(i){
+  const n = KAPITEL[LAUF.node];
+  if(!n || !n.tempo || LAUF.tempo === n.id) return;   // Wächter gegen den zweiten Klick
+  const t = TEMPO[i]; if(!t) return;
+  LAUF.tempo = n.id;
+  const zusatz = n.tempo[t.id] || {};
+
+  /* Grund- und Kapitelwirkung landen in **einem** Kasten: Der Spieler soll
+     nicht zwei Rechnungen lesen, sondern eine. */
+  const w = Object.assign({}, zusatz);
+  delete w.text; delete w.hint;
+  w.atem = (w.atem||0) + t.atem;
+  w.belastung = (w.belastung||0) + t.belastung;
+  if(t.ruf) w.ruf = (w.ruf||0) + t.ruf;
+
+  let schuhe = '';
+  if(t.forciert && S.ausr.schuhe && S.ausr.schuhe.zustand < 40){
+    w.atem -= 8; w.belastung += 4;
+    if(!w.wunde) w.wunde = 'Wundgelaufene Füße';
+    schuhe = ' Deine Schuhe halten das nicht. Am dritten Tag gehst du auf etwas, das keine Sohle mehr hat.';
+  }
+
+  verschleiss(t.verschleiss);
+  anwenden(w);
+  if(t.forciert && n.tempo.ueberspringt) LAUF.ueberspringen = n.tempo.ueberspringt;
+  S.log.push((n.ort||'') + ': ' + t.label);
+  laufSichern();
+
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>Das Tempo</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="prose"><p class="said">${esc(t.label)}</p></div>
+        <div class="ergebnis ${t.forciert?'schlecht':'gut'}">${t.text}${schuhe}${zusatz.text?'<br><br>'+zusatz.text:''}</div>
+        ${wirkungen(w)}</div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 /* ── Szene ── */
+/* ── Rangfassungen (KAMPAGNEN §0.3) ──
+   „Jede Station trägt jeden Rang." Eine Szene, die 1806 geschrieben ist, muss
+   für einen Caporal stimmen und für einen Colonel — und wo das mit einem Text
+   nicht geht, bekommt sie eine zweite Lage. Beides ist **additiv**, nach dem
+   Muster von `rangTun` im Lager:
+
+     rangText:{7:['…']}       zusätzliche Absätze ab Rang 7
+     rangOptionen:{7:[{…}]}   zusätzliche Knöpfe ab Rang 7
+
+   **Additiv und nicht ersetzend, aus einem Grund:** Ein ersetzter Text wäre
+   eine zweite Szene unter demselben Namen, und dann hätte man zwei zu pflegen.
+   Ein zusätzlicher Absatz sagt, was der Höhergestellte *mehr* sieht — und das
+   ist ohnehin die Wahrheit über Ränge. Wer eine Wahl nur unten oder nur oben
+   haben will, nimmt weiterhin `ab:{wert:'rang',min:n,sonst:'…'}`; das sperrt
+   mit einem Satz statt mit einem grauen Knopf. */
+function rangZusatz(o){
+  if(!o) return [];
+  const raus = [];
+  for(const r in o) if(S.rang >= +r) raus.push(...o[r]);
+  return raus;
+}
+function szeneText(n){ return (n.text||[]).concat(rangZusatz(n.rangText)); }
+function szeneOptionen(n){ return (n.optionen||[]).concat(rangZusatz(n.rangOptionen)); }
+
 /* Ob eine Szenenwahl überhaupt offensteht. Dieselbe Sperr-Regel wie bei den
    Marsch-Zwischenfällen (CLAUDE.md): **Wer eine Probe erkennbar nicht bestehen
    kann, bekommt keinen Knopf, sondern einen Satz.** Ein stummer gesperrter
@@ -1323,24 +1465,59 @@ function szeneVerwehrt(o){
 }
 
 function zeigeSzene(n){
-  const gesperrtText = n.optionen.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
+  const alle = szeneOptionen(n);
+  const gesperrtText = alle.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
     .map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
-  const opt = n.optionen.filter(o=>!szeneVerwehrt(o)).map((o)=>{
-    const i = n.optionen.indexOf(o);
+  const opt = alle.filter(o=>!szeneVerwehrt(o)).map((o)=>{
+    const i = alle.indexOf(o);
     const gesperrt = o.probe && wert(o.probe.wert)<5;
     return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
       ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}${
         o.kette?' · '+o.kette.map(st=>wertName(st.wert)+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · '):''}</span></button>`;
   }).join('');
+  /* ── Der Notausgang ──
+     **Eine Szene ohne einen einzigen drückbaren Knopf ist eine Sackgasse**, und
+     der Lauf ist verloren, obwohl der Mann lebt. Das kann passieren, ohne dass
+     es jemand beim Schreiben der Daten sieht: `wert()` zieht Wunden, Belastung
+     und kaputte Schuhe ab (Konstitution −18 unter Zustand 25), und wer unter 5
+     fällt, dessen Knopf wird gesperrt. Trägt jede Wahl der Szene eine Probe,
+     bleibt nichts übrig.
+
+     Gefunden beim Rangdurchlauf von Kapitel 5 (`test/kapitel.js`): ein
+     Fusilier mit durchgelaufenen Schuhen stand vor der Verfolgung und konnte
+     nichts mehr tun. **Die Regel bleibt, dass jede Szene eine Wahl ohne Probe
+     haben soll** — dies hier ist die Sicherung dagegen, dass sie einmal
+     vergessen wird, und sie ist absichtlich das Kärglichste, was das Spiel
+     anbieten kann. */
+  const notausgang = opt ? '' :
+    `<button class="ord" onclick="szeneAushalten()">Es aushalten
+      <span class="cost">Du kannst nichts von dem, was hier zu tun wäre</span></button>`;
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div></div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+      <div class="cb"><div class="prose">${szeneText(n).map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div></div></div>
+      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}${notausgang}</div></div>
     </div>${seitenleiste()}</div>`;
   LAUF.szene = n.id;
 }
+/* Der Notausgang aus `zeigeSzene`: keine Probe, keine Wirkung außer der, die
+   ohnehin da ist. Er kostet einen Punkt Belastung, damit er kein Schlupfloch
+   ist — aber er tut auch nicht so, als sei Nichtstun eine Leistung. */
+function szeneAushalten(){
+  const n = KAPITEL[LAUF.node];
+  const erg = {text:'Es gibt an diesem Tag nichts, was du tun kannst. Du gehst mit, du stehst dabei, und am Abend ist es vorbei, ohne dass jemand deinen Namen genannt hätte.', belastung:2};
+  anwenden(erg);
+  S.log.push(n.id + ': ausgehalten');
+  stationErledigt();
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="ergebnis">${erg.text}</div>${wirkungen(erg)}</div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 function waehleOption(i){
-  const n = KAPITEL[LAUF.node], o = n.optionen[i];
+  const n = KAPITEL[LAUF.node], o = szeneOptionen(n)[i];
   let erg, klasse='', probeText='', kettenText='';
 
   /* ── Ketten in Szenen ──

@@ -5,6 +5,40 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Kapitel 5: Jena–Auerstedt 1806
+
+**Die eigene Regel: Der Krieg wird mit den Beinen gewonnen.** Siebzehn Stationen, drei Gefechte, drei Marschentscheidungen — das Verhältnis bildet den Feldzug ab: vierzehn Tage marschiert, zwei Tage geschossen, und danach gibt es keine preußische Armee mehr.
+
+**Neu und kapitelübergreifend: die Tempowahl** (`TEMPO` in `src/oberflaeche.js`). Drei Knöpfe vor jedem langen Marsch — schonend (Ruf −2), nach Vorschrift, forcieren (Verschleiß 0,5 · Atem −25 · Belastung +8 · **überspringt eine Station**). Welche Station der forcierte Marsch auslässt, steht in den Daten (`tempo.ueberspringt`), nie im Code. Sie steht in den Systemdateien, weil Russland und 1814 sie wieder brauchen (KAMPAGNEN §8).
+
+- **Ohne Probe**, wie die Rechnung des Bataillonschefs: Es gibt keine Fertigkeit, die einem abnimmt, ob man seine Leute schont oder verheizt.
+- **Die Schuhe zahlen mit** (unter Zustand 40: Atem −8, Belastung +4, wundgelaufene Füße). Rückwirkende Aufwertung eines alten Ladenpostens statt eines neuen Systems.
+- **Die übersprungene Station findet wirklich nicht statt** — kein `stationErledigt()`, also keine Zeitheilung, kein Sold, kein Chronikeintrag.
+
+**Rangfassungen in Szenen** (`rangText`, `rangOptionen`), additiv nach dem Muster von `rangTun`: KAMPAGNEN §0.3 verlangt, dass jede Station jeden Rang trägt. Additiv und nicht ersetzend, weil ein ersetzter Text eine zweite Szene unter demselben Namen wäre.
+
+**Neuer Prüfstand `test/kapitel.js`** für Grundsatz 3: springt an den Anfang eines Kapitels, setzt den Rang auf 1, 5, 8 und 12 und klickt durch — jede Station erreicht, jedes Gefecht auf dem Maßstab des Rangs, nichts in der Konsole. Geheilt wird vor jedem Schritt: gemessen wird Vollständigkeit, nicht Härte.
+
+> **Ein echter Fehler, gefunden von diesem Prüfstand: die Szene ohne drückbaren Knopf.** `wert()` zieht kaputte Schuhe ab (Konstitution −18 unter Zustand 25), und `zeigeSzene` sperrt jeden Knopf unter Wert 5. Trägt **jede** Wahl einer Szene eine Probe, steht ein abgelaufener Mann vor einer Station, an der er nichts tun kann — der Lauf ist verloren, obwohl er lebt. Zwei Antworten: die Regel (jede Szene bekommt eine Wahl ohne Probe; in Kapitel 5 an zwei Stellen nachgetragen) und die Sicherung (`szeneAushalten()`, „Es aushalten", Belastung +2, kein Gewinn). *Audit: `marsch_rhein` und `donau` in Kapitel 4 haben ebenfalls keine probefreie Wahl und hängen jetzt an der Sicherung.*
+
+> **Befund beim Eichen am Hebel: Der Linien-Hebel der Feindgüte steht seit Ägypten am Boden.** `linie *= max(0,3 ; 1 − guete·0,15)` erreicht den Boden bei Güte 4,67 — Ägypten (5), Austerlitz (6) und Jena (7) haben also **denselben** Linien-Hebel, und alle künftigen Kapitel ebenfalls. Der als „wichtigster Hebel" beschriebene Teil der Güte trennt nur die Werte 0 bis 4. Ab 5 eskaliert sie über Gefahr (+1 je Punkt) und eigene Verluste (+15 % je Punkt). **Nicht repariert:** Der Boden ist Absicht, und ihn zu senken hieße, die zwei gemessenen Kapitel neu zu eichen. Was ein spätes Kapitel hart macht, muss aus seiner eigenen Regel kommen — genau so steht es in KAMPAGNEN.
+
+**Kapitel 4 endet jetzt auf `uebergang` statt auf `ende`** (dieselbe Umstellung wie seinerzeit bei Kapitel 1 und 2). Das Jahr zwischen Preßburg und Bamberg heilt, was heilbar ist.
+
+**Ein Bot-Fehler, zwei Messreihen lang unbemerkt:** `f(/^Forcieren/)` traf nie, weil `textContent` eines Knopfes mit dem Zeilenumbruch aus dem Markup beginnt. Der Bot fiel in den Szenen-Zweig und drückte den ersten Knopf — „schonend", die eine Wahl, die ein kundiger Spieler nie trifft. Behoben; dazu trägt der forcierte Knopf jetzt `data-gewinn`, wenn das Kapitel ihm etwas anhängt. Das ist kein verstecktes Wissen: Es steht als Satz auf dem Knopf.
+
+**Sold-Moral 0,8** (Preußen ist reich, der Feldzug kurz) · **Feindgüte 7**, am Hebel geprüft (`feindGuete()` je Gefecht ausgelesen), nicht am Ergebnis geraten.
+
+**Jena: Gefahr 14 → 12.** Mit `haerte` (+3) und Güte 7 hätte der Entwurfswert 24 ergeben und Jena still zum tödlichsten Gefecht des Spiels gemacht — über Akkon und Austerlitz, die beide bei 22 liegen. **Regel daraus: Kein Gefecht geht über 22, wenn nicht das Gefecht selbst die Regel seines Kapitels ist.** Die Regel von Kapitel 5 ist der Marsch.
+
+**Die Leitzahl „höchster Rang" wandert von Rang 6 auf Rang 9** (`LEITRANG` in `test/balance.js`). Der Vorbehalt aus Phase C („Wer Phase E misst, entscheidet das neu") ist damit eingelöst: Ein Drittel der reichen Veteranenläufe erreicht den Capitaine, und eine Leitzahl, die den Sergent-major zählt, misst dann nur noch, wie viele bis zur Mitte kommen. **Alle Zahlen vor dem 29.07.2026 sind damit nicht mehr unmittelbar vergleichbar.**
+
+**`VP=400` löst `VP=160` als Leitmessung des Veteranen ab.** Ein Spitzenlauf bringt mit fünf Kapiteln über 440 Punkte statt 350; 160 misst nicht mehr den Veteranen, den das Spiel hervorbringt. `VETERAN_ZIELE` ist entsprechend verlängert, sonst kann der Bot den Vorrat gar nicht ausgeben.
+
+**Gemessen** *(vorsichtig und mutig je 80 Läufe, die Veteranen je 40)*: überlebt **23 / 6 / 13 / 25 %**, höchster Rang (Cpt) **5 / 4 / 18 / 30 %**.
+
+> **⚠ Die Progression hat sich dabei einmal umgedreht, und es lag am Bot.** Der Veteran mit 160 VP überlebte seltener (13 %) als der Erstläufer ohne Vorrat (23 %) — die eine Zahl, die nie so stehen darf. Gefunden an der Sterbeort-Zeile: Der Veteran stirbt in Jena, der Erstläufer in Ägypten. Der Bot forcierte, sobald er über halbes Blut hatte, und **nur der Veteran hat überhaupt die Kraft, in die Falle zu laufen.** Die Bedingung steht jetzt auf `anteil > 0,8 && Atem > 70 && Schuhe ≥ 40`; die Nachmessung läuft. **Regel:** Wer eine Wahl einbaut, die Kraft kostet und Ruf bringt, muss dem Bot beibringen, *wann* sie sich lohnt.
+
 ## 2026-07-29 — Rangleiter Phase E: die Patente
 
 **Die einzige zugelassene Ausnahme von Invariante 3 — und die Antwort auf ein gemessenes Problem.** Mit vier Kapiteln erreichte kein Lauf Rang 10; die halbe Rangleiter war gebaut und für den Spieler unsichtbar. Die Patente lösen das ohne ein neues Kapitel: Wer eines kauft, startet 1796 in Savona als Offizier.

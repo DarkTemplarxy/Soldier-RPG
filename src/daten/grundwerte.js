@@ -276,7 +276,7 @@ const KAMPAGNEN = [
   {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
   {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
   {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, kurz:'Die perfekte Schlacht.'},
-  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
   {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
   {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
   {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, kurz:'Kein Feldzug, ein Überlebensspiel.'},
@@ -333,7 +333,18 @@ const ORDEN = [
   {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
    ab:'1804', vp:12, ruf:10, pension:1.0,
    was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
-   bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'}
+   bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'},
+
+  /* Der zweite Grad. Historisch war der Sprung vom Légionnaire zum Officier an
+     den Rang gebunden: Mannschaften wurden Légionnaire, Offiziere Officier.
+     Deshalb setzt er den ersten Grad *und* ein Patent voraus — er ist keine
+     zweite Auszeichnung, sondern dieselbe eine Stufe höher. Die Pension
+     verdoppelt sich, und das war der eigentliche Unterschied: zweitausend
+     Francs im Jahr statt fünfhundert. */
+  {id:'legion_offizier', name:'Offizier der Ehrenlegion', voll:'Officier de la Légion d\'honneur',
+   ab:'1807', vp:12, ruf:10, pension:2.0,
+   was:'Dasselbe Kreuz, größer, an einem Band mit Rosette. Zweitausend Francs im Jahr, und in einer Liste, die in Paris geführt wird, steht dein Name jetzt in der zweiten Spalte statt in der ersten.',
+   bedingung:'Die Ehrenlegion, ein Patent und acht Nennungen'}
 ];
 function ordenVon(id){ return ORDEN.find(o=>o.id===id) || null; }
 function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
@@ -358,12 +369,17 @@ function ordensbild(id){
     <rect x="22" y="2" width="2" height="3.4" fill="#3e5a2c"/>
     <path d="M18 7 L23 13 L18 19 L13 13 Z" fill="#e8e2d4" stroke="#8a8272" stroke-width=".6"/>
     <circle cx="18" cy="13" r="2.4" fill="none" stroke="#6e5320" stroke-width="1.5"/></svg>`;
-  if(id==='legion'){
+  if(id==='legion' || id==='legion_offizier'){
+    /* Der zweite Grad trägt dasselbe Kreuz an einem Band mit **Rosette** — der
+       einzige Unterschied, den man auf sechsunddreißig Pixel sehen kann, und
+       historisch genau der, an dem man ihn erkannte. */
+    const offizier = id === 'legion_offizier';
     const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
       fill="#f0ece2" stroke="#8a8272" stroke-width=".5" transform="rotate(${a+45} 18 12)"/>`).join('');
-    return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenlegion">
+    return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="${offizier?'Offizier der Ehrenlegion':'Ehrenlegion'}">
       <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
       <rect x="13" y="2" width="10" height="4" fill="#9c3125"/>
+      ${offizier?'<circle cx="18" cy="4" r="2.6" fill="#9c3125" stroke="#6e2018" stroke-width=".6"/>':''}
       ${arme}<circle cx="18" cy="12" r="2.6" fill="#8a6410"/></svg>`;
   }
   return '';
@@ -406,9 +422,16 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
         Gunst 0, und die Quellen, aus denen sich Gunst sonst speist — Abende am
         Feuer, Listen führen, den Tornister eines Erschöpften tragen —, sind für
         ihn geschlossen. Er ist mechanisch stärker und **sozial nackt**.
-     3. **Die ersten vier Kapitel werden härter** (`guetePlus`): +8 auf die
-        Feindgüte. Ein Offizier kommt nicht in dieselben Gefechte wie ein
-        Fusilier; er kommt in die, die man einem Offizier gibt.
+     3. **Man steht sichtbarer.** Der Gefahrzuschlag des Patents ist **+2** je
+        Runde, zusätzlich zu den +4/+5 des Offiziersrangs — Epauletten an einem
+        Mann, den in dieser Kompanie niemand kennt.
+
+   **Was hier ausdrücklich nicht steht: ein Güte-Zuschlag.** Die erste Fassung
+   erhöhte die Feindgüte der ersten vier Kapitel um 8, und das Ergebnis waren
+   40 Tote in 40 Läufen. Der Grund stand längst in CLAUDE.md und wurde
+   übersehen: `guete` schrumpft die Hilfe der eigenen Linie, und bei 8 sitzt
+   dieser Hebel am Boden (0,3) — damit ist kein Gefecht mehr zu gewinnen, und
+   jedes verlorene kostet Blut. **`guete` ist kein Schwierigkeitsregler.**
 
    Erzählt wird es als das, was es historisch war: der Sohn eines
    zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,

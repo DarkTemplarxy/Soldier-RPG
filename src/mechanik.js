@@ -47,6 +47,11 @@ function stationErledigt(){
      Auch die Klemme lag falsch — je Wunde einzeln bei 1 gekappt, verschluckte
      sie bei zwei Krankheiten die Hälfte der Summe. Jetzt: eine Summe, eine
      Klemme, und Genesung erst, wenn das Fieber weg ist. */
+  /* Der Frost wirkt vor der Zehrung, aber die Wunde, die er gibt, zehrt erst
+     ab der nächsten Station: Man erfriert nicht an dem Abend, an dem es
+     anfängt. */
+  const kalt = frostWirken(KAPITEL[LAUF.node-1]);
+  if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
   if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
   else lebenAuffuellen(0.05);
@@ -146,6 +151,17 @@ function ordenFaellig(){
   if(!hatOrden('legion') && jahr >= 1804 &&
      (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel') || (S.nennungen >= 5 && S.ruf >= 45)))
     return ordenVon('legion');
+  /* ── Der zweite Grad, ab 1807 ──
+     **Ein Grad ist keine zweite Auszeichnung, sondern dieselbe eine Stufe
+     höher** — deshalb setzt er den ersten voraus und nicht bloß Zahlen. Die
+     Ehrenlegion hatte fünf Grade, und der Sprung vom Légionnaire zum Officier
+     war historisch an den Rang gebunden: Mannschaften wurden Légionnaire,
+     Offiziere wurden Officier. Genau so steht es hier — Rang 7 als Schranke,
+     acht Nennungen als Leistung, ab dem Jahr, in dem die Vakanzwelle von
+     Eylau die Armee mit neuen Offizieren auffüllt. */
+  if(!hatOrden('legion_offizier') && jahr >= 1807 && hatOrden('legion') &&
+     S.rang >= 7 && S.nennungen >= 8)
+    return ordenVon('legion_offizier');
   return null;
 }
 
@@ -404,6 +420,14 @@ function anwenden(e){
      Dinge). Bewusst schmal: nur setzen, nie rechnen — wer eine Zahl braucht,
      nimmt eines der bestehenden Felder. */
   if(e.setzt) for(const k in e.setzt) S[k] = e.setzt[k];
+  /* ── Ein Gegenstand, den man vorher nicht hatte ──
+     `ausr:` verändert den Zustand vorhandener Ausrüstung; `ausruestung:` legt
+     ein Stück neu an. Gebraucht wird das zum ersten Mal für den Mantel: Ohne
+     ihn zehrt der Frost, und ein Kapitel, in dem man ihn nur mit
+     Veteranenpunkten bekommen kann, wäre eine Mautstelle statt einer Regel.
+     **Was man im Feld findet, ist schlechter als was man kauft** — das ist der
+     Unterschied, und er steht in den Daten, nicht hier. */
+  if(e.ausruestung) for(const k in e.ausruestung) S.ausr[k] = Object.assign({}, e.ausruestung[k]);
   atemKlemmen();
 }
 
@@ -451,6 +475,51 @@ function atemKlemmen(){
   if(!S) return;
   S.leben = Math.max(0, Math.min(S.leben, lebenMax()));
   S.atem  = Math.max(0, Math.min(S.atem, S.leben));
+}
+
+/* ══════════════════ DER FROST ══════════════════
+
+   **Die eigene Regel von Kapitel 6: Der Winter schießt mit.** Das erste Mal,
+   dass das Wetter ein Gegner mit Werten ist — und es ist ausdrücklich *keine*
+   neue Krankheit, sondern die Einlösung von KAMPAGNEN §0.9: „Kälte ist keine
+   Krankheit, sondern Belastung und Verschleiß."
+
+   `frost:n` an einer Station heißt: Diese Station wird unter freiem Himmel
+   verbracht. Die Stufe ist die Härte — 1 in Ostpreußen, 3 auf dem Rückweg von
+   Moskau, 4 ohne Mantel ab Smolensk.
+
+   | | mit Mantel | ohne |
+   |---|---|---|
+   | Belastung | +4 je Station | +4 |
+   | Verschleiß | ×(1 + Stufe/2) | dasselbe |
+   | Leben | — | **eine zehrende Wunde, Stufe = Zehrung** |
+
+   **Der Beutemantel ist damit rückwirkend der wichtigste Posten im Laden**,
+   und das ist der ganze Trick: Kapitel 6 baut kein neues System, es macht ein
+   altes wichtig. Genau wie die Schuhe in der Tempowahl.
+
+   **Der Frost taut auf, sobald eine Station ein Dach hat** (jede ohne `frost`).
+   Er ist kein Fieber, das man mitschleppt — er ist der Zustand, in dem man
+   gerade lebt. Deshalb wird die Wunde entfernt und nicht geheilt: Es gibt
+   nichts zuzunähen. */
+const FROST_WUNDE = 'Der Frost';
+
+function frostWirken(n){
+  if(!S) return '';
+  const stufe = (n && n.frost) | 0;
+  const hat = S.wunden.some(w => w.name === FROST_WUNDE);
+  if(!stufe){
+    if(!hat) return '';
+    S.wunden = S.wunden.filter(w => w.name !== FROST_WUNDE);
+    atemKlemmen();
+    return 'Ein Dach, ein Ofen, und es dauert zwei Tage, bis die Finger wieder etwas halten.';
+  }
+  S.belastung = Math.min(100, S.belastung + 4);
+  verschleiss(0.15 * stufe);
+  const mantel = S.ausr.mantel && S.ausr.mantel.zustand >= 20;
+  if(mantel || hat) return '';
+  wundeGeben(FROST_WUNDE, 6, stufe);
+  return 'Eine Nacht im Freien ohne Mantel. Es geht in die Finger und bleibt dort.';
 }
 
 function wundeGeben(name, abzug, zehrt){

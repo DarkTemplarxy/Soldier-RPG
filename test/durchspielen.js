@@ -36,6 +36,9 @@ const ziel = process.argv[2] === 'dist'
         z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinknien|Flach hinlegen/);
       if (!z && txt.includes('VERBLEIBENDE ABENDE') && +(txt.match(/Gunst Martel\s+(\d+)/) || [, 0])[1] < 4)
         z = f(/Am Feuer/);
+      // Die Tempowahl: forcieren, damit der Sprung über eine Station auch
+      // wirklich durchlaufen wird — ein Pfad, den sonst nichts prüft.
+      if (!z) z = f(/Forcieren/);
       if (!z) z = btn.find(e => !/Zurückweichen|Mitmachen/.test(e.textContent)) || btn[0];
       if (z) { z.click(); return true; } return false;
     });
