@@ -61,37 +61,46 @@ const VP  = parseInt(process.env.VP || '0', 10);   // Vorrat des Veteranen, 0 = 
    reicht — sonst misst man, ob der Bot sparen kann, und nicht das Spiel. */
 const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
 
-/* Wofür ein Veteran seinen Vorrat ausgibt, in dieser Reihenfolge. Konstitution
-   zuerst, weil sie der Lebensvorrat *und* die Elitegrenze ist; dann Geschick
-   für den Voltigeur; dann die Muskete, weil kürzere Gefechte weniger Treffer
-   heißen. Was danach kommt, kauft nur ein reicher Lauf. */
-const VETERAN_ZIELE = [['konstitution',70],['geschick',70],['muskete',60],
-                       ['bildung',40],['kaltbluetigkeit',60],['autoritaet',50],['bajonett',40],
-                       /* Ab hier nur noch für die reichen Läufe. **Die Liste
-                          muss mit dem Inhalt wachsen:** Mit fünf Kapiteln
-                          bringt ein Spitzenlauf über 440 Punkte, und ein Bot,
-                          der sie nicht ausgeben kann, misst einen ärmeren
-                          Veteranen als den, den das Spiel tatsächlich
-                          hervorbringt. */
-                       ['drill',55],['taktik',50],['verwaltung',50],['menschenkenntnis',60]];
-/* Bildung 40 steht bewusst vor Kaltblütigkeit: Sie ist die Schwelle zum
-   Caporal-fourrier (35) und damit der einzige Weg, den ein Veteran *kaufen*
-   kann — im Feld kostet sie Lagerabende und Geld. KONZEPT nennt sie „den
-   eigentlichen Flaschenhals dieses Spiels". */
+/* ── Die Einkaufsliste des Veteranen, eine einzige Reihenfolge ──
 
-/* ── Und was er an Stücken und Gewohnheiten kauft, bevor er Punkte verteilt ──
+   **Punkte und Stücke stehen in *einer* Liste, und das ist der Kern.** Die
+   erste Fassung trennte beides: erst alle Stücke, dann die Punkte. Gemessen
+   war das ein Bot-Artefakt und keine Balance — ein Veteran mit 160 VP gab
+   135 davon für Mantel, Schuhe und zwei Gewohnheiten aus und hatte für
+   Konstitution **fünfundzwanzig** übrig. Er lief also mit den Attributen
+   eines Erstläufers und guten Angewohnheiten los, und die Rangquote fiel von
+   30 auf 15 %. Kein Mensch kauft so.
 
-   **Ohne diese Liste misst das Skript die Blindheit des Bots.** Bis hierher
-   kannte er nur Attribute und Fertigkeiten: Er kaufte nie einen Mantel, also
-   maß jede Frostmessung den Ausnahmefall (`OFFEN.md` Punkt 3), und die
-   Gewohnheiten hätte er gar nicht gesehen. Das ist derselbe Fehler wie damals
-   bei der Gunst und der Regimentsschule, nur eine Ebene höher.
+   Umgekehrt geht es auch nicht — wer zuerst alle Punkte verteilt, hat für
+   ein Stück mit festem Preis nie wieder genug übrig, weil Punkte beliebig
+   teilbar sind und Stücke nicht.
 
-   Die Reihenfolge ist die eines Mannes, der weiß, woran er zuletzt gestorben
-   ist: erst der Mantel (Eylau und Russland), dann die Schuhe, dann die
-   Gewohnheiten gegen das, was zwischen den Gefechten tötet. */
-const VETERAN_KAEUFE = ['mantel_gut','schuhe_gut',
-                        'zaeh_wasser','zaeh_fuesse','zaeh_nachzuegler','zaeh_schlaf','zaeh_narben'];
+   **Also abwechselnd, in der Reihenfolge, in der ein Mann es täte, der weiß,
+   woran er zuletzt gestorben ist:** zuerst der Lebensvorrat, dann der Mantel,
+   dann das, was ihn durch Ägypten bringt, und der Rest, wenn noch etwas da
+   ist. `['k', id]` ist ein Stück, `['w', name, bis]` ein Wert. */
+const VETERAN_PLAN = [
+  ['w','konstitution',70],      // der Lebensvorrat zuerst — er ist die Schwelle des Todes
+  ['k','mantel_gut'],           // Eylau und Russland, und er kostet nur 30
+  ['w','geschick',70],          // Voltigeur, und die zweite Elitegrenze
+  ['k','zaeh_wasser'],          // Ägypten tötet mehr Veteranen als jedes andere Kapitel
+  ['w','muskete',60],           // kürzere Gefechte heißen weniger Runden mit Treffern
+  ['k','schuhe_gut'], ['k','zaeh_fuesse'],
+  /* Bildung 40 steht bewusst hier: Sie ist die Schwelle zum Caporal-fourrier
+     (35) und der einzige Weg, den ein Veteran *kaufen* kann — im Feld kostet
+     sie Lagerabende und Geld. KONZEPT nennt sie „den eigentlichen Flaschenhals
+     dieses Spiels". */
+  ['w','bildung',40],
+  ['k','zaeh_nachzuegler'],     // Spanien und Russland
+  ['w','kaltbluetigkeit',60],
+  ['k','zaeh_schlaf'], ['k','zaeh_narben'],
+  /* Ab hier nur noch für die reichen Läufe. **Die Liste muss mit dem Inhalt
+     wachsen:** Mit acht Kapiteln bringt ein Spitzenlauf über 500 Punkte, und
+     ein Bot, der sie nicht ausgeben kann, misst einen ärmeren Veteranen als
+     den, den das Spiel tatsächlich hervorbringt. */
+  ['w','autoritaet',50], ['w','bajonett',40], ['w','drill',55],
+  ['w','taktik',50], ['w','verwaltung',50], ['w','menschenkenntnis',60]
+];
 const ziel = path.resolve(__dirname, '../index.html');
 
 /* Kurzname je Rang — das Skript kennt `grundwerte.js` nicht, weil es im Browser
@@ -197,15 +206,14 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     await p.click('text=Weiter zu den Veteranenpunkten');
     // Das Patent zuerst — es ist die teuerste Einzelentscheidung des Ladens.
     if (PATENT) await p.evaluate(id => waehle(id), PATENT);
-    /* Stücke und Gewohnheiten zuerst: Sie haben feste Preise, während die
-       Punkte beliebig teilbar sind — wer zuerst Punkte verteilt, hat für ein
-       30-VP-Stück nie mehr genug übrig, und die Messung sähe einen Veteranen,
-       der grundsätzlich nichts kauft. `waehle()` nimmt nur an, was der Vorrat
-       trägt, also fällt Überzähliges von allein weg. */
-    if (VP > 0) await p.evaluate(ids => ids.forEach(id => waehle(id)), VETERAN_KAEUFE);
-    // Der Veteran gibt den Rest nach fester Rangfolge aus; bei VP=0 nichts.
-    if (VP > 0) await p.evaluate(ziele => {
-      for (const [k, bis] of ziele){
+    /* Der Veteran arbeitet **eine** Liste ab, abwechselnd Werte und Stücke.
+       Beides greift auf denselben Vorrat zu; was nicht mehr hineinpasst, fällt
+       von allein weg, weil `waehle()` und `stellePunkt()` beide prüfen. Bei
+       VP=0 wird nichts gekauft — dann *ist* der Bot der Erstlauf-Spieler. */
+    if (VP > 0) await p.evaluate(plan => {
+      for (const eintrag of plan){
+        if (eintrag[0] === 'k'){ waehle(eintrag[1]); continue; }
+        const k = eintrag[1], bis = eintrag[2];
         for(;;){
           if (istWert(k) + (PUNKTE[k]||0) + PUNKT_SCHRITT > bis) break;
           const vorher = PUNKTE[k]||0;
@@ -213,7 +221,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if ((PUNKTE[k]||0) === vorher) break;      // der Vorrat reicht nicht mehr
         }
       }
-    }, VETERAN_ZIELE);
+    }, VETERAN_PLAN);
     await p.click('#startbtn');
     if (!STATIONSZAHL) STATIONSZAHL = await p.evaluate(() => KAPITEL.length);
 

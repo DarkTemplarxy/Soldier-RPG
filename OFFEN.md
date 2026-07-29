@@ -95,7 +95,8 @@ Der Boden 0,3 wird bei **Güte 4,67** erreicht. Ägypten (5), Austerlitz (6), Je
 
 | Punkt | Wie geschlossen | Messwert |
 |---|---|---|
-| Der Bot kaufte keine Ausrüstung, weshalb der Frost durchweg den Ausnahmefall maß | `VETERAN_KAEUFE` in `test/balance.js` — Mantel und Schuhe zuerst, dann die fünf Gewohnheiten. **Stücke vor Punkten**, sonst ist für ein 30-VP-Stück nie mehr genug übrig | *(Messung läuft)* |
+| Der Bot kaufte keine Ausrüstung, weshalb der Frost durchweg den Ausnahmefall maß | `VETERAN_PLAN` in `test/balance.js` — **eine** Liste, abwechselnd Werte und Stücke | Der 160er kauft jetzt den Mantel und steckt den Rest in Werte; der 400er kauft Mantel, vier Gewohnheiten *und* Werte |
+| Die erste Fassung dieser Liste kaufte alle Stücke **vor** allen Punkten | Ein Veteran mit 160 VP gab 135 für Ausrüstung aus und hatte für Konstitution fünfundzwanzig übrig — er lief mit den Attributen eines Erstläufers los. **Kein Mensch kauft so.** Jetzt abwechselnd | Rangquote fiel dadurch 30 → 15 %; die Messung der Gewohnheiten ist damit ungültig und wird wiederholt |
 | Der Überlebensbonus in `wertung()` war ein Platzhalter von 25 | Mit der Rangschranke in Kapitel 8 gebaut: `S.ende` trägt jetzt `ruhestand` / `halbsold` / sonst, und `wertung()` staffelt danach **180 / 120 / 70** wie KONZEPT §5 | Rang 5 ausgemustert 326 · Rang 9 geht 469 · Rang 9 marschiert weiter 359 Punkte — **weitermarschieren kostet sofort 110** |
 | Der Härtemodus zählte jeden Gefallenen als Überlebenden | `zeigeTod()` nullt `LAUF` und über `binde()` auch `S` — genau wie ein Kapitelende. Unterschieden wird jetzt am Bildschirm, nicht am Zustand | Spanien und Russland meldeten **100 %**, tatsächlich 3 % |
 | Der Vollständigkeitsmodus zählte jeden Ausgemusterten als Gefallenen | Er suchte im Schlusstext nach „gefallen" — und der Ruhestandsbildschirm sagt *„Du bist nicht gefallen."* Erkannt wird jetzt am Knopf | Russland: 3 von 4 Rängen falsch als tot gemeldet |
