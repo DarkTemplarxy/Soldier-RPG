@@ -5,6 +5,29 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Zwei Würfe statt einem: Können wiegt schwerer als Glück
+
+**Die Klage war: „Manchmal schafft man eine Probe mit dem doppelten Wert nicht."** Sie war berechtigt, und der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher Wurf über 1–100 ist überall gleich wahrscheinlich; ein Zielwert von 80 ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je Kapitel fühlt sich das an, als zähle Können nicht.
+
+**Der Wurf ist jetzt der Mittelwert aus zwei Würfen.** Die Werte ballen sich um die Mitte: Wer deutlich über der Aufgabe steht, besteht fast immer; wer deutlich darunter steht, fast nie.
+
+| Zielwert | vorher | jetzt |
+|---|---|---|
+| 20 | 20 % | **8 %** |
+| 35 | 35 % | **24 %** |
+| 50 | 50 % | 50 % |
+| 65 | 65 % | **76 %** |
+| 80 | 80 % | **92 %** |
+| 95 | 95 % | **99 %** |
+
+*(Formel gegen 200 000 Würfe geprüft: 7,8 · 24,3 · 49,6 · 75,2 · 91,8 · 99,4 %.)*
+
+**Der Münzwurf in der Mitte bleibt ein Münzwurf.** Die Eichung „Wert 40 gegen Schwierigkeit 40 ist fifty-fifty" gilt unverändert, und **keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden** — es sind die Ränder, die sich bewegen.
+
+**Die Oberfläche musste mit.** Der Zielwert *war* bis dahin die Prozentzahl auf dem Knopf; mit zwei Würfen ist er es nicht mehr. `chance()` rechnet ihn geschlossen um — und deckelt bei 99 statt 100, weil es keine sichere Probe gibt und „100 %" auf einem Knopf eine Lüge wäre.
+
+**Nebenwirkung, die Absicht ist:** Der Erstläufer steht härter da, weil seine niedrigen Werte jetzt seltener durchrutschen. Das ist dieselbe Richtung wie der tiefere Sockel — und die Stelle, an der Italien endlich beißen darf (Sollwert: nicht mehr als 20 % Tote im Erstlauf).
+
 ## 2026-07-29 — Das Können über der Klemme: das obere Ende der Skala ist keine tote Währung mehr
 
 **Der Befund, nachgerechnet und nicht vermutet:** Die Probe klemmt bei 95, also sind gegen die üblichen Schwierigkeiten 35 bis 50 **Wert 85 und Wert 100 dieselbe Zahl**. Und weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit ausschließlich Trefferwahrscheinlichkeit. Wer viele Veteranenpunkte in eine Spitze steckte, bekam dafür nichts.

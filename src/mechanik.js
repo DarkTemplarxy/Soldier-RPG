@@ -430,7 +430,56 @@ function abzugGrund(k){
    Knopf stehen — sie sollen beim Entscheiden helfen. Eine Zahl, die man erst
    umrechnen muss, tut das nicht. */
 function aussicht(k, schwierigkeit){
-  return Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50));
+  return chance(Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50)));
+}
+
+/* ══════════════════ ZWEI WÜRFE STATT EINEM ══════════════════
+
+   **Der Wurf ist der Mittelwert aus zwei Würfen über 1–100, nicht ein
+   einzelner.** Das ist die wichtigste Änderung am Probensystem seit seiner
+   Einführung, und sie behebt eine Klage, die man beim Spielen sofort hat:
+   *Manchmal schafft man eine Probe mit dem doppelten Wert nicht.*
+
+   Der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher
+   Wurf über hundert ist überall gleich wahrscheinlich; ein Zielwert von 80
+   ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je
+   Kapitel fühlt sich das an, als zähle Können nicht. **Der Mittelwert aus
+   zwei Würfen ballt sich um die Mitte** — wer deutlich über der Aufgabe
+   steht, besteht fast immer; wer deutlich darunter steht, fast nie.
+
+   | Zielwert | vorher | jetzt |
+   |---|---|---|
+   | 20 | 20 % | **8 %** |
+   | 35 | 35 % | **25 %** |
+   | 50 | 50 % | 50 % |
+   | 65 | 65 % | **75 %** |
+   | 80 | 80 % | **92 %** |
+   | 95 | 95 % | **99 %** |
+
+   **Der Münzwurf in der Mitte bleibt ein Münzwurf** — die Eichung „Wert 40
+   gegen Schwierigkeit 40 ist fifty-fifty" gilt unverändert, und keine einzige
+   Schwierigkeit in den Kapiteldaten musste angefasst werden. Was sich ändert,
+   sind die Ränder: **Können und Unvermögen wiegen beide schwerer.**
+
+   Dass der Erstläufer damit härter dasteht, ist gewollt und Teil derselben
+   Richtung wie der tiefere Sockel — und es ist die Stelle, an der Italien
+   endlich beißen darf (Sollwert: nicht mehr als 20 % Tote im Erstlauf). */
+function wurfZahl(){
+  return Math.round((1 + Math.floor(Math.random()*100) + 1 + Math.floor(Math.random()*100)) / 2);
+}
+
+/* Die Wahrscheinlichkeit, einen Zielwert zu erreichen — geschlossen gerechnet,
+   damit auf dem Knopf steht, was wirklich passiert. **Ohne diese Umrechnung
+   löge die Oberfläche:** Der Zielwert *war* bis dahin die Prozentzahl, und mit
+   zwei Würfen ist er es nicht mehr. */
+function chance(ziel){
+  const t = Math.max(0, Math.min(100, ziel)) / 100;
+  const p = t <= 0.5 ? 2*t*t : 1 - 2*(1-t)*(1-t);
+  /* **Nie 100, nie 0.** Beim geklemmten Zielwert 95 sind es rechnerisch 99,4 %,
+     und „100 %" auf einem Knopf wäre eine Lüge — es gibt keine sichere Probe.
+     Am unteren Ende dasselbe: Wer bei 5 steht, hat 0,5 %, und das ist nicht
+     nichts. Gerundet würde beides zu einer Zahl, die etwas verspricht. */
+  return Math.min(99, Math.max(1, Math.round(p*100)));
 }
 
 /* ══════════════════ DIE PROBE — UND WAS ÜBER IHR LIEGT ══════════════════
@@ -463,7 +512,7 @@ function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
   const roh = w - schwierigkeit + 50;
   const ziel = Math.max(5, Math.min(95, roh));
-  const wurf = 1 + Math.floor(Math.random()*100);
+  const wurf = wurfZahl();   // Mittel aus zwei Würfen, siehe oben
   if(!ohneUebung) nutzen(k, 1);
   PROBE_ZULETZT = {wurf, ziel, wertRoh:w, roh, koennen: Math.max(0, roh - 95), erfolg: wurf <= ziel};
   return PROBE_ZULETZT;

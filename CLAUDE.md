@@ -428,9 +428,28 @@ Leben ≤ 0 → Tod
 roh      = Wert − Schwierigkeit + 50        (ungeklemmt)
 Zielwert = clamp(roh, 5, 95)
 Können   = max(0, roh − 95)
-Wurf 1–100, Erfolg wenn Wurf ≤ Zielwert
+Wurf     = Mittel aus ZWEI Würfen über 1–100 · Erfolg wenn Wurf ≤ Zielwert
 ```
 Wert 40 gegen Schwierigkeit 40 ist also ein Münzwurf. Das ist die Eichung — Schwierigkeiten in Szenen immer gegen die erwarteten Werte des Kapitels ansetzen (Kapitel 1: Attribute 15–70, Fertigkeiten 5–50).
+
+### Zwei Würfe statt einem — Können wiegt schwerer als Glück
+
+**Die Klage, die den Umbau ausgelöst hat, war berechtigt:** *„Manchmal schafft man eine Probe mit dem doppelten Wert nicht."* Der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher Wurf über hundert ist überall gleich wahrscheinlich; ein Zielwert von 80 ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je Kapitel fühlt sich das an, als zähle Können nicht.
+
+| Zielwert | vorher | jetzt | gemessen (200 000 Würfe) |
+|---|---|---|---|
+| 20 | 20 % | **8 %** | 7,8 |
+| 35 | 35 % | **24 %** | 24,3 |
+| 50 | 50 % | 50 % | 49,6 |
+| 65 | 65 % | **76 %** | 75,2 |
+| 80 | 80 % | **92 %** | 91,8 |
+| 95 | 95 % | **99 %** | 99,4 |
+
+**Der Münzwurf in der Mitte bleibt ein Münzwurf**, und **keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden** — es sind die Ränder, die sich bewegen. Können *und* Unvermögen wiegen beide schwerer.
+
+> **Die Oberfläche musste mit, sonst löge sie.** Der Zielwert *war* bis dahin die Prozentzahl auf dem Knopf; mit zwei Würfen ist er es nicht mehr. `chance()` rechnet ihn geschlossen um und deckelt bei **99 statt 100** — es gibt keine sichere Probe, und eine Zahl, die eine verspricht, gehört nicht auf einen Knopf. Wer eine neue Anzeige baut, nimmt `aussicht()` und nicht den Zielwert.
+
+> **Zusammen mit dem `koennen` darüber ergibt das eine durchgehende Kurve:** Bis Wert 60 kauft man Trefferchance, zwischen 60 und 85 kauft man Verlässlichkeit, darüber Wirkung. Vorher hörte die Skala bei 85 auf, etwas zu bedeuten.
 
 ### Das Können über der Klemme (`meister()` in `src/mechanik.js`)
 
