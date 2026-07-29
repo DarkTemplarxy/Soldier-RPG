@@ -3339,6 +3339,36 @@ function zeigeNachfolger(nf, n){
 /* Die Verleihung steht auf Papier, wie der Beförderungsbescheid und das
    Chronikblatt: Ein Orden ist ein Schriftstück, bevor er ein Stück Blech ist.
    Der Ton bleibt trocken — verliehen wird, nicht gefeiert. */
+/* **Der Vorschlag.** Zwischen „du hast genug getan" und „du bist befördert"
+   lag bisher nichts — die Schwelle wurde stumm geprüft, und zwei Stationen
+   später stand die Beförderung da. Jetzt sagt es dir der Mann, der es tut.
+
+   Der Text nennt beides: dass dein Name oben liegt, und dass keine Stelle frei
+   ist. **Was daraus folgt, wird nicht ausgesprochen** — das ist Invariante 5,
+   und sie wird nie erklärt, nur gezeigt. */
+function zeigeVorschlag(patronId, n){
+  const wer = personName(patronId);
+  laufSichern();
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    <div class="card papier"><div class="ch"><span>${esc(wer)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb">
+        <div class="prose">
+          <p>${esc(wer)} hält dich nach dem Appell auf. Er hat ein Blatt in der Hand, das er nicht vorzeigt.</p>
+          <p>„Ich habe deinen Namen weitergegeben", sagt er. „Für die nächste Sektion, die einen Sergenten braucht." Er sagt es so, wie man eine Bestandsmeldung vorliest.</p>
+          <p>Dann fügt er hinzu, was er hinzufügen muss: Es sei zurzeit keine Stelle frei. Die Kompanie habe ihre Sergenten, und alle drei seien gesund.</p>
+          <p>Er faltet das Blatt und steckt es weg. „Halt dich bereit", sagt er noch, und geht.</p>
+        </div>
+        <div class="wirkung"><span>Auf der Liste</span>
+          Dein Name liegt beim Bataillon. Ruf ${S.ruf} · Fürsprache ${esc(personKurz(patronId))} ${gunst(patronId)}</div>
+      </div></div>
+    <div class="orders"><div class="ordbody">
+      <button class="ord weiter" onclick="vorschlagWeiter()">Wegtreten</button>
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+function vorschlagWeiter(){ LAUF.vorschlag = null; laufSichern(); naechster(); }
+
 function zeigeOrden(o, n){
   ordenVerleihen(o);
   laufSichern();
@@ -3399,6 +3429,10 @@ function naechster(){
     if(o){ zeigeOrden(o, n); return; }
     LAUF.orden = null;
   }
+
+  /* Der Lieutenant hat deinen Namen nach oben gegeben. Das steht vor der
+     nächsten Station, weil es zu dem gehört, was gerade passiert ist. */
+  if(LAUF.vorschlag){ zeigeVorschlag(LAUF.vorschlag, n); return; }
 
   /* Zwischenfall auf dem Marsch: hängt einer an (auch nach Fortsetzen), steht
      er wieder da; sonst wird beim ersten Betreten einer Station mit Marschweg
@@ -5238,11 +5272,26 @@ function leiterZiel(){
    stimmen, wird der Tod des Sergent-majors **angesagt** und fällt im nächsten
    Gefecht (`ketteImGefecht`). Erst danach ist die Stelle frei — und die Naht
    zwischen „ich bin qualifiziert" und „über mir stirbt einer" bleibt unsichtbar. */
+/* Stimmen Ruf und Fürsprache, **schlägt der Lieutenant dich vor** — und erst
+   danach wird die Stelle frei.
+
+   Bis zum 28.07.2026 setzte diese Prüfung nur stumm ein Flag: Der Spieler
+   erfuhr nie, dass sein Name nach oben gegangen war, und die Beförderung zwei
+   Stationen später kam aus dem Nichts. Der Vorschlag ist aber das eigentliche
+   Ereignis — er ist das, was ein Mann sich verdient. Die Vakanz ist nur, was
+   danach passieren muss.
+
+   **Und genau darin liegt Invariante 5, ohne dass sie ausgesprochen wird:**
+   Berthaud sagt, dein Name stehe auf der Liste, und es sei keine Stelle frei.
+   Was daraus folgt, denkt der Spieler selbst. */
 function vakanzPruefen(){
   if(!S || !S.leute || S.majorTot || S.majorFaellt) return;
   const z = LEITER.filter(e => e.rang === 5 && e.von.indexOf(S.rang) >= 0)[0];
   if(!z) return;
-  if(S.ruf >= z.ruf && gunst(z.patron) >= z.gunst) S.majorFaellt = true;
+  if(S.ruf >= z.ruf && gunst(z.patron) >= z.gunst){
+    S.majorFaellt = true;
+    if(LAUF) LAUF.vorschlag = z.patron;
+  }
 }
 
 function zeigeBefoerderung(n){

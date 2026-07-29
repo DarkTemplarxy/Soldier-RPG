@@ -968,6 +968,36 @@ function zeigeNachfolger(nf, n){
 /* Die Verleihung steht auf Papier, wie der Beförderungsbescheid und das
    Chronikblatt: Ein Orden ist ein Schriftstück, bevor er ein Stück Blech ist.
    Der Ton bleibt trocken — verliehen wird, nicht gefeiert. */
+/* **Der Vorschlag.** Zwischen „du hast genug getan" und „du bist befördert"
+   lag bisher nichts — die Schwelle wurde stumm geprüft, und zwei Stationen
+   später stand die Beförderung da. Jetzt sagt es dir der Mann, der es tut.
+
+   Der Text nennt beides: dass dein Name oben liegt, und dass keine Stelle frei
+   ist. **Was daraus folgt, wird nicht ausgesprochen** — das ist Invariante 5,
+   und sie wird nie erklärt, nur gezeigt. */
+function zeigeVorschlag(patronId, n){
+  const wer = personName(patronId);
+  laufSichern();
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    <div class="card papier"><div class="ch"><span>${esc(wer)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb">
+        <div class="prose">
+          <p>${esc(wer)} hält dich nach dem Appell auf. Er hat ein Blatt in der Hand, das er nicht vorzeigt.</p>
+          <p>„Ich habe deinen Namen weitergegeben", sagt er. „Für die nächste Sektion, die einen Sergenten braucht." Er sagt es so, wie man eine Bestandsmeldung vorliest.</p>
+          <p>Dann fügt er hinzu, was er hinzufügen muss: Es sei zurzeit keine Stelle frei. Die Kompanie habe ihre Sergenten, und alle drei seien gesund.</p>
+          <p>Er faltet das Blatt und steckt es weg. „Halt dich bereit", sagt er noch, und geht.</p>
+        </div>
+        <div class="wirkung"><span>Auf der Liste</span>
+          Dein Name liegt beim Bataillon. Ruf ${S.ruf} · Fürsprache ${esc(personKurz(patronId))} ${gunst(patronId)}</div>
+      </div></div>
+    <div class="orders"><div class="ordbody">
+      <button class="ord weiter" onclick="vorschlagWeiter()">Wegtreten</button>
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+function vorschlagWeiter(){ LAUF.vorschlag = null; laufSichern(); naechster(); }
+
 function zeigeOrden(o, n){
   ordenVerleihen(o);
   laufSichern();
@@ -1028,6 +1058,10 @@ function naechster(){
     if(o){ zeigeOrden(o, n); return; }
     LAUF.orden = null;
   }
+
+  /* Der Lieutenant hat deinen Namen nach oben gegeben. Das steht vor der
+     nächsten Station, weil es zu dem gehört, was gerade passiert ist. */
+  if(LAUF.vorschlag){ zeigeVorschlag(LAUF.vorschlag, n); return; }
 
   /* Zwischenfall auf dem Marsch: hängt einer an (auch nach Fortsetzen), steht
      er wieder da; sonst wird beim ersten Betreten einer Station mit Marschweg

@@ -1650,11 +1650,26 @@ function leiterZiel(){
    stimmen, wird der Tod des Sergent-majors **angesagt** und fällt im nächsten
    Gefecht (`ketteImGefecht`). Erst danach ist die Stelle frei — und die Naht
    zwischen „ich bin qualifiziert" und „über mir stirbt einer" bleibt unsichtbar. */
+/* Stimmen Ruf und Fürsprache, **schlägt der Lieutenant dich vor** — und erst
+   danach wird die Stelle frei.
+
+   Bis zum 28.07.2026 setzte diese Prüfung nur stumm ein Flag: Der Spieler
+   erfuhr nie, dass sein Name nach oben gegangen war, und die Beförderung zwei
+   Stationen später kam aus dem Nichts. Der Vorschlag ist aber das eigentliche
+   Ereignis — er ist das, was ein Mann sich verdient. Die Vakanz ist nur, was
+   danach passieren muss.
+
+   **Und genau darin liegt Invariante 5, ohne dass sie ausgesprochen wird:**
+   Berthaud sagt, dein Name stehe auf der Liste, und es sei keine Stelle frei.
+   Was daraus folgt, denkt der Spieler selbst. */
 function vakanzPruefen(){
   if(!S || !S.leute || S.majorTot || S.majorFaellt) return;
   const z = LEITER.filter(e => e.rang === 5 && e.von.indexOf(S.rang) >= 0)[0];
   if(!z) return;
-  if(S.ruf >= z.ruf && gunst(z.patron) >= z.gunst) S.majorFaellt = true;
+  if(S.ruf >= z.ruf && gunst(z.patron) >= z.gunst){
+    S.majorFaellt = true;
+    if(LAUF) LAUF.vorschlag = z.patron;
+  }
 }
 
 function zeigeBefoerderung(n){

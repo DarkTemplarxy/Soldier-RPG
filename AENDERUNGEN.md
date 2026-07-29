@@ -5,6 +5,20 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Der Lieutenant schlägt dich vor
+
+**Aus einer Schwellenprüfung wird ein Ereignis.** `vakanzPruefen()` setzte bisher stumm ein Flag, sobald Ruf und Fürsprache für den Sergenten reichten. Der Spieler erfuhr nie, dass sein Name nach oben gegangen war — die Beförderung kam zwei Stationen später aus dem Nichts.
+
+**Der Vorschlag ist aber das eigentliche Ereignis.** Er ist das, was ein Mann sich verdient; die Vakanz ist nur, was danach passieren muss. Jetzt hält Berthaud dich nach dem Appell auf, mit einem Blatt in der Hand, das er nicht vorzeigt:
+
+> „Ich habe deinen Namen weitergegeben. Für die nächste Sektion, die einen Sergenten braucht." — Dann fügt er hinzu, was er hinzufügen muss: Es sei zurzeit keine Stelle frei. Die Kompanie habe ihre Sergenten, und alle drei seien gesund.
+
+**Was daraus folgt, wird nicht ausgesprochen.** Das ist Invariante 5, gezeigt statt erklärt.
+
+Damit hat der Aufstieg zum Sergenten drei Schläge statt einem: **Vorschlag → Vakanz → Beförderung.** Geprüft am ganzen Lauf; keine Zahl geändert, keine Schwelle verschoben.
+
+---
+
 ## 2026-07-28 — Der Lieutenant schreibt deinen Namen auf
 
 **Eine Frage des Entwicklers, die eine falsche Einschätzung von mir korrigiert hat.** Ich hatte Berthauds automatische Fürsprache (+1 je Gefecht aus `anerkennung()`) als zu großzügig eingestuft und vorgeschlagen, sie bei +3 zu deckeln — Begründung: Beim Sergenten falle damit eine der drei Bedingungen aus.
