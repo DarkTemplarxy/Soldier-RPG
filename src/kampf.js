@@ -2524,7 +2524,26 @@ function kampfEnde(sieg, letzterText){
   if(n.ueberfall && !sieg && erg && erg.ruf < 0) erg.ruf = 0;
   if(!sieg && S.lebt && S.leben > 0){
     const rest = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
-    K.rueckzug = Math.round((5 + 13*rest) * (1 + feindGuete(n)*0.2));
+    /* ── Beim Überfall gibt es keinen Güte-Faktor auf den Rückzugszoll ──
+       **Der Faktor existiert, weil manche Gegner verfolgen** — Dschesärs
+       Garnison tut es, Beaulieus geschlagene Kolonnen nicht. Guerrilleros in
+       den Hügeln verfolgen keine Kompanie über offenes Land; sie lösen sich
+       auf. Genau das sagt der Gefechtstext selbst: „Nach vier Stunden hört es
+       auf, weil sie weggehen, nicht weil ihr sie vertrieben hättet."
+
+       **Gemessen war es die Wand des Kapitels.** Ein Überfall hat keine Linie,
+       die von allein mitschießt; der eigene Schaden muss die volle Feindmoral
+       tragen, also endet er meistens als Niederlage. Mit dem Faktor 2,6 bei
+       Güte 8 kostete jede dieser Niederlagen dreißig bis vierzig Lebenspunkte,
+       zweimal im Kapitel, zusätzlich zu drei gewöhnlichen Gefechten. Spanien
+       tötete dadurch 64 bis 77 % derer, die es erreichten — mehr als jedes
+       andere Kapitel, Ägypten eingeschlossen.
+
+       **Der Zoll selbst bleibt.** Eine Kolonne, die rückwärts aus einem
+       Hohlweg geht, lässt Männer liegen; nur wird sie nicht auch noch
+       eingeholt. */
+    const verfolgt = n.ueberfall ? 1 : (1 + feindGuete(n)*0.2);
+    K.rueckzug = Math.round((5 + 13*rest) * verfolgt);
     S.leben = Math.max(0, S.leben - K.rueckzug);
     if(S.leben <= 0){
       gefallen(letzterText + ' Ihr geht rückwärts aus dem Feuer, und das Feuer geht mit. Dich trägt niemand.',
