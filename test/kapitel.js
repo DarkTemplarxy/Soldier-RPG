@@ -115,7 +115,7 @@ async function haerteLauf(b, rang) {
     const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
     const ok = await p.evaluate(i => {
       const btn = [...document.querySelectorAll('.ord:not([disabled])')]
-        .filter(e => !/Zurückweichen|Zurückgehen/.test(e.textContent));
+        .filter(e => !/Zurückweichen|Zurückgehen|Ablehnen|Den Abschied nehmen/.test(e.textContent));
       if (!btn.length) return false;
       btn[i % btn.length].click(); return true;
     }, s);
@@ -265,9 +265,16 @@ async function haerteLauf(b, rang) {
       if (fertig) { ende = 'durchgelaufen'; break; }
 
       const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+      /* **Ein Vollständigkeitsläufer nimmt keinen freiwilligen Ausstieg.**
+         „Ablehnen" (der Rückruf 1815) und „Den Abschied nehmen" (die beiden
+         Rangschranken) sind vollwertige Enden — und genau deshalb verstecken
+         sie den Rest des Kapitels. Gemessen: Nach dem Layoutumbau verschob
+         sich die Reihenfolge der Knöpfe, der Bot landete auf „Ablehnen", und
+         alle vier Ränge meldeten 2 von 9 Stationen. Das war kein Fehler im
+         Kapitel, sondern eine richtige Entscheidung zur falschen Zeit. */
       const ok = await p.evaluate(i => {
         const btn = [...document.querySelectorAll('.ord:not([disabled])')]
-          .filter(e => !/Zurückweichen|Zurückgehen/.test(e.textContent));
+          .filter(e => !/Zurückweichen|Zurückgehen|Ablehnen|Den Abschied nehmen/.test(e.textContent));
         if (!btn.length) return false;
         btn[i % btn.length].click(); return true;   // reihum, damit alle Optionen drankommen
       }, s);
