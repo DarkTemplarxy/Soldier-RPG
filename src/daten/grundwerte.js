@@ -281,7 +281,7 @@ const KAMPAGNEN = [
   {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
   {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, kurz:'Kein Feldzug, ein Überlebensspiel.'},
   {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
-  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, kurz:'Verteidigung der Heimat, Abdankung.'},
   {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, kurz:'Waterloo. Epilog je nach Rang.'}
 ];
 const STATIONEN = {};

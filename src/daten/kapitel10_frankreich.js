@@ -48,7 +48,7 @@ const KAPITEL10 = [
         gelaende:'Ort im Tal, Schloss auf der Höhe, gefrorener Boden',
         stellung:'Erstes Treffen, am Ortseingang'},
   intro:'Zum ersten Mal seit achtzehn Jahren wird auf französischem Boden geschlagen.',
-  runden:6,feindMoral:58,gefahr:14,gelaende:'mauer',
+  runden:6,feindMoral:58,gefahr:10,gelaende:'mauer',
   sieg:{text:'Gegen zehn Uhr abends gehört euch der Ort, und um Mitternacht das Schloss. Blücher zieht ab; er hat in dem Zimmer geschlafen, in dem vor dreißig Jahren ein Junge aus Ajaccio geschlafen hat, und ist eine halbe Stunde zu spät aufgestanden.\\n\\nDrei Tage später, bei La Rothière, kommt er mit hunderttausend Mann zurück, und dann geht es rückwärts.',ruf:7,ruhm:true},
   niederlage:{text:'Ihr kommt bis zur Kirche und nicht weiter. Der Ort wird gegen Mitternacht von einem anderen Regiment genommen. Drei Tage später steht Blücher mit hunderttausend Mann bei La Rothière, und es geht rückwärts.',ruf:-3,belastung:10}},
 
@@ -98,7 +98,7 @@ const KAPITEL10 = [
         gelaende:'Flaches Land, Schlamm, ein Dorf an der Kreuzung',
         stellung:'Erstes Treffen, an der Kreuzung'},
   intro:'Sie wissen nicht, dass ihr hier seid. Fünf Tage lang wird das der ganze Plan sein.',
-  runden:5,feindMoral:50,gefahr:14,gelaende:'damm',
+  runden:5,feindMoral:50,gefahr:9,gelaende:'damm',
   sieg:{text:'Nach vier Stunden ist das Korps nicht mehr da: zweitausend gefangen, der Rest zerstreut, der kommandierende General gefangen und ohne Degen.\\n\\nAm Abend steht auf dem Tisch eine Karte, und der Kaiser zeigt darauf, wo morgen die nächste Kolonne stehen wird. Er hat recht.',ruf:6,ruhm:true},
   niederlage:{text:'Die Kolonne kommt an euch vorbei nach Norden. Was von ihr übrig bleibt, holt zwei Tage später jemand anders ein. Der Plan funktioniert; euer Teil davon nicht.',ruf:-3,belastung:8}},
 
@@ -117,7 +117,7 @@ const KAPITEL10 = [
         gelaende:'Offenes Feld, ein Gehöft, dahinter die Straße nach Osten',
         stellung:'Erstes Treffen, rechts neben der Garde'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Rechts von dir geht die alte Garde vor, und sie schießt nicht.',
-  runden:8,feindMoral:78,gefahr:15,gelaende:'damm',
+  runden:8,feindMoral:78,gefahr:8,gelaende:'damm',
   sieg:{text:'Um sechs Uhr abends ist das Feld leer. Viertausend Gefangene, alle Geschütze, und die Straße nach Osten offen.\\n\\nDie Garde marschiert zurück in ihr Biwak, in Ordnung, ohne dass jemand ein Kommando gegeben hätte. Ein Bataillon von euch nimmt beim Vorbeimarsch von allein das Gewehr über — das ist nicht vorgeschrieben und wird auch nicht gerügt.',ruf:12,ruhm:true},
   niederlage:{text:'Euer Flügel kommt nicht über den Graben am Gehöft. Was durchbricht, ist die Garde, und die tut es allein. Am Abend ist die Straße offen und ihr steht noch da, wo ihr um zwei gestanden habt.',ruf:-4,belastung:14}},
 
@@ -195,7 +195,7 @@ const KAPITEL10 = [
         gelaende:'Offene Straße, Gehölze, keine Deckung für den, der weicht',
         stellung:'Erstes Treffen, quer über der Straße'},
   intro:'Der vierte in fünf Tagen. Danach ist die Reserve leer — endgültig.',
-  runden:6,feindMoral:60,gefahr:14,gelaende:'damm',
+  runden:6,feindMoral:60,gefahr:9,gelaende:'damm',
   sieg:{text:'Bei Dunkelheit ist die Kolonne auf der Straße zerschlagen. Siebentausend Gefangene, und die Straße ist auf drei Kilometern so voll, dass man nicht hindurchreiten kann.\\n\\nEs ist der letzte Sieg dieser Serie und der letzte, der etwas ändert. Drei Wochen später stehen sie wieder da, mit mehr Männern als vorher, und diesmal alle zusammen.',ruf:8,ruhm:true},
   niederlage:{text:'Ihr haltet die Straße nicht, und die Kolonne kommt durch. Was von ihr die Kavallerie noch einholt, ist ein Drittel. Der Feldzug ist trotzdem gewonnen — und drei Wochen später zählt keiner dieser vier Siege mehr.',ruf:-3,belastung:12}},
 
@@ -221,7 +221,7 @@ const KAPITEL10 = [
         gelaende:'Ebene ohne Deckung, Stadt auf hundert Meter hohem Rücken',
         stellung:'Erstes Treffen, in der Ebene'},
   intro:'Diese Schlacht ist nicht zu gewinnen. Der Auftrag ist ein anderer.',
-  runden:7,feindMoral:72,gefahr:15,gelaende:'mauer',
+  runden:7,feindMoral:72,gefahr:11,gelaende:'mauer',
   sieg:{text:'Ihr löst euch in der Nacht, in Ordnung, mit den Geschützen. Das ist alles, was zu erreichen war, und es ist mehr, als am Nachmittag wahrscheinlich schien.\\n\\nEin Korps auf dem rechten Flügel wird in der Nacht überrascht und verliert fünfundvierzig Geschütze. Die Armee steht am Morgen noch. Sie steht nur zwanzig Kilometer weiter südlich.',ruf:5},
   niederlage:{text:'Aus dem Lösen wird ein Zurückgehen und aus dem Zurückgehen streckenweise etwas anderes. Am Morgen sind die Geschütze weg und die Regimenter durcheinander. Es dauert zwei Tage, bis wieder gezählt werden kann.',ruf:-5,belastung:16}},
 

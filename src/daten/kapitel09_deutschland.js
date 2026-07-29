@@ -236,7 +236,7 @@ const KAPITEL9 = [
   sieg:{text:'Am Abend ist die Straße frei. Neuntausend Bayern und Österreicher liegen auf dem Feld; von euch fünftausend.\\n\\nZwei Tage später steht ihr am Rhein. Es ist der 2. November 1813, und zum ersten Mal seit siebzehn Jahren steht diese Armee an der Grenze und nicht dahinter.',ruf:7,ruhm:true},
   niederlage:{text:'Euer Angriff bleibt in der Lichtung liegen. Was den Durchbruch macht, sind die Gardegeschütze und ein anderes Regiment. Die Straße ist frei, und ihr geht darauf, wie alle anderen auch.',ruf:-3,belastung:12}},
 
-/* 135 */ {typ:'ende',id:'ende_deutschland',datum:'November 1813 · Am Rhein',ort:'Zu Hause',
+/* 135 */ {typ:'uebergang',id:'ende_deutschland',datum:'November 1813 · Am Rhein',ort:'Zu Hause',
   marsch:{von:'Hanau',nach:'Mainz und über den Rhein',weg:'Achtzig Kilometer · und dahinter ist Frankreich'},
   text:[
     'Am 2. November geht die Armee bei Mainz über den Rhein. Von den vierhunderttausend, die im Frühjahr aufgestellt worden sind, kommen siebzigtausend zurück; in Mainz bricht Typhus aus und holt in acht Wochen noch einmal zwanzigtausend.',
@@ -244,7 +244,7 @@ const KAPITEL9 = [
     'Zum ersten Mal seit 1796 ist der Krieg zu Hause. Was das heißt, versteht man nicht in Mainz. Man versteht es im Januar, wenn man in Frankreich requiriert und die Bauern das Korn vor der eigenen Armee verstecken.',
     'Von den vier Männern, die im März in Mainz mit dir angetreten sind und die 1812 dabei waren, ist keiner mehr da.'
   ],
-  ausblick:'<b>Hier endet der gebaute Stand.</b> Im Januar 1814 gehen dreihunderttausend Verbündete über den Rhein. Was ihnen entgegensteht, sind siebzigtausend Mann und ein Feldherr, der in sechs Tagen vier Schlachten gewinnen wird — und danach ist die Reserve leer, endgültig.'}
+  ausblick:'Im Januar 1814 gehen dreihunderttausend Verbündete über den Rhein. Was ihnen entgegensteht, sind siebzigtausend Mann und ein Feldherr, der in sechs Tagen vier Schlachten gewinnen wird — und danach ist die Reserve leer, endgültig.'}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

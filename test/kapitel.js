@@ -173,6 +173,17 @@ async function haerteLauf(b, rang) {
       S.rang = r;
       if (r === 2) S.zweig = 'voltigeur';
       S.attr.bildung = 60;
+      /* **Konstitution wird mitgesetzt, aus demselben Grund wie Bildung.**
+         Der Prüfstand heilt vor jedem Klick, aber er heilt nur bis
+         `lebenMax()` — und das hängt am rohen Attribut. Seit der Sockel bei 15
+         steht, würfelt „Auswürfeln" Männer mit Konstitution 15 aus, also
+         neunundvierzig Lebenspunkten; eine Sondermissionskette kostet in drei
+         Stufen bis zu sechzig, **also stirbt so einer aus voller Kraft in
+         einem einzigen Klick** und der Prüfstand sieht das halbe Kapitel
+         nicht. Gemessen wird hier Vollständigkeit, nicht Härte — die Härte
+         misst `HAERTE=n` mit seinem eigenen, festen Prüfmann. */
+      S.attr.konstitution = Math.max(S.attr.konstitution, 60);
+      S.leben = lebenMax();
       for (const k in S.fert) S.fert[k] = Math.max(S.fert[k], 45);
       S.verheiratet = true;
       laufSichern();

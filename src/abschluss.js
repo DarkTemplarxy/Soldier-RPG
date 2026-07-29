@@ -860,7 +860,7 @@ function zeigeSchranke(n){
   if(!durch){
     /* Ausgemustert. Kein Knopf, keine Wahl — die Listen werden neu
        geschrieben, und was kein Offizier ist, steht nicht mehr darauf. */
-    S.ende = 'ruhestand';
+    S.ende = sch.endeArt || 'ruhestand';
     schrankeEnde(n, prosa + `<p>${esc(sch.ende)}</p>`, sch.epilog);
     return;
   }
@@ -869,14 +869,14 @@ function zeigeSchranke(n){
       <div class="cb"><div class="prose">${prosa}</div>
         <div class="ergebnis gut">${esc(sch.durch)}</div>
         <div class="wirkung"><span>Was jetzt zur Wahl steht</span>
-          Du bist ${rangName(S.rang)}. Wer geht, bekommt <b>180 Punkte</b> und hört auf.
+          Du bist ${rangName(S.rang)}. Wer geht, bekommt <b>${sch.bonus} Punkte</b> und hört auf.
           Wer bleibt, behält alles, was er sich noch verdienen kann — und alles, was er verlieren kann.</div>
       </div></div>
       <div class="orders"><div class="ch"><span>Wie entscheidest du?</span></div><div class="ordbody">
         <button class="ord" onclick="schrankeWeiter()">Weitermarschieren
           <span class="cost">Der Krieg geht weiter, und er braucht dich · +70 am Ende</span></button>
         <button class="ord" onclick="schrankeGehen()">Den Abschied nehmen
-          <span class="cost">Ruhestand · +180 Punkte · die Laufbahn endet hier</span></button>
+          <span class="cost">${sch.endeArt==='halbsold'?'Halbsold':'Ruhestand'} · +${sch.bonus} Punkte · die Laufbahn endet hier</span></button>
       </div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
@@ -912,7 +912,10 @@ function schrankeWeiter(){
 function schrankeGehen(){
   const n = KAPITEL[LAUF.node];
   const sch = SCHRANKEN[n.schranke] || {};
-  S.ende = 'ruhestand';
+  /* Wer freiwillig geht, geht auf demselben Weg wie der Ausgemusterte — nach
+     Russland in den Ruhestand, nach 1814 auf Halbsold. Der Unterschied liegt
+     nicht in der Art des Endes, sondern darin, dass man es gewählt hat. */
+  S.ende = sch.endeArt || 'ruhestand';
   S.log.push((n.ort||'') + ': den Abschied genommen');
   schrankeEnde(n, (n.text||[]).map(t=>`<p>${t}</p>`).join('') +
     `<p>Du meldest dich ab. Es geht schneller, als du gedacht hast — ein Formular, zwei Unterschriften, und der Adjutant sieht dabei nicht auf.</p>`,
@@ -923,7 +926,7 @@ function schrankeGehen(){
    — dieselbe Maschine wie `zeigeKapitelende()`, nur mit einem anderen Satz
    darunter und ohne den Ausblick auf ein nächstes Kapitel. */
 function schrankeEnde(n, prosa, epilog){
-  const p = eintragen('Ruhestand · '+rangName(S.rang));
+  const p = eintragen((S.ende==='halbsold'?'Halbsold · ':'Ruhestand · ')+rangName(S.rang));
   const neu = p.rekord;
   app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
     <div class="cb"><div class="prose">${prosa}</div>

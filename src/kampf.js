@@ -3184,12 +3184,22 @@ function fehltWas(z){
    **Gebaut, bevor die Kapitel dafür stehen.** Eine Station setzt
    `schranke:'russland'` oder `'waterloo'`; die Prüfung liegt hier, damit
    Kapitel 8 und 10 später nur noch Daten anhängen müssen. */
+/* `endeArt` sagt, **wie** ein Lauf endet, der hier aufhört, und `wertung()`
+   rechnet danach (180 / 120 / 70 aus KONZEPT §5). Die beiden Schranken enden
+   verschieden, und das ist kein Zahlenspiel:
+
+   **Nach Russland ist es ein Ruhestand** — man hat zwanzig Jahre gedient, wird
+   ausgemustert, dankt ab und bekommt eine Pension. **Nach 1814 ist es
+   Halbsold** — die Armee wird aufgelöst, niemand dankt jemandem, und man
+   bekommt ein Papier, eine Zahl und eine Adresse. Sechzig Punkte weniger,
+   weil es das schlechtere Ende ist; und weil es das schlechtere ist, zieht
+   die zweite Schranke stärker zum Weitermachen als die erste. */
 const SCHRANKEN = {
-  russland:{rang:7, name:'Nach Russland', bonus:180,
+  russland:{rang:7, name:'Nach Russland', bonus:180, endeArt:'ruhestand',
     durch:'Von der Armee, die im Juni über den Njemen ging, kommen im Dezember dreißigtausend zurück. Du bist einer davon, und du bist Offizier — also wirst du gebraucht.',
     ende:'Die Listen werden neu geschrieben, und was kein Offizier ist, steht nicht mehr darauf. Man dankt dir, zahlt aus und schickt dich nach Hause.',
     epilog:'Du hast alles gesehen, was ein Mensch sehen kann, und gehst nach Hause. Dass du kein Offizier geworden bist, macht das nicht kleiner: Von hundert, die mit dir über den Njemen gingen, sind sechs zurückgekommen.'},
-  waterloo:{rang:10, name:'Vor Waterloo', bonus:120,
+  waterloo:{rang:10, name:'Vor Waterloo', bonus:120, endeArt:'halbsold',
     durch:'Er ruft die zurück, die er kennt. Du stehst auf der Liste, weil ein Regiment ohne dich nicht marschiert.',
     ende:'Die Armee wird aufgelöst, die Offiziere auf Halbsold gesetzt. Du bekommst ein Papier, eine Zahl und eine Adresse.',
     epilog:'Im März 1815 liest du in der Zeitung, dass er zurück ist. Du liest es zu Ende, faltest sie und legst sie weg. Es ist die vernünftigste Entscheidung deines Lebens, und du wirst sie dreißig Jahre lang bereuen.'}
