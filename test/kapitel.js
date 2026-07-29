@@ -18,18 +18,136 @@
    die **Vollständigkeit** des Kapitels, nicht seine Härte — die misst
    `balance.js`, und ein Toter sieht die zweite Hälfte eines Kapitels nie.
 
+   ── Der Härtemodus ──
+
+   **Späte Kapitel lassen sich mit `balance.js` nicht mehr messen.** Der
+   Trichter frisst die Stichprobe: Von achtzig Läufen erreichen Spanien acht
+   und Russland zwei, und auf zwei Läufen lässt sich nichts eichen. Die Quote
+   je Kapitel, die `balance.js` seit Kapitel 7 druckt, sagt für die letzten
+   Kapitel deshalb „nur 2" statt einer Zahl.
+
+   `HAERTE=40` misst ein Kapitel **direkt**: vierzig Läufe, die an seinem
+   Anfang beginnen, mit einem Mann, wie er dort ankommen würde — und **ohne
+   Heilung zwischendurch**. Gemessen wird, wie viele es überstehen.
+
+   **Der Mann ist die Eichung, nicht das Kapitel.** Er bekommt die Werte, die
+   ein Veteran an dieser Stelle hätte (Attribute 55–70, Fertigkeiten 45, Rang
+   nach Ausbaustand), volle Gesundheit und keine Ausrüstungsgeschenke. Wer die
+   Zahlen ändert, ändert den Maßstab für alle Kapitel gleichzeitig — das ist
+   Absicht: Vergleichbarkeit zwischen Kapiteln ist der ganze Zweck.
+
    Aufruf:  node test/kapitel.js jena
-            node test/kapitel.js jena 7        (nur ein Rang)                  */
+            node test/kapitel.js jena 7        (nur ein Rang)
+            HAERTE=40 node test/kapitel.js russland 9   (vierzig Läufe, ungeheilt) */
 const { chromium } = require('playwright');
 const path = require('path');
 const ziel = path.resolve(__dirname, '../index.html');
 const KAP = process.argv[2] || 'jena';
+const HAERTE = parseInt(process.env.HAERTE || '0', 10);
 const RAENGE = process.argv[3] ? [parseInt(process.argv[3], 10)] : [1, 5, 8, 12];
+
+/* ── Der Härtemodus ──
+   Ein Lauf: an den Anfang des Kapitels springen, den Mann auf Veteranenmaß
+   setzen und durchklicken, **ohne zu heilen**. Rückgabe: überlebt oder nicht,
+   und an welcher Station es endete. */
+async function haerteLauf(b, rang) {
+  const p = await b.newPage();
+  const errs = [];
+  p.on('pageerror', e => errs.push(e.message));
+  await p.goto('file://' + ziel);
+  await p.click('text=Neuen Mann aufstellen');
+  await p.click('text=Auswürfeln');
+  await p.click('#h_schmied');
+  await p.click('text=Weiter zu den Veteranenpunkten');
+  await p.click('#startbtn');
+
+  const start = await p.evaluate(({ kap, r }) => {
+    const liste = STATIONEN[kap];
+    if (!liste || !liste.length) return null;
+    const i = KAPITEL.findIndex(x => x.id === liste[0].id);
+    if (i < 0) return null;
+    LAUF.node = i; S.rang = r;
+    /* **Der Mann ist absichtlich gut und absichtlich fest.**
+       Fest, damit Kapitel untereinander vergleichbar bleiben — nicht
+       ausgewürfelt. Gut, weil die Zahl sonst am Boden klebt: Mit Konstitution
+       70 und mittelmäßiger Ausrüstung starben in Spanien wie in Russland
+       siebenunddreißig von vierzig, und zwei Kapitel, die beide 3 % liefern,
+       sagen über ihren Unterschied nichts. **Ein Prüfstand ohne Kopfraum
+       misst seinen eigenen Boden.** Die Ausrüstung gehört dazu, und der
+       Mantel besonders: Ohne ihn misst man in Russland nur die Frostregel
+       und nie das Kapitel. */
+    S.attr.konstitution = 85; S.attr.geschick = 70; S.attr.kaltbluetigkeit = 70;
+    S.attr.autoritaet = 70; S.attr.bildung = 60; S.attr.menschenkenntnis = 65;
+    for (const k in S.fert) S.fert[k] = 60;
+    S.ausr.muskete.zustand = 100; S.ausr.seitenwaffe.zustand = 100;
+    S.ausr.schuhe.zustand = 100; S.ausr.tornister.zustand = 100;
+    S.ausr.mantel = { name: 'Beutemantel, gewachst', zustand: 100, verschleiss: 6 };
+    S.wunden = []; S.leben = lebenMax(); S.atem = 100; S.belastung = 10;
+    S.ruf = 90; S.einheit = 70; S.sektionGuete = 0;
+    laufSichern(); naechster();
+    return { letzte: liste[liste.length - 1].id };
+  }, { kap: KAP, r: rang });
+  if (!start) { await p.close(); return null; }
+
+  let s = 0, ende = 'Limit', letzterOrt = '';
+  while (s++ < 700) {
+    /* **Am Zustand ist der Tod nicht zu erkennen — das ist die Falle hier.**
+       `zeigeTod()` setzt `LAUF=null` und ruft `binde()`, und danach ist auch
+       `S` null. Genau dasselbe tut ein Kapitelende. Wer also auf `!LAUF` oder
+       `!S` prüft und daraus „durch" schließt, zählt jeden Gefallenen als
+       Überlebenden — die erste Fassung tat das und meldete für Spanien wie
+       für Russland hundert Prozent. **Unterschieden wird am Bildschirm.** */
+    const st = await p.evaluate(() => {
+      if (!S || !LAUF) return { weg: true };
+      if (!S.lebt) return { tot: true };
+      return { ort: (KAPITEL[LAUF.node] || {}).ort || '' };
+    });
+    const t = await p.$eval('#app', e => e.innerText).catch(() => '');
+    if (st.tot || /Nächster Mann/.test(t)) { ende = 'tot'; break; }
+    if (st.weg) { ende = /Nächster Mann/.test(t) ? 'tot' : 'durch'; break; }
+    if (st.ort) letzterOrt = st.ort;
+    const fertig = await p.evaluate(l => {
+      if (!LAUF) return true;
+      const i = KAPITEL.findIndex(x => x.id === l);
+      return LAUF.node > i;
+    }, start.letzte);
+    if (fertig) { ende = 'durch'; break; }
+    const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+    const ok = await p.evaluate(i => {
+      const btn = [...document.querySelectorAll('.ord:not([disabled])')]
+        .filter(e => !/Zurückweichen|Zurückgehen/.test(e.textContent));
+      if (!btn.length) return false;
+      btn[i % btn.length].click(); return true;
+    }, s);
+    if (!ok) { ende = 'kein Knopf'; break; }
+  }
+  await p.close();
+  return { ende, wo: letzterOrt, fehler: errs };
+}
 
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
   const fehler = [];
   let schlecht = 0;
+
+  if (HAERTE) {
+    const rang = RAENGE.length === 1 ? RAENGE[0] : 9;
+    const wo = {}; let durch = 0, tot = 0;
+    for (let i = 0; i < HAERTE; i++) {
+      const r = await haerteLauf(b, rang);
+      if (!r) { console.log(`Kapitel „${KAP}" nicht gefunden.`); await b.close(); process.exit(1); }
+      if (r.ende === 'durch') durch++;
+      else { tot++; if (r.wo) wo[r.wo] = (wo[r.wo] || 0) + 1; }
+      r.fehler.forEach(e => fehler.push(e));
+    }
+    console.log(`${KAP} · Rang ${rang} · ${HAERTE} Läufe ab Kapitelanfang, ungeheilt`);
+    console.log(`\n  ÜBERSTANDEN ${durch} (${Math.round(durch / HAERTE * 100)} %)\n`);
+    const orte = Object.keys(wo).sort((a, x) => wo[x] - wo[a]).slice(0, 5).map(k => `${k} ${wo[k]}`);
+    if (orte.length) console.log(`Gestorben bei: ${orte.join(' · ')}`);
+    console.log('Fehler:', fehler.length ? fehler.slice(0, 3) : 'keine');
+    await b.close();
+    process.exit(fehler.length ? 1 : 0);
+  }
 
   for (const rang of RAENGE) {
     const p = await b.newPage({ viewport: { width: 1280, height: 1200 } });
@@ -96,7 +214,14 @@ const RAENGE = process.argv[3] ? [parseInt(process.argv[3], 10)] : [1, 5, 8, 12]
          sie hier eingetragen statt über den Kopf erkannt. */
       if (stand.weg) {
         const t0 = await p.$eval('#app', e => e.innerText).catch(() => '');
-        if (/Nächster Mann|Der Mann ist tot|gefallen/i.test(t0)) { ende = 'gestorben'; break; }
+        /* **Erkannt wird am Knopf, nicht am Fließtext.** Die frühere Prüfung
+           suchte unter anderem nach „gefallen" — und der Ruhestandsbildschirm
+           der Rangschranke sagt wörtlich *„Du bist nicht gefallen."* Damit
+           galten in Russland drei von vier Rängen als tot, die in Ehren
+           ausgemustert worden waren. Die Knöpfe sind eindeutig: „Nächster
+           Mann" steht nur auf dem Todesblatt, „Noch einmal, besser" nur unter
+           einem Ende, das der Mann überlebt hat. */
+        if (/Nächster Mann/.test(t0)) { ende = 'gestorben'; break; }
         ende = 'Kapitel zu Ende'; gesehen.add(start.letzte); break;
       }
       if (stand.tot) { ende = 'gestorben'; break; }
@@ -132,9 +257,17 @@ const RAENGE = process.argv[3] ? [parseInt(process.argv[3], 10)] : [1, 5, 8, 12]
       if (!ok) { ende = 'kein Knopf mehr'; break; }
     }
 
-    const fehlend = await p.evaluate(({ kap, ges }) =>
-      (STATIONEN[kap] || []).map(x => x.id).filter(id => !ges.includes(id)),
-      { kap: KAP, ges: [...gesehen] });
+    /* **Eine Station, die der forcierte Marsch verschluckt, fehlt nicht.**
+       `tempo.ueberspringt` nennt sie beim Namen; wer forciert, sieht sie
+       wirklich nicht, und das ist der Preis, um den es dort geht. Ein
+       Prüfstand, der das als Lücke meldet, meldet die Tempowahl als Fehler. */
+    const fehlend = await p.evaluate(({ kap, ges }) => {
+      const liste = STATIONEN[kap] || [];
+      const uebersprungen = liste.filter(x => x.tempo && x.tempo.ueberspringt)
+                                 .map(x => x.tempo.ueberspringt);
+      return liste.map(x => x.id)
+                  .filter(id => !ges.includes(id) && !uebersprungen.includes(id));
+    }, { kap: KAP, ges: [...gesehen] });
 
     const sollBild = rang >= 12 ? 'karte' : rang >= 10 ? 'rechtecke' : rang >= 7 ? 'skizze' : 'sichtfeld';
     /* **Ab Rang 7 ist das Sichtfeld kein falsches Bild, sondern ein zweites.**

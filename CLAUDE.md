@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)**, **Kapitel 5 (Jena–Auerstedt 1806)** **Kapitel 6 (Eylau und Friedland 1807)** und **Kapitel 7 (Spanien 1808–12)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)**, **Kapitel 5 (Jena–Auerstedt 1806)**, **Kapitel 6 (Eylau und Friedland 1807)**, **Kapitel 7 (Spanien 1808–12)** und **Kapitel 8 (Russland 1812)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -64,10 +64,15 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | **Der Frost** (`frost:n`) — der Mantel wird rückwirkend wichtig | Russland in zwei Stufen |
 | **Der Sturm** (`sturm:true`) — der Feind ist nur noch eine Schätzung | |
 | **Offizier der Ehrenlegion** — der zweite Ordensgrad | Commandeur, Grand Officier |
-| **Kapitel 7 (Spanien 1808–12)**, 14 Stationen, Feindgüte 8 | Kapitel 8–11 |
+| **Kapitel 7 (Spanien 1808–12)**, 14 Stationen, Feindgüte 8 | Kapitel 9–11 |
 | **Der Überfall** (`ueberfall:true`) — keine Linie, keine Zeugen | |
 | **Der stumme Krieg** (`stumm:true`) — die Bulletins schweigen | |
 | **`OFFEN.md`** — ein Register für alles Gemessene, nicht Entschiedene | |
+| **Kapitel 8 (Russland 1812)**, 14 Stationen, Feindgüte 10 | Kapitel 9–11 |
+| **Der Aderlass** (`aderlass:n`) — der Krieg tötet zwischen den Gefechten | |
+| **Die erste Rangschranke** und der freiwillige Ausstieg | die zweite vor Waterloo |
+| **Der gestaffelte Überlebensbonus** 180/120/70 statt des Platzhalters 25 | |
+| **Der Härtemodus** (`HAERTE=n`) — ein Kapitel für sich messen | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -83,6 +88,7 @@ npm install playwright && npx playwright install chromium   # einmalig
 node test/durchspielen.js         # ein Lauf, meldet Konsolenfehler
 node test/raenge.js               # alle 14 Ränge von Hand gesetzt: Knöpfe, Bild, und was fehlen muss
 node test/kapitel.js jena         # ein Kapitel mit vier künstlichen Rängen durchlaufen (Grundsatz 3)
+HAERTE=40 node test/kapitel.js russland 9   # 40 Läufe nur durch dieses Kapitel: wie tödlich ist es?
 node test/spielstand.js           # sichern, fortsetzen, sterben, alte Fassungen
 node test/durchspielen.js dist    # dasselbe mit der gebauten Einzeldatei
 node test/balance.js 80           # 80 Läufe, misst die beiden Leitzahlen
@@ -94,6 +100,35 @@ node werkzeug/bauen.js            # baut dist/marschallstab.html zum Weitergeben
 > **`test/kapitel.js` ist der Prüfstand für Grundsatz 3** aus KAMPAGNEN §0: *„Jede Station trägt jeden Rang."* Er springt an den Anfang eines Kapitels, setzt den Rang von Hand auf 1, 5, 8 und 12 und klickt durch — wird jede Station erreicht, läuft jedes Gefecht auf dem Maßstab des Rangs (Sichtfeld · Skizze · Rechtecke · Karte), fällt etwas in die Konsole? Der Mann wird vor jedem Schritt geheilt: **gemessen wird Vollständigkeit, nicht Härte.** Die Härte misst `balance.js`, und ein Toter sieht die zweite Hälfte eines Kapitels nie.
 >
 > **Geheilt gehören auch die Wunden, nicht nur das Leben.** Die erste Fassung heilte nur `S.leben` und meldete daraufhin eine Endlosschleife, die keine war: `wert()` zieht Wunden ab, und ein Knopf unter Wert 5 wird gesperrt — es hing der Prüfstand, nicht das Kapitel. *(Die Suche danach hat trotzdem einen echten Fehler gefunden, siehe „Der Notausgang".)*
+
+### Der Härtemodus — ein einzelnes Kapitel messen (`HAERTE=n`)
+
+**`balance.js` misst den ganzen Weg, und das wird mit jedem Kapitel unbrauchbarer.** Von achtzig Läufen erreichen Spanien noch zwölf und Russland noch drei; eine Quote aus drei Läufen ist keine Quote. Der Trichter ist gewollt — man *soll* unterwegs sterben —, aber er macht genau die Kapitel unmessbar, die am dringendsten gemessen gehören.
+
+`HAERTE=40 node test/kapitel.js russland 9` setzt vierzig Männer an den **Anfang eines Kapitels** und lässt sie durch, **ohne zwischendurch zu heilen**. Ergebnis: eine Überlebensquote und die Orte, an denen gestorben wurde. Damit ist ein Kapitel mit einem anderen vergleichbar, unabhängig davon, wie viele Läufe überhaupt bis dorthin kommen.
+
+**Der Prüfmann ist fest und absichtlich gut** — Konstitution 85, übrige Attribute 60–70, alle Fertigkeiten 60, Ausrüstung auf 100, **Mantel dabei**. Fest, damit die Kapitel untereinander vergleichbar bleiben; gut, weil der Prüfstand sonst seinen eigenen Boden misst: Mit Konstitution 70 und Ausgabeausrüstung starben in Spanien wie in Russland siebenunddreißig von vierzig, und **zwei Kapitel, die beide 3 % liefern, sagen über ihren Unterschied nichts.** Der Mantel gehört dazu, sonst misst man in Russland nur die Frostregel.
+
+> **⚠ Der teuerste Fehler dieses Prüfstands, und er sah wie ein Erfolg aus.** Die erste Fassung meldete für Spanien wie für Russland **100 % überstanden** — für zwei Kapitel, von denen eines das Wort „Überlebensspiel" im Kurztext trägt. Grund: `zeigeTod()` setzt `LAUF=null` und ruft `binde()`, und `binde()` setzt daraufhin auch `S` auf null. **Ein Kapitelende tut exakt dasselbe.** Am Zustand ist der Tod also nicht zu erkennen; wer aus `!LAUF` auf „durch" schließt, zählt jeden Gefallenen als Überlebenden.
+>
+> **Regel daraus, und sie gilt für jeden künftigen Prüfstand: Ein Messwert von 100 % ist verdächtig, nicht erfreulich.** Dieselbe Lektion wie beim stummen Güte-Leck und beim stummen Filter im Lager — wenn eine Zahl zu gut aussieht, misst man zuerst den Mechanismus und nicht das Ergebnis. Unterschieden wird jetzt am Bildschirm (`Nächster Mann`), nicht am Zustand.
+>
+> **Und derselbe Fehler steckte ein zweites Mal im Vollständigkeitsmodus**, in umgekehrter Richtung: Er suchte im Schlussbildschirm unter anderem nach dem Wort „gefallen" — und der Ruhestandsbildschirm der Rangschranke sagt wörtlich *„Du bist nicht gefallen."* In Russland galten dadurch **drei von vier Rängen als tot, die in Ehren ausgemustert worden waren.** Erkannt wird jetzt am Knopf: „Nächster Mann" steht nur auf dem Todesblatt, „Noch einmal, besser" nur unter einem Ende, das der Mann überlebt hat. **Ein Fließtext ist kein Zustand.**
+
+### Die Härteleiter — gemessen, je 40 Läufe, Prüfmann auf Rang 9
+
+| Kapitel | überstanden | woran vor allem |
+|---|---|---|
+| Jena–Auerstedt | **78 %** | drei Gefechte, und der Krieg wird mit den Beinen geführt |
+| Italien | **50 %** | fünf Gefechte, aber Güte 0 — das Lehrstück |
+| Eylau & Friedland | **38 %** | drei Gefechte auf 20–22, dazu der Frost |
+| **Spanien** | **15 %** | fünf Gefechte, gleichmäßig tödlich (13 · 7 · 6 · 6 · 2) |
+| **Russland** | **3 %** | Borodino allein 22 von 39 — und der Aderlass davor |
+
+> **Das ist die Antwort auf „Spanien eine härtere Wand, Russland die härtere".** Sie steht jetzt an einer Zahl und nicht an einem Gefühl. **Zwei Dinge sind beim Lesen wichtig:**
+>
+> 1. **Russland liegt am Boden der Skala.** Bei 3 % kann der Prüfstand nicht mehr zeigen, ob eine weitere Änderung das Kapitel härter oder leichter macht. Wer dort noch einmal dreht, hebt zuerst den Prüfmann — sonst misst er wieder seinen eigenen Boden.
+> 2. **Der Härtemodus misst ein Kapitel isoliert.** Was er nicht sieht, ist der Zustand, in dem man wirklich ankommt. Er sagt, wie tödlich ein Kapitel *ist*, nicht wie tödlich es *im Lauf* ist — beide Zahlen gehören nebeneinander, nicht gegeneinander.
 
 ---
 
@@ -119,6 +154,7 @@ src/daten/kapitel04_austerlitz.js Kapitel 4 — die Ernte von Boulogne, Feindgü
 src/daten/kapitel05_jena.js     Kapitel 5 — der Krieg mit den Beinen, Feindgüte 7
 src/daten/kapitel06_eylau.js    Kapitel 6 — der Winter schießt mit, Feindgüte 8
 src/daten/kapitel07_spanien.js  Kapitel 7 — kein Ruhm, nur Entscheidungen, Feindgüte 8
+src/daten/kapitel08_russland.js Kapitel 8 — ein Vorrat, der kleiner wird, Feindgüte 10
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -431,16 +467,28 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 
 | Kampagne | Güte | | Kampagne | Güte |
 |---|---|---|---|---|
-| Italien 1796/97 | **0** | | Spanien | 8 |
-| Ägypten 1798/99 | **5** | | Russland | 10 |
-| Garnison | 0 | | Deutschland | 10 |
-| Austerlitz | 6 | | Frankreich | 11 |
-| Jena–Auerstedt | 7 | | Hundert Tage | 12 |
-| Eylau & Friedland | 8 | | | |
+| Italien 1796/97 | **0** | | Spanien 1808–12 | **8** |
+| Ägypten 1798/99 | **5** | | Russland 1812 | **10** |
+| Garnison 1801–04 | **0** | | Deutschland | 10 |
+| Austerlitz 1805 | **6** | | Frankreich | 11 |
+| Jena–Auerstedt 1806 | **7** | | Hundert Tage | 12 |
+| Eylau & Friedland 1807 | **8** | | | |
 
-**Nur Italien (0) und Ägypten (5) sind gemessen.** Alles ab Austerlitz ist eine entworfene Kurve für Kapitel, die es noch nicht gibt — wer eines baut, misst seine Güte neu, statt der Zahl zu glauben. Der Sinn der Tabelle ist, dass die Eskalation **einmal entworfen** ist und nicht elfmal neu erfunden wird.
+**Gebaut und am Hebel ausgelesen sind alle Werte bis Russland (10)** — nicht am Ergebnis geraten, sondern `feindGuete()` je Gefecht in eine Tabelle geschrieben, weil das stumme Güte-0-Leck die teuerste Lektion des Projekts war. Deutschland bis Hundert Tage bleiben eine entworfene Kurve; wer eines dieser Kapitel baut, misst seine Güte neu, statt der Zahl zu glauben.
 
 **Güte ist die Grundlinie einer Kampagne, `haerte` die Spitze eines einzelnen Gefechts.** Beide addieren sich: Akkon steht bei Gefahr 14 + 3 (Höhepunkt) + 5 (Güte) = **22**.
+
+### Die 22 — die Decke, über die kein Gefecht geht
+
+**Die Regel stammt aus Kapitel 5 und gilt seitdem für jedes neue Gefecht:** *Kein Gefecht geht über wirksame Gefahr 22, wenn es nicht selbst die Regel seines Kapitels ist.* Wirksam heißt: Basiswert + 3 für einen Höhepunkt + Güte, minus 4 bei Sturm.
+
+| Auf der 22 stehen | |
+|---|---|
+| Akkon 1799 · Austerlitz 1805 · Jena 1806 · Friedland 1807 · Saragossa 1809 · Borodino und die Beresina 1812 | |
+
+> **Zweimal ist die Regel schon gebrochen worden, und beide Male beim Bau eines späten Kapitels.** Spaniens Überfälle waren mit 16–18 entworfen (wirksam 24–26), Russlands vier Gefechte standen bei 23, 27, 28 und **29**. Beide Male war die Ursache dieselbe: Der Entwurf nannte eine Zahl, die **vor der Güte** gedacht war, und niemand hat sie hinterher addiert. **Wer ein Kapitel baut, liest `feindGuete()` je Gefecht aus, bevor er die erste Balance-Messung startet** — die Rechnung im Kopf hat zweimal versagt.
+>
+> **Und die Reparatur ist nie, die Decke anzuheben.** Was ein spätes Kapitel hart macht, kommt aus seiner eigenen Regel: der Frost, der Überfall, der Aderlass, der doppelte Verschleiß — oder, wie bei Borodino, aus der **Länge** des Gefechts statt aus seiner Trefferchance.
 
 ### Fünf Hebel, die das Spiel gefährlich machen (28.07.2026)
 
@@ -637,6 +685,38 @@ Die Leiter der Sichtbarkeit bleibt auf ihrer untersten Stufe stehen: **Lob vor d
 > **Die Härte eines Überfalls steckt nicht in der Trefferchance.** Der Entwurf nannte Gefahr 16–18 — das war vor der Güte gerechnet und ergäbe hier 24 bis 26, also weit über der Decke. Gebaut sind 11 und 12 (also 19 und 20): Was den Überfall teuer macht, ist die fehlende Linie, weil das Gefecht dadurch länger dauert und mehr Runden mit Treffern bringt.
 
 > **Und eine Falle, die beim Bauen aufgefallen ist:** `kampfEnde()` arbeitete auf `n.niederlage` selbst statt auf einer Kopie. Wer dort für `ueberfall` den Ruf-Abzug auf null setzt, ändert die Kapiteldaten **für jeden weiteren Lauf im selben Browserfenster**. Das wäre die Sorte Fehler, die man erst nach dreißig Messläufen bemerkt. Jetzt `Object.assign({}, …)`.
+
+### Kapitel 8 — Russland 1812 (`kapitel08_russland.js`)
+
+**Die eigene Regel: Das ist kein Feldzug, das ist ein Vorrat, der kleiner wird.** Vierzehn Stationen, vier Gefechte, Feindgüte 10, Sold-Moral **0,1** — der niedrigste Wert des Spiels, und es gibt nichts zu kaufen.
+
+| Gefecht | Runden | Feindmoral | Gefahr | Güte | wirksam |
+|---|---|---|---|---|---|
+| Smolensk | 7 | 66 | 10 | +10 | 20 |
+| **Borodino (Höhepunkt)** | **10** | **95** | 9 → 12 | +10 | **22** |
+| Krasnoi | 5 | 45 | 10 | +10 | 20 · Überfall · Frost 3 |
+| **Beresina (Höhepunkt)** | 8 | 70 | 9 → 12 | +10 | **22** · Überfall · Frost 4 |
+
+> **Die erste Fassung stand bei 23, 29, 27 und 28 — sieben Punkte über der Decke.** Das war der falsche Ort für die Härte dieses Kapitels: **Russland ist nicht das Kapitel, in dem am besten geschossen wird, sondern das, in dem der Vorrat nicht zurückkommt.** Jetzt liegen alle vier bei 20 oder auf der 22.
+>
+> **Borodino trägt seine Härte in der Länge** — zehn Runden gegen Feindmoral 95, das längste und zäheste Gefecht des Spiels. Ein Tag, der nicht aufhört, ist die richtige Übersetzung für den blutigsten Tag des Jahrhunderts; eine erhöhte Trefferchance wäre nur eine größere Zahl gewesen. Gemessen tötet es trotzdem **22 von 39**, die es erreichen — nicht, weil es gefährlicher wäre, sondern weil man leer davorsteht.
+
+**Dazu zwei Kampagnenschalter, die es vorher nicht gab:** `verschleiss:2` (Ausrüstung nutzt sich doppelt ab) und `ersatz:false` (sie wird nicht ersetzt — der Marketender hat nichts). Über die Schuhe ist das ein Malus, der sich selbst verstärkt: unter Zustand 25 kostet er 18 Konstitution, und es gibt keinen Weg, ihn abzustellen.
+
+### Der Aderlass (`aderlass:n`, `aderlass()` in `src/mechanik.js`)
+
+**Manche Kriege töten in den Gefechten. Andere töten dazwischen.** Spanien hat Frankreich dreihunderttausend Mann gekostet, und fast keiner davon ist in einer Schlacht gefallen — Posten, die nicht zurückkamen, Nachzügler, Fieber, ein Messer im Quartier. Russland hat vierhunderttausend gekostet, und das Gefecht war die Ausnahme.
+
+`aderlass:n` steht an der **Kampagne**, nicht an der Station, und zieht an jeder Station n Lebenspunkte und ebenso viel Einheitszustand ab. **Keine Probe dagegen, kein Knopf dafür** — ein Aderlass ist keine Entscheidung, sondern die Eigenschaft eines Krieges.
+
+| Kampagne | Aderlass | was das heißt |
+|---|---|---|
+| Spanien | **4** | hebt die Zeitheilung fast genau auf: **man kommt nie wieder hoch** |
+| Russland | **8** | liegt darüber: **der Vorrat fällt wirklich** |
+
+> **⚠ Die erste Fassung stand auf 2 und 4 und tat rechnerisch nichts.** Die Zeitheilung gibt 5 % des Vorrats, bei neunzig Lebenspunkten also viereinhalb je Station. Russlands 4 ergab damit **plus einen halben Punkt je Station** — der Mann wurde nicht weniger, er stand still, und das Kapitel hielt nicht, was sein eigener Kopfkommentar verspricht.
+>
+> **Das ist derselbe Fehler wie damals bei der Krankheit** („Ein Kranker *gewann* einen Punkt je Station"), nur eine Ebene höher, und er ist erst aufgefallen, als der Härtemodus Spanien und Russland auf dieselbe Zahl legte. **Regel: Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert** — wer einen neuen einführt, rechnet ihn zuerst gegen die 5 %.
 
 ### Rang 6 — Sergent-major und der Zug
 
@@ -839,6 +919,9 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 | Sergent | 1,50 | | Jena–Auerstedt 1806 | **0,8** |
 | Sergent-major | 2,00 | | Eylau & Friedland 1807 | **0,6** |
 | Sous-Lieutenant | 2,10 | | Spanien 1808–12 | **0,7** |
+| | | | Russland 1812 | **0,1** |
+
+> **Russlands 0,1 ist der niedrigste Wert des Spiels, und er ist keine Härteschraube.** Es gibt dort nichts zu kaufen (`ersatz:false`), also wäre jeder Sold ohnehin Zierde; die Zahl sagt nur, was sie sagt. Historisch war es genau so — der Sold der Großen Armee kam 1812 nicht mehr nach, und was ausgezahlt wurde, war Papier.
 
 > **Geeicht am Marketender, nicht am Geschichtsbuch.** Historisch bekam ein Fusilier fünf Sous am Tag — im Spiel wären das **1,4 Francs für den ganzen Italienfeldzug** gewesen: korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen: **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender kaufen** (8–18 F).
 
@@ -937,7 +1020,9 @@ if(!sieg) S.leben -= 5 + 13·(Restwiderstand des Feindes / Anfangswert)
 ### Wertung: die volle Skala (`wertung()` in `src/abschluss.js`)
 
 ```
-Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 20 (nie gekniffen)
+Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + Überleben + 20 (nie gekniffen)
+
+Überleben:  0 tot · 70 lebend · 120 Halbsold · 180 Ruhestand an einer Schranke
 ```
 
 **Seit dem 28.07.2026 rechnet die ganze Wertung in der vollen Skala aus KONZEPT §5** (Maximum 918). Rangwerte 0 / 12 / 26 / 42 / 62 — die standen dort schon immer, auch die 42 und die 62.
@@ -948,7 +1033,17 @@ Rangwert + 8×überlebte Kapitel + 5×(Ruf/10) + 3×Nennungen + 25 (lebend) + 20
 
 **Ein Kapitel statt einer Station.** Die Prototypskala zahlte 2 VP je erreichter Station und belohnte damit den, der auf Station 30 von 32 fiel, fast wie den, der ankam. Die volle Skala zahlt **je überlebtem Kapitel** (`kapitelUeberlebt()`): Ein Feldzug ist ein Feldzug, und ein halber ist keiner. Das ist der Grund, warum der Punkte-Median so deutlich fällt — ein abgebrochener Lauf ist jetzt sichtbar weniger wert als ein vollendeter, und das war der Sinn.
 
-**Der Überlebensbonus steht auf 25 und ist ein Platzhalter.** Die volle Skala sieht gestaffelte 70/120/180 vor, aber die ergeben erst Sinn, wenn es den **freiwilligen Ausstieg an den Rangschranken** gibt — dann ist die Höhe des Bonus die Belohnung dafür, rechtzeitig aufzuhören. Ohne diese Entscheidung wäre er nur eine große Zahl für jeden, der nicht stirbt. **Wer den Ausstieg baut, ersetzt hier die 25.**
+**Der Überlebensbonus ist seit Kapitel 8 gestaffelt** — 70 / 120 / 180 aus KONZEPT §5, statt des Platzhalters 25. Er hing an genau einer Voraussetzung, und die steht jetzt: dem **freiwilligen Ausstieg an einer Rangschranke**. Ohne diese Entscheidung wäre eine große Zahl nur ein Geschenk an jeden, der nicht stirbt; mit ihr ist sie die Belohnung dafür, rechtzeitig aufzuhören.
+
+> **Gemessen an den drei Wegen durch die Schranke am Njemen:**
+>
+> | Weg | Überleben | Punkte |
+> |---|---|---|
+> | Rang 5, ausgemustert (keine Wahl) | 180 | **326** |
+> | Rang 9, geht freiwillig | 180 | **469** |
+> | Rang 9, marschiert weiter | 70 | **359** |
+>
+> **Weitermarschieren kostet sofort 110 Punkte** — und das ist die ganze Frage, die eine Schranke stellt: Was du danach holst, musst du erst einmal gegen diese 110 verdienen, und du kannst dabei sterben. `S.ende` trägt dafür `ruhestand`, `halbsold` oder nichts.
 
 **Was noch fehlt:** Ehrenlegion (+12 je Grad) und fremde Orden (+10, höchstens zwei) — beides hängt an den Orden, die es nicht gibt.
 
@@ -1618,11 +1713,10 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 ## Was als Nächstes ansteht
 
-1. **Kapitel 5 und 6** (Jena–Auerstedt 1806, Eylau & Friedland 1807) — sie sind das, was jetzt am meisten fehlt: **Ohne sie bleiben die Ränge 10 bis 14 ungemessen**, weil auch der gekaufte Lieutenant bei Rang 8 anfängt und Rang 9 die Ehrenlegion verlangt.
-2. **Die Leitzahl „höchster Rang" neu setzen** — sie misst den Sergent-major, während ein Drittel der Veteranenläufe ein Patent erreicht. Die Zahlen für die Umstellung liegen vor (siehe „Die zwei Leitzahlen"); es fehlt die Entscheidung.
-3. **Die höheren Ordensgrade** (Officier ab 1807, Commandeur ab 1809). Sie sind in KONZEPT §6 vollständig entworfen und hängen nur an Kapiteln, die es noch nicht gibt. *(Die Dotationen sind mit Phase D erledigt.)*
-4. **Kapitel 7 bis 11** — je Kapitel ein Rang als Wohnort (RANGLEITER §10, Phase F).
-5. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
+1. **Kapitel 9 bis 11** (Deutschland 1813, Frankreich 1814, Die Hundert Tage 1815). Die Datendateien liegen, eingehängt sind sie nicht — jedem fehlt noch ein System: **Rekruten und der Adler** (9), **die zweite Schranke mit dem Halbsold** (10), **der Rückruf mit einer echten Ablehnung und der Lebensepilog** (11).
+2. **Die höheren Ordensgrade** (Commandeur ab 1809, Grand Officier). Sie sind in KONZEPT §6 vollständig entworfen; Rang 13 fordert bereits einen Grad, den es nicht gibt.
+3. **Die Layoutüberarbeitung** nach dem Entwurfspaket — Rangabzeichen für alle vierzehn Ränge, Beförderungsbescheide in zehn Graden, der Stationsbogen als ein Blatt. **Drei unverrückbare Regeln:** keine Bilddatei, keine Schriftdatei, klassische Skripte.
+4. **Alles, was in `OFFEN.md` steht** — allen voran die flache Überlebensprogression (Punkt 1).
 
 > **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen, und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `höchster Rang` neu gesetzt. Beides steht oben unter „Balance-Konstanten".
 >
@@ -1630,7 +1724,9 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 >
 > **Ebenfalls am 29.07.2026:** Rangleiter Phase D — die Ränge 10 bis 14 (siehe „Ränge 10–14 — der Stab"). **Alle vier sichtbaren Brüche stehen damit**, und die Generalskampagnen sind freigeschaltet, sobald jemand Rang 12 erreicht. Die Dotationen sind mit erledigt.
 >
-> **Und Phase E:** die Offizierspatente (siehe dort). **Die Rangleiter ist damit vollständig — gebaut, vergebbar und zugänglich.** Was bleibt, sind Kapitel und die eine offene Entwurfsfrage oben unter Nummer 2.
+> **Und Phase E:** die Offizierspatente (siehe dort). **Die Rangleiter ist damit vollständig — gebaut, vergebbar und zugänglich.**
+>
+> **Erledigt mit Kapitel 8 (29.07.2026):** Die Leitzahl „höchster Rang" steht als `LEITRANG` in `test/balance.js` und ist auf **Rang 9 (Capitaine)** umgestellt; die Entwurfsfrage, die hier zwei Punkte lang offenstand, ist damit entschieden. Ebenso **der freiwillige Ausstieg an der ersten Rangschranke** und mit ihm der **gestaffelte Überlebensbonus 180 / 120 / 70**.
 
 > **⚠ Offen und ausdrücklich nicht gemessen: die Härte der Offiziersränge.** RANGLEITER §11 fragt, ob der Spieler den Anschluss verliert, wenn die Muskete weg ist — „zu messen, nicht zu beschließen: Wenn nach Rang 7 die Sterblichkeit einbricht oder explodiert, stimmt die Umstellung der Proben nicht."
 >

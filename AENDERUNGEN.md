@@ -5,6 +5,44 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Kapitel 8: Russland 1812, die Rangschranke, und ein Prüfstand, der lügen konnte
+
+**Die eigene Regel: Das ist kein Feldzug, das ist ein Vorrat, der kleiner wird.** Vierzehn Stationen, vier Gefechte, Feindgüte 10, Sold-Moral 0,1.
+
+**`verschleiss:2` und `ersatz:false`** an der Kampagne: Ausrüstung nutzt sich doppelt ab und wird nicht ersetzt. Über die Schuhe (unter Zustand 25 kostet das 18 Konstitution) ist das ein Malus, der sich selbst verstärkt — und er greift ausgerechnet dort, wo es keinen Marketender mehr gibt.
+
+**Die Rangschranke** (`schranke:'russland'` an der letzten Station, `zeigeSchranke()` in `src/abschluss.js`): Wer lebt und unter Rang 7 steht, wird ausgemustert. Wer darüber steht, wählt. **Damit fällt der Platzhalter 25 im Überlebensbonus** und wird durch die gestaffelten **180 / 120 / 70** aus KONZEPT §5 ersetzt — `S.ende` trägt `ruhestand`, `halbsold` oder nichts. Gemessen an drei Wegen: Rang 5 ausgemustert **326**, Rang 9 geht **469**, Rang 9 marschiert weiter **359**. **Weitermarschieren kostet sofort 110 Punkte** — genau das war der Sinn der Staffelung.
+
+### Der Aderlass stand auf einer Zahl, die kleiner war als die Heilung
+
+`aderlass:n` zieht an jeder Station n Lebenspunkte und ebenso viel Einheitszustand ab. Er stand für Spanien auf **2** und für Russland auf **4** — und tat damit rechnerisch fast nichts: Die Zeitheilung gibt 5 % des Vorrats, bei neunzig Lebenspunkten also viereinhalb je Station. **Russlands 4 ergab plus einen halben Punkt.** Der Mann wurde nicht weniger, er stand still, und das Kapitel hielt nicht, was sein Kopfkommentar verspricht.
+
+> **Das ist derselbe Fehler wie damals bei der Krankheit** („Ein Kranker *gewann* einen Punkt je Station"), nur eine Ebene höher. Er fiel erst auf, als der neue Härtemodus Spanien und Russland auf dieselbe Zahl legte. **Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert.**
+
+**Jetzt: Spanien 4, Russland 8.** Spaniens 4 hebt die Erholung fast genau auf — man kommt nie wieder hoch. Russlands 8 liegt darüber, und erst dadurch fällt der Vorrat wirklich.
+
+### Und die vier Gefechte kommen unter die Decke zurück
+
+Am Hebel ausgelesen standen sie bei **23, 29, 27 und 28** wirksamer Gefahr — Borodino sieben Punkte über der 22, die kein Gefecht überschreitet, wenn es nicht selbst die Regel seines Kapitels ist. Russlands Regel ist der schwindende Vorrat, nicht das Schießen. Jetzt: Smolensk 13 → **10** (wirksam 20), Krasnoi 17 → **10** (20), Borodino 16 → **9** und die Beresina 15 → **9** (mit `haerte` je 22).
+
+**Borodino trägt seine Härte in der Länge**: zehn Runden gegen Feindmoral 95, das längste und zäheste Gefecht des Spiels. Ein Tag, der nicht aufhört, ist die richtige Übersetzung für den blutigsten Tag des Jahrhunderts; eine erhöhte Trefferchance wäre nur eine größere Zahl gewesen.
+
+### Der Härtemodus — und der Fehler darin, der wie ein Erfolg aussah
+
+`HAERTE=40 node test/kapitel.js <id> 9` setzt vierzig Männer an den Anfang eines Kapitels und lässt sie ungeheilt durch. **Gebaut, weil `balance.js` die späten Kapitel nicht mehr misst:** Von achtzig Läufen erreichen Spanien zwölf und Russland drei.
+
+> **⚠ Die erste Fassung meldete für Spanien wie für Russland 100 % überstanden.** Grund: `zeigeTod()` setzt `LAUF=null` und ruft `binde()`, und das nullt auch `S` — **ein Kapitelende tut exakt dasselbe.** Am Zustand ist der Tod also nicht zu erkennen, und wer aus `!LAUF` auf „durch" schließt, zählt jeden Gefallenen als Überlebenden. Unterschieden wird jetzt am Bildschirm. **Ein Messwert von 100 % ist verdächtig, nicht erfreulich** — dieselbe Lektion wie beim stummen Güte-Leck und beim stummen Filter im Lager.
+>
+> **Der Prüfmann ist außerdem angehoben worden** (Konstitution 85, Fertigkeiten 60, Ausrüstung auf 100, Mantel dabei). Mit dem alten starben in Spanien wie in Russland siebenunddreißig von vierzig, und **zwei Kapitel, die beide 3 % liefern, sagen über ihren Unterschied nichts.** Ein Prüfstand ohne Kopfraum misst seinen eigenen Boden.
+>
+> **Und derselbe Fehler steckte ein zweites Mal im Vollständigkeitsmodus, in umgekehrter Richtung:** Er suchte nach dem Wort „gefallen" — und der Ruhestandsbildschirm sagt wörtlich *„Du bist nicht gefallen."* In Russland galten dadurch drei von vier Rängen als tot, die in Ehren ausgemustert worden waren. Erkannt wird jetzt am Knopf. **Ein Fließtext ist kein Zustand.** *(Dazu: Eine Station, die `tempo.ueberspringt` verschluckt, gilt nicht mehr als Lücke — sonst meldet der Prüfstand die Tempowahl als Fehler.)*
+
+**Gemessen, je 40 Läufe, Prüfmann auf Rang 9:** Jena **78 %** · Italien **50 %** · Eylau **38 %** · **Spanien 15 %** · **Russland 3 %**.
+
+> **Damit ist die Vorgabe erfüllt und nachweisbar: Spanien ist eine harte Wand, Russland die härtere.** Spaniens Tote verteilen sich gleichmäßig auf alle fünf Gefechte (13 · 7 · 6 · 6 · 2) — es ist der Feldzug, der tötet. In Russland tötet Borodino allein 22 von 39, und zwar bei gesenkter Trefferchance: Man steht leer davor.
+>
+> **⚠ Russland liegt damit am Boden der Skala.** Bei 3 % kann der Prüfstand nicht mehr zeigen, ob eine weitere Änderung härter oder leichter macht. Wer dort noch einmal dreht, hebt zuerst den Prüfmann.
+
 ## 2026-07-29 — Kapitel 7: Spanien 1808–1812
 
 **Die eigene Regel: Es gibt hier keinen Ruhm. Nur Entscheidungen, bei denen niemand zusieht.** Vierzehn Stationen, fünf Gefechte, Feindgüte 8, Sold-Moral 0,7.

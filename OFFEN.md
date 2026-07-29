@@ -87,11 +87,13 @@ Der Boden 0,3 wird bei **Güte 4,67** erreicht. Ägypten (5), Austerlitz (6), Je
 
 ---
 
-## 7 · Der Überlebensbonus in `wertung()` ist ein Platzhalter
+## 7 · Späte Kapitel sind über `balance.js` nicht mehr messbar
 
-Er steht auf **25**. KONZEPT §5 sieht gestaffelte **180 / 120 / 70** vor — aber die ergeben erst Sinn, wenn es den **freiwilligen Ausstieg an den Rangschranken** gibt, denn dann ist die Höhe des Bonus die Belohnung dafür, rechtzeitig aufzuhören.
+**Der Trichter ist gewollt, aber er macht genau die Kapitel unmessbar, die es am nötigsten hätten.** Von achtzig vorsichtigen Erstläufen erreichen Spanien zwölf und Russland drei; beim Veteranen mit 400 VP sind es acht und drei. Eine Quote aus drei Läufen ist keine Quote — die Zeile „Russland 0 % (nur 3)" sagt über das Kapitel nichts.
 
-**Fällig mit Kapitel 8** (Russland trägt die erste Schranke). Wer den Ausstieg baut, ersetzt dort die 25.
+**Der Hebel ist der Härtemodus** (`HAERTE=40 node test/kapitel.js <id> 9`, siehe CLAUDE.md): vierzig Männer ab Kapitelanfang, ungeheilt, fester Prüfmann. Er ist gebaut, und er misst jetzt.
+
+**Was damit nicht gelöst ist:** Der Härtemodus misst ein Kapitel *isoliert*. Was er nicht sieht, ist die Wirkung des Kapitels davor — ein Mann, der Spanien mit vier Wunden verlässt, spielt ein anderes Russland als der Prüfmann. **Beide Zahlen gehören nebeneinander gelesen, nicht gegeneinander.**
 
 ---
 
@@ -99,6 +101,11 @@ Er steht auf **25**. KONZEPT §5 sieht gestaffelte **180 / 120 / 70** vor — ab
 
 | Punkt | Wie geschlossen | Messwert |
 |---|---|---|
+| Der Überlebensbonus in `wertung()` war ein Platzhalter von 25 | Mit der Rangschranke in Kapitel 8 gebaut: `S.ende` trägt jetzt `ruhestand` / `halbsold` / sonst, und `wertung()` staffelt danach **180 / 120 / 70** wie KONZEPT §5 | Rang 5 ausgemustert 326 · Rang 9 geht 469 · Rang 9 marschiert weiter 359 Punkte — **weitermarschieren kostet sofort 110** |
+| Der Härtemodus zählte jeden Gefallenen als Überlebenden | `zeigeTod()` nullt `LAUF` und über `binde()` auch `S` — genau wie ein Kapitelende. Unterschieden wird jetzt am Bildschirm, nicht am Zustand | Spanien und Russland meldeten **100 %**, tatsächlich 3 % |
+| Der Vollständigkeitsmodus zählte jeden Ausgemusterten als Gefallenen | Er suchte im Schlusstext nach „gefallen" — und der Ruhestandsbildschirm sagt *„Du bist nicht gefallen."* Erkannt wird jetzt am Knopf | Russland: 3 von 4 Rängen falsch als tot gemeldet |
+| Der Aderlass war kleiner als die Zeitheilung und tat nichts | Spanien 2 → **4** (hebt die Erholung auf), Russland 4 → **8** (der Vorrat fällt wirklich) | Russlands 4 gegen 4,5 Heilung = **plus ein halber Punkt je Station** |
+| Vier Gefechte in Russland standen über der Decke von 22 | Am Hebel ausgelesen: 23 / 29 / 27 / 28. Basiswerte gesenkt auf 20 / 22 / 20 / 22; die Härte steckt jetzt im Aderlass und in Borodinos Länge | Härtemodus vorher wie nachher **3 %** — dieselbe Wand, ehrliche Quelle |
 | Die Leitzahl „höchster Rang" misst den Sergent-major, während ein Drittel der Läufe ein Patent erreicht | `LEITRANG` in `test/balance.js`, auf Rang 9 (Capitaine) umgestellt und dort dokumentiert, dass er mit dem Ausbaustand wandert | Rang 9 erreichen 9 / 1 / 33 / 38 % |
 | Der Bot nahm auf der Tempowahl immer „schonend" | `f(/^Forcieren/)` traf nie — `textContent` beginnt mit dem Zeilenumbruch aus dem Markup | — |
 | Der Bot forcierte bei halbem Blut und drehte damit die Progression um | Bedingung auf `Blut > 80 %, Atem > 70, Schuhe ≥ 40` verschärft | Veteran 160: 13 → 53 % |

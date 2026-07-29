@@ -115,11 +115,21 @@ function soldFaktor(){
    keine Probe dagegen und keinen Knopf dafür. **Das ist der Punkt:** Ein
    Aderlass ist keine Entscheidung, sondern die Eigenschaft eines Krieges.
 
-   **Er ersetzt die Zeitheilung nicht, er misst sich mit ihr.** Fünf Prozent
-   des Vorrats sind bei achtzig Lebenspunkten vier je Station; ein Aderlass von
-   2 halbiert die Erholung, einer von 3 hebt sie fast auf. In Spanien kommt man
-   also nie ganz wieder hoch, in Russland gar nicht mehr — und beides ohne eine
-   einzige Sonderregel in den Kapiteldaten. */
+   **Er ersetzt die Zeitheilung nicht, er misst sich mit ihr** — und das ist
+   der ganze Trick, aber es ist auch die Stelle, an der die erste Fassung
+   danebenlag. Fünf Prozent des Vorrats sind bei neunzig Lebenspunkten
+   viereinhalb je Station. Spaniens **4** hebt die Erholung damit fast genau
+   auf: Man kommt nie wieder hoch. Russlands **8** liegt darüber, und erst
+   dadurch fällt der Vorrat wirklich — was das Kapitel im Kopfkommentar
+   verspricht („ein Vorrat, der kleiner wird"), tut es seitdem auch.
+
+   > **Die erste Fassung stand auf 2 und 4 und tat rechnerisch nichts.**
+   > Russlands 4 gegen 4,5 Heilung ergab **plus einen halben Punkt je
+   > Station** — der Mann wurde nicht weniger, er stand still. Das ist
+   > derselbe Fehler wie damals bei der Krankheit („Ein Kranker *gewann*
+   > einen Punkt je Station"), nur eine Ebene höher, und er fiel erst auf,
+   > als der Härtemodus Spanien und Russland auf dieselbe Zahl legte.
+   > **Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert.** */
 function aderlass(n){
   const k = kampagneVon(n);
   const wert = k && k.aderlass ? k.aderlass : 0;

@@ -16,6 +16,17 @@
    im November, `frost:3` ab Krasnoi, `frost:4` an der Beresina. Ohne Mantel
    ist das eine zehrende Wunde, die an jeder Station weiterfrisst.
 
+   **Die vier Gefechte liegen deshalb nicht über der Decke, sondern darunter**
+   — Smolensk 20, Krasnoi 20, Borodino und die Beresina auf den 22, die kein
+   Gefecht überschreitet, wenn es nicht selbst die Regel seines Kapitels ist
+   (CLAUDE.md, „Die 22"). Die erste Fassung stand bei 23, 27, 28 und **29**,
+   und das war der falsche Ort: Russland ist nicht das Kapitel, in dem am
+   besten geschossen wird, sondern das, in dem der Vorrat nicht zurückkommt.
+   **Borodino trägt seine Härte in der Länge** — zehn Runden gegen Feindmoral
+   95, das längste und zäheste Gefecht des Spiels. Ein Tag, der nicht aufhört,
+   ist die richtige Übersetzung für den blutigsten Tag des Jahrhunderts; eine
+   erhöhte Trefferchance wäre nur eine größere Zahl gewesen.
+
    **Und am Ende steht die erste Rangschranke** (`schranke:'russland'`,
    RANGLEITER §9): Wer lebt und unter Rang 7 ist, wird ausgemustert — Ruhestand,
    +180 Punkte, und der Abschlusstext, der dazu gehört. Wer Rang 7 oder höher
@@ -137,7 +148,7 @@ const KAPITEL8 = [
         gelaende:'Holzhäuser, die brennen · dahinter Mauer und Graben',
         stellung:'Erstes Treffen, rechte Vorstadt'},
   intro:'Zum ersten Mal seit dem Njemen steht jemand. Er steht, damit die anderen wegkommen.',
-  runden:7,feindMoral:66,gefahr:13,gelaende:'mauer',
+  runden:7,feindMoral:66,gefahr:10,gelaende:'mauer',
   sieg:{text:'Am Morgen des 18. gehört euch eine Stadt, die es nicht mehr gibt. In der Kathedrale liegen dreitausend Verwundete beider Seiten, und in den Straßen liegt, was von einer Stadt aus Holz übrig ist, wenn sie zwei Tage gebrannt hat.\\n\\nDie russische Armee ist weg. Sie ist nach Osten gegangen, in der Nacht, in Ordnung, und niemand hat sie aufgehalten.',ruf:7,ruhm:true},
   niederlage:{text:'Ihr kommt nicht durch die brennende Vorstadt und liegt bis Mitternacht in einem Garten, in dem es zu heiß ist zum Atmen. Am Morgen ist die Stadt trotzdem leer, weil sie in der Nacht abgezogen sind.',ruf:-3,belastung:12}},
 
@@ -167,7 +178,7 @@ const KAPITEL8 = [
         gelaende:'Offenes Feld, Erdwerke, acht Kilometer Front, kein Flügel offen',
         stellung:'Erstes Treffen, vor der großen Schanze'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Es ist auch keine Bühne — nur eine Mühle, und das ist die Aussage.',
-  runden:10,feindMoral:95,gefahr:16,gelaende:'mauer',
+  runden:10,feindMoral:95,gefahr:9,gelaende:'mauer',
   sieg:{text:'Um vier Uhr nachmittags gehört euch die große Schanze. Um sechs hört es auf, weil auf beiden Seiten niemand mehr angreifen kann.\\n\\nAuf dem Feld liegen fünfundzwanzigtausend Franzosen und vierzigtausend Russen. Die russische Armee zieht in der Nacht ab, in Ordnung, wie immer. Der Weg nach Moskau ist frei, und es ist der teuerste Weg, den je jemand gekauft hat.',ruf:14,ruhm:true},
   niederlage:{text:'Ihr kommt bis an den Graben der Schanze und liegt dort, bis eine andere Division es zu Ende bringt. Am Abend ist das Feld gewonnen. Es liegen fünfundzwanzigtausend Franzosen darauf, und die russische Armee zieht in Ordnung ab.',ruf:-4,belastung:16}},
 
@@ -272,7 +283,7 @@ const KAPITEL8 = [
         gelaende:'Verschneite Straße, offenes Feld, keine Deckung',
         stellung:'Was von der Kompanie noch geht'},
   intro:'Keine Linie hilft. Zurückweichen kostet keinen Ruf — es gibt nur kein Zurück.',
-  runden:5,feindMoral:45,gefahr:17,gelaende:'wueste',
+  runden:5,feindMoral:45,gefahr:10,gelaende:'wueste',
   sieg:{text:'Ihr kommt durch. Von dem Korps, das am Morgen angetreten ist, kommen sechstausend von sechzehntausend durch, und die Geschütze bleiben stehen, weil keine Pferde mehr da sind, sie zu ziehen.\\n\\nDrei Tage später erfährt man, dass ein ganzes Korps hinter euch nicht durchgekommen ist.',ruf:6},
   niederlage:{text:'Ihr kommt nicht durch die Straße und geht querfeldein nach Norden, durch Schnee, der bis über die Knie geht, und stoßt zwei Tage später wieder auf die Kolonne. Was ihr dabei verliert, zählt niemand.',ruf:0,belastung:16}},
 
@@ -291,7 +302,7 @@ const KAPITEL8 = [
         gelaende:'Sumpf, Treibeis, zwei Bockbrücken über achtzig Meter',
         stellung:'Am Brückenkopf, Ostufer'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Die Laufbahn hat auf einer Brücke angefangen.',
-  runden:8,feindMoral:70,gefahr:15,gelaende:'bruecke',
+  runden:8,feindMoral:70,gefahr:9,gelaende:'bruecke',
   sieg:{text:'Am Abend des 28. steht der Brückenkopf noch. In der Nacht geht hinüber, wer gehen kann; am Morgen des 29. werden die Brücken angezündet, während auf dem Ostufer noch zehntausend Nachzügler stehen.\\n\\nWas dort passiert, sieht man vom Westufer aus. Man sieht es sehr genau, weil es hell ist und weil es zwei Stunden dauert.',ruf:12,ruhm:true},
   niederlage:{text:'Der Brückenkopf wird zusammengedrückt, und was übrig ist, kommt einzeln über die Bohlen. Du kommst hinüber. Wie, wirst du später nicht erklären können, und es fragt auch nie jemand.',ruf:-3,belastung:20}},
 
