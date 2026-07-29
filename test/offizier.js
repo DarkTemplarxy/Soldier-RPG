@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
 const path = require('path');
 const ziel = path.resolve(__dirname, '../index.html');
 
-const RAENGE = [7, 8, 9];
+const RAENGE = [7, 8, 9, 10, 11, 12, 13, 14];
 
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
@@ -33,16 +33,22 @@ const RAENGE = [7, 8, 9];
     // Rang von Hand setzen und bis zum ersten Gefecht klicken.
     await p.evaluate(r => { S.rang = r; S.attr.bildung = 60; }, rang);
 
-    let s = 0, gesehen = {knoepfe: [], skizze: false, muskete: true};
+    let s = 0, gesehen = {knoepfe: [], skizze: false, rechtecke: false, karte: false,
+                          atem: false, widerstand: false};
     while (s++ < 220) {
       const t = await p.$eval('#app', e => e.innerText);
       if (t.includes('Nächster Mann') || t.includes('Noch einmal, besser')) break;
-      if (t.includes('RUNDE ')) {
+      if (/RUNDE |PHASE |STUNDE |TAG /.test(t)) {
         gesehen.knoepfe = await p.evaluate(() =>
           [...document.querySelectorAll('.ord')].map(e => e.textContent.split('\n')[0].trim()));
-        gesehen.skizze = await p.evaluate(() =>
-          !!document.querySelector('svg[aria-label="Handskizze der Lage"]'));
-        gesehen.muskete = /RUNDE /.test(t) && /Anlegen und feuern|^Laden/m.test(t);
+        const bilder = await p.evaluate(() => ({
+          skizze: !!document.querySelector('svg[aria-label="Handskizze der Lage"]'),
+          rechtecke: !!document.querySelector('svg[aria-label="Das Bataillon in vier Kompanien"]'),
+          karte: !!document.querySelector('svg[aria-label="Operationskarte"]')
+        }));
+        Object.assign(gesehen, bilder);
+        gesehen.atem = /\bAtem\b/.test(t);
+        gesehen.widerstand = /WIDERSTAND DES FEINDES/.test(t);
         break;
       }
       const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
@@ -57,7 +63,7 @@ const RAENGE = [7, 8, 9];
     // Ein paar Runden Gefecht: jeden Offiziersknopf mindestens einmal drücken.
     for (let r = 0; r < 24; r++) {
       const t = await p.$eval('#app', e => e.innerText);
-      if (!t.includes('RUNDE ')) break;
+      if (!/RUNDE |PHASE |STUNDE |TAG /.test(t)) break;
       const ok = await p.evaluate(i => {
         const btn = [...document.querySelectorAll('.ord:not([disabled])')]
           .filter(e => !/Zurückweichen/.test(e.textContent));
@@ -67,16 +73,27 @@ const RAENGE = [7, 8, 9];
       if (!ok) break;
     }
 
-    const soll = ['Den Zug vorführen', 'Das Gelände nutzen', 'Die Front verkürzen lassen', 'Den Degen ziehen']
-      .concat(rang >= 8 ? ['Den Zug aus der Linie lösen'] : []);
+    /* Je Maßstab ein anderes Bild und andere Pflichtknöpfe. Der vierte Bruch
+       prüft zusätzlich, dass die Atemleiste weg ist und der Feind kein
+       Widerstandsbalken mehr ist — das sind die beiden Dinge, die den Bruch
+       ausmachen, und beide bestehen im Weglassen. */
+    const soll = rang >= 12 ? ['Aufklärung anfordern', 'Warten, bis die Meldungen kommen']
+      : rang >= 10 ? ['Die 1. Kompanie vorgehen lassen']
+      : ['Den Zug vorführen', 'Das Gelände nutzen', 'Die Front verkürzen lassen', 'Den Degen ziehen']
+        .concat(rang >= 8 ? ['Den Zug aus der Linie lösen'] : []);
     const fehlt = soll.filter(x => !gesehen.knoepfe.some(k => k.startsWith(x)));
     const musketeDa = gesehen.knoepfe.some(k => /^Laden$|Anlegen und feuern|Sorgfältig zielen/.test(k));
+    const bildDa = rang >= 12 ? gesehen.karte : rang >= 10 ? gesehen.rechtecke : gesehen.skizze;
+    const bildName = rang >= 12 ? 'KARTE' : rang >= 10 ? 'RECHTECKE' : 'SKIZZE';
 
     let zeile = `Rang ${rang}: ${gesehen.knoepfe.length} Knöpfe`;
     if (fehlt.length) { zeile += ` · FEHLT: ${fehlt.join(', ')}`; schlecht++; }
     if (musketeDa) { zeile += ' · MUSKETE NOCH DA'; schlecht++; }
-    if (!gesehen.skizze) { zeile += ' · KEINE SKIZZE'; schlecht++; }
-    if (!fehlt.length && !musketeDa && gesehen.skizze) zeile += ' · Muskete weg · Skizze da';
+    if (!bildDa) { zeile += ` · KEIN BILD (${bildName})`; schlecht++; }
+    if (rang >= 10 && gesehen.atem) { zeile += ' · ATEMLEISTE NOCH DA'; schlecht++; }
+    if (rang >= 12 && gesehen.widerstand) { zeile += ' · WIDERSTANDSWERT NOCH DA'; schlecht++; }
+    if (!fehlt.length && !musketeDa && bildDa) zeile += ` · Muskete weg · ${bildName.toLowerCase()} da` +
+      (rang >= 10 ? ' · Atem weg' : '') + (rang >= 12 ? ' · Feind nur gemeldet' : '');
     console.log(zeile);
     await p.close();
   }

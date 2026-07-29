@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 7;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier
+const LAUF_FASSUNG    = 8;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -144,6 +144,21 @@ const LAUF_WANDLER = {
       if(!m.nahkampfKapitel) m.nahkampfKapitel = [];
     }
     return Object.assign({}, alt, {fassung:7});
+  },
+  /* Fassung 7 endete beim Capitaine. Der Stab bringt zwei Felder mit, die
+     nicht bloß Zähler sind:
+
+     **Der Adler fängt bei „getragen" an, nicht bei null.** Ein Regiment hat
+     einen; die Frage ist nur, ob es ihn behält. Und die **Dotation** ist ab
+     Rang 13 ein laufender Ertrag — rückwirkend gutzuschreiben wäre geraten,
+     also fängt sie bei der nächsten Station an zu laufen. */
+  7: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.adler === undefined) m.adler = (m.rang>=11 ? 'getragen' : null);
+      if(m.dotation === undefined) m.dotation = (m.rang>=13 ? 8 : 0);
+    }
+    return Object.assign({}, alt, {fassung:8});
   }
 };
 
@@ -162,7 +177,12 @@ function wandle(d, wandler, ziel){
 }
 
 function neueChronik(){
-  return {fassung:CHRONIK_FASSUNG, vp:0, chronik:[], bestKapitel:{}, laeufe:0, zuletzt:null};
+  /* `generalskampagnen` ist die einzige dauerhafte Freischaltung des Spiels —
+     einmal Rang 12 erreicht, bleibt sie offen. Ein fehlendes Feld ist
+     schlicht `undefined` und damit falsch; es braucht deshalb keinen Wandler
+     und keine neue Chronikfassung. */
+  return {fassung:CHRONIK_FASSUNG, vp:0, chronik:[], bestKapitel:{}, laeufe:0,
+          generalskampagnen:false, zuletzt:null};
 }
 
 /* ══════════════════ CHRONIK ══════════════════ */
@@ -262,6 +282,9 @@ function dateiEinlesen(text){
      senken. Vorher tat es genau das. `laeufe` zählt Läufe, addiert sich also. */
   c.vp = Math.max(c.vp|0, META.vp|0);
   c.laeufe = Math.max(c.laeufe|0, META.laeufe|0);
+  /* Dieselbe Logik für die Freischaltung: Wer sie einmal hatte, behält sie.
+     Eine ältere Datei darf sie nicht wieder wegnehmen. */
+  c.generalskampagnen = !!(c.generalskampagnen || META.generalskampagnen);
   META = c;
   CHRONIK_GESPERRT = false;    // eine gültige Datei hebt den Riegel auf
   chronikSichern();

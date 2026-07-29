@@ -175,6 +175,33 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           // Nur in den ersten beiden Runden versuchen: `lueckeGelobt` wird erst
           // bei gelungener Probe gesetzt, sonst drückte der Bot acht Runden lang
           // denselben Knopf, statt zu schießen.
+          /* ── Ab Rang 12: der Stab ──
+             **Die Reihenfolge ist wieder eine andere**, weil nichts mehr
+             sofort wirkt. Zuerst aufklären (das verkleinert den Fehler in
+             allen späteren Meldungen), dann Befehle geben, solange Verbände
+             ohne Order dastehen, die Reserve erst, wenn der Feind wankt —
+             und sonst warten. Warten ist hier eine Handlung, keine Lücke. */
+          if (S.rang >= 12) {
+            if (!(K.aufklaerung > 0)) z = f(/Aufklärung anfordern/);
+            if (!z) z = f(/^Befehl an die/);
+            if (!z && !K.reserveWeg && K.feindMoral < 45) z = f(/Reserve einsetzen/);
+            if (!z) z = f(/Warten, bis die Meldungen/);
+          }
+          /* ── Rang 10 und 11: das Bataillon ──
+             Die Vorhut-Wahl ist keine Optimierung, sondern eine Entscheidung;
+             der Bot nimmt die Kompanie mit der besten Haltung, weil das die
+             ist, die am längsten steht. Danach staffeln, bevor sie bricht. */
+          else if (S.rang >= 10) {
+            if (K.vorhut == null) {
+              const best = (K.kompanien || []).reduce((b, k, i, a) => a[b].haltung >= k.haltung ? b : i, 0);
+              z = f(new RegExp('Die ' + (best + 1) + '\\. Kompanie vorgehen'));
+            }
+            if (!z && K.kompanien && K.kompanien[K.vorhut] && K.kompanien[K.vorhut].haltung < 35) z = f(/Kompanien staffeln/);
+            if (!z && K.kompanien && K.kompanien.some(k => k.haltung < 30)) z = f(/Gebrochenen sammeln/);
+            if (!z && !K.gemeldet) z = f(/Verstärkung/);
+            if (!z && S.rang >= 11 && !K.adlerVorn && K.feindMoral > 40) z = f(/Adler nach vorn/);
+            if (!z) z = f(/Schwerpunkt verlegen/) || f(/Kompanien staffeln/);
+          }
           /* ── Ab Rang 7: der Offizier ──
              **Die Reihenfolge ist eine andere als bei allen Rängen davor**,
              weil es keinen eigenen Schuss mehr gibt. Zuerst das Gelände (drei
@@ -187,7 +214,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
              und bei der Regimentsschule. Der gelöste Zug bleibt bewusst außen
              vor: Er ist ein Handel, kein Handgriff, und ein Bot, der ihn immer
              drückt, misst nicht, ob er sich lohnt. */
-          if (S.rang >= 7) {
+          else if (S.rang >= 7) {
             if (K.nahkampf > 0) z = f(/Den Säbel nehmen|Stehenbleiben/);
             if (!z && !(K.gelaendeVorteil > 0)) z = f(/Gelände nutzen/);
             if (!z && K.sektion != null && K.sektion < 70) z = f(/Front verkürzen/);

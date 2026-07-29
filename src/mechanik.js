@@ -103,7 +103,23 @@ function soldAuszahlen(){
 
 function ordenPension(){
   if(!S || !S.orden) return 0;
-  return S.orden.reduce((sum,id)=>{ const o = ordenVon(id); return sum + (o ? o.pension : 0); }, 0);
+  return S.orden.reduce((sum,id)=>{ const o = ordenVon(id); return sum + (o ? o.pension : 0); }, 0)
+    + dotationsErtrag();
+}
+
+/* ── Die Dotation (ab Rang 13) ──
+   Ein Landgut in Westfalen oder Polen mit jährlichem Ertrag. **Das erste
+   Einkommen im Spiel, das nichts mit Sold zu tun hat** — und das erste, das
+   einem etwas zu verlieren gibt, das nicht das eigene Leben ist.
+
+   Sie läuft wie eine Pension, weil sie mechanisch eine ist; erzählt wird sie
+   anders, und das ist der ganze Unterschied. Napoleon hat seine Generale
+   bewusst reich gemacht: Wer ein Gut in Polen hat, will, dass Polen
+   französisch bleibt. */
+function dotationsErtrag(){
+  if(!S || S.rang < 13) return 0;
+  if(!S.dotation) S.dotation = 8;      // Francs je Station
+  return S.dotation;
 }
 
 /* Wer welchen Orden verdient hat — **geprüft, nicht gewürfelt.** Ein Orden ist
@@ -189,6 +205,9 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     /* Der Offizier: `einheit` bleibt null, bis es eine Kompanie gibt (Rang 9).
        `nahkampfKapitel` merkt, wo die Linie schon einmal gebrochen ist. */
     einheit:null, kasseRisiko:0, kasseQuartal:false, auftraege:0, nahkampfKapitel:[],
+    /* Der Stab: der Adler kommt mit dem Regiment (Rang 11), die Dotation mit
+       dem Divisionsgeneral (Rang 13). Bis dahin gibt es beides nicht. */
+    adler:null, dotation:0,
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);

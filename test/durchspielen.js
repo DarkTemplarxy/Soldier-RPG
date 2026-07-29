@@ -32,7 +32,7 @@ const ziel = process.argv[2] === 'dist'
       const f = re => btn.find(e => re.test(e.textContent));
       const txt = document.body.innerText;
       let z = null;
-      if (txt.includes('RUNDE '))
+      if (/RUNDE |PHASE |STUNDE |TAG /.test(txt))
         z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinknien|Flach hinlegen/);
       if (!z && txt.includes('VERBLEIBENDE ABENDE') && +(txt.match(/Gunst Martel\s+(\d+)/) || [, 0])[1] < 4)
         z = f(/Am Feuer/);

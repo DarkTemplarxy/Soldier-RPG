@@ -5,6 +5,47 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Rangleiter Phase D: der Stab (Ränge 10–14)
+
+**Der dritte und der vierte sichtbare Bruch stehen — und beide bestehen im Weglassen.**
+
+**Ab Rang 10 verschwindet die Atemleiste. Ersatzlos, ohne Kommentar.** Zehn Ränge lang war sie die Zahl, auf die man am häufigsten geschaut hat; jetzt ist sie weg, und es steht nirgends, dass sie weg ist. Ein Hinweis hätte den Bruch vollständig zerstört. Der Wert läuft im Hintergrund weiter und tut nur nichts mehr.
+
+**Ab Rang 12 verschwindet der Widerstandsbalken.** An seiner Stelle steht eine gemeldete Stärke mit Alter und Verlässlichkeit. Die Operationskarte zeigt `gemeldet`, nie `bestand` — der General sieht mehr und weiß weniger.
+
+**Die Zeit läuft mit dem Rang** (`zeitWort()`): Runden → Phasen (10–11) → Stunden (12) → Tage (13–14).
+
+**Rang 10 und 11: vier Rechtecke** (`bataillonsfeld()`, `kompanienStart()`). Die Entscheidung des Rangs ist **die Rechnung und hat bewusst keine Probe**: Welche der vier Kompanien geht zuerst hinein? Danach staffeln (Taktik 45), Schwerpunkt verlegen (Taktik 50, die anderen Abschnitte stehen offen), Gebrochene sammeln (Autorität 45), Verstärkung erbitten (Verwaltung 40). Der Schaden hängt am Zustand der Rechtecke, nicht an der eigenen Probe; die Haltung sinkt schneller als der Bestand, und eine Kompanie mit Haltung 0 geht von allein zurück.
+
+**Namen gibt es ab Rang 10 nicht mehr** — die Verlustliste aus Phase C hört auf, und der Chef de bataillon bekommt Summen.
+
+**Der Adler** (`S.adler`: getragen · gerettet · verloren) ab Rang 11. Ein verlorener Adler kostet den Rang, unabhängig von allem anderen; ein geretteter erzwingt von allein einen Bulletin-Eintrag. Dazu die Lieferantenverträge (0 F / +600 F gegen Einheitszustand +30 / −15 und Risiko 0 / +35 %), die die Kompaniekasse ab Rang 11 ablösen.
+
+**Rang 12 bis 14: die Operationskarte** (`karte()`, `verbaendeStart()`). **Kein Knopf wirkt sofort.** Ein Befehl braucht 1–2 Zeiteinheiten und wirkt gegen die Lage von dann (55 % Trefferquote, +12 % je Aufklärung). Aufklärung kauft frischere Meldungen und einen kleineren Fehler, nie die Wahrheit. Ein Verband, der drei Zeiteinheiten schweigt, schweigt weiter — vernichtet oder unterwegs, und es gibt keinen Weg, das herauszufinden. „Warten" ist eine Handlung.
+
+**Die Gefahr ändert ihre Form** (RANGLEITER §8): Ab Rang 10 fällt der Zuschlag je Runde auf null. An seiner Stelle ein **Stabsereignis mit 8 % je Gefecht** — Streuschuss, stürzendes Pferd, Splitter beim Kartenlesen, 16–32 Leben plus bleibende Wunde. Ohne Vorwarnung, und man kann sich nicht hinwerfen.
+
+**Rang 12 schaltet die Generalskampagnen dauerhaft frei** (`META.generalskampagnen`, über alle Läufe). **Rang 13** bringt die Dotation (8 F je Station, das erste Einkommen ohne Sold) und den Zwischenfall „Er fragt dich etwas" — der Kaiser, und Schweigen als eine der drei Optionen. **Rang 14** feiert nichts: Der Abschlusstext nennt die Namen, die vor deinem stehen, und stellt fest, dass die Liste nicht länger wird.
+
+**`LAUF_FASSUNG` 7 → 8** mit Wandler (`adler`, `dotation`). `test/offizier.js` prüft jetzt die Ränge 7 bis 14, inklusive der beiden Dinge, die im Weglassen bestehen: keine Atemleiste ab 10, kein Widerstandswert ab 12. Der Testbot in `balance.js` kennt Bataillon und Stab; `durchspielen.js` erkennt das Gefecht an `/RUNDE |PHASE |STUNDE |TAG /` statt an `RUNDE `.
+
+**Gemessen, je 40 Läufe:**
+
+| | überlebt | höchster Rang | Rangverteilung (höchster je Lauf) |
+|---|---|---|---|
+| Erstlauf vorsichtig | **43 %** | **23 %** | 16× Fus · 3× Elite · 2× Cap · 10× Serg · 7× S-maj · 2× Lt |
+| Erstlauf mutig *(80 Läufe)* | **19 %** | **16 %** | 31× Fus · 11× Elite · 8× Cap · 17× Serg · 10× S-maj · 3× Lt |
+| Veteran 160 | **70 %** | **55 %** | 3× Fus · 2× Elite · 4× Cap · 9× Serg · 14× S-maj · 8× Lt |
+| Veteran 260 | 75 % | 70 % | 4× Cap · 8× Serg · 20× S-maj · 8× Lt |
+
+**Alle sechs Leitzahlen im Band** (30–45 / 8–20 / 60–75 und 12–25 / 3–15 / 45–60); der mutige „höchster Rang" liegt mit 16 % einen Punkt über der Bandgrenze und damit im Rauschen.
+
+> **Der mutige Lauf wurde mit 80 Läufen nachgemessen, und das war nötig.** Die erste Messung mit 40 Läufen ergab **25 % überlebt** — fünf Punkte über dem Band und fünfzehn über Phase C. Die eigene Regel („bei Zweifeln 80 Läufe") hat sich bewährt: Mit der doppelten Stichprobe steht der Wert bei **19 %** und damit im Band. Es gab auch keinen mechanischen Grund für einen Sprung — sämtliche Änderungen dieser Phase greifen erst ab Rang 10, und **kein einziger der 200 gemessenen Läufe hat Rang 10 erreicht.**
+
+> **Die Stabsränge sind mit vier Kapiteln unerreichbar — anders als die Offiziersränge.** Rang 7 und 8 tauchen in jeder Messreihe auf (bis zu 20 % beim Veteranen), aber bei Rang 8 ist Schluss: Rang 9 verlangt die Ehrenlegion und Ruf 150, Rang 10 dazu Ruf 180 und Reiten 40. **Phase D ist damit vollständig gebaut und ausschließlich über `test/offizier.js` geprüft** — die Härte der Ränge 10 bis 14 ist ungemessen und bleibt es, bis Phase E die Patente bringt. Das ist kein Mangel dieser Phase, sondern genau die Lücke, die Phase E schließen soll.
+
+---
+
 ## 2026-07-29 — Rangleiter Phase C: der Offizier (Ränge 7–9)
 
 **Der zweite sichtbare Bruch steht.** Ab Rang 7 verschwinden Laden, Feuern, Zielen und Bajonett vollständig aus `aktionen()` — nicht abgefedert, nicht als Notknopf behalten. An ihre Stelle treten vier Befehle, die alle Proben auf *andere Leute* sind: Den Zug vorführen (Autorität 45, Gefahr +8), Das Gelände nutzen (Taktik 40, drei Runden −12 Gefahr bei −20 % Schaden), Die Front verkürzen (Drill 45), Den Degen ziehen (Kaltblütigkeit 50, einmal je Gefecht, Gefahr +20, der Zug fällt nicht unter 30 %).

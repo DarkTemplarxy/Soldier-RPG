@@ -210,6 +210,23 @@ const LAGER_TUN = {
       S.kasseRisiko = (S.kasseRisiko||0) + 15;
       return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger. <span class="fein">+150 F · Einheitszustand +10</span>'; }},
 
+  /* ── Ab Rang 11: die Lieferantenverträge ──
+     Dieselbe Struktur wie die Kompaniekasse, eine Größenordnung darüber, mit
+     demselben Schweigen. Ein Colonel bestellt Tuch, Schuhe und Brot für
+     zweitausend Mann; wer die Lieferung bekommt, entscheidet er. */
+  vertrag_sauber:{label:'Den Vertrag an den vergeben, der liefert',
+    cost:'0 F · Einheitszustand ++',
+    tu(){ S.kasseQuartal = true;
+      S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+30);
+      return 'Der Tuchhändler aus Elbeuf ist der teuerste von dreien und der einzige, dessen Ware nach dem ersten Regen noch Tuch ist. Du nimmst ihn. Der Intendant zieht die Augenbrauen hoch und schreibt es auf. <span class="fein">Einheitszustand +30</span>'; }},
+
+  vertrag_still:{label:'Den Vertrag an den vergeben, der zahlt',
+    cost:'+600 F · Einheitszustand − · es fällt wahrscheinlich auf',
+    tu(){ S.kasseQuartal = true; S.geld += 600;
+      S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
+      S.kasseRisiko = (S.kasseRisiko||0) + 35;
+      return 'Er kommt selbst, im eigenen Wagen, und er redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt. <span class="fein">+600 F · Einheitszustand −15</span>'; }},
+
   kasse_voll:{label:'Kräftig zulangen',
     cost:'+400 F · Einheitszustand − · es fällt wahrscheinlich auf',
     tu(){ S.kasseQuartal = true; S.geld += 400;
@@ -236,7 +253,8 @@ function lagerHandlungen(n){
      verteidigt, statt ihn zu steigern. */
   if(S.rang>=7) ids.push('fechtboden','zugfuehren','karten');
   if(S.rang>=8) ids.push('adjutant');
-  if(S.rang>=9 && !S.kasseQuartal) ids.push('kasse_ganz','kasse_ueblich','kasse_voll');
+  if(S.rang>=9 && S.rang<11 && !S.kasseQuartal) ids.push('kasse_ganz','kasse_ueblich','kasse_voll');
+  if(S.rang>=11 && !S.kasseQuartal) ids.push('vertrag_sauber','vertrag_still');
   if(S.zweig==='grenadier') ids.push('tornister');
   if(S.zweig==='voltigeur') ids.push('gelaende');
   /* Ein Offizier exerziert nicht mehr selbst und trägt keine Muskete mehr —
@@ -765,9 +783,22 @@ function zeigeKapitelende(n){
   n = n || KAPITEL[KAPITEL.length-1] || {};
   const p = eintragen('Feldzüge überstanden · '+rangName(S.rang));
   const neu = p.rekord;
-  const rangSatz = S.rang>=3 ? 'Acht Mann sehen dich morgens an und warten, was du sagst.'
-    : (S.rang===2 ? 'Du stehst nicht mehr in der Mitte des Bataillons, sondern dort, wo sie die Leute hinstellen, auf die es ankommt.'
-                  : 'Du stehst noch in der Reihe wie am ersten Tag — aber du stehst.');
+  /* ── Der Schlusssatz wandert mit dem Rang ──
+     **Und er wird nach oben hin nüchterner, nicht feierlicher** (Invariante 7).
+     Der Marschallstab ist ausdrücklich die Legende, nicht das Ziel:
+     sechsundzwanzig in zwölf Jahren, unter Hunderttausenden. Der Abschluss
+     feiert deshalb nichts — er nennt die Namen, die vor deinem stehen, und
+     das Datum. */
+  const rangSatz =
+      S.rang>=14 ? 'Sechsundzwanzig Männer haben diesen Stab in zwölf Jahren bekommen. Vor deinem Namen stehen Lannes, der bei Aspern gefallen ist, Bessières, der bei Rippach gefallen ist, und Ney, der noch lebt. Die Liste wird nicht länger.'
+    : S.rang>=13 ? 'Zehntausend Mann, ein Landgut in Westfalen und ein Titel, den es vor zehn Jahren nicht gab. Du kennst niemanden mehr, der dich beim Vornamen nennt.'
+    : S.rang>=12 ? 'Du entscheidest über Lagen, die es nicht mehr gibt, wenn deine Befehle ankommen. Man gewöhnt sich daran; das ist das Beunruhigende.'
+    : S.rang>=11 ? 'Zweitausend Mann tragen deinen Namen im Regimentsbuch, und ein Adler steht in deinem Zelt.'
+    : S.rang>=10 ? 'Vier Kompanien, achthundert Mann, und du siehst keine Gesichter mehr. Das ist kein Bild, das ist der Dienst.'
+    : S.rang>=7  ? 'Du trägst Epauletten und keine Muskete. Was du im Gefecht tust, tun andere Leute für dich, und ob sie es tun, entscheidet sich vorher.'
+    : S.rang>=3  ? 'Acht Mann sehen dich morgens an und warten, was du sagst.'
+    : S.rang===2 ? 'Du stehst nicht mehr in der Mitte des Bataillons, sondern dort, wo sie die Leute hinstellen, auf die es ankommt.'
+                 : 'Du stehst noch in der Reihe wie am ersten Tag — aber du stehst.';
   app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
     <div class="cb"><div class="prose">
       ${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}

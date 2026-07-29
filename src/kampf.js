@@ -22,7 +22,17 @@ function aktionen(){
      Gefecht für zwei bis drei Runden auf die persönliche Ansicht zurück. Dann
      gibt es wieder Säbel und Deckung — aber nie wieder eine Muskete. */
   const offizier = S.rang >= 7;
+  const stab = S.rang >= 10;                 // Bataillon und darüber
+  const general = S.rang >= 12;              // die Operationskarte
   const nah = offizier && K.nahkampf > 0;
+
+  /* ── Der Stab ──
+     Ab Rang 10 gibt es keine persönliche Handlung mehr, auch keine im
+     Nahkampf: Ein Chef de bataillon, der den Degen zieht, hat sein Bataillon
+     bereits verloren. Die Knöpfe unten hören deshalb hier auf und fangen
+     weiter unten neu an. */
+  if(stab && !general) return stabAktionen();
+  if(general) return generalAktionen();
 
   if(!offizier){
   a.push({id:'laden',label:'Laden',cost:'Geschick · Atem −8',aus:()=>K.geladen});
@@ -114,6 +124,71 @@ function aktionen(){
   }
   a.push({id:'zurueck',label:'Zurückweichen',cost:'Ruf −− · der Kampf ist für dich vorbei',risk:true});
   return a;
+}
+
+/* ── Die Knöpfe des Bataillonschefs (Rang 10 und 11) ──
+   Fünf, und keiner davon ist eine Handlung — es sind Anweisungen an vier
+   Rechtecke. Der erste ist die Rechnung: **Wen schickst du zuerst hinein?** */
+function stabAktionen(){
+  const a = [], K1 = K.kompanien || [];
+  if(!K.vorhut){
+    K1.forEach((k,i)=> a.push({id:'vorhut'+i, label:'Die '+k.name+' vorgehen lassen',
+      cost:'Bestand '+Math.round(k.bestand)+' · Haltung '+Math.round(k.haltung)+
+           ' · sie geht als erste hinein', risk:true}));
+    return a;
+  }
+  a.push({id:'staffeln',label:'Die Kompanien staffeln',
+    cost:'Taktik · die hinteren lösen die vordere ab, ehe sie bricht'});
+  a.push({id:'schwerpunkt',label:'Den Schwerpunkt verlegen',
+    cost:'Taktik · voller Druck auf einen Abschnitt · die anderen stehen offen',risk:true});
+  a.push({id:'sammeln',label:'Die Gebrochenen sammeln lassen',
+    cost:'Autorität · Haltung zurück, Bestand nicht'});
+  a.push({id:'melden',label:'Nach oben melden und um Verstärkung bitten',
+    cost:'Verwaltung · manchmal kommt sie · einmal je Gefecht',
+    aus:()=> !!K.gemeldet});
+  /* Ab Rang 11 hängt am Bataillon ein Adler, und der Adler ist kein Symbol,
+     sondern ein Zustand mit drei Werten (siehe `adlerStand()`). */
+  if(S.rang>=11) a.push({id:'adler',label:'Den Adler nach vorn tragen lassen',
+    cost:'Autorität · Haltung im ganzen Regiment · und er steht dort, wo geschossen wird',risk:true});
+  a.push({id:'zurueck',label:'Das Bataillon zurücknehmen',
+    cost:'Ruf −− · das Gefecht ist für euch vorbei',risk:true});
+  return a;
+}
+
+/* ── Die Knöpfe des Generals (Rang 12 bis 14) ──
+   **Keiner davon wirkt sofort.** Ein Befehl braucht Laufzeit, eine Aufklärung
+   braucht Laufzeit, und was zurückkommt, ist vierzig Minuten alt. Das ist die
+   Umkehrung des Fusiliers und der Punkt des ganzen Spiels: *Der General sieht
+   mehr und weiß weniger.* Der Fusilier sah vier Männer und Rauch — aber was er
+   sah, war wahr. */
+function generalAktionen(){
+  const a = [], V = K.verbaende || [];
+  V.forEach((v,i)=>{
+    if(v.befehl) return;                        // ein Verband hat einen Befehl oder keinen
+    a.push({id:'befehl'+i, label:'Befehl an die '+v.name,
+      cost:'gemeldet '+Math.round(v.gemeldet)+(v.alter?' · '+v.alter+' '+zeitWort(true)+' alt':' · eben erst')+
+           (v.schweigt?' · sie antwortet nicht':'')+' · Laufzeit'});
+  });
+  a.push({id:'aufklaeren',label:'Aufklärung anfordern',
+    cost:'Kartenkunde · du erfährst es, wenn es vorbei ist'});
+  a.push({id:'reserve',label:'Die Reserve einsetzen',
+    cost:'Taktik · einmal · und danach hast du keine mehr',risk:true, aus:()=> !!K.reserveWeg});
+  a.push({id:'warten',label:'Warten, bis die Meldungen kommen',
+    cost:'nichts tun · und das ist manchmal die Entscheidung'});
+  a.push({id:'zurueck',label:'Den Angriff abbrechen',
+    cost:'Ruf −− · und niemand wird dir sagen, ob es nötig war',risk:true});
+  return a;
+}
+
+/* ── Die Zeit läuft mit dem Rang ──
+   Runden (1–9) → Phasen (10–11) → Stunden (12) → Tage (13–14). Es ist die
+   billigste Rückmeldung über Größe, die es gibt, und sie kostet eine Zeile:
+   Wer in Tagen denkt, führt keine Männer mehr, sondern einen Feldzug. */
+function zeitWort(mehrzahl){
+  if(S.rang>=13) return mehrzahl ? 'Tage' : 'TAG';
+  if(S.rang>=12) return mehrzahl ? 'Stunden' : 'STUNDE';
+  if(S.rang>=10) return mehrzahl ? 'Phasen' : 'PHASE';
+  return mehrzahl ? 'Runden' : 'RUNDE';
 }
 
 /* ── Anmarsch: der Weg dorthin, die Lage, das Warten ──
@@ -208,9 +283,51 @@ function starteKampf(n){
                  und `nahkampf`, die Runden, in denen das alles nichts gilt. */
               geloest:false, gelaendeVorteil:0, degenGezogen:false, zugHaelt:false,
               nahkampf:0, nahkampfGrund:'', auftragErfuellt:null,
+              /* Der Stab: vier Kompanien ab Rang 10, Verbände auf der Karte ab
+                 Rang 12, und die Meldungen, die immer zu spät kommen. */
+              kompanien: S.rang>=10 ? kompanienStart() : null,
+              vorhut:null, stabsereignis:false,
+              verbaende: S.rang>=12 ? verbaendeStart() : null,
+              befehle:[], meldungen:[], uhr:0,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
+}
+
+/* ══════════════════ DER DRITTE SICHTBARE BRUCH: DAS BATAILLON ══════════════════
+
+   **Ab Rang 10 sind Männer Rechtecke.** Vier Kompanien, jede mit Bestand und
+   Haltung, und du siehst kein einziges Gesicht mehr. Die Kompanie, die als
+   erste hineingeht, hat einen Namen und einen Buchstaben; wenn sie
+   zusammenbricht, steht das als Zahl in einer Meldung.
+
+   **Die neue Frage ist eine Rechnung, die man nicht gerne macht.** Eine der
+   vier muss vorgehen, damit die anderen drei durchkommen. Das Spiel fragt
+   dich, welche. Es sagt dir nicht, dass es eine falsche Wahl gibt, und es sagt
+   dir hinterher nicht, ob du richtig lagst — es nennt nur die Zahl und den
+   Buchstaben. Genau darin liegt der Unterschied zu allen Rängen davor: Bis
+   Rang 9 hast du entschieden, was **du** tust. Ab hier entscheidest du, wer
+   stirbt. */
+function kompanienStart(){
+  /* Die Güte kommt aus dem Lager (`S.sektionGuete`), wie schon bei Sektion und
+     Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl. */
+  const g = Math.min(20, (S.sektionGuete||0)/2);
+  return ['1.','2.','3.','4.'].map((nm,i)=>({
+    name: nm+' Kompanie', kurz: nm[0],
+    bestand: 100, haltung: 70 + Math.round(g) - i*3, vorn: false
+  }));
+}
+
+/* Ab Rang 12 sind es keine Kompanien mehr, sondern Verbände auf einer Karte —
+   und ihr Zustand ist nicht bekannt, sondern **gemeldet**. Siehe `karte()`. */
+function verbaendeStart(){
+  const n = S.rang>=13 ? 5 : 4;
+  const namen = ['9. Linie','24. Linie','57. Linie','5. Leichte','12. Kürassiere'];
+  return namen.slice(0,n).map((nm,i)=>({
+    name: nm, bestand: 100, ort: i, befehl: null,
+    /* Was du zuletzt gehört hast, und wie alt es ist. Nicht, was wahr ist. */
+    gemeldet: 100, alter: 0, schweigt: false
+  }));
 }
 
 /* ══════════════════ DIE ZWEITE ACHSE: DER AUFTRAG ══════════════════
@@ -303,12 +420,17 @@ function gefechtsbereitschaft(){
   if(angeschlagen()) z.push(S.leben <= lebenMax()*0.15
     ? 'Du hast zu viel Blut verloren, um hier zu stehen. Wenn dich heute etwas trifft, war es das.'
     : 'Du bist nicht wiederhergestellt. Was noch nicht zu ist, wird gleich wieder aufgehen.');
-  if(ausserAtem()) z.push(S.atem<30
+  // Ab Rang 10 schweigt der Atem, hier wie in der Seitenleiste (der dritte Bruch).
+  if(ausserAtem() && S.rang<10) z.push(S.atem<30
     ? 'Du bist ausgepumpt, bevor der erste Schuss fällt. Unter 30 Atem trifft dich mehr, als dich treffen müsste — das hier wird teuer.'
     : 'Dir geht die Luft aus, bevor es losgeht. Unter 30 wird jede Runde gefährlicher.');
   if(S.belastung>60) z.push('Deine Hände sind nicht ruhig. Du hältst sie an den Riemen, damit es niemand sieht.');
   if(S.kameradschaft>=50) z.push('Links und rechts stehen Männer, die deinen Namen kennen. Das ist keine Kleinigkeit.');
-  if(S.rang>=3) z.push('Acht Mann sehen dich an und warten darauf, dass du etwas sagst.');
+  if(S.rang>=13) z.push('Zehntausend Mann stehen auf einer Fläche, die du von hier nicht überblicken kannst. Was du von ihnen weißt, steht auf Papier.');
+  else if(S.rang>=12) z.push('Fünf Regimenter, drei Straßen, eine Uhr. Du wirst heute niemanden sehen, den du kennst.');
+  else if(S.rang>=11) z.push('Zweitausend Mann und ein Adler. Der Adler wiegt zwei Kilo und ist das Einzige, dessen Verlust dich den Rang kostet.');
+  else if(S.rang>=10) z.push('Vier Kompanien stehen bereit. Du wirst gleich entscheiden müssen, welche davon zuerst hineingeht.');
+  else if(S.rang>=3) z.push('Acht Mann sehen dich an und warten darauf, dass du etwas sagst.');
   else if(S.zweig==='voltigeur') z.push('Du gehst vor der Linie. Wenn es losgeht, steht neben dir niemand.');
   else if(S.zweig==='grenadier') z.push('Die Grenadierkompanie steht vorne. Das ist der Sinn der Bärenfellmütze.');
   return z;
@@ -536,8 +658,123 @@ function skizzenfeld(n){
   </svg></div>`;
 }
 
+/* ══════════════════ DER DRITTE BRUCH ALS BILD: VIER RECHTECKE ══════════════════
+
+   **Männer werden zu Rechtecken.** Kein Strich mehr, der eine Front andeutet,
+   und schon gar keine Figuren — vier Kästen mit einem Buchstaben, einer Zahl
+   für den Bestand und einem Balken für die Haltung. Der Kasten, der vorn
+   steht, ist der einzige, der sich bewegt.
+
+   Das ist ehrlich gezeichnet, nicht abstrakt aus Bequemlichkeit: Ein Chef de
+   bataillon sah 1809 genau das — Meldungen, Ziffern, und in der Ferne Staub. */
+function bataillonsfeld(n){
+  const streu = (i,a)=>{ const x = Math.sin(i*127.1 + a*311.7)*43758.5453; return x-Math.floor(x); };
+  const feindTeil = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
+  const BLAU = STICH.BLAU, ROT = STICH.ROT, TINTE = STICH.MESSING;
+  const K1 = K.kompanien || [];
+
+  const kasten = (k,i)=>{
+    const vorn = (i === K.vorhut);
+    const x = 60 + i*140, y = vorn ? 168 : 218;
+    const h = Math.max(0, Math.min(1, k.haltung/100));
+    const b = Math.max(0, Math.min(1, k.bestand/100));
+    return `<g>
+      <rect x="${x}" y="${y}" width="${(96*(0.55+b*0.45)).toFixed(1)}" height="34" fill="${BLAU}"
+        opacity="${(0.30 + h*0.6).toFixed(2)}" stroke="${BLAU}" stroke-width="${vorn?2.4:1}"/>
+      <text x="${x+8}" y="${y+23}" fill="${STICH.HIMMEL}" font-size="17"
+        font-family="var(--didone),Georgia,serif">${esc(k.kurz)}</text>
+      <text x="${x}" y="${y+50}" fill="${TINTE}" font-size="11"
+        font-family="ui-monospace,monospace" letter-spacing=".5">${Math.round(k.bestand)} · ${Math.round(k.haltung)}</text>
+      ${vorn?`<text x="${x}" y="${y-8}" fill="${ROT}" font-size="10"
+        font-family="ui-monospace,monospace" letter-spacing=".8">VORN</text>`:''}
+    </g>`;
+  };
+
+  return `<div class="feld"><svg viewBox="0 0 640 300" width="100%" height="180"
+      preserveAspectRatio="xMidYMid slice" role="img" aria-label="Das Bataillon in vier Kompanien">
+    <rect width="640" height="300" fill="${STICH.HIMMEL}"/>
+    ${Array.from({length:7},(_,i)=>`<path d="M 0 ${40+i*38} H 640" stroke="${TINTE}" stroke-width="0.5" opacity="0.1"/>`).join('')}
+    ${/* Der Feind: ein einziger Block, dessen Breite die Feindmoral ist. Kein
+         Buchstabe, keine Zahl — man weiß von drüben nichts als die Front. */''}
+    <rect x="${(60 + (1-feindTeil)*140).toFixed(0)}" y="70" width="${(520*feindTeil).toFixed(0)}" height="30"
+      fill="${ROT}" opacity="0.55" stroke="${ROT}" stroke-width="1.4"/>
+    <text x="60" y="58" fill="${ROT}" font-size="11" font-family="ui-monospace,monospace" letter-spacing=".8">DER FEIND</text>
+    ${K1.map(kasten).join('')}
+    ${K.adlerVorn?`<g><path d="M 320 128 L 320 162" stroke="${TINTE}" stroke-width="2.4"/>
+      <path d="M 312 128 L 328 128 L 320 118 Z" fill="${TINTE}"/>
+      <text x="334" y="132" fill="${TINTE}" font-size="10" font-family="ui-monospace,monospace" letter-spacing=".8">ADLER VORN</text></g>`:''}
+    <text x="60" y="286" fill="${BLAU}" font-size="11" font-family="ui-monospace,monospace" letter-spacing=".8">
+      ${S.rang>=11?'DEIN REGIMENT':'DEIN BATAILLON'} · ${K1.length} KOMPANIEN · BESTAND UND HALTUNG</text>
+    <text x="620" y="24" fill="${TINTE}" font-size="11" text-anchor="end"
+      font-family="ui-monospace,monospace" letter-spacing=".8">${esc((n.datum||'').split(' · ')[0]||'')}</text>
+  </svg></div>`;
+}
+
+/* ══════════════════ DER VIERTE BRUCH: DIE OPERATIONSKARTE ══════════════════
+
+   **Der Feind ist ab hier eine Vermutung.** Wo bis Rang 11 eine Feindmoral als
+   Balken stand, steht jetzt eine Meldung mit Uhrzeit und Verlässlichkeit — und
+   sie ist alt. Was du liest, ist vierzig Minuten alt, manches davon ist
+   falsch, und du entscheidest trotzdem, und zwar jetzt.
+
+   **Das ist die Umkehrung des Fusiliers und der Punkt des ganzen Spiels:** Der
+   General sieht mehr und weiß weniger. Der Fusilier sah vier Männer und Rauch
+   — aber was er sah, war wahr.
+
+   Deshalb zeigt die Karte **`gemeldet`, nie `bestand`.** Wer hier den wahren
+   Wert einblendet, hat den Rang nicht gebaut, sondern nur eine hübschere
+   Anzeige für denselben. */
+function karte(n){
+  const TINTE = STICH.MESSING, BLAU = STICH.BLAU, ROT = STICH.ROT;
+  const V = K.verbaende || [];
+  const orte = [[110,120],[250,90],[390,130],[520,100],[300,200]];
+
+  const symbol = (v,i)=>{
+    const [x,y] = orte[i % orte.length];
+    const g = Math.max(0, Math.min(1, v.gemeldet/100));
+    return `<g>
+      <rect x="${x-26}" y="${y-11}" width="52" height="22" fill="${BLAU}"
+        opacity="${v.schweigt?0.18:(0.3+g*0.5).toFixed(2)}" stroke="${BLAU}"
+        stroke-width="1.2" ${v.schweigt?'stroke-dasharray="4 3"':''}/>
+      <path d="M ${x-26} ${y-11} L ${x+26} ${y+11} M ${x+26} ${y-11} L ${x-26} ${y+11}"
+        stroke="${BLAU}" stroke-width="0.9" opacity="0.7"/>
+      <text x="${x}" y="${y+27}" fill="${TINTE}" font-size="10" text-anchor="middle"
+        font-family="ui-monospace,monospace" letter-spacing=".4">${esc(v.name)}</text>
+      <text x="${x}" y="${y+39}" fill="${v.schweigt?ROT:TINTE}" font-size="10" text-anchor="middle"
+        font-family="ui-monospace,monospace">${v.schweigt?'antwortet nicht':Math.round(v.gemeldet)+' · '+(v.alter||0)+' alt'}</text>
+      ${v.befehl?`<text x="${x}" y="${y-19}" fill="${ROT}" font-size="9" text-anchor="middle"
+        font-family="ui-monospace,monospace" letter-spacing=".6">ORDER UNTERWEGS</text>`:''}
+    </g>`;
+  };
+
+  const feindTeil = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
+  const vermutung = feindTeil>0.75 ? 'in voller Stärke' : feindTeil>0.45 ? 'im Weichen'
+    : feindTeil>0.15 ? 'stark angeschlagen' : 'aufgelöst';
+  const verlaesslich = (K.aufklaerung||0) >= 2 ? 'gut' : (K.aufklaerung||0) >= 1 ? 'mäßig' : 'gering';
+
+  return `<div class="feld"><svg viewBox="0 0 640 300" width="100%" height="180"
+      preserveAspectRatio="xMidYMid slice" role="img" aria-label="Operationskarte">
+    <rect width="640" height="300" fill="${STICH.HIMMEL}"/>
+    ${/* Straßen und ein Fluss — das Einzige auf dieser Karte, das sicher stimmt. */''}
+    <path d="M 20 250 Q 180 210 320 235 T 620 200" fill="none" stroke="${TINTE}" stroke-width="1.6" opacity="0.45"/>
+    <path d="M 60 40 Q 200 150 340 160 T 600 260" fill="none" stroke="${STICH.WASSER}" stroke-width="4" opacity="0.6"/>
+    <path d="M 120 280 L 250 100 L 520 70" fill="none" stroke="${TINTE}" stroke-width="1.2"
+      opacity="0.4" stroke-dasharray="7 5"/>
+    ${V.map(symbol).join('')}
+    <rect x="360" y="238" width="250" height="42" fill="${ROT}" opacity="0.1" stroke="${ROT}"
+      stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="372" y="256" fill="${ROT}" font-size="11" font-family="ui-monospace,monospace" letter-spacing=".6">GEMELDETE STÄRKE: ${esc(vermutung.toUpperCase())}</text>
+    <text x="372" y="272" fill="${TINTE}" font-size="10" font-family="ui-monospace,monospace">Meldung ${40+((K.runde||1)*20)%60} Minuten alt · Verlässlichkeit ${esc(verlaesslich)}</text>
+    <text x="20" y="24" fill="${TINTE}" font-size="11" font-family="ui-monospace,monospace" letter-spacing=".8">${S.rang>=13?'DIVISION':'BRIGADE'} · ${esc((n.datum||'').split(' · ')[0]||'')}</text>
+  </svg></div>`;
+}
+
 function sichtfeld(){
   const n = KAPITEL[LAUF.node], zw = S.zweig;
+  /* Der Rang bestimmt, was man überhaupt sieht — vier Bilder, vier Brüche.
+     Wenn die Linie bricht, fällt alles davon auf das erste zurück. */
+  if(S.rang>=12 && !(K.nahkampf>0)) return karte(n);
+  if(S.rang>=10 && !(K.nahkampf>0)) return bataillonsfeld(n);
   /* Der Offizier sieht eine Skizze, nicht ein Feld — außer die Linie bricht. */
   if(S.rang>=7 && !(K.nahkampf>0)) return skizzenfeld(n);
   const rauch = Math.min(1, K.runde/6);
@@ -1113,7 +1350,7 @@ function zeigeEreignis(e){
     <div><div class="card"><div class="ch"><span>${esc(e.frage)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
         <div class="prose" style="margin-top:15px">${e.text.map(t=>`<p>${t}</p>`).join('')}</div>
-        <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden}
+        <div class="probe" style="margin-top:12px">${zeitWort()} ${K.runde} VON ${n.runden}
           · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
           · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}</div>
         ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
@@ -1215,6 +1452,37 @@ function ereignisWaehlen(i){
   zeigeKampf(text);
 }
 
+/* ══════════════════ DIE VIER BRÜCHE BEKOMMEN JE EINEN SATZ ══════════════════
+
+   **Ein Satz, keine Fanfare, und danach nie wieder.** Beim ersten Gefecht in
+   einem neuen Maßstab hält das Spiel einmal an und sagt, was anders ist — und
+   zwar immer das, **was fehlt**, nicht das, was dazugekommen ist.
+
+   Größe muss man sehen, nicht erklärt bekommen. Deshalb steht hier auch kein
+   Wort über neue Knöpfe: Die findet man selbst. Was man nicht selbst findet,
+   ist die Abwesenheit einer Sache, die zehn Ränge lang da war.
+
+   **Der dritte Bruch bekommt bewusst keinen Hinweis auf die Atemleiste.** Sie
+   ist einfach weg. Wer sie vermisst, hat den Bruch verstanden; wer nicht, hat
+   nichts verloren. Ein Satz „Ab jetzt zählt dein Atem nicht mehr" würde ihn
+   vollständig zerstören. */
+function bruchAnsage(){
+  if(K.runde !== 1) return '';
+  const zeig = (schluessel, kopf, text)=>{
+    if(S[schluessel]) return null;
+    S[schluessel] = true;
+    return `<div class="wirkung" style="margin-top:14px"><span>${esc(kopf)}</span>${text}</div>`;
+  };
+  let a = null;
+  if(S.rang>=12) a = zeig('karteGesehen','Was du jetzt siehst',
+    'Eine Karte, drei Straßen, fünf Kästchen und eine Uhr. Auf keinem der Kästchen steht, wie es dort wirklich aussieht — es steht darauf, was zuletzt gemeldet wurde und wie alt die Meldung ist. Ein Fusilier sah vier Männer und Rauch. Was er sah, war wahr.');
+  else if(S.rang>=10) a = zeig('rechteckeGesehen','Was du jetzt siehst',
+    'Vier Rechtecke, ein Buchstabe in jedem, zwei Zahlen darunter. Achthundert Mann, und du wirst heute keinen davon von nahem sehen. Gleich wirst du entscheiden, welches der vier zuerst hineingeht.');
+  else if(S.rang>=7) a = zeig('skizzeGesehen','Was du jetzt siehst',
+    'Ein Blatt, ein Bleistift und die Front als Strich. Wo bis gestern Gesichter standen, steht eine Zahl. Deine Muskete hat der Fourrier eingezogen; man hat dir nichts dafür gegeben außer einem Degen, den du selbst bezahlt hast.');
+  return a || '';
+}
+
 function zeigeKampf(text){
   const n = KAPITEL[LAUF.node];
   const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
@@ -1222,28 +1490,30 @@ function zeigeKampf(text){
   app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
-        ${(()=>{
-          /* **Der Bruch bekommt einen Satz, keine Fanfare.** Beim ersten
-             Gefecht als Offizier hält das Spiel einmal an und sagt, was anders
-             ist — und zwar das, was fehlt, nicht das, was dazugekommen ist.
-             Danach nie wieder (`S.skizzeGesehen`). */
-          if(S.rang>=7 && !S.skizzeGesehen && K.runde===1){ S.skizzeGesehen = true;
-            return `<div class="wirkung" style="margin-top:14px"><span>Was du jetzt siehst</span>
-              Ein Blatt, ein Bleistift und die Front als Strich. Wo bis gestern Gesichter standen, steht eine Zahl. Deine Muskete hat der Fourrier eingezogen; man hat dir nichts dafür gegeben außer einem Degen, den du selbst bezahlt hast.</div>`; }
-          return ''; })()}
+        ${bruchAnsage()}
         ${(()=>{ const auf = auftragFuer(n); return auf
           ? `<div class="wirkung" style="margin-top:14px"><span>Auftrag des Chef de bataillon</span>${esc(auf.text)}</div>` : ''; })()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
-        ${ausserAtem()?`<p class="warnung">Du bekommst keine Luft mehr. ${S.atem<30?'Jeder Handgriff dauert zu lange, und du bist ein leichteres Ziel.':'Noch geht es — aber nicht mehr lange.'} <b>Atem ${S.atem}</b> · ${S.zweig==='voltigeur'?'Flach hinlegen':'Hinknien'} bringt +10.</p>`:''}
-        <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden}
-          · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
-          · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}
+        ${/* Ab Rang 12 stehen hier Meldungen statt eines Zustands — mit Alter,
+             ohne Gewähr. Sie sind das Einzige, was ein General vom Gefecht hat. */''}
+        ${(K.meldungen&&K.meldungen.length)?`<div class="lage"><div class="lagekopf">Was auf dem Tisch liegt</div>
+          ${K.meldungen.slice().reverse().map(m=>`<div class="tat"><span>${esc(m.text)}</span><b>${m.alter} ${esc(zeitWort(true).toLowerCase())} alt</b></div>`).join('')}</div>`:''}
+        ${(ausserAtem()&&S.rang<10)?`<p class="warnung">Du bekommst keine Luft mehr. ${S.atem<30?'Jeder Handgriff dauert zu lange, und du bist ein leichteres Ziel.':'Noch geht es — aber nicht mehr lange.'} <b>Atem ${S.atem}</b> · ${S.zweig==='voltigeur'?'Flach hinlegen':'Hinknien'} bringt +10.</p>`:''}
+        <div class="probe" style="margin-top:12px">${zeitWort()} ${K.runde} VON ${n.runden}
+          ${/* **Ab Rang 12 gibt es keinen Widerstandswert mehr.** Der Feind ist
+               eine Vermutung, und eine Vermutung hat keinen Balken. Wer sie hier
+               doch anzeigt, hat den Rang nicht gebaut. */''}
+          ${S.rang>=12 ? '· DER FEIND: SIEHE MELDUNG'
+            : '· WIDERSTAND DES FEINDES '+Math.max(0,Math.round(K.feindMoral))}
+          ${S.rang>=10 ? '' : '· EURE LINIE '+Math.max(0,Math.round(K.eigen==null?100:K.eigen))}
           ${/* Der Kopf zählt in der Größe, die man führt: zwanzig, sechzig, hundertzwanzig. */''}
-          ${S.rang>=9 && K.sektion!=null ? '· DEINE KOMPANIE '+Math.max(0,Math.round(K.sektion*1.2))+' VON 120'
+          ${S.rang>=12 ? '· '+(K.verbaende||[]).length+' VERBÄNDE'
+            : S.rang>=10 ? '· '+(K.kompanien||[]).length+' KOMPANIEN'+(K.vorhut!=null?' · '+esc(K.kompanien[K.vorhut].name.toUpperCase())+' VORN':' · KEINE VORN')
+            : S.rang>=9 && K.sektion!=null ? '· DEINE KOMPANIE '+Math.max(0,Math.round(K.sektion*1.2))+' VON 120'
             : S.rang>=6 && K.sektion!=null ? '· DEIN ZUG '+Math.max(0,Math.round(K.sektion*0.6))+' VON 60'+(K.rollend>0?' · ROLLENDES FEUER':'')
             : S.rang===5 && K.sektion!=null ? '· DEINE SEKTION '+Math.max(0,Math.round(K.sektion/5))+' VON 20' : ''}</div>
-        ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
-        ${S.rang>=5 && K.sektion!=null ? balken('b-steel',Math.max(0,K.sektion),100) : ''}
+        ${S.rang>=12 ? '' : balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
+        ${(S.rang>=5 && S.rang<10 && K.sektion!=null) ? balken('b-steel',Math.max(0,K.sektion),100) : ''}
         <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
       </div></div>
       <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
@@ -1483,9 +1753,134 @@ function kampfAktion(id){
     else { text = 'Du triffst den Kolben statt den Mann. Der Degen bleibt hängen, und du bekommst ihn erst wieder frei, als jemand neben dir zusticht.';
       S.belastung = Math.min(100,S.belastung+8); }
   }
+  /* ══════════════════ DAS BATAILLON (RANG 10 UND 11) ══════════════════ */
+
+  /* **Die Rechnung.** Vier Kompanien, eine geht zuerst hinein. Es gibt keine
+     Probe darauf, weil es keine Fertigkeit gibt, die einem diese Entscheidung
+     abnimmt — man wählt, und danach ist es gewählt. Das Spiel sagt nicht, ob
+     es eine falsche Wahl war. Es nennt nach dem Gefecht die Zahl und den
+     Buchstaben. */
+  else if(id.startsWith('vorhut')){
+    const i = +id.slice(6); const k = K.kompanien[i];
+    K.vorhut = i; k.vorn = true;
+    schaden = 10;
+    text = `Du zeigst auf die ${esc(k.name)}, und der Adjutant reitet los. Zwei Minuten später setzt sie sich in Bewegung, in Kolonne, das Tambour vorneweg. Die anderen drei sehen ihr nach.`;
+  }
+  else if(id==='staffeln'){
+    const p = probe('taktik', 45);
+    const K1 = K.kompanien;
+    if(p.erfolg){
+      /* Ablösen heißt: Die vordere kommt heraus, ehe sie bricht, und eine
+         frische geht hinein. Es kostet Zeit und damit Wirkung, aber es ist der
+         einzige Weg, ein Bataillon ganz aus einem Gefecht zu bringen. */
+      const alt = K1[K.vorhut]; alt.vorn = false;
+      let best = 0; for(let i=0;i<K1.length;i++) if(K1[i].bestand > K1[best].bestand) best = i;
+      K.vorhut = best; K1[best].vorn = true;
+      schaden = 14 + Math.random()*8;
+      alt.haltung = Math.min(100, alt.haltung + 12);
+      text = `Die ${esc(alt.name)} kommt heraus, die ${esc(K1[best].name)} geht hinein, und dazwischen liegen elf Sekunden, in denen niemand schießt. Es ist der Handgriff, an dem man ein gut geführtes Bataillon erkennt, und man sieht ihn von hier oben nicht — man hört ihn nur nicht schiefgehen.`;
+    } else {
+      text = 'Der Wechsel gerät ineinander. Für eine halbe Minute stehen zwei Kompanien im selben Abschnitt und eine dritte gar nicht mehr, wo sie stehen sollte.';
+      K1.forEach(k=> k.haltung = Math.max(0, k.haltung - 6));
+    }
+  }
+  else if(id==='schwerpunkt'){
+    const p = probe('taktik', 50);
+    if(p.erfolg){ schaden = 34 + Math.random()*16;
+      text = 'Du nimmst zwei Kompanien aus der Front und schiebst sie hinter die dritte. Alles, was du hast, drückt jetzt auf zweihundert Schritt. Genau das ist der Unterschied zwischen einem Bataillon und achthundert Männern.'
+           + anerkennung(2,'Den Schwerpunkt verlegt, und es hat getragen'); }
+    else { schaden = 10;
+      text = 'Die Verlegung dauert zu lange. Als sie steht, steht drüben auch etwas, und deine Flanken sind offen, wo sie vorher besetzt waren.'; }
+    // Wer den Schwerpunkt verlegt, macht die anderen Abschnitte auf — immer.
+    K.kompanien.forEach((k,i)=>{ if(i!==K.vorhut) k.bestand = Math.max(0, k.bestand - (5+Math.random()*6)); });
+  }
+  else if(id==='sammeln'){
+    const p = probe('autoritaet', 45);
+    if(p.erfolg){ K.kompanien.forEach(k=> k.haltung = Math.min(100, k.haltung + 14));
+      text = 'Hinter der Front stehen die, die es nach hinten geschafft haben, in Gruppen von drei und vier. Deine Adjutanten treiben sie zusammen, und weil jemand ihnen sagt, wohin, gehen sie. Es sind keine feigen Männer. Es hat ihnen nur zwanzig Minuten lang niemand gesagt, wohin.'; }
+    else { text = 'Die Gruppen hinter der Front lösen sich auf, sobald deine Adjutanten weiterreiten. Man kann Männer nicht sammeln, indem man an ihnen vorbeireitet.';
+      K.kompanien.forEach(k=> k.haltung = Math.max(0, k.haltung - 3)); }
+  }
+  else if(id==='melden'){
+    K.gemeldet = true;
+    const p = probe('verwaltung', 40);
+    if(p.erfolg && Math.random()<0.5){
+      K.kompanien.forEach(k=>{ k.bestand = Math.min(100, k.bestand + 12); k.haltung = Math.min(100, k.haltung + 8); });
+      text = 'Eine Dreiviertelstunde später kommen zweihundert Mann von der Brigade herüber, geführt von einem Capitaine, der nicht weiß, wo er hin soll. Du weißt es.';
+    } else if(p.erfolg){
+      gunstGeben('grandmaison',1);
+      text = 'Die Meldung ist knapp, richtig und rechtzeitig. Verstärkung gibt es keine — es ist keine da. Aber oben weiß jetzt jemand, wie es hier steht, und das ist der eigentliche Zweck einer Meldung.';
+    } else {
+      gunstGeben('grandmaison',-1);
+      text = 'Deine Meldung kommt an, und aus ihr geht nicht hervor, ob du Verstärkung brauchst oder Erlaubnis, zurückzugehen. Man schickt dir einen Adjutanten, der fragt, was du eigentlich willst.';
+    }
+  }
+  /* ── Der Adler (ab Rang 11) ──
+     **Wie viele Männer ist ein Gegenstand wert?** Das Spiel beantwortet die
+     Frage nicht. Es rechnet nur mit: Der Adler vorn hebt die Haltung des
+     ganzen Regiments — und er steht dann dort, wo geschossen wird. */
+  else if(id==='adler'){
+    const p = probe('autoritaet', 50);
+    K.adlerVorn = true;
+    if(p.erfolg){ K.kompanien.forEach(k=> k.haltung = Math.min(100, k.haltung + 20));
+      schaden = 12;
+      text = 'Der Adlerträger geht durch bis ins erste Glied und bleibt dort stehen. Zweitausend Mann sehen zwei Kilo Messing auf einer Stange, und zweitausend Mann gehen deshalb nicht zurück. Man kann darüber denken, was man will; es funktioniert.'
+           + anerkennung(2,'Den Adler nach vorn geschickt'); }
+    else { text = 'Der Adlerträger geht vor, und der Rest bleibt, wo er ist. Jetzt steht das teuerste Stück des Regiments allein zwanzig Schritt vor der Front.';
+      S.adlerGefahr = true; }
+  }
+
+  /* ══════════════════ DER STAB (RANG 12 BIS 14) ══════════════════ */
+
+  else if(id.startsWith('befehl')){
+    /* **Ein Befehl wirkt nicht, er reist.** Zwischen dem Augenblick, in dem du
+       ihn gibst, und dem, in dem er ausgeführt wird, liegen ein Reiter, drei
+       Kilometer und die Möglichkeit, dass sich die Lage inzwischen geändert
+       hat. Genau das ist der Rang. */
+    const i = +id.slice(6); const v = K.verbaende[i];
+    const lauf = 1 + Math.floor(Math.random()*2);
+    v.befehl = {rest: lauf, art: 'vor'};
+    K.befehle.push({verband:i, rest:lauf});
+    text = `Der Befehl an die ${esc(v.name)} geht mit einem Ordonnanzoffizier ab. Er braucht ${lauf===1?'eine':'zwei'} ${lauf===1?zeitWort().toLowerCase():zeitWort(true).toLowerCase()} dorthin, falls er ankommt. Was du eben angeordnet hast, gilt für eine Lage, die es dann vielleicht nicht mehr gibt.`;
+  }
+  else if(id==='aufklaeren'){
+    const p = probe('kartenkunde', 40);
+    K.aufklaerung = (K.aufklaerung||0) + 1;
+    if(p.erfolg){
+      /* Aufklärung kauft keine Wahrheit, sondern **frischere** Meldungen —
+         und einen kleineren Fehler darin. Mehr kann man nicht kaufen. */
+      K.verbaende.forEach(v=>{ v.alter = 0; v.schweigt = false;
+        v.gemeldet = Math.max(0, Math.min(100, v.bestand + (Math.random()*12-6))); });
+      text = 'Zwei Schwadronen gehen vor und kommen wieder. Was sie bringen, ist eine Stunde alt statt vier, und die Zahlen darin sind fast richtig. Fast ist hier sehr viel.';
+    } else {
+      text = 'Die Patrouille kommt zurück und meldet, was sie gesehen hat. Was sie gesehen hat, ist eine Staubwolke. Eine Staubwolke ist entweder ein Korps oder ein Fuhrpark.';
+    }
+  }
+  else if(id==='reserve'){
+    K.reserveWeg = true;
+    const p = probe('taktik', 45);
+    if(p.erfolg){ schaden = 40 + Math.random()*20;
+      text = 'Du schickst die Reserve, und du schickst sie an die Stelle, an der drüben nichts mehr steht. Es ist die einzige Entscheidung des Tages, deren Wirkung du selbst siehst — der Rauch dort drüben zieht in die falsche Richtung, nämlich nach hinten.'
+           + anerkennung(3,'Die Reserve zur rechten Zeit'); }
+    else { schaden = 12;
+      text = 'Du schickst die Reserve, und sie kommt an einer Stelle an, an der vor zwei Stunden eine Lücke war. Jetzt steht dort eine Batterie. Ab diesem Augenblick hast du nichts mehr in der Hand.'; }
+  }
+  else if(id==='warten'){
+    /* **Nichts tun ist ab Rang 12 eine Handlung.** Ein General, der jede Stunde
+       etwas anordnet, führt keinen Feldzug, sondern stört seine Untergebenen.
+       Der Knopf kostet Zeit und bringt Meldungen — und manchmal ist genau das
+       die richtige Entscheidung. */
+    schaden = 6;
+    text = 'Du wartest. Es ist das Schwerste, was dieser Posten verlangt, und es sieht von außen aus wie Untätigkeit. Auf dem Tisch sammeln sich Zettel.';
+  }
+
   else if(id==='zurueck'){
     S.ruf = Math.max(0, S.ruf-8); S.belastung=Math.min(100,S.belastung+10); S.gekniffen=true;
-    kampfEnde(false, 'Du gehst zurück. Niemand hält dich auf, und das ist das Schlimmste daran.');
+    kampfEnde(false, S.rang>=12
+      ? 'Du brichst ab. Es ist die richtige Entscheidung, wenn die Meldungen stimmen, und niemand wird dir je sagen, ob sie stimmten.'
+      : S.rang>=10
+      ? 'Du nimmst das Bataillon zurück, in Ordnung, mit den Verwundeten. Es ist sauber gemacht und es ist trotzdem ein Rückzug.'
+      : 'Du gehst zurück. Niemand hält dich auf, und das ist das Schlimmste daran.');
     return;
   }
 
@@ -1513,6 +1908,14 @@ function kampfAktion(id){
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */
   if(K.gelaendeVorteil > 0) schaden *= 0.8;
+  /* **Der Schaden des Bataillons hängt an dem, was noch steht — nicht an dir.**
+     Das ist die mechanische Fassung von „du siehst keine Gesichter mehr": Deine
+     Probe entscheidet, *ob* der Befehl ankommt; wie viel er wert ist,
+     entscheiden vier Rechtecke, an denen du nichts mehr ändern kannst. */
+  if(K.kompanien){
+    const kraft = K.kompanien.reduce((s,k)=> s + k.bestand*k.haltung/10000, 0) / K.kompanien.length;
+    schaden *= Math.max(0.3, kraft*1.6);
+  }
 
   /* **Rollendes Feuer wirkt auch in der Runde, in der du nichts tust.** Das ist
      der Sinn des Ranges und der einzige Ort, an dem Schaden ohne eigene
@@ -1573,6 +1976,60 @@ function kampfAktion(id){
     if(K.zugHaelt) K.sektion = Math.max(30, K.sektion);
   }
   if(K.gelaendeVorteil > 0) K.gelaendeVorteil--;
+
+  /* ── Die vier Kompanien bluten, und die vorderste blutet am meisten ──
+     Das ist der ganze mechanische Gehalt der Rechnung: Wer vorgeht, zahlt.
+     Die Haltung sinkt schneller als der Bestand, weil ein Bataillon nicht
+     aufhört, wenn es Männer verliert, sondern wenn es aufhört zu glauben. */
+  if(K.kompanien){
+    const druck = Math.max(0, K.feindMoral/n.feindMoral) * (1 + feindGuete(n)*0.15);
+    K.kompanien.forEach((k,i)=>{
+      const vorn = (i === K.vorhut);
+      k.bestand = Math.max(0, k.bestand - (vorn ? 5+Math.random()*5 : 1+Math.random()*2) * druck);
+      k.haltung = Math.max(0, k.haltung - (vorn ? 6+Math.random()*5 : 2+Math.random()*2) * druck);
+      /* Eine Kompanie, deren Haltung fällt, geht von allein zurück — dann
+         steht der Abschnitt offen, und das kostet den Rest. */
+      if(k.haltung <= 0 && vorn){ K.vorhut = null; k.vorn = false;
+        K.protokoll.push(k.name + ' geht zurück. Niemand hat es befohlen.'); }
+    });
+  }
+
+  /* ── Befehle reisen, Meldungen altern ──
+     Die zwei Zeilen, an denen der vierte Bruch hängt. Ein Befehl wirkt, wenn
+     er ankommt, nicht wenn er gegeben wird; und was auf deinem Tisch liegt,
+     wird mit jeder Stunde eine Stunde falscher. */
+  if(K.verbaende){
+    K.befehle = (K.befehle||[]).filter(b=>{
+      if(--b.rest > 0) return true;
+      const v = K.verbaende[b.verband];
+      if(!v) return false;
+      v.befehl = null;
+      /* Der Verband tut, was befohlen war — gegen die Lage von jetzt, nicht
+         gegen die von damals. Ob das passt, entscheidet der Zufall, den man
+         mit besserer Aufklärung kleiner macht, aber nie beseitigt. */
+      const passt = Math.random() < 0.55 + (K.aufklaerung||0)*0.12;
+      K.feindMoral -= passt ? (16 + Math.random()*14) : (3 + Math.random()*4);
+      v.bestand = Math.max(0, v.bestand - (passt ? 6+Math.random()*6 : 12+Math.random()*10));
+      K.meldungen.push({text: v.name + (passt
+        ? ' meldet den Auftrag ausgeführt.'
+        : ' meldet, sie sei auf Widerstand gestoßen, den die Order nicht vorgesehen hat.'),
+        alter: 0});
+      return false;
+    });
+    K.verbaende.forEach(v=>{
+      v.bestand = Math.max(0, v.bestand - (1+Math.random()*2) * Math.max(0, K.feindMoral/n.feindMoral));
+      v.alter++;
+      /* Ein Verband, der nicht antwortet, ist entweder vernichtet oder
+         unterwegs, und du hast keine Möglichkeit, das herauszufinden. */
+      if(v.alter >= 3 && Math.random() < 0.3) v.schweigt = true;
+      if(!v.schweigt && Math.random() < 0.35){
+        v.alter = 1;
+        v.gemeldet = Math.max(0, Math.min(100, v.bestand + (Math.random()*24-12)));
+      }
+    });
+    (K.meldungen||[]).forEach(m=> m.alter++);
+    if(K.meldungen.length > 6) K.meldungen = K.meldungen.slice(-6);
+  }
   if(geschlossen) K.geschlossen--;
 
   K.protokoll.push(text);
@@ -1594,7 +2051,19 @@ function kampfAktion(id){
      Offizier auf dreihundert Schritt kenntlich, und beide Seiten schossen
      gezielt auf ihn; ab dem Capitaine sammelt sich die Kompanie zusätzlich um
      ihn. Wer aufsteigt, kauft sich nicht in Sicherheit ein. */
-  if(S.rang>=9) gefahr += 5;
+  /* ── Und ab Rang 10 ändert die Gefahr ihre Form ──
+     Der Zuschlag je Runde fällt weg; du stehst nicht mehr im Feuer. An seiner
+     Stelle steht **ein Stabsereignis je Gefecht mit rund 8 %** — ein
+     Streuschuss, ein stürzendes Pferd, ein Splitter beim Kartenlesen. Selten,
+     ohne Vorwarnung, und **man kann sich nicht hinwerfen.**
+
+     Ein Bataillonschef ist statistisch sicherer als ein Caporal und stirbt
+     trotzdem, nur eben ohne die Möglichkeit, etwas dagegen zu tun. Das ist
+     nicht dieselbe Gefahr in kleiner, sondern eine andere Art von Gefahr, und
+     sie passt zu einem Rang, dessen ganzes Wesen darin besteht, dass man nicht
+     mehr selbst handelt. */
+  if(S.rang>=10) gefahr = 0;
+  else if(S.rang>=9) gefahr += 5;
   else if(S.rang>=7) gefahr += 4;
   else if(S.rang>=3) gefahr += 2;
   /* Wer im Gelände liegt, wird schlechter getroffen — drei Runden lang. */
@@ -1605,8 +2074,29 @@ function kampfAktion(id){
      damit ein Gefecht mit einem einzigen Feld zum Höhepunkt wird. */
   if(n.haerte > 1) gefahr += 3;
   gefahr += feindGuete(n);      // bessere Truppen treffen öfter
-  gefahr = Math.max(4, gefahr);
+  gefahr = S.rang>=10 ? 0 : Math.max(4, gefahr);
   let treffer = '';
+  /* Das Stabsereignis: einmal je Gefecht gewürfelt, ohne Ankündigung und ohne
+     Gegenmittel. Es kostet mehr als ein gewöhnlicher Treffer, weil es keinen
+     zweiten gibt — und weil ein Mann, der nicht damit rechnet, ungeschützt
+     steht. Der Text nennt nie eine Kugel, die auf dich gezielt hat. */
+  if(S.rang>=10 && !K.stabsereignis && !n.uebung && Math.random() < 0.08){
+    K.stabsereignis = true;
+    const arten = [
+      ['Eine verirrte Kugel — niemand hat auf dich gezielt, dafür bist du zu weit weg — geht durch den Oberschenkel, während du auf die Karte siehst.', 'Streifschuss am Oberschenkel', 8],
+      ['Das Pferd geht unter dir zu Boden, ohne dass du gehört hättest, was es getroffen hat. Du liegst darunter, bis zwei Adjutanten es hochbekommen.', 'Sturz mit dem Pferd', 12],
+      ['Eine Granate schlägt vierzig Schritt entfernt ein. Ein Splitter, groß wie ein Daumennagel, geht durch die Kartentasche und danach in die Seite.', 'Splitter in der Seite', 14]
+    ];
+    const e = arten[Math.floor(Math.random()*arten.length)];
+    const schaden = 16 + Math.floor(Math.random()*16);
+    S.leben -= schaden; S.wunden.push({name:e[1], abzug:e[2]});
+    atemKlemmen();
+    treffer = ` <b>${esc(e[0])}</b> <span class="fein">Leben −${schaden} · „${esc(e[1])}"</span>`;
+    if(S.leben <= 0){
+      gefallen(text + treffer, 'Gefallen bei ' + (n.datum||'').split(' · ')[1]);
+      return;
+    }
+  }
   if(Math.random()*100 < gefahr){
     /* Ein Treffer tötet nicht mehr durch einen eigenen Wurf, sondern zehrt an
        den Lebenspunkten. Der Unterschied ist der ganze Sinn des Umbaus:
@@ -1985,7 +2475,61 @@ function kampfEnde(sieg, letzterText){
      Zwanzig Mann, von denen die Hälfte liegt, sind ein gewonnenes Gefecht und
      eine verlorene Woche. */
   let abrechnung = '';
-  if(S.rang>=5 && K.sektion != null){
+
+  /* ══════════════════ DIE ABRECHNUNG DES STABES ══════════════════
+
+     Ab Rang 10 wird nicht mehr appelliert, sondern gerechnet. Was auf dem
+     Zettel steht, sind vier Zahlen und ein Buchstabe — und der Buchstabe ist
+     der der Kompanie, die du vorgeschickt hast.
+
+     **Das Spiel sagt nie, ob es die richtige war.** Es nennt die Zahl. */
+  if(K.kompanien){
+    const gesamt = K.kompanien.reduce((s,k)=> s + k.bestand, 0) / K.kompanien.length;
+    const kopf = S.rang>=11 ? 2000 : 800;
+    const uebrig = Math.round(kopf * gesamt/100);
+    const verlust = kopf - uebrig;
+    const vorne = K.vorhut != null ? K.kompanien[K.vorhut] : null;
+    if(verlust >= kopf*0.4){ gunstGeben('grandmaison',-1); S.belastung=Math.min(100,S.belastung+6); }
+    else if(verlust <= kopf*0.12) gunstGeben('grandmaison',1);
+    abrechnung = `<div class="wirkung"><span>Die Verlustmeldung</span>
+      Von ${kopf} Mann stehen ${uebrig}. ${vorne
+        ? 'Die ' + esc(vorne.name) + ' ist mit ' + Math.round(vorne.bestand) + ' von 100 herausgekommen. Sie ist die, die du vorgeschickt hast.'
+        : 'Keine Kompanie ist zuerst hineingegangen; die Front ist über die ganze Breite in Bewegung gekommen und hat sich selbst gefunden.'}
+      <b>${verlust >= kopf*0.4 ? 'Fürsprache Grandmaison −1 · Belastung +6'
+          : verlust <= kopf*0.12 ? 'Fürsprache Grandmaison +1' : 'Zur Kenntnis genommen'}</b></div>`;
+    /* Namen gibt es hier nicht mehr — das ist kein Versehen, sondern der Rang.
+       Ein Chef de bataillon bekommt Summen; die Namen stehen in vier Listen,
+       die vier andere Männer schreiben. */
+  }
+
+  /* ── Der Adler (ab Rang 11) ──
+     **Ein verlorener Adler kostet den Rang**, unabhängig von allem anderen und
+     unabhängig davon, wie gut geführt wurde. Ein geretteter erzwingt von
+     allein einen Eintrag im Bulletin — die einzige Tat im Spiel, die das tut.
+
+     Damit stellt Rang 11 eine Frage, die keiner der Ränge davor gestellt hat:
+     **Wie viele Männer ist ein Gegenstand wert?** Das Spiel beantwortet sie
+     nicht. Es rechnet nur mit. */
+  if(S.rang>=11 && K.adlerVorn){
+    const gesamt = K.kompanien ? K.kompanien.reduce((s,k)=> s+k.bestand,0)/K.kompanien.length : 100;
+    const weg = S.adlerGefahr && (!sieg || gesamt < 40) && Math.random() < 0.5;
+    if(weg){
+      S.adler = 'verloren';
+      S.rang = Math.max(10, S.rang-1); S.ruf = Math.max(0, S.ruf-25);
+      gunstGeben('grandmaison',-3);
+      abrechnung += `<div class="wirkung"><span>Der Adler</span>
+        Er ist nicht zurückgekommen. Man wird nie herausfinden, wer ihn zuletzt gehabt hat, und es spielt auch keine Rolle: Ein Regiment, das seinen Adler verliert, hat keinen Colonel mehr. Der Befehl kommt nach elf Tagen, und er ist zwei Zeilen lang.
+        <b>Rang zurück · Ruf −25 · Fürsprache Grandmaison −3</b></div>`;
+    } else if(sieg){
+      S.adler = 'gerettet'; S.bulletins = (S.bulletins||0)+1; S.nennungen += 2; S.ruf += 6;
+      abrechnung += `<div class="wirkung"><span>Der Adler</span>
+        Er ist vorn gewesen und er ist zurück. Der Adlerträger lebt nicht mehr, der zweite auch nicht; der dritte ist ein Tambour von neunzehn, der ihn hält, als wäre er heiß. Das steht so im Bulletin, und zwar ohne dass jemand es hätte melden müssen.
+        <b>Bulletin · Nennungen +2 · Ruf +6</b></div>`;
+    }
+    S.adlerGefahr = false;
+  }
+
+  if(S.rang>=5 && S.rang<10 && K.sektion != null){
     /* Ab Rang 6 rechnet dieselbe Zahl über sechzig Mann statt über zwanzig —
        und der, dem man Rechenschaft schuldet, ist nicht mehr der Lieutenant,
        sondern der Capitaine. Die Schwellen skalieren mit. */
@@ -2484,6 +3028,19 @@ function zeigeBefoerderung(n){
     if(ziel.patron) gunstGeben(ziel.patron, 1);
     text = ziel.text(ziel.patron ? personName(ziel.patron) : '');
     klasse = 'gut';
+    /* ── Rang 12 schaltet die Generalskampagnen frei ──
+       Einmal erreicht, bleiben sie dauerhaft offen (`META.generalskampagnen`) —
+       sonst sähen 96 % der Spieler die aufwendigste Darstellungsstufe nie.
+       Die Szenarien selbst gibt es noch nicht; freigeschaltet wird trotzdem
+       jetzt, damit die Freischaltung nicht später nachgereicht werden muss und
+       ein alter Chronikeintrag sie rückwirkend nicht bekommt. */
+    /* Mit dem Regiment kommt der Adler. Er wird nicht verliehen, er ist da —
+       die Frage ist nur, ob er bleibt. */
+    if(ziel.rang>=11 && !S.adler) S.adler = 'getragen';
+    if(ziel.rang>=12 && typeof META==='object' && META && !META.generalskampagnen){
+      META.generalskampagnen = true;
+      try{ chronikSichern(); }catch(e){}
+    }
     /* ── Die Szene, die nichts kostet und alles sagt ──
        Sie steht genau einmal, beim Patent, und sie hat keinen Knopf, keine
        Probe und keine Wirkung. **Das ist der Punkt.** Was ein Patent bedeutet,

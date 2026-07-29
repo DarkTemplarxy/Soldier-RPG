@@ -247,12 +247,36 @@ function seitenleiste(){
         ${balken(angeschlagen()?'b-red':'b-green',S.leben,lebenMax())}
         ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}
         <div class="kv wunden"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div></div>
-      <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
+      ${/* ══════════════════ DER DRITTE SICHTBARE BRUCH ══════════════════
+
+           **Ab Rang 10 verschwindet die Atemleiste. Ersatzlos, ohne Kommentar.**
+
+           Zehn Ränge lang war sie die Zahl, auf die man am häufigsten geschaut
+           hat: Sie hat entschieden, ob man knien musste, ob man vorgehen
+           konnte, ob man einen Lagerabend verschläft. Jetzt ist sie weg, und
+           es steht nirgends, dass sie weg ist.
+
+           **Der Spieler merkt in derselben Sekunde, dass sein Körper aufgehört
+           hat, das Thema zu sein** — und das ist der stärkste der vier Brüche,
+           weil er fast nichts kostet zu bauen. Ein Hinweis („Ab jetzt zählt
+           dein Atem nicht mehr") würde ihn vollständig zerstören: Man soll es
+           bemerken, nicht gesagt bekommen.
+
+           Der Wert läuft im Hintergrund weiter — `atemKlemmen()` und die
+           Erholung fassen ihn wie bisher an. Er tut nur nichts mehr, weil ein
+           Chef de bataillon nicht selbst lädt und nicht selbst rennt. */''}
+      ${S.rang<10?`<div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
         ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
-        ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>
+        ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>`:''}
       <div class="stat"><div class="statlab"><span>Belastung</span><span>${S.belastung}</span></div>${balken('b-red',S.belastung,100)}</div>
       <div class="stat"><div class="statlab"><span>Ruf</span><span>${S.ruf}</span></div>${balken('b-brass',S.ruf,100)}</div>
       <div class="stat"><div class="statlab"><span>Kameradschaft</span><span>${S.kameradschaft}</span></div>${balken('b-green',S.kameradschaft,100)}</div>
+      ${/* Der Adler steht in der Seitenleiste, sobald es einen gibt — als Wort,
+           nicht als Balken. Ein Gegenstand hat keinen Prozentsatz; er ist da,
+           er ist vorn, oder er ist weg, und das Letzte kostet den Rang. */''}
+      ${S.adler?`<div class="kv"><span>Der Adler</span><b class="${S.adler==='verloren'?'warn':''}">${
+        S.adler==='verloren'?'verloren':S.adler==='gerettet'?'gerettet':'getragen'}</b></div>`:''}
+      ${(S.rang>=13&&S.dotation)?`<div class="kv"><span>Dotation</span><b>${S.dotation} F je Station</b></div>`:''}
       ${S.rang>=9?`<div class="stat"><div class="statlab"><span>Einheitszustand</span><span class="${(S.einheit==null?70:S.einheit)<40?'warn':''}">${Math.round(S.einheit==null?70:S.einheit)}</span></div>${balken((S.einheit==null?70:S.einheit)<40?'b-red':'b-steel',(S.einheit==null?70:S.einheit),100)}
         ${(S.einheit!=null&&S.einheit<40)?`<p class="warnung">Deine Kompanie hat nichts an den Füßen.${S.einheit<20?' Jeder Marsch kostet Männer, die niemand beschossen hat.':' Der Feldscher meldet mehr Kranke, als er sollte.'}</p>`:''}</div>`:''}
       ${K?`<div class="rule"></div>${S.rang>=7?'':`<div class="kv"><span>Muskete</span><b>${geladen}</b></div>`}
@@ -669,6 +693,37 @@ const MARSCH_EREIGNISSE = [
 
      Es steht bewusst als Zwischenfall und nicht als Szene in einem Kapitel:
      Widerspruch gehört keinem Feldzug, er gehört dem Rang. */
+  /* ══════════════════ AB RANG 13 · DER KAISER STELLT DIR EINE FRAGE ══════════════════
+
+     **Er ist kein Gönner, sondern jemand, der Fragen stellt, auf die es keine
+     gute Antwort gibt.** Die Szenen dieses Rangs sind fast alle Gespräche, und
+     in fast allen ist **Schweigen** eine der Optionen — manchmal die beste.
+
+     Das ist keine Bequemlichkeit im Entwurf: Wer zehn Ränge lang Handgriffe,
+     Befehle und Meldungen gedrückt hat, bekommt hier zum ersten Mal einen
+     Knopf, auf dem steht, dass man nichts sagt. Es ist der einzige Ort im
+     Spiel, an dem das eine Handlung ist. */
+  {id:'kaiser', titel:'Er fragt dich etwas', wenn:()=>S.rang>=13,
+   text:['Es ist nach elf, das Zelt ist zu warm, und auf dem Tisch liegen Karten von einem Land, in dem ihr seit fünf Wochen steht. Berthier ist gegangen. Zwei Ordonnanzoffiziere stehen am Eingang und sehen weg.',
+         'Er sieht nicht auf, als er fragt, ob die Armee noch so ist wie 1805. Es ist keine rhetorische Frage; er wartet auf eine Antwort, und er wartet lange genug, dass es unangenehm wird.'],
+   optionen:[
+     {label:'Nein sagen', hint:'Kaltblütigkeit · und danach den Satz nicht abschwächen',
+      probe:{wert:'kaltbluetigkeit', schw:55}, risk:true,
+      erfolg:{text:'Du sagst nein und sagst auch, woran du es siehst: an den Schuhen, am Alter der Konskribierten, daran, dass in deiner Division vier Bataillone von Offizieren geführt werden, die 1805 noch nicht geboren waren — das letzte stimmt nicht ganz, und er weiß es, und er lässt es durchgehen. Er sagt eine Weile nichts. Dann sagt er, du sollst das aufschreiben.',
+              ruf:8, gunst:1, gunstVon:'grandmaison'},
+      misserfolg:{text:'Du sagst nein und hörst dich dabei selbst, und was du hörst, klingt wie ein Mann, der sich herausreden will. Er unterbricht dich nach dem dritten Satz, nicht unfreundlich, und redet über etwas anderes. Am nächsten Morgen kommt der Befehl über deinen Abschnitt, und darin steht nichts von dem, was du gesagt hast.',
+              ruf:-3, belastung:8}},
+     {label:'Ja sagen', hint:'Es ist, was er hören will, und es ist nicht wahr',
+      erfolg:{text:'Du sagst ja. Er nickt und wendet sich der Karte zu, und danach geht es zwei Stunden lang um Straßen und Marschzeiten. Es ist ein leichter Abend. Sechs Wochen später steht deine Division an einer Stelle, an der eine Armee von 1805 gestanden hätte, und deine ist nicht die von 1805.',
+              ruf:2, gunst:1, gunstVon:'grandmaison', belastung:6}},
+     {label:'Nichts sagen', hint:'Schweigen ist hier eine Handlung',
+      probe:{wert:'menschenkenntnis', schw:45},
+      erfolg:{text:'Du sagst nichts. Es dauert lange genug, dass die beiden am Eingang sich ansehen. Dann sagt er, das sei auch eine Antwort, und geht zur Karte. Er nimmt zwei Regimenter aus deinem Abschnitt heraus und stellt sie nach hinten, ohne zu erklären, warum. Es ist genau das, was du gesagt hättest.',
+              ruf:5, gunst:2, gunstVon:'grandmaison'},
+      misserfolg:{text:'Du sagst nichts, und dein Schweigen kommt nicht als Antwort an, sondern als Zögern. Er wiederholt die Frage etwas langsamer, so wie man sie einem stellt, der sie nicht verstanden hat. Danach beantwortet er sie selbst.',
+              ruf:-2, belastung:5}}
+   ]},
+
   {id:'order', titel:'Die Order des Chef de bataillon', wenn:()=>S.rang>=8,
    text:['Der Befehl kommt um vier Uhr morgens auf einem halben Blatt: Dein Zug soll bei Tagesanbruch das Gehöft am Waldrand nehmen und halten.',
          'Du bist gestern Abend dort gewesen. Das Gehöft liegt in einer Senke, es hat drei Zugänge und keinen einzigen, den sechzig Mann decken können. Der Chef de bataillon war nicht dort. Auf seiner Karte ist es ein Punkt.'],
