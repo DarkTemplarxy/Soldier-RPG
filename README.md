@@ -39,15 +39,17 @@ Historische Fixpunkte, dazwischen freies Spiel: Montenotte, die Brücke von Lodi
 
 ## Stand
 
-**Zwei Feldzüge sind spielbar** — Italien 1796/97 und Ägypten 1798/99, zusammen zweiunddreißig Stationen, zehn Gefechte, fünf Lager, zwei Winterquartiere, Ränge 1 bis 3.
+**Vier Feldzüge sind spielbar** — Italien 1796/97, Ägypten 1798/99, die Garnison von Nîmes 1801–04 und Austerlitz 1805, zusammen dreiundsechzig Stationen, dreizehn Gefechte, Lager, Winterquartiere und vier Garnisonssaisons.
 
-Italien ist das Lehrstück: barfuß über die Pässe, die Brücke von Lodi, der Sumpf von Arcole. Ägypten ist etwas anderes — dort töten die Wege mehr Männer als die Gefechte. Hitzschlag im Marsch auf Damanhur, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Akkon fällt nicht, so wie es 1799 nicht gefallen ist, und nach Abukir liegt die Flotte auf dem Meeresgrund: Es gibt keinen Weg mehr nach Hause.
+Italien ist das Lehrstück: barfuß über die Pässe, die Brücke von Lodi, der Sumpf von Arcole. Ägypten ist etwas anderes — dort töten die Wege mehr Männer als die Gefechte. Hitzschlag im Marsch auf Damanhur, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Akkon fällt nicht, so wie es 1799 nicht gefallen ist, und nach Abukir liegt die Flotte auf dem Meeresgrund: Es gibt keinen Weg mehr nach Hause. Dann drei Jahre Frieden, in denen der Feind nicht die Kugel ist, sondern die Zeit — und danach Austerlitz, wo geprüft wird, was in diesen drei Jahren gelernt wurde.
 
 Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000 km über See und durch die Wüste, jede Station mit Entfernung und Dauer. Vor jedem Gefecht steht der Anmarsch — der Nachtmarsch im Regen, die vier Stunden Warten in den Gassen von Lodi, die Lagemeldung und das, womit du dastehst. In den Lagern entscheidest du, was du mit den zwei oder drei Abenden anfängst: exerzieren, scharf schießen, die Schuhe zum Schuster tragen, die Muskete ölen, schlafen. Es ist immer mehr zu tun als Zeit da ist.
 
-Entworfen, aber noch nicht gebaut: die Kapitel 3 bis 11 (Garnison, Austerlitz, Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), die Ränge 4 bis 14, Orden, Pferd, Kompaniekasse und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md).
+**Die Rangleiter steht ganz.** Alle vierzehn Ränge sind vergebbar, und neun davon haben ein eigenes Spiel: Der Fusilier steuert seinen Körper, der Caporal acht Männer, der Sergent eine Sektion von zwanzig, der Sergent-major einen Zug von sechzig. Beim Patent zum Sous-Lieutenant wird die Muskete eingezogen — Laden und Feuern verschwinden ersatzlos, an ihre Stelle treten Befehle, und aus dem Gefechtsbild wird eine Handskizze mit einem gestrichelten Feind. Ab dem Capitaine hat jedes Gefecht zwei Ziele, von denen nur eines der Sieg ist, und im Schrank liegt das Geld, mit dem hundertzwanzig Männer Schuhe bekommen sollen.
 
-Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht. Wer beides schafft, hat zweiunddreißig Stationen hinter sich — und immer noch neun Feldzüge vor sich.
+Entworfen, aber noch nicht gebaut: die Kapitel 5 bis 11 (Jena, Eylau, Spanien, Russland, Leipzig, Frankreich, Waterloo), das Gefecht der Ränge 10 bis 14 mit Operationskarte und verzögerten Meldungen, die Offizierspatente und die vier möglichen Enden einer Laufbahn. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
+
+Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat dreiundsechzig Stationen hinter sich — und immer noch sieben Feldzüge vor sich.
 
 ---
 
@@ -69,6 +71,7 @@ Chronik und laufender Feldzug lassen sich über „Spielstand sichern" zusätzli
 npm install playwright && npx playwright install chromium
 
 node test/durchspielen.js     # spielt einen Lauf durch, meldet Konsolenfehler
+node test/offizier.js         # Ränge 7 bis 9: sind die Befehle da, ist die Muskete weg
 node test/spielstand.js       # sichern, fortsetzen, sterben, alte Fassungen
 node test/balance.js 40       # 40 Läufe, misst die Überlebensquote
 node werkzeug/bauen.js        # baut dist/marschallstab.html

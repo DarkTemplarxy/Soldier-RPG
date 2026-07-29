@@ -144,7 +144,78 @@ const LAGER_TUN = {
   gelaende:{label:'Allein im Gelände üben',
     cost:'Geschick und Muskete · Atem −6',
     tu(){ nutzen('geschick',1.5); nutzen('muskete',1.5); S.atem=Math.max(0,S.atem-6);
-      return 'Von Deckung zu Deckung, hinlegen, zielen, weiter. Vor der Linie gibt es keinen Nebenmann, der dir sagt, wann du aufstehst. Das musst du selbst wissen. <span class="fein">Geschick und Muskete steigen · Atem −6</span>'; }}
+      return 'Von Deckung zu Deckung, hinlegen, zielen, weiter. Vor der Linie gibt es keinen Nebenmann, der dir sagt, wann du aufstehst. Das musst du selbst wissen. <span class="fein">Geschick und Muskete steigen · Atem −6</span>'; }},
+
+  /* ══════════════════ AB RANG 7 · DER OFFIZIER IM LAGER ══════════════════ */
+
+  /* Die einzige Quelle, aus der der Säbel noch wächst. Ein Abend, den man
+     nicht auf Listen, Kasse oder den Zug verwendet — und der sich erst
+     auszahlt, wenn die Linie bricht. Meistens nie. */
+  fechtboden:{label:'Auf den Fechtboden gehen',
+    cost:'Säbel · der einzige Weg, auf dem er noch wächst',
+    tu(){ nutzen('bajonett',2.5,true); S.atem=Math.max(0,S.atem-6);
+      return 'Ein Fechtmeister, der vor der Revolution Adlige unterrichtet hat und jetzt Offiziere unterrichtet, die nicht lesen konnten, als er anfing. Er sagt, der Degen sei kein Bajonett, und du sollst aufhören zu stechen wie einer, der weitergehen will. <span class="fein">Säbel steigt · Atem −6</span>'; }},
+
+  zugfuehren:{label:'Deinen Zug selbst antreten lassen',
+    cost:'Autorität und Taktik · dein Zug hält besser',
+    tu(){ nutzen('autoritaet',2.5); nutzen('taktik',2);
+      S.sektionGuete = (S.sektionGuete||0) + 8;
+      S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+5);
+      return 'Sechzig Mann, drei Sergenten, und die Sergenten machen die Arbeit. Deine besteht darin, dazustehen und an drei Stellen etwas zu sagen, das keiner der drei sagen könnte, ohne den anderen zu übergehen. <span class="fein">Autorität und Taktik steigen · dein Zug hält besser</span>'; }},
+
+  karten:{label:'Die Karten des Abschnitts durchgehen',
+    cost:'Kartenkunde und Taktik · zahlt erst im Gefecht',
+    tu(){ nutzen('kartenkunde',2.5); nutzen('taktik',2);
+      return 'Ein Blatt von 1793, auf dem drei Dörfer fehlen und ein Fluss falsch liegt. Der Adjutant sagt, es sei das beste, das sie haben. Du zeichnest den Weg nach, den ihr heute gegangen seid, und danach weißt du, wo ihr wirklich seid. <span class="fein">Kartenkunde und Taktik steigen</span>'; }},
+
+  /* ── Ab Rang 8: der Adjutantenauftrag ──
+     Drei Fertigkeiten, die zehn Ränge lang fast nichts getan haben, bekommen
+     hier ihre Verwendung. Reihum, damit nicht dieselbe Probe dreimal kommt. */
+  adjutant:{label:'Einen Auftrag des Bataillons übernehmen',
+    cost:'Reiten, Kartenkunde oder Verwaltung · Fürsprache Vernet',
+    tu(){ const arten = [
+        ['reiten',40,'Eine Meldung nach Norden reiten, achtzehn Kilometer, zwei davon im Dunkeln.',
+         'Du bist vor der Dämmerung dort und kannst hersagen, was du gesehen hast, ohne aufzusehen.',
+         'Das Pferd bricht in einem Graben ein, und du kommst zwei Stunden zu spät. Die Meldung ist bis dahin überholt.'],
+        ['kartenkunde',40,'Eine Stellung erkunden und aufzeichnen: welcher Hang, welcher Weg, wo man ein Bataillon verstecken kann.',
+         'Deine Skizze geht ohne Rückfrage an den Stab, und drei Tage später steht darauf, wo die Batterien hinkommen.',
+         'Du zeichnest den Bach auf der falschen Seite ein. Es fällt jemandem auf, der es besser weiß.'],
+        ['verwaltung',40,'Einen Nachschubzug führen: elf Wagen, sechs Fuhrleute, die nicht Soldaten sind.',
+         'Elf Wagen kommen an, und keiner davon leer. Das ist seltener, als es klingt.',
+         'Zwei Wagen bleiben in Vaux stehen, weil ein Fuhrmann sich weigert, und du hast nichts, womit du ihn zwingen kannst.']];
+      const a = arten[(S.auftraege||0) % 3];
+      S.auftraege = (S.auftraege||0)+1;
+      const p = probe(a[0], a[1]);
+      if(p.erfolg){ gunstGeben('vernet',1); S.ruf += 1;
+        return a[2]+' '+a[3]+' <span class="fein">Fürsprache Vernet +1 · Ruf +1</span>'; }
+      gunstGeben('vernet',-1);
+      return a[2]+' '+a[4]+' <span class="fein">Fürsprache Vernet −1</span>'; }},
+
+  /* ── Ab Rang 9: die Kompaniekasse ──
+     Historisch die *masses*, verwaltet vom Capitaine. Das Spiel kommentiert
+     die Wahl nie — es zeigt ein halbes Jahr später einen Satz darüber, wie
+     viele auf dem Marsch zurückgeblieben sind. Der Stachel steckt woanders:
+     Du hast Veteranenpunkte für deine eigene Muskete ausgegeben und weißt
+     deshalb genau, was gute Ausrüstung wert ist. */
+  kasse_ganz:{label:'Die Kasse ausgeben, wie sie vorgesehen ist',
+    cost:'0 F · Einheitszustand ++',
+    tu(){ S.kasseQuartal = true;
+      S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+25);
+      return 'Schuhe für einundvierzig Mann, Hemden für neunzehn, ein Fass Branntwein und ein Wagen Stroh. Am Ende liegt der Rest in Kupfer auf dem Tisch, und der Rest ist nichts. <span class="fein">Einheitszustand +25</span>'; }},
+
+  kasse_ueblich:{label:'Das Übliche abzweigen',
+    cost:'+150 F · Einheitszustand + · es kann auffallen',
+    tu(){ S.kasseQuartal = true; S.geld += 150;
+      S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
+      S.kasseRisiko = (S.kasseRisiko||0) + 15;
+      return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger. <span class="fein">+150 F · Einheitszustand +10</span>'; }},
+
+  kasse_voll:{label:'Kräftig zulangen',
+    cost:'+400 F · Einheitszustand − · es fällt wahrscheinlich auf',
+    tu(){ S.kasseQuartal = true; S.geld += 400;
+      S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
+      S.kasseRisiko = (S.kasseRisiko||0) + 40;
+      return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat. <span class="fein">+400 F · Einheitszustand −10</span>'; }}
 };
 
 /* Unteroffiziere sind vom Wachdienst und von den Handreichungen befreit, die
@@ -159,9 +230,78 @@ function lagerHandlungen(n){
   if(S.rang>=3) ids.push('korporalschaft');
   if(S.rang>=4) ids.push('listen','ausgabe');
   if(S.rang>=5) ids.push('rekruten','sektion');
+  /* Ab dem Patent fällt weg, was die Muskete betraf, und es kommt hinzu, was
+     eine Einheit betrifft. Der Fechtboden steht dabei allein: Er ist die
+     einzige Handlung im Spiel, die einen Wert gegen sein eigenes Verkümmern
+     verteidigt, statt ihn zu steigern. */
+  if(S.rang>=7) ids.push('fechtboden','zugfuehren','karten');
+  if(S.rang>=8) ids.push('adjutant');
+  if(S.rang>=9 && !S.kasseQuartal) ids.push('kasse_ganz','kasse_ueblich','kasse_voll');
   if(S.zweig==='grenadier') ids.push('tornister');
   if(S.zweig==='voltigeur') ids.push('gelaende');
+  /* Ein Offizier exerziert nicht mehr selbst und trägt keine Muskete mehr —
+     die Lagerhandlungen, die daran hängen, verschwinden mit ihr. */
+  if(S.rang>=7) return ids.filter(id=>LAGER_TUN[id]
+    && !['exerzieren','bajonett','scharf','waffe','gelaende','tornister'].includes(id));
   return ids.filter(id=>LAGER_TUN[id]);
+}
+
+/* ══════════════════ DER INSPECTEUR AUX REVUES ══════════════════
+
+   **Die Kasse hat keinen Moralbalken, sondern eine Zahl und einen Beamten.**
+   Der Einheitszustand (0–100) ist das, was hundertzwanzig Männer an den Füßen
+   haben; der Inspecteur ist der, der es aufschreibt. Beides zusammen macht aus
+   einer Unterschlagung eine Entscheidung statt einer Versuchung: Der Gewinn
+   ist sofort und in Francs, der Preis kommt ein halbes Jahr später und in
+   Männern, die auf dem Marsch zurückbleiben.
+
+   **Das Spiel kommentiert die Wahl nie.** Es zeigt die Zahl, es zeigt den
+   Satz über die Zurückgebliebenen, und es sagt nicht, ob das schlimm war. */
+function inspektion(){
+  if(S.rang<9) return '';
+  const z = (S.einheit==null ? (S.einheit=70) : S.einheit);
+  const risiko = S.kasseRisiko||0;
+  let t = '', ertappt = false;
+  if(risiko>0 && Math.random()*100 < risiko){
+    ertappt = true; S.kasseRisiko = 0;
+    /* Bei Entdeckung sind Rang **und** Fürsprecher weg — das ist die schärfste
+       Strafe, die das Spiel außerhalb des Todes kennt, und sie ist angesagt. */
+    S.rang = Math.max(6, S.rang-1); S.ruf = Math.max(0, S.ruf-20);
+    gunstGeben('vernet',-4); gunstGeben('grandmaison',-3);
+    t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
+      Er rechnet die Ausgabelisten gegen die Bestandslisten und braucht dafür einen Vormittag. Am Nachmittag steht er auf und geht zum Chef de bataillon, ohne dich anzusehen. Was danach passiert, passiert schnell und ohne Verhandlung.
+      <b>Rang zurück · Ruf −20 · Fürsprache Vernet −4</b></div>`;
+  } else {
+    S.kasseRisiko = Math.max(0, risiko-10);
+    const wem = 'vernet';
+    if(z>=75){ gunstGeben(wem,1);
+      t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
+        Er lässt die Kompanie antreten und geht die Reihen ab, Schuhe, Hemden, Tornister. Nach zwanzig Mann hört er auf zu zählen. <b>Einheitszustand ${Math.round(z)} · Fürsprache Vernet +1</b></div>`; }
+    else if(z<40){ gunstGeben(wem,-1);
+      t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
+        Er lässt die Kompanie antreten und findet neunzehn Mann ohne brauchbare Schuhe. Er schreibt neunzehn auf. Er fragt nicht, warum. <b>Einheitszustand ${Math.round(z)} · Fürsprache Vernet −1</b></div>`; }
+    else t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
+        Er geht die Reihen ab, schreibt eine Zahl auf und geht zur nächsten Kompanie. <b>Einheitszustand ${Math.round(z)}</b></div>`;
+  }
+  return t;
+}
+
+/* Der Zustand zehrt sich zwischen den Lagern ab — Schuhe halten nicht ewig.
+   Unter 40 steigt die Krankheitsrate, unter 20 verliert jeder Marsch Männer;
+   beides wird an der Station gerechnet, nicht angekündigt. */
+function einheitZehren(){
+  if(S.rang<9) return '';
+  if(S.einheit==null) S.einheit = 70;
+  S.einheit = Math.max(0, S.einheit - 2);
+  if(S.einheit < 20 && Math.random()<0.5){
+    S.ruf = Math.max(0,S.ruf-1);
+    return 'Auf dem Marsch bleiben vier zurück. Keiner davon ist verwundet.';
+  }
+  if(S.einheit < 40 && Math.random()<0.3){
+    S.belastung = Math.min(100, S.belastung+4);
+    return 'Der Feldscher meldet elf Kranke. Vor einem Monat waren es drei.';
+  }
+  return '';
 }
 
 /* Das Lager ist der angesagte Halt: Hier wird der Feldzug gesichert und
@@ -170,7 +310,10 @@ function lagerHandlungen(n){
 function zeigeLager(n){
   const L = LAUF.lager;
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
-    L.sold = soldAuszahlen(); laufSichern(); }
+    L.sold = soldAuszahlen();
+    S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
+    L.inspektion = inspektion();
+    laufSichern(); }
   const opt = lagerHandlungen(n).map(id=>{
     const t = LAGER_TUN[id];
     return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
@@ -181,6 +324,7 @@ function zeigeLager(n){
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
+      ${L.inspektion||''}
       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${abendeFuer(n)}${
         abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'EIN ABEND':'ZWEI ABENDE'} MEHR ALS ${rangName(S.rang).toUpperCase()}`:''}</div>

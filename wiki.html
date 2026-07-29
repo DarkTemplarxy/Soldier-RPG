@@ -223,20 +223,27 @@ wurde beim Bau von Kapitel 3 nicht mitgezogen; sie kommt jetzt aus den Daten.
 <tr><td><b>Die volle Punkteskala</b></td><td>Rang und Zuschläge rechnen wieder in <i>einer</i> Skala. Je überlebtem Kapitel +8 statt je Station +2.</td></tr>
 <tr><td><b>Napoleonische Gestaltung</b></td><td>Papier für Schriftstücke, Kokarde und Adler, das Gefechtsbild nach Rang, Gelände je Gefecht.</td></tr>
 <tr><td><b>Marketender</b></td><td>Ausrüstung für Francs statt für Veteranenpunkte — Geld hat zum ersten Mal eine Verwendung.</td></tr>
+<tr><td><b>Kapitel 4 — Austerlitz 1805</b></td><td>Vierzehn Stationen, Feindgüte 6, der Pratzeberg als Sondermission. Die Ernte von Boulogne: Was in drei Friedensjahren gelernt wurde, wird hier geprüft.</td></tr>
+<tr><td><b>Rang 6 — Sergent-major</b></td><td>Der Zug in drei Sektionen, rollendes Feuer. Und die härteste Vakanz des Spiels: Der Posten wird frei, weil Martel fällt. Das Spiel spricht es nie aus.</td></tr>
+<tr><td><b>Der Sold</b></td><td>Francs waren Zierde; jetzt kommen sie je Station an und werden im Lager ausgezahlt. Je Kampagne eine eigene Zahlungsmoral — die Italienarmee von 1796 sah monatelang nichts.</td></tr>
+<tr><td><b>Die ganze Rangleiter</b></td><td>Alle vierzehn Ränge sind vergebbar, mit Schwellen, Fürsprechern, Zusatzschranken und vier Rangschranken, an denen eine Laufbahn enden kann.</td></tr>
+<tr><td><b>Die Ränge 7 bis 9 — der Offizier</b></td><td><b>Beim Patent wird die Muskete eingezogen.</b> Laden und Feuern verschwinden ersatzlos, das Gefechtsbild wird eine Handskizze mit gestricheltem Feind, und jeder Knopf ist eine Probe auf andere Leute. Ab dem Capitaine hat jedes Gefecht zwei Ziele, und nur eines davon ist der Sieg.</td></tr>
 </table>
 
 <h3>Was spielbar ist</h3>
-<p><b>Fünfzig Stationen, elf Gefechte</b> (davon eines mit Platzpatronen),
-fünf Lager, zwei Winterquartiere, vier Garnisonssaisons, <b>Ränge 1 bis 5</b>.
-Sechs Herkünfte, sechs Attribute, neun Fertigkeiten, ein Kaufladen mit acht
-Posten, ein Marketender, drei Orden, fünfzehn Zwischenfälle.</p>
+<p><b>Vierundsechzig Stationen, vierzehn Gefechte</b> (davon eines mit Platzpatronen),
+Lager, zwei Winterquartiere, vier Garnisonssaisons. <b>Ränge 1 bis 9 haben ein
+eigenes Spiel</b>, alle vierzehn sind vergebbar. Sechs Herkünfte, sechs Attribute,
+neun Fertigkeiten, ein Kaufladen mit acht Posten, ein Marketender, vier Orden,
+sechzehn Zwischenfälle, Sold je Rang und Kampagne.</p>
 
 <h3>Was entworfen, aber nicht gebaut ist</h3>
-<p>Kapitel 4 bis 11, Ränge 6 bis 14, die höheren Ordensgrade und die
-Auszeichnungen der Kompanie, das Pferd, die Kompaniekasse, der Einheitszustand
-mit Inspektionen, die Rangschranken und die vier Enden, die Offizierspatente,
-die Generalskampagnen. Alles davon steht ausformuliert in
-<code>KONZEPT.md</code> — es fehlt der Code, nicht der Entwurf.</p>
+<p>Kapitel 5 bis 11 und das Gefecht der Ränge 10 bis 14: Kompanien als Rechtecke,
+Phasen statt Runden, die Operationskarte mit vierzig Minuten alten Meldungen, der
+Adler, der Kaiser. Dazu die höheren Ordensgrade, die Dotationen, das Pferd, die
+Offizierspatente und der freiwillige Ausstieg an den Rangschranken. Alles davon
+steht ausformuliert in <code>KONZEPT.md</code> und <code>RANGLEITER.md</code> —
+es fehlt der Code, nicht der Entwurf.</p>
 </section>
 
 <!-- ============================== OFFENE PUNKTE ============================== -->
@@ -797,8 +804,8 @@ gekaufter Leutnant 760.</p>
 
 <table>
 <tr><th>Wofür</th><th class="num">VP</th><th>Stand im Prototyp</th></tr>
-<tr><td>Erreichter Rang</td><td class="num">0 … 580</td><td>in Betrieb, Ränge 1–5 (0/12/26/42/62)</td></tr>
-<tr><td>Je überlebtem Kapitel</td><td class="num">+8</td><td>in Betrieb, max. 2 Kapitel</td></tr>
+<tr><td>Erreichter Rang</td><td class="num">0 … 580</td><td>in Betrieb, alle vierzehn Ränge vergebbar</td></tr>
+<tr><td>Je überlebtem Kapitel</td><td class="num">+8</td><td>in Betrieb, max. 4 Kapitel</td></tr>
 <tr><td>Ruf, je volle 10</td><td class="num">+5</td><td>in Betrieb</td></tr>
 <tr><td>Je Nennung im Tagesbefehl</td><td class="num">+3</td><td>in Betrieb, max. 10</td></tr>
 <tr><td>Nie gekniffen, nie desertiert</td><td class="num">+20</td><td>in Betrieb</td></tr>
@@ -938,12 +945,12 @@ eine Einmal-Marke im Lauf-Teil der Datei.</div>
 <tr><td class="num">1</td><td>Fusilier</td><td>Füsilier</td><td class="num">—</td><td>Der eigene Körper, sieben Ausrüstungsplätze <span class="tag w">gebaut</span></td></tr>
 <tr><td class="num">2</td><td>Grenadier / Voltigeur</td><td>Grenadier / Plänkler</td><td class="num">—</td><td>Auswahl statt Beförderung. Der Voltigeur bekommt eine zweite Kampfart <span class="tag w">gebaut</span></td></tr>
 <tr><td class="num">3</td><td>Caporal</td><td>Korporal</td><td class="num">8</td><td>Kleine Befehle, Wachdienst, haftet für Fehlbestände <span class="tag w">gebaut</span></td></tr>
-<tr><td class="num">4</td><td>Caporal-fourrier</td><td>Korporal-Furier</td><td class="num">8 + Listen</td><td>Schwelle Bildung 35. Bestandslisten, Verpflegung — erste Verwaltung</td></tr>
-<tr><td class="num">5</td><td>Sergent</td><td>Sergeant</td><td class="num">20</td><td>Sektion in der Linie halten, Drill, Rekrutenauswahl</td></tr>
-<tr><td class="num">6</td><td>Sergent-major</td><td>Feldwebel</td><td class="num">60</td><td>Zug, Feuerdisziplin, Fourage, erste Korruptionschancen</td></tr>
-<tr><td class="num">7</td><td>Sous-Lieutenant</td><td>Unterleutnant</td><td class="num">Zug</td><td><b>Bildung 50</b> — die schärfste Kante im Spiel. Degen, Pferd erlaubt, erste Karte</td></tr>
-<tr><td class="num">8</td><td>Lieutenant</td><td>Leutnant</td><td class="num">Zug</td><td>Zug frei bewegen, Adjutantenaufträge beim Stab</td></tr>
-<tr><td class="num">9</td><td>Capitaine</td><td>Hauptmann</td><td class="num">~120</td><td><b>Die Kompaniekasse</b>, eigene Personalpolitik</td></tr>
+<tr><td class="num">4</td><td>Caporal-fourrier</td><td>Korporal-Furier</td><td class="num">8 + Listen</td><td>Schwelle Bildung 35. Bestandslisten, Verpflegung — erste Verwaltung <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">5</td><td>Sergent</td><td>Sergeant</td><td class="num">20</td><td>Sektion in der Linie halten, Drill, Rekrutenauswahl <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">6</td><td>Sergent-major</td><td>Feldwebel</td><td class="num">60</td><td>Zug in drei Sektionen, rollendes Feuer, die Sergenten einteilen <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">7</td><td>Sous-Lieutenant</td><td>Unterleutnant</td><td class="num">Zug</td><td><b>Bildung 50</b> — die schärfste Kante im Spiel. <b>Die Muskete wird eingezogen</b>, das Bild wird eine Handskizze, das Bajonett heißt Säbel und wächst nicht mehr <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">8</td><td>Lieutenant</td><td>Leutnant</td><td class="num">Zug</td><td>Den Zug aus der Linie lösen — kein Linienfeuer mehr, dafür nichts gedeckelt. Adjutantenaufträge, Widerspruch <span class="tag w">gebaut</span></td></tr>
+<tr><td class="num">9</td><td>Capitaine</td><td>Hauptmann</td><td class="num">~120</td><td><b>Die Kompaniekasse</b> und der Auftrag als zweite Achse: Man kann siegen und den Auftrag verfehlen <span class="tag w">gebaut</span></td></tr>
 <tr><td class="num">10</td><td>Chef de bataillon</td><td>Major</td><td class="num">~800</td><td>Pferd wird gestellt, mehrere Kompanien</td></tr>
 <tr><td class="num">11</td><td>Colonel</td><td>Oberst</td><td class="num">~2.000</td><td>Regimentsehre, Adlerträger, Lieferantenverträge</td></tr>
 <tr><td class="num">12</td><td>Général de brigade</td><td>Brigadegeneral</td><td class="num">Brigade</td><td>Operationskarte. <b>Schaltet die Generalskampagnen frei</b></td></tr>
@@ -1478,7 +1485,7 @@ Lemons</i>, <i>A Legionary's Life</i> (86 % positiv bei rund 2.200 Rezensionen,
 </section>
 
 <footer>
-  <span>Der Marschallstab · Handbuch, Stand 28. Juli 2026 · drei Kapitel, Ränge 1–5</span>
+  <span>Der Marschallstab · Handbuch, Stand 29. Juli 2026 · vier Kapitel, Ränge 1–9 gespielt, 1–14 vergebbar</span>
   <span>Code MIT · Inhalte CC BY-NC-SA 4.0</span>
 </footer>
 
@@ -1522,12 +1529,12 @@ const AUFGABEN = [
 {n:10,d:'später',k:'Technik',t:'Leitzahlen auf 80 Läufe hochziehen',
  x:'Alle vier Leitzahlen beruhen auf je 40 Läufen bei ±8 Punkten Rauschen. Die eigene Regel im Dokument lautet „bei Zweifeln 80 Läufe“. Die aktuelle Zielwerttabelle erfüllt sie nicht.',
  q:'CLAUDE.md Z. 572–574, 588–589'},
-{n:14,d:'später',k:'Inhalt',t:'Kapitel 4 bis 11 — Austerlitz bis Waterloo',
- x:'Acht weitere Datendateien, je mit eigenem Charakter (Spanien Moral, Russland Ressourcen-Überleben, 1813 Wiederaufbau). Jede braucht: einen Übergang oder ein Ende, eine Beförderung, ein Winterquartier mit eigenem Text, ein Lager je zwei Gefechte, höchstens vier.',
- q:'KONZEPT.md §9 · CLAUDE.md Z. 87–95'},
-{n:19,d:'später',k:'Inhalt',t:'Ränge 6 bis 14 samt Maßstabswechseln',
- x:'Sergent-major (Zug), Sous-Lieutenant (erste Karte, Bildung 50), Lieutenant, Capitaine, Chef de bataillon, Colonel, drei Generalsränge. Jeder muss neue Knöpfe bringen, nicht größere Zahlen: Regimentskarte, Operationskarte, verzögerte Meldungen.',
- q:'KONZEPT.md §4, §12'},
+{n:14,d:'später',k:'Inhalt',t:'Kapitel 5 bis 11 — Jena bis Waterloo',
+ x:'Kapitel 4 (Austerlitz) steht seit dem 28.07.2026. Es bleiben sieben Datendateien, je mit eigenem Charakter (Spanien Moral, Russland Ressourcen-Überleben, 1813 Wiederaufbau). Jede braucht: einen Übergang oder ein Ende, eine Beförderung, ein Winterquartier mit eigenem Text, ein Lager je zwei Gefechte, höchstens vier.',
+ q:'KONZEPT.md §9 · RANGLEITER.md §10, Phase F'},
+{n:19,d:'später',k:'Inhalt',t:'Ränge 10 bis 14 samt Maßstabswechseln',
+ x:'Die Ränge 6 bis 9 stehen: Zug, Patent mit eingezogener Muskete, gelöster Zug, Kompanie mit Auftrag und Kasse. Es bleiben Chef de bataillon, Colonel und die drei Generalsränge — Kompanien als Rechtecke, Phasen statt Runden, der Adler, die Operationskarte mit verzögerten Meldungen. Und der stärkste der vier Brüche, der fast nichts kostet: Ab Rang 10 verschwindet die Atemleiste ersatzlos und ohne Kommentar.',
+ q:'RANGLEITER.md §2, §3 · KONZEPT.md §4, §12'},
 {n:20,d:'später',k:'Inhalt',t:'Generalskampagnen als Freischaltung',
  x:'Wagram 1809, Leipzig 1813, Waterloo 1815 — je 30 bis 60 Minuten, reine Operationsebene mit Meldungen und Befehlslaufzeiten, eigene Wertung und eigener Chronikeintrag. Freischaltung ab einmal Rang 12, sonst sähen 96 % der Spieler die aufwendigste Darstellungsstufe nie.',
  q:'KONZEPT.md §9'},

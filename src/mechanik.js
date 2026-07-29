@@ -65,6 +65,10 @@ function stationErledigt(){
   /* KONZEPT §10: „Briefe von zu Hause senken Belastung." Genau ein Punkt je
      Station — kein System, ein Beiwerk, wie es dort ausdrücklich heißt. */
   if(S.verheiratet) S.belastung = Math.max(0, S.belastung - 1);
+  /* Ab Rang 9 zehrt der Zustand der Kompanie zwischen den Lagern ab, und was
+     daraus folgt, steht als Satz im Verlauf — nicht als Warnung vorher. */
+  const zustand = (typeof einheitZehren==='function') ? einheitZehren() : '';
+  if(zustand) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + zustand);
   atemKlemmen();
   laufSichern();
 }
@@ -182,6 +186,9 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
+    /* Der Offizier: `einheit` bleibt null, bis es eine Kompanie gibt (Rang 9).
+       `nahkampfKapitel` merkt, wo die Linie schon einmal gebrochen ist. */
+    einheit:null, kasseRisiko:0, kasseQuartal:false, auftraege:0, nahkampfKapitel:[],
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);
@@ -278,9 +285,18 @@ function probe(k, schwierigkeit, ohneUebung){
   return {wurf, ziel, wertRoh:w, erfolg: wurf <= ziel};
 }
 
-function nutzen(k, intens){
+function nutzen(k, intens, fechtboden){
   const ist = (S.attr[k] !== undefined) ? S.attr[k] : S.fert[k];
   if(ist >= 100) return;
+  /* ── Die Pointe des Säbels ──
+     Ab Rang 7 wächst der Nahkampfwert nicht mehr von allein, weil man nicht
+     mehr täglich damit übt: Ein Offizier hat den Degen an der Seite, nicht in
+     der Hand. Nach drei Kapiteln als Offizier ist man schlechter im Nahkampf
+     als man es als Grenadier war — **du wirst größer und schwächer zugleich.**
+     Wer sich dagegen wehren will, geht im Lager auf den Fechtboden; das ist
+     die einzige Quelle, und sie kostet einen Abend, den man nicht auf Listen,
+     Kasse oder Drill verwendet. Sie umgeht diese Sperre über `fechten:true`. */
+  if(k==='bajonett' && S.rang>=7 && !fechtboden) return;
   const zuwachs = (1.7 * intens * (100-ist)/100) * (0.5 + Math.random());
   if(Math.random() < 0.75){
     const neu = Math.min(100, ist + Math.max(1, Math.round(zuwachs)));

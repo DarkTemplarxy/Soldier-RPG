@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 6;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold
+const LAUF_FASSUNG    = 7;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -126,6 +126,24 @@ const LAUF_WANDLER = {
   5: alt => {
     if(alt.mann && alt.mann.soldOffen === undefined) alt.mann.soldOffen = 0;
     return Object.assign({}, alt, {fassung:6});
+  },
+  /* Fassung 6 kannte die Offiziersränge nur als Namen, nicht als Zustand: Es
+     gab keinen Einheitszustand, keine Kompaniekasse und keine Merkliste, in
+     welchem Kapitel die Linie schon einmal gebrochen ist.
+
+     **Der Einheitszustand fängt bei 70 an, nicht bei 100.** Wer als Capitaine
+     eine Kompanie übernimmt, übernimmt sie so, wie sein Vorgänger sie
+     hinterlassen hat — und der ist gefallen. Hundert wäre ein Geschenk, das
+     die erste Entscheidung an der Kasse entwerten würde. */
+  6: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.einheit === undefined) m.einheit = (m.rang>=9 ? 70 : null);
+      if(m.kasseRisiko === undefined) m.kasseRisiko = 0;
+      if(m.auftraege === undefined) m.auftraege = 0;
+      if(!m.nahkampfKapitel) m.nahkampfKapitel = [];
+    }
+    return Object.assign({}, alt, {fassung:7});
   }
 };
 

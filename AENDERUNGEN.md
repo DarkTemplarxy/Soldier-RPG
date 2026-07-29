@@ -5,6 +5,57 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Rangleiter Phase C: der Offizier (Ränge 7–9)
+
+**Der zweite sichtbare Bruch steht.** Ab Rang 7 verschwinden Laden, Feuern, Zielen und Bajonett vollständig aus `aktionen()` — nicht abgefedert, nicht als Notknopf behalten. An ihre Stelle treten vier Befehle, die alle Proben auf *andere Leute* sind: Den Zug vorführen (Autorität 45, Gefahr +8), Das Gelände nutzen (Taktik 40, drei Runden −12 Gefahr bei −20 % Schaden), Die Front verkürzen (Drill 45), Den Degen ziehen (Kaltblütigkeit 50, einmal je Gefecht, Gefahr +20, der Zug fällt nicht unter 30 %).
+
+**Die Handskizze** (`skizzenfeld()`) ersetzt das Sichtfeld: eigene Front als Strich in drei Abschnitten, Feind gestrichelt mit „GEMELDET … ?". Nichts darin wird gewürfelt — die Handzitterei hängt an `streu(i,a)`, wie im Sichtfeld.
+
+**Der Säbel** heißt ab Rang 7 so (`wertName()`, Schlüssel bleibt `bajonett`) und **wächst nicht mehr von allein**: `nutzen('bajonett')` steigt bei Rang ≥ 7 aus, einzige Quelle ist der Lagerabend Fechtboden. Du wirst größer und schwächer zugleich.
+
+**Die Linie bricht** (`nahkampfPruefen()`): zwei bis drei Runden Rückfall auf das alte Sichtfeld, höchstens einmal je Kapitel, vier Auslöser (Bestand < 40 %, Reiter im Karree, Bresche, Nachhut). Der einzige Augenblick, in dem der verkümmerte Säbel etwas tut.
+
+**Gefahrzuschlag** nach RANGLEITER §8: **+4 für Rang 7–8, +5 ab Rang 9** statt der +2 der Unteroffiziere. Die gefährlichsten Ränge des Spiels sind 7 bis 9, nicht 1.
+
+**Der gelöste Zug** (ab Rang 8) nimmt den Linienbeitrag ganz weg (`linie = 0`) und gibt dafür Faktor 1,6 auf allen eigenen Schaden. Der schärfste Hebel der Phase, weil er die wichtigste Zeile des Kampfsystems abschaltet.
+
+**Die Verlustliste** mit Namen statt Zahlen ab Rang 7 (`MANNSCHAFT`, `verlustNamen()`), gedeckelt bei zwölf.
+
+**Der Auftrag** (`AUFTRAEGE`, ab Rang 9) als zweite Achse: Vier Aufträge, deterministisch je Station. **Die Sichtbarkeit hängt am Auftrag, nicht am Sieg** — verfehlt heißt Stufe ≤ 1, auch bei gewonnenem Gefecht, plus Vernet −1 und Ruf −2; erfüllt gibt Vernet +1 und Ruf +2.
+
+**Die Kompaniekasse** (ab Rang 9, je Lager einmal): 0 F / +150 F / +400 F gegen Einheitszustand +25 / +10 / −10 und Inspektionsrisiko 0 / +15 / +40 %. Bei Entdeckung ein Rang zurück, Ruf −20, Vernet −4. **Einheitszustand** `S.einheit` (Start 70, −2 je Station; unter 40 Kranke, unter 20 Männer, die auf dem Marsch zurückbleiben).
+
+**Sold ab Rang 7:** 2,10 · 2,80 · 4,20 · 5,60 · 10,50 · 17,50 · 28,00 · 70,00 F je Station — die Vielfachen aus RANGLEITER §8 auf den Fusilier-Satz 0,70 gerechnet.
+
+**Neue Lagerabende ab Rang 7:** Fechtboden, Zug antreten, Karten durchgehen; ab 8 der Adjutantenauftrag (Reiten/Kartenkunde/Verwaltung reihum, Vernet ±1); ab 9 die drei Kassenknöpfe. **Weggefallen ab Rang 7:** Exerzieren, Bajonettfechten, Scharfschießen, Muskete ölen, Gelände üben, Tornistermarsch — alles, was an der Muskete hing.
+
+**Neuer Zwischenfall `order`** (ab Rang 8): Widerspruch gegen einen Befehl, Taktik 50. Er steht als Zwischenfall und nicht in einem Kapitel, weil Widerspruch keinem Feldzug gehört, sondern dem Rang.
+
+**Die Martel-Szene** steht wörtlich aus RANGLEITER §3 auf dem Patent-Bildschirm — einmal, ohne Knopf, ohne Wirkung.
+
+**`LAUF_FASSUNG` 6 → 7** mit Wandler: `einheit` (70 ab Rang 9, sonst null), `kasseRisiko`, `auftraege`, `nahkampfKapitel`.
+
+**Neuer Prüfstand `test/offizier.js`.** `durchspielen.js` erreicht Rang 7 nicht zuverlässig — ohne diesen Test wären die Offiziersknöpfe gebaut und weitgehend ungetestet. Er setzt den Rang von Hand auf 7, 8 und 9 und prüft je ein Gefecht auf die vier Befehlsknöpfe, die verschwundene Muskete, die gezeichnete Skizze und Konsolenfehler.
+
+**`balance.js` druckt jetzt eine Rangverteilung** (RANGLEITER §10 verlangt sie nach jeder Phase), und der Testbot kennt die Offiziersknöpfe: Gelände lesen, Front verkürzen, Degen, sonst Feuerbefehl; im Lager Fechtboden, Adjutantenauftrag und die Kasse — **immer ehrlich**, weil ein Bot, der unterschlägt, das Strafsystem misst und nicht das Spiel.
+
+**Gemessen, je 40 Läufe:**
+
+| | überlebt | höchster Rang | Rangverteilung (höchster je Lauf) |
+|---|---|---|---|
+| Erstlauf vorsichtig | **45 %** | **20 %** | 14× Fus · 7× Elite · 2× Cap · 9× Serg · 7× S-maj · **1× Lt** |
+| Erstlauf mutig | **10 %** | **10 %** | 16× Fus · 5× Elite · 5× Cap · 10× Serg · 4× S-maj |
+| Veteran 160 | **60 %** | **53 %** | 5× Fus · 3× Cap · 11× Serg · 16× S-maj · **1× S-Lt · 4× Lt** |
+| Veteran 260 | 60 % | 63 % | 2× Fus · 13× Serg · 14× S-maj · **1× S-Lt · 10× Lt** |
+
+**Alle sechs Leitzahlen im Band** (30–45 / 8–20 / 60–75 und 12–25 / 3–15 / 45–60). Gegen Phase B (40 / 23) ist die Bewegung Rauschen.
+
+> **Der überraschende Befund: Rang 7 und 8 sind mit vier Kapiteln erreichbar.** Erwartet war das Gegenteil — die Annahme lautete, niemand komme über Rang 6, und die Phase-E-Patente seien der einzige Weg zur Offiziershälfte. Gemessen erreichen **28 % der Veteranenläufe mit 260 VP** ein Patent, mit 160 VP noch 13 %, und selbst **ein Erstlauf ohne Vorrat** hat es geschafft. Möglich machen das die Sprungeinträge der Leiter (`von` mit zwei Rängen) zusammen mit der Regimentsschule, die Bildung 50 liefert.
+>
+> **Zwei Folgen.** Erstens ist die Offiziersmechanik nicht nur gebaut, sondern wird tatsächlich gespielt — die Läufe mit Patent stellen die höchsten Punktzahlen (bis 394), und die Sterblichkeit ist nach Rang 7 weder eingebrochen noch explodiert (RANGLEITER §11, Frage 2, vorläufig beantwortet). Zweitens ist die **Leitzahl „höchster Rang" strenggenommen von 6 auf 8 gewandert**, weil sie den höchsten *erreichbaren* Rang meint. Sie wird trotzdem weiter gegen Rang 6 gedruckt: Die Bänder sind dort geeicht, und 11 Läufe sind keine Stichprobe, auf die man eine Leitzahl umstellt. **Wer Phase E misst, entscheidet das neu.**
+
+---
+
 ## 2026-07-28 — Rangleiter Phase B: alle vierzehn Ränge vergebbar
 
 Einträge 7 bis 14 nach RANGLEITER §7. Schwellen 95 / 120 / 150 / 180 / 200 / 230 / 260 / 300, Patrone Berthaud → Vernet → Grandmaison, Zusatzschranken Bildung 50 · Ehrenlegion · Reiten 40 · Adler · 3 Bulletins · Grand Officier · Generalskampagne.

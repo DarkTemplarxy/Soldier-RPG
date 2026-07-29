@@ -61,6 +61,13 @@ const VETERAN_ZIELE = [['konstitution',70],['geschick',70],['muskete',60],
    eigentlichen Flaschenhals dieses Spiels". */
 const ziel = path.resolve(__dirname, '../index.html');
 
+/* Kurzname je Rang — das Skript kennt `grundwerte.js` nicht, weil es im Browser
+   läuft und nicht in Node. Sieben Wörter doppelt zu halten ist billiger als
+   eine Brücke zwischen beiden Welten. */
+const RANG_KURZ = ['', 'Fus', 'Elite', 'Cap', 'Four', 'Serg', 'S-maj', 'S-Lt',
+                   'Lt', 'Cpt', 'Chef', 'Col', 'GdB', 'GdD', 'Mar'];
+const rangKurz = r => RANG_KURZ[r] || ('R' + r);
+
 /* ── Die Punkteverteilung ──
    60 Punkte auf fünf Attribute (Bildung ist ausgenommen), Sockel 20, höchstens
    70. Vorher drückte das Skript „Auswürfeln" — und maß damit vor allem den
@@ -83,7 +90,14 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
   const p = await b.newPage();
-  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0, punkte: [] };
+  /* ── Die Rangverteilung ──
+     RANGLEITER §10 verlangt sie nach **jeder** Phase: wie viele Läufe enden auf
+     welchem Rang. Die beiden Leitzahlen sagen, ob das Spiel hart genug ist und
+     ob die Leiter trägt — sie sagen nicht, **wo** sie trägt. Mit vierzehn
+     Rängen und vier Kapiteln ist genau das die Frage: Sammelt sich alles bei
+     Rang 6, oder sieht überhaupt jemand ein Patent? */
+  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0,
+                punkte: [], raenge: {} };
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
     /* Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0. Sonst ließe
@@ -161,7 +175,27 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           // Nur in den ersten beiden Runden versuchen: `lueckeGelobt` wird erst
           // bei gelungener Probe gesetzt, sonst drückte der Bot acht Runden lang
           // denselben Knopf, statt zu schießen.
-          if (S.rang >= 3 && S.rang < 5 && !K.lueckeGelobt && K.runde <= 2) z = f(/Lücke/);
+          /* ── Ab Rang 7: der Offizier ──
+             **Die Reihenfolge ist eine andere als bei allen Rängen davor**,
+             weil es keinen eigenen Schuss mehr gibt. Zuerst das Gelände (drei
+             Runden −12 Gefahr, einmal je Gefecht), dann die Front verkürzen,
+             wenn der Zug abbaut, dann der Degen, wenn es kippt — und sonst
+             immer der Feuerbefehl, weil er das Einzige ist, das Schaden macht.
+
+             **Wer dem Bot das nicht beibringt, misst wieder seine Blindheit
+             und nicht das Spiel** — dieselbe Lektion wie damals bei der Gunst
+             und bei der Regimentsschule. Der gelöste Zug bleibt bewusst außen
+             vor: Er ist ein Handel, kein Handgriff, und ein Bot, der ihn immer
+             drückt, misst nicht, ob er sich lohnt. */
+          if (S.rang >= 7) {
+            if (K.nahkampf > 0) z = f(/Den Säbel nehmen|Stehenbleiben/);
+            if (!z && !(K.gelaendeVorteil > 0)) z = f(/Gelände nutzen/);
+            if (!z && K.sektion != null && K.sektion < 70) z = f(/Front verkürzen/);
+            if (!z && !K.degenGezogen && K.sektion != null && K.sektion < 45) z = f(/Degen ziehen/);
+            if (!z && (anteil <= 0.3 || S.atem <= 30)) z = f(/In Deckung gehen/);
+            if (!z) z = f(/Den Zug vorführen/);
+          }
+          if (!z && S.rang >= 3 && S.rang < 5 && !K.lueckeGelobt && K.runde <= 2) z = f(/Lücke/);
           // Ab Sergent: erst die Sektion schließen, dann die Salve. Wer die
           // Sektion verkommen lässt, verliert die Fürsprache des Lieutenants.
           if (!z && S.rang >= 5 && !K.sektionGelobt && K.runde <= 2) z = f(/Schließen und halten/);
@@ -184,6 +218,19 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
              um Fürsprache und würde nie befördert — gemessen würde dann nicht
              die Schwelle, sondern die Blindheit des Bots. */
           if (anteil < 0.6) z = f(/Schlafen und liegen/);
+          /* ── Ab Rang 7 ist das Lager ein anderes Lager ──
+             Muskete und Exerzieren sind weg; dafür gibt es den Fechtboden (die
+             einzige Quelle, aus der der Säbel noch wächst), den Zug und ab
+             Rang 8 den Adjutantenauftrag, der Vernets Fürsprache trägt.
+
+             **Die Kompaniekasse nimmt der Bot immer ehrlich.** Ein Bot, der
+             unterschlägt, misst nicht das Spiel, sondern das Strafsystem — und
+             die Entscheidung ist eine moralische, nicht eine optimale. Wer die
+             andere Seite messen will, ändert diese eine Zeile und sagt dazu,
+             dass er es getan hat. */
+          if (!z && S.rang >= 9) z = f(/Kasse ausgeben, wie sie vorgesehen/);
+          if (!z && S.rang >= 8 && gunst('vernet') < 4) z = f(/Auftrag des Bataillons/);
+          if (!z && S.rang >= 7) z = f(/Fechtboden/) || f(/Zug selbst antreten/) || f(/Karten des Abschnitts/);
           if (!z && gunst('martel') < 4) z = f(/Am Feuer/);
           /* Die Leiter verlangt jetzt verschiedene Fürsprecher und Bildung 35.
              Wem man das nicht beibringt, der misst wieder die Blindheit des
@@ -260,6 +307,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     if (hoechster >= 4) res.fourrier++;
     if (hoechster >= 5) res.sergent++;
     if (hoechster >= 6) res.major++;
+    res.raenge[hoechster] = (res.raenge[hoechster] || 0) + 1;
     const t = await p.$eval('#app', e => e.innerText);
     const m = t.match(/Summe\s+(\d+)/); if (m) res.punkte.push(+m[1]);
   }
@@ -272,5 +320,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
   console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
+  const verteilung = Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
+    .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`).join(' · ');
+  console.log(`Rangverteilung (höchster je Lauf): ${verteilung}`);
   await b.close();
 })();

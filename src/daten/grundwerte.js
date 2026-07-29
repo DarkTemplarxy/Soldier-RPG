@@ -27,6 +27,19 @@ const FERTIGKEITEN = [
   ['feldchirurgie','Feldchirurgie','Blut stillen, halten, zunähen. Zählt am Verbandsplatz nach dem Gefecht und bei den Kranken am Sinai — später der Unterschied zwischen einer Wunde und einem Grab.']
 ];
 const NAMEN = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,n])=>(o[k]=n,o),{});
+/* ── Der Wert heißt anders, sobald du ein Patent hast ──
+   Das Bajonett steckt auf einer Muskete, und ab Rang 7 gibt es keine Muskete
+   mehr. Der Wert bleibt derselbe — dieselbe Zahl, dieselbe Fertigkeit —, aber
+   er heißt **Säbel**, weil das der Gegenstand ist, den du jetzt trägst.
+
+   **Deshalb wird umbenannt statt neu angelegt:** Ein zweiter Nahkampfwert
+   würde den ersten entwerten, und ein Grenadier, der zehn Jahre lang gestochen
+   hat, soll das mitnehmen. Was er nicht mitnimmt, ist das Weiterüben —
+   `nutzen('bajonett')` greift ab Rang 7 nicht mehr (siehe `nutzen()`). */
+function wertName(k){
+  if(k==='bajonett' && typeof S!=='undefined' && S && S.rang>=7) return 'Säbel';
+  return NAMEN[k] || k;
+}
 const ERKLAERUNG = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,,e])=>(o[k]=e||'',o),{});
 
 /* Ein Wort mit Erklärung beim Überfahren. Reines CSS, keine Abhängigkeit. */
@@ -70,8 +83,43 @@ const RANG = [
    **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender
    kaufen** (8–18 F). Bei ~16 Stationen heißt das für den Füsilier rund 11 F
    bei voller Zahlung — und in Italien, wo zu 30 % gezahlt wird, drei. */
-const SOLD = {1:0.70, 2:0.80, 3:1.00, 4:1.20, 5:1.50, 6:2.00};
-function soldSatz(rang){ return SOLD[rang] || SOLD[6]; }
+/* ── Ab Rang 7 ist Sold kein Zubrot mehr, sondern ein Haushalt ──
+   Ein Offizier bezahlte Uniform, Degen, Pferd und seine Verpflegung im Feld
+   selbst; ein Capitaine dazu die Repräsentation, ein Général Stab und
+   Equipage. Deshalb springt der Satz bei 7 auf das Dreifache und wächst
+   danach steil — und deshalb ist es trotzdem kein Geschenk: Was ein Offizier
+   mehr bekommt, gibt er auch wieder aus. Die Ausgabenseite steht bei den
+   Rängen selbst (Kompaniekasse ab 9), nicht hier.
+
+   Die Vielfachen folgen RANGLEITER §8: 7–8 dreifach bis vierfach, 9 fünf- bis
+   siebenfach, 10–11 acht- bis fünfzehnfach, 12–13 fünfundzwanzig- bis
+   vierzigfach, 14 hundertfach. Gerechnet auf den Fusilier-Satz 0,70. */
+const SOLD = {1:0.70, 2:0.80, 3:1.00, 4:1.20, 5:1.50, 6:2.00,
+              7:2.10, 8:2.80, 9:4.20, 10:5.60, 11:10.50, 12:17.50, 13:28.00, 14:70.00};
+function soldSatz(rang){ return SOLD[rang] || SOLD[14]; }
+
+/* ══════════════════ DIE VERLUSTLISTE ══════════════════
+
+   **Ab Rang 7 schreibt man sie selbst.** Wer als Sergent „vier von zwanzig"
+   gelesen hat, liest jetzt vier Namen — und das ist der ganze Unterschied.
+   Eine Zahl ist ein Ergebnis, ein Name ist ein Mann; das Spiel sagt dazu
+   nichts, es druckt nur die Liste, die ein Offizier ohnehin abzuliefern hat.
+
+   Die Namen sind gewöhnliche französische Namen des Jahrgangs, keine Figuren:
+   Wer hier steht, wird nicht wiederkommen und hatte auch vorher keine Szene.
+   Genau das ist gemeint. */
+const MANNSCHAFT = [
+  'Barrière','Aubry','Cheval','Delorme','Fabre','Gantier','Hurel','Jourdain',
+  'Lavaud','Merle','Nadaud','Ollier','Pichon','Quesnel','Rouvier','Sarrazin',
+  'Thibaud','Vasseur','Amiot','Boissel','Carrère','Doumer','Estève','Ferrand',
+  'Gaubert','Hénault','Imbert','Joubert','Laffitte','Mazet','Noguès','Perrot',
+  'Rabaud','Signoret','Toussaint','Vialar','Bézard','Colomb','Dagorne','Espitalier'
+];
+function verlustNamen(anzahl, saat){
+  const zufall = i => { const x = Math.sin(i*127.1 + saat*311.7)*43758.5453; return x-Math.floor(x); };
+  return MANNSCHAFT.map((nm,i)=>[nm, zufall(i)]).sort((a,b)=>a[1]-b[1])
+    .slice(0, Math.max(0, Math.min(MANNSCHAFT.length, anzahl))).map(x=>x[0]);
+}
 
 function rangNameVon(mann){
   if(mann.rang===2) return mann.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';

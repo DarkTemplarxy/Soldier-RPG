@@ -16,12 +16,12 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)** und **Kapitel 4 (Austerlitz 1805)**, Ränge 1–6, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)** und **Kapitel 4 (Austerlitz 1805)**, Ränge 1–9, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
 | Charaktererschaffung mit Pool und sechs Herkünften | Kapitel 3–11 |
-| Attribute und Fertigkeiten 0–100 mit Wachstum | Ränge 6–14 |
+| Attribute und Fertigkeiten 0–100 mit Wachstum | Ränge 10–14 |
 | Gefecht auf zwei Maßstäben (Körper / Sektion) | Ausrüstungskauf im Spiel |
 | Voltigeur- und Grenadierzweig mit eigenen Aktionen | Orden und Ehrenlegion |
 | Ausrüstung mit Zustandsverschleiß | Pferd, Kompaniekasse, Inspektionen |
@@ -49,7 +49,9 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | Vier Garnisonssaisons mit eigenen Handlungen | |
 | **Sold** je Rang und Kampagne, im Lager ausgezahlt | Pferd, Offizierssold |
 | **Kapitel 4 (Austerlitz 1805)**, 14 Stationen, Feindgüte 6 | Kapitel 5–11 |
-| **Rang 6 (Sergent-major)** mit dem Zug als drittem Maßstab | Ränge 7–14 |
+| **Rang 6 (Sergent-major)** mit dem Zug als drittem Maßstab | Ränge 10–14 |
+| **Ränge 7–9**: Muskete weg, Skizze, Säbel, Auftrag, Kompaniekasse | Kompanien als Rechtecke, Operationskarte |
+| Rangleiter bis 14 vergebbar, vier Rangschranken | Patente (Phase E), Prüfmodus |
 | **Eiserne Krone** — der erste fremde Orden | zweiter fremder Orden |
 | Ehe als Beiwerk · Duell mit Todespfad · Übungsgefecht | |
 
@@ -65,13 +67,14 @@ Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nich
 npm install playwright && npx playwright install chromium   # einmalig
 
 node test/durchspielen.js         # ein Lauf, meldet Konsolenfehler
+node test/offizier.js             # Ränge 7, 8, 9 von Hand gesetzt: Knöpfe, Muskete weg, Skizze
 node test/spielstand.js           # sichern, fortsetzen, sterben, alte Fassungen
 node test/durchspielen.js dist    # dasselbe mit der gebauten Einzeldatei
 node test/balance.js 40           # 40 Läufe, misst die Überlebensquote
 node werkzeug/bauen.js            # baut dist/marschallstab.html zum Weitergeben
 ```
 
-**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 40`, nach jeder Änderung am Zustand `node test/spielstand.js`.
+**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 40`, nach jeder Änderung am Zustand `node test/spielstand.js`, nach jeder Änderung an den Offiziersrängen `node test/offizier.js`.
 
 ---
 
@@ -81,6 +84,7 @@ node werkzeug/bauen.js            # baut dist/marschallstab.html zum Weitergeben
 README.md                       Eingangstür für Fremde
 CLAUDE.md                       diese Datei — Arbeitsgedächtnis
 KONZEPT.md                      vollständiges Design, auch das Ungebaute
+RANGLEITER.md                   die vierzehn Ränge, Schwellen, Brüche, Baureihenfolge
 AENDERUNGEN.md                  Protokoll aller Balance-Änderungen
 LICENSE / LICENSE-INHALTE       MIT für Code, CC BY-NC-SA für Inhalte
 entwurf/                        Konzeptgrafiken, Bildschirmfotos, GITHUB.md
@@ -508,6 +512,61 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 
 **Die Abrechnung skaliert mit** — dieselbe Zahl über sechzig statt zwanzig, Schwellen bei 45 % und 15 % Verlust, und Rechenschaft schuldet man jetzt Vernet statt Berthaud. Das Appell-Bild zeichnet drei Reihen zu zwanzig, mit Lücke: Es sind drei Sektionen, nicht sechzig Einzelne.
 
+### Ränge 7–9 — der Offizier (Phase C der Rangleiter)
+
+**Der zweite sichtbare Bruch** (RANGLEITER §2). Ab Rang 7 verschwinden Laden und Feuern **vollständig** — nicht abgefedert, nicht als Notknopf behalten. Ein „Muskete aufheben"-Knopf würde den Bruch in eine Option verwandeln, und eine Option ist kein Bruch.
+
+| Was weg ist | Was dafür kommt |
+|---|---|
+| Muskete, Laden, Feuern, Bajonett, Zielen | vier Befehlsknöpfe, alle Proben auf *andere Leute* |
+| die Ladeanzeige in der Seitenleiste | Einheitszustand (ab 9) |
+| das Sichtfeld mit Männern | die **Handskizze**: eigene Front als Strich, Feind gestrichelt |
+| Lagerabende an Muskete und Exerzieren | Fechtboden, Zug antreten, Karten, Adjutantenauftrag, Kompaniekasse |
+
+| Knopf | Probe | Wirkung |
+|---|---|---|
+| **Den Zug vorführen** | Autorität 45 | voller Schaden, skaliert mit dem Zugbestand · **Gefahr +8** |
+| **Das Gelände nutzen** | Taktik 40 | drei Runden **Gefahr −12**, dafür **Schaden −20 %** |
+| **Die Front verkürzen** | Drill 45 | Bestand +5 · drei Runden halbe Verluste |
+| **Den Degen ziehen** | Kaltblütigkeit 50 | einmal je Gefecht: der Zug fällt nicht unter 30 % · **Gefahr +20** |
+| **Den Zug lösen** *(ab 8)* | Taktik 40 | **kein Linienbeitrag mehr** · dafür eigener Schaden ×1,6 |
+
+> **Die neue Ohnmacht ist der Entwurf, nicht ein Nebeneffekt.** Als Fusilier lag zwischen Entscheidung und Wirkung nichts — du hast gezielt und getroffen. Als Sous-Lieutenant gibst du einen Befehl und wartest, ob er ausgeführt wird. **Du bist mächtiger und hilfloser zugleich.** Deshalb hängt jeder Schaden am Zustand der Einheit und nicht mehr an der eigenen Hand: Wer seine Leute im Lager vernachlässigt hat, merkt es hier und kann nichts dagegen tun.
+
+> **Der gelöste Zug ist der schärfste Hebel der ganzen Phase.** Er nimmt die Zeile `feindMoral -= schaden + linie` weg — die wichtigste im Kampfsystem, ohne die alle Gefechte unwinnbar sind (siehe „Warum so niedrig?"). Zum ersten Mal steht der eigene Schaden für sich allein, und der Faktor 1,6 ist die Gegenrechnung. **Wer daran dreht, misst zuerst, ob Gefechte ab Rang 8 überhaupt noch enden.**
+
+**Der Säbel** (`bajonett`, ab Rang 7 nur umbenannt über `wertName()`): Der Wert bleibt, aber **`nutzen('bajonett')` greift ab Rang 7 nicht mehr** — ein Offizier übt nicht mehr täglich. Einzige Quelle ist der Lagerabend **Fechtboden** (`nutzen(k,i,true)`). Nach drei Kapiteln als Offizier ist man schlechter im Nahkampf als man es als Grenadier war: **Du wirst größer und schwächer zugleich.**
+
+**Die Linie bricht** (`K.nahkampf`, `nahkampfPruefen()`): Zwei bis drei Runden fällt der Bildschirm auf das alte Sichtfeld zurück — Männer und Rauch, wie 1796, nur bist du jetzt der, den sie zuerst suchen. **Höchstens einmal je Kapitel** (`S.nahkampfKapitel`), vier Auslöser: Bestand unter 40 %, Reiter im Karree, Bresche, Nachhut. Es ist der einzige Augenblick, in dem der Säbelwert etwas tut — und damit die Einlösung dafür, dass er verkümmert.
+
+**Die Gefahr** (RANGLEITER §8): **+4 für 7–8, +5 ab 9**, statt der +2 der Unteroffiziere. Epauletten, Degen und drei Schritte vor der Front machten einen Offizier auf dreihundert Schritt kenntlich. **Die gefährlichsten Ränge des Spiels sind 7 bis 9, nicht 1** — wer aufsteigt, kauft sich nicht in Sicherheit ein.
+
+**Die Verlustliste** ersetzt ab Rang 7 das Appell-Bild: Namen aus `MANNSCHAFT` statt Zahlen, deterministisch je Gefecht gezogen. Wer bis Rang 6 „vier von zwanzig" gelesen hat, liest jetzt vier Namen. Über zwölf bricht die Liste ab — nicht aus Platzmangel, sondern weil ein Offizier ab einer bestimmten Zahl aufhört, Namen zu schreiben.
+
+**Die zweite Achse: der Auftrag** (`AUFTRAEGE`, ab Rang 9). Jedes Gefecht hat zwei Ziele — Feindmoral wie bisher und einen Auftrag vom Chef de bataillon. **Die Sichtbarkeit hängt am Auftrag, nicht am Sieg:** Wer ihn verfehlt, kommt über Stufe 1 nicht hinaus, auch bei gewonnenem Gefecht. Damit hört „gewinnen" auf, eine eindeutige Sache zu sein. Der Auftrag steht **vor** der ersten Runde auf dem Schirm — ein verstecktes Ziel wäre eine Falle, und Fallen sind nicht das, was dieser Rang verkauft.
+
+**Die Kompaniekasse** (ab Rang 9, je Lager einmal, `S.kasseQuartal`):
+
+| Entscheidung | für dich | Einheitszustand | Inspektionsrisiko |
+|---|---|---|---|
+| Wie vorgesehen ausgeben | 0 F | +25 | keines |
+| Das Übliche abzweigen | +150 F | +10 | +15 % |
+| Kräftig zulangen | +400 F | −10 | +40 % |
+
+Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20, Vernet −4.** Das Risiko sinkt je Lager um 10, wenn nichts passiert — man kann es aussitzen, aber nicht dauerhaft. **Der Einheitszustand** (`S.einheit`, 0–100, Start 70) zehrt sich je Station um 2 ab; unter 40 steigt die Krankheitsrate, unter 20 verliert jeder Marsch Männer. Das Spiel kommentiert die Wahl nie — es zeigt ein halbes Jahr später einen Satz darüber, wie viele zurückgeblieben sind.
+
+> **Der Stachel steckt woanders als im Geld.** Du hast Veteranenpunkte für deine eigene Muskete ausgegeben und weißt deshalb genau, was gute Ausrüstung wert ist — weil du dafür bezahlt hast. Und jetzt sitzt du auf dem Geld, mit dem hundertzwanzig andere Männer Schuhe bekommen sollen.
+
+**Widerspruch** (Zwischenfall `order`, ab Rang 8): Zum ersten Mal die Möglichkeit, einem Vorgesetzten ins Gesicht zu sagen, dass sein Befehl falsch ist — Taktik 50, Fürsprache sofort weg, Ruf nur, wenn man recht behält. Er steht bewusst als Zwischenfall und nicht in einem Kapitel: **Widerspruch gehört keinem Feldzug, er gehört dem Rang.**
+
+**Der Sold ab Rang 7** springt auf das Dreifache (2,10 F je Station) und erreicht 70,00 beim Marschall — die Vielfachen aus RANGLEITER §8, gerechnet auf den Fusilier-Satz 0,70. Es ist kein Geschenk: Ein Offizier bezahlte Uniform, Degen, Pferd und Verpflegung selbst, ein Capitaine dazu die Repräsentation. Die Ausgabenseite steht bei den Rängen (Kompaniekasse ab 9), nicht in `SOLD`.
+
+**Und die Szene, die nichts kostet und alles sagt** — einmal, beim Patent, ohne Knopf und ohne Wirkung:
+
+> *Martel steht in der Reihe, in der du zehn Jahre gestanden hast. Als du vorbeigehst, salutiert er. Er ist zweiundvierzig, er hat dich im April 1796 über die Pässe gebracht, und er wird nie ein Patent bekommen, weil er nicht lesen kann. Er sagt nichts dazu. Du auch nicht.*
+
+**Geprüft mit `node test/offizier.js`** — setzt den Rang von Hand auf 7, 8 und 9 und prüft je ein Gefecht: Sind die vier Befehlsknöpfe da, ist die Muskete weg, wird die Skizze gezeichnet, gibt es Konsolenfehler? **Ohne diesen Prüfstand wären die Offiziersknöpfe gebaut und ungetestet**, weil `durchspielen.js` Rang 7 mit vier Kapiteln nie erreicht — derselbe Fehler wie ein stummer Filter, nur eine Ebene höher.
+
 ### Der Sold (`SOLD` in `grundwerte.js`, `soldAuszahlen()` in `mechanik.js`)
 
 **Francs waren bis zum 28.07.2026 Zierde.** Es gab sie aus siebenundzwanzig Szenen, und der Marketender nahm sie — aber es gab keine verlässliche Quelle, also war Geld eine Zahl, die man nicht planen konnte.
@@ -708,7 +767,11 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 | **überlebt** | **30–45 %** | **8–20 %** | **60–75 %** |
 | **höchster Rang** | **12–25 %** | **3–15 %** | **45–60 %** |
 
-Gemessen mit Kapitel 4, je 40 Läufe: überlebt **35 / 8 / 65 %**, höchster Rang **18 / 3 / 55 %**. Alle sechs im Band.
+Gemessen nach Phase C, je 40 Läufe: überlebt **45 / 10 / 60 %**, höchster Rang **20 / 10 / 53 %**. Alle sechs im Band. *(Mit Kapitel 4, vor den Rangleiter-Phasen: 35 / 8 / 65 % und 18 / 3 / 55 %.)*
+
+> **⚠ Die Leitzahl „höchster Rang" ist strenggenommen von 6 auf 8 gewandert — und wird trotzdem weiter gegen 6 gedruckt.** Sie meint den höchsten mit dem gebauten Inhalt *erreichbaren* Rang, und nach Phase C erreichen **28 % der Veteranenläufe mit 260 VP ein Patent** (Rang 7 oder 8), mit 160 VP noch 13 %, und selbst ein Erstlauf ohne Vorrat hat es einmal geschafft. Möglich machen das die Sprungeinträge der Leiter zusammen mit der Regimentsschule.
+>
+> **Nicht umgestellt wird trotzdem**, aus zwei Gründen: Die Bänder sind gegen Rang 6 geeicht, und elf Läufe sind keine Stichprobe, auf die man eine Leitzahl setzt. **Wer Phase E misst, entscheidet das neu** — dann ist die Offiziershälfte über die Patente ohnehin regulär zugänglich.
 
 > ### ✓ Eingelöst mit Kapitel 4: Der Abstand ist zurück auf 30 Punkte
 >
@@ -740,17 +803,20 @@ Gemessen mit Kapitel 4, je 40 Läufe: überlebt **35 / 8 / 65 %**, höchster Ran
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **überlebt** *(Leitzahl)* | **35 %** | **8 %** | **65 %** | 65 % |
-| **höchster Rang: Sergent-major** *(Leitzahl)* | **18 %** | **3 %** | **55 %** | 63 % |
-| Sergent erreicht | 23 % | 10 % | 73 % | 88 % |
-| Gestorben | 18 von 40 | **30 von 40** | 12 von 40 | 15 von 40 |
-| Italien überstanden *(Lehrstück)* | 98 % | 88 % | 100 % | 100 % |
-| Elitekompanie erreicht | 53 % | 57 % | 98 % | 98 % |
-| Caporal erreicht | 35 % | 53 % | 98 % | 95 % |
-| Caporal-fourrier erreicht | 23 % | 25 % | 78 % | 78 % |
-| Punkte, Median | 61 | 60 | 203 | 211 |
+| **überlebt** *(Leitzahl)* | **45 %** | **10 %** | **60 %** | 60 % |
+| **höchster Rang: Sergent-major** *(Leitzahl)* | **20 %** | **10 %** | **53 %** | 63 % |
+| Sergent erreicht | 43 % | 35 % | 80 % | 95 % |
+| Gestorben | 22 von 40 | **36 von 40** | 16 von 40 | 16 von 40 |
+| Italien überstanden *(Lehrstück)* | 100 % | 98 % | 98 % | 98 % |
+| Elitekompanie erreicht | 57 % | 53 % | 88 % | 93 % |
+| Caporal erreicht | 48 % | 48 % | 88 % | 95 % |
+| Caporal-fourrier erreicht | 43 % | 35 % | 80 % | 95 % |
+| **Patent erreicht (Rang 7 oder 8)** | **3 %** | **0 %** | **13 %** | **28 %** |
+| Punkte, Median | 85 | 55 | 284 | 342 |
 
-*(Drei Kapitel, Stand 28.07.2026. „überlebt" heißt jetzt: alle drei hinter sich gebracht.)*
+*(Vier Kapitel, Rangleiter bis Phase C, Stand 29.07.2026. „überlebt" heißt: alle vier hinter sich gebracht.)*
+
+> **Die letzte Zeile ist die neue.** Sie misst, was Phase C überhaupt erst sichtbar macht: Wie oft sieht ein Lauf die Offiziershälfte? Die Antwort — 3 % im Erstlauf, 28 % beim reichen Veteranen — ist zugleich die Rechtfertigung für Phase E: Ohne die Patente bleibt der zweite Bruch für die meisten Spieler eine Zahl in der Rangtabelle.
 
 > **Das ist die Kurve, um die es geht.** Italien ist das Lehrstück und lässt fast jeden durch; **Ägypten tötet den ersten Mann** — vorsichtig sehen 43 % das Ende, wer aufsteigen will, nur 20 %. Mit dem Vorrat eines guten ersten Laufs (160 VP) steigt es auf 73 %, und der Sergent wird von einer Ausnahme (18 %) zum Regelfall (70 %).
 >
@@ -825,8 +891,12 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | **Kapitel 3 gebaut · Erstlauf v / m** | 40 / 40 | 98 / 88 % | 35 / 53 % | 61 / 60 |
 | Leiter der Sichtbarkeit · Erstlauf v / m | 40 / 40 | 100 / 98 % | 45 / 53 % | 93 / 87 |
 | dieselbe Fassung · Veteran 160 / 260 | 40 / 40 | 100 / 100 % | 98 / 95 % | 203 / 211 |
-| **Kapitel 4 + Rang 6 (gültig) · Erstlauf v / m** | **40 / 40** | **98 / 100 %** | **45 / 45 %** | **82 / 72** |
-| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **95 / 100 %** | **249 / 267** |
+| Kapitel 4 + Rang 6 · Erstlauf v / m | 40 / 40 | 98 / 100 % | 45 / 45 % | 82 / 72 |
+| dieselbe Fassung · Veteran 160 / 260 | 40 / 40 | 100 / 100 % | 95 / 100 % | 249 / 267 |
+| Rangleiter Phase A (Fundament) · Erstlauf vorsichtig | 40 | — | 50 % überlebt · 28 % höchster Rang | 82 |
+| Rangleiter Phase B (alle 14 vergebbar) · Erstlauf vorsichtig | 40 | — | 40 % überlebt · 23 % höchster Rang | — |
+| **Rangleiter Phase C (der Offizier, gültig) · Erstlauf v / m** | **40 / 40** | **100 / 98 %** | **48 / 48 %** | **85 / 55** |
+| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **98 / 98 %** | **88 / 95 %** | **284 / 342** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
 
@@ -867,6 +937,8 @@ Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang 
 | Gefecht | Lücke einmal je Gefecht · hinknien bei wenig Blut oder Luft · als Caporal immer die Salve · sonst feuern · nachladen. Kein Bajonett. |
 | Lager | ruhen unter 60 % Leben · Fürsprache, solange Gunst < 4 · Muskete ölen · Schuster · scharf schießen · exerzieren |
 | Winterquartier | ruhen unter 80 % Leben oder bei einer Wunde · sonst Fürsprache, Ausrüstung, Drill |
+| **Gefecht ab Rang 7** | Säbel, wenn die Linie bricht · Gelände lesen, solange der Vorteil aus ist · Front verkürzen unter 70 % Zug · Degen unter 45 % · sonst **immer** der Feuerbefehl. **Den gelösten Zug drückt er nie** — der ist ein Handel, kein Handgriff, und ein Bot, der ihn immer nimmt, misst nicht, ob er sich lohnt. |
+| **Lager ab Rang 7** | Kasse ehrlich ausgeben · Adjutantenauftrag, solange Vernet < 4 · Fechtboden, Zug, Karten |
 | Szenen | der Knopf mit dem größten Abstand zwischen Wert und Schwierigkeit; riskante mit Abschlag, bei wenig Blut gar nicht |
 | Gefechts-Ereignisse | dieselbe Rechnung. **`MUT=1` sucht das Risiko** statt es zu meiden — außer es steht um sein Leben. |
 | Erschaffung | Konstitution 60, Geschick 40 — die ganzen 60 Poolpunkte. Herkunft reihum durch alle sechs. |
@@ -875,6 +947,8 @@ Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang 
 **Warum die feste Verteilung wichtiger ist, als sie aussieht.** „Auswürfeln" maß vor allem den Zufallsgenerator: Weil der Tod seit den Lebenspunkten eine Schwelle ist und der Vorrat an der Konstitution hängt, entschied der Wurf über den Lauf, bevor er begann — derselbe Stand lieferte 48 %, 64 % und 51 %. Mit fester Verteilung ist die Streuung weg, und 40 Läufe sagen mehr als vorher 80.
 
 **Regel, die daraus folgt:** Wer eine Schwelle einführt, die mehrere Handlungen verlangt, muss dem Bot beibringen, sie zu verfolgen — sonst misst das Skript die Blindheit des Bots und nicht das Spiel. Das galt für die Gunst und gilt für jede weitere Schwelle.
+
+**Seit Phase C druckt `balance.js` eine Rangverteilung** — wie viele Läufe auf welchem Rang enden (RANGLEITER §10 verlangt sie nach jeder Phase). Die beiden Leitzahlen sagen, ob das Spiel hart genug ist und ob die Leiter trägt; sie sagen nicht, **wo** sie trägt. Mit vierzehn Rängen und vier Kapiteln ist genau das die Frage: Sammelt sich alles bei Rang 6, oder sieht überhaupt jemand ein Patent?
 
 ---
 
@@ -1193,10 +1267,16 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 ## Was als Nächstes ansteht
 
-1. **Die Rangleiter, Phasen B bis E** (`RANGLEITER.md` §10) — Einträge 7–14, der Offizier, der Stab, die Patente.
-2. **Die höheren Ordensgrade** (Officier ab 1807, Commandeur ab 1809), die **fremden Orden** (Eiserne Krone ab 1805) und die **Dotationen** ab Tilsit. Alle drei sind in KONZEPT §6 vollständig entworfen und hängen nur an Kapiteln, die es noch nicht gibt.
-3. **Auszeichnungen der Kompanie ab Rang 9** — Belobigung, Bulletin, Fahneninschrift, samt der zweiten Gefechtsachse „Auftrag erfüllt". Entworfen in KONZEPT §6; braucht den Capitaine.
+1. **Die Rangleiter, Phase D** (`RANGLEITER.md` §10) — Ränge 10–14: Kompanien als Rechtecke, **die Atemleiste verschwindet ersatzlos und ohne Kommentar**, Phasen statt Runden, Stabsereignis statt Gefahrzuschlag, der Adler, die Operationskarte, Meldungslaufzeit, der Kaiser.
+2. **Die Rangleiter, Phase E** — die Patente (Sous-Lieutenant 110 VP, Lieutenant 145 VP), der Prüfmodus über alle vierzehn Ränge, die Rangverteilung in `balance.js`. **Phase E trägt den Schlüssel:** Solange nur vier Kapitel stehen, erreicht niemand Ruf 230 — die oberen Ränge sind gebaut und unsichtbar. Wer ein Patent kauft, spielt die Offiziershälfte vom ersten Kapitel an.
+3. **Die höheren Ordensgrade** (Officier ab 1807, Commandeur ab 1809) und die **Dotationen** ab Tilsit. Beide sind in KONZEPT §6 vollständig entworfen und hängen nur an Kapiteln, die es noch nicht gibt.
 4. **Kapitel 5 bis 11** — je Kapitel ein Rang als Wohnort (RANGLEITER §10, Phase F).
 5. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
 
-> **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen (Punkt 3 der alten Liste), und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `Sergent erreicht` neu gesetzt (Punkt 2). Beides steht oben unter „Balance-Konstanten".
+> **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen, und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `höchster Rang` neu gesetzt. Beides steht oben unter „Balance-Konstanten".
+>
+> **Erledigt am 29.07.2026:** Rangleiter Phase C — die Ränge 7 bis 9 (siehe „Ränge 7–9 — der Offizier"). Damit ist auch die frühere Nummer 3 der Liste eingelöst: Die **zweite Gefechtsachse „Auftrag erfüllt"** steht, und die Auszeichnungen hängen ab Rang 9 daran statt am Sieg.
+
+> **⚠ Offen und ausdrücklich nicht gemessen: die Härte der Offiziersränge.** RANGLEITER §11 fragt, ob der Spieler den Anschluss verliert, wenn die Muskete weg ist — „zu messen, nicht zu beschließen: Wenn nach Rang 7 die Sterblichkeit einbricht oder explodiert, stimmt die Umstellung der Proben nicht."
+>
+> **Diese Messung ist mit vier Kapiteln unmöglich**, weil kein Lauf Rang 7 erreicht; `balance.js` sieht die Offiziersknöpfe nie. Geprüft ist bisher nur, **dass** sie funktionieren (`test/offizier.js`), nicht **wie hart** sie sind. **Wer Phase E baut, misst als Erstes den gekauften Leutnant** — und zwar gegen die vier bekannten Zahlen, nicht gegen ein Gefühl. Zwei Verdächtige stehen dabei schon fest: der Gefahrzuschlag +4/+5 und der gelöste Zug, der die Linie ganz abschaltet.

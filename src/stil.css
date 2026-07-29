@@ -298,6 +298,11 @@
   .lage table{font-size:13.5px}
   .lage td{padding:4px 12px 4px 0}
   .lage .prose p{margin:0 0 7px;font-size:15px;color:var(--dim)}
+  /* Die Verlustliste: Namen in Spalten, wie auf einem Vordruck. Keine Zahlen,
+     keine Balken — der ganze Sinn der Liste ist, dass sie Namen enthält. */
+  .verluste{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:2px 14px}
+  .verluste span{font-size:13.5px;color:var(--text);
+    font-family:var(--didone),Georgia,serif;border-bottom:1px solid var(--line);padding:2px 0}
   .fein{color:var(--faint);font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
 
   /* Ergebnis einer Probe — nur gelungen oder misslungen, nicht die Rechnung */

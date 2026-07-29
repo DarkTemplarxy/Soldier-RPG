@@ -6,6 +6,25 @@
 function aktionen(){
   const a = [];
   const zw = S.zweig;
+
+  /* ══════════════════ DER ZWEITE SICHTBARE BRUCH ══════════════════
+
+     **Ab Rang 7 verschwinden Laden und Feuern vollständig.** Nicht abgefedert,
+     nicht als Notknopf behalten — ein Offizier trug keine Muskete, und das ist
+     der Punkt: *Du schießt nicht mehr. Du entscheidest.*
+
+     Es ist der härteste Eingriff des ganzen Entwurfs, weil er dem Spieler das
+     wegnimmt, was er zehn Spieljahre lang getan hat. Genau deshalb darf er
+     nicht weich sein: Ein „Muskete aufheben"-Knopf würde den Bruch in eine
+     Option verwandeln, und eine Option ist kein Bruch.
+
+     **Ausnahme mit Ansage:** Wenn die Linie bricht (`K.nahkampf`), klappt das
+     Gefecht für zwei bis drei Runden auf die persönliche Ansicht zurück. Dann
+     gibt es wieder Säbel und Deckung — aber nie wieder eine Muskete. */
+  const offizier = S.rang >= 7;
+  const nah = offizier && K.nahkampf > 0;
+
+  if(!offizier){
   a.push({id:'laden',label:'Laden',cost:'Geschick · Atem −8',aus:()=>K.geladen});
   if(zw==='voltigeur'){
     a.push({id:'zielen',label:'Sorgfältig zielen und feuern',cost:'Muskete +15 · kostet zwei Atemzüge',aus:()=>!K.geladen});
@@ -24,6 +43,45 @@ function aktionen(){
   }
   a.push({id:'bajonett',label:zw==='grenadier'?'Bajonett fällen und vorgehen':'Mit dem Bajonett vor',
     cost:(zw==='grenadier'?'Bajonett +10 · ':'Bajonett · ')+'sehr gefährlich',risk:true});
+  }
+
+  /* ── Der Offizier ──
+     Vier Knöpfe, und keiner davon ist ein Schuss. Der Feuerbefehl ist sein
+     „Schuss": Er skaliert mit dem Zustand der Einheit, nicht mit der eigenen
+     Hand. Das Gelände lesen wirkt einmal je Gefecht und dauerhaft — die erste
+     Verwendung von Taktik, die etwas kostet und etwas bringt.
+
+     **Die Initiative ist die Frage des Ranges.** Gehorchen oder handeln, und
+     der Preis für Eigenmacht ist nicht Blut, sondern die Kette: Wer danebenhaut,
+     hat eigenmächtig gehandelt, und das steht in einem Bericht. */
+  if(offizier && !nah){
+    a.push({id:'vorfuehren',label:'Den Zug vorführen',
+      cost:'Autorität · voller Schaden · Gefahr +8, denn du gehst voran',risk:true});
+    a.push({id:'gelaendenutzen',label:'Das Gelände nutzen',
+      cost:'Taktik · drei Runden weniger Gefahr, dafür weniger Wirkung'});
+    a.push({id:'frontverkuerzen',label:'Die Front verkürzen lassen',
+      cost:'Drill · Bestand +5 · drei Runden halbe Verluste'});
+    a.push({id:'degen',label:'Den Degen ziehen',
+      cost:'Kaltblütigkeit · einmal je Gefecht · deine Einheit hält, egal wie es steht · Gefahr +20',
+      risk:true, aus:()=> !!K.degenGezogen});
+    /* Ab Rang 8 darf sich der Zug aus der Linie lösen — und damit fällt der
+       Beitrag der zweihundert anderen weg, ohne den seit Rang 1 kein Gefecht
+       zu gewinnen war. Zum ersten Mal steht dein Schaden für sich allein. */
+    if(S.rang>=8) a.push({id:'loesen',label:K.geloest?'Den Zug wieder in die Linie nehmen':'Den Zug aus der Linie lösen',
+      cost:K.geloest?'zurück unter den Schutz der Linie':'Taktik · kein Linienfeuer mehr · dafür ist nichts mehr gedeckelt'});
+  }
+
+  /* Wenn die Linie bricht: zurück auf vier Männer und Rauch. Keine Muskete —
+     die ist seit dem Patent weg —, aber Säbel, Deckung und die Frage, ob man
+     stehen bleibt. Wie in Savona 1796, nur suchen sie jetzt zuerst dich. */
+  if(nah){
+    a.push({id:'saebel',label:'Den Säbel nehmen',
+      cost:'Säbel · sie sind schon in der Linie',risk:true});
+    a.push({id:'halten',label:'Stehenbleiben, wo du stehst',cost:'Kaltblütigkeit'});
+    a.push({id:'ducken',label:'In Deckung gehen',
+      cost:'Atem +10 · und jeder sieht, dass der Offizier sich duckt',
+      aus:()=> (K.duckFolge||0)>=2});
+  }
   if(S.rang>=3 && S.rang<5){
     a.push({id:'salve',label:'Der Korporalschaft Salve befehlen',
       cost:'Autorität · acht Musketen auf einmal — mehr als du allein triffst, und deine bleibt geladen'});
@@ -146,9 +204,86 @@ function starteKampf(n){
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
               sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
               rollend:0,
+              /* Der Offizier: gelöster Zug, Geländevorteil, gezogener Degen —
+                 und `nahkampf`, die Runden, in denen das alles nichts gilt. */
+              geloest:false, gelaendeVorteil:0, degenGezogen:false, zugHaelt:false,
+              nahkampf:0, nahkampfGrund:'', auftragErfuellt:null,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
+}
+
+/* ══════════════════ DIE ZWEITE ACHSE: DER AUFTRAG ══════════════════
+
+   **Ab Rang 9 hat jedes Gefecht zwei Ziele.** Die Feindmoral wie bisher — und
+   einen Auftrag vom Chef de bataillon, der damit nichts zu tun haben muss.
+
+   Man kann siegen und den Auftrag verfehlen. Man kann den Auftrag erfüllen und
+   die halbe Kompanie verlieren. **Die Auszeichnungen hängen am Auftrag, nicht
+   am Sieg** — und damit hört „gewinnen" auf, eine eindeutige Sache zu sein.
+   Das ist der eigentliche Rangunterschied des Capitaine: Bis Rang 8 war klar,
+   was gut ausgegangen ist; ab hier steht es auf zwei Blättern, und die beiden
+   Blätter widersprechen einander regelmäßig.
+
+   Der Auftrag steht **vor** der ersten Runde auf dem Schirm und wird nie
+   nachträglich geändert. Ein verstecktes Ziel wäre eine Falle, und Fallen sind
+   nicht das, was dieser Rang verkauft. */
+const AUFTRAEGE = [
+  {id:'halten', text:'Die Kompanie hält den Abschnitt, bis das zweite Bataillon durch ist.',
+   erfuellt:(n)=> (K.sektion==null?100:K.sektion) >= 50,
+   gut:'Das zweite Bataillon ist durch. Der Abschnitt hat gehalten, weil hundertzwanzig Mann dort gestanden sind, wo sie stehen sollten.',
+   schlecht:'Das zweite Bataillon ist durch, aber nicht dort, wo es durch sollte, weil dein Abschnitt vorher aufgemacht hat.'},
+  {id:'nehmen', text:'Die Kompanie nimmt die Stellung, ehe es dunkel wird.',
+   erfuellt:(n)=> K.feindMoral <= 0,
+   gut:'Die Stellung ist genommen, und sie ist vor der Dämmerung genommen. Mehr stand nicht im Befehl.',
+   schlecht:'Es wird dunkel, und die Stellung ist nicht genommen. Was im Befehl stand, steht am Morgen unverändert wieder da.'},
+  {id:'decken', text:'Die Kompanie deckt die linke Flanke der Brigade. Vorgehen ist nicht befohlen.',
+   erfuellt:(n)=> (K.eigen==null?100:K.eigen) >= 45,
+   gut:'Die Flanke steht. Von der Brigade hat es niemand gesehen, und das ist bei einer gedeckten Flanke die Regel.',
+   schlecht:'Die Flanke ist aufgegangen. Was hindurchkam, kam der Brigade in den Rücken, und das hat jemand gesehen.'},
+  {id:'schonen', text:'Die Kompanie hält den Abschnitt und schont ihre Leute. Man braucht sie übermorgen.',
+   erfuellt:(n)=> (K.sektion==null?100:K.sektion) >= 70,
+   gut:'Übermorgen steht die Kompanie da, wo man sie braucht, und sie steht vollzählig genug, um etwas damit anzufangen.',
+   schlecht:'Übermorgen fehlt der Kompanie ein Drittel. Der Befehl hat das ausdrücklich verhindern wollen.'}
+];
+function auftragFuer(n){
+  if(S.rang < 9) return null;
+  const saat = (n.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  return AUFTRAEGE[saat % AUFTRAEGE.length];
+}
+
+/* ══════════════════ DIE LINIE BRICHT ══════════════════
+
+   **Der Bildschirm klappt für zwei bis drei Runden auf die persönliche Ansicht
+   zurück.** Keine Sektionen, keine Befehle, keine Probe auf andere Leute. Vier
+   Männer und Rauch, wie in Savona 1796 — nur bist du jetzt der, den sie zuerst
+   suchen.
+
+   **Höchstens einmal je Kapitel**, sonst wäre es kein Einbruch, sondern eine
+   Spielart. Und es ist der einzige Augenblick, in dem der Säbelwert etwas tut:
+   derselbe Wert, den man als Grenadier hatte, und seither nicht gewachsen
+   (siehe `nutzen()`). Wer im Lager nie auf dem Fechtboden war, merkt genau
+   hier, was zehn Jahre Schreibtisch mit einem Mann machen. */
+function nahkampfPruefen(n){
+  if(S.rang < 7 || K.nahkampf > 0) return '';
+  const kap = (typeof kapitelVon==='function') ? kapitelVon(n) : 'x';
+  if((S.nahkampfKapitel||[]).includes(kap)) return '';
+  let grund = '';
+  if((K.sektion||100) < 40) grund = 'bestand';
+  else if(n.formation==='karree' && K.runde>=4 && Math.random()<0.5) grund = 'reiter';
+  else if(n.gelaende==='mauer' && K.runde>=5 && Math.random()<0.4) grund = 'bresche';
+  else if(K.feindMoral > n.feindMoral*0.8 && K.runde>=6 && Math.random()<0.25) grund = 'nachhut';
+  if(!grund) return '';
+  S.nahkampfKapitel = (S.nahkampfKapitel||[]).concat([kap]);
+  K.nahkampf = 2 + Math.floor(Math.random()*2);
+  K.nahkampfGrund = grund;
+  K.deckung = false;
+  return ({
+    bestand:'Von deinen sechzig stehen keine vierundzwanzig mehr, und die Ordnung, die sie zusammengehalten hat, ist keine Ordnung mehr. Was jetzt kommt, kommt zu dir.',
+    reiter:'Das Karree hält an drei Seiten. An der vierten kommt ein Pferd durch, und hinter dem Pferd kommen die anderen. Drinnen ist kein Platz zum Ausweichen — das ist der Sinn eines Karrees und gerade jetzt sein Fehler.',
+    bresche:'Auf der Rampe wird es eng, und in der Bresche ist es kein Gefecht mehr, sondern Gedränge mit Eisen. Niemand befiehlt hier irgendetwas.',
+    nachhut:'Der Rückzug geht über einen Damm, der für zwei Mann nebeneinander gebaut ist. Die Nachhut bist du, weil du der Letzte bist, der noch etwas sagen kann.'
+  })[grund];
 }
 
 /* Was du über dich selbst weißt, bevor es losgeht. Keine Zahlen, die in der
@@ -324,8 +459,87 @@ function appellBild(uebrig, kopf){
   return `<svg viewBox="0 0 540 ${40+(reihen-1)*34}" class="appell" role="img" aria-label="Appell: ${uebrig} von ${kopf} stehen">${R.join('')}</svg>`;
 }
 
+/* ══════════════════ DER ZWEITE SICHTBARE BRUCH: DIE HANDSKIZZE ══════════════════
+
+   **Ab Rang 7 siehst du keine Männer mehr.** Was ein Sous-Lieutenant vom
+   Gefecht hat, ist das, was er auf ein Blatt zeichnen kann, während er es
+   führt: die eigene Front als Strich in drei Abschnitten, den Feind gestrichelt
+   und mit einem Fragezeichen, weil niemand weiß, was hinter dem Rauch steht.
+
+   **Das ist der Verlust, um den es geht.** Ein Caporal sah acht Gesichter. Ein
+   Sous-Lieutenant sieht drei Striche und eine Zahl, und die Zahl ist das
+   Einzige, was ihm sagt, wie es seinen Leuten geht. Größe kostet Nähe — und
+   das muss man **sehen**, nicht erklärt bekommen.
+
+   Gezeichnet wird wie im Sichtfeld: **nichts gewürfelt.** Die Handzitterei der
+   Striche hängt an `streu(i,a)`, damit die Skizze bei jedem Klick dieselbe ist.
+
+   **Wenn die Linie bricht** (`K.nahkampf`), fällt der Bildschirm auf das alte
+   Sichtfeld zurück — dann gibt es wieder Männer und Rauch. */
+function skizzenfeld(n){
+  const streu = (i,a)=>{ const x = Math.sin(i*127.1 + a*311.7)*43758.5453; return x - Math.floor(x); };
+  const feindTeil = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
+  const teil = Math.max(0, Math.min(1, (K.sektion==null?100:K.sektion)/100));
+  const kopf = S.rang>=9 ? 120 : 60;
+  const uebrig = Math.max(0, Math.round(teil*kopf));
+  const TINTE = STICH.MESSING, BLAU = STICH.BLAU, ROT = STICH.ROT;
+
+  /* Ein von Hand gezogener Strich: drei Stützstellen, alle aus `streu`. */
+  const strich = (x1,x2,y,a)=> {
+    const m1 = (x1*2+x2)/3, m2 = (x1+x2*2)/3;
+    return `M ${x1} ${(y+streu(1,a)*4-2).toFixed(1)} Q ${m1} ${(y+streu(2,a)*6-3).toFixed(1)} ${m2} ${(y+streu(3,a)*5-2.5).toFixed(1)} T ${x2} ${(y+streu(4,a)*4-2).toFixed(1)}`;
+  };
+
+  /* Die eigene Front: drei Abschnitte, so viele wie Sektionen. Wo Verluste
+     sind, reißt der Strich — nicht als Balken, sondern als Lücke. */
+  let front = '';
+  for(let s=0;s<3;s++){
+    const x1 = 90 + s*160, x2 = x1 + 140;
+    const heil = teil > (s===1 ? 0.35 : 0.6);        // die Mitte hält am längsten
+    front += `<path d="${strich(x1,x2,236,s+1)}" fill="none" stroke="${BLAU}" stroke-width="${heil?4:2.4}"
+      stroke-linecap="round" ${heil?'':'stroke-dasharray="9 7"'} opacity="${heil?0.95:0.6}"/>`;
+  }
+
+  /* Der Feind: gestrichelt, weil man ihn nicht sieht, sondern vermutet. */
+  let gegen = '';
+  for(let s=0;s<3;s++){
+    const x1 = 70 + s*170, x2 = x1 + 150;
+    gegen += `<path d="${strich(x1,x2,86,s+7)}" fill="none" stroke="${ROT}" stroke-width="3"
+      stroke-linecap="round" stroke-dasharray="${(6+streu(s,3)*5).toFixed(1)} ${(7+streu(s,4)*4).toFixed(1)}"
+      opacity="${(0.35 + feindTeil*0.55).toFixed(2)}"/>`;
+  }
+
+  /* Dein Platz: drei Schritt vor der eigenen Front, als Kreuz. Ein Offizier
+     steht nicht *in* der Zeichnung, er steht daneben — sichtbar für beide. */
+  const meinY = K.geloest ? 196 : 214;
+  const ich = `<g stroke="${TINTE}" stroke-width="2.6" stroke-linecap="round">
+      <path d="M 314 ${meinY-7} L 326 ${meinY+7}"/><path d="M 326 ${meinY-7} L 314 ${meinY+7}"/></g>`;
+
+  const marke = (t,x,y,farbe,anker)=>`<text x="${x}" y="${y}" fill="${farbe}" font-size="11"
+      text-anchor="${anker||'start'}" font-family="ui-monospace,monospace" letter-spacing=".8">${esc(t)}</text>`;
+
+  return `<div class="feld"><svg viewBox="0 0 640 300" width="100%" height="180"
+      preserveAspectRatio="xMidYMid slice" role="img" aria-label="Handskizze der Lage">
+    <rect width="640" height="300" fill="${STICH.HIMMEL}"/>
+    ${/* Karierung wie auf Millimeterpapier — der Untergrund, auf dem 1805
+         Skizzen entstanden, war liniert oder gar nichts. */''}
+    ${Array.from({length:7},(_,i)=>`<path d="M 0 ${40+i*38} H 640" stroke="${TINTE}" stroke-width="0.5" opacity="0.12"/>`).join('')}
+    ${gegen}
+    ${marke('GEMELDET: ' + (feindTeil>0.7?'STARK':feindTeil>0.35?'IM WANKEN':'IM ABBRÖCKELN') + ' ?', 20, 62, ROT)}
+    ${K.gelaendeVorteil>0?`<path d="${strich(120,520,160,21)}" fill="none" stroke="${TINTE}" stroke-width="1.6" opacity="0.5" stroke-dasharray="3 6"/>`+marke('BODENWELLE', 20, 156, TINTE):''}
+    ${front}
+    ${ich}
+    ${marke((S.rang>=9?'DEINE KOMPANIE · ':'DEIN ZUG · ')+uebrig+' VON '+kopf, 20, 262, BLAU)}
+    ${K.geloest?marke('AUS DER LINIE GELÖST — KEIN FEUER VON RECHTS UND LINKS', 20, 282, ROT):''}
+    ${K.zugHaelt?marke('DEGEN GEZOGEN', 620, 262, TINTE, 'end'):''}
+    ${marke('SKIZZE · '+esc((n.datum||'').split(' · ')[0]||''), 620, 24, TINTE, 'end')}
+  </svg></div>`;
+}
+
 function sichtfeld(){
   const n = KAPITEL[LAUF.node], zw = S.zweig;
+  /* Der Offizier sieht eine Skizze, nicht ein Feld — außer die Linie bricht. */
+  if(S.rang>=7 && !(K.nahkampf>0)) return skizzenfeld(n);
   const rauch = Math.min(1, K.runde/6);
   const feindTeil = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
   const eigenTeil = Math.max(0, Math.min(1, (K.eigen==null?100:K.eigen) / 100));
@@ -890,8 +1104,8 @@ function zeigeEreignis(e){
   const n = KAPITEL[LAUF.node];
   const opt = e.optionen.map((o,i)=>{
     const proben = o.kette
-      ? ' · ' + o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · ')
-      : (o.probe ? ' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%' : '');
+      ? ' · ' + o.kette.map(st=>wertName(st.wert)+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · ')
+      : (o.probe ? ' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%' : '');
     return `<button class="ord ${o.risk?'risk':''}" onclick="ereignisWaehlen(${i})">
     ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${proben}</span></button>`;
   }).join('');
@@ -956,7 +1170,7 @@ function ereignisWaehlen(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${NAMEN[st.wert]} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
       K.protokoll.push(st.name + (p.erfolg?' — gelungen':' — misslungen'));
       if(S.leben <= 0){
         gefallen(zeilen.join(' ') + ' ' + (o.tod||''),
@@ -1008,12 +1222,25 @@ function zeigeKampf(text){
   app.innerHTML = `<div class="stage">${verlauf()}
     <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${sichtfeld()}
+        ${(()=>{
+          /* **Der Bruch bekommt einen Satz, keine Fanfare.** Beim ersten
+             Gefecht als Offizier hält das Spiel einmal an und sagt, was anders
+             ist — und zwar das, was fehlt, nicht das, was dazugekommen ist.
+             Danach nie wieder (`S.skizzeGesehen`). */
+          if(S.rang>=7 && !S.skizzeGesehen && K.runde===1){ S.skizzeGesehen = true;
+            return `<div class="wirkung" style="margin-top:14px"><span>Was du jetzt siehst</span>
+              Ein Blatt, ein Bleistift und die Front als Strich. Wo bis gestern Gesichter standen, steht eine Zahl. Deine Muskete hat der Fourrier eingezogen; man hat dir nichts dafür gegeben außer einem Degen, den du selbst bezahlt hast.</div>`; }
+          return ''; })()}
+        ${(()=>{ const auf = auftragFuer(n); return auf
+          ? `<div class="wirkung" style="margin-top:14px"><span>Auftrag des Chef de bataillon</span>${esc(auf.text)}</div>` : ''; })()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
         ${ausserAtem()?`<p class="warnung">Du bekommst keine Luft mehr. ${S.atem<30?'Jeder Handgriff dauert zu lange, und du bist ein leichteres Ziel.':'Noch geht es — aber nicht mehr lange.'} <b>Atem ${S.atem}</b> · ${S.zweig==='voltigeur'?'Flach hinlegen':'Hinknien'} bringt +10.</p>`:''}
         <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden}
           · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
           · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}
-          ${S.rang>=6 && K.sektion!=null ? '· DEIN ZUG '+Math.max(0,Math.round(K.sektion*0.6))+' VON 60'+(K.rollend>0?' · ROLLENDES FEUER':'')
+          ${/* Der Kopf zählt in der Größe, die man führt: zwanzig, sechzig, hundertzwanzig. */''}
+          ${S.rang>=9 && K.sektion!=null ? '· DEINE KOMPANIE '+Math.max(0,Math.round(K.sektion*1.2))+' VON 120'
+            : S.rang>=6 && K.sektion!=null ? '· DEIN ZUG '+Math.max(0,Math.round(K.sektion*0.6))+' VON 60'+(K.rollend>0?' · ROLLENDES FEUER':'')
             : S.rang===5 && K.sektion!=null ? '· DEINE SEKTION '+Math.max(0,Math.round(K.sektion/5))+' VON 20' : ''}</div>
         ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         ${S.rang>=5 && K.sektion!=null ? balken('b-steel',Math.max(0,K.sektion),100) : ''}
@@ -1054,9 +1281,17 @@ function kampfAktion(id){
        und ein Gefecht ließ sich vom Boden aus aussitzen. */
     K.duckFolge = (K.duckFolge||0) + 1;
     K.deckung=true; S.atem=Math.min(100,S.atem+10); S.belastung=Math.max(0,S.belastung-2);
-    text = zw==='voltigeur'
+    /* Ein Offizier hat keinen Kolben, den er in den Dreck setzen könnte, und
+       er kniet auch nicht hinter dem Vordermann — er steht vor der Front. Das
+       Ducken kostet ihn deshalb nicht Luft, sondern Ansehen: Es sieht jeder. */
+    text = S.rang>=7
+      ? 'Du gehst hinter die Böschung, drei Schritte, mehr ist es nicht. Es reicht, um zu Atem zu kommen, und es reicht, damit sechzig Mann sehen, dass ihr Offizier hinter der Böschung ist.'
+      : zw==='voltigeur'
       ? 'Du gehst flach in eine Ackerfurche, das Gesicht im Dreck, und atmest zum ersten Mal seit zehn Minuten bis unten. Vor der Linie sucht dich jetzt niemand mehr — die eigenen Leute auch nicht.'
       : 'Du gehst auf ein Knie, den Kolben in den Dreck, den Kopf hinter den Rücken des Vordermanns. Hinlegen kann sich in der Linie niemand — das Glied bliebe offen. Man kann nicht ewig knien, aber jetzt gerade schon.';
+    /* Und für den Offizier reißt die Serie nicht nur — es kostet sofort. */
+    if(S.rang>=7 && K.duckFolge>=2){ S.ruf = Math.max(0,S.ruf-2);
+      text += ' <span class="fein">Die zweite Runde dahinter. Es wird niemand ansprechen, und es wird trotzdem jeder wissen. Ruf −2</span>'; }
     if(K.duckFolge===3){
       S.ruf = Math.max(0, S.ruf-2);
       text += zw==='voltigeur'
@@ -1170,6 +1405,84 @@ function kampfAktion(id){
       text = 'Schließen, aufschließen, Abstand halten. Zwanzig Mann sind keine acht: Man sieht die Enden nicht mehr, man muss sie sich denken. Deine Sektion steht, wo sie stehen soll.' + lob; }
     else { text = 'Du rufst gegen den Lärm an, und der Lärm gewinnt. Das rechte Ende der Sektion hört dich nicht.'; K.sektion = Math.max(0,(K.sektion||100)-6); }
   }
+  /* ══════════════════ DER OFFIZIER ══════════════════
+
+     **Die neue Ohnmacht.** Als Fusilier lag zwischen Entscheidung und Wirkung
+     nichts — du hast gezielt und getroffen. Als Sous-Lieutenant gibst du einen
+     Befehl und wartest, ob er ausgeführt wird: Jeder Knopf hier ist eine Probe
+     auf *andere Leute*. Das ist die Erfahrung, die Rang 7 verkauft — **du bist
+     mächtiger und hilfloser zugleich.**
+
+     Deshalb hängt jeder Schaden am Zustand der Einheit (`K.sektion`) und nicht
+     mehr an der eigenen Hand. Wer seine Leute im Lager vernachlässigt hat,
+     merkt es hier und kann nichts dagegen tun. */
+  else if(id==='vorfuehren'){
+    const p = probe('autoritaet', 45);
+    const anteil = Math.max(0.35, (K.sektion||100)/100);
+    K.deckung = false; gefahrMod = +8;    // du gehst voran, sonst geht niemand
+    if(p.erfolg){ schaden = (36 + Math.random()*16) * anteil;
+      text = 'Du gehst die drei Schritte vor die Front, drehst dich nicht um und weißt trotzdem, dass sie mitkommen. Genau dafür stehst du dort: damit sechzig Männer etwas sehen, dem sie folgen können.'
+           + anerkennung(2,'Den Zug selbst vorgeführt'); }
+    else { schaden = 8 * anteil; K.sektion = Math.max(0,(K.sektion||100)-7);
+      text = 'Du gehst vor, und die vordere Sektion kommt mit. Die beiden hinteren nicht, weil sie den Befehl im Lärm nicht gehört haben, und für zehn Sekunden steht ein Drittel deines Zuges allein im Freien.'; }
+  }
+  else if(id==='gelaendenutzen'){
+    /* Die erste Verwendung von Taktik, die etwas kostet und etwas bringt: Wer
+       eine Bodenwelle nutzt, wird schlechter getroffen und trifft schlechter.
+       Das ist der Handel, den ein Offizier abschließt und ein Fusilier nicht
+       abschließen konnte, weil er stand, wo man ihn hinstellte. */
+    const p = probe('taktik', 40);
+    if(p.erfolg){ K.gelaendeVorteil = 3;
+      text = 'Zweihundert Schritt links liegt eine Bodenwelle, die auf keiner Karte steht. Du lässt den Zug dorthin ziehen, ehe drüben jemand merkt, dass er sich bewegt. Von hier aus schießt es sich schlechter — und auf euch auch.'; }
+    else { text = 'Was von hier aus wie eine Senke aussah, ist eine Mulde von vierzig Schritt, die an beiden Enden offen liegt. Der Zug steht darin wie in einer Schüssel.'; gefahrMod = +6; }
+  }
+  else if(id==='frontverkuerzen'){
+    const p = probe('drill', 45);
+    if(p.erfolg){ K.geschlossen = 3; K.sektion = Math.min(100,(K.sektion||100)+5);
+      text = 'Von drei Sektionen auf zwei, das rechte Ende zieht nach innen. Die Front ist kürzer, die Wand ist dichter, und die Lücken, durch die es vorhin hereinkam, sind zu.'; }
+    else { text = 'Der Befehl geht durch, und dann steht das rechte Ende an zwei Stellen doppelt und an einer gar nicht. Es dauert eine Minute, das aufzulösen, und in der Minute wird geschossen.';
+      K.sektion = Math.max(0,(K.sektion||100)-6); }
+  }
+  else if(id==='degen'){
+    /* Einmal je Gefecht, und es ist keine Handlung, sondern ein Zeichen: Ein
+       Offizier mit gezogenem Degen ist auf dreihundert Schritt zu erkennen —
+       von den eigenen Leuten und von denen, die zielen. */
+    K.degenGezogen = true; K.deckung = false;
+    const p = probe('kaltbluetigkeit', 50);
+    gefahrMod = +20;
+    if(p.erfolg){ K.zugHaelt = true; schaden = 14;
+      text = 'Du ziehst den Degen und hältst ihn hoch, und danach geht niemand mehr zurück. Es ist kein Befehl. Es ist nur etwas, das jeder sehen kann, und in einem Gefecht ist das mehr wert als ein Befehl.'
+           + anerkennung(2,'Mit gezogenem Degen vor der Front gestanden'); }
+    else { text = 'Du ziehst den Degen, und für einen Augenblick sieht dich der halbe Zug an statt nach vorn. Dann fällt links jemand, und sie sehen wieder nach vorn.';
+      S.belastung = Math.min(100,S.belastung+6); }
+  }
+  else if(id==='loesen'){
+    /* **Rang 8 nimmt dir die Linie.** Die zweihundert anderen, die seit Rang 1
+       unsichtbar mitgeschossen haben und ohne die kein Gefecht zu gewinnen war,
+       fallen weg. Dafür ist nichts mehr gedeckelt: Ein gut geführter, gelöster
+       Zug richtet mehr an als je zuvor — und ein schlechter stirbt allein. */
+    if(K.geloest){ K.geloest = false;
+      text = 'Du führst den Zug zurück an die Bataillonsfront. Es dauert zwei Minuten, in denen ihr nichts tut, und danach steht wieder rechts und links jemand.'; }
+    else {
+      const p = probe('taktik', 40);
+      if(p.erfolg){ K.geloest = true;
+        text = 'Du nimmst den Zug aus der Linie heraus und führst ihn schräg nach vorn, auf eigene Rechnung. Von hier an schießt niemand mehr für dich mit. Was drüben geschieht, geschieht durch deine sechzig Mann oder gar nicht.'; }
+      else { text = 'Du willst den Zug herausnehmen, und der Chef de bataillon schickt einen Adjutanten, der dich fragt, ob du dir sicher bist. Du bist es dann doch nicht.'; }
+    }
+  }
+  /* ── Wenn die Linie bricht ──
+     Keine Muskete — die ist seit dem Patent weg —, aber Säbel und die Frage,
+     ob man stehen bleibt. Der Wert dafür ist derselbe, den man als Grenadier
+     hatte, und er ist seither nicht gewachsen. */
+  else if(id==='saebel'){
+    const p = probe('bajonett', 45);
+    K.deckung = false; S.atem = Math.max(0,S.atem-16); gefahrMod = +18;
+    if(p.erfolg){ schaden = 26+Math.random()*14; K.nahkampf = Math.max(0,K.nahkampf-1);
+      text = 'Der Degen ist kein Bajonett, und deine Hände wissen das nicht. Sie tun, was sie 1797 gelernt haben, und es funktioniert trotzdem. Vor dir wird eine Lücke frei, und in die Lücke tritt einer deiner Sergenten.'
+           + anerkennung(2,'Mit dem Degen in der Hand'); }
+    else { text = 'Du triffst den Kolben statt den Mann. Der Degen bleibt hängen, und du bekommst ihn erst wieder frei, als jemand neben dir zusticht.';
+      S.belastung = Math.min(100,S.belastung+8); }
+  }
   else if(id==='zurueck'){
     S.ruf = Math.max(0, S.ruf-8); S.belastung=Math.min(100,S.belastung+10); S.gekniffen=true;
     kampfEnde(false, 'Du gehst zurück. Niemand hält dich auf, und das ist das Schlimmste daran.');
@@ -1190,7 +1503,16 @@ function kampfAktion(id){
      einzige Schadenszahl angefasst wurde. Boden bei 30 %, sonst wären die
      späten Kapitel rechnerisch unmöglich (siehe „Warum so niedrig?"). */
   const guete = feindGuete(n);
-  const linie = (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
+  /* **Der gelöste Zug steht allein.** Das ist der Bruch von Rang 8, und er ist
+     absichtlich einer: Wer die Linie verlässt, verliert den einzigen Beitrag,
+     der ein Gefecht auch ohne ihn vorantreibt — und bekommt dafür sechzig
+     Mann, die auf eigene Rechnung schießen (Faktor 1,6 auf allen eigenen
+     Schaden). Ein guter Zug gewinnt damit schneller als je zuvor; ein
+     schlechter bekommt nichts geschenkt. */
+  const linie = K.geloest ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
+  if(K.geloest) schaden *= 1.6;
+  /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */
+  if(K.gelaendeVorteil > 0) schaden *= 0.8;
 
   /* **Rollendes Feuer wirkt auch in der Runde, in der du nichts tust.** Das ist
      der Sinn des Ranges und der einzige Ort, an dem Schaden ohne eigene
@@ -1245,7 +1567,12 @@ function kampfAktion(id){
     const guete2 = 1 - Math.min(0.4, (S.sektionGuete||0)/100);
     K.sektion = Math.max(0, K.sektion - (2 + Math.random()*3) * (1 + guete*0.15) * guete2
       * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
+    /* Der gezogene Degen hält den Zug zusammen — nicht heil, aber beisammen.
+       Der Boden bei 30 ist die Zusage des Knopfes und zugleich seine Grenze:
+       Er verhindert den Zusammenbruch, nicht die Verluste. */
+    if(K.zugHaelt) K.sektion = Math.max(30, K.sektion);
   }
+  if(K.gelaendeVorteil > 0) K.gelaendeVorteil--;
   if(geschlossen) K.geschlossen--;
 
   K.protokoll.push(text);
@@ -1262,7 +1589,16 @@ function kampfAktion(id){
      Historisch fielen Unteroffiziere überproportional; im Entwurf ist das der
      Preis des Rangs, nicht seine Macht — Invariante 4 bleibt gewahrt, weil
      der Rang weiterhin Knöpfe gibt und hier nur Deckung kostet. */
-  if(S.rang>=3) gefahr += 2;
+  /* **Die gefährlichsten Ränge des Spiels sind 7 bis 9, nicht 1** (RANGLEITER
+     §8). Epauletten, Degen und drei Schritte vor der Front machen einen
+     Offizier auf dreihundert Schritt kenntlich, und beide Seiten schossen
+     gezielt auf ihn; ab dem Capitaine sammelt sich die Kompanie zusätzlich um
+     ihn. Wer aufsteigt, kauft sich nicht in Sicherheit ein. */
+  if(S.rang>=9) gefahr += 5;
+  else if(S.rang>=7) gefahr += 4;
+  else if(S.rang>=3) gefahr += 2;
+  /* Wer im Gelände liegt, wird schlechter getroffen — drei Runden lang. */
+  if(K.gelaendeVorteil > 0) gefahr -= 12;
   /* Ein Höhepunkt ist nicht nur teurer, sondern auch dichter: +3 Trefferchance
      je Runde. Das ist der Teil, der auch den Vorsichtigen trifft — beschossen
      wird man, ob man vortritt oder nicht. `haerte` schaltet beides zusammen,
@@ -1361,10 +1697,21 @@ function kampfAktion(id){
     return;
   }
 
+  /* Der Einbruch wird angesagt, nicht gewürfelt und dann verschwiegen: Wenn
+     die Linie bricht, steht der Grund im selben Absatz wie die Runde. Danach
+     zählen die Runden herunter, und wenn sie abgelaufen sind, steht der Zug
+     wieder da, wo ein Zug steht. */
+  if(K.nahkampf > 0){ K.nahkampf--;
+    if(K.nahkampf === 0) treffer += ' <span class="fein">Es wird wieder ruhiger. Zwei Sergenten sammeln, was noch steht, und du bist wieder der, der etwas befiehlt.</span>'; }
+  else {
+    const einbruch = nahkampfPruefen(n);
+    if(einbruch) treffer += ' <b>'+einbruch+'</b>';
+  }
+
   /* Ereignis vor der nächsten Runde: Es unterbricht die Handgriffe mit einer
      Frage. Der Text der eben abgeschlossenen Runde steht dabei nicht mehr da —
      er kommt ins Protokoll, damit die Frage die Seite für sich hat. */
-  const e = ereignisWuerfeln(n);
+  const e = K.nahkampf>0 ? null : ereignisWuerfeln(n);
   if(e){
     K.ereignis = e.id; K.ereignisZahl++; K.gesehen.push(e.id);
     K.protokoll.push(text + treffer);
@@ -1605,6 +1952,25 @@ function kampfEnde(sieg, letzterText){
   if((z.schaden >= 100 && z.offen > z.gedeckt) || (z.ereignisse >= 2)) stufe = 2;
   if(z.schaden >= 150 || (z.ereignisse >= 1 && z.vorn && n.haerte) || K.kette) stufe = 3;
 
+  /* ── Ab Rang 9 hängt die Sichtbarkeit am Auftrag, nicht am Sieg ──
+     Ein Capitaine wird nicht dafür gemeldet, dass er tapfer war, sondern
+     dafür, dass die Kompanie getan hat, was ihr aufgetragen war. Wer den
+     Auftrag verfehlt, kommt über das Lob vor der Front nicht hinaus, und zwar
+     auch dann nicht, wenn er das Gefecht gewonnen hat. **Damit hört „gewinnen"
+     auf, eine eindeutige Sache zu sein** — genau das ist der Rang. */
+  const auftrag = auftragFuer(n);
+  let auftragZeile = '';
+  if(auftrag){
+    const ok = auftrag.erfuellt(n);
+    K.auftragErfuellt = ok;
+    if(!ok) stufe = Math.min(stufe, 1);
+    if(ok){ gunstGeben('vernet',1); S.ruf += 2; }
+    else { gunstGeben('vernet',-1); S.ruf = Math.max(0,S.ruf-2); }
+    auftragZeile = `<div class="wirkung"><span>Der Auftrag${ok?' — erfüllt':' — verfehlt'}</span>
+      ${esc(auftrag.text)} ${esc(ok?auftrag.gut:auftrag.schlecht)}
+      <b>Fürsprache Vernet ${ok?'+1 · Ruf +2':'−1 · Ruf −2'}</b></div>`;
+  }
+
   S.belobigungen = S.belobigungen || 0;
   S.bulletins = S.bulletins || 0;
   K.stufe = stufe;
@@ -1624,27 +1990,46 @@ function kampfEnde(sieg, letzterText){
        und der, dem man Rechenschaft schuldet, ist nicht mehr der Lieutenant,
        sondern der Capitaine. Die Schwellen skalieren mit. */
     const zug = S.rang>=6;
-    const kopf = zug ? 60 : 20;
+    const kopf = S.rang>=9 ? 120 : (zug ? 60 : 20);
     const wem = zug ? 'vernet' : 'berthaud';
     const uebrig = Math.max(0, Math.round(K.sektion/100*kopf));
     const verlust = kopf - uebrig;
+    const kopfWort = kopf===120?'hundertzwanzig':kopf===60?'sechzig':'zwanzig';
     if(verlust >= kopf*0.45){ gunstGeben(wem,-1); S.belastung=Math.min(100,S.belastung+6);
       abrechnung = `<div class="wirkung"><span>Appell nach dem Gefecht</span>
-        Von ${kopf==60?'sechzig':'zwanzig'} stehen ${uebrig}. ${zug
+        Von ${kopfWort} stehen ${uebrig}. ${zug
           ? 'Der Capitaine lässt sich die Listen bringen und geht sie durch, ohne aufzusehen. Er sagt nichts, und das ist schlimmer als etwas zu sagen.'
           : 'Der Lieutenant lässt sich die Namen der Fehlenden geben und sagt nichts weiter, und das ist schlimmer als etwas zu sagen.'}
         <b>Fürsprache ${esc(personKurz(wem))} −1 · Belastung +6</b></div>`; }
     else if(verlust <= kopf*0.15){ gunstGeben(wem,1); S.kameradschaft=Math.min(100,S.kameradschaft+5);
       abrechnung = `<div class="wirkung"><span>Appell nach dem Gefecht</span>
-        Von ${kopf==60?'sechzig':'zwanzig'} stehen ${uebrig}. Das fällt auf, weil es sonst nicht so ist. ${zug
+        Von ${kopfWort} stehen ${uebrig}. Das fällt auf, weil es sonst nicht so ist. ${zug
           ? 'Drei Sergenten haben ihre Leute beisammen, und drei Sergenten wissen, von wem sie das haben.'
           : 'Deine Leute merken es zuerst.'}
         <b>Fürsprache ${esc(personKurz(wem))} +1 · Kameradschaft +5</b></div>`; }
     else abrechnung = `<div class="wirkung"><span>Appell nach dem Gefecht</span>
-        Von ${kopf==60?'sechzig':'zwanzig'} stehen ${uebrig}. ${zug
+        Von ${kopfWort} stehen ${uebrig}. ${zug
           ? 'Der Capitaine schreibt die Zahl auf und geht zur nächsten Kompanie.'
           : 'Der Lieutenant schreibt die Zahl auf und geht zur nächsten Sektion.'}</div>`;
-    abrechnung = appellBild(uebrig, kopf) + abrechnung;
+    /* ── Die Verlustliste ──
+       **Ab Rang 7 ist der Appell eine Pflicht, keine Anzeige.** Wer bis Rang 6
+       „vier von zwanzig" gelesen hat, liest jetzt vier Namen, und die Namen
+       stehen in derselben Handschrift wie die Meldung, die er unterschreibt.
+       Das Spiel sagt dazu nichts. Es druckt die Liste, und die Liste ist bei
+       einem verlorenen Gefecht länger als bei einem gewonnenen.
+
+       Bei mehr als zwölf Gefallenen bricht die Liste ab — „und siebzehn
+       weitere". Das ist nicht Platzmangel, sondern der Punkt: Ab einer
+       bestimmten Zahl hört ein Offizier auf, Namen zu schreiben. */
+    if(S.rang>=7 && verlust>0){
+      const saat = (n.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0) + K.runde;
+      const namen = verlustNamen(Math.min(12, verlust), saat);
+      abrechnung += `<div class="lage"><div class="lagekopf">Verlustliste · ${esc(n.ort)}</div>
+        <p class="hinweis" style="margin:0 0 6px">Du schreibst sie selbst, und du unterschreibst sie auch.</p>
+        <div class="verluste">${namen.map(nm=>`<span>${esc(nm)}</span>`).join('')}</div>
+        ${verlust>12?`<p class="hinweis" style="margin:6px 0 0">Und ${verlust-12} weitere, deren Namen der Fourrier nachträgt.</p>`:''}</div>`;
+    }
+    else abrechnung = appellBild(uebrig, kopf) + abrechnung;
   }
 
   vakanzPruefen();                    // stimmen die Zahlen, ist der Tod angesagt
@@ -1656,7 +2041,7 @@ function kampfEnde(sieg, letzterText){
       <div class="cb"><div class="prose"><p>${letzterText}</p></div>
         <div class="ergebnis ${sieg?'gut':'schlecht'}">${erg.text}</div>${wirkungen(erg)}
         ${kk.rueckzug?`<div class="wirkung"><span>Der Rückzug</span>Ihr geht rückwärts aus dem Feuer, und das Feuer geht mit. Wer fällt, bleibt liegen. <b>Leben −${kk.rueckzug}</b></div>`:''}
-        ${abrechnung}${ketteMeldung}
+        ${auftragZeile}${abrechnung}${ketteMeldung}
         ${kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
           ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
           ${kk.ruhm>=RUHM_JE_GEFECHT?'<p class="hinweis" style="margin:9px 0 0">Mehr sieht in diesem Rauch niemand.</p>':''}
@@ -2099,6 +2484,18 @@ function zeigeBefoerderung(n){
     if(ziel.patron) gunstGeben(ziel.patron, 1);
     text = ziel.text(ziel.patron ? personName(ziel.patron) : '');
     klasse = 'gut';
+    /* ── Die Szene, die nichts kostet und alles sagt ──
+       Sie steht genau einmal, beim Patent, und sie hat keinen Knopf, keine
+       Probe und keine Wirkung. **Das ist der Punkt.** Was ein Patent bedeutet,
+       lässt sich nicht in Zahlen sagen; es lässt sich nur zeigen, indem man
+       den Mann zeigt, der es nie bekommen wird — und der einen im April 1796
+       über die Pässe gebracht hat. Das Spiel wertet nicht. Es stellt die beiden
+       nebeneinander und geht weiter (Invariante 7). */
+    if(ziel.rang===7 && !S.martelSalut){
+      S.martelSalut = true;
+      text += `<br><br>Martel steht in der Reihe, in der du zehn Jahre gestanden hast. Als du vorbeigehst, salutiert er. Er ist zweiundvierzig, er hat dich im April 1796 über die Pässe gebracht, und er wird nie ein Patent bekommen, weil er nicht lesen kann. Er sagt nichts dazu. Du auch nicht.`;
+      S.log.push(n.id+': Martel salutiert.');
+    }
   } else if(!vakanz){
     text = 'Die Stelle über dir ist besetzt, und der, der sie hat, steht fest. Es gibt nichts zu vergeben.'
          + `<br><br><em>Für den ${esc(ziel.name)} braucht es eine freie Stelle. Frei wird sie nicht, weil du bereit bist.</em>`;

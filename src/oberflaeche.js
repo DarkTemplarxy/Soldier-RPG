@@ -253,14 +253,16 @@ function seitenleiste(){
       <div class="stat"><div class="statlab"><span>Belastung</span><span>${S.belastung}</span></div>${balken('b-red',S.belastung,100)}</div>
       <div class="stat"><div class="statlab"><span>Ruf</span><span>${S.ruf}</span></div>${balken('b-brass',S.ruf,100)}</div>
       <div class="stat"><div class="statlab"><span>Kameradschaft</span><span>${S.kameradschaft}</span></div>${balken('b-green',S.kameradschaft,100)}</div>
-      ${K?`<div class="rule"></div><div class="kv"><span>Muskete</span><b>${geladen}</b></div>
+      ${S.rang>=9?`<div class="stat"><div class="statlab"><span>Einheitszustand</span><span class="${(S.einheit==null?70:S.einheit)<40?'warn':''}">${Math.round(S.einheit==null?70:S.einheit)}</span></div>${balken((S.einheit==null?70:S.einheit)<40?'b-red':'b-steel',(S.einheit==null?70:S.einheit),100)}
+        ${(S.einheit!=null&&S.einheit<40)?`<p class="warnung">Deine Kompanie hat nichts an den Füßen.${S.einheit<20?' Jeder Marsch kostet Männer, die niemand beschossen hat.':' Der Feldscher meldet mehr Kranke, als er sollte.'}</p>`:''}</div>`:''}
+      ${K?`<div class="rule"></div>${S.rang>=7?'':`<div class="kv"><span>Muskete</span><b>${geladen}</b></div>`}
            <div class="kv"><span>Deckung</span><b>${K.deckung?'ja':'nein'}</b></div>`:''}
       <div class="rule"></div>
       <p class="mini">Attribute</p>
       ${ATTRIBUTE.map(([k,n])=>attrZeile(k,n,S.attr[k])).join('')}
       <div class="rule"></div>
       <p class="mini">Fertigkeiten</p>
-      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>attrZeile(k,n,S.fert[k])).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
+      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k])=>attrZeile(k,wertName(k),S.fert[k])).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
       <div class="rule"></div>
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
@@ -657,6 +659,37 @@ function fortsetzen(){
    wäre falsch. */
 const MARSCH_EREIGNISSE = [
 
+  /* ══════════════════ AB RANG 8 · DU DARFST WIDERSPRECHEN ══════════════════
+
+     **Rang 7 hat dir die Waffe genommen. Rang 8 nimmt dir die Anweisung.**
+     Zum ersten Mal gibt es die Möglichkeit, einem Vorgesetzten ins Gesicht zu
+     sagen, dass sein Befehl falsch ist. Sie kostet Fürsprache sofort und
+     bringt Ruf, wenn man recht behält — **meistens behält man nicht recht**,
+     und das ist der Preis, den ein eigener Kopf hat.
+
+     Es steht bewusst als Zwischenfall und nicht als Szene in einem Kapitel:
+     Widerspruch gehört keinem Feldzug, er gehört dem Rang. */
+  {id:'order', titel:'Die Order des Chef de bataillon', wenn:()=>S.rang>=8,
+   text:['Der Befehl kommt um vier Uhr morgens auf einem halben Blatt: Dein Zug soll bei Tagesanbruch das Gehöft am Waldrand nehmen und halten.',
+         'Du bist gestern Abend dort gewesen. Das Gehöft liegt in einer Senke, es hat drei Zugänge und keinen einzigen, den sechzig Mann decken können. Der Chef de bataillon war nicht dort. Auf seiner Karte ist es ein Punkt.'],
+   optionen:[
+     {label:'Ihm sagen, dass der Befehl falsch ist', hint:'Taktik · es kostet Fürsprache, ehe du den Satz zu Ende hast',
+      probe:{wert:'taktik', schw:50}, risk:true,
+      erfolg:{text:'Du sagst es kurz, im Stehen, ohne den Befehl anzufassen: Die Senke sei nicht zu halten, der Waldrand zweihundert Schritt weiter östlich sei es. Er sieht dich an, dann die Karte, dann wieder dich. Am Nachmittag steht dein Zug am Waldrand, und in der Senke steht niemand, und um vier Uhr geht durch die Senke ein ganzes Bataillon Jäger, das dort niemanden findet.',
+              ruf:6, gunst:1, gunstVon:'vernet'},
+      misserfolg:{text:'Du sagst es, und er hört es sich an. Dann sagt er, dass er den Abschnitt seit drei Wochen kennt und du seit gestern Abend, und dass er den Befehl nicht ändern wird. Du nimmst das Gehöft bei Tagesanbruch. Es ist zu halten. Es kostet neun Mann, und danach sagt niemand mehr etwas dazu — auch du nicht.',
+              ruf:-2, gunst:-2, gunstVon:'vernet', belastung:8}},
+     {label:'Den Befehl ausführen', hint:'Er ist der Chef de bataillon, und du bist es nicht',
+      erfolg:{text:'Du führst den Zug bei Tagesanbruch in die Senke und verteilst ihn auf drei Zugänge, von denen keiner zu halten ist. Ihr haltet ihn trotzdem, bis um zehn Uhr Ablösung kommt. Der Chef de bataillon schreibt: „Auftrag erfüllt." Es stimmt.',
+              gunst:1, gunstVon:'vernet', belastung:5, leben:-8}},
+     {label:'Den Befehl ausführen und ihn im Rapport festhalten', hint:'Verwaltung · Papier vergisst nicht',
+      probe:{wert:'verwaltung', schw:40},
+      erfolg:{text:'Du führst den Befehl aus und schreibst am Abend zwei Sätze darüber, wie die Senke beschaffen ist, ohne ein Wort darüber, wessen Befehl es war. Drei Wochen später fragt ein Adjutant des Brigadestabs nach dem Gehöft, und man reicht ihm deinen Rapport.',
+              ruf:3, belastung:4, leben:-6, fert:{verwaltung:3}},
+      misserfolg:{text:'Du führst den Befehl aus und schreibst am Abend drei Sätze, die man auch als Beschwerde lesen kann. Jemand liest sie so.',
+              gunst:-1, gunstVon:'vernet', belastung:6, leben:-6}}
+   ]},
+
   /* ── Garnison 1801–04 ──
      Vier Jahre Frieden brauchen ihre eigenen kleinen Fragen. Zwei davon
      (Patrouille, Werbung) gibt es nur hier, weil es sie im Feld nicht gibt. */
@@ -926,7 +959,7 @@ function marschWuerfeln(n){
 function zeigeMarschEreignis(e, n){
   const offen = marschOffen(e);
   const opt = offen.map((o,i)=>`<button class="ord ${o.risk?'risk':''}" onclick="marschWaehlen(${i})">
-    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}</span></button>`).join('');
+    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}</span></button>`).join('');
   const gesperrt = marschVerwehrt(e).map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>Auf dem Marsch · ${esc(e.titel)}</span><span>${esc(n.datum||'')}</span></div>
@@ -948,7 +981,7 @@ function marschWaehlen(i){
     const p = probe(o.probe.wert, o.probe.schw);
     w = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
     klasse = p.erfolg ? 'gut' : 'schlecht';
-    probeText = `<div class="pruefung ${klasse}">${NAMEN[o.probe.wert]} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
   } else w = o.erfolg;
   anwenden(w);
   S.log.push('marsch: '+o.label);
@@ -1198,8 +1231,8 @@ function zeigeSzene(n){
     const i = n.optionen.indexOf(o);
     const gesperrt = o.probe && wert(o.probe.wert)<5;
     return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
-      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}${
-        o.kette?' · '+o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · '):''}</span></button>`;
+      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}${
+        o.kette?' · '+o.kette.map(st=>wertName(st.wert)+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · '):''}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
@@ -1233,7 +1266,7 @@ function waehleOption(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${NAMEN[st.wert]} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
       if(S.leben <= 0){
         S.log.push(n.id+': '+o.label);
         toetlich(o.todesart || 'Gefallen');
@@ -1251,7 +1284,7 @@ function waehleOption(i){
     klasse = p.erfolg ? 'gut' : 'schlecht';
     // Nur das Ergebnis, nicht die Rechnung: Wert und Schwierigkeit stehen schon
     // vor der Wahl auf dem Knopf, und Zielwert und Wurf sagen hinterher nichts mehr.
-    probeText = `<div class="pruefung ${klasse}">${NAMEN[o.probe.wert]} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
   } else { erg = o.erfolg; klasse='gut'; }
   anwenden(erg);
   verschleiss(0.35);
@@ -1271,8 +1304,8 @@ function wirkungen(e){
   const m = {ruf:'Ruf',gunst:'Gunst '+personKurz(e.gunstVon||'martel'),kameradschaft:'Kameradschaft',
              belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben'};
   for(const k in m) if(e[k]) t.push(`${m[k]} ${e[k]>0?'+':''}${e[k]}`);
-  if(e.attr) for(const k in e.attr) t.push(`${NAMEN[k]} ${e.attr[k]>0?'+':''}${e.attr[k]}`);
-  if(e.fert) for(const k in e.fert) if(e.fert[k]) t.push(`${NAMEN[k]} ${e.fert[k]>0?'+':''}${e.fert[k]}`);
+  if(e.attr) for(const k in e.attr) t.push(`${wertName(k)} ${e.attr[k]>0?'+':''}${e.attr[k]}`);
+  if(e.fert) for(const k in e.fert) if(e.fert[k]) t.push(`${wertName(k)} ${e.fert[k]>0?'+':''}${e.fert[k]}`);
   if(e.ausr) for(const k in e.ausr) t.push(`${S.ausr[k].name} ${e.ausr[k]>0?'+':''}${e.ausr[k]}`);
   if(e.wunde) t.push('Wunde: '+e.wunde);
   if(e.nennung) t.push('Im Tagesbefehl genannt');
