@@ -424,6 +424,36 @@
    erzählt den Epochenwechsel, ohne ein Wort dazu. */
 .emblem{ width:26px; height:26px; flex:0 0 auto; display:block }
 
+/* ══════════════════ DIE BEIDEN SPALTEN ══════════════════
+
+   Links der Verlauf, rechts das Livret. Beide sind **Nachschlagewerke, keine
+   Fließtexte**: Man sucht dort eine Zahl oder einen Ort, statt zu lesen.
+   Deshalb stehen sie kräftiger als der Fließtext in der Mitte — auf dem hellen
+   Papier verschwand die frühere Abstufung zu leicht.
+
+   Die alte Regel bleibt: Die **Zahl** ist kräftiger als ihre Beschriftung, weil
+   man im Spiel die Zahl sucht und nicht das Wort. */
+aside.card .kv span, aside.card .statlab span:first-child{ color:var(--dim); font-weight:600 }
+aside.card .kv b, aside.card .statlab span:last-child{ color:var(--text); font-weight:700 }
+aside.card .mini{ color:var(--brass); font-weight:700; letter-spacing:.19em }
+aside.card .who{ font-weight:700 }
+aside.card .whorank{ font-weight:600 }
+aside.card .zust-name{ font-weight:600 }
+.kmpst-ort{ font-weight:600 }
+.kmpkopf{ font-weight:700 }
+
+/* Die Wunden stehen jetzt direkt unter dem Lebensbalken statt unten bei Geld
+   und Nennungen: Sie erklären, warum die Obergrenze wandert, und gehören
+   deshalb neben die Zahl, die sie drückt. */
+.kv.wunden{ margin-top:6px; padding-top:6px; border-top:1px dotted var(--line) }
+
+/* ── Kopfzeile: was ein Mann besitzt, links von dem, was er ist ── */
+.kopfzeile{ display:inline-flex; align-items:center; gap:10px; justify-content:flex-end }
+.kopfgruppe{ display:inline-flex; align-items:center; gap:5px }
+.kopforden .abzeichen{ width:30px; height:20px; vertical-align:middle }
+.kopfgeld{ color:#d8c79f; font-weight:700; letter-spacing:.06em }
+.kopftrenner{ width:1px; height:15px; background:#4a3a28; display:inline-block }
+
 /* Knöpfe wie geprägt statt flach — ein Hauch Tiefe, kein Skeuomorphismus. */
 .ord, button.plain{ text-shadow:0 1px 0 rgba(0,0,0,.55);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.35) }

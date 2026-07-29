@@ -5,6 +5,28 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Seitenspalten, Wunden, Kopfzeile — und ein Mann, der falsch anfing
+
+**Ein Fehler, vom Spieler gemeldet: Atem stand bei 100, obwohl der Deckel schon bei 82 lag.** `atemKlemmen()` lief erst bei der ersten Handlung; bis dahin zeigte die Seitenleiste einen Wert, der nicht zu den Werten des Mannes passte, und sprang beim ersten Klick nach unten. Das sah aus wie ein Fehler, weil es einer war. **Der Atem-Deckel gilt jetzt ab der ersten Sekunde** — `neuerCharakter()` klemmt selbst.
+
+Gemessen an einem Mann mit Konstitution 70: vorher „Atem 100" bis zum ersten Klick, dann 82. Jetzt 82 von Anfang an.
+
+### Die beiden Spalten stehen kräftiger
+
+Links der Verlauf, rechts das Livret. Beide sind **Nachschlagewerke, keine Fließtexte** — man sucht dort eine Zahl oder einen Ort, statt zu lesen. Auf dem hellen Pergament verschwand die frühere Abstufung zu leicht; jetzt stehen Beschriftungen halbfett und Zahlen fett. **Die alte Regel bleibt:** Die Zahl ist kräftiger als ihr Wort, weil man im Spiel die Zahl sucht.
+
+### Die Wunden stehen unter dem Lebensbalken
+
+Vorher standen sie ganz unten zwischen Geld und Nennungen. Sie erklären aber, **warum die Obergrenze wandert** („82 / 79 von 82"), und gehören deshalb neben die Zahl, die sie drücken. Eine gepunktete Linie trennt sie vom Balken.
+
+### Die Kopfzeile zeigt, was ein Mann besitzt
+
+Links vom Namen: **die Orden als Abzeichen und das Geld in Francs.** Beides stand bisher nur unten in der Seitenleiste, wo man es beim Spielen nicht sieht — und seit es einen Marketender und eine Ordenspension gibt, ist Geld eine Zahl, auf die man schaut.
+
+**Dabei aufgefallen:** Die Rang- und Ordensabzeichen trugen noch ihren dunklen Rahmen aus der Nachtfassung (`#26221c`) — auf dem Pergament sahen sie aus wie Löcher im Papier. Alle Abzeichen sind auf die neue Palette umgestellt: Epauletten in gedecktem Rot und Olivgrün, Tressen in Bronze, das Kreuz der Ehrenlegion mit Konturlinie statt reinem Weiß.
+
+---
+
 ## 2026-07-28 — Pergament statt Nacht
 
 **Die Oberfläche ist von einem dunklen UI auf einen Feldtisch umgestellt.** Alles, was man sieht, sind Papiere: das Livret, die Meldungen, die Schlachtskizze, das Wertungsblatt. Der Grund dahinter ist dunkles Holz und nur an den Rändern sichtbar.

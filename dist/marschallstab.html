@@ -431,6 +431,36 @@
    erzählt den Epochenwechsel, ohne ein Wort dazu. */
 .emblem{ width:26px; height:26px; flex:0 0 auto; display:block }
 
+/* ══════════════════ DIE BEIDEN SPALTEN ══════════════════
+
+   Links der Verlauf, rechts das Livret. Beide sind **Nachschlagewerke, keine
+   Fließtexte**: Man sucht dort eine Zahl oder einen Ort, statt zu lesen.
+   Deshalb stehen sie kräftiger als der Fließtext in der Mitte — auf dem hellen
+   Papier verschwand die frühere Abstufung zu leicht.
+
+   Die alte Regel bleibt: Die **Zahl** ist kräftiger als ihre Beschriftung, weil
+   man im Spiel die Zahl sucht und nicht das Wort. */
+aside.card .kv span, aside.card .statlab span:first-child{ color:var(--dim); font-weight:600 }
+aside.card .kv b, aside.card .statlab span:last-child{ color:var(--text); font-weight:700 }
+aside.card .mini{ color:var(--brass); font-weight:700; letter-spacing:.19em }
+aside.card .who{ font-weight:700 }
+aside.card .whorank{ font-weight:600 }
+aside.card .zust-name{ font-weight:600 }
+.kmpst-ort{ font-weight:600 }
+.kmpkopf{ font-weight:700 }
+
+/* Die Wunden stehen jetzt direkt unter dem Lebensbalken statt unten bei Geld
+   und Nennungen: Sie erklären, warum die Obergrenze wandert, und gehören
+   deshalb neben die Zahl, die sie drückt. */
+.kv.wunden{ margin-top:6px; padding-top:6px; border-top:1px dotted var(--line) }
+
+/* ── Kopfzeile: was ein Mann besitzt, links von dem, was er ist ── */
+.kopfzeile{ display:inline-flex; align-items:center; gap:10px; justify-content:flex-end }
+.kopfgruppe{ display:inline-flex; align-items:center; gap:5px }
+.kopforden .abzeichen{ width:30px; height:20px; vertical-align:middle }
+.kopfgeld{ color:#d8c79f; font-weight:700; letter-spacing:.06em }
+.kopftrenner{ width:1px; height:15px; background:#4a3a28; display:inline-block }
+
 /* Knöpfe wie geprägt statt flach — ein Hauch Tiefe, kein Skeuomorphismus. */
 .ord, button.plain{ text-shadow:0 1px 0 rgba(0,0,0,.55);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.35) }
@@ -532,17 +562,17 @@ function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
 function rangabzeichen(mann){
   const r = mann.rang, hoehe = 23;
   const rahmen = i => `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>${i}</svg>`;
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>${i}</svg>`;
 
   if(r===2){                                   // Epaulette auf der Schulter
-    const f = mann.zweig==='voltigeur' ? '#9aa85c' : '#c2483a';
+    const f = mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125';
     const fransen = [10,14,18,22,26].map(x=>`<rect x="${x}" y="13" width="2" height="7" rx="1"/>`).join('');
     return rahmen(`<rect x="7" y="5" width="22" height="7" rx="3.5" fill="${f}"/>
       <g fill="${f}" opacity=".8">${fransen}</g>`);
   }
   if(r>=3){                                    // Streifen am Unterarm
     const tresse = r>=5;
-    const f = tresse ? '#d0a75e' : '#c98a3a';  // Tresse in Metallfarbe, Wolle in Aurore
+    const f = tresse ? '#8a6410' : '#a86a20';  // Tresse in Metallfarbe, Wolle in Aurore
     const streifen = tresse
       ? `<polygon points="11,19 22,5 29,5 18,19" fill="${f}"/>`
       : `<polygon points="7,19 16,5 21,5 12,19" fill="${f}"/>
@@ -704,22 +734,22 @@ function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
    Wortes, und in derselben Größe, damit die Seitenleiste ruhig bleibt. */
 function ordensbild(id){
   if(id==='ehrenwaffe') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenwaffe">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
-    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#b8b0a2"/>
-    <rect x="5" y="10" width="6" height="4" rx="1" fill="#8a6a3c"/>
-    <circle cx="27" cy="12" r="3" fill="none" stroke="#d0a75e" stroke-width="1.4"/></svg>`;
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
+    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#6a6152"/>
+    <rect x="5" y="10" width="6" height="4" rx="1" fill="#6e5320"/>
+    <circle cx="27" cy="12" r="3" fill="none" stroke="#8a6410" stroke-width="1.4"/></svg>`;
   if(id==='ehrensaebel') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrensäbel">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
-    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#e8e2d4" stroke-width="1.8" stroke-linecap="round"/>
-    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#d0a75e"/>
-    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#d0a75e" stroke-width="1.3"/></svg>`;
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
+    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#5c5446" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#8a6410"/>
+    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#8a6410" stroke-width="1.3"/></svg>`;
   if(id==='legion'){
     const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
-      fill="#e8e2d4" transform="rotate(${a+45} 18 12)"/>`).join('');
+      fill="#f0ece2" stroke="#8a8272" stroke-width=".5" transform="rotate(${a+45} 18 12)"/>`).join('');
     return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenlegion">
-      <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
-      <rect x="13" y="2" width="10" height="4" fill="#c2483a"/>
-      ${arme}<circle cx="18" cy="12" r="2.6" fill="#d0a75e"/></svg>`;
+      <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
+      <rect x="13" y="2" width="10" height="4" fill="#9c3125"/>
+      ${arme}<circle cx="18" cy="12" r="2.6" fill="#8a6410"/></svg>`;
   }
   return '';
 }
@@ -2144,6 +2174,13 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);
+  /* **Der Atem-Deckel gilt ab der ersten Sekunde.** `atemKlemmen()` lief bisher
+     erst bei der ersten Handlung — bis dahin stand in der Seitenleiste „Atem
+     100", obwohl der Deckel bei einem Mann mit Konstitution 70 schon 82 ist.
+     Der Wert sprang dann beim ersten Klick nach unten, und das sah aus wie ein
+     Fehler, weil es einer war: Ein Mann, dessen Anzeige nicht zu seinen Werten
+     passt, ist nicht erst nach der ersten Handlung falsch, sondern vorher. */
+  mann.atem = Math.min(mann.atem, mann.leben);
   return mann;
 }
 
@@ -2416,7 +2453,18 @@ function kopfzeile(){
   if(fussStand) fussStand.textContent = `${gebauteKapitel(true)} · Ränge 1–${RANG[RANG.length-1].n}`;
   if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`;
     untertitel.textContent = gebauteKapitel(true); return; }
-  kopf.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;justify-content:flex-end">
+  /* Links vom Namen steht, was ein Mann besitzt: sein Geld und seine Orden.
+     Beides stand bisher nur unten in der Seitenleiste, wo man es beim Spielen
+     nicht sieht — und seit es einen Marketender und eine Ordenspension gibt,
+     ist Geld eine Zahl, auf die man schaut. */
+  const orden = (S.orden||[]).map(id=>{
+    const o = ordenVon(id);
+    return o ? `<span class="kopforden" title="${esc(o.name)}">${ordensbild(id)}</span>` : '';
+  }).join('');
+  kopf.innerHTML = `<span class="kopfzeile">
+    ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
+    <span class="kopfgeld">${S.geld} F</span>
+    <span class="kopftrenner"></span>
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span></span>`;
   const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
@@ -2535,7 +2583,8 @@ function seitenleiste(){
         <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p></div>
       <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}${lebenMax()<lebenGrund()?` <i class="fein">von ${lebenGrund()}</i>`:''}</span></div>
         ${balken(angeschlagen()?'b-red':'b-green',S.leben,lebenMax())}
-        ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}</div>
+        ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}
+        <div class="kv wunden"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div></div>
       <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
         ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
         ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>
@@ -2555,7 +2604,6 @@ function seitenleiste(){
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
       <div class="rule"></div>
       <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
-      <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
       ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
       ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}

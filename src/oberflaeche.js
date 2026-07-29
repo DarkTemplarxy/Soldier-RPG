@@ -94,7 +94,18 @@ function kopfzeile(){
   if(fussStand) fussStand.textContent = `${gebauteKapitel(true)} · Ränge 1–${RANG[RANG.length-1].n}`;
   if(!S){ kopf.innerHTML = `VETERANENPUNKTE ${META.vp} · LÄUFE ${META.laeufe|0}`;
     untertitel.textContent = gebauteKapitel(true); return; }
-  kopf.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;justify-content:flex-end">
+  /* Links vom Namen steht, was ein Mann besitzt: sein Geld und seine Orden.
+     Beides stand bisher nur unten in der Seitenleiste, wo man es beim Spielen
+     nicht sieht — und seit es einen Marketender und eine Ordenspension gibt,
+     ist Geld eine Zahl, auf die man schaut. */
+  const orden = (S.orden||[]).map(id=>{
+    const o = ordenVon(id);
+    return o ? `<span class="kopforden" title="${esc(o.name)}">${ordensbild(id)}</span>` : '';
+  }).join('');
+  kopf.innerHTML = `<span class="kopfzeile">
+    ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
+    <span class="kopfgeld">${S.geld} F</span>
+    <span class="kopftrenner"></span>
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span></span>`;
   const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
@@ -213,7 +224,8 @@ function seitenleiste(){
         <p class="whorank">${rangName(S.rang)} · 32. Halbbrigade</p></div>
       <div class="stat"><div class="statlab"><span>Leben</span><span class="${angeschlagen()?'warn':''}">${S.leben} / ${lebenMax()}${lebenMax()<lebenGrund()?` <i class="fein">von ${lebenGrund()}</i>`:''}</span></div>
         ${balken(angeschlagen()?'b-red':'b-green',S.leben,lebenMax())}
-        ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}</div>
+        ${angeschlagen()?`<p class="warnung">Du hast zu viel Blut verloren.${S.leben<=lebenMax()*0.15?' Der nächste Treffer wird der letzte sein.':' Noch ein oder zwei Treffer, und es ist vorbei.'}</p>`:''}
+        <div class="kv wunden"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div></div>
       <div class="stat"><div class="statlab"><span>Atem</span><span class="${ausserAtem()?'warn':''}">${S.atem}</span></div>
         ${balken(ausserAtem()?'b-red':'b-steel',S.atem,100)}
         ${ausserAtem()?`<p class="warnung">Du bist außer Atem.${S.atem<30?' Unter 30 wird jede Runde im Gefecht gefährlicher — du triffst schlechter und sie treffen dich leichter.':' Unter 30 wird es im Gefecht gefährlich.'}</p>`:''}</div>
@@ -233,7 +245,6 @@ function seitenleiste(){
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
       <div class="rule"></div>
       <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
-      <div class="kv"><span>Wunden</span><b class="${S.wunden.length?'warn':''}">${w}</b></div>
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
       ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
       ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}

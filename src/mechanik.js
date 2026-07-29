@@ -147,6 +147,13 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);
+  /* **Der Atem-Deckel gilt ab der ersten Sekunde.** `atemKlemmen()` lief bisher
+     erst bei der ersten Handlung — bis dahin stand in der Seitenleiste „Atem
+     100", obwohl der Deckel bei einem Mann mit Konstitution 70 schon 82 ist.
+     Der Wert sprang dann beim ersten Klick nach unten, und das sah aus wie ein
+     Fehler, weil es einer war: Ein Mann, dessen Anzeige nicht zu seinen Werten
+     passt, ist nicht erst nach der ersten Handlung falsch, sondern vorher. */
+  mann.atem = Math.min(mann.atem, mann.leben);
   return mann;
 }
 

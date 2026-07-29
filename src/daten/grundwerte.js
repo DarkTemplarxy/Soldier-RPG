@@ -54,17 +54,17 @@ function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
 function rangabzeichen(mann){
   const r = mann.rang, hoehe = 23;
   const rahmen = i => `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>${i}</svg>`;
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>${i}</svg>`;
 
   if(r===2){                                   // Epaulette auf der Schulter
-    const f = mann.zweig==='voltigeur' ? '#9aa85c' : '#c2483a';
+    const f = mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125';
     const fransen = [10,14,18,22,26].map(x=>`<rect x="${x}" y="13" width="2" height="7" rx="1"/>`).join('');
     return rahmen(`<rect x="7" y="5" width="22" height="7" rx="3.5" fill="${f}"/>
       <g fill="${f}" opacity=".8">${fransen}</g>`);
   }
   if(r>=3){                                    // Streifen am Unterarm
     const tresse = r>=5;
-    const f = tresse ? '#d0a75e' : '#c98a3a';  // Tresse in Metallfarbe, Wolle in Aurore
+    const f = tresse ? '#8a6410' : '#a86a20';  // Tresse in Metallfarbe, Wolle in Aurore
     const streifen = tresse
       ? `<polygon points="11,19 22,5 29,5 18,19" fill="${f}"/>`
       : `<polygon points="7,19 16,5 21,5 12,19" fill="${f}"/>
@@ -226,22 +226,22 @@ function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
    Wortes, und in derselben Größe, damit die Seitenleiste ruhig bleibt. */
 function ordensbild(id){
   if(id==='ehrenwaffe') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenwaffe">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
-    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#b8b0a2"/>
-    <rect x="5" y="10" width="6" height="4" rx="1" fill="#8a6a3c"/>
-    <circle cx="27" cy="12" r="3" fill="none" stroke="#d0a75e" stroke-width="1.4"/></svg>`;
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
+    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#6a6152"/>
+    <rect x="5" y="10" width="6" height="4" rx="1" fill="#6e5320"/>
+    <circle cx="27" cy="12" r="3" fill="none" stroke="#8a6410" stroke-width="1.4"/></svg>`;
   if(id==='ehrensaebel') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrensäbel">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
-    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#e8e2d4" stroke-width="1.8" stroke-linecap="round"/>
-    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#d0a75e"/>
-    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#d0a75e" stroke-width="1.3"/></svg>`;
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
+    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#5c5446" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#8a6410"/>
+    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#8a6410" stroke-width="1.3"/></svg>`;
   if(id==='legion'){
     const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
-      fill="#e8e2d4" transform="rotate(${a+45} 18 12)"/>`).join('');
+      fill="#f0ece2" stroke="#8a8272" stroke-width=".5" transform="rotate(${a+45} 18 12)"/>`).join('');
     return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenlegion">
-      <rect x="0" y="0" width="36" height="24" rx="2" fill="#26221c" stroke="#3a342c"/>
-      <rect x="13" y="2" width="10" height="4" fill="#c2483a"/>
-      ${arme}<circle cx="18" cy="12" r="2.6" fill="#d0a75e"/></svg>`;
+      <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
+      <rect x="13" y="2" width="10" height="4" fill="#9c3125"/>
+      ${arme}<circle cx="18" cy="12" r="2.6" fill="#8a6410"/></svg>`;
   }
   return '';
 }
