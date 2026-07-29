@@ -503,9 +503,11 @@ function patentKarte(){
 function zeigeLaden(){
   if(!ERSCH || !ERSCH.herkunft){ zeigeErschaffung(); return; }
   AUSWAHL = []; PUNKTE = {};
-  const zeilen = LADEN.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
+  const kaufZeile = p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
     <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
-    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
+    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`;
+  const zeilen  = LADEN.filter(p=>p.art!=='zaeh').map(kaufZeile).join('');
+  const zeilenZ = LADEN.filter(p=>p.art==='zaeh').map(kaufZeile).join('');
   const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft);
   app.innerHTML = `
   <div class="card"><div class="ch"><span>Zweiter Schritt · Veteranenpunkte</span><span id="vpanz">${META.vp} verfügbar</span></div>
@@ -532,6 +534,12 @@ function zeigeLaden(){
   <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
    <div class="cb">
     <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+   </div></div>
+
+  <div class="card"><div class="ch"><span>Was ein Mann behält</span><span>nicht Kraft, sondern Gewohnheit</span></div>
+   <div class="cb">
+    <p class="hinweis">Was einer aus zwei Feldzügen mitbringt, ist selten Kraft. Es ist das Wissen, wie man nicht stirbt: welches Wasser man trinkt, wie man seine Füße behält, wo man sich hinlegt, wenn es kein Dach gibt. <b>Nichts davon macht dich im Gefecht besser</b> — es hält dich nur zwischen den Gefechten aufrecht, und dort verliert man die meisten Männer.</p>
+    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilenZ}</table>
     <div style="margin-top:18px;display:flex;gap:10px">
       <button class="plain" onclick="zeigeErschaffung()">Zurück zur Erschaffung</button>
       <button class="plain haupt" id="startbtn" onclick="starte()">Einrücken</button></div>
@@ -1409,6 +1417,15 @@ function waehleTempo(i){
     w.atem -= 8; w.belastung += 4;
     if(!w.wunde) w.wunde = 'Wundgelaufene Füße';
     schuhe = ' Deine Schuhe halten das nicht. Am dritten Tag gehst du auf etwas, das keine Sohle mehr hat.';
+  }
+  /* „Füße wie Leder", zweite Hälfte. Der forcierte Marsch bleibt teuer — er
+     kostet weiterhin Verschleiß, Belastung und eine übersprungene Station.
+     Was ein Gewohnter spart, ist Luft: acht von fünfundzwanzig. Das reicht,
+     um ihn nicht unter die Warnschwelle 35 zu drücken, und ändert nichts
+     daran, dass Forcieren eine Entscheidung mit Preis bleibt. */
+  if(t.forciert && zaeh('zaeh_fuesse')){
+    w.atem += 8;
+    schuhe += ' Du gehst, wie man geht, wenn man es oft genug getan hat: kurze Schritte, und die Füße bleiben trocken.';
   }
 
   verschleiss(t.verschleiss);

@@ -31,7 +31,8 @@
 
 | Hebel | Wo | Warum verdächtig |
 |---|---|---|
-| **Eine Progression, die im Lauf wirkt** | Sockel senken · Konstitution wächst am `uebergang` und nach überstandener Krankheit (Aufgabe #31) | **Der einzige Hebel, der nicht am Rang hängt.** Er belohnt den Überlebenden statt den Käufer und rührt Invariante 3 nicht an. Erste Wahl |
+| **Was ein Mann behält** — fünf Gewohnheiten im Laden | `art:'zaeh'` in `LADEN`, Wirkung in `verschleiss()` · `stationErledigt()` · `aderlass()` · `frostWirken()` · `kampfEnde()` | **Gebaut, Messung läuft.** Sie wirken nur auf die Zermürbung zwischen den Gefechten und können die Ruf-Kette deshalb nicht füttern. Der Prüfpunkt ist nicht, ob die Weite steigt, sondern ob sie steigt, **ohne dass die Rangverteilung mitwandert** |
+| **Eine Progression, die im Lauf wirkt** | Sockel senken · Konstitution wächst am `uebergang` und nach überstandener Krankheit (Aufgabe #31) | Belohnt den Überlebenden statt den Käufer und rührt Invariante 3 nicht an. Der zweite Versuch, falls die Gewohnheiten allein nicht tragen |
 | **Rangzuschlag +4/+5** | `kampfAktion()` in `src/kampf.js`, RANGLEITER §8 | Ein Fusilier steht bei Jena auf Gefahr 19, ein Capitaine auf 24 — im selben Gefecht |
 | **Ereignis-Schwelle Ruf 30** | `ereignisWuerfeln()` | Sie stammt aus der Zeit, als der Sergent die Decke war. Heute liegt **jeder** Offizier weit darüber, also hat jedes Veteranengefecht drei Ereignisse statt zwei. Dieselbe Alterung wie bei den Leitzahlen — eine Schwelle, die einmal getrennt hat und jetzt nur noch durchlässt |
 
@@ -49,17 +50,7 @@
 
 ---
 
-## 3 · Der Bot kauft keine Ausrüstung — und der Frost misst deshalb den Ausnahmefall
-
-`VETERAN_ZIELE` in `test/balance.js` kennt nur Attribute und Fertigkeiten. Ein Mantel wird nie gekauft, und die einzige Mantelquelle vor Eylau ist eine `risk`-Wahl, die ein vorsichtiger Bot grundsätzlich meidet.
-
-**Gemessen:** Eylau tötet den Veteranen mit 160 VP zu **63 %**, den mit 400 zu **23 %** — der Unterschied ist reine Konstitution gegen eine flache Zehrung. Beide spielen das Kapitel **ohne Mantel**, also durchweg den Fall, für den die Regel gebaut wurde, und nicht den Normalfall eines Menschen.
-
-**Der Hebel ist das Skript, nicht das Spiel: `VETERAN_ZIELE` um Ladenposten erweitern.** Solange das nicht geschehen ist, wird **am Frost nichts gedreht** — sonst repariert man das Spiel gegen eine Blindheit des Messgeräts. Das ist derselbe Fehler wie damals bei der Gunst und der Regimentsschule, nur eine Ebene höher.
-
----
-
-## 4 · Die Achse „Mut kostet, Mut steigt auf" ist stumpf geworden
+## 3 · Die Achse „Mut kostet, Mut steigt auf" ist stumpf geworden
 
 Der mutige Erstläufer sollte seltener überleben und **öfter aufsteigen**. Gemessen nach sechs Kapiteln: überlebt 0 % gegen 19 %, höchster Rang 1 % gegen 9 % — **er steigt nicht mehr öfter auf, er stirbt nur früher.** Von 80 mutigen Läufen sterben 59 in Ägypten.
 
@@ -70,7 +61,7 @@ Der mutige Erstläufer sollte seltener überleben und **öfter aufsteigen**. Gem
 
 ---
 
-## 5 · Der Linien-Hebel der Feindgüte ist seit Ägypten gesättigt
+## 4 · Der Linien-Hebel der Feindgüte ist seit Ägypten gesättigt
 
 ```
 linie = (2 + Zufall·4) · max(0,3 ; 1 − guete·0,15)
@@ -82,7 +73,7 @@ Der Boden 0,3 wird bei **Güte 4,67** erreicht. Ägypten (5), Austerlitz (6), Je
 
 ---
 
-## 6 · Zwei Szenen in Kapitel 4 haben keine probefreie Wahl
+## 5 · Zwei Szenen in Kapitel 4 haben keine probefreie Wahl
 
 `marsch_rhein` und `donau` in `kapitel04_austerlitz.js`. Ein Mann mit durchgelaufenen Schuhen (`wert('konstitution')` −18) steht dort vor lauter gesperrten Knöpfen und landet auf dem Notausgang `szeneAushalten()`.
 
@@ -90,7 +81,7 @@ Der Boden 0,3 wird bei **Güte 4,67** erreicht. Ägypten (5), Austerlitz (6), Je
 
 ---
 
-## 7 · Späte Kapitel sind über `balance.js` nicht mehr messbar
+## 6 · Späte Kapitel sind über `balance.js` nicht mehr messbar
 
 **Der Trichter ist gewollt, aber er macht genau die Kapitel unmessbar, die es am nötigsten hätten.** Von achtzig vorsichtigen Erstläufen erreichen Spanien zwölf und Russland drei; beim Veteranen mit 400 VP sind es acht und drei. Eine Quote aus drei Läufen ist keine Quote — die Zeile „Russland 0 % (nur 3)" sagt über das Kapitel nichts.
 
@@ -104,6 +95,7 @@ Der Boden 0,3 wird bei **Güte 4,67** erreicht. Ägypten (5), Austerlitz (6), Je
 
 | Punkt | Wie geschlossen | Messwert |
 |---|---|---|
+| Der Bot kaufte keine Ausrüstung, weshalb der Frost durchweg den Ausnahmefall maß | `VETERAN_KAEUFE` in `test/balance.js` — Mantel und Schuhe zuerst, dann die fünf Gewohnheiten. **Stücke vor Punkten**, sonst ist für ein 30-VP-Stück nie mehr genug übrig | *(Messung läuft)* |
 | Der Überlebensbonus in `wertung()` war ein Platzhalter von 25 | Mit der Rangschranke in Kapitel 8 gebaut: `S.ende` trägt jetzt `ruhestand` / `halbsold` / sonst, und `wertung()` staffelt danach **180 / 120 / 70** wie KONZEPT §5 | Rang 5 ausgemustert 326 · Rang 9 geht 469 · Rang 9 marschiert weiter 359 Punkte — **weitermarschieren kostet sofort 110** |
 | Der Härtemodus zählte jeden Gefallenen als Überlebenden | `zeigeTod()` nullt `LAUF` und über `binde()` auch `S` — genau wie ein Kapitelende. Unterschieden wird jetzt am Bildschirm, nicht am Zustand | Spanien und Russland meldeten **100 %**, tatsächlich 3 % |
 | Der Vollständigkeitsmodus zählte jeden Ausgemusterten als Gefallenen | Er suchte im Schlusstext nach „gefallen" — und der Ruhestandsbildschirm sagt *„Du bist nicht gefallen."* Erkannt wird jetzt am Knopf | Russland: 3 von 4 Rängen falsch als tot gemeldet |

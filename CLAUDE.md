@@ -1096,6 +1096,41 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 **Invariante 3 bleibt gewahrt:** Gekauft wird der Ausgangspunkt, nie der Aufstieg. Rang, Ruf, Gunst und Nennungen sind unkäuflich.
 
+### Was ein Mann behält — die Gewohnheiten (`art:'zaeh'` in `LADEN`)
+
+**Der Rekrut kauft Muskeln, der Veteran kauft Gewohnheiten.**
+
+Gebaut als Antwort auf den schärfsten gemessenen Befund des Projekts: **Veteranenpunkte kaufen Rang und keine Strecke** (Weite 57 / 62 / 61 Stationen bei 11 / 30 / 38 % Capitaine). Die Ursache ist eine Kette, und sie ist geschlossen:
+
+```
+bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
+             → Offiziersränge mit +4/+5 Gefahr je Runde → tot
+```
+
+**Jeder Kauf, der die Kampfkraft hebt, landet am Ende in dieser Kette und zahlt seinen Gewinn dort wieder zurück.** Das ist kein Fehler — „Wer aufsteigt, kauft sich nicht in Sicherheit ein" ist Entwurf. Aber es lässt Veteranenpunkte für das Überleben nichts mehr kaufen, und damit bricht die Schleife, auf der das ganze Spiel beruht.
+
+**Die Gewohnheiten können die Kette nicht füttern**, weil sie ausschließlich auf die Zermürbung **zwischen** den Gefechten wirken. Ein Mann, der weiß, welches Wasser er trinkt, wird davon nicht befördert.
+
+| Kauf | Wirkung | greift in | VP |
+|---|---|---|---|
+| **Füße wie Leder** | Schuhverschleiß halbiert · Forcieren kostet 8 Atem weniger | `verschleiss()` · `waehleTempo()` | 30 |
+| **Er weiß, welches Wasser** | Krankheits- und Frostzehrung halbiert | `stationErledigt()` | 35 |
+| **Er bleibt nicht zurück** | Aderlass −3 je Station | `aderlass()` | 45 |
+| **Er schläft im Freien** | Frost eine Stufe milder | `frostWirken()` | 30 |
+| **Alte Narben** | Der Feldscher näht zwei Wunden statt einer | `kampfEnde()` | 40 |
+
+**Und sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am Anfang — Italien übersteht er zu 98–100 %. Er stirbt in **Ägypten** (15 von 40: Hitze, Ruhr) und **Jena** (11 von 40: die Beine). Jede der fünf handelt davon.
+
+**Drei Entscheidungen beim Bauen, die nicht offensichtlich sind:**
+
+1. **„Er bleibt nicht zurück" schützt nur dich, nicht deine Einheit.** `S.einheit` zehrt weiter mit dem vollen Kampagnenwert — der Zustand deiner Kompanie hängt nicht daran, was *du* gelernt hast.
+2. **„Er schläft im Freien" ist kein Ersatz für den Mantel.** Bei Frost 4 an der Beresina bleibt auch der Gewohnte auf Stufe 3 und bekommt seine zehrende Wunde. Sonst wäre der Mantel entwertet — und der ist die eigene Regel von Kapitel 6.
+3. **Die Zehrungssperre bleibt.** Wer krank ist, bekommt weiterhin keine Zeitheilung; er wird nur langsamer weniger. Wer das aufweicht, wiederholt den Fehler, bei dem ein Kranker einen Punkt je Station *gewann*.
+
+> **Der Prüfpunkt ist nicht, ob die Weite steigt.** Er ist, ob sie steigt, **ohne dass die Rangverteilung mitwandert.** Die eiserne Regel lautet: *Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Aufstieg.* Wandert der Rang mit, ist der Entwurf verfehlt — dann ist irgendeine der fünf doch im Gefecht angekommen.
+
+**Der Testbot kauft jetzt** (`VETERAN_KAEUFE` in `test/balance.js`): Mantel und Schuhe zuerst, dann die fünf. Das erledigt zugleich `OFFEN.md` Punkt 3 — bisher kaufte er **nie** einen Mantel, weshalb jede Frostmessung durchweg den Ausnahmefall maß statt des Normalfalls. **Stücke werden vor den Punkten gekauft:** Punkte sind beliebig teilbar, ein 30-VP-Stück ist es nicht, und wer zuerst Punkte verteilt, hat für ein Stück nie wieder genug übrig.
+
 ### Zielwerte
 
 **Achtung: Der Testbot misst seit dem 28.07.2026 etwas anderes als vorher.** Er würfelt seine Attribute nicht mehr aus, sondern verteilt sie bewusst, ruht, wenn er verwundet ist, und befiehlt als Caporal die Salve. Gemessen wird damit, wie hart das Spiel für einen **kundigen** Spieler ist — vorher, wie hart es für einen blinden war. Alle Zahlen vor diesem Datum sind mit den neuen nicht vergleichbar.

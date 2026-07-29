@@ -5,6 +5,30 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Was ein Mann behält: eine Kaufklasse, die Strecke kauft statt Rang
+
+**Der Rekrut kauft Muskeln, der Veteran kauft Gewohnheiten.** Fünf neue Posten im Laden (`art:'zaeh'`), die ausschließlich auf die Zermürbung **zwischen** den Gefechten wirken.
+
+**Der Anlass ist gemessen:** Weite 57 / 62 / 61 Stationen bei 11 / 30 / 38 % Capitaine — Veteranenpunkte kaufen Rang und keine Strecke. Die Kette dahinter ist geschlossen: bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung → Offiziersränge mit +4/+5 Gefahr → tot. **Jeder Kauf, der Kampfkraft hebt, landet in dieser Kette und zahlt seinen Gewinn dort zurück.**
+
+| Kauf | Wirkung | greift in | VP |
+|---|---|---|---|
+| Füße wie Leder | Schuhverschleiß halbiert · Forcieren kostet 8 Atem weniger | `verschleiss()` · `waehleTempo()` | 30 |
+| Er weiß, welches Wasser | Krankheits- und Frostzehrung halbiert | `stationErledigt()` | 35 |
+| Er bleibt nicht zurück | Aderlass −3 je Station | `aderlass()` | 45 |
+| Er schläft im Freien | Frost eine Stufe milder | `frostWirken()` | 30 |
+| Alte Narben | Der Feldscher näht zwei Wunden statt einer | `kampfEnde()` | 40 |
+
+Zusammen 180 VP — bezahlbar mit 400, aber nicht nebenbei; sie konkurrieren mit Konstitution 70, die allein über 100 kostet.
+
+**Sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am Anfang: Italien übersteht er zu 98–100 %. Er stirbt in Ägypten (15 von 40, Hitze und Ruhr) und Jena (11 von 40, die Beine).
+
+**Drei Entscheidungen, die nicht offensichtlich sind:** „Er bleibt nicht zurück" schützt nur den Mann, nicht `S.einheit` — der Zustand der Kompanie hängt nicht daran, was *du* gelernt hast. „Er schläft im Freien" ist **kein Ersatz für den Mantel**: Bei Frost 4 bleibt auch der Gewohnte auf Stufe 3, sonst wäre die eigene Regel von Kapitel 6 entwertet. Und die Zehrungssperre bleibt — wer krank ist, bekommt weiterhin keine Zeitheilung.
+
+> **Der Prüfpunkt ist nicht, ob die Weite steigt, sondern ob sie steigt, ohne dass die Rangverteilung mitwandert.** Wandert sie mit, ist eine der fünf doch im Gefecht angekommen und der Entwurf verfehlt.
+
+**Der Testbot kauft jetzt** (`VETERAN_KAEUFE`): Mantel und Schuhe zuerst, dann die fünf. **Das erledigt `OFFEN.md` Punkt 3** — bisher kaufte er nie einen Mantel, weshalb jede Frostmessung durchweg den Ausnahmefall maß. Stücke werden vor den Punkten gekauft, weil Punkte beliebig teilbar sind und ein 30-VP-Stück sonst nie mehr hineinpasst.
+
 ## 2026-07-29 — Kapitel 8: Russland 1812, die Rangschranke, und ein Prüfstand, der lügen konnte
 
 **Die eigene Regel: Das ist kein Feldzug, das ist ein Vorrat, der kleiner wird.** Vierzehn Stationen, vier Gefechte, Feindgüte 10, Sold-Moral 0,1.

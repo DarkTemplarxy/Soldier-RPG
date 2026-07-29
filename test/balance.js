@@ -78,6 +78,20 @@ const VETERAN_ZIELE = [['konstitution',70],['geschick',70],['muskete',60],
    Caporal-fourrier (35) und damit der einzige Weg, den ein Veteran *kaufen*
    kann — im Feld kostet sie Lagerabende und Geld. KONZEPT nennt sie „den
    eigentlichen Flaschenhals dieses Spiels". */
+
+/* ── Und was er an Stücken und Gewohnheiten kauft, bevor er Punkte verteilt ──
+
+   **Ohne diese Liste misst das Skript die Blindheit des Bots.** Bis hierher
+   kannte er nur Attribute und Fertigkeiten: Er kaufte nie einen Mantel, also
+   maß jede Frostmessung den Ausnahmefall (`OFFEN.md` Punkt 3), und die
+   Gewohnheiten hätte er gar nicht gesehen. Das ist derselbe Fehler wie damals
+   bei der Gunst und der Regimentsschule, nur eine Ebene höher.
+
+   Die Reihenfolge ist die eines Mannes, der weiß, woran er zuletzt gestorben
+   ist: erst der Mantel (Eylau und Russland), dann die Schuhe, dann die
+   Gewohnheiten gegen das, was zwischen den Gefechten tötet. */
+const VETERAN_KAEUFE = ['mantel_gut','schuhe_gut',
+                        'zaeh_wasser','zaeh_fuesse','zaeh_nachzuegler','zaeh_schlaf','zaeh_narben'];
 const ziel = path.resolve(__dirname, '../index.html');
 
 /* Kurzname je Rang — das Skript kennt `grundwerte.js` nicht, weil es im Browser
@@ -183,7 +197,13 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     await p.click('text=Weiter zu den Veteranenpunkten');
     // Das Patent zuerst — es ist die teuerste Einzelentscheidung des Ladens.
     if (PATENT) await p.evaluate(id => waehle(id), PATENT);
-    // Der Veteran gibt seinen Vorrat nach fester Rangfolge aus; bei VP=0 nichts.
+    /* Stücke und Gewohnheiten zuerst: Sie haben feste Preise, während die
+       Punkte beliebig teilbar sind — wer zuerst Punkte verteilt, hat für ein
+       30-VP-Stück nie mehr genug übrig, und die Messung sähe einen Veteranen,
+       der grundsätzlich nichts kauft. `waehle()` nimmt nur an, was der Vorrat
+       trägt, also fällt Überzähliges von allein weg. */
+    if (VP > 0) await p.evaluate(ids => ids.forEach(id => waehle(id)), VETERAN_KAEUFE);
+    // Der Veteran gibt den Rest nach fester Rangfolge aus; bei VP=0 nichts.
     if (VP > 0) await p.evaluate(ziele => {
       for (const [k, bis] of ziele){
         for(;;){

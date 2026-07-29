@@ -2562,9 +2562,18 @@ function kampfEnde(sieg, letzterText){
      Läufe beide Feldzüge — bei rund neun Treffern im ganzen Spiel wiegt jede
      geschenkte Genesung schwerer als der Schaden. Wer wieder auf die Beine
      will, verbringt einen Lagerabend oder eine Winterwoche damit. */
+  /* „Alte Narben": zwei statt einer. Der Feldscher wird dadurch nicht besser —
+     der Mann ist es. Wer schon dreimal zugenäht worden ist, hält still, weiß,
+     was er zeigen muss, und kommt an die Reihe, ehe der Karren voll ist.
+     Es bleibt die schwächste der fünf Gewohnheiten, weil sie nur greift, wenn
+     überhaupt zwei leichte Wunden offen sind — dafür greift sie in jedem
+     Kapitel und nicht nur in Frost oder Aderlass. */
   // Krankheiten kann er nicht: eine Ruhr näht man nicht zu (`!w.zehrt`)
-  const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
-  if(leicht>=0){ S.wunden.splice(leicht,1); atemKlemmen(); }   // der Vorrat wächst wieder
+  for(let i = zaeh('zaeh_narben') ? 2 : 1; i > 0; i--){
+    const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
+    if(leicht<0) break;
+    S.wunden.splice(leicht,1); atemKlemmen();                  // der Vorrat wächst wieder
+  }
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
 
   /* ══════════════════ DIE LEITER DER SICHTBARKEIT ══════════════════

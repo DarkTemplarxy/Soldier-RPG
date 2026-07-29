@@ -457,5 +457,43 @@ const LADEN = [
   {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:30},
   {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
   {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:15},
-  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12}
+  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12},
+
+  /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
+
+     **Der Rekrut kauft Muskeln, der Veteran kauft Gewohnheiten.**
+
+     Gemessen kaufen Veteranenpunkte heute **Rang und keine Strecke** — Weite
+     57 / 62 / 61 Stationen bei 11 / 30 / 38 % Capitaine. Die Ursache ist eine
+     Kette: bessere Werte → kürzere Gefechte → mehr Ruf → schnellere
+     Beförderung → Offiziersränge mit +4 bis +5 Gefahr je Runde. **Jeder Kauf,
+     der die Kampfkraft hebt, landet am Ende in dieser Kette und zahlt seinen
+     Gewinn dort wieder zurück.**
+
+     Diese fünf können das nicht. Sie wirken ausschließlich auf die
+     Zermürbung **zwischen** den Gefechten — Verschleiß, Krankheit, Aderlass,
+     Frost, alte Wunden. Sie machen zäher, ohne sichtbarer zu machen, und
+     erzeugen deshalb keinen Ruf.
+
+     **Und sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am
+     Anfang: Italien übersteht er zu 98 bis 100 %. Er stirbt in Ägypten an
+     Hitze und Ruhr und in Jena an den Beinen. Genau davon handelt jede
+     einzelne.
+
+     Inhaltlich ist das, was ein Mann aus zwei Feldzügen mitbringt, ohnehin
+     nicht Kraft, sondern das Wissen, wie man nicht stirbt: welches Wasser
+     man trinkt, wie man seine Füße behält, wann man sich hinlegt. */
+  {id:'zaeh_fuesse',art:'zaeh',label:'Füße wie Leder',
+   beschr:'Schuhe halten doppelt so lange, und ein forcierter Marsch nimmt dir weniger Luft',vp:30},
+  {id:'zaeh_wasser',art:'zaeh',label:'Er weiß, welches Wasser',
+   beschr:'Ruhr, Fieber und Sumpffieber zehren nur halb so stark',vp:35},
+  {id:'zaeh_nachzuegler',art:'zaeh',label:'Er bleibt nicht zurück',
+   beschr:'In Kriegen, die zwischen den Gefechten töten, kostet dich jede Station drei Punkte weniger',vp:45},
+  {id:'zaeh_schlaf',art:'zaeh',label:'Er schläft im Freien',
+   beschr:'Der Frost trifft dich eine Stufe milder, als er ist',vp:30},
+  {id:'zaeh_narben',art:'zaeh',label:'Alte Narben',
+   beschr:'Der Feldscher näht dir nach jedem Gefecht zwei Wunden zu statt einer',vp:40}
 ];
+/* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
+   gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */
+function zaeh(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }

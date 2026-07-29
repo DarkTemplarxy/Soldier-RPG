@@ -53,7 +53,13 @@ function stationErledigt(){
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   aderlass(KAPITEL[LAUF.node-1]);
-  const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
+  /* „Er weiß, welches Wasser." Halbiert wird die Zehrung, nicht abgeschafft —
+     und die Sperre der Zeitheilung bleibt bestehen, solange überhaupt etwas
+     zehrt. Wer krank ist, erholt sich nicht; er wird nur langsamer weniger.
+     Der Frost zählt bewusst mit: Auch ihn übersteht der besser, der weiß, wie
+     man im Freien liegt. */
+  let zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
+  if(zehrung && zaeh('zaeh_wasser')) zehrung = Math.ceil(zehrung/2);
   if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
   else lebenAuffuellen(0.05);
   /* Die Pension läuft, solange der Mann lebt. Historisch war die Ehrenlegion
@@ -132,10 +138,16 @@ function soldFaktor(){
    > **Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert.** */
 function aderlass(n){
   const k = kampagneVon(n);
-  const wert = k && k.aderlass ? k.aderlass : 0;
+  let wert = k && k.aderlass ? k.aderlass : 0;
   if(!wert || !S) return '';
-  S.leben = Math.max(1, S.leben - wert);
-  if(S.einheit != null) S.einheit = Math.max(0, S.einheit - wert);
+  /* „Er bleibt nicht zurück." Der Aderlass ist keine Wunde und keine Kugel,
+     sondern die Summe aus Nachzüglern, Posten, die nicht wiederkommen, und
+     Fieber im Quartier. Genau davor schützt Erfahrung — nicht ganz, aber
+     merklich. Am Mann wirkt sie; die Einheit zehrt weiter, denn deren
+     Zustand hängt nicht daran, was **du** gelernt hast. */
+  if(zaeh('zaeh_nachzuegler')) wert = Math.max(0, wert - 3);
+  if(wert) S.leben = Math.max(1, S.leben - wert);
+  if(S.einheit != null) S.einheit = Math.max(0, S.einheit - (k.aderlass|0));
   return '';
 }
 
@@ -556,7 +568,12 @@ const FROST_WUNDE = 'Der Frost';
 
 function frostWirken(n){
   if(!S) return '';
-  const stufe = (n && n.frost) | 0;
+  /* „Er schläft im Freien." Eine Stufe milder, und bei Stufe 1 heißt das:
+     gar nicht. Das ist kein Ersatz für den Mantel — ohne ihn bleibt auch der
+     Gewohnte im Januar bei Stufe 4 eine zehrende Wunde schuldig. Es ist die
+     Erfahrung, die daneben steht: wo man liegt, wie man sich einwickelt,
+     wann man aufsteht und geht, statt liegen zu bleiben. */
+  const stufe = Math.max(0, ((n && n.frost) | 0) - (zaeh('zaeh_schlaf') ? 1 : 0));
   const hat = S.wunden.some(w => w.name === FROST_WUNDE);
   if(!stufe){
     if(!hat) return '';
@@ -596,7 +613,12 @@ function verschleiss(faktor){
   if(k && k.verschleiss) faktor *= k.verschleiss;
   for(const k2 in S.ausr){
     const a = S.ausr[k2];
-    if(a.verschleiss>0) a.zustand = Math.max(0, a.zustand - Math.round(a.verschleiss*faktor));
+    /* „Füße wie Leder": Nur die Schuhe, und nur sie — ein Mann, der weiß, wie
+       man geht, schont sein Schuhwerk und sonst nichts. Das trifft genau die
+       Stelle, an der Verschleiß wirklich wehtut: Unter Zustand 25 kostet
+       Schuhwerk 18 Konstitution, und in Russland gibt es keinen Ersatz. */
+    const f = (k2==='schuhe' && zaeh('zaeh_fuesse')) ? faktor*0.5 : faktor;
+    if(a.verschleiss>0) a.zustand = Math.max(0, a.zustand - Math.round(a.verschleiss*f));
   }
 }
 
