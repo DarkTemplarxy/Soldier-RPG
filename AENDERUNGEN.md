@@ -5,6 +5,24 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Kapitel 10 und 11: die Rangleiter hat jetzt einen Inhalt bis zum Ende
+
+**Alle elf Kapitel sind gebaut** — einhundertsiebenundfünfzig Stationen, einundvierzig Gefechte, Italien 1796 bis Waterloo 1815.
+
+**Kapitel 11 (Die Hundert Tage 1815):** Neun Stationen, zwei Gefechte, Feindgüte 12, Sold-Moral **1,0** — Napoleon zahlt sofort und bar, und es ist das Geld eines Mannes, der keine zweite Chance bekommt. Waterloo steht bei zehn Runden gegen Feindmoral **100**, dem höchsten Wert des Spiels; seine Härte liegt in der Länge, nicht in der Trefferchance (7 + 3 + 12 = 22).
+
+**Die Ablehnung** (`S.abgelehnt`): Der Rückruf im April 1815 hat zwei Knöpfe, und beide führen zu einem vollwertigen Ende. Wer ablehnt, geht direkt in den Epilog — kein Gefecht, kein Zwischenfall, keine halbe Wertung.
+
+> **Die Prüfung steht ganz oben in `naechster()`, und das war ein echter Fund.** Die erste Fassung stand weiter unten in der Kette, hinter `typ==='szene'` — und traf deshalb **nie**, weil auf den Brief eine Szene folgt. Gemessen: `S.abgelehnt` war gesetzt, und der Mann marschierte trotzdem nach Belgien.
+
+**Der Lebensepilog** (`epilog:true`, `zeigeEpilog()`): das einzige Ende, das über den Tag hinaussieht. **Was den Text bestimmt, ist der Rang und nicht der Sieg** — Waterloo ist verloren, für alle gleich; was danach kommt, hängt davon ab, wie hoch man stand. Fünf Stufen von „ein Dorf, das kleiner ist, als du es in Erinnerung hattest" bis zur Liste, die man später Proskriptionen nennen wird.
+
+Gemessen: Colonel **678**, Marschall **928 Punkte**. Damit ist die volle Skala aus KONZEPT §5 (Maximum 918) zum ersten Mal ausgeschöpft.
+
+**Zum vierten und fünften Mal stand ein Kapitelentwurf über der Decke:** Frankreich 25/25/29/25/26, Hundert Tage 27 und 32. Alle jetzt bei 20 bis 22.
+
+**Und der Kapitelprüfstand meldete ein falsches Gefechtsbild, wo gar kein Gefecht ist:** Er suchte nach `TAG ` im Bildschirmtext, und die Station „Der Tag des Regens" steht als Kartenkopf in Großbuchstaben da. Gesucht wird jetzt die vollständige Rundenzeile `<ZEIT> n VON m`. **Dritter Fund derselben Art** — ein Fließtext ist kein Zustand.
+
 ## 2026-07-29 — Zwei Würfe statt einem: Können wiegt schwerer als Glück
 
 **Die Klage war: „Manchmal schafft man eine Probe mit dem doppelten Wert nicht."** Sie war berechtigt, und der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher Wurf über 1–100 ist überall gleich wahrscheinlich; ein Zielwert von 80 ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je Kapitel fühlt sich das an, als zähle Können nicht.

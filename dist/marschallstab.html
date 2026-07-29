@@ -47,6 +47,22 @@
     /* Kanzleipapier — für alles, was ein amtliches Schriftstück *ist* */
     --papier:#f2ebda; --papier2:#e8dfc9; --tinte:#241f1a; --tinte2:#4e4335;
 
+    /* ── Die Bescheide ──
+       **Der Bogen sagt den Rang, bevor man ihn liest.** Ein Sergent bekommt
+       ein Stück Feldpergament mit einer Bruchkante; ein Marschall ein Patent
+       mit vierundzwanzig Pixel Goldgeflecht, fünf Unterschriften und drei
+       Siegeln. Dazwischen kommt je Stufe eine Zutat dazu — das ist die ganze
+       Regel, und sie braucht keine Sonderfälle.
+       Kontraste gerechnet: #1d1814 auf #f2ebda = 14,8:1 · #20304a auf #f2ebda
+       = 8,9:1 · #5f5240 auf #f2ebda = 5,6:1 · #8a6410 auf #f8f3e6 = 4,9:1. */
+    --pergament:#ddd0ae;         /* Feldpergament, Rang 5 */
+    --patent:#f7f1e2;            /* Patentbogen, Rang 7–8 */
+    --gold:#c8901f; --gold-hell:#f0dfae; --gold-dunkel:#8a6410;
+    --gold-linie:rgba(138,100,16,.5);
+    --hand:#20304a;              /* Handschrift, bläuliche Eisengallustinte */
+    --waffe-inf:#27415f; --waffe-kav:#2c4630; --waffe-art:#1e2a3f;
+    --wolle:#d08a2a; --tresse:#e8c469; --silber:#dfe3e0;
+
     /* Didone — die Schriftform der französischen Zeit um 1800: hohe
        Strichkontraste, senkrechte Achse. Nur Systemschriften, kein Download:
        Das Spiel bleibt eine Datei ohne Abhängigkeiten. Wo keine da ist,
@@ -501,6 +517,86 @@ a.plain:hover{ color:var(--brass) }
    sitzt; im Kartenkopf teilt es sich die Zeile mit dem Titel. */
 .ch .emblem{ display:inline-block; vertical-align:-6px; width:20px; height:20px; margin-right:7px }
 
+/* ══════════════════ DIE BESCHEIDE ══════════════════
+
+   Zehn Stufen von Rang 5 bis 14, aus dem Entwurfspaket (Bündel 3). Die Regel
+   dahinter ist eine einzige: **Je höher der Rang, desto mehr Zutaten** —
+   Papier heller, Rahmen breiter, mehr Unterschriften, größeres Siegel. Für
+   die Ränge 1 bis 4 gibt es keinen Bescheid, und das ist Absicht: Dort wird
+   nichts ausgestellt, man bekommt es gesagt. */
+
+/* Handschrift — nur Systemschriften, mit Rückfall auf Kursiv */
+.hand{ font-family:'Brush Script MT','Segoe Script','Bradley Hand',cursive;
+  color:var(--hand); line-height:1.2; font-style:italic }
+.feldzeile{ display:grid; grid-template-columns:auto 1fr; gap:8px 14px; align-items:baseline }
+.feldname{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--gold-dunkel) }
+.feldwert{ border-bottom:1px solid var(--gold-linie) }
+.unterschrift{ border-top:1px solid var(--gold-linie); margin-top:6px; padding-top:5px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:9.5px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--tinte2) }
+.bescheidkopf{ font-family:var(--didone); font-variant:small-caps; letter-spacing:.2em;
+  text-align:center; color:var(--gold-dunkel); font-size:13px; margin-bottom:2px }
+.bescheidrang{ font-family:var(--didone); text-align:center; font-size:27px;
+  color:#1d1814; margin:6px 0 2px; line-height:1.1 }
+.bescheidzusatz{ text-align:center; font-size:12.5px; color:var(--tinte2); margin-bottom:14px }
+.bescheidfuss{ display:flex; justify-content:space-between; align-items:flex-end;
+  gap:18px; margin-top:20px; flex-wrap:wrap }
+.siegelrund{ flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  border-radius:47% 53% 51% 49% / 52% 48% 52% 48%;
+  background:radial-gradient(circle at 36% 32%, #b8402c, #7e1f16 68%, #5e150e);
+  box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35),
+             inset 0 2px 3px rgba(255,255,255,.18);
+  color:rgba(255,225,210,.42); font-family:var(--didone);
+  text-shadow:0 1px 0 rgba(0,0,0,.5) }
+
+/* ── Feldpergament, nur Rang 5 ──
+   Vierzehn Punkte für die Bruchkante, kein Bild. `clip-path` schneidet den
+   Schlagschatten mit ab, deshalb sitzt der Schatten auf der Hülle. */
+.pergamenthuelle{ filter:drop-shadow(0 10px 22px rgba(0,0,0,.5)) }
+.pergament{ background:var(--pergament); color:#241f1a;
+  background-image:
+    radial-gradient(circle at 84% 12%, rgba(120,92,44,.22), transparent 26%),
+    radial-gradient(circle at 12% 78%, rgba(120,92,44,.18), transparent 30%),
+    radial-gradient(circle at 46% 40%, rgba(140,110,60,.10), transparent 55%),
+    var(--korn), var(--wolken);
+  background-blend-mode:normal,normal,normal,multiply,multiply;
+  clip-path:polygon(0.4% .8%,99.2% 0,99.6% 11%,98.7% 24%,99.7% 37%,98.5% 51%,
+    99.6% 64%,98.8% 78%,99.8% 90%,99% 100%,0.6% 99.3%,0 62%,0.7% 34%,0 14%); }
+.pergament .cb{ color:#241f1a }
+.falte{ position:absolute; pointer-events:none;
+  background:linear-gradient(90deg, rgba(80,60,30,.16), rgba(255,255,255,.34)) }
+
+/* ── Das Patent, Rang 7 aufwärts ──
+   Die Goldbordüre ist eine Hülle, kein `border-image` — sie muss auf jeder
+   Breite gleich aussehen und darf nicht kacheln. */
+.patenthuelle{ padding:7px; box-shadow:0 14px 32px rgba(0,0,0,.5);
+  background:linear-gradient(135deg,#8a6410,#e3c98c 22%,#c8901f 46%,#f0dfae 62%,#8a6410 88%,#c8901f) }
+.patent{ background:var(--patent); color:#1d1814 }
+.patent .cb{ color:#1d1814 }
+.stufe2 .patenthuelle{ padding:10px }
+.stufe3 .patenthuelle{ padding:14px }
+.stufe4 .patenthuelle{ padding:18px;
+  background:repeating-linear-gradient(45deg,#8a6410 0 4px,#e8d29a 4px 8px,#c8901f 8px 12px,#f6ecc8 12px 16px) }
+.stufe5 .patenthuelle{ padding:20px }
+.stufe6 .patenthuelle{ padding:24px }
+.stufe2 .patent{ background-color:#f8f3e6; background-image:
+  repeating-linear-gradient(45deg, rgba(138,100,16,.035) 0 2px, transparent 2px 7px),
+  repeating-linear-gradient(-45deg, rgba(138,100,16,.03) 0 2px, transparent 2px 7px) }
+.stufe3 .patent{ background-color:#faf6ea }
+.stufe4 .patent{ background-color:#fcf9ef }
+.stufe5 .patent{ background-color:#fdfbf4 }
+.stufe6 .patent{ background-color:#fefdf8 }
+/* Das rote Titelband ab Stufe 3 */
+.titelband{ background:linear-gradient(180deg,#a5301f,#7e1f16); color:#f3e2c8;
+  font-family:var(--didone); font-variant:small-caps; letter-spacing:.22em;
+  text-align:center; padding:5px 10px; margin:-4px -10px 14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.35) }
+/* Goldkugeln in den Ecken, nur Stufe 6 */
+.goldkugel{ position:absolute; width:13px; height:13px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #f6ecc8, #c8901f 62%, #8a6410);
+  box-shadow:0 1px 2px rgba(0,0,0,.45) }
+
 </style>
 </head>
 <body>
@@ -658,34 +754,114 @@ function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
    erkennt man an der Epaulette (Grenadier rot, Voltigeur grüngelb), die
    Unteroffiziere an den Streifen am Unterarm: Caporal zwei aus Wolle,
    Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse. */
-function rangabzeichen(mann){
-  const r = mann.rang, hoehe = 23;
-  const rahmen = i => `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>${i}</svg>`;
+/* ══════════════════ DIE RANGABZEICHEN ══════════════════
 
-  if(r===2){                                   // Epaulette auf der Schulter
-    const f = mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125';
-    const fransen = [10,14,18,22,26].map(x=>`<rect x="${x}" y="13" width="2" height="7" rx="1"/>`).join('');
-    return rahmen(`<rect x="7" y="5" width="22" height="7" rx="3.5" fill="${f}"/>
-      <g fill="${f}" opacity=".8">${fransen}</g>`);
+   **Vierzehn Ränge, drei Waffengattungen, kein einziges Bild.** Die Formen
+   stammen aus dem Entwurfspaket (`abzeichen/*.svg`); eingebaut sind sie als
+   Funktion, die einen SVG-String zurückgibt — sonst brechen `file://`, die
+   Einzeldatei-Weitergabe und `werkzeug/bauen.js`.
+
+   **Das Schildchen trägt die Farbe des Rocks**, das Metall die der Gattung:
+   Infanterie Gold auf Königsblau, Kavallerie Silber auf Dragonergrün,
+   Artillerie Gold auf Dunkelblau mit rotem Vorstoß. **Ab Rang 12 gibt es
+   keine Gattung mehr** — ein General ist keiner Waffe mehr zugeordnet, und
+   das Schildchen wird selbst golden.
+
+   Die Stufenfolge ist in allen Gattungen dieselbe und erzählt die Laufbahn:
+   leer → Epaulette der Elitekompanie → zwei Wollstreifen → plus Querstreifen
+   → eine Tresse aus Metallfaden → zwei Tressen → Epaulette mit rotem
+   Seidenstreifen → Streifen blass → Epaulette und Contre-Epaulette → dicke
+   Fransen → zwei dicke → zwei Sterne → drei Sterne → gekreuzte Stäbe. */
+const WAFFE = {
+  infanterie: {plate:'#27415f', stroke:'#16283d', wolle:'#d08a2a', tresse:'#e8c469',
+               tresseD:'#a8791a', ep:'#e0b552'},
+  kavallerie: {plate:'#2c4630', stroke:'#182a1a', wolle:'#d08a2a', tresse:'#dfe3e0',
+               tresseD:'#9aa3a0', ep:'#cfd6d2'},
+  artillerie: {plate:'#1e2a3f', stroke:'#0f1624', piping:'rgba(156,49,37,.75)',
+               wolle:'#9c3125', tresse:'#e8c469', tresseD:'#a8791a', ep:'#e0b552'}
+};
+
+/* Die drei Bausteine, aus denen jedes Abzeichen besteht. Sie stehen hier
+   einmal statt in vierzehn Vorlagen mehrfach. */
+function abzChevron(x1, f, breit){
+  const b = breit||9;
+  return `<polygon points="${x1},19 ${x1+b},5 ${x1+b+5},5 ${x1+5},19" fill="${f}"/>`;
+}
+function abzEpaulette(x, w, f, fransen, dick){
+  const n = fransen===undefined ? 5 : fransen;
+  const fy = dick ? 8 : 6.6, fw = dick ? 3.4 : 1.8, schritt = dick ? 4 : 4;
+  let out = `<rect x="${x}" y="5" width="${w}" height="7.4" rx="3.7" fill="${f}"/>`;
+  for(let i=0;i<n;i++){
+    const fx = x + 5 + i*schritt;
+    out += `<rect x="${fx}" y="13" width="${fw}" height="${fy}" rx="${fw/2}" fill="${f}" opacity=".${dick?'85':'8'}"/>`;
   }
-  if(r>=3){                                    // Streifen am Unterarm
-    const tresse = r>=5;
-    const f = tresse ? '#8a6410' : '#a86a20';  // Tresse in Metallfarbe, Wolle in Aurore
-    /* Der Sergent-major trägt **zwei** Tressen aus Metallfaden — historisch
-       genau der Unterschied zum Sergenten, und auf 36 Pixel der einzige, den
-       man sehen kann. */
-    const streifen = r>=6
-      ? `<polygon points="6,19 17,5 22,5 11,19" fill="${f}"/>
-         <polygon points="17,19 28,5 33,5 22,19" fill="${f}"/>`
-      : tresse
-      ? `<polygon points="11,19 22,5 29,5 18,19" fill="${f}"/>`
-      : `<polygon points="7,19 16,5 21,5 12,19" fill="${f}"/>
-         <polygon points="16,19 25,5 30,5 21,19" fill="${f}"/>`;
-    const quer = r===4 ? `<rect x="6" y="2.5" width="24" height="2.6" rx="1.3" fill="${f}" opacity=".85"/>` : '';
-    return rahmen(streifen + quer);
+  return out;
+}
+function abzStern(cx, gr){
+  const h = (gr||6.8)/2;
+  return `<rect x="${cx-h}" y="${12-h}" width="${gr||6.8}" height="${gr||6.8}" transform="rotate(45 ${cx} 12)" fill="url(#pgold)"/>`;
+}
+
+function rangabzeichen(mann){
+  const r = mann.rang|0;
+  if(r < 2) return '';                        // Fusilier: der Ärmel ist leer
+  const gold = r >= 12;
+  const P = WAFFE[mann.waffe || 'infanterie'] || WAFFE.infanterie;
+  const verlauf = `<defs><linearGradient id="pgold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0%" stop-color="#f6ecc8"/><stop offset="34%" stop-color="#e0b552"/>
+    <stop offset="70%" stop-color="#c8901f"/><stop offset="100%" stop-color="#8a6410"/></linearGradient></defs>`;
+  const grund = gold
+    ? `<rect x="0" y="0" width="36" height="24" rx="2" fill="url(#pgold)" stroke="#8a6410"/>
+       <rect x="1.2" y="1.2" width="33.6" height="21.6" rx="1.4" fill="none" stroke="rgba(94,66,8,.35)"/>`
+    : `<rect x="0" y="0" width="36" height="24" rx="2" fill="${P.plate}" stroke="${P.stroke}"/>
+       <rect x="1.2" y="1.2" width="33.6" height="21.6" rx="1.4" fill="none" stroke="${P.piping||'rgba(255,255,255,.10)'}"/>`;
+
+  let i = '';
+  if(r === 2){                                 // Elitekompanie: rot oder grüngelb
+    i = abzEpaulette(6, 24, mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125');
+  } else if(r === 3){                          // zwei Wollstreifen
+    i = abzChevron(6, P.wolle) + abzChevron(15, P.wolle);
+  } else if(r === 4){                          // dazu der Querstreifen des Fourriers
+    i = abzChevron(6, P.wolle) + abzChevron(15, P.wolle)
+      + `<rect x="6" y="2.4" width="24" height="2.6" rx="1.3" fill="${P.wolle}" opacity=".9"/>`;
+  } else if(r === 5){                          // eine Tresse aus Metallfaden
+    i = `<polygon points="11,19 20,5 25,5 16,19" fill="${P.tresse}"/>
+         <polygon points="11,19 20,5 21.4,5 12.4,19" fill="${P.tresseD}" opacity=".5"/>`;
+  } else if(r === 6){                          // zwei Tressen — der sichtbare Unterschied
+    i = abzChevron(5, P.tresse) + abzChevron(16, P.tresse);
+  } else if(r === 7){                          // Epaulette mit rotem Seidenstreifen
+    i = abzEpaulette(6, 24, P.ep)
+      + `<rect x="8" y="7.6" width="20" height="2" rx="1" fill="#9c3125" opacity=".9"/>`;
+  } else if(r === 8){                          // derselbe Streifen, blasser
+    i = abzEpaulette(6, 24, P.ep)
+      + `<rect x="8" y="7.6" width="20" height="1.2" rx=".6" fill="#9c3125" opacity=".55"/>`;
+  } else if(r === 9){                          // Epaulette und Contre-Epaulette
+    i = `<rect x="2" y="5" width="9" height="7.4" rx="3.7" fill="${P.ep}" opacity=".85"/>`
+      + abzEpaulette(8, 24, P.ep);
+  } else if(r === 10 || r === 11){             // dicke Fransen, ab 11 auf beiden Schultern
+    if(r === 10){
+      i = `<rect x="6" y="5" width="24" height="7.4" rx="3.7" fill="${P.ep}"/>`;
+      for(let k=0;k<5;k++) i += `<rect x="${9.6+k*4}" y="13" width="3.4" height="8" rx="1.7" fill="${P.ep}" opacity=".85"/>`;
+    } else {
+      i = '';
+      for(const x0 of [1.6, 22]){
+        i += `<rect x="${x0}" y="5" width="12" height="7.4" rx="3.7" fill="${P.ep}"/>`;
+        for(let k=0;k<3;k++) i += `<rect x="${x0+1.4+k*3.4}" y="12.4" width="3.2" height="8" rx="1.6" fill="${P.ep}" opacity=".85"/>`;
+      }
+    }
+  } else if(r === 12){                         // zwei Sterne auf dem Balken
+    i = `<rect x="5" y="9" width="26" height="6" rx="3" fill="#1e3350" opacity=".92"/>`
+      + abzStern(13) + abzStern(23);
+  } else if(r === 13){                         // drei Sterne
+    i = `<rect x="4" y="9" width="28" height="6" rx="3" fill="#1e3350" opacity=".92"/>`
+      + abzStern(11, 6.4) + abzStern(18, 6.4) + abzStern(25, 6.4);
+  } else {                                     // der Marschallstab: gekreuzte Stäbe
+    i = `<g stroke="#1e3350" stroke-width="3.4" stroke-linecap="round">
+        <line x1="9" y1="18" x2="27" y2="6"/><line x1="27" y1="18" x2="9" y2="6"/></g>`
+      + abzStern(18, 7.2)
+      + [[9,6],[27,6],[9,18],[27,18]].map(([cx,cy])=>`<circle cx="${cx}" cy="${cy}" r="1.9" fill="#1e3350"/>`).join('');
   }
-  return '';                                   // Fusilier: der Ärmel ist leer
+  return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">${verlauf}${grund}${i}</svg>`;
 }
 
 /* ══════════════════ DIE KETTE ÜBER DIR ══════════════════
@@ -803,11 +979,11 @@ const KAMPAGNEN = [
   {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, kurz:'Die perfekte Schlacht.'},
   {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
   {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, sold:0.6, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
-  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:2, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
-  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:4, verschleiss:2, kurz:'Kein Feldzug, ein Überlebensspiel.'},
-  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
-  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, kurz:'Verteidigung der Heimat, Abdankung.'},
-  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, kurz:'Waterloo. Epilog je nach Rang.'}
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, sold:1.0, kurz:'Waterloo. Epilog je nach Rang.'}
 ];
 const STATIONEN = {};
 
@@ -982,8 +1158,46 @@ const LADEN = [
   {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:30},
   {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
   {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:15},
-  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12}
+  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12},
+
+  /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
+
+     **Der Rekrut kauft Muskeln, der Veteran kauft Gewohnheiten.**
+
+     Gemessen kaufen Veteranenpunkte heute **Rang und keine Strecke** — Weite
+     57 / 62 / 61 Stationen bei 11 / 30 / 38 % Capitaine. Die Ursache ist eine
+     Kette: bessere Werte → kürzere Gefechte → mehr Ruf → schnellere
+     Beförderung → Offiziersränge mit +4 bis +5 Gefahr je Runde. **Jeder Kauf,
+     der die Kampfkraft hebt, landet am Ende in dieser Kette und zahlt seinen
+     Gewinn dort wieder zurück.**
+
+     Diese fünf können das nicht. Sie wirken ausschließlich auf die
+     Zermürbung **zwischen** den Gefechten — Verschleiß, Krankheit, Aderlass,
+     Frost, alte Wunden. Sie machen zäher, ohne sichtbarer zu machen, und
+     erzeugen deshalb keinen Ruf.
+
+     **Und sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am
+     Anfang: Italien übersteht er zu 98 bis 100 %. Er stirbt in Ägypten an
+     Hitze und Ruhr und in Jena an den Beinen. Genau davon handelt jede
+     einzelne.
+
+     Inhaltlich ist das, was ein Mann aus zwei Feldzügen mitbringt, ohnehin
+     nicht Kraft, sondern das Wissen, wie man nicht stirbt: welches Wasser
+     man trinkt, wie man seine Füße behält, wann man sich hinlegt. */
+  {id:'zaeh_fuesse',art:'zaeh',label:'Füße wie Leder',
+   beschr:'Schuhe halten doppelt so lange, und ein forcierter Marsch nimmt dir weniger Luft',vp:30},
+  {id:'zaeh_wasser',art:'zaeh',label:'Er weiß, welches Wasser',
+   beschr:'Ruhr, Fieber und Sumpffieber zehren nur halb so stark',vp:35},
+  {id:'zaeh_nachzuegler',art:'zaeh',label:'Er bleibt nicht zurück',
+   beschr:'In Kriegen, die zwischen den Gefechten töten, kostet dich jede Station drei Punkte weniger',vp:45},
+  {id:'zaeh_schlaf',art:'zaeh',label:'Er schläft im Freien',
+   beschr:'Der Frost trifft dich eine Stufe milder, als er ist',vp:30},
+  {id:'zaeh_narben',art:'zaeh',label:'Alte Narben',
+   beschr:'Der Feldscher näht dir nach jedem Gefecht zwei Wunden zu statt einer',vp:40}
 ];
+/* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
+   gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */
+function zaeh(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }
 
 
 'use strict';
@@ -3383,6 +3597,17 @@ STATIONEN.spanien = KAPITEL7.slice();
    im November, `frost:3` ab Krasnoi, `frost:4` an der Beresina. Ohne Mantel
    ist das eine zehrende Wunde, die an jeder Station weiterfrisst.
 
+   **Die vier Gefechte liegen deshalb nicht über der Decke, sondern darunter**
+   — Smolensk 20, Krasnoi 20, Borodino und die Beresina auf den 22, die kein
+   Gefecht überschreitet, wenn es nicht selbst die Regel seines Kapitels ist
+   (CLAUDE.md, „Die 22"). Die erste Fassung stand bei 23, 27, 28 und **29**,
+   und das war der falsche Ort: Russland ist nicht das Kapitel, in dem am
+   besten geschossen wird, sondern das, in dem der Vorrat nicht zurückkommt.
+   **Borodino trägt seine Härte in der Länge** — zehn Runden gegen Feindmoral
+   95, das längste und zäheste Gefecht des Spiels. Ein Tag, der nicht aufhört,
+   ist die richtige Übersetzung für den blutigsten Tag des Jahrhunderts; eine
+   erhöhte Trefferchance wäre nur eine größere Zahl gewesen.
+
    **Und am Ende steht die erste Rangschranke** (`schranke:'russland'`,
    RANGLEITER §9): Wer lebt und unter Rang 7 ist, wird ausgemustert — Ruhestand,
    +180 Punkte, und der Abschlusstext, der dazu gehört. Wer Rang 7 oder höher
@@ -3504,7 +3729,7 @@ const KAPITEL8 = [
         gelaende:'Holzhäuser, die brennen · dahinter Mauer und Graben',
         stellung:'Erstes Treffen, rechte Vorstadt'},
   intro:'Zum ersten Mal seit dem Njemen steht jemand. Er steht, damit die anderen wegkommen.',
-  runden:7,feindMoral:66,gefahr:13,gelaende:'mauer',
+  runden:7,feindMoral:66,gefahr:10,gelaende:'mauer',
   sieg:{text:'Am Morgen des 18. gehört euch eine Stadt, die es nicht mehr gibt. In der Kathedrale liegen dreitausend Verwundete beider Seiten, und in den Straßen liegt, was von einer Stadt aus Holz übrig ist, wenn sie zwei Tage gebrannt hat.\\n\\nDie russische Armee ist weg. Sie ist nach Osten gegangen, in der Nacht, in Ordnung, und niemand hat sie aufgehalten.',ruf:7,ruhm:true},
   niederlage:{text:'Ihr kommt nicht durch die brennende Vorstadt und liegt bis Mitternacht in einem Garten, in dem es zu heiß ist zum Atmen. Am Morgen ist die Stadt trotzdem leer, weil sie in der Nacht abgezogen sind.',ruf:-3,belastung:12}},
 
@@ -3534,7 +3759,7 @@ const KAPITEL8 = [
         gelaende:'Offenes Feld, Erdwerke, acht Kilometer Front, kein Flügel offen',
         stellung:'Erstes Treffen, vor der großen Schanze'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Es ist auch keine Bühne — nur eine Mühle, und das ist die Aussage.',
-  runden:10,feindMoral:95,gefahr:16,gelaende:'mauer',
+  runden:10,feindMoral:95,gefahr:9,gelaende:'mauer',
   sieg:{text:'Um vier Uhr nachmittags gehört euch die große Schanze. Um sechs hört es auf, weil auf beiden Seiten niemand mehr angreifen kann.\\n\\nAuf dem Feld liegen fünfundzwanzigtausend Franzosen und vierzigtausend Russen. Die russische Armee zieht in der Nacht ab, in Ordnung, wie immer. Der Weg nach Moskau ist frei, und es ist der teuerste Weg, den je jemand gekauft hat.',ruf:14,ruhm:true},
   niederlage:{text:'Ihr kommt bis an den Graben der Schanze und liegt dort, bis eine andere Division es zu Ende bringt. Am Abend ist das Feld gewonnen. Es liegen fünfundzwanzigtausend Franzosen darauf, und die russische Armee zieht in Ordnung ab.',ruf:-4,belastung:16}},
 
@@ -3639,7 +3864,7 @@ const KAPITEL8 = [
         gelaende:'Verschneite Straße, offenes Feld, keine Deckung',
         stellung:'Was von der Kompanie noch geht'},
   intro:'Keine Linie hilft. Zurückweichen kostet keinen Ruf — es gibt nur kein Zurück.',
-  runden:5,feindMoral:45,gefahr:17,gelaende:'wueste',
+  runden:5,feindMoral:45,gefahr:10,gelaende:'wueste',
   sieg:{text:'Ihr kommt durch. Von dem Korps, das am Morgen angetreten ist, kommen sechstausend von sechzehntausend durch, und die Geschütze bleiben stehen, weil keine Pferde mehr da sind, sie zu ziehen.\\n\\nDrei Tage später erfährt man, dass ein ganzes Korps hinter euch nicht durchgekommen ist.',ruf:6},
   niederlage:{text:'Ihr kommt nicht durch die Straße und geht querfeldein nach Norden, durch Schnee, der bis über die Knie geht, und stoßt zwei Tage später wieder auf die Kolonne. Was ihr dabei verliert, zählt niemand.',ruf:0,belastung:16}},
 
@@ -3658,7 +3883,7 @@ const KAPITEL8 = [
         gelaende:'Sumpf, Treibeis, zwei Bockbrücken über achtzig Meter',
         stellung:'Am Brückenkopf, Ostufer'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Die Laufbahn hat auf einer Brücke angefangen.',
-  runden:8,feindMoral:70,gefahr:15,gelaende:'bruecke',
+  runden:8,feindMoral:70,gefahr:9,gelaende:'bruecke',
   sieg:{text:'Am Abend des 28. steht der Brückenkopf noch. In der Nacht geht hinüber, wer gehen kann; am Morgen des 29. werden die Brücken angezündet, während auf dem Ostufer noch zehntausend Nachzügler stehen.\\n\\nWas dort passiert, sieht man vom Westufer aus. Man sieht es sehr genau, weil es hell ist und weil es zwei Stunden dauert.',ruf:12,ruhm:true},
   niederlage:{text:'Der Brückenkopf wird zusammengedrückt, und was übrig ist, kommt einzeln über die Bohlen. Du kommst hinüber. Wie, wirst du später nicht erklären können, und es fragt auch nie jemand.',ruf:-3,belastung:20}},
 
@@ -3684,7 +3909,7 @@ const KAPITEL8 = [
        belastung:8}}
   ]},
 
-/* 122 */ {typ:'ende',id:'ende_russland',datum:'Ende Dezember 1812 · Königsberg',ort:'Die Listen werden neu geschrieben',
+/* 122 */ {typ:'uebergang',id:'ende_russland',datum:'Ende Dezember 1812 · Königsberg',ort:'Die Listen werden neu geschrieben',
   schranke:'russland',
   text:[
     'In Königsberg wird gesammelt, gezählt und neu eingeteilt. Was von der Großen Armee übrig ist, füllt keine Division.',
@@ -3692,7 +3917,7 @@ const KAPITEL8 = [
     'Es wird eine neue Armee aufgestellt. Sie wird aus Konskribierten des Jahrgangs 1813 bestehen und aus denen, die man aus Spanien holt, und sie wird Offiziere brauchen — Offiziere, die wissen, wie eine Kolonne bei minus zwanzig Grad zusammenbleibt.',
     'Was man nicht mehr braucht, sind Unteroffiziere. Davon gibt es genug, und die meisten von ihnen wollen nach Hause.'
   ],
-  ausblick:'<b>Hier endet der gebaute Stand.</b> Im Frühjahr 1813 steht eine neue Armee am Rhein. Sie ist achtzehn Jahre alt, hat noch nie geschossen und wird nach dem Namen einer Kaiserin benannt, die keiner von ihnen je gesehen hat.'}
+  ausblick:'Im Frühjahr 1813 steht eine neue Armee am Rhein. Sie ist achtzehn Jahre alt, hat noch nie geschossen und wird nach dem Namen einer Kaiserin benannt, die keiner von ihnen je gesehen hat.'}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.
@@ -3700,6 +3925,808 @@ const KAPITEL8 = [
 KAPITEL.push(...KAPITEL8);
 STATIONEN.russland = KAPITEL8.slice();
 (KAMPAGNEN.find(k=>k.id==='russland')||{}).gebaut = true;
+
+
+'use strict';
+/* Kapitel 9 — Deutschland 1813. Reine Daten, wie die Kapitel davor.
+
+   ══════════════════ Die eigene Regel ══════════════════
+
+   **Deine Armee ist achtzehn Jahre alt.**
+
+   Die alte Armee liegt in Russland. Die neue besteht aus Konskribierten, die
+   noch nie geschossen haben — die *Marie-Louises*, benannt nach einer
+   Kaiserin, die keiner von ihnen je gesehen hat. Mechanisch heißt das:
+   **Einheitszustand und Sektionsgüte starten bei einem Bruchteil**
+   (`rekruten:true` an der Kampagne), und der Drill zwischen den Schlachten
+   wird zum eigentlichen Spiel.
+
+   Es ist derselbe Drill wie in Savona 1796 — nur stehst du auf der anderen
+   Seite, und die Gesichter vor dir sind das eigene von damals. **Das Kapitel
+   sagt das genau einmal, in einem Nebensatz**, und danach nie wieder.
+
+   Jedes Gefecht prüft die Ausbildung, nicht den Mut: Ein schlecht gedrillter
+   Zug bricht bei den ersten Verlusten. Wer die Lagerabende in Drill steckt,
+   kauft damit buchstäblich Standfestigkeit.
+
+   **Und der Adler kommt.** Ab Rang 11 ist er ein Zustand mit drei Werten —
+   getragen, gerettet, verloren. Ein verlorener Adler kostet den Rang,
+   unabhängig von allem anderen. Die Sondermission von Leipzig ist deshalb
+   keine Heldentat, sondern eine Bergung.
+
+   ══════════════════ Historische Fixpunkte (Invariante 8) ══════════════════
+
+   Lützen 2. Mai 1813 · Bautzen 20.–21. Mai · Waffenstillstand von Pläswitz
+   Juni bis August · Dresden 26.–27. August, der letzte große Sieg · die
+   Niederlagen der Unterführer im selben Monat (Katzbach, Kulm, Dennewitz) ·
+   **Leipzig 16.–19. Oktober**, die Völkerschlacht · die zu früh gesprengte
+   Elsterbrücke am 19. · Hanau 30.–31. Oktober · der Rhein im November.
+   Dazwischen ist alles frei erfunden. */
+
+const KAPITEL9 = [
+
+/* 123 */ {typ:'szene',id:'mainz',datum:'März 1813 · Mainz',ort:'Das neue Regiment',
+  marsch:{von:'Sammelplatz in Frankreich',nach:'Mainz',weg:'Ein Depot, in dem dreitausend Achtzehnjährige stehen und niemand weiß, wohin mit ihnen'},
+  text:[
+    'Das Regiment steht auf dem Exerzierplatz, und es steht falsch. Nicht schlecht ausgerichtet — falsch: Sie stehen wie Leute, die noch nie in einer Reihe gestanden haben, weil sie noch nie in einer Reihe gestanden haben.',
+    'Es sind Konskribierte des Jahrgangs 1814, vorzeitig eingezogen. Der Jüngste ist siebzehn. Viele haben eine Muskete zum ersten Mal in der Hand, als sie sie ausgehändigt bekommen, und drei Wochen später gehen sie damit über den Rhein.',
+    'Von den Männern, mit denen du 1812 über den Njemen gegangen bist, sind vier hier. Vier, in einem Regiment von zweitausend.',
+    'Einer der Neuen fragt dich abends am Feuer, wie es ist. Er meint es nicht als Redensart; er will es wirklich wissen, und er ist der Einzige, der fragt.'
+  ],
+  optionen:[
+    {label:'Die Wahrheit sagen',hint:'Er hat gefragt',
+     erfolg:{text:'Du sagst ihm, dass es laut ist, dass man nichts sieht, dass der Mann neben ihm fallen wird und dass er dann weiterladen muss. Du sagst ihm auch, dass die, die sich hinlegen, meistens dort liegen bleiben.\\n\\nEr hört zu und sagt danach nichts mehr. Am nächsten Morgen steht er beim Exerzieren vorn und stellt Fragen, die vernünftig sind.',
+       kameradschaft:8,einheit:6}},
+    {label:'Ihm sagen, es sei halb so schlimm',hint:'Es ist die Antwort, die man gibt',
+     erfolg:{text:'Du sagst, es sei lauter als schlimm und man gewöhne sich daran. Er glaubt es, weil er es glauben will, und schläft in dieser Nacht gut.\\n\\nBei Lützen wird er in der zweiten Reihe stehen. Was dann passiert, hat mit dem, was du gesagt hast, nichts zu tun, und du wirst trotzdem daran denken.',
+       kameradschaft:4,belastung:6}},
+    {label:'Nichts sagen und ihm zeigen, wie man lädt',hint:'Drill · zwölf Zeiten, achtzigmal',
+     probe:{wert:'drill',schw:40},
+     erfolg:{text:'Du antwortest nicht, sondern nimmst ihm die Muskete aus der Hand und machst es vor. Zwölf Zeiten, dann noch einmal, dann lässt du ihn. Nach einer Stunde geht es. Nach drei Abenden geht es im Dunkeln.\\n\\nEs ist die einzige Antwort auf seine Frage, die etwas nützt, und sie beantwortet sie nicht.',
+       einheit:12,fert:{drill:6},kameradschaft:6},
+     misserfolg:{text:'Du machst es vor, und er macht es nach, und nach der vierten Wiederholung merkst du, dass du selbst zwei Griffe anders machst als das Reglement, weil man das nach siebzehn Jahren so macht. Er übernimmt beide.',
+       einheit:4,fert:{drill:3}}},
+    {label:'Sagen, dass du selbst so angefangen hast',hint:'Es ist wahr, und es ist der einzige Satz dieses Kapitels darüber',
+     erfolg:{text:'Du sagst ihm, du seist 1796 mit siebzehn in Savona angetreten und habest damals dieselbe Frage gestellt, und der, den du gefragt hast, sei bei Lodi geblieben.\\n\\nDanach redest du in diesem Kapitel nicht mehr davon. Es ist gesagt, und einmal reicht.',
+       kameradschaft:10,belastung:-6,attr:{menschenkenntnis:3}}}
+  ]},
+
+/* 124 */ {typ:'lager',id:'drilllager',datum:'April 1813 · Drilllager am Rhein',ort:'Drei Wochen, um aus Jungen eine Linie zu machen',
+  abende:3,
+  tun:['exerzieren','bajonett','scharf','instand','schuhe','waffe','ruhe','leute'],
+  rangTun:{3:['korporalschaft'],4:['listen'],5:['sektion','rekruten'],7:['fechtboden','zugfuehren','karten','adjutant'],9:['kasse_ganz','kasse_ueblich','kasse_voll']},
+  text:[
+    'Drei Wochen. In drei Wochen macht man aus einem Achtzehnjährigen keinen Soldaten; man macht aus ihm jemanden, der in der Reihe stehen bleibt, wenn geschossen wird, und das ist alles, was gebraucht wird.',
+    'Geübt wird das Nötigste: laden, in Linie gehen, Karree formieren, und vor allem stehen bleiben. Zielen wird nicht geübt, weil dafür Pulver fehlt und weil es auf zweihundert Schritt ohnehin keine Rolle spielt.',
+    'Was fehlt, ist Kavallerie. Es gibt fast keine Pferde mehr in Frankreich, und ohne Kavallerie kann man siegen, aber nicht verfolgen — jeder Sieg dieses Jahres wird deshalb ein halber sein.',
+    'Was hier in die Ausbildung geht, steht im Mai in der Linie. Was nicht hineingeht, liegt im Mai davor.'
+  ]},
+
+/* 125 */ {typ:'kampf',id:'luetzen',datum:'2. Mai 1813 · Großgörschen',ort:'Die Rekruten halten',
+  marsch:{von:'Lager bei Naumburg',nach:'Die Dörfer bei Lützen',weg:'35 km · und dann steht die preußische Kavallerie in der Flanke'},
+  anmarschKosten:{verschleiss:0.15,atem:6,belastung:2},
+  anmarsch:[
+    'Es beginnt als Überraschung, und zwar für euch: Die Kolonne marschiert nach Leipzig, und um elf Uhr vormittags geht in vier Dörfern rechts der Straße das Feuer los.',
+    'Was dort steht, ist die preußisch-russische Hauptarmee, und was ihr gegenüberstellt, sind Bataillone aus Achtzehnjährigen, die vor sechs Wochen zu Hause waren.',
+    'Sie stehen. Sie stehen nicht gut, sie stehen ungeordnet und mit zu viel Abstand, und sie laden zu langsam — aber sie gehen nicht weg. Vier Dörfer wechseln bis zum Abend fünfmal den Besitzer.',
+    'Der Kaiser reitet mitten hinein und bleibt bis in die Nacht dort. Es heißt später, er habe seit Arcole nicht mehr so weit vorn gestanden. Was man sieht, ist ein Mann zu Pferd zwischen Jungen, die sich an ihm ausrichten wie an einem Fahnenmast.'
+  ],
+  lage:{gegner:'Preußisch-russische Hauptarmee, achtzigtausend Mann, dazu Kavallerie, die ihr nicht habt',
+        auftrag:'Die Dörfer halten, bis die Korps von rechts und links da sind',
+        gelaende:'Vier Dörfer in einer Mulde, Gärten, Mauern, Teiche',
+        stellung:'Erstes Treffen, im zweiten Dorf'},
+  intro:'Es hängt nicht am Mut. Es hängt daran, ob drei Wochen Drill reichen.',
+  runden:7,feindMoral:62,gefahr:10,gelaende:'damm',
+  sieg:{text:'Am Abend gehören euch die Dörfer. Es ist ein Sieg, und er hat zwanzigtausend Mann gekostet, und verfolgen kann ihn niemand, weil keine Kavallerie da ist.\\n\\nAm nächsten Tag reitet der Kaiser die Front ab und nennt die jungen Bataillone beim Namen. Es ist nicht üblich, und es ist an diesem Tag verdient.',ruf:8,ruhm:true},
+  niederlage:{text:'Euer Dorf geht dreimal verloren und wird zweimal zurückgenommen, das dritte Mal von einem anderen Regiment. Am Abend ist die Schlacht gewonnen. Was in eurem Dorf liegt, ist zur Hälfte unter zwanzig.',ruf:-4,belastung:12}},
+
+/* 126 */ {typ:'kampf',id:'bautzen',datum:'21. Mai 1813 · Bautzen',ort:'Sieg ohne Früchte',
+  marsch:{von:'Dresden',nach:'Die Höhen bei Bautzen',weg:'80 km ostwärts · zwei Tage, und diesmal weiß man vorher, wo sie stehen'},
+  anmarschKosten:{verschleiss:0.15,atem:6,belastung:2},
+  anmarsch:[
+    'Diesmal ist es geplant: Ein Korps geht in die Flanke, während die Front festhält, und wenn beides zusammenkommt, ist die verbündete Armee eingeschlossen.',
+    'Beides kommt nicht zusammen. Das Flankenkorps ist zu spät, zu weit außen und marschiert an der Stelle vorbei, an der es hätte einschwenken sollen.',
+    'Was übrig bleibt, ist ein Frontalangriff auf Höhen, die befestigt sind. Zwei Tage lang.',
+    'Am Abend des 21. sind die Höhen euer. Die verbündete Armee zieht ab, in Ordnung, ohne einen Gefangenen und ohne ein Geschütz zurückzulassen — weil niemand da ist, der ihr folgt.'
+  ],
+  lage:{gegner:'Verbündete Armee auf befestigten Höhen, in aller Ruhe eingegraben',
+        auftrag:'Die Höhen frontal nehmen',
+        gelaende:'Terrassen, Bachtäler, Feldschanzen',
+        stellung:'Erstes Treffen, Mitte'},
+  intro:'Man gewinnt und hat nichts davon. Zum zweiten Mal in drei Wochen.',
+  runden:7,feindMoral:64,gefahr:10,gelaende:'mauer',
+  sieg:{text:'Am Abend stehen die Höhen leer. Kein Gefangener, kein Geschütz, keine Fahne — sie sind abgezogen, wie man abzieht, wenn man weiß, dass niemand hinterherkommt.\\n\\nDer Kaiser sagt am Abend einen Satz, den ein Adjutant aufschreibt: Wie, nach einem solchen Gemetzel, kein Ergebnis? Es ist die erste Frage dieser Art, die er stellt.',ruf:6},
+  niederlage:{text:'Euer Angriff bleibt auf der zweiten Terrasse liegen, bis die Stellung von rechts aufgerollt wird. Am Abend ist die Höhe genommen, der Feind abgezogen, und niemand hat etwas gewonnen.',ruf:-3,belastung:10}},
+
+/* 127 */ {typ:'winter',id:'waffenstillstand',datum:'Juni–August 1813 · Waffenstillstand',ort:'Zehn Wochen mitten im Krieg',
+  wochen:4,
+  tun:['ausr','drill','lesen','leute','ruhe','marketender','ausbilden','verdienst'],
+  rangTun:{4:['magazin'],5:['ausbilden','schreiber'],7:['fechtboden']},
+  frage:'Zehn Wochen. Beide Seiten benutzen sie. Wofür benutzt du sie?',
+  text:[
+    'Am 4. Juni wird ein Waffenstillstand geschlossen, der bis zum 10. August dauert. Er wird später als der größte Fehler des Kaisers gelten, und die Rechnung dahinter ist einfach: Ihr gewinnt in zehn Wochen dreißigtausend Mann dazu, sie gewinnen zweihunderttausend und Österreich.',
+    'Für die Kompanie sind es zehn Wochen mit Dach, Sold und Zeit. Es wird exerziert, geschossen, neu eingekleidet und aufgefüllt. Die Rekruten vom März sind jetzt Soldaten; nicht gute, aber welche.',
+    'In den Wirtshäusern hört man, was in Sachsen geredet wird, und es klingt anders als im Vorjahr. Die Leute sind höflich und rechnen.',
+    'Jeder weiß, dass es weitergeht. Man kann in dieser Zeit sehr genau sehen, wer wie damit umgeht.'
+  ]},
+
+/* 128 */ {typ:'befoerderung',id:'musterung_dresden',datum:'August 1813 · Dresden',ort:'Musterung vor dem Herbstfeldzug',
+  keinZiel:'Die Stellen, die frei sind, werden mit Leuten besetzt, die man seit dem Frühjahr kennt. Über dir ist keine frei, und in diesem Jahr wird nach oben nicht mehr viel frei — es fallen die, die vorn stehen.',
+  text:[
+    'Am 12. August erklärt Österreich den Krieg. Damit stehen gegen euch drei Armeen mit zusammen einer halben Million Mann, und der Plan der Verbündeten ist so einfach, dass er funktioniert: Wo der Kaiser selbst steht, wird ausgewichen; wo er nicht steht, wird geschlagen.',
+    'Gemustert wird in Dresden, in einer Stadt, die noch französisch ist und in der man abends ins Theater gehen kann. Es ist die letzte Musterung dieser Art.',
+    'Was gebraucht wird, sind Offiziere, die einen Zug aus Achtzehnjährigen zusammenhalten können, wenn Kavallerie in der Flanke steht. Wer das im Mai gezeigt hat, steht auf einer Liste.'
+  ]},
+
+/* 129 */ {typ:'kampf',id:'dresden',datum:'27. August 1813 · Dresden',ort:'Der letzte große Sieg',
+  marsch:{von:'Quartier in der Neustadt',nach:'Die Vorstädte im Süden',weg:'Fünf Kilometer durch eine Stadt, in der es seit dem Vortag regnet'},
+  anmarschKosten:{verschleiss:0.2,atem:6,belastung:3},
+  anmarsch:[
+    'Zweihundertfünfzigtausend Verbündete stehen vor Dresden, ihr seid hunderttausend, und der Kaiser ist in siebzig Stunden mit der Garde von Schlesien herangekommen.',
+    'Es regnet seit dem Vortag und hört nicht auf. Das Pulver in den Pfannen wird nass; nach einer Stunde schießt auf beiden Seiten fast niemand mehr, und was entscheidet, ist das Bajonett und die Kavallerie.',
+    'Auf dem linken Flügel steht österreichische Infanterie in einer Mulde, mit einem Bachtal im Rücken, und kann nicht weg. Was dort passiert, wird kurz und vollständig sein.',
+    'Es ist der Tag, an dem diese Armee zum letzten Mal etwas tut, was ihr in zwanzig Jahren niemand nachgemacht hat.'
+  ],
+  lage:{gegner:'Böhmische Armee, zweihundertfünfzigtausend, in Anmarschordnung und im Regen',
+        auftrag:'Die Vorstadt räumen und den linken Flügel aufrollen',
+        gelaende:'Gärten, Weinberge, ein Bachtal · alles im Regen',
+        stellung:'Erstes Treffen, linker Flügel'},
+  intro:'Das Pulver ist nass. Was heute entscheidet, ist, wer näher herangeht.',
+  runden:8,feindMoral:70,gefahr:11,gelaende:'damm',
+  sieg:{text:'Am Abend des 27. ziehen sie nach Böhmen ab und lassen fünfzehntausend Gefangene und alle Geschütze des linken Flügels zurück.\\n\\nEs ist der letzte große Sieg dieser Armee. In derselben Woche verliert sie an der Katzbach, bei Kulm und bei Dennewitz drei Schlachten, in denen der Kaiser nicht anwesend war, und die Summe dieser drei ist größer als Dresden.',ruf:10,ruhm:true},
+  niederlage:{text:'Euer Angriff kommt im Schlamm nicht über den Weinberg. Was den Flügel aufrollt, ist zwei Stunden später die Kavallerie. Der Sieg ist vollständig, und drei andere Schlachten in derselben Woche sind es auch — nur andersherum.',ruf:-3,belastung:12}},
+
+/* 130 */ {typ:'szene',id:'nachrichten',datum:'September 1813 · Zwischen Dresden und Leipzig',ort:'Die Nachrichten der anderen',
+  zwischenfall:true,
+  text:[
+    'Man rechnet in diesem Herbst viel. Nicht laut, aber in der Kompanie kann jeder rechnen, der einmal Rationen ausgegeben hat.',
+    'An der Katzbach: ein Korps vernichtet, fünfzehntausend Mann, hundert Geschütze. Bei Kulm: ein Korps eingeschlossen, dreizehntausend, der Kommandierende gefangen. Bei Dennewitz: zweiundzwanzigtausend. Bei Großbeeren davor noch einmal dreitausend.',
+    'Alle vier an Orten, an denen der Kaiser nicht war. Er kann nicht überall sein, und die andere Seite hat ausgerechnet, dass sie genau das ausnutzen muss.',
+    'Wer diese Zahlen zusammenzählt, kommt auf mehr, als bei Dresden gewonnen worden ist. Es sagt niemand laut. Alle haben es gerechnet.'
+  ],
+  optionen:[
+    {label:'Es ausrechnen und für dich behalten',hint:'Verwaltung · vier Zahlen, eine Summe',
+     ab:{wert:'bildung',min:35,sonst:'Man hört Zahlen und behält sie nicht. Was hängen bleibt, ist, dass es viele waren.'},
+     erfolg:{text:'Dreiundfünfzigtausend in vier Wochen, gegen fünfzehntausend Gefangene bei Dresden. Du rechnest es zweimal, weil es beim ersten Mal nicht stimmen kann, und beim zweiten Mal stimmt es wieder.\\n\\nDu sagst es niemandem. Es gibt niemanden, dem man das sagen könnte, ohne dass es eine Meldung wird.',
+       fert:{taktik:6,verwaltung:5},belastung:10}},
+    {label:'Deinen Leuten die Zahlen ausreden',hint:'Autorität · sie rechnen ohnehin',
+     ab:{wert:'rang',min:5,sonst:'Es wird abends gerechnet, und du rechnest mit. Es kommt jedes Mal dasselbe heraus.'},
+     probe:{wert:'autoritaet',schw:45},
+     erfolg:{text:'Du sagst, dass eine Zahl aus dritter Hand keine Zahl ist, und das stimmt sogar. Es hilft drei Tage. Danach rechnen sie wieder, aber leiser, und leiser ist besser als gar nicht.',
+       einheit:8,kameradschaft:4},
+     misserfolg:{text:'Ein Sergent, der 1806 dabei war, rechnet dir vor, dass deine Zahlen die aus dem Bulletin sind, und dass die Bulletins seit Russland niemand mehr glaubt. Er hat recht, und alle wissen, dass er recht hat.',
+       einheit:-6,kameradschaft:-4}},
+    {label:'Nicht zuhören',hint:'Es ändert nichts, ob man es weiß',
+     erfolg:{text:'Du gehst früh schlafen, wenn abends gerechnet wird. Es ist die vernünftigste Art, mit dieser Sorte Nachricht umzugehen, und sie funktioniert bis Mitte Oktober.',
+       belastung:-6}}
+  ]},
+
+/* 131 */ {typ:'kampf',id:'leipzig1',datum:'16. Oktober 1813 · Wachau',ort:'Der erste Tag',
+  haerte:1.4,
+  marsch:{von:'Stellung bei Liebertwolkwitz',nach:'Die Höhen bei Wachau',weg:'Sechs Kilometer · und ringsum stehen dreihundertsechzigtausend'},
+  anmarschKosten:{verschleiss:0.2,atem:7,belastung:3},
+  anmarsch:[
+    'Um Leipzig stehen an diesem Morgen sechshunderttausend Mann. Es ist die größte Schlacht, die vor 1914 geschlagen wird, und niemand auf dem Feld kann sie überblicken — auch der Kaiser nicht.',
+    'Euer Auftrag lautet nicht, den Feind zu schlagen. Er lautet: die Stellung halten, bis rechts der Angriff angesetzt ist. Es ist der Unterschied zwischen Sieg und Auftrag, und in dieser Schlacht ist er zum ersten Mal der wichtigere.',
+    'Um zehn Uhr beginnt es auf einer Front von acht Kilometern gleichzeitig. Was danach passiert, erfährt man abends oder gar nicht.',
+    'Gegen Mittag geht die schwere Kavallerie vor, kommt bis an die Höhe, auf der die drei Monarchen stehen, und wird zurückgeworfen, weil ihr niemand folgt. Es ist der Augenblick, in dem der Krieg entschieden wird, und man sieht ihn von hier aus als Staub.'
+  ],
+  lage:{gegner:'Böhmische Armee, hundertdreißigtausend, im Angriff auf eurer ganzen Front',
+        auftrag:'Die Höhe halten — nicht: sie nehmen',
+        gelaende:'Sanfte Höhen, Dörfer, Teiche, achtzehnhundert Geschütze auf acht Kilometern',
+        stellung:'Erstes Treffen, vor Wachau'},
+  intro:'Das hier wird kein gewöhnliches Gefecht. Und der Sieg zählt nicht — die Stellung zählt.',
+  runden:9,feindMoral:85,gefahr:9,gelaende:'damm',
+  sieg:{text:'Am Abend steht ihr, wo ihr am Morgen gestanden habt. Das ist der Auftrag, und er ist erfüllt.\\n\\nIn der Nacht rücken auf der anderen Seite hunderttausend Mann nach, die am Morgen noch nicht da waren. Auf eurer Seite rückt niemand nach.',ruf:10,ruhm:true},
+  niederlage:{text:'Die Höhe geht am Nachmittag verloren und wird nicht zurückgenommen. In der Nacht wird die Stellung um zwei Kilometer zurückverlegt, und auf der anderen Seite rücken hunderttausend nach.',ruf:-4,belastung:14}},
+
+/* 132 */ {typ:'kampf',id:'leipzig2',datum:'19. Oktober 1813 · Die Elsterbrücke',ort:'Der Rückzug durch die Stadt',
+  haerte:1.4, ueberfall:true,
+  marsch:{von:'Die Vorstädte',nach:'Die Brücke über die Elster',weg:'Zwei Kilometer durch eine Stadt, durch die sich eine Armee zurückzieht'},
+  anmarschKosten:{verschleiss:0.25,atem:8,belastung:4},
+  anmarsch:[
+    'Am 19. wird abgezogen. Es gibt eine Straße nach Westen und eine Brücke über die Elster, und über diese eine Brücke muss eine Armee von hunderttausend Mann.',
+    'Die Nachhut steht in den Vorstädten und hält, während die Kolonne über die Bohlen geht. Es geht langsam, weil es nicht schneller geht.',
+    'Um ein Uhr mittags fliegt die Brücke in die Luft. Ein Korporal der Pioniere hat den Befehl bekommen, sie zu sprengen, sobald der Feind kommt, und er hat den Feind gesehen.',
+    'Auf dieser Seite stehen in diesem Augenblick noch dreißigtausend Mann. Was jetzt kommt, hat mit einem Gefecht nichts zu tun.'
+  ],
+  lage:{gegner:'Vier Armeen, die gleichzeitig in die Stadt kommen',
+        auftrag:'Was zu retten ist, über den Fluss bringen',
+        gelaende:'Gassen, Gärten, ein Fluss von vierzig Metern und keine Brücke',
+        stellung:'Nachhut, diesseits'},
+  intro:'Es gibt keine Brücke mehr. Es gibt einen Fluss, und was hinüber soll, muss hindurch.',
+  runden:6,feindMoral:55,gefahr:9,gelaende:'bruecke',
+  sieg:{text:'Du kommst hinüber. Wie, wirst du später erzählen können, aber nicht gern.\\n\\nVon den dreißigtausend, die diesseits standen, kommen etwa zehntausend durch. Der Rest ist gefangen oder liegt in der Elster; darunter ein Marschall, der schwimmen wollte und es nicht konnte.',ruf:8,ruhm:true},
+  niederlage:{text:'Du kommst hinüber, ohne etwas mitzubringen — keine Verwundeten, keine Wagen, keinen von denen, die dir am Morgen unterstanden. Am anderen Ufer setzt du dich hin und siehst zurück auf eine Stadt, die euch seit gestern nicht mehr gehört.',ruf:-4,belastung:18}},
+
+/* 133 */ {typ:'befoerderung',id:'musterung_rueckzug_13',datum:'Ende Oktober 1813 · Erfurt',ort:'Musterung im Rückzug',
+  keinZiel:'Es sind viele Stellen frei — es sind fast nur noch freie Stellen da. Über dir ist trotzdem keine, und das liegt daran, dass über dir seit Leipzig niemand mehr steht, der ersetzt werden müsste.',
+  text:[
+    'In Erfurt wird gezählt, was aus Leipzig gekommen ist. Es sind achtzigtausend von hundertsiebzigtausend, dazu dreißigtausend, die in den Lazaretten liegen und Typhus haben.',
+    'Die Verbündeten von gestern sind die Gegner von heute: Sachsen und Württemberg sind während der Schlacht übergelaufen, Bayern hat eine Woche vorher die Seiten gewechselt und steht jetzt bei Hanau quer über der Straße nach Frankreich.',
+    'Was hier befördert wird, wird befördert, weil jemand tot ist. Das war immer so; in diesem Herbst sagt man es zum ersten Mal laut.'
+  ]},
+
+/* 134 */ {typ:'kampf',id:'hanau',datum:'30. Oktober 1813 · Hanau',ort:'Der Weg nach Hause',
+  marsch:{von:'Der Spessart',nach:'Hanau',weg:'Vierzig Kilometer · und dahinter liegt der Rhein'},
+  anmarschKosten:{verschleiss:0.2,atem:7,belastung:3},
+  anmarsch:[
+    'Bei Hanau steht eine bayerisch-österreichische Armee von vierzigtausend Mann quer über der Straße nach Frankfurt. Sie hat sich einen guten Platz ausgesucht und rechnet damit, dass das, was aus Leipzig kommt, kein Heer mehr ist.',
+    'Es ist noch eines. Was nach Hanau kommt, sind achtzigtausend Männer, die seit vierzehn Tagen marschieren, und dreißig Geschütze der Garde unter einem Mann namens Drouot.',
+    'Drouot fährt die dreißig Geschütze in den Wald hinein, auf hundertfünfzig Meter an die feindliche Linie heran, und schießt eine Bresche in eine Armee.',
+    'Es ist kein Sieg. Es ist ein Durchbruch, und der Unterschied ist, dass man danach weitergeht, statt zu bleiben.'
+  ],
+  lage:{gegner:'Bayerisch-österreichische Armee, vierzigtausend, quer über der Straße',
+        auftrag:'Durchbrechen — die Straße nach Frankfurt öffnen',
+        gelaende:'Wald, eine Lichtung, dahinter offenes Feld und die Kinzig',
+        stellung:'Erstes Treffen, hinter den Gardegeschützen'},
+  intro:'Kein Sieg. Ein Durchbruch. Der Unterschied ist, dass man danach weitergeht.',
+  runden:6,feindMoral:58,gefahr:10,gelaende:'damm',
+  sieg:{text:'Am Abend ist die Straße frei. Neuntausend Bayern und Österreicher liegen auf dem Feld; von euch fünftausend.\\n\\nZwei Tage später steht ihr am Rhein. Es ist der 2. November 1813, und zum ersten Mal seit siebzehn Jahren steht diese Armee an der Grenze und nicht dahinter.',ruf:7,ruhm:true},
+  niederlage:{text:'Euer Angriff bleibt in der Lichtung liegen. Was den Durchbruch macht, sind die Gardegeschütze und ein anderes Regiment. Die Straße ist frei, und ihr geht darauf, wie alle anderen auch.',ruf:-3,belastung:12}},
+
+/* 135 */ {typ:'uebergang',id:'ende_deutschland',datum:'November 1813 · Am Rhein',ort:'Zu Hause',
+  marsch:{von:'Hanau',nach:'Mainz und über den Rhein',weg:'Achtzig Kilometer · und dahinter ist Frankreich'},
+  text:[
+    'Am 2. November geht die Armee bei Mainz über den Rhein. Von den vierhunderttausend, die im Frühjahr aufgestellt worden sind, kommen siebzigtausend zurück; in Mainz bricht Typhus aus und holt in acht Wochen noch einmal zwanzigtausend.',
+    'Deutschland ist verloren. Die Festungen östlich des Rheins halten noch — Dresden, Danzig, Hamburg —, aber sie halten für nichts, und ihre Besatzungen werden bis zum Frühjahr kapitulieren.',
+    'Zum ersten Mal seit 1796 ist der Krieg zu Hause. Was das heißt, versteht man nicht in Mainz. Man versteht es im Januar, wenn man in Frankreich requiriert und die Bauern das Korn vor der eigenen Armee verstecken.',
+    'Von den vier Männern, die im März in Mainz mit dir angetreten sind und die 1812 dabei waren, ist keiner mehr da.'
+  ],
+  ausblick:'Im Januar 1814 gehen dreihunderttausend Verbündete über den Rhein. Was ihnen entgegensteht, sind siebzigtausend Mann und ein Feldherr, der in sechs Tagen vier Schlachten gewinnen wird — und danach ist die Reserve leer, endgültig.'}
+];
+
+/* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.
+   `.slice()` ist Pflicht, nicht Kosmetik — siehe die Warnung in Kapitel 1. */
+KAPITEL.push(...KAPITEL9);
+STATIONEN.deutschland = KAPITEL9.slice();
+(KAMPAGNEN.find(k=>k.id==='deutschland')||{}).gebaut = true;
+
+
+'use strict';
+/* Kapitel 10 — Frankreich 1814. Reine Daten, wie die Kapitel davor.
+
+   ══════════════════ Die eigene Regel ══════════════════
+
+   **Du verteidigst dein eigenes Land, und es will dich nicht mehr.**
+
+   Das kürzeste Kampfkapitel und das dichteste. Zwei Linien laufen nebeneinander:
+
+   1. **Militärisch das Meisterstück.** Der Sechs-Tage-Feldzug ist die
+      brillanteste Leistung dieser Laufbahn, geführt mit einer Armee, die es
+      kaum noch gibt: drei Schlachten in fünf Tagen, forcierte Märsche
+      dazwischen, jeder Sieg ohne Reserve. Wer die Tempowahl aus 1806 gelernt
+      hat, spielt sie hier im Endspiel — und diesmal kostet jede Wahl.
+   2. **Menschlich die Auflösung.** Die Bauern verstecken das Korn vor der
+      eigenen Armee. Die Präfekten verhandeln schon mit dem Feind. Die
+      Loyalitätsfrage zieht sich durch alle Szenen: nicht *ob* du fällst,
+      sondern **wofür noch**. Das Spiel beantwortet sie nie — es stellt sie nur
+      jedes Mal konkreter.
+
+   **Am Ende steht die zweite Rangschranke** (`schranke:'waterloo'`): Rang 10
+   wird gebraucht, um 1815 zurückgerufen zu werden. Darunter: Halbsold-Ende,
+   +120 Punkte. Ab 10: die Wahl. Der Erwartungswert des Weitermachens ist fast
+   null, und das Spiel rechnet ihn nicht vor. Man geht trotzdem.
+
+   ══════════════════ Historische Fixpunkte (Invariante 8) ══════════════════
+
+   Brienne 29. Januar 1814 — der Ort, an dem der Kaiser zur Schule ging ·
+   La Rothière 1. Februar · der Sechs-Tage-Feldzug 10.–14. Februar
+   (Champaubert, Montmirail, Château-Thierry, Vauchamps) · Laon 9.–10. März ·
+   Paris kapituliert am 30./31. März · Abdankung in Fontainebleau am 6. April ·
+   der Abschied von der Garde am 20. April.
+   Dazwischen ist alles frei erfunden. */
+
+const KAPITEL10 = [
+
+/* 136 */ {typ:'kampf',id:'brienne',datum:'29. Januar 1814 · Brienne',ort:'Die Schule',
+  marsch:{von:'Châlons',nach:'Brienne-le-Château',weg:'60 km über gefrorene Feldwege · und der Ort steht auf keiner Karte, die jemand liest'},
+  anmarschKosten:{verschleiss:0.2,atem:7,belastung:3},
+  anmarsch:[
+    'Dreihunderttausend Verbündete sind über den Rhein gegangen. Was ihnen entgegensteht, sind siebzigtausend Mann, verteilt auf drei Richtungen, und in der Mitte der Kaiser mit dem, was er zusammenbekommen hat.',
+    'Bei Brienne steht Blücher mit dem schlesischen Korps. Der Angriff geht am Nachmittag los, gegen ein Schloss auf einer Höhe und einen Ort darunter.',
+    'In diesem Schloss ist der Kaiser von zehn bis fünfzehn zur Schule gegangen, als er noch Buonaparte hieß und kein Französisch konnte. Er sagt es niemandem. Alle wissen es, und man merkt es daran, dass an diesem Abend niemand darüber redet.',
+    'Es ist die erste Schlacht dieses Krieges auf französischem Boden. Die Bauern der Umgegend haben sich in den Wäldern versteckt, und zwar vor beiden Armeen.'
+  ],
+  lage:{gegner:'Blüchers Vorhut, dreißigtausend Mann, im Ort und im Schloss',
+        auftrag:'Den Ort nehmen, ehe es dunkel ist',
+        gelaende:'Ort im Tal, Schloss auf der Höhe, gefrorener Boden',
+        stellung:'Erstes Treffen, am Ortseingang'},
+  intro:'Zum ersten Mal seit achtzehn Jahren wird auf französischem Boden geschlagen.',
+  runden:6,feindMoral:58,gefahr:10,gelaende:'mauer',
+  sieg:{text:'Gegen zehn Uhr abends gehört euch der Ort, und um Mitternacht das Schloss. Blücher zieht ab; er hat in dem Zimmer geschlafen, in dem vor dreißig Jahren ein Junge aus Ajaccio geschlafen hat, und ist eine halbe Stunde zu spät aufgestanden.\\n\\nDrei Tage später, bei La Rothière, kommt er mit hunderttausend Mann zurück, und dann geht es rückwärts.',ruf:7,ruhm:true},
+  niederlage:{text:'Ihr kommt bis zur Kirche und nicht weiter. Der Ort wird gegen Mitternacht von einem anderen Regiment genommen. Drei Tage später steht Blücher mit hunderttausend Mann bei La Rothière, und es geht rückwärts.',ruf:-3,belastung:10}},
+
+/* 137 */ {typ:'szene',id:'korn_und_bauern',datum:'Anfang Februar 1814 · Ein Dorf in der Champagne',ort:'Requirieren zu Hause',
+  frost:1,
+  marsch:{von:'Troyes',nach:'Nach Norden, in die Champagne',weg:'50 km durch Dörfer, in denen man seine eigene Sprache spricht'},
+  zwischenfall:true,
+  text:[
+    'Das Dorf hat vierzig Häuser und einen Bürgermeister mit Schärpe. Er kommt heraus, grüßt korrekt, und sagt, es sei nichts da.',
+    'Es ist etwas da. Man sieht es an der Scheune, an den Spuren im Schnee, an der Art, wie er zwischen dir und dem Kellerloch stehen bleibt.',
+    'In Spanien war das einfach: Es war ihr Korn, und es war ein fremdes Land. Hier ist es französisches Korn, es sind französische Bauern, und der Mann mit der Schärpe hat eine Urkunde an der Wand, auf der derselbe Name steht wie auf deinem Patent.',
+    'Deine Leute haben seit zwei Tagen nichts gegessen. Das ist keine Redensart und keine Verhandlungsposition.'
+  ],
+  optionen:[
+    {label:'Requirieren, wie man requiriert',hint:'Es steht dir zu, und du hast einen Zettel dafür',
+     erfolg:{text:'Du lässt die Scheune öffnen, nimmst zwei Drittel und stellst eine Empfangsbestätigung aus, die auf die Staatskasse lautet und in drei Monaten nichts mehr wert ist. Der Bürgermeister nimmt sie und faltet sie sorgfältig.\\n\\nDeine Leute essen an diesem Abend. Auf dem Weg aus dem Dorf sieht dich niemand an.',
+       kameradschaft:10,belastung:10}},
+    {label:'Bezahlen, was du selbst hast',hint:'Es ist dein Geld, und es reicht nicht weit',
+     ab:{wert:'geld',min:40,sonst:'Du hast nichts, womit du bezahlen könntest. Der Gedanke kommt trotzdem, und er kommt in den nächsten Wochen öfter.'},
+     erfolg:{text:'Du zahlst aus der eigenen Tasche, in Münzen, und zwar mehr, als es wert ist. Der Bürgermeister zählt nach und sagt nichts. Deine Leute erfahren nicht, woher das Geld kam; einer errät es und behält es für sich.',
+       geld:-40,kameradschaft:12,belastung:-4}},
+    {label:'Weitergehen',hint:'Konstitution · zwei weitere Tage',risk:true,
+     probe:{wert:'konstitution',schw:45},
+     erfolg:{text:'Ihr geht weiter, ohne die Scheune zu öffnen. Zwei Tage später gibt es Brot von einem Magazin, das noch funktioniert hat. Es hat also gereicht, und du weißt bis heute nicht, ob das eine Entscheidung war oder Glück.',
+       kameradschaft:6,atem:-14,belastung:8},
+     misserfolg:{text:'Ihr geht weiter, und zwei Tage später gibt es immer noch nichts. Im nächsten Dorf wird nicht mehr gefragt, und du bist der, der dann nichts sagt.',
+       leben:-14,atem:-16,belastung:16,kameradschaft:-6}},
+    {label:'Deine Leute selbst suchen lassen',hint:'Menschenkenntnis · dann warst du es nicht',risk:true,
+     probe:{wert:'menschenkenntnis',schw:45},
+     erfolg:{text:'Du gehst zum Ortsrand und siehst dir die Straße an, und hinter dir wird eine Scheune geöffnet. Als du zurückkommst, ist es geschehen, und niemand hat einen Befehl gehört.\\n\\nEs ist der bequemste Weg, und er hat einen Preis, den man erst später ausgestellt bekommt.',
+       kameradschaft:8,belastung:14,einheit:-6},
+     misserfolg:{text:'Ohne Befehl wird aus Suchen etwas anderes. Als du zurückkommst, steht der Bürgermeister mit einer aufgeschlagenen Lippe da, und zwei deiner Leute tragen etwas, das kein Korn ist.',
+       belastung:20,einheit:-12,ruf:-6,kameradschaft:-4}}
+  ]},
+
+/* 138 */ {typ:'kampf',id:'champaubert',datum:'10. Februar 1814 · Champaubert',ort:'Der erste Schlag',
+  marsch:{von:'Nogent',nach:'Champaubert',weg:'70 km in zwei Tagen · durch Schlamm, in dem die Geschütze bis zur Achse stehen'},
+  anmarschKosten:{verschleiss:0.2,atem:8,belastung:3},
+  anmarsch:[
+    'Blüchers Armee marschiert in vier getrennten Kolonnen auf Paris zu, jede einen Tagesmarsch von der nächsten. Niemand von ihnen weiß, wo die anderen stehen.',
+    'Der Kaiser weiß es. Er ist die Nacht durchgeritten, hat die Armee zusammengezogen und stellt sich mitten zwischen die Kolonnen.',
+    'Was jetzt kommt, ist fünf Tage lang dasselbe: Man fällt über eine Kolonne her, schlägt sie, marschiert nachts weiter und fällt am nächsten Tag über die nächste.',
+    'Bei Champaubert steht ein russisches Korps von viertausend Mann, das nicht damit rechnet, dass hier überhaupt Franzosen sind.'
+  ],
+  lage:{gegner:'Russisches Korps, viertausend Mann, ohne Verbindung zu den Nachbarn',
+        auftrag:'Die Straße sperren und die Kolonne zerschlagen',
+        gelaende:'Flaches Land, Schlamm, ein Dorf an der Kreuzung',
+        stellung:'Erstes Treffen, an der Kreuzung'},
+  intro:'Sie wissen nicht, dass ihr hier seid. Fünf Tage lang wird das der ganze Plan sein.',
+  runden:5,feindMoral:50,gefahr:9,gelaende:'damm',
+  sieg:{text:'Nach vier Stunden ist das Korps nicht mehr da: zweitausend gefangen, der Rest zerstreut, der kommandierende General gefangen und ohne Degen.\\n\\nAm Abend steht auf dem Tisch eine Karte, und der Kaiser zeigt darauf, wo morgen die nächste Kolonne stehen wird. Er hat recht.',ruf:6,ruhm:true},
+  niederlage:{text:'Die Kolonne kommt an euch vorbei nach Norden. Was von ihr übrig bleibt, holt zwei Tage später jemand anders ein. Der Plan funktioniert; euer Teil davon nicht.',ruf:-3,belastung:8}},
+
+/* 139 */ {typ:'kampf',id:'montmirail',datum:'11. Februar 1814 · Montmirail',ort:'Neben der alten Garde',
+  haerte:1.4,
+  marsch:{von:'Champaubert',nach:'Montmirail',weg:'20 km in einer Nacht · und um neun Uhr früh steht man in Linie'},
+  anmarschKosten:{verschleiss:0.15,atem:8,belastung:3},
+  anmarsch:[
+    'Zwanzig Kilometer in der Nacht, nach einem Gefechtstag, und um neun Uhr früh steht die Linie. Gegenüber stehen zwanzigtausend Russen und Preußen, ihr seid zehntausend.',
+    'Es wird bis zum Nachmittag gewartet, weil die Garde noch nicht da ist. Die Garde kommt gegen zwei, in Marschordnung, ohne Aufenthalt, und geht ohne Halt in die Linie über.',
+    'Was danach kommt, hat kein Mann dieser Armee je vergessen: sechstausend Grenadiere und Jäger der alten Garde gehen im Schritt über ein offenes Feld, im Feuer, ohne zu schießen, mit gefälltem Bajonett.',
+    'Es ist das letzte Mal, dass die alte Garde das tut, und es ist das letzte Mal, dass es funktioniert.'
+  ],
+  lage:{gegner:'Russisch-preußische Kolonne, zwanzigtausend, in Stellung um ein Gehöft',
+        auftrag:'Mit der Garde durchbrechen',
+        gelaende:'Offenes Feld, ein Gehöft, dahinter die Straße nach Osten',
+        stellung:'Erstes Treffen, rechts neben der Garde'},
+  intro:'Das hier wird kein gewöhnliches Gefecht. Rechts von dir geht die alte Garde vor, und sie schießt nicht.',
+  runden:8,feindMoral:78,gefahr:8,gelaende:'damm',
+  sieg:{text:'Um sechs Uhr abends ist das Feld leer. Viertausend Gefangene, alle Geschütze, und die Straße nach Osten offen.\\n\\nDie Garde marschiert zurück in ihr Biwak, in Ordnung, ohne dass jemand ein Kommando gegeben hätte. Ein Bataillon von euch nimmt beim Vorbeimarsch von allein das Gewehr über — das ist nicht vorgeschrieben und wird auch nicht gerügt.',ruf:12,ruhm:true},
+  niederlage:{text:'Euer Flügel kommt nicht über den Graben am Gehöft. Was durchbricht, ist die Garde, und die tut es allein. Am Abend ist die Straße offen und ihr steht noch da, wo ihr um zwei gestanden habt.',ruf:-4,belastung:14}},
+
+/* 140 */ {typ:'szene',id:'dritter_marsch',datum:'12.–13. Februar 1814 · Nachts zwischen zwei Schlachten',ort:'Der dritte Marsch bei Nacht',
+  frost:1,
+  marsch:{von:'Montmirail',nach:'Vauchamps',weg:'Der dritte Nachtmarsch in vier Tagen'},
+  tempo:{
+    text:[
+      'Es ist der dritte Nachtmarsch in vier Tagen, nach dem dritten Gefechtstag. Die Männer schlafen im Gehen; man erkennt es daran, dass die Kolonne alle paar hundert Meter langsamer wird und wieder aufholt, wie eine Ziehharmonika.',
+      'Es gibt keine gute Wahl. Wer schont, kommt zu spät und trifft die nächste Kolonne nicht mehr allein an. Wer forciert, trifft sie an — mit Leuten, die seit neunzig Stunden nicht geschlafen haben.',
+      'Der ganze Feldzug beruht darauf, schneller zu sein als vier Armeen, die zusammen fünfmal so stark sind. Es gibt keinen Plan B, weil es keine Reserve gibt.'
+    ],
+    ueberspringt:'quartier_montmirail',
+    forciert:{hint:'ihr steht morgen früh vor ihnen, nicht neben ihnen',
+      text:'Ihr geht durch. Um sechs Uhr früh steht die Kolonne an der Straße, über die Blüchers Nachhut abmarschieren will, und sie kommt eine Stunde später und weiß von nichts.',
+      ruf:5},
+    schonend:{text:'Ihr rastet vier Stunden. Es ist die richtige Entscheidung für die Männer und die falsche für den Feldzug, und beides ist an diesem Morgen gleichzeitig wahr.',
+      atem:14,leben:10}
+  },
+  text:[
+    'Vier Tage, drei Gefechte, drei Nachtmärsche. Es ist die Sorte Leistung, über die in vierzig Jahren in Militärschulen gesprochen wird, und sie besteht aus Männern, die im Gehen schlafen.',
+    'Von deiner Kompanie sind zwei am Straßenrand geblieben, nicht verwundet, sondern eingeschlafen. Die Gendarmerie sammelt sie am Morgen ein, wenn sie noch da ist.',
+    'Es wird nicht mehr gesprochen. Wenn gehalten wird, setzt sich niemand hin, weil das Aufstehen zu lange dauert.',
+    'Vor euch, sagt der Adjutant, steht Blüchers Nachhut bei einem Ort namens Vauchamps.'
+  ],
+  optionen:[
+    {label:'Deine Leute wach halten',hint:'Autorität · anstoßen, ansprechen, weitergehen',
+     ab:{wert:'rang',min:3,sonst:'Du hältst dich selbst wach, indem du zählst. Bis tausend, dann von vorn.'},
+     probe:{wert:'autoritaet',schw:45},
+     erfolg:{text:'Du gehst die Reihe entlang und wieder zurück, die ganze Nacht, und stößt jeden an, der zu still wird. Es kostet dich das Doppelte an Weg. Am Morgen ist deine Sektion vollzählig, und das ist an diesem Morgen ungewöhnlich.',
+       kameradschaft:12,einheit:10,atem:-14},
+     misserfolg:{text:'Du hältst sie wach, so lange du selbst wach bist. Gegen vier Uhr merkst du, dass du seit einer Weile neben der Kolonne hergehst und nicht mehr weißt, wo dein Zug ist.',
+       atem:-16,belastung:10,einheit:-4}},
+    {label:'Gehen und zählen',hint:'Es ist die einzige Methode, die immer funktioniert',
+     erfolg:{text:'Bis tausend, dann von vorn. Bei ungefähr dem elften Mal wird es hell. Du weißt bis heute nicht, ob du dabei geschlafen hast.',
+       atem:-8,belastung:6}}
+  ]},
+
+/* 141 */ {typ:'szene',id:'quartier_montmirail',datum:'13. Februar 1814 · Ein Gehöft an der Straße',ort:'Vier Stunden',
+  text:[
+    'Ein Gehöft mit einer Scheune voll Stroh, vier Stunden Halt, verordnet vom Divisionsgeneral gegen den Befehl des Korps.',
+    'Vier Stunden sind nicht viel. Es reicht, um die Schuhe auszuziehen, die Füße trocknen zu lassen und einmal warm zu essen, und wer das drei Tage lang nicht getan hat, weiß, was es wert ist.',
+    'Der Bauer, dem das Gehöft gehört, sitzt in der Küche und sieht zu, wie sein Stroh verbraucht wird. Er sagt nichts. Als ihr abmarschiert, steht er in der Tür und sieht euch nach, und man kann nicht sagen, was er denkt.',
+    'Vier Stunden später ist die Kolonne zwei Stunden hinter dem Zeitplan, und der Zeitplan ist der ganze Feldzug.'
+  ],
+  optionen:[
+    {label:'Schlafen',hint:'Vier Stunden, zum ersten Mal seit vier Tagen',
+     erfolg:{text:'Du liegst im Stroh und schläfst, bevor du liegst. Als geweckt wird, ist es, als hätte man dich weggenommen und wieder hingelegt.',
+       atem:24,leben:18,belastung:-12}},
+    {label:'Die Füße versorgen',hint:'Geschick · was jetzt nicht trocken wird, wird es nicht mehr',
+     probe:{wert:'geschick',schw:35},
+     erfolg:{text:'Schuhe aus, Lappen trocknen, Sohlen mit Fett, und dabei bei drei Leuten dasselbe. Es ist eine kleinere Sache als Schlaf und hält länger.',
+       ausr:{schuhe:35},kameradschaft:8,atem:8},
+     misserfolg:{text:'Die Lappen werden am Feuer nicht trocken, weil zu viele am Feuer stehen. Du ziehst sie nass wieder an, und das ist schlechter, als sie gar nicht ausgezogen zu haben.',
+       ausr:{schuhe:-10},belastung:4}},
+    {label:'Mit dem Bauern reden',hint:'Menschenkenntnis · er sitzt in seiner Küche und sagt nichts',
+     probe:{wert:'menschenkenntnis',schw:45},
+     erfolg:{text:'Er redet nach einer Weile. Er hat zwei Söhne gehabt; einer ist 1812 nicht wiedergekommen, der andere ist im Dezember eingezogen worden und liegt seither in einem Depot in Orléans. Er fragt nicht nach dem Krieg. Er fragt, ob man in Orléans genug zu essen bekommt.\\n\\nDu sagst ja. Es ist die einzige Lüge, die du in diesem Kapitel bewusst sagst.',
+       belastung:8,attr:{menschenkenntnis:4}},
+     misserfolg:{text:'Er sagt nichts, so lange du dasitzt, und steht auf, als du gehst. Es ist kein Schweigen aus Angst, sondern eines aus Rechnen, und das ist unangenehmer.',
+       belastung:6}}
+  ]},
+
+/* 142 */ {typ:'kampf',id:'vauchamps',datum:'14. Februar 1814 · Vauchamps',ort:'Der letzte Schlag der Serie',
+  marsch:{von:'Montmirail',nach:'Vauchamps',weg:'25 km ostwärts · der vierte Tag in Folge'},
+  anmarschKosten:{verschleiss:0.2,atem:8,belastung:3},
+  anmarsch:[
+    'Der vierte Schlag in fünf Tagen. Blücher kommt mit zwanzigtausend Mann zurück, weil er glaubt, vor sich nur eine Nachhut zu haben.',
+    'Er hat die Armee vor sich. Was danach kommt, dauert bis in die Nacht und endet mit einer Kolonne, die auf offener Straße von Kavallerie zusammengetrieben wird.',
+    'Am Abend hat der Feldzug eine Bilanz, die niemand glauben will: In fünf Tagen sind viermal Schlachten geschlagen und viermal gewonnen worden, mit dreißigtausend gegen fünfmal so viele.',
+    'Und danach ist nichts mehr da. Keine Reserve, keine Ersatzleute, kein zweiter Anlauf.'
+  ],
+  lage:{gegner:'Blüchers Hauptkolonne, zwanzigtausend, im Vormarsch und ohne Aufklärung',
+        auftrag:'Halten, bis die Kavallerie um die Flanke herum ist',
+        gelaende:'Offene Straße, Gehölze, keine Deckung für den, der weicht',
+        stellung:'Erstes Treffen, quer über der Straße'},
+  intro:'Der vierte in fünf Tagen. Danach ist die Reserve leer — endgültig.',
+  runden:6,feindMoral:60,gefahr:9,gelaende:'damm',
+  sieg:{text:'Bei Dunkelheit ist die Kolonne auf der Straße zerschlagen. Siebentausend Gefangene, und die Straße ist auf drei Kilometern so voll, dass man nicht hindurchreiten kann.\\n\\nEs ist der letzte Sieg dieser Serie und der letzte, der etwas ändert. Drei Wochen später stehen sie wieder da, mit mehr Männern als vorher, und diesmal alle zusammen.',ruf:8,ruhm:true},
+  niederlage:{text:'Ihr haltet die Straße nicht, und die Kolonne kommt durch. Was von ihr die Kavallerie noch einholt, ist ein Drittel. Der Feldzug ist trotzdem gewonnen — und drei Wochen später zählt keiner dieser vier Siege mehr.',ruf:-3,belastung:12}},
+
+/* 143 */ {typ:'befoerderung',id:'musterung_feld',datum:'Ende Februar 1814 · Im Feld bei Troyes',ort:'Musterung ohne Kaserne',
+  keinZiel:'Es wird nichts mehr vergeben, was über dir läge. In dieser Armee gibt es mehr freie Stellen als Männer, und trotzdem nicht die eine — sie ist nicht frei, sie ist abgeschafft.',
+  text:[
+    'Gemustert wird auf einem Feld, an einem Tisch, den ein Adjutant hält. Es gibt keine Kaserne mehr, in der man mustern könnte, und keine Listen, die vollständig wären.',
+    'Was hier vergeben wird, wird vergeben, weil das Offizierskorps leer ist. Brigaden werden von Obersten geführt, Bataillone von Lieutenants, Kompanien von Sergenten. Das ist keine Auszeichnung, das ist Arithmetik.',
+    'Grandmaison ist seit dem Januar auf Divisionshöhe. Er sagt bei der Musterung einen Satz, den man auf zwei Arten verstehen kann, und geht weiter, bevor man nachfragen kann.'
+  ]},
+
+/* 144 */ {typ:'kampf',id:'laon',datum:'10. März 1814 · Laon',ort:'Die Stadt auf dem Berg',
+  marsch:{von:'Soissons',nach:'Laon',weg:'40 km nach Norden · und die Stadt liegt hundert Meter über der Ebene'},
+  anmarschKosten:{verschleiss:0.2,atem:7,belastung:3},
+  anmarsch:[
+    'Laon liegt auf einem Bergrücken, hundert Meter über einer flachen Ebene, und ist von drei Seiten unangreifbar. Blücher hat hunderttausend Mann darauf und darum.',
+    'Ihr seid siebenunddreißigtausend. Der Angriff wird trotzdem befohlen, weil ein Rückzug in diesem Feldzug dasselbe bedeutet wie eine Niederlage: Die Verbündeten marschieren dann auf Paris, und niemand steht davor.',
+    'Es ist der Punkt, an dem die Serie reißt. Man merkt es am zweiten Tag, an der Art, wie ein Angriff nicht mehr durchkommt und man ihn trotzdem wiederholt.',
+    'Der Auftrag heißt hier nicht mehr siegen. Er heißt: sich geordnet lösen, ohne dass daraus eine Flucht wird.'
+  ],
+  lage:{gegner:'Blüchers vereinigte Armee, hunderttausend, auf einem Bergrücken',
+        auftrag:'Sich geordnet lösen — die Armee erhalten, nicht die Stellung',
+        gelaende:'Ebene ohne Deckung, Stadt auf hundert Meter hohem Rücken',
+        stellung:'Erstes Treffen, in der Ebene'},
+  intro:'Diese Schlacht ist nicht zu gewinnen. Der Auftrag ist ein anderer.',
+  runden:7,feindMoral:72,gefahr:11,gelaende:'mauer',
+  sieg:{text:'Ihr löst euch in der Nacht, in Ordnung, mit den Geschützen. Das ist alles, was zu erreichen war, und es ist mehr, als am Nachmittag wahrscheinlich schien.\\n\\nEin Korps auf dem rechten Flügel wird in der Nacht überrascht und verliert fünfundvierzig Geschütze. Die Armee steht am Morgen noch. Sie steht nur zwanzig Kilometer weiter südlich.',ruf:5},
+  niederlage:{text:'Aus dem Lösen wird ein Zurückgehen und aus dem Zurückgehen streckenweise etwas anderes. Am Morgen sind die Geschütze weg und die Regimenter durcheinander. Es dauert zwei Tage, bis wieder gezählt werden kann.',ruf:-5,belastung:16}},
+
+/* 145 */ {typ:'szene',id:'praefekt',datum:'März 1814 · Eine Unterpräfektur in der Aisne',ort:'Der Beamte',
+  text:[
+    'Der Unterpräfekt ist zweiundfünfzig, trägt den kaiserlichen Rock und bittet um eine Bedeckung für das Archiv seiner Behörde. Er ist höflich, gut vorbereitet und hat eine Liste dabei.',
+    'In der obersten Schublade seines Schreibtischs liegt eine weiße Kokarde. Du siehst sie, weil er die Schublade aufzieht, um die Liste herauszunehmen, und weil er nicht darauf achtet, ob du hinsiehst.',
+    'Er ist nicht verlegen. Es ist ein Mann, der ausgerechnet hat, wie das hier ausgeht, und der schon einmal in seinem Leben von einer Kokarde auf eine andere gewechselt ist. Er wird es wieder tun, und er wird sein Amt behalten, und in zwanzig Jahren wird er in derselben Behörde sitzen.',
+    'Er wartet auf deine Antwort und ist dabei vollkommen ruhig.'
+  ],
+  optionen:[
+    {label:'Die Bedeckung stellen',hint:'Das Archiv gehört dem Staat, und der Staat ist der Staat',
+     erfolg:{text:'Du stellst acht Mann ab. Das Archiv kommt durch, und der Unterpräfekt bedankt sich schriftlich, mit Datum und Siegel.\\n\\nIm Juli wird dieselbe Behörde von demselben Mann geführt, unter einem anderen Wappen. Der Dank liegt dann immer noch in derselben Akte.',
+       gunst:1,gunstVon:'grandmaison',belastung:6}},
+    {label:'Ihn auf die Schublade ansprechen',hint:'Menschenkenntnis · er wird nicht lügen',risk:true,
+     probe:{wert:'menschenkenntnis',schw:50},
+     erfolg:{text:'Du sagst, was du gesehen hast. Er zieht die Schublade wieder auf, legt die Kokarde auf den Tisch und sagt, er habe seit 1789 vier Regierungen gedient und dabei jedes Mal dieselbe Präfektur verwaltet, und die Straßen seien unter allen vieren instand geblieben.\\n\\nEs ist die ehrlichste Antwort, die du in diesem Jahr bekommst, und die unangenehmste.',
+       belastung:12,attr:{menschenkenntnis:5},fert:{verwaltung:4}},
+     misserfolg:{text:'Er sieht dich an und fragt, ob das eine dienstliche Feststellung sei. Es ist keine, und beide wisst ihr das. Danach ist das Gespräch beendet und die Bedeckung auch.',
+       belastung:10,gunst:-1,gunstVon:'grandmaison'}},
+    {label:'Nichts stellen und weitermarschieren',hint:'Es gibt keine acht Mann zu entbehren',
+     erfolg:{text:'Du sagst, du habest keine acht Mann. Es stimmt. Er nickt, als hätte er damit gerechnet, und trägt es in seine Liste ein — in eine Spalte, die vermutlich „verweigert" heißt.',
+       belastung:4}}
+  ]},
+
+/* 146 */ {typ:'szene',id:'paris_faellt',datum:'31. März 1814 · Bei Fontainebleau',ort:'Die Nachricht',
+  text:[
+    'Ein Kurier kommt gegen zwei Uhr nachts an, reitet bis vor das Haus und entschuldigt sich, bevor er meldet. Es ist eine merkwürdige Sache, dass ein Mann sich für eine Nachricht entschuldigt.',
+    'Paris hat kapituliert. Die Marschälle, die die Stadt hielten, haben einen Vertrag unterschrieben und ziehen ab; die Verbündeten sind am Morgen des 31. eingezogen, über die Boulevards, und es hat Leute gegeben, die zugesehen und Hüte geschwenkt haben.',
+    'Ihr seid sechzig Kilometer entfernt. Ihr wart auf dem Weg und wärt in zwei Tagen dort gewesen.',
+    'Die Armee steht am Morgen im Wald von Fontainebleau, sechzigtausend Mann, geschlossen, mit Geschützen, und es gibt nichts mehr, worauf sie marschieren könnte.'
+  ],
+  optionen:[
+    {label:'Zuhören, was die Offiziere reden',hint:'Menschenkenntnis · seit gestern reden sie anders',
+     probe:{wert:'menschenkenntnis',schw:45},
+     erfolg:{text:'Sie reden über den Marsch auf Paris, den es geben soll, und keiner von ihnen glaubt daran. Zwei Marschälle sind seit dem Morgen nicht mehr im Lager. Was gesagt wird, ist militärisch; was gemeint ist, ist arithmetisch, und die Rechnung ist seit gestern eindeutig.',
+       fert:{taktik:5},attr:{menschenkenntnis:4},belastung:8},
+     misserfolg:{text:'Sie hören auf zu reden, wenn du in die Nähe kommst. Es ist das erste Mal in achtzehn Jahren, dass das passiert, und es sagt mehr als das Gespräch.',
+       belastung:12}},
+    {label:'Bei deinen Leuten bleiben',hint:'Sie fragen dich, und du weißt es auch nicht',
+     erfolg:{text:'Sie fragen, ob es stimmt, und du sagst ja. Sie fragen, was jetzt wird, und darauf sagst du nichts, weil es nichts zu sagen gibt. Es wird an diesem Vormittag in der ganzen Armee dieselbe Frage gestellt und dieselbe Antwort nicht gegeben.',
+       kameradschaft:8,belastung:6}},
+    {label:'Nachrechnen, was noch da ist',hint:'Verwaltung · sechzigtausend, geschlossen, mit Geschützen',
+     ab:{wert:'bildung',min:40,sonst:'Es wird gezählt, und die Zahl geht durch das Lager. Sie ist größer, als man denkt.'},
+     erfolg:{text:'Sechzigtausend Mann, geschlossen, mit Artillerie, in guter Stellung. Gegen zweihunderttausend in einer Stadt, in der sie sich nicht auskennen. Es ist keine hoffnungslose Rechnung; es ist eine, bei der herauskommt, dass es noch achtzigtausend Tote kosten würde.\\n\\nDu rechnest sie zu Ende und verstehst zum ersten Mal, warum die Marschälle nicht mehr im Lager sind.',
+       fert:{taktik:8,verwaltung:6},belastung:10}}
+  ]},
+
+/* 147 */ {typ:'szene',id:'fontainebleau',datum:'20. April 1814 · Fontainebleau',ort:'Der Abschied',
+  text:[
+    'Am 6. April hat er abgedankt, ohne Bedingungen. Am 11. ist der Vertrag unterschrieben worden: Elba, ein Titel, zwei Millionen im Jahr, vierhundert Mann Garde. Am 12. hat er in der Nacht versucht, sich zu vergiften, mit einem Gift von 1812, das nicht mehr gewirkt hat. Das erfährt man erst Jahre später.',
+    'Am 20. April tritt die alte Garde im Hof des Schlosses an, im Karree, und er kommt die Treppe herunter. Es dauert vier Minuten.',
+    'Er sagt, sie hätten ihm zwanzig Jahre lang gedient, er hätte weiterkämpfen können, aber es hätte den Bürgerkrieg bedeutet. Er umarmt den General, der die Fahne hält, und küsst den Adler.',
+    'Die Garde weint. Sechshundert Männer, die zwanzig Jahre lang alles gesehen haben, was ein Mensch sehen kann, stehen im Karree und weinen, und das ist nicht die Sorte Satz, die man erfindet.'
+  ],
+  optionen:[
+    {label:'Im Hof stehen und zusehen',hint:'Es kostet nichts. Es ändert nichts',
+     erfolg:{text:'Du stehst hinten, wo die stehen, die nicht zur Garde gehören, und siehst zu. Es dauert vier Minuten. Danach steigt er in einen Wagen, und der Wagen fährt weg, und der Hof bleibt voll.\\n\\nNiemand geht sofort. Es dauert eine halbe Stunde, bis der Erste sich rührt.',
+       belastung:12,attr:{kaltbluetigkeit:4}}},
+    {label:'Nicht hingehen',hint:'Es gibt anderes zu tun, und es gibt nichts zu tun',
+     erfolg:{text:'Du bleibst im Quartier und schreibst eine Liste zu Ende, die niemand mehr braucht. Vom Hof hört man nichts; er ist zu weit weg, und es wird dort ohnehin nicht laut.',
+       belastung:8}},
+    {label:'Nachher deine Leute entlassen, wie es sich gehört',hint:'Autorität · sie werden morgen auf Halbsold gesetzt',
+     ab:{wert:'rang',min:5,sonst:'Man sagt euch, ihr sollt euch bereithalten, und niemand sagt wofür. Am nächsten Tag bekommt jeder ein Papier.'},
+     probe:{wert:'autoritaet',schw:40},
+     erfolg:{text:'Du lässt antreten, verliest, was zu verlesen ist, und gibst jedem sein Papier in die Hand statt es auszulegen. Es dauert eine Stunde länger und ist der einzige Unterschied, den du an diesem Tag machen kannst.\\n\\nZwei bedanken sich. Einer fragt, ob du weißt, wo er hin soll. Du weißt es nicht.',
+       kameradschaft:14,belastung:6},
+     misserfolg:{text:'Die Papiere liegen am Nachmittag auf einem Tisch, und wer will, holt sich seins. Am Abend ist der Tisch leer und der Hof auch.',
+       kameradschaft:-6,belastung:10}}
+  ]},
+
+/* 148 */ {typ:'uebergang',id:'ende_frankreich',datum:'Mai 1814 · Irgendwo in Frankreich',ort:'Halbsold',
+  schranke:'waterloo',
+  text:[
+    'Die Armee wird aufgelöst. Aus sechshunderttausend werden zweihunderttausend, und aus zweihunderttausend werden Papiere: Entlassungsscheine, Halbsoldlisten, Wohnorte.',
+    'Der König ist zurück. Er ist neunundfünfzig, sehr dick, war dreiundzwanzig Jahre im Ausland und zählt seine Regierungsjahre ab 1795, als wäre nichts gewesen. Die weiße Kokarde ist wieder Vorschrift.',
+    'Die Offiziere der kaiserlichen Armee werden auf Halbsold gesetzt. Man bekommt ein Papier, eine Zahl und eine Adresse, an die man sich vierteljährlich zu wenden hat.',
+    'Es ist Mai, es ist Frieden, und es ist zum ersten Mal seit achtzehn Jahren nicht die Frage, wohin marschiert wird, sondern wohin man geht.'
+  ],
+  ausblick:'Am 1. März 1815 landet ein Mann mit siebenhundert Grenadieren bei Golfe-Juan. Zwanzig Tage später ist er in Paris, ohne dass ein Schuss gefallen wäre. Wer 1814 auf Halbsold gesetzt worden ist, bekommt in diesen Wochen einen Brief.'}
+];
+
+/* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.
+   `.slice()` ist Pflicht, nicht Kosmetik — siehe die Warnung in Kapitel 1. */
+KAPITEL.push(...KAPITEL10);
+STATIONEN.frankreich = KAPITEL10.slice();
+(KAMPAGNEN.find(k=>k.id==='frankreich')||{}).gebaut = true;
+
+
+'use strict';
+/* Kapitel 11 — Die Hundert Tage 1815. Reine Daten, wie die Kapitel davor.
+
+   ══════════════════ Die eigene Regel ══════════════════
+
+   **Alle wissen, wie es ausgeht. Die Figuren nicht.**
+
+   Das kürzeste Kapitel: acht Stationen, achtzehn Tage Feldzug. Zutritt nur mit
+   Rang ≥ 10 — die Schranke aus Kapitel 10 —, und der Rückruf aus dem
+   Ruhestand ist die Eingangsszene: ein Brief, eine Nacht Bedenkzeit, und die
+   Bedenkzeit ist eine echte Wahl. **Wer hier ablehnt, bekommt ein
+   vollwertiges Ende**, nicht ein schlechteres.
+
+   **Der Ton kippt ein letztes Mal.** Sold-Moral 1,0 — Napoleon zahlt sofort
+   und bar, und das Spiel lässt spüren, warum: Es ist das Geld eines Mannes,
+   der keine zweite Chance bekommt. Alles hier hat diese Doppelbödigkeit; die
+   Begeisterung der Armee ist echt, und auf der Karte bewegen sich drei Armeen
+   auf Belgien zu, gegen eine.
+
+   **Waterloo ist auf jeder Ebene spielbar, auf der man ankommt** — Rang 10–11
+   führt ein Bataillon oder Regiment im klassischen Bild, Rang 12–13 auf der
+   Operationskarte. Dieselben Fixpunkte, vier Maßstäbe. Das ist der
+   Abschlussbeweis der ganzen Bauidee: ein Inhalt, vier Maßstäbe.
+
+   ══════════════════ Historische Fixpunkte (Invariante 8) ══════════════════
+
+   Landung bei Golfe-Juan 1. März 1815 · Paris 20. März · Grenzübertritt
+   15. Juni · **Ligny und Quatre-Bras 16. Juni** · der Regen am 17. ·
+   **Waterloo 18. Juni** · „la Garde recule" am Abend · zweite Abdankung
+   22. Juni. Dazwischen ist alles frei erfunden. */
+
+const KAPITEL11 = [
+
+/* 149 */ {typ:'szene',id:'der_brief',datum:'April 1815 · Zu Hause',ort:'Der Rückruf',
+  text:[
+    'Der Brief kommt mit der Post und liegt zwei Stunden auf dem Tisch, bevor du ihn aufmachst. Er ist gedruckt, mit einer handschriftlichen Zeile am Rand und einem Siegel, das seit einem Jahr nicht mehr gültig sein sollte.',
+    'Es steht darin, dass die Armee neu aufgestellt wird und dass dein Rang, dein Dienstalter und deine Verwendung anerkannt bleiben. Es steht nicht darin, gegen wen.',
+    'Draußen ist April. Du hast seit einem Jahr Halbsold, ein Zimmer, und niemand hat in dieser Zeit von dir verlangt, dass jemand stirbt.',
+    'Es wird nicht gedrängt. Es gibt eine Frist von vierzehn Tagen, und was man in diesen vierzehn Tagen entscheidet, ist die letzte Entscheidung dieser Laufbahn, die einem vollständig selbst gehört.'
+  ],
+  optionen:[
+    {label:'Annehmen',hint:'Nach Paris, und von dort nach Norden',
+     erfolg:{text:'Du packst, was du hast, und meldest dich bei der nächsten Sammelstelle. Es sind erstaunlich viele da, die du kennst, und alle sehen älter aus, als sie sein sollten.\\n\\nEs wird nicht darüber gesprochen, warum man gekommen ist. Es ist nicht nötig.',
+       setzt:{zurueckgerufen:true},belastung:6,ruf:4}},
+    {label:'Ablehnen',hint:'Ein Ende, kein schlechteres · die Laufbahn endet hier',
+     erfolg:{text:'Du schreibst zwei Sätze, faltest das Papier und gibst es zur Post. Danach gehst du hinaus und tust den Rest des Tages nichts Besonderes.\\n\\nIm Juli liest du in der Zeitung, wie es ausgegangen ist. Du liest es zu Ende, faltest die Zeitung und legst sie weg. Es ist die vernünftigste Entscheidung deines Lebens, und du wirst sie dreißig Jahre lang bereuen.',
+       setzt:{abgelehnt:true},belastung:-10}}
+  ]},
+
+/* 150 */ {typ:'szene',id:'paris_april',datum:'Mai 1815 · Paris',ort:'Die alte Armee sammelt sich',
+  marsch:{von:'Halbsold, irgendwo',nach:'Paris',weg:'Von überall her, auf eigene Kosten, in vierzehn Tagen'},
+  zwischenfall:true,
+  text:[
+    'In sechs Wochen entsteht eine Armee aus nichts: zweihundertachtzigtausend Mann, davon die Hälfte Veteranen, die aus dem Halbsold, aus englischer Gefangenschaft und aus den Depots zurückkommen.',
+    'Es sind bekannte Gesichter dabei, und es fehlen bekannte Gesichter. Wer 1812 in Russland geblieben ist, ist geblieben; wer 1814 auf Halbsold ging, steht hier oder nicht.',
+    'Die Stimmung ist etwas, das man nicht erwartet hätte. Es ist keine Begeisterung wie 1805; es ist etwas Trockeneres, Entschlosseneres, und es hat mit dem Wissen zu tun, dass diesmal nichts mehr danach kommt.',
+    'Auf der Karte im Stab bewegen sich drei Armeen auf Belgien zu: Wellington, Blücher, dazu Österreicher und Russen am Rhein. Zusammen achthunderttausend. Der Plan ist, die ersten beiden zu schlagen, bevor die anderen da sind.'
+  ],
+  optionen:[
+    {label:'Deine Leute suchen',hint:'Menschenkenntnis · wer von damals noch da ist, ist mehr wert als zwei Rekruten',
+     probe:{wert:'menschenkenntnis',schw:45},
+     erfolg:{text:'Du gehst die Sammelstellen ab und suchst nach Namen, die du kennst. Du findest neun. Zwei kommen aus englischer Gefangenschaft, einer war seit 1813 in einem Depot vergessen worden.\\n\\nNeun Männer, die wissen, wie man in einem Karree steht, sind in dieser Armee mehr wert als hundert, die es nicht wissen.',
+       einheit:18,kameradschaft:14},
+     misserfolg:{text:'Die Listen sind unvollständig, die Sammelstellen überfüllt, und die Namen, die du suchst, stehen auf keiner davon. Vielleicht sind sie da. Du findest sie nicht.',
+       belastung:8}},
+    {label:'Ausrüstung besorgen, solange die Magazine offen sind',hint:'Verwaltung · in vierzehn Tagen ist nichts mehr da',
+     probe:{wert:'verwaltung',schw:45},
+     erfolg:{text:'Die Magazine sind voll, weil sie ein Jahr lang niemand angerührt hat, und leer, sobald jemand mit einem Zettel kommt. Du kommst mit einem Zettel, und zwar zuerst.',
+       ausr:{schuhe:60,muskete:45,tornister:40,mantel:40},kameradschaft:8},
+     misserfolg:{text:'Vor dem Magazin stehen sechs Regimenter, und der Verwalter hat eine Reihenfolge, in der deins nicht vorkommt. Was du bekommst, ist, was übrig ist.',
+       ausr:{schuhe:15,muskete:10},belastung:6}},
+    {label:'Zuhören, was geredet wird',hint:'Es klingt anders als 1805, und man merkt sofort, warum',
+     erfolg:{text:'Es wird nicht geprahlt. Es wird über Marschtabellen geredet, über Pferde, über die Frage, ob die Belgier in Wellingtons Armee schießen werden. Es ist die Sorte Gespräch, die Leute führen, die genau wissen, wie knapp es ist.',
+       fert:{taktik:5},belastung:-8,attr:{menschenkenntnis:3}}}
+  ]},
+
+/* 151 */ {typ:'szene',id:'grenzuebertritt',datum:'15. Juni 1815 · Über die Sambre',ort:'Der letzte Marsch',
+  marsch:{von:'Beaumont',nach:'Über die Sambre bei Charleroi',weg:'Der letzte Grenzübertritt dieser Laufbahn'},
+  tempo:{
+    text:[
+      'Wellington steht bei Brüssel, Blücher bei Namur, und zwischen ihnen liegen fünfzig Kilometer. Der ganze Feldzug beruht darauf, in diese Lücke zu gehen und beide getrennt zu schlagen.',
+      'Das heißt: schneller sein, als zwei Armeen sich verständigen können. Es ist derselbe Gedanke wie 1806 und wie im Februar 1814, und es ist das letzte Mal, dass er angewandt wird.',
+      'Es ist der 15. Juni, es ist warm, und in Brüssel geben sie an diesem Abend einen Ball.'
+    ],
+    ueberspringt:'quartier_charleroi',
+    forciert:{hint:'ihr steht zwischen ihnen, bevor sie es wissen',
+      text:'Ihr geht durch. Am Abend des 15. steht die Armee auf beiden Seiten der Sambre, zwischen zwei Armeen, die noch nicht wissen, dass der Feldzug begonnen hat. Es ist genau das, was der Plan verlangt.',
+      ruf:5},
+    schonend:{text:'Ihr geht das Tempo, bei dem alle ankommen. Am Abend steht die Hälfte der Armee diesseits der Sambre, und in Brüssel weiß man seit zwei Stunden Bescheid.',
+      atem:12}
+  },
+  text:[
+    'Um halb vier Uhr früh geht es über die Grenze, in drei Kolonnen, auf einer Front von zwanzig Kilometern. Es ist gut gemacht: Bis zum Mittag hat keine der beiden feindlichen Armeen begriffen, was passiert.',
+    'Die Kolonne geht durch Dörfer, in denen vor drei Jahren französische Präfekten saßen und in denen jetzt niemand grüßt.',
+    'Es ist das siebte Land, in das du in dieser Laufbahn einmarschierst. Bei den ersten sechs hast du mitgezählt.',
+    'Abends steht die Armee an der Sambre. Vor euch, irgendwo, stehen zweihundertfünfzigtausend Mann in zwei Armeen, die noch nicht zusammen sind.'
+  ],
+  optionen:[
+    {label:'Die Karte lesen, solange es hell ist',hint:'Kartenkunde · fünfzig Kilometer Lücke, und sie schließt sich',
+     probe:{wert:'kartenkunde',schw:45},
+     erfolg:{text:'Zwei Straßen, eine Kreuzung bei einem Ort namens Quatre-Bras, und dahinter ein Höhenzug, auf dem ein Wald steht. Wer die Kreuzung hat, trennt die beiden Armeen. Wer sie nicht hat, hat morgen zwei Gegner statt einem.\\n\\nDu siehst es auf der Karte in fünf Minuten. Es sehen an diesem Abend mehrere, und einer von ihnen ist der, der den Befehl schreibt.',
+       fert:{kartenkunde:8,taktik:6}},
+     misserfolg:{text:'Straßen, Bäche, Ortsnamen auf Flämisch. Nach zehn Minuten legst du die Karte weg und merkst dir das Einzige, was sicher ist: Es geht nach Norden.',
+       fert:{kartenkunde:3}}},
+    {label:'Bei den Leuten bleiben',hint:'Die Hälfte war 1812 dabei, und die andere Hälfte fragt sie danach',
+     erfolg:{text:'Am Feuer sitzen zwei, die Russland überlebt haben, und drei, die im März siebzehn geworden sind. Die drei fragen, die zwei antworten nicht viel, und beides ist genau richtig.',
+       kameradschaft:10,einheit:8,belastung:-6}}
+  ]},
+
+/* 152 */ {typ:'szene',id:'quartier_charleroi',datum:'15. Juni 1815, abends · Charleroi',ort:'Eine Nacht diesseits',
+  text:[
+    'Die Stadt ist am Mittag genommen worden, fast ohne Schuss. Es gibt Quartier, es gibt Brot, und es gibt einen Abend, an dem noch nichts entschieden ist.',
+    'Der Kaiser sitzt vor einem Gasthaus an der Straße und sieht der Kolonne beim Vorbeimarsch zu. Es heißt, er sei eingeschlafen. Man kann es glauben oder nicht; man kann von dieser Stelle aus sehen, dass er sitzt und dass er sechsundvierzig ist und aussieht wie fünfundfünfzig.',
+    'Es ist die letzte ruhige Nacht dieses Feldzugs und die letzte dieser Laufbahn.',
+    'In Brüssel, siebzig Kilometer nördlich, wird um diese Zeit ein Ball eröffnet.'
+  ],
+  optionen:[
+    {label:'Schlafen',hint:'Morgen wird geschlagen, übermorgen auch',
+     erfolg:{text:'Sechs Stunden in einem Bett, in einem Haus, mit einem Dach. Es ist das letzte Mal.',
+       leben:20,atem:22,belastung:-12}},
+    {label:'Alles zum letzten Mal durchsehen',hint:'Geschick · was jetzt nicht in Ordnung ist, bleibt es',
+     probe:{wert:'geschick',schw:35},
+     erfolg:{text:'Schuhe, Riemen, Schloss, Klinge. Du machst es, wie du es seit neunzehn Jahren machst, in derselben Reihenfolge, ohne nachzudenken. Es dauert vierzig Minuten und ist so etwas wie ein Gebet für jemanden, der nicht betet.',
+       ausr:{schuhe:35,muskete:35,tornister:25},belastung:-6},
+     misserfolg:{text:'Du fängst an und schläfst dabei ein. Am Morgen liegt alles halb zerlegt da, und es ist keine Zeit mehr.',
+       ausr:{muskete:-10},atem:8}},
+    {label:'Nachrechnen, was gegen euch steht',hint:'Taktik · es ist keine Zahl, die man nachrechnen sollte',
+     ab:{wert:'bildung',min:40,sonst:'Es werden Zahlen genannt. Man hört sie und legt sich hin.'},
+     erfolg:{text:'Hundertfünfundzwanzigtausend gegen zweihundertzwanzigtausend, und dahinter noch einmal fünfhunderttausend am Rhein, die in sechs Wochen da sind. Das geht nur auf, wenn beide getrennt geschlagen werden, und zwar diese Woche.\\n\\nDu rechnest es zu Ende, und dann liegst du wach.',
+       fert:{taktik:8},belastung:10}}
+  ]},
+
+/* 153 */ {typ:'kampf',id:'ligny',datum:'16. Juni 1815 · Ligny',ort:'Der letzte Sieg',
+  marsch:{von:'Charleroi',nach:'Ligny',weg:'15 km nach Nordosten · und die Preußen stehen auf einem Hang, den man von unten ganz übersieht'},
+  anmarschKosten:{verschleiss:0.15,atem:6,belastung:2},
+  anmarsch:[
+    'Blücher hat drei Korps auf einem Hang aufgestellt, in Dörfern an einem Bach, und man kann von unten jedes einzelne Bataillon zählen. Wellington hat ihm am Vormittag gesagt, so aufgestellt werde er zusammengeschossen. Blücher hat es trotzdem so gelassen.',
+    'Die Dörfer am Bach — Ligny, Saint-Amand — werden ab drei Uhr genommen, verloren, wieder genommen. Es sind Häuser aus Bruchstein, Mauern, Gärten, und der Bach dazwischen ist vier Meter breit.',
+    'Gegen halb acht abends, bei einem Gewitter, geht die Garde in der Mitte durch. Danach ist die preußische Armee in zwei Teile geschnitten und Blücher liegt unter seinem Pferd.',
+    'Es ist der letzte Sieg dieser Armee, und es weiß an diesem Abend niemand.'
+  ],
+  lage:{gegner:'Blüchers Armee, vierundachtzigtausend Mann, in Dörfern an einem Bach',
+        auftrag:'Die Dörfer halten, bis die Garde in der Mitte durchgeht',
+        gelaende:'Bach, Dörfer aus Bruchstein, Hang dahinter · abends Gewitter',
+        stellung:'Erstes Treffen, in Ligny'},
+  intro:'Der letzte Sieg dieser Laufbahn. Man erkennt ihn nicht daran, dass er der letzte ist.',
+  runden:8,feindMoral:74,gefahr:10,gelaende:'damm',
+  sieg:{text:'Um halb neun ist das Dorf euer und die preußische Mitte durchbrochen. Blücher wird unter seinem toten Pferd hervorgezogen und weggebracht; die Armee zieht in der Nacht ab.\\n\\nSie zieht nach **Norden** ab, nicht nach Osten. Das ist der ganze Unterschied dieses Feldzugs, und niemand auf dieser Seite bemerkt es bis übermorgen nachmittags um halb fünf.',ruf:12,ruhm:true},
+  niederlage:{text:'Das Dorf wechselt sechsmal, und beim sechsten Mal steht ihr nicht mehr darin. Was durchbricht, ist um halb acht die Garde. Die preußische Armee zieht in der Nacht ab — nach Norden, was hier niemandem auffällt.',ruf:-4,belastung:14}},
+
+/* 154 */ {typ:'szene',id:'tag_des_regens',datum:'17. Juni 1815 · Auf der Straße nach Brüssel',ort:'Der Tag des Regens',
+  text:[
+    'Es fängt am Mittag an zu regnen und hört bis in die Nacht nicht auf. Die Felder sind Lehm; die Kolonne kommt zwei Kilometer in der Stunde voran, und die Artillerie kommt gar nicht voran.',
+    'Am Vormittag ist nichts geschehen. Es hat sechs Stunden gedauert, bis ein Befehl gegeben wurde, und in diesen sechs Stunden ist Wellington von Quatre-Bras auf einen Höhenzug bei Mont-Saint-Jean abmarschiert, ungestört.',
+    'Gegen Mittag geht ein Marschall mit dreiunddreißigtausend Mann nach Osten ab, um die Preußen zu verfolgen. Der Befehl ist mündlich gegeben und schriftlich nachgereicht worden, und in beiden steht nicht dasselbe.',
+    'Man liest die Meldung darüber am Abend im Biwak und denkt sich nichts dabei. Man wird sie am übernächsten Tag um halb fünf noch einmal lesen und dann etwas dabei denken.'
+  ],
+  optionen:[
+    {label:'Die Meldung lesen und nichts denken',hint:'Es gibt keinen Grund, etwas zu denken',
+     erfolg:{text:'Dreiunddreißigtausend Mann gehen nach Osten, um eine geschlagene Armee zu verfolgen. Das ist Vorschrift und richtig, und wenn es klappt, kommt Blücher nicht zurück.\\n\\nDu liest es und gibst das Blatt weiter. Es ist die letzte Meldung dieses Krieges, bei der du dir nichts denkst.',
+       belastung:4}},
+    {label:'Auf der Karte nachsehen, wo die Preußen hin sind',hint:'Kartenkunde · nach Osten steht im Befehl. Nach Norden wäre schlimmer',risk:true,
+     ab:{wert:'rang',min:9,sonst:'Die Karte liegt beim Stab, und beim Stab hat man anderes zu tun, als sie einem Zugführer zu zeigen.'},
+     probe:{wert:'kartenkunde',schw:50},
+     erfolg:{text:'Die Meldungen der Kavalleriepatrouillen sind dünn und widersprechen sich. Zwei sagen Osten, eine sagt Wavre, und Wavre liegt nach Norden — zwanzig Kilometer von Mont-Saint-Jean, das heißt einen halben Tagesmarsch.\\n\\nDu meldest es. Es wird zur Kenntnis genommen. Was aus einer zur Kenntnis genommenen Meldung wird, entscheidet sich übermorgen um halb fünf.',
+       fert:{kartenkunde:8,taktik:6},ruf:4,belastung:8},
+     misserfolg:{text:'Die Meldungen widersprechen sich, und du kommst zu keinem Schluss. Es ist keine Schande — es kommt in diesen zwei Tagen niemand zu einem Schluss, und das ist der Grund, warum es ausgeht, wie es ausgeht.',
+       belastung:6}},
+    {label:'Für die Nacht sorgen',hint:'Es regnet, und morgen wird geschlagen',
+     erfolg:{text:'Kein Feuer, kein Stroh, kein Dach; es gibt nichts zu holen. Was zu tun ist: das Schloss trocken halten, die Patronen unter den Rock, und sich so hinlegen, dass man nicht im Wasser liegt.\\n\\nDie ganze Armee verbringt diese Nacht so. Am Morgen ist keiner ausgeruht, und auf der anderen Seite auch nicht.',
+       ausr:{muskete:20},belastung:-4,atem:6}}
+  ]},
+
+/* 155 */ {typ:'kampf',id:'waterloo',datum:'18. Juni 1815 · Mont-Saint-Jean',ort:'Waterloo',
+  haerte:1.4,
+  marsch:{von:'Biwak bei Le Caillou',nach:'Die Ebene vor Mont-Saint-Jean',weg:'Drei Kilometer · und dann wird bis halb zwölf gewartet, bis der Boden trocknet'},
+  anmarschKosten:{verschleiss:0.15,atem:6,belastung:3},
+  anmarsch:[
+    'Der Angriff beginnt um halb zwölf statt um sechs, weil der Boden zu weich für die Artillerie ist. Es sind fünf Stunden, und sie werden am Abend genau die fünf Stunden sein, die fehlen.',
+    'Gegenüber, auf einem Höhenzug, steht Wellington mit achtundsechzigtausend Mann, davon ein Drittel Briten und der Rest Niederländer, Belgier, Braunschweiger, Hannoveraner. Er steht hinter dem Kamm, wo man ihn nicht sieht und nicht trifft.',
+    'Vor seinem rechten Flügel liegt ein ummauertes Gut namens Hougoumont, vor der Mitte ein Bauernhof namens La Haye Sainte. Beide werden den ganzen Tag über gehalten, und beide fressen mehr, als sie wert sind.',
+    'Um halb fünf Uhr nachmittags erscheint am östlichen Horizont eine dunkle Linie. Ein Adjutant meldet, es seien die Truppen des Marschalls, der nach Osten abmarschiert ist. Es sind die Preußen.'
+  ],
+  lage:{gegner:'Wellingtons Armee auf dem Höhenzug — und ab halb fünf Blücher in der rechten Flanke',
+        auftrag:'Den Kamm nehmen, bevor die Preußen da sind',
+        gelaende:'Ebene, ein Hohlweg, zwei ummauerte Güter, dahinter ein Höhenzug',
+        stellung:'Erstes Treffen, gegen die Mitte'},
+  intro:'Das hier wird kein gewöhnliches Gefecht. Und ab halb fünf steht rechts von euch etwas, das dort nicht stehen sollte.',
+  runden:10,feindMoral:100,gefahr:7,gelaende:'mauer',
+  sieg:{text:'Gegen sieben Uhr geht die Garde den Hang hinauf, in zwei Kolonnen, zum ersten Mal in zwanzig Jahren gegen eine ungebrochene Linie. Sie kommt bis zwanzig Schritt an den Kamm.\\n\\nDann steht die britische Linie auf, die dahinter im Getreide gelegen hat, und feuert. Die Garde geht zurück, und jemand in der französischen Linie ruft die zwei Wörter, die diesen Krieg beenden.\\n\\nDu stehst da, wo du stehst, und was um dich herum passiert, ist keine Schlacht mehr.',ruf:14,ruhm:true},
+  niederlage:{text:'Es ist um neun Uhr abends vorbei. Was auf der Straße nach Süden geht, ist keine Armee, und was die preußische Kavallerie in dieser Nacht einholt, bleibt liegen.\\n\\nDrei Karrees der alten Garde stehen bis zuletzt auf dem Feld und werden zusammengeschossen. Man sieht es aus der Entfernung, und es sieht aus wie etwas, das man später nicht erklären kann.',ruf:-4,belastung:20}},
+
+/* 156 */ {typ:'szene',id:'strasse_nach_sueden',datum:'19.–22. Juni 1815 · Auf der Straße nach Süden',ort:'Was übrig ist',
+  marsch:{von:'Mont-Saint-Jean',nach:'Nach Süden, über die Grenze zurück',weg:'Achtzig Kilometer, in vier Tagen, ohne Ordnung'},
+  text:[
+    'Die Straße nach Charleroi ist vier Tage lang voll. Es marschiert niemand; es gehen Männer, einzeln und in kleinen Gruppen, in dieselbe Richtung.',
+    'Am 21. ist der Kaiser in Paris. Am 22. dankt er zum zweiten Mal ab, diesmal zugunsten seines Sohnes, den niemand je als Kaiser anerkennen wird. Es steht in einer Zeitung, die jemand aus Paris mitgebracht hat, und sie wird am Straßenrand von zwanzig Männern nacheinander gelesen.',
+    'Was jetzt kommt, ist keine Frage der Armee mehr. Es ist eine Frage dessen, was jeder Einzelne mit dem anfängt, was ihm geblieben ist.',
+    'Wenn du einen Adler trägst, trägst du ihn immer noch. Es gibt niemanden mehr, dem man ihn abgeben könnte.'
+  ],
+  optionen:[
+    {label:'Den Adler zerlegen und verstecken',hint:'Sie werden eingesammelt und eingeschmolzen',
+     ab:{wert:'adler',min:1,sonst:'Du trägst keinen Adler. Was du zu tragen hast, wiegt weniger und lässt sich schlechter verstecken.'},
+     erfolg:{text:'Du nimmst ihn von der Stange, wickelst ihn in ein Hemd und trägst ihn im Tornister. Die Stange bleibt an der Straße liegen; eine Stange ist nur Holz.\\n\\nIm Juli werden alle Adler eingesammelt und eingeschmolzen. Deiner nicht. Er liegt bis 1830 unter den Dielen eines Zimmers, und danach hängt er über einem Kamin, und danach weiß niemand mehr, welcher es war.',
+       ruf:5,belastung:-8}},
+    {label:'Deine Leute zusammenhalten, solange es geht',hint:'Autorität · es gibt kein Ziel mehr, zu dem man sie führen könnte',
+     probe:{wert:'autoritaet',schw:45},
+     erfolg:{text:'Du sammelst ein, wen du kennst, und bringst neunzehn Mann über die Grenze, in Ordnung, mit Waffen. Es gibt keinen Grund dafür. Es ist das Einzige, was du noch kannst, und du tust es deshalb ordentlich.',
+       kameradschaft:16,ruf:4,belastung:-6},
+     misserfolg:{text:'Sie hören zu und gehen dann weiter, jeder in seine Richtung. Es ist kein Ungehorsam; es ist nur nichts mehr da, worauf ein Befehl sich stützen könnte.',
+       kameradschaft:-8,belastung:12}},
+    {label:'Allein gehen',hint:'Achtzig Kilometer, und danach ist es vorbei',
+     erfolg:{text:'Du gehst allein, weil es nichts zu führen gibt und nichts zu bereden. Vier Tage, achtzig Kilometer, dieselbe Richtung wie zehntausend andere, die auch allein gehen.\\n\\nAn der Grenze steht ein Gendarm mit einer weißen Kokarde und schreibt Namen auf. Du nennst deinen. Er schreibt ihn falsch, und du berichtigst ihn nicht.',
+       belastung:10}}
+  ]},
+
+/* 157 */ {typ:'ende',id:'epilog',datum:'Sommer 1815',ort:'Der Epilog',
+  epilog:true,
+  text:[
+    'Es ist vorbei. Neunzehn Jahre, sieben Feldzüge, und am Ende ein Höhenzug in Belgien, auf dem eine Linie aufsteht, die im Getreide gelegen hat.',
+    'Was von der Armee übrig ist, wird im Juli aufgelöst. Die Adler werden eingesammelt und eingeschmolzen; die Offiziere werden entlassen, auf Halbsold gesetzt oder auf Listen geschrieben, die man später „Proskriptionen" nennen wird. Manche gehen nach Amerika.',
+    'Der Mann, für den das alles geschehen ist, wird auf ein Schiff gebracht und auf eine Insel im Südatlantik gefahren, die achttausend Kilometer von hier entfernt ist. Er wird dort sechs Jahre leben und ein Buch diktieren, in dem alles ein bisschen anders steht.',
+    'Und du bist noch da.'
+  ]}
+];
+
+/* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.
+   `.slice()` ist Pflicht, nicht Kosmetik — siehe die Warnung in Kapitel 1. */
+KAPITEL.push(...KAPITEL11);
+STATIONEN.hunderttage = KAPITEL11.slice();
+(KAMPAGNEN.find(k=>k.id==='hunderttage')||{}).gebaut = true;
 
 
 'use strict';
@@ -4062,7 +5089,13 @@ function stationErledigt(){
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   aderlass(KAPITEL[LAUF.node-1]);
-  const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
+  /* „Er weiß, welches Wasser." Halbiert wird die Zehrung, nicht abgeschafft —
+     und die Sperre der Zeitheilung bleibt bestehen, solange überhaupt etwas
+     zehrt. Wer krank ist, erholt sich nicht; er wird nur langsamer weniger.
+     Der Frost zählt bewusst mit: Auch ihn übersteht der besser, der weiß, wie
+     man im Freien liegt. */
+  let zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
+  if(zehrung && zaeh('zaeh_wasser')) zehrung = Math.ceil(zehrung/2);
   if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
   else lebenAuffuellen(0.05);
   /* Die Pension läuft, solange der Mann lebt. Historisch war die Ehrenlegion
@@ -4124,17 +5157,50 @@ function soldFaktor(){
    keine Probe dagegen und keinen Knopf dafür. **Das ist der Punkt:** Ein
    Aderlass ist keine Entscheidung, sondern die Eigenschaft eines Krieges.
 
-   **Er ersetzt die Zeitheilung nicht, er misst sich mit ihr.** Fünf Prozent
-   des Vorrats sind bei achtzig Lebenspunkten vier je Station; ein Aderlass von
-   2 halbiert die Erholung, einer von 3 hebt sie fast auf. In Spanien kommt man
-   also nie ganz wieder hoch, in Russland gar nicht mehr — und beides ohne eine
-   einzige Sonderregel in den Kapiteldaten. */
+   **Er ersetzt die Zeitheilung nicht, er misst sich mit ihr** — und das ist
+   der ganze Trick, aber es ist auch die Stelle, an der die erste Fassung
+   danebenlag. Fünf Prozent des Vorrats sind bei neunzig Lebenspunkten
+   viereinhalb je Station. Spaniens **4** hebt die Erholung damit fast genau
+   auf: Man kommt nie wieder hoch. Russlands **8** liegt darüber, und erst
+   dadurch fällt der Vorrat wirklich — was das Kapitel im Kopfkommentar
+   verspricht („ein Vorrat, der kleiner wird"), tut es seitdem auch.
+
+   > **Die erste Fassung stand auf 2 und 4 und tat rechnerisch nichts.**
+   > Russlands 4 gegen 4,5 Heilung ergab **plus einen halben Punkt je
+   > Station** — der Mann wurde nicht weniger, er stand still. Das ist
+   > derselbe Fehler wie damals bei der Krankheit („Ein Kranker *gewann*
+   > einen Punkt je Station"), nur eine Ebene höher, und er fiel erst auf,
+   > als der Härtemodus Spanien und Russland auf dieselbe Zahl legte.
+   > **Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert.** */
+/* ── Der Drill zahlt doppelt, wo die Leute nichts können ──
+
+   **Sonst wäre `rekruten` eine Mautstelle statt einer Regel.** Ein Kapitel,
+   dessen eigene Schwierigkeit man nicht abarbeiten kann, ist keine
+   Entscheidung, sondern ein Abzug — dieselbe Überlegung wie beim Mantel im
+   Frost, der von einem toten Russen zu nehmen ist.
+
+   1813 heißt das: Der Exerzierplatz wird zum eigentlichen Spiel. Es ist
+   derselbe Drill wie in Savona 1796, nur stehst du auf der anderen Seite,
+   und die Gesichter vor dir sind das eigene von damals. */
+function guetePlus(n){
+  const k = kampagneVon(KAPITEL[LAUF?LAUF.node:0]);
+  const faktor = (k && k.rekruten) ? 2 : 1;
+  S.sektionGuete = (S.sektionGuete||0) + Math.round(n*faktor);
+  return S.sektionGuete;
+}
+
 function aderlass(n){
   const k = kampagneVon(n);
-  const wert = k && k.aderlass ? k.aderlass : 0;
+  let wert = k && k.aderlass ? k.aderlass : 0;
   if(!wert || !S) return '';
-  S.leben = Math.max(1, S.leben - wert);
-  if(S.einheit != null) S.einheit = Math.max(0, S.einheit - wert);
+  /* „Er bleibt nicht zurück." Der Aderlass ist keine Wunde und keine Kugel,
+     sondern die Summe aus Nachzüglern, Posten, die nicht wiederkommen, und
+     Fieber im Quartier. Genau davor schützt Erfahrung — nicht ganz, aber
+     merklich. Am Mann wirkt sie; die Einheit zehrt weiter, denn deren
+     Zustand hängt nicht daran, was **du** gelernt hast. */
+  if(zaeh('zaeh_nachzuegler')) wert = Math.max(0, wert - 3);
+  if(wert) S.leben = Math.max(1, S.leben - wert);
+  if(S.einheit != null) S.einheit = Math.max(0, S.einheit - (k.aderlass|0));
   return '';
 }
 
@@ -4226,7 +5292,12 @@ function jahrVonStation(){
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
-  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
+  /* Fertigkeiten beginnen bei 5, nicht mehr bei 10 (29.07.2026, zusammen mit
+     dem Attributsockel 15). Ein Rekrut hat die Muskete zweimal abgefeuert;
+     alles darüber ist etwas, das er sich verdient oder gekauft hat. Nebenbei
+     verlängert es die Strecke, auf der Übung noch etwas bringt — `nutzen()`
+     gibt bei niedrigen Werten am meisten. */
+  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 5);
   /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
      was man mitbringt, nicht das, was man sich aussucht. Das war früher der
      halbe Exploit (Konstitution 90 = unsterblich); die andere Hälfte lag in der
@@ -4395,15 +5466,115 @@ function abzugGrund(k){
    Knopf stehen — sie sollen beim Entscheiden helfen. Eine Zahl, die man erst
    umrechnen muss, tut das nicht. */
 function aussicht(k, schwierigkeit){
-  return Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50));
+  return chance(Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50)));
 }
 
+/* ══════════════════ ZWEI WÜRFE STATT EINEM ══════════════════
+
+   **Der Wurf ist der Mittelwert aus zwei Würfen über 1–100, nicht ein
+   einzelner.** Das ist die wichtigste Änderung am Probensystem seit seiner
+   Einführung, und sie behebt eine Klage, die man beim Spielen sofort hat:
+   *Manchmal schafft man eine Probe mit dem doppelten Wert nicht.*
+
+   Der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher
+   Wurf über hundert ist überall gleich wahrscheinlich; ein Zielwert von 80
+   ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je
+   Kapitel fühlt sich das an, als zähle Können nicht. **Der Mittelwert aus
+   zwei Würfen ballt sich um die Mitte** — wer deutlich über der Aufgabe
+   steht, besteht fast immer; wer deutlich darunter steht, fast nie.
+
+   | Zielwert | vorher | jetzt |
+   |---|---|---|
+   | 20 | 20 % | **8 %** |
+   | 35 | 35 % | **25 %** |
+   | 50 | 50 % | 50 % |
+   | 65 | 65 % | **75 %** |
+   | 80 | 80 % | **92 %** |
+   | 95 | 95 % | **99 %** |
+
+   **Der Münzwurf in der Mitte bleibt ein Münzwurf** — die Eichung „Wert 40
+   gegen Schwierigkeit 40 ist fifty-fifty" gilt unverändert, und keine einzige
+   Schwierigkeit in den Kapiteldaten musste angefasst werden. Was sich ändert,
+   sind die Ränder: **Können und Unvermögen wiegen beide schwerer.**
+
+   Dass der Erstläufer damit härter dasteht, ist gewollt und Teil derselben
+   Richtung wie der tiefere Sockel — und es ist die Stelle, an der Italien
+   endlich beißen darf (Sollwert: nicht mehr als 20 % Tote im Erstlauf). */
+function wurfZahl(){
+  return Math.round((1 + Math.floor(Math.random()*100) + 1 + Math.floor(Math.random()*100)) / 2);
+}
+
+/* Die Wahrscheinlichkeit, einen Zielwert zu erreichen — geschlossen gerechnet,
+   damit auf dem Knopf steht, was wirklich passiert. **Ohne diese Umrechnung
+   löge die Oberfläche:** Der Zielwert *war* bis dahin die Prozentzahl, und mit
+   zwei Würfen ist er es nicht mehr. */
+function chance(ziel){
+  const t = Math.max(0, Math.min(100, ziel)) / 100;
+  const p = t <= 0.5 ? 2*t*t : 1 - 2*(1-t)*(1-t);
+  /* **Nie 100, nie 0.** Beim geklemmten Zielwert 95 sind es rechnerisch 99,4 %,
+     und „100 %" auf einem Knopf wäre eine Lüge — es gibt keine sichere Probe.
+     Am unteren Ende dasselbe: Wer bei 5 steht, hat 0,5 %, und das ist nicht
+     nichts. Gerundet würde beides zu einer Zahl, die etwas verspricht. */
+  return Math.min(99, Math.max(1, Math.round(p*100)));
+}
+
+/* ══════════════════ DIE PROBE — UND WAS ÜBER IHR LIEGT ══════════════════
+
+   ```
+   roh    = Wert − Schwierigkeit + 50        (ungeklemmt)
+   Ziel   = clamp(roh, 5, 95)
+   Können = max(0, roh − 95)
+   ```
+
+   **Die Klemme bleibt, und sie ist richtig.** Fünf Prozent Fehlschlag gehören
+   dazu: Im Rauch schießt auch der beste Schütze daneben, und eine Probe, die
+   nie misslingt, ist keine. Aber sie hatte eine Nebenwirkung, die erst mit
+   vielen Veteranenpunkten sichtbar wurde — **gegen die üblichen
+   Schwierigkeiten 35 bis 50 sind Wert 85 und Wert 100 dieselbe Zahl.** Und
+   weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit
+   ausschließlich Trefferwahrscheinlichkeit. Damit war das obere Fünftel der
+   Skala **tote Währung**: Wer seine Spitze nachschärfte, bekam dafür nichts.
+
+   `koennen` ist genau das, was die Klemme wegwirft. Es zahlt nicht mehr in
+   die Trefferchance — die bleibt bei 95 % —, sondern in die **Wirkung**.
+   Damit gilt für die ganze Skala wieder: Mehr Wert ist mehr wert; nur ändert
+   sich oben, *worin*. Ein Meister trifft nicht öfter, er trifft härter. */
+/* Die zuletzt gewürfelte Probe. `kampfAktion()` setzt sie am Anfang auf null
+   und liest sie am Ende aus, wo der Schaden verrechnet wird — so steht der
+   Meisterschaftsfaktor an **einer** Stelle statt an fünfzehn Schadenszeilen,
+   und keine davon kann ihn beim nächsten Umbau vergessen. */
+let PROBE_ZULETZT = null;
 function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
-  const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
-  const wurf = 1 + Math.floor(Math.random()*100);
+  const roh = w - schwierigkeit + 50;
+  const ziel = Math.max(5, Math.min(95, roh));
+  const wurf = wurfZahl();   // Mittel aus zwei Würfen, siehe oben
   if(!ohneUebung) nutzen(k, 1);
-  return {wurf, ziel, wertRoh:w, erfolg: wurf <= ziel};
+  PROBE_ZULETZT = {wurf, ziel, wertRoh:w, roh, koennen: Math.max(0, roh - 95), erfolg: wurf <= ziel};
+  return PROBE_ZULETZT;
+}
+
+/* Der Faktor, den `koennen` auf eine Wirkung legt. **Gedeckelt bei +50 %**,
+   und der Deckel ist der wichtigere Teil der Zahl: Ohne ihn liefe ein Wert
+   von 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die
+   späten Gefechte wären in drei Runden vorbei.
+
+   30 Punkte über der Klemme sind das Maximum, das im Spiel vorkommt (Wert 100
+   gegen Schwierigkeit 35). Wer dort steht, richtet die Hälfte mehr an als
+   einer, der die Probe gerade so sicher besteht. */
+/* **Wie deutlich es gelungen ist, in einem Wort.** Ab fünfzehn Punkten über
+   der Klemme steht der Mann so weit über der Aufgabe, dass die Probe nur noch
+   Form ist — und das gehört auf den Schirm, sonst merkt niemand, wofür er
+   seine Veteranenpunkte ausgegeben hat. Unter fünfzehn steht nichts: Ein Wort,
+   das immer dasteht, sagt nichts. */
+function probeWort(p){
+  if(!p || !p.erfolg) return 'misslungen';
+  return p.koennen >= 15 ? 'mühelos gelungen' : 'gelungen';
+}
+
+function meister(p){
+  if(!p || !p.erfolg || !p.koennen) return 1;
+  return 1 + Math.min(30, p.koennen) / 60;
 }
 
 function nutzen(k, intens, fechtboden){
@@ -4436,7 +5607,20 @@ function anwenden(e){
   if(e.atem) S.atem = Math.max(0, Math.min(100, S.atem + e.atem));
   if(e.geld) S.geld = Math.max(0, S.geld + e.geld);
   if(e.nennung){ S.nennungen++; }
-  if(e.attr) for(const k in e.attr) S.attr[k] = Math.max(0, Math.min(100, S.attr[k] + e.attr[k]));
+  /* **Konstitution darf über 100 gehen, alles andere nicht.** Sie ist der
+     einzige Wert, der in etwas Ungeklemmtes zahlt — `lebenMax()` rechnet
+     `40 + 0,6 × roh`, linear und ohne Obergrenze. Bei jedem anderen Attribut
+     wäre die 100 ohnehin tote Währung, weil die Probe bei 95 klemmt: Gegen
+     die üblichen Schwierigkeiten 35–50 sind 85 und 100 dieselbe Zahl.
+     Wohlgemerkt hebt das nur die *Klemme*; **wachsen** kann auch die
+     Konstitution nur bis 100 (`nutzen()` steigt dort aus), denn die
+     Wachstumsformel `(100 − Wert)/100` wird darüber negativ. Was über die
+     100 hinausgeht, kommt ausschließlich aus überstandenen Feldzügen —
+     Drill plateauiert, ein Krieg nicht. */
+  if(e.attr) for(const k in e.attr){
+    const deckel = k==='konstitution' ? Infinity : 100;
+    S.attr[k] = Math.max(0, Math.min(deckel, S.attr[k] + e.attr[k]));
+  }
   if(e.fert) for(const k in e.fert) S.fert[k] = Math.max(0, Math.min(100, S.fert[k] + e.fert[k]));
   if(e.ausr) for(const k in e.ausr) S.ausr[k].zustand = Math.max(0, Math.min(100, S.ausr[k].zustand + e.ausr[k]));
   if(e.leben) S.leben = Math.max(1, Math.min(lebenMax(), S.leben + e.leben));
@@ -4555,7 +5739,12 @@ const FROST_WUNDE = 'Der Frost';
 
 function frostWirken(n){
   if(!S) return '';
-  const stufe = (n && n.frost) | 0;
+  /* „Er schläft im Freien." Eine Stufe milder, und bei Stufe 1 heißt das:
+     gar nicht. Das ist kein Ersatz für den Mantel — ohne ihn bleibt auch der
+     Gewohnte im Januar bei Stufe 4 eine zehrende Wunde schuldig. Es ist die
+     Erfahrung, die daneben steht: wo man liegt, wie man sich einwickelt,
+     wann man aufsteht und geht, statt liegen zu bleiben. */
+  const stufe = Math.max(0, ((n && n.frost) | 0) - (zaeh('zaeh_schlaf') ? 1 : 0));
   const hat = S.wunden.some(w => w.name === FROST_WUNDE);
   if(!stufe){
     if(!hat) return '';
@@ -4595,7 +5784,12 @@ function verschleiss(faktor){
   if(k && k.verschleiss) faktor *= k.verschleiss;
   for(const k2 in S.ausr){
     const a = S.ausr[k2];
-    if(a.verschleiss>0) a.zustand = Math.max(0, a.zustand - Math.round(a.verschleiss*faktor));
+    /* „Füße wie Leder": Nur die Schuhe, und nur sie — ein Mann, der weiß, wie
+       man geht, schont sein Schuhwerk und sonst nichts. Das trifft genau die
+       Stelle, an der Verschleiß wirklich wehtut: Unter Zustand 25 kostet
+       Schuhwerk 18 Konstitution, und in Russland gibt es keinen Ersatz. */
+    const f = (k2==='schuhe' && zaeh('zaeh_fuesse')) ? faktor*0.5 : faktor;
+    if(a.verschleiss>0) a.zustand = Math.max(0, a.zustand - Math.round(a.verschleiss*f));
   }
 }
 
@@ -5112,9 +6306,11 @@ function patentKarte(){
 function zeigeLaden(){
   if(!ERSCH || !ERSCH.herkunft){ zeigeErschaffung(); return; }
   AUSWAHL = []; PUNKTE = {};
-  const zeilen = LADEN.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
+  const kaufZeile = p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
     <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
-    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
+    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`;
+  const zeilen  = LADEN.filter(p=>p.art!=='zaeh').map(kaufZeile).join('');
+  const zeilenZ = LADEN.filter(p=>p.art==='zaeh').map(kaufZeile).join('');
   const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft);
   app.innerHTML = `
   <div class="card"><div class="ch"><span>Zweiter Schritt · Veteranenpunkte</span><span id="vpanz">${META.vp} verfügbar</span></div>
@@ -5132,7 +6328,7 @@ function zeigeLaden(){
 
   <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 60</span></div>
    <div class="cb">
-    <p class="hinweis">Alle beginnen bei 10, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
+    <p class="hinweis">Alle beginnen bei 5, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
     ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
@@ -5141,6 +6337,12 @@ function zeigeLaden(){
   <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
    <div class="cb">
     <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+   </div></div>
+
+  <div class="card"><div class="ch"><span>Was ein Mann behält</span><span>nicht Kraft, sondern Gewohnheit</span></div>
+   <div class="cb">
+    <p class="hinweis">Was einer aus zwei Feldzügen mitbringt, ist selten Kraft. Es ist das Wissen, wie man nicht stirbt: welches Wasser man trinkt, wie man seine Füße behält, wo man sich hinlegt, wenn es kein Dach gibt. <b>Nichts davon macht dich im Gefecht besser</b> — es hält dich nur zwischen den Gefechten aufrecht, und dort verliert man die meisten Männer.</p>
+    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilenZ}</table>
     <div style="margin-top:18px;display:flex;gap:10px">
       <button class="plain" onclick="zeigeErschaffung()">Zurück zur Erschaffung</button>
       <button class="plain haupt" id="startbtn" onclick="starte()">Einrücken</button></div>
@@ -5204,24 +6406,47 @@ function aktualisiereLaden(){
    Progression, die das Spiel bisher nur behauptet hat: Gegner, gegen die man am
    Anfang chancenlos ist, werden später schlagbar.
 
-   Der Schritt ist 10, also muss POOL durch 10 teilbar sein — sonst lässt sich
-   der Vorrat nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
+   **Der Sockel ist am 29.07.2026 von 20 auf 15 gefallen, und der Schritt von
+   10 auf 5.** Beides gehört zusammen: Von 15 aus ist die 70 in Zehnerschritten
+   nicht erreichbar (15+50 = 65, 15+60 = 75), also musste erst der Schritt
+   feiner werden. Mit 5 geht 15 + 55 = 70 exakt auf, POOL 60 ist durch 5
+   teilbar, und **beide Hälften der Erschaffung schreiten jetzt gleich** —
+   `PUNKT_SCHRITT` für die Veteranenpunkte stand ohnehin schon auf 5.
+
+   **Wozu der tiefere Sockel:** Ein Erstlauf-Mann soll früher sterben, damit
+   der Veteran länger lebt. Die Wachstumsformel gibt bei niedrigen Werten am
+   meisten (`1,7 × Intensität × (100 − Wert)/100`), also verlängert ein
+   tieferer Sockel zugleich die Strecke, auf der ein Mann sich noch
+   verbessern kann. Das ist die Gegenseite zur wachsenden Konstitution.
+
+   **Der Sollwert dafür ist Italien** (Entscheidung des Entwicklers): Das
+   Lehrstück darf töten, aber **nicht mehr als 20 % im Erstlauf**. Fällt
+   „Italien überstanden" unter 80 %, ist der Sockel zu tief.
+
    Invariante 3 bleibt unberührt: Gekauft wird der Ausgangspunkt, nie der
    Aufstieg. */
-const POOL = 60, SOCKEL = 20, MAXE = 70;
+const POOL = 60, SOCKEL = 15, MAXE = 70, ERSCH_SCHRITT = 5;
+/* **Bildung ist die Ausnahme und bleibt bei 20.** Sie ist schon immer vom Pool
+   ausgenommen, weil sie kein körperlicher Ausgangspunkt ist, sondern eine
+   soziale Tatsache — man kann nicht lesen —, und sie hat einen eigenen Weg
+   über die Regimentsschule. Sie mit abzusenken träfe die **Rangleiter**
+   (Fourrier braucht 35, Rang 7 braucht 50) statt der Überlebensfähigkeit,
+   und darum geht es beim Sockel nicht. */
+const BILDUNG_SOCKEL = 20;
+const sockelVon = k => k==='bildung' ? BILDUNG_SOCKEL : SOCKEL;
 let ERSCH = null;
 function zeigeErschaffung(neu){
   if(neu || !ERSCH){
     ERSCH = {name:'', herkunft:null, attr:{}};
-    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
   }
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
       <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
       ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
       <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
-      <span><button class="pmbtn" onclick="stelle('${k}',-10)" id="am_${k}">−</button>
-      <button class="pmbtn" onclick="stelle('${k}',10)" id="ap_${k}">+</button></span>
+      <span><button class="pmbtn" onclick="stelle('${k}',-ERSCH_SCHRITT)" id="am_${k}">−</button>
+      <button class="pmbtn" onclick="stelle('${k}',ERSCH_SCHRITT)" id="ap_${k}">+</button></span>
     </div>`).join('');
   app.innerHTML = `
   <div class="stage">${verlauf()}
@@ -5231,8 +6456,8 @@ function zeigeErschaffung(neu){
       </div></div>
       <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
         <div class="cb">${zeilen}
-        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel 20 · höchstens 70 bei der Erschaffung · Bildung ist vom Pool ausgenommen.
-        Alle neun Fertigkeiten beginnen bei 10.<br>
+        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · Schritte zu ${ERSCH_SCHRITT} · höchstens ${MAXE} bei der Erschaffung · Bildung ist vom Pool ausgenommen und steht auf ${BILDUNG_SOCKEL}.
+        Alle neun Fertigkeiten beginnen bei 5.<br>
         Sechzig Punkte sind wenig, und das ist Absicht: Ein Rekrut ist kein Veteran. Was fehlt, holen die Veteranenpunkte deiner früheren Männer im nächsten Schritt.</p>
         <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
       </div></div>
@@ -5252,7 +6477,7 @@ function zufallsName(){
   const n=['Duval','Rey','Vasseur','Marchand','Ferrand','Bonnet','Lemoine','Charpentier','Roussel','Barbier'];
   return v[Math.floor(Math.random()*v.length)]+' '+n[Math.floor(Math.random()*n.length)];
 }
-function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-SOCKEL),0); }
+function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-sockelVon(k)),0); }
 function stelle(k,d){
   if(k==='bildung') return;
   const neu = ERSCH.attr[k]+d;
@@ -5261,14 +6486,14 @@ function stelle(k,d){
   ERSCH.attr[k]=neu; aktualisiereErschaffung();
 }
 function wuerfeln(){
-  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
   const frei = ATTRIBUTE.map(([k])=>k).filter(k=>k!=='bildung');
   let rest = POOL;
   const gew = frei.map(()=>Math.random()+0.35);
   while(rest>0){
     const i = gew.map((g,i)=>[g*Math.random(),i]).sort((a,b)=>b[0]-a[0])[0][1];
     const k = frei[i];
-    if(ERSCH.attr[k]+10<=MAXE){ ERSCH.attr[k]+=10; rest-=10; }
+    if(ERSCH.attr[k]+ERSCH_SCHRITT<=MAXE){ ERSCH.attr[k]+=ERSCH_SCHRITT; rest-=ERSCH_SCHRITT; }
     else { gew[i]=0; if(gew.every(g=>g===0)) break; }
   }
   aktualisiereErschaffung();
@@ -5284,8 +6509,8 @@ function aktualisiereErschaffung(){
   ATTRIBUTE.forEach(([k])=>{
     document.getElementById('av_'+k).textContent = ERSCH.attr[k];
     const b = document.getElementById('ab_'+k); if(b) b.querySelector('i').style.width = ERSCH.attr[k]+'%';
-    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=SOCKEL;
-    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+10>POOL;
+    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=sockelVon(k);
+    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+ERSCH_SCHRITT>POOL;
   });
   const b = document.getElementById('weiterbtn');
   if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
@@ -5682,7 +6907,7 @@ function marschWaehlen(i){
     const p = probe(o.probe.wert, o.probe.schw);
     w = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
     klasse = p.erfolg ? 'gut' : 'schlecht';
-    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${probeWort(p)}</div>`;
   } else w = o.erfolg;
   anwenden(w);
   S.log.push('marsch: '+o.label);
@@ -5855,6 +7080,21 @@ function naechster(){
   /* Das Tempo wird vor dem Marsch gewählt, nicht auf ihm — also vor dem
      Zwischenfall-Wurf, aber nach einer noch offenen Frage von vorhin. */
   if(n.tempo && LAUF.tempo !== n.id){ zeigeTempo(n); return; }
+  /* ── Wer den Rückruf abgelehnt hat, marschiert nicht mit ──
+     **Ganz oben, vor allem anderen.** Die Ablehnung im April 1815 ist eine
+     echte Wahl mit einem vollwertigen Ende, kein schlechteres — deshalb
+     überspringt sie alles, was noch käme, und geht direkt in den Epilog. Ein
+     Mann, der zu Hause bleibt, steht nicht bei Ligny und begegnet auch keinem
+     Zwischenfall auf einem Marsch, den er nicht mitmacht.
+
+     Die erste Fassung stand weiter unten in der Kette, hinter `typ==='szene'`
+     — und traf deshalb nie, weil auf den Brief eine Szene folgt. */
+  if(S && S.abgelehnt && !n.epilog){
+    const i = KAPITEL.findIndex(x=>x.epilog);
+    if(i >= 0 && LAUF.node !== i){ LAUF.node = i; laufSichern(); naechster(); return; }
+    zeigeEpilog(KAPITEL[i] || n); return;
+  }
+
   /* Gewürfelt wird auf Stationen mit Marschweg — und seit Kapitel 3 auch auf
      solchen, die es ausdrücklich anfordern (`zwischenfall:true`). In einer
      Garnison marschiert niemand, und ohne diese zweite Tür hätten die vier
@@ -5882,6 +7122,7 @@ function naechster(){
     else if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.');
     else starteKampf(n);
   }
+  else if(n.epilog) zeigeEpilog(n);
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
@@ -5906,6 +7147,30 @@ function zeigeUebergang(n){
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
+    /* ── Was ein Feldzug aus einem Körper macht ──
+
+       **Der einzige Ort im Spiel, an dem ein Attribut wächst, ohne dass man
+       etwas dafür gedrückt hat — und er ist verdient, nicht geschenkt.** Wer
+       hier steht, hat einen ganzen Feldzug überlebt; das ist die Bedingung,
+       und sie ist die härteste im Spiel.
+
+       Gebaut gegen den schärfsten gemessenen Befund: **Veteranenpunkte kaufen
+       Rang und keine Strecke** (Weite 57 / 62 / 61 bei 11 / 30 / 38 %
+       Capitaine). Jede Progression, die über bessere Werte läuft, endet in
+       der Ruf-Kette und damit in den Offiziersrängen mit ihren +4 bis +5
+       Gefahr. Diese hier läuft über die **Strecke**: Sieben Übergänge sind
+       +21 Konstitution und damit rund dreizehn Lebenspunkte, und man bekommt
+       sie nur, indem man ankommt.
+
+       **Ohne Deckel bei 100.** `lebenMax()` rechnet vom rohen Wert, linear
+       und ungeklemmt — ein Mann, der acht Feldzüge überlebt hat, darf
+       zäher sein als menschenmöglich. Natürliches Üben plateauiert dagegen
+       weiterhin bei 100, weil die Wachstumsformel darüber negativ wird.
+
+       Reihenfolge: **erst der Zuwachs, dann auffüllen.** `lebenMax()` hängt
+       an der Konstitution, und wer davor auffüllt, füllt gegen den kleineren
+       Vorrat — derselbe Fehler wie damals bei den Wunden. */
+    S.attr.konstitution = (S.attr.konstitution|0) + 3;
     // Erst die Wunden weg, dann auffüllen: `lebenMax()` schrumpft mit offenen
     // Wunden, sonst rückt der Mann mit 68 statt 82 ein, obwohl „voll" dasteht.
     S.wunden = [];
@@ -5921,7 +7186,8 @@ function zeigeUebergang(n){
         <div class="wirkung"><span>Zwischenstand</span>
           ${rangName(S.rang)} · Ruf ${S.ruf} · ${stationen()} Stationen · ${S.nennungen}× im Tagesbefehl</div>
         <div class="wirkung"><span>Ein Jahr Garnison</span>
-          Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.</div>
+          Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.
+          <b>Konstitution +3:</b> Der Körper hat sich an das Marschieren gewöhnt, an das Schlafen im Nassen und daran, mit wenig auszukommen.</div>
         </div></div>
       <div class="orders"><div class="ordbody">
         <button class="ord weiter" onclick="stationErledigt();naechster()">Weiter
@@ -6018,6 +7284,15 @@ function waehleTempo(i){
     w.atem -= 8; w.belastung += 4;
     if(!w.wunde) w.wunde = 'Wundgelaufene Füße';
     schuhe = ' Deine Schuhe halten das nicht. Am dritten Tag gehst du auf etwas, das keine Sohle mehr hat.';
+  }
+  /* „Füße wie Leder", zweite Hälfte. Der forcierte Marsch bleibt teuer — er
+     kostet weiterhin Verschleiß, Belastung und eine übersprungene Station.
+     Was ein Gewohnter spart, ist Luft: acht von fünfundzwanzig. Das reicht,
+     um ihn nicht unter die Warnschwelle 35 zu drücken, und ändert nichts
+     daran, dass Forcieren eine Entscheidung mit Preis bleibt. */
+  if(t.forciert && zaeh('zaeh_fuesse')){
+    w.atem += 8;
+    schuhe += ' Du gehst, wie man geht, wenn man es oft genug getan hat: kurze Schritte, und die Füße bleiben trocken.';
   }
 
   verschleiss(t.verschleiss);
@@ -6153,7 +7428,7 @@ function waehleOption(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+        ` <span class="fein">${wertName(st.wert)} — ${probeWort(p)}${schaden?' · Leben −'+schaden:''}</span>`);
       if(S.leben <= 0){
         S.log.push(n.id+': '+o.label);
         toetlich(o.todesart || 'Gefallen');
@@ -6171,7 +7446,7 @@ function waehleOption(i){
     klasse = p.erfolg ? 'gut' : 'schlecht';
     // Nur das Ergebnis, nicht die Rechnung: Wert und Schwierigkeit stehen schon
     // vor der Wahl auf dem Knopf, und Zielwert und Wurf sagen hinterher nichts mehr.
-    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${probeWort(p)}</div>`;
   } else { erg = o.erfolg; klasse='gut'; }
   anwenden(erg);
   verschleiss(0.35);
@@ -6479,7 +7754,16 @@ function starteKampf(n){
                  die Ruf-Ereignisse (Text), `zaehlung` sind die Zahlen dahinter. */
               zaehlung:{schaden:0, serie:0, bestSerie:0, ereignisse:0, vorn:false, gedeckt:0, offen:0},
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
-              sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
+              /* **`rekruten` — die eigene Regel von 1813.** Deine Leute treten
+                 nicht mit voller Zahl an, sondern mit dem, was von einem
+                 Verband übrig ist, den es vor sechs Wochen noch nicht gab.
+                 Das trifft alles, was am Bestand hängt: den Schaden der
+                 Feuerbefehle (`anteil`), die Schwelle, ab der die Linie
+                 bricht, und das Bild. **Es hebt keine einzige Gefahr-Zahl** —
+                 die Härte kommt aus dem eigenen Zustand, nicht aus einem
+                 besseren Feind. Abarbeitbar: Drill im Lager zahlt hier
+                 doppelt, und `S.sektionGuete` hebt den Startwert wieder. */
+              sektion:rekrutenStart(), sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
               rollend:0,
               /* Der Offizier: gelöster Zug, Geländevorteil, gezogener Degen —
                  und `nahkampf`, die Runden, in denen das alles nichts gilt. */
@@ -6510,13 +7794,41 @@ function starteKampf(n){
    Buchstaben. Genau darin liegt der Unterschied zu allen Rängen davor: Bis
    Rang 9 hast du entschieden, was **du** tust. Ab hier entscheidest du, wer
    stirbt. */
+/* ══════════════════ DIE REKRUTEN (1813) ══════════════════
+
+   **Deine Armee ist achtzehn Jahre alt.** Die alte liegt in Russland; was
+   1813 antritt, sind Konskribierte des Jahrgangs 1814, vorzeitig eingezogen,
+   und viele halten die Muskete zum ersten Mal, als man sie ihnen aushändigt.
+
+   `rekruten:n` an der **Kampagne** senkt den Startbestand deiner Einheit um n
+   Prozent. Mehr nicht — und das ist der Punkt: **Es wird keine Gefahr-Zahl
+   angefasst.** Der Feind schießt 1813 nicht besser als 1812; deine Leute
+   halten schlechter. Das trifft genau die Größen, die ohnehin am Bestand
+   hängen — den Schaden jedes Feuerbefehls, die Schwelle, ab der die Linie
+   bricht (`nahkampfPruefen()` bei unter 40), und das Bild.
+
+   **Und es ist abarbeitbar, sonst wäre es eine Mautstelle:** `S.sektionGuete`
+   aus den Lagerabenden hebt den Startwert wieder an, und der Drill zahlt in
+   diesem Kapitel doppelt. Damit wird der Exerzierplatz zum eigentlichen
+   Spiel — dasselbe Exerzieren wie in Savona 1796, nur stehst du jetzt auf
+   der anderen Seite. */
+function rekrutenStart(){
+  const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
+  const roh = (k && k.rekruten) | 0;
+  if(!roh) return 100;
+  return Math.max(40, 100 - roh + Math.min(roh, (S.sektionGuete||0)));
+}
+
 function kompanienStart(){
   /* Die Güte kommt aus dem Lager (`S.sektionGuete`), wie schon bei Sektion und
-     Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl. */
+     Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl.
+     Die Rekruten schlagen auf die Haltung, nicht auf den Bestand: Ein
+     Bataillon aus Achtzehnjährigen ist vollzählig und hält trotzdem nicht. */
   const g = Math.min(20, (S.sektionGuete||0)/2);
+  const roh = rekrutenStart();
   return ['1.','2.','3.','4.'].map((nm,i)=>({
     name: nm+' Kompanie', kurz: nm[0],
-    bestand: 100, haltung: 70 + Math.round(g) - i*3, vorn: false
+    bestand: 100, haltung: Math.max(25, 70 + Math.round(g) - i*3 - (100-roh)), vorn: false
   }));
 }
 
@@ -7691,8 +9003,8 @@ function ereignisWaehlen(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
-      K.protokoll.push(st.name + (p.erfolg?' — gelungen':' — misslungen'));
+        ` <span class="fein">${wertName(st.wert)} — ${probeWort(p)}${schaden?' · Leben −'+schaden:''}</span>`);
+      K.protokoll.push(st.name + (' — '+probeWort(p)));
       if(S.leben <= 0){
         gefallen(zeilen.join(' ') + ' ' + (o.tod||''),
                  o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
@@ -7711,7 +9023,7 @@ function ereignisWaehlen(i){
     const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
     w = p.erfolg ? o.erfolg : (o.misserfolg || o.erfolg);
     text = w.text;
-    K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
+    K.protokoll.push(esc(o.label) + (o.probe ? (' — '+probeWort(p)) : ''));
   }
   ereignisWirkung(w);
   /* Eine Ereignisrunde ist eine Runde: Wer vorgetreten ist, hat nicht gekniet.
@@ -7806,6 +9118,7 @@ function zeigeKampf(text){
 function kampfAktion(id){
   const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
   const zw = S.zweig;
+  PROBE_ZULETZT = null;   // siehe `meister()` — der Faktor wird unten einmal gelegt
 
   if(id==='laden'){
     const p = probe('geschick', 30);
@@ -8195,6 +9508,18 @@ function kampfAktion(id){
      dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein
      Handel, sondern eine Lage. Ausgeglichen wird über kurze Runden und
      niedrige Feindmoral in den Daten. */
+  /* ── Können über der Klemme ──
+     **Hier wird das obere Ende der Skala erst etwas wert.** Die Probe klemmt
+     bei 95, also kaufen die letzten fünfzehn bis zwanzig Punkte einer
+     Fertigkeit keine Trefferchance mehr (siehe `probe()`). Was die Klemme
+     wegwirft, legt sich stattdessen auf die **Wirkung** — bis zu +50 %.
+
+     Es steht bewusst **vor** allen übrigen Faktoren und hinter keinem: Der
+     gelöste Zug, das Gelände und der Zustand der Kompanien sind Umstände,
+     das Können ist der Mann. Multiplikativ verrechnet ist die Reihenfolge
+     zwar gleichgültig — die Anordnung sagt trotzdem, was wovon abhängt. */
+  const meisterFaktor = meister(PROBE_ZULETZT);
+  if(schaden > 0) schaden *= meisterFaktor;
   let linie = (K.geloest || n.ueberfall) ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */
@@ -8764,9 +10089,18 @@ function kampfEnde(sieg, letzterText){
      Läufe beide Feldzüge — bei rund neun Treffern im ganzen Spiel wiegt jede
      geschenkte Genesung schwerer als der Schaden. Wer wieder auf die Beine
      will, verbringt einen Lagerabend oder eine Winterwoche damit. */
+  /* „Alte Narben": zwei statt einer. Der Feldscher wird dadurch nicht besser —
+     der Mann ist es. Wer schon dreimal zugenäht worden ist, hält still, weiß,
+     was er zeigen muss, und kommt an die Reihe, ehe der Karren voll ist.
+     Es bleibt die schwächste der fünf Gewohnheiten, weil sie nur greift, wenn
+     überhaupt zwei leichte Wunden offen sind — dafür greift sie in jedem
+     Kapitel und nicht nur in Frost oder Aderlass. */
   // Krankheiten kann er nicht: eine Ruhr näht man nicht zu (`!w.zehrt`)
-  const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
-  if(leicht>=0){ S.wunden.splice(leicht,1); atemKlemmen(); }   // der Vorrat wächst wieder
+  for(let i = zaeh('zaeh_narben') ? 2 : 1; i > 0; i--){
+    const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
+    if(leicht<0) break;
+    S.wunden.splice(leicht,1); atemKlemmen();                  // der Vorrat wächst wieder
+  }
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
 
   /* ══════════════════ DIE LEITER DER SICHTBARKEIT ══════════════════
@@ -9340,12 +10674,22 @@ function fehltWas(z){
    **Gebaut, bevor die Kapitel dafür stehen.** Eine Station setzt
    `schranke:'russland'` oder `'waterloo'`; die Prüfung liegt hier, damit
    Kapitel 8 und 10 später nur noch Daten anhängen müssen. */
+/* `endeArt` sagt, **wie** ein Lauf endet, der hier aufhört, und `wertung()`
+   rechnet danach (180 / 120 / 70 aus KONZEPT §5). Die beiden Schranken enden
+   verschieden, und das ist kein Zahlenspiel:
+
+   **Nach Russland ist es ein Ruhestand** — man hat zwanzig Jahre gedient, wird
+   ausgemustert, dankt ab und bekommt eine Pension. **Nach 1814 ist es
+   Halbsold** — die Armee wird aufgelöst, niemand dankt jemandem, und man
+   bekommt ein Papier, eine Zahl und eine Adresse. Sechzig Punkte weniger,
+   weil es das schlechtere Ende ist; und weil es das schlechtere ist, zieht
+   die zweite Schranke stärker zum Weitermachen als die erste. */
 const SCHRANKEN = {
-  russland:{rang:7, name:'Nach Russland', bonus:180,
+  russland:{rang:7, name:'Nach Russland', bonus:180, endeArt:'ruhestand',
     durch:'Von der Armee, die im Juni über den Njemen ging, kommen im Dezember dreißigtausend zurück. Du bist einer davon, und du bist Offizier — also wirst du gebraucht.',
     ende:'Die Listen werden neu geschrieben, und was kein Offizier ist, steht nicht mehr darauf. Man dankt dir, zahlt aus und schickt dich nach Hause.',
     epilog:'Du hast alles gesehen, was ein Mensch sehen kann, und gehst nach Hause. Dass du kein Offizier geworden bist, macht das nicht kleiner: Von hundert, die mit dir über den Njemen gingen, sind sechs zurückgekommen.'},
-  waterloo:{rang:10, name:'Vor Waterloo', bonus:120,
+  waterloo:{rang:10, name:'Vor Waterloo', bonus:120, endeArt:'halbsold',
     durch:'Er ruft die zurück, die er kennt. Du stehst auf der Liste, weil ein Regiment ohne dich nicht marschiert.',
     ende:'Die Armee wird aufgelöst, die Offiziere auf Halbsold gesetzt. Du bekommst ein Papier, eine Zahl und eine Adresse.',
     epilog:'Im März 1815 liest du in der Zeitung, dass er zurück ist. Du liest es zu Ende, faltest sie und legst sie weg. Es ist die vernünftigste Entscheidung deines Lebens, und du wirst sie dreißig Jahre lang bereuen.'}
@@ -9354,6 +10698,128 @@ const SCHRANKEN = {
 function schrankeGeschafft(id){
   const sch = SCHRANKEN[id];
   return !sch || S.rang >= sch.rang;
+}
+
+/* ══════════════════ DER BESCHEID ══════════════════
+
+   **Der Bogen sagt den Rang, bevor man ihn liest** (Bündel 3 des
+   Entwurfspakets). Ein Sergent bekommt ein Stück Feldpergament mit einer
+   Bruchkante und einer Unterschrift; ein Marschall ein Patent mit
+   vierundzwanzig Pixel Goldgeflecht, fünf Unterschriften und drei Siegeln.
+   Dazwischen kommt je Stufe genau eine Zutat dazu.
+
+   **Für die Ränge 1 bis 4 gibt es keinen Bescheid, und das ist Absicht:**
+   Dort wird nichts ausgestellt. Man bekommt zwei Wollstreifen an den Ärmel
+   und die Mitteilung, dass acht Mann jetzt einem gehören — auf ein Papier
+   ist das niemandem wert. Der erste Bogen kommt mit der Tresse. */
+function bescheidStufe(rang){
+  if(rang <= 5) return 'pergament';
+  if(rang === 6) return 'papier';
+  if(rang <= 8) return 'patent';
+  if(rang <= 10) return 'patent stufe2';
+  if(rang === 11) return 'patent stufe3';
+  if(rang === 12) return 'patent stufe4';
+  if(rang === 13) return 'patent stufe5';
+  return 'patent stufe6';
+}
+/* Wieviel Zierrat auf welcher Stufe. Eine Tabelle statt zehn Sonderfälle. */
+function bescheidMass(rang){
+  return {
+    siegel:  rang<=5 ? 0 : rang===6 ? 46 : rang<=8 ? 56 : rang<=10 ? 60 : rang===11 ? 66 : rang===12 ? 74 : rang===13 ? 80 : 92,
+    nebensiegel: rang>=14 ? 2 : 0,
+    unterschriften: rang<=6 ? 1 : rang<=8 ? 2 : rang<=13 ? 3 : 5,
+    titelband: rang>=11,
+    kugeln: rang>=14,
+    /* **Ab Rang 12 zeichnet der Kaiser selbst.** Der Patron rutscht dann in
+       die Gegenzeichnung — nicht weil er unwichtig würde, sondern weil über
+       einem Général de brigade nur noch einer steht. */
+    kaiser: rang>=12
+  };
+}
+/* Die Zeile über und unter dem Rangnamen. Sie steht hier und nicht in
+   `LEITER`, weil sie zum Bogen gehört und nicht zur Schwelle. */
+const BESCHEID_TEXT = {
+  5:['Ernennung zum Unteroffizier','Eine Tresse aus Metallfaden'],
+  6:['Ernennung zum Unteroffizier','Die zweite Tresse · der Zug von sechzig'],
+  7:['Patent eines Offiziers','Epauletten, ein Degen, und keine Muskete mehr'],
+  8:['Patent eines Offiziers','Die zweite Epaulette'],
+  9:['Patent eines Offiziers','Eine Kompanie von hundertzwanzig und ihre Kasse'],
+  10:['Ernennung im Namen des Kaisers','Ein Bataillon in vier Kompanien'],
+  11:['Ernennung im Namen des Kaisers','Ein Regiment und sein Adler'],
+  12:['Erhebung in den Generalsrang','Zwei Sterne · eine Brigade'],
+  13:['Erhebung in den Generalsrang','Drei Sterne · eine Division und eine Dotation'],
+  14:['Würde eines Marschalls des Kaiserreichs','Der Stab · sechsundzwanzig in zwölf Jahren']
+};
+
+/* Ein Feld auf dem Bogen: Bezeichnung in Mono, Wert in Handschrift. */
+function bescheidFeld(name, wert){
+  return `<div class="feldname">${esc(name)}</div><div class="feldwert hand" style="font-size:19px">${esc(wert)}</div>`;
+}
+
+function bescheidBogen(ziel, text, klasse, statuszeile){
+  const r = ziel.rang, m = bescheidMass(r), stufe = bescheidStufe(r);
+  const [kopf, zusatz] = BESCHEID_TEXT[r] || ['Ernennung',''];
+  const jahr = (String((KAPITEL[Math.max(0,LAUF.node-1)]||{}).datum||'').match(/1[78]\d\d/)||['1796'])[0];
+
+  /* Die Unterschriften. Die erste ist der Patron — ab Rang 12 der Kaiser,
+     und der Patron rückt eine Zeile tiefer. */
+  const namen = [];
+  if(m.kaiser){
+    namen.push({n:'Napoléon', a:'Empereur des Français', gross:true});
+    if(ziel.patron) namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+  } else if(ziel.patron){
+    namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+  }
+  const weitere = [
+    {n:'Delzons', a:'Colonel · 32ᵉ de ligne'},
+    {n:'Berthier', a:'Major général de la Grande Armée'},
+    {n:'Clarke',  a:'Ministre de la Guerre'},
+    {n:'Cambacérès', a:'Archichancelier de l\'Empire'}
+  ];
+  while(namen.length < m.unterschriften && weitere.length) namen.push(weitere.shift());
+  const unterschriften = namen.slice(0, m.unterschriften).map(u=>
+    `<div style="min-width:150px"><div class="hand" style="font-size:${u.gross?42:26}px;${u.gross?'transform:rotate(-3deg);transform-origin:left bottom;':''}">${esc(u.n)}</div>
+     <div class="unterschrift">${esc(u.a)}</div></div>`).join('');
+
+  const siegel = m.siegel ? `<div style="display:flex;gap:8px;align-items:flex-end">
+      ${Array.from({length:1+m.nebensiegel},(_,i)=>{
+        const gr = i===0 ? m.siegel : Math.round(m.siegel*0.55);
+        return `<div class="siegelrund" style="width:${gr}px;height:${gr}px;font-size:${Math.round(gr*0.42)}px${
+          r>=7?';box-shadow:0 0 0 2px var(--gold),0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35)':''}">${kaiserreich()?'N':'RF'}</div>`;
+      }).join('')}</div>` : '';
+
+  const kugeln = m.kugeln
+    ? [[6,6],[6,'auto'],['auto',6],['auto','auto']].map((_,i)=>{
+        const pos = ['top:5px;left:5px','bottom:5px;left:5px','top:5px;right:5px','bottom:5px;right:5px'][i];
+        return `<div class="goldkugel" style="${pos}"></div>`;
+      }).join('') : '';
+
+  const falten = stufe==='pergament'
+    ? `<div class="falte" style="left:33%;top:0;bottom:0;width:2px"></div>
+       <div class="falte" style="left:67%;top:0;bottom:0;width:2px"></div>
+       <div class="falte" style="top:48%;left:0;right:0;height:2px"></div>` : '';
+
+  const huelle = stufe==='pergament' ? 'pergamenthuelle' : (r>=7 ? 'patenthuelle' : '');
+  const inhalt = `<div class="card ${stufe}" style="position:relative;margin:0">
+      ${falten}${kugeln}
+      <div class="cb" style="padding:26px 30px 24px">
+        ${m.titelband?`<div class="titelband">Au nom de l'Empereur</div>`:''}
+        <div class="bescheidkopf">${esc(kopf)}</div>
+        <div class="bescheidrang">${esc(ziel.name)}</div>
+        <div class="bescheidzusatz">${esc(zusatz)}</div>
+        <div class="feldzeile" style="margin-bottom:16px">
+          ${bescheidFeld('Name', S.name)}
+          ${bescheidFeld('Einheit', '32ᵉ demi-brigade de bataille')}
+          ${bescheidFeld('Ausgefertigt', jahr)}
+        </div>
+        <div class="ergebnis ${klasse}" style="background:none;border-left:2px solid var(--gold-linie);padding-left:14px">${text}</div>
+        <div class="bescheidfuss">
+          <div style="display:flex;gap:26px;flex-wrap:wrap">${unterschriften}</div>
+          ${siegel}
+        </div>
+        <div class="probe" style="margin-top:16px">${statuszeile}</div>
+      </div></div>`;
+  return huelle ? `<div class="${huelle}" style="margin-bottom:18px">${inhalt}</div>` : inhalt;
 }
 
 function zeigeBefoerderung(n){
@@ -9437,13 +10903,26 @@ function zeigeBefoerderung(n){
          + `<br><br><em>${(nachsatz[fehlt] || nachsatz.fehltRuf)()}</em>`;
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
-  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card papier"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+  const statuszeile = `${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}`;
+
+  /* **Ein Bescheid wird nur ausgestellt, wenn es etwas zu bescheiden gibt** —
+     und erst ab Rang 5. Wer übergangen wird oder zwei Wollstreifen bekommt,
+     sieht den gewohnten Bogen: Über eine Ernennung, die nicht stattgefunden
+     hat, schreibt keine Kanzlei ein Papier. */
+  const mitBescheid = bekommt && ziel.rang >= 5;
+  const blatt = mitBescheid
+    ? bescheidBogen(ziel, text, klasse, statuszeile)
+    : `<div class="card papier"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${vordruck(n)}<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
       <div class="rangzeile" style="margin-top:12px">${bekommt?rangabzeichen(S):''}
-        <span class="probe" style="margin:0">${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</span></div>
-      </div></div>
+        <span class="probe" style="margin:0">${statuszeile}</span></div>
+      </div></div>`;
+
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    ${mitBescheid?`<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div></div></div>`:''}
+    ${blatt}
     <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
@@ -9537,7 +11016,15 @@ const LAGER_TUN = {
       if(krank>=0){
         const p = probe('konstitution', 35, true);   // ohne Übungseffekt, siehe probe()
         if(p.erfolg){ const w=S.wunden.splice(krank,1)[0]; atemKlemmen();
-          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden</span>`; }
+          /* **Was man überstanden hat, macht härter — aber nur, was man
+             wirklich überstanden hat.** Der Punkt hängt am Erfolg der Probe,
+             nicht am Zubettgehen; wer die Ruhr weiterschleppt, bekommt
+             nichts. Die Probe selbst läuft weiterhin mit `ohneUebung`, damit
+             nicht jeder Ruhe-Abend für sich schon Konstitution trainiert —
+             das wäre die alte Falle, in der ausgerechnet der Kranke seinen
+             Lebensvorrat übt. */
+          S.attr.konstitution = (S.attr.konstitution|0) + 1;
+          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden · Konstitution +1</span>`; }
         else zusatz = ' Das Fieber bleibt. Es wird bei Dunkelheit stärker, und es wird jede Nacht bei Dunkelheit stärker. <span class="fein">Krankheit hält an</span>';
       }
       // Erst die Krankheit weg, dann heilen — sonst heilt man gegen den kleineren Vorrat.
@@ -9576,7 +11063,7 @@ const LAGER_TUN = {
   rekruten:{label:'Die Rekruten für deine Sektion aussuchen',
     cost:'Menschenkenntnis · wer neben dir steht, entscheidet mit',
     tu(){ const p = probe('menschenkenntnis',40);
-      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 12 : -6);
+      guetePlus(p.erfolg ? 12 : -6);
       nutzen('autoritaet',1);
       return p.erfolg
         ? 'Du gehst die Neuen ab und siehst nicht auf die Schultern, sondern auf die Hände und auf die Augen. Zwei nimmst du, die niemand wollte, und einen Großen lässt du stehen. Man wird dich in vier Wochen dafür verstehen. <span class="fein">Deine Sektion wird besser</span>'
@@ -9585,7 +11072,7 @@ const LAGER_TUN = {
   sektion:{label:'Deine zwanzig Mann exerzieren lassen',
     cost:'Autorität und Drill · Ruf +1 · deine Sektion hält besser',
     tu(){ nutzen('autoritaet',2.5); nutzen('drill',2.5); S.ruf+=1;
-      S.sektionGuete = (S.sektionGuete||0) + 8;
+      guetePlus(8);
       return 'Zwanzig Mann in zwei Gliedern, Salve auf Kommando, vierzig Mal. Beim vierzigsten geht es gleichzeitig los, und das Geräusch ist ein einziges. Genau darum geht es: Zwanzig Musketen, die nacheinander knallen, sind Lärm. Zwanzig auf einmal sind eine Wand. <span class="fein">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'; }},
 
   tornister:{label:'Mit vollem Tornister auf den Hügel und zurück',
@@ -9611,7 +11098,7 @@ const LAGER_TUN = {
   zugfuehren:{label:'Deinen Zug selbst antreten lassen',
     cost:'Autorität und Taktik · dein Zug hält besser',
     tu(){ nutzen('autoritaet',2.5); nutzen('taktik',2);
-      S.sektionGuete = (S.sektionGuete||0) + 8;
+      guetePlus(8);
       S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+5);
       return 'Sechzig Mann, drei Sergenten, und die Sergenten machen die Arbeit. Deine besteht darin, dazustehen und an drei Stellen etwas zu sagen, das keiner der drei sagen könnte, ohne den anderen zu übergehen. <span class="fein">Autorität und Taktik steigen · dein Zug hält besser</span>'; }},
 
@@ -9971,7 +11458,7 @@ const WINTER_TUN = {
   ausbilden:{label:'Die Rekruten des Jahrgangs ausbilden', cost:'Autorität und Drill · deine Sektion wird besser',
     tu(){ const p = probe('autoritaet', 40);
       nutzen('autoritaet',3); nutzen('drill',3);
-      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 14 : 5);
+      guetePlus(p.erfolg ? 14 : 5);
       if(p.erfolg) S.ruf += 1;
       return p.erfolg
         ? 'Die Konskribierten des Jahrgangs XI sind achtzehn und haben noch nie einen Toten gesehen. Du hast vier Wochen, ihnen die zwölf Handgriffe beizubringen, und du nimmst dir acht. Danach laden sie im Schlaf. <span style="color:var(--faint)">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'
@@ -10304,7 +11791,7 @@ function zeigeSchranke(n){
   if(!durch){
     /* Ausgemustert. Kein Knopf, keine Wahl — die Listen werden neu
        geschrieben, und was kein Offizier ist, steht nicht mehr darauf. */
-    S.ende = 'ruhestand';
+    S.ende = sch.endeArt || 'ruhestand';
     schrankeEnde(n, prosa + `<p>${esc(sch.ende)}</p>`, sch.epilog);
     return;
   }
@@ -10313,14 +11800,14 @@ function zeigeSchranke(n){
       <div class="cb"><div class="prose">${prosa}</div>
         <div class="ergebnis gut">${esc(sch.durch)}</div>
         <div class="wirkung"><span>Was jetzt zur Wahl steht</span>
-          Du bist ${rangName(S.rang)}. Wer geht, bekommt <b>180 Punkte</b> und hört auf.
+          Du bist ${rangName(S.rang)}. Wer geht, bekommt <b>${sch.bonus} Punkte</b> und hört auf.
           Wer bleibt, behält alles, was er sich noch verdienen kann — und alles, was er verlieren kann.</div>
       </div></div>
       <div class="orders"><div class="ch"><span>Wie entscheidest du?</span></div><div class="ordbody">
         <button class="ord" onclick="schrankeWeiter()">Weitermarschieren
           <span class="cost">Der Krieg geht weiter, und er braucht dich · +70 am Ende</span></button>
         <button class="ord" onclick="schrankeGehen()">Den Abschied nehmen
-          <span class="cost">Ruhestand · +180 Punkte · die Laufbahn endet hier</span></button>
+          <span class="cost">${sch.endeArt==='halbsold'?'Halbsold':'Ruhestand'} · +${sch.bonus} Punkte · die Laufbahn endet hier</span></button>
       </div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
@@ -10330,6 +11817,25 @@ function zeigeSchranke(n){
 function schrankeWeiter(){
   const n = KAPITEL[LAUF.node];
   S.log.push((n.ort||'') + ': weitermarschiert');
+  /* **Eine Schranke am Kapitelende ist auch ein Übergang.** Wer weitergeht,
+     hat denselben Winter vor sich wie jeder andere zwischen zwei Feldzügen —
+     und ohne ihn überlebt niemand 1813, der aus Russland kommt: Er käme mit
+     vier Wunden und leerem Vorrat in ein Kapitel, das seine eigene Härte
+     hat, und stürbe an Borodino statt an Leipzig.
+
+     Die Dispatch-Reihenfolge in `naechster()` prüft `schranke` **vor**
+     `typ`, also läuft `zeigeUebergang()` hier nie. Deshalb steht die
+     Erholung an dieser Stelle noch einmal — mitsamt der Konstitution, denn
+     wer Russland überlebt hat, hat sie sich verdient wie sonst nur einer,
+     der einen ganzen Feldzug hinter sich hat. Reihenfolge wie dort: erst
+     der Zuwachs, dann auffüllen. */
+  if(n.typ === 'uebergang'){
+    S.attr.konstitution = (S.attr.konstitution|0) + 3;
+    S.wunden = [];
+    S.leben = lebenMax();
+    S.atem = 100; atemKlemmen();
+    S.belastung = Math.max(0, Math.floor(S.belastung/2));
+  }
   stationErledigt();
   naechster();
 }
@@ -10337,7 +11843,10 @@ function schrankeWeiter(){
 function schrankeGehen(){
   const n = KAPITEL[LAUF.node];
   const sch = SCHRANKEN[n.schranke] || {};
-  S.ende = 'ruhestand';
+  /* Wer freiwillig geht, geht auf demselben Weg wie der Ausgemusterte — nach
+     Russland in den Ruhestand, nach 1814 auf Halbsold. Der Unterschied liegt
+     nicht in der Art des Endes, sondern darin, dass man es gewählt hat. */
+  S.ende = sch.endeArt || 'ruhestand';
   S.log.push((n.ort||'') + ': den Abschied genommen');
   schrankeEnde(n, (n.text||[]).map(t=>`<p>${t}</p>`).join('') +
     `<p>Du meldest dich ab. Es geht schneller, als du gedacht hast — ein Formular, zwei Unterschriften, und der Adjutant sieht dabei nicht auf.</p>`,
@@ -10347,8 +11856,68 @@ function schrankeGehen(){
 /* Der gemeinsame Abschluss beider Wege. Wertung, Chronikeintrag, Titelrückkehr
    — dieselbe Maschine wie `zeigeKapitelende()`, nur mit einem anderen Satz
    darunter und ohne den Ausblick auf ein nächstes Kapitel. */
+/* ══════════════════ DER LEBENSEPILOG ══════════════════
+
+   **Das einzige Ende, das über den Tag hinaussieht.** Jedes andere hört auf,
+   wo der Mann aufhört — gefallen, ausgemustert, auf Halbsold. Dieses eine
+   sagt, was aus ihm geworden ist, und es sagt es in vier Zeilen, ohne zu
+   werten (Invariante 7).
+
+   **Was den Text bestimmt, ist der Rang und nicht der Sieg.** Waterloo ist
+   verloren, für alle gleich; was danach kommt, hängt davon ab, wie hoch man
+   stand, als es verloren ging. Ein Bataillonschef verschwindet in einer
+   Provinzstadt; ein Marschall steht auf einer Liste, die man später
+   Proskriptionen nennen wird.
+
+   Und wer den Rückruf abgelehnt hat, bekommt denselben Bogen mit einem
+   anderen Satz — **kein schlechteres Ende, ein anderes.** */
+const EPILOG_LEBEN = [
+  {ab:14, text:'Dein Name steht auf der Liste, die im Juli in der Zeitung erscheint. Zwei der sechsundzwanzig werden erschossen; du gehörst nicht dazu, und niemand hat dir je erklärt, warum. Du lebst noch dreißig Jahre, gibst keine Erinnerungen heraus und gehst nicht zu den Feiern. Als man dir 1840 einen Platz im Zug anbietet, der ihn zurückbringt, sagst du ab.'},
+  {ab:12, text:'Man setzt dich auf Halbsold und dann auf eine Liste. Du gehst nicht nach Amerika, obwohl es angeboten wird, sondern in eine Provinzstadt, in der niemand weiß, was ein Général ist. Vierundzwanzig Jahre später bekommst du einen Brief mit der Anrede, die du seit Waterloo nicht gelesen hast, und legst ihn weg, ohne ihn zu beantworten.'},
+  {ab:10, text:'Die Armee wird im Juli aufgelöst, und du wirst mit ihr aufgelöst: ein Papier, eine Zahl, eine Adresse. Du heiratest spät, arbeitest an etwas, das mit Krieg nichts zu tun hat, und erzählst deinen Kindern nichts. Sie erfahren es von einem Nachbarn, der auch dabei war.'},
+  {ab:7,  text:'Du bekommst Halbsold und eine Adresse, an die man ihn schickt. In den ersten Jahren kommt er unregelmäßig, dann gar nicht mehr, dann wieder. Du wirst alt, ohne dass jemand dich fragt, und einmal im Jahr, im Juni, gehst du früher schlafen als sonst.'},
+  {ab:1,  text:'Du gehst nach Hause, in ein Dorf, das kleiner ist, als du es in Erinnerung hattest. Man weiß dort, wo du warst, und fragt nicht nach. Nach ein paar Jahren fragt niemand mehr etwas, und das ist keine Kränkung, sondern nur die Zeit.'}
+];
+
+function zeigeEpilog(n){
+  const abgelehnt = !!S.abgelehnt;
+  /* Wer abgelehnt hat, bleibt auf Halbsold — er hat ihn ja nie verlassen.
+     Wer mitgegangen und lebendig geblieben ist, ebenso: 1815 gibt es keinen
+     Ruhestand mehr zu vergeben, es gibt nur noch Auflösung. */
+  S.ende = 'halbsold';
+  const leben = (EPILOG_LEBEN.find(e => S.rang >= e.ab) || EPILOG_LEBEN[EPILOG_LEBEN.length-1]).text;
+  const p = eintragen('Epilog · ' + rangName(S.rang));
+  const neu = p.rekord;
+
+  const prosa = abgelehnt
+    ? `<p>Der Feldzug findet ohne dich statt. Am 18. Juni bist du zu Hause, es regnet auch dort, und du erfährst es elf Tage später aus einer Zeitung.</p>
+       <p>Was du gelesen hast, hättest du selbst gesehen, wenn du im April zwei andere Sätze geschrieben hättest. Es steht nicht fest, ob es anders ausgegangen wäre. Es steht fest, dass du nicht dabei warst.</p>`
+    : (n.text||[]).map(t=>`<p>${t}</p>`).join('');
+
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card papier"><div class="ch"><span>${esc(n.ort||'Der Epilog')}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb">${vordruck(n)}
+        <div class="prose">${prosa}</div>
+        <div class="ergebnis" style="margin-top:16px">${leben}</div>
+        <div class="grid2" style="margin-top:18px">
+          <div>${wertungsTabelle(p)}</div>
+          <div class="note ${neu?'green':''}">
+            ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
+            <p style="margin-top:10px">Neunzehn Jahre, ${S.kapitel|0} Feldzüge, ${stationen()} Stationen. Von hundert, die 1796 in Savona angetreten sind, steht am Ende keiner mehr in der Liste — und du bist noch da.</p>
+          </div>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="plain" onclick="zeigeErschaffung(true)">Noch einmal, besser</button>
+          <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+          <button class="plain" onclick="speichern()">Spielstand sichern</button>
+        </div>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  LAUF=null; binde(); kopfzeile();
+}
+
 function schrankeEnde(n, prosa, epilog){
-  const p = eintragen('Ruhestand · '+rangName(S.rang));
+  const p = eintragen((S.ende==='halbsold'?'Halbsold · ':'Ruhestand · ')+rangName(S.rang));
   const neu = p.rekord;
   app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
     <div class="cb"><div class="prose">${prosa}</div>

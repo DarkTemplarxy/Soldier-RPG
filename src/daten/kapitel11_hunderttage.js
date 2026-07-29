@@ -144,7 +144,7 @@ const KAPITEL11 = [
         gelaende:'Bach, Dörfer aus Bruchstein, Hang dahinter · abends Gewitter',
         stellung:'Erstes Treffen, in Ligny'},
   intro:'Der letzte Sieg dieser Laufbahn. Man erkennt ihn nicht daran, dass er der letzte ist.',
-  runden:8,feindMoral:74,gefahr:15,gelaende:'damm',
+  runden:8,feindMoral:74,gefahr:10,gelaende:'damm',
   sieg:{text:'Um halb neun ist das Dorf euer und die preußische Mitte durchbrochen. Blücher wird unter seinem toten Pferd hervorgezogen und weggebracht; die Armee zieht in der Nacht ab.\\n\\nSie zieht nach **Norden** ab, nicht nach Osten. Das ist der ganze Unterschied dieses Feldzugs, und niemand auf dieser Seite bemerkt es bis übermorgen nachmittags um halb fünf.',ruf:12,ruhm:true},
   niederlage:{text:'Das Dorf wechselt sechsmal, und beim sechsten Mal steht ihr nicht mehr darin. Was durchbricht, ist um halb acht die Garde. Die preußische Armee zieht in der Nacht ab — nach Norden, was hier niemandem auffällt.',ruf:-4,belastung:14}},
 
@@ -186,7 +186,7 @@ const KAPITEL11 = [
         gelaende:'Ebene, ein Hohlweg, zwei ummauerte Güter, dahinter ein Höhenzug',
         stellung:'Erstes Treffen, gegen die Mitte'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Und ab halb fünf steht rechts von euch etwas, das dort nicht stehen sollte.',
-  runden:10,feindMoral:100,gefahr:17,gelaende:'mauer',
+  runden:10,feindMoral:100,gefahr:7,gelaende:'mauer',
   sieg:{text:'Gegen sieben Uhr geht die Garde den Hang hinauf, in zwei Kolonnen, zum ersten Mal in zwanzig Jahren gegen eine ungebrochene Linie. Sie kommt bis zwanzig Schritt an den Kamm.\\n\\nDann steht die britische Linie auf, die dahinter im Getreide gelegen hat, und feuert. Die Garde geht zurück, und jemand in der französischen Linie ruft die zwei Wörter, die diesen Krieg beenden.\\n\\nDu stehst da, wo du stehst, und was um dich herum passiert, ist keine Schlacht mehr.',ruf:14,ruhm:true},
   niederlage:{text:'Es ist um neun Uhr abends vorbei. Was auf der Straße nach Süden geht, ist keine Armee, und was die preußische Kavallerie in dieser Nacht einholt, bleibt liegen.\\n\\nDrei Karrees der alten Garde stehen bis zuletzt auf dem Feld und werden zusammengeschossen. Man sieht es aus der Entfernung, und es sieht aus wie etwas, das man später nicht erklären kann.',ruf:-4,belastung:20}},
 

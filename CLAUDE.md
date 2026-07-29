@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)** bis **Kapitel 9 (Deutschland 1813)** — neun Feldzüge, einhundertfünfunddreißig Stationen —, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **alle elf Kapitel** — Italien 1796/97 bis Waterloo 1815, einhundertsiebenundfünfzig Stationen —, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -160,6 +160,8 @@ src/daten/kapitel06_eylau.js    Kapitel 6 — der Winter schießt mit, Feindgüt
 src/daten/kapitel07_spanien.js  Kapitel 7 — kein Ruhm, nur Entscheidungen, Feindgüte 8
 src/daten/kapitel08_russland.js Kapitel 8 — ein Vorrat, der kleiner wird, Feindgüte 10
 src/daten/kapitel09_deutschland.js Kapitel 9 — deine Armee ist achtzehn, Feindgüte 10
+src/daten/kapitel10_frankreich.js Kapitel 10 — der Krieg kommt nach Hause, Feindgüte 11
+src/daten/kapitel11_hunderttage.js Kapitel 11 — alle wissen, wie es ausgeht, Feindgüte 12
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -549,11 +551,11 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 | Italien 1796/97 | **0** | | Spanien 1808–12 | **8** |
 | Ägypten 1798/99 | **5** | | Russland 1812 | **10** |
 | Garnison 1801–04 | **0** | | Deutschland 1813 | **10** |
-| Austerlitz 1805 | **6** | | Frankreich | 11 |
-| Jena–Auerstedt 1806 | **7** | | Hundert Tage | 12 |
+| Austerlitz 1805 | **6** | | Frankreich 1814 | **11** |
+| Jena–Auerstedt 1806 | **7** | | Hundert Tage 1815 | **12** |
 | Eylau & Friedland 1807 | **8** | | | |
 
-**Gebaut und am Hebel ausgelesen sind alle Werte bis Deutschland (10)** — nicht am Ergebnis geraten, sondern `feindGuete()` je Gefecht in eine Tabelle geschrieben, weil das stumme Güte-0-Leck die teuerste Lektion des Projekts war. Frankreich und Hundert Tage bleiben eine entworfene Kurve; wer eines dieser Kapitel baut, misst seine Güte neu, statt der Zahl zu glauben.
+**Gebaut und am Hebel ausgelesen sind alle elf Werte** — nicht am Ergebnis geraten, sondern `feindGuete()` je Gefecht in eine Tabelle geschrieben, weil das stumme Güte-0-Leck die teuerste Lektion des Projekts war. Keine Zahl ist mehr geraten.
 
 **Güte ist die Grundlinie einer Kampagne, `haerte` die Spitze eines einzelnen Gefechts.** Beide addieren sich: Akkon steht bei Gefahr 14 + 3 (Höhepunkt) + 5 (Güte) = **22**.
 
@@ -563,9 +565,9 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 
 | Auf der 22 stehen | |
 |---|---|
-| Akkon 1799 · Austerlitz 1805 · Jena 1806 · Friedland 1807 · Saragossa 1809 · Borodino und die Beresina 1812 | |
+| Akkon 1799 · Austerlitz 1805 · Jena 1806 · Friedland 1807 · Saragossa 1809 · Borodino und die Beresina 1812 · Leipzig und die Elsterbrücke 1813 · Montmirail und Laon 1814 · **Ligny und Waterloo 1815** | |
 
-> **Zweimal ist die Regel schon gebrochen worden, und beide Male beim Bau eines späten Kapitels.** Spaniens Überfälle waren mit 16–18 entworfen (wirksam 24–26), Russlands vier Gefechte standen bei 23, 27, 28 und **29**. Beide Male war die Ursache dieselbe: Der Entwurf nannte eine Zahl, die **vor der Güte** gedacht war, und niemand hat sie hinterher addiert. **Wer ein Kapitel baut, liest `feindGuete()` je Gefecht aus, bevor er die erste Balance-Messung startet** — die Rechnung im Kopf hat zweimal versagt.
+> **Viermal ist die Regel schon gebrochen worden, und jedes Mal beim Bau eines späten Kapitels.** Spaniens Überfälle waren mit 16–18 entworfen (wirksam 24–26), Russlands vier Gefechte standen bei 23, 27, 28 und **29**. Beide Male war die Ursache dieselbe: Der Entwurf nannte eine Zahl, die **vor der Güte** gedacht war, und niemand hat sie hinterher addiert. **Wer ein Kapitel baut, liest `feindGuete()` je Gefecht aus, bevor er die erste Balance-Messung startet** — die Rechnung im Kopf hat zweimal versagt.
 >
 > **Und die Reparatur ist nie, die Decke anzuheben.** Was ein spätes Kapitel hart macht, kommt aus seiner eigenen Regel: der Frost, der Überfall, der Aderlass, der doppelte Verschleiß — oder, wie bei Borodino, aus der **Länge** des Gefechts statt aus seiner Trefferchance.
 
@@ -832,6 +834,26 @@ Die Leiter der Sichtbarkeit bleibt auf ihrer untersten Stufe stehen: **Lob vor d
 Russlands Schlussstation trägt jetzt `typ:'uebergang'` **und** `schranke:'russland'`. Die Dispatch-Reihenfolge in `naechster()` prüft `schranke` **vor** `typ`, also läuft `zeigeUebergang()` dort nie — die Erholung steht deshalb ein zweites Mal in `schrankeWeiter()`.
 
 > **Ohne sie überlebt niemand 1813, der aus Russland kommt.** Er käme mit vier Wunden und leerem Vorrat in ein Kapitel, das seine eigene Härte hat, und stürbe an Borodino statt an Leipzig. Die Konstitution +3 gibt es dort mit — wer Russland überlebt hat, hat sie sich verdient wie sonst nur einer, der einen ganzen Feldzug hinter sich hat.
+
+### Kapitel 10 und 11 — der Krieg kommt nach Hause
+
+**Kapitel 10 (Frankreich 1814):** *Du verteidigst dein eigenes Land, und es will dich nicht mehr.* Dreizehn Stationen, fünf Gefechte (20–22), Feindgüte 11, Sold-Moral 0,2, `rekruten:20`. Zwei Linien nebeneinander — militärisch das Meisterstück des Sechs-Tage-Feldzugs, menschlich die Auflösung: Die Bauern verstecken das Korn vor der eigenen Armee.
+
+**Kapitel 11 (Die Hundert Tage 1815):** *Alle wissen, wie es ausgeht. Die Figuren nicht.* Neun Stationen, zwei Gefechte, Feindgüte 12, Sold-Moral **1,0** — Napoleon zahlt sofort und bar, und es ist das Geld eines Mannes, der keine zweite Chance bekommt. Waterloo steht bei Runden 10 und Feindmoral **100**, dem höchsten Wert des Spiels; seine Härte liegt in der Länge, nicht in der Trefferchance (Gefahr 7 + 3 + 12 = 22).
+
+### Die Ablehnung — die letzte Entscheidung, die einem ganz gehört
+
+Der Rückruf im April 1815 hat zwei Knöpfe, und **beide führen zu einem vollwertigen Ende.** Wer ablehnt, setzt `S.abgelehnt` und geht direkt in den Epilog — kein Gefecht, kein Zwischenfall, keine halbe Wertung.
+
+> **Die Prüfung steht ganz oben in `naechster()`, vor allem anderen.** Die erste Fassung stand weiter unten in der Kette, hinter `typ==='szene'` — und traf deshalb **nie**, weil auf den Brief eine Szene folgt. Ein Mann, der zu Hause bleibt, darf auch keinem Marsch-Zwischenfall begegnen auf einem Marsch, den er nicht mitmacht.
+
+### Der Lebensepilog (`epilog:true`, `zeigeEpilog()` in `src/abschluss.js`)
+
+**Das einzige Ende, das über den Tag hinaussieht.** Jedes andere hört auf, wo der Mann aufhört — gefallen, ausgemustert, auf Halbsold. Dieses sagt, was aus ihm geworden ist, in vier Zeilen und ohne zu werten.
+
+**Was den Text bestimmt, ist der Rang und nicht der Sieg.** Waterloo ist verloren, für alle gleich; was danach kommt, hängt davon ab, wie hoch man stand, als es verloren ging — fünf Stufen von „ein Dorf, das kleiner ist, als du es in Erinnerung hattest" bis zur Liste, die man später Proskriptionen nennen wird. Wer abgelehnt hat, bekommt denselben Bogen mit einem anderen Satz: **kein schlechteres Ende, ein anderes.**
+
+Gemessen: Colonel **678**, Marschall **928 Punkte** — damit ist die volle Skala aus KONZEPT §5 (Maximum 918) zum ersten Mal ausgeschöpft und sogar leicht überschritten.
 
 ### Rang 6 — Sergent-major und der Zug
 
@@ -1892,9 +1914,8 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 ## Was als Nächstes ansteht
 
-1. **Kapitel 10 und 11** (Frankreich 1814, Die Hundert Tage 1815). Die Datendateien liegen, eingehängt sind sie nicht — beiden fehlt noch ein System: **die zweite Schranke mit dem Halbsold** (10), **der Rückruf mit einer echten Ablehnung und der Lebensepilog** (11).
+1. **Die Layoutüberarbeitung zu Ende bringen** — Bündel 4 (Rangabzeichen) und 3 (Bescheide) stehen; offen sind **Bündel 1** (Stationsbogen), **Bündel 2** (Schlachtscreen) und **Bündel 5** (Orden und Tapferkeitsmedaillen).
 2. **Die höheren Ordensgrade** (Commandeur ab 1809, Grand Officier). Sie sind in KONZEPT §6 vollständig entworfen; Rang 13 fordert bereits einen Grad, den es nicht gibt.
-3. **Die Layoutüberarbeitung** nach dem Entwurfspaket — Rangabzeichen für alle vierzehn Ränge, Beförderungsbescheide in zehn Graden, der Stationsbogen als ein Blatt. **Drei unverrückbare Regeln:** keine Bilddatei, keine Schriftdatei, klassische Skripte.
 4. **Alles, was in `OFFEN.md` steht** — allen voran die flache Überlebensprogression (Punkt 1).
 
 > **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen, und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `höchster Rang` neu gesetzt. Beides steht oben unter „Balance-Konstanten".

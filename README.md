@@ -39,7 +39,7 @@ Historische Fixpunkte, dazwischen freies Spiel: Montenotte, die Brücke von Lodi
 
 ## Stand
 
-**Neun Feldzüge sind spielbar** — Italien 1796/97, Ägypten 1798/99, die Garnison von Nîmes 1801–04, Austerlitz 1805, Jena–Auerstedt 1806, Eylau–Friedland 1807, Spanien 1808–12, Russland 1812 und Deutschland 1813, zusammen einhundertfünfunddreißig Stationen, vierunddreißig Gefechte, Lager, Winterquartiere und fünf Saisons.
+**Alle elf Feldzüge sind spielbar** — Italien 1796/97, Ägypten 1798/99, die Garnison von Nîmes 1801–04, Austerlitz 1805, Jena–Auerstedt 1806, Eylau–Friedland 1807, Spanien 1808–12, Russland 1812, Deutschland 1813, Frankreich 1814 und die Hundert Tage 1815, zusammen einhundertsiebenundfünfzig Stationen, einundvierzig Gefechte, Lager, Winterquartiere und fünf Saisons.
 
 Italien ist das Lehrstück: barfuß über die Pässe, die Brücke von Lodi, der Sumpf von Arcole. Ägypten ist etwas anderes — dort töten die Wege mehr Männer als die Gefechte. Hitzschlag im Marsch auf Damanhur, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Akkon fällt nicht, so wie es 1799 nicht gefallen ist, und nach Abukir liegt die Flotte auf dem Meeresgrund: Es gibt keinen Weg mehr nach Hause. Dann drei Jahre Frieden, in denen der Feind nicht die Kugel ist, sondern die Zeit — und danach Austerlitz, wo geprüft wird, was in diesen drei Jahren gelernt wurde.
 
@@ -53,6 +53,8 @@ Und 1808 kippt es. **In Spanien gibt es keinen Ruhm — nur Entscheidungen, bei 
 
 1813 kehrt der Krieg als etwas Neues zurück: **Deine Armee ist achtzehn Jahre alt.** Die alte liegt in Russland, und was am Rhein antritt, sind Konskribierte, die die Muskete zum ersten Mal halten, als man sie ihnen aushändigt. Deine Leute treten nicht mit voller Zahl an, sondern mit dem, was von einem Verband übrig ist, den es vor sechs Wochen noch nicht gab — und keine einzige Gefahr-Zahl ist dafür angehoben worden: Der Feind schießt nicht besser, deine Leute halten schlechter. Der Exerzierplatz wird damit zum eigentlichen Spiel, und der Drill zahlt hier doppelt. Es ist derselbe Drill wie in Savona 1796, nur stehst du auf der anderen Seite, und die Gesichter vor dir sind das eigene von damals. Das Kapitel sagt das genau einmal, in einem Nebensatz.
 
+1814 kommt der Krieg nach Hause, und das Land will ihn nicht: Die Bauern verstecken das Korn vor der eigenen Armee, die Präfekten verhandeln schon. Und 1815 steht am Anfang ein Brief. **Der Rückruf ist eine echte Wahl** — wer ablehnt, bekommt kein schlechteres Ende, sondern ein anderes: Man liest es elf Tage später in der Zeitung, faltet sie und legt sie weg. Wer annimmt, steht bei Waterloo, und **danach kommt zum ersten Mal ein Epilog, der über den Tag hinaussieht** und sagt, was aus dem Mann geworden ist — bestimmt vom Rang, nicht vom Ausgang. Verloren haben alle.
+
 Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000 km über See und durch die Wüste, jede Station mit Entfernung und Dauer. Vor jedem Gefecht steht der Anmarsch — der Nachtmarsch im Regen, die vier Stunden Warten in den Gassen von Lodi, die Lagemeldung und das, womit du dastehst. In den Lagern entscheidest du, was du mit den zwei oder drei Abenden anfängst: exerzieren, scharf schießen, die Schuhe zum Schuster tragen, die Muskete ölen, schlafen. Es ist immer mehr zu tun als Zeit da ist.
 
 **Die Rangleiter steht ganz — alle vierzehn Ränge, und jeder spielt sich anders.** Der Fusilier steuert seinen Körper, der Caporal acht Männer, der Sergent eine Sektion von zwanzig, der Sergent-major einen Zug von sechzig. Beim Patent zum Sous-Lieutenant wird die Muskete eingezogen: Laden und Feuern verschwinden ersatzlos, an ihre Stelle treten Befehle, und aus dem Gefechtsbild wird eine Handskizze mit einem gestrichelten Feind. Ab dem Capitaine hat jedes Gefecht zwei Ziele, von denen nur eines der Sieg ist, und im Schrank liegt das Geld, mit dem hundertzwanzig Männer Schuhe bekommen sollen.
@@ -61,9 +63,9 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000
 
 **Und du kommst dorthin.** Wer einmal Sergent-major war, kann sich beim nächsten Mann ein **Offizierspatent** kaufen: Er rückt 1796 in Savona mit Epauletten ein, hat nie eine Muskete abgefeuert, und niemand in der Kompanie kennt ihn. Martel, Collot, Berthaud und Vernet stehen bei null, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen. Er ist mechanisch stärker und sozial nackt — und er überlebt in acht von hundert Läufen. Der Kauf erhöht auch nie den Punktevorrat; er zeigt dir die andere Hälfte des Spiels, mehr nicht.
 
-Entworfen, aber noch nicht gebaut: die Kapitel 10 und 11 (Frankreich 1814, Waterloo) und die Generalskampagnen als eigene Szenarien. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
+Entworfen, aber noch nicht gebaut: die Generalskampagnen als eigene Szenarien. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
 
-Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat einhundertfünfunddreißig Stationen hinter sich — und immer noch zwei Feldzüge vor sich.
+Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat einhundertsiebenundfünfzig Stationen und neunzehn Jahre hinter sich — und einen Epilog, der sagt, was aus ihm geworden ist.
 
 ---
 

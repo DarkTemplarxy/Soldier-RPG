@@ -925,6 +925,66 @@ function schrankeGehen(){
 /* Der gemeinsame Abschluss beider Wege. Wertung, Chronikeintrag, Titelrückkehr
    — dieselbe Maschine wie `zeigeKapitelende()`, nur mit einem anderen Satz
    darunter und ohne den Ausblick auf ein nächstes Kapitel. */
+/* ══════════════════ DER LEBENSEPILOG ══════════════════
+
+   **Das einzige Ende, das über den Tag hinaussieht.** Jedes andere hört auf,
+   wo der Mann aufhört — gefallen, ausgemustert, auf Halbsold. Dieses eine
+   sagt, was aus ihm geworden ist, und es sagt es in vier Zeilen, ohne zu
+   werten (Invariante 7).
+
+   **Was den Text bestimmt, ist der Rang und nicht der Sieg.** Waterloo ist
+   verloren, für alle gleich; was danach kommt, hängt davon ab, wie hoch man
+   stand, als es verloren ging. Ein Bataillonschef verschwindet in einer
+   Provinzstadt; ein Marschall steht auf einer Liste, die man später
+   Proskriptionen nennen wird.
+
+   Und wer den Rückruf abgelehnt hat, bekommt denselben Bogen mit einem
+   anderen Satz — **kein schlechteres Ende, ein anderes.** */
+const EPILOG_LEBEN = [
+  {ab:14, text:'Dein Name steht auf der Liste, die im Juli in der Zeitung erscheint. Zwei der sechsundzwanzig werden erschossen; du gehörst nicht dazu, und niemand hat dir je erklärt, warum. Du lebst noch dreißig Jahre, gibst keine Erinnerungen heraus und gehst nicht zu den Feiern. Als man dir 1840 einen Platz im Zug anbietet, der ihn zurückbringt, sagst du ab.'},
+  {ab:12, text:'Man setzt dich auf Halbsold und dann auf eine Liste. Du gehst nicht nach Amerika, obwohl es angeboten wird, sondern in eine Provinzstadt, in der niemand weiß, was ein Général ist. Vierundzwanzig Jahre später bekommst du einen Brief mit der Anrede, die du seit Waterloo nicht gelesen hast, und legst ihn weg, ohne ihn zu beantworten.'},
+  {ab:10, text:'Die Armee wird im Juli aufgelöst, und du wirst mit ihr aufgelöst: ein Papier, eine Zahl, eine Adresse. Du heiratest spät, arbeitest an etwas, das mit Krieg nichts zu tun hat, und erzählst deinen Kindern nichts. Sie erfahren es von einem Nachbarn, der auch dabei war.'},
+  {ab:7,  text:'Du bekommst Halbsold und eine Adresse, an die man ihn schickt. In den ersten Jahren kommt er unregelmäßig, dann gar nicht mehr, dann wieder. Du wirst alt, ohne dass jemand dich fragt, und einmal im Jahr, im Juni, gehst du früher schlafen als sonst.'},
+  {ab:1,  text:'Du gehst nach Hause, in ein Dorf, das kleiner ist, als du es in Erinnerung hattest. Man weiß dort, wo du warst, und fragt nicht nach. Nach ein paar Jahren fragt niemand mehr etwas, und das ist keine Kränkung, sondern nur die Zeit.'}
+];
+
+function zeigeEpilog(n){
+  const abgelehnt = !!S.abgelehnt;
+  /* Wer abgelehnt hat, bleibt auf Halbsold — er hat ihn ja nie verlassen.
+     Wer mitgegangen und lebendig geblieben ist, ebenso: 1815 gibt es keinen
+     Ruhestand mehr zu vergeben, es gibt nur noch Auflösung. */
+  S.ende = 'halbsold';
+  const leben = (EPILOG_LEBEN.find(e => S.rang >= e.ab) || EPILOG_LEBEN[EPILOG_LEBEN.length-1]).text;
+  const p = eintragen('Epilog · ' + rangName(S.rang));
+  const neu = p.rekord;
+
+  const prosa = abgelehnt
+    ? `<p>Der Feldzug findet ohne dich statt. Am 18. Juni bist du zu Hause, es regnet auch dort, und du erfährst es elf Tage später aus einer Zeitung.</p>
+       <p>Was du gelesen hast, hättest du selbst gesehen, wenn du im April zwei andere Sätze geschrieben hättest. Es steht nicht fest, ob es anders ausgegangen wäre. Es steht fest, dass du nicht dabei warst.</p>`
+    : (n.text||[]).map(t=>`<p>${t}</p>`).join('');
+
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card papier"><div class="ch"><span>${esc(n.ort||'Der Epilog')}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb">${vordruck(n)}
+        <div class="prose">${prosa}</div>
+        <div class="ergebnis" style="margin-top:16px">${leben}</div>
+        <div class="grid2" style="margin-top:18px">
+          <div>${wertungsTabelle(p)}</div>
+          <div class="note ${neu?'green':''}">
+            ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
+            <p style="margin-top:10px">Neunzehn Jahre, ${S.kapitel|0} Feldzüge, ${stationen()} Stationen. Von hundert, die 1796 in Savona angetreten sind, steht am Ende keiner mehr in der Liste — und du bist noch da.</p>
+          </div>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="plain" onclick="zeigeErschaffung(true)">Noch einmal, besser</button>
+          <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+          <button class="plain" onclick="speichern()">Spielstand sichern</button>
+        </div>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  LAUF=null; binde(); kopfzeile();
+}
+
 function schrankeEnde(n, prosa, epilog){
   const p = eintragen((S.ende==='halbsold'?'Halbsold · ':'Ruhestand · ')+rangName(S.rang));
   const neu = p.rekord;

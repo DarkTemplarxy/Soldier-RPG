@@ -241,7 +241,13 @@ async function haerteLauf(b, rang) {
       const t = await p.$eval('#app', e => e.innerText);
       if (t.includes('Nächster Mann')) { ende = 'gestorben'; break; }
       if (t.includes('Noch einmal, besser')) { ende = 'Kapitel zu Ende'; break; }
-      if (/RUNDE |PHASE |STUNDE |TAG /.test(t)) {
+      /* **Die Rundenzeile, nicht irgendein Wort.** Die frühere Prüfung suchte
+         nach `RUNDE |PHASE |STUNDE |TAG ` im ganzen Bildschirmtext — und die
+         Station „Der Tag des Regens" (1815) steht als Kartenkopf in
+         Großbuchstaben da, also traf `TAG `. Vier Ränge meldeten daraufhin ein
+         falsches Gefechtsbild in einer Szene, in der es gar kein Gefecht gibt.
+         Gesucht wird jetzt die vollständige Zeile `<ZEIT> n VON m`. */
+      if (/(RUNDE|PHASE|STUNDE|TAG) \d+ VON \d+/.test(t)) {
         const bild = await p.evaluate(() =>
           document.querySelector('svg[aria-label="Operationskarte"]') ? 'karte'
           : document.querySelector('svg[aria-label="Das Bataillon in vier Kompanien"]') ? 'rechtecke'

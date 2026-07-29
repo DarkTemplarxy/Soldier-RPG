@@ -293,7 +293,7 @@ const KAPITEL10 = [
        kameradschaft:-6,belastung:10}}
   ]},
 
-/* 148 */ {typ:'ende',id:'ende_frankreich',datum:'Mai 1814 · Irgendwo in Frankreich',ort:'Halbsold',
+/* 148 */ {typ:'uebergang',id:'ende_frankreich',datum:'Mai 1814 · Irgendwo in Frankreich',ort:'Halbsold',
   schranke:'waterloo',
   text:[
     'Die Armee wird aufgelöst. Aus sechshunderttausend werden zweihunderttausend, und aus zweihunderttausend werden Papiere: Entlassungsscheine, Halbsoldlisten, Wohnorte.',
@@ -301,7 +301,7 @@ const KAPITEL10 = [
     'Die Offiziere der kaiserlichen Armee werden auf Halbsold gesetzt. Man bekommt ein Papier, eine Zahl und eine Adresse, an die man sich vierteljährlich zu wenden hat.',
     'Es ist Mai, es ist Frieden, und es ist zum ersten Mal seit achtzehn Jahren nicht die Frage, wohin marschiert wird, sondern wohin man geht.'
   ],
-  ausblick:'<b>Hier endet der gebaute Stand.</b> Am 1. März 1815 landet ein Mann mit siebenhundert Grenadieren bei Golfe-Juan. Zwanzig Tage später ist er in Paris, ohne dass ein Schuss gefallen wäre. Wer 1814 auf Halbsold gesetzt worden ist, bekommt in diesen Wochen einen Brief.'}
+  ausblick:'Am 1. März 1815 landet ein Mann mit siebenhundert Grenadieren bei Golfe-Juan. Zwanzig Tage später ist er in Paris, ohne dass ein Schuss gefallen wäre. Wer 1814 auf Halbsold gesetzt worden ist, bekommt in diesen Wochen einen Brief.'}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

@@ -1277,6 +1277,21 @@ function naechster(){
   /* Das Tempo wird vor dem Marsch gewählt, nicht auf ihm — also vor dem
      Zwischenfall-Wurf, aber nach einer noch offenen Frage von vorhin. */
   if(n.tempo && LAUF.tempo !== n.id){ zeigeTempo(n); return; }
+  /* ── Wer den Rückruf abgelehnt hat, marschiert nicht mit ──
+     **Ganz oben, vor allem anderen.** Die Ablehnung im April 1815 ist eine
+     echte Wahl mit einem vollwertigen Ende, kein schlechteres — deshalb
+     überspringt sie alles, was noch käme, und geht direkt in den Epilog. Ein
+     Mann, der zu Hause bleibt, steht nicht bei Ligny und begegnet auch keinem
+     Zwischenfall auf einem Marsch, den er nicht mitmacht.
+
+     Die erste Fassung stand weiter unten in der Kette, hinter `typ==='szene'`
+     — und traf deshalb nie, weil auf den Brief eine Szene folgt. */
+  if(S && S.abgelehnt && !n.epilog){
+    const i = KAPITEL.findIndex(x=>x.epilog);
+    if(i >= 0 && LAUF.node !== i){ LAUF.node = i; laufSichern(); naechster(); return; }
+    zeigeEpilog(KAPITEL[i] || n); return;
+  }
+
   /* Gewürfelt wird auf Stationen mit Marschweg — und seit Kapitel 3 auch auf
      solchen, die es ausdrücklich anfordern (`zwischenfall:true`). In einer
      Garnison marschiert niemand, und ohne diese zweite Tür hätten die vier
@@ -1304,6 +1319,7 @@ function naechster(){
     else if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.');
     else starteKampf(n);
   }
+  else if(n.epilog) zeigeEpilog(n);
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
