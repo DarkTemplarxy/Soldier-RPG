@@ -359,9 +359,39 @@ Leben ≤ 0 → Tod
 
 ### Charaktererschaffung (`src/oberflaeche.js`, `src/daten/grundwerte.js`)
 
-- Sockel **20** auf allen sechs Attributen, Verteilungspool **60** (bis 28.07.2026: 120), Höchstwert bei Erschaffung **70**. Der Schritt ist 10, also muss der Pool durch 10 teilbar sein — sonst lässt er sich nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
-- **Bildung ist vom Pool ausgenommen** und bleibt bei 20 — man kann nicht lesen.
-- Alle neun Fertigkeiten starten bei **10**.
+- Sockel **15** auf den Attributen (bis 29.07.2026: 20), Verteilungspool **60** (bis 28.07.2026: 120), Höchstwert bei Erschaffung **70**. **Der Schritt ist 5**, also muss der Pool durch 5 teilbar sein — sonst lässt er sich nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
+- **Bildung ist vom Pool ausgenommen** und bleibt bei **20** — man kann nicht lesen. Sie ist auch beim Sockel die Ausnahme (`BILDUNG_SOCKEL`), siehe unten.
+- Alle neun Fertigkeiten starten bei **5** (bis 29.07.2026: 10).
+
+> **Sockel und Schritt gehören zusammen, und der Schritt musste zuerst fallen.** Von 15 aus ist die 70 in Zehnerschritten nicht erreichbar (15 + 50 = 65, 15 + 60 = 75). Mit 5 geht 15 + 55 = 70 exakt auf, und **beide Hälften der Erschaffung schreiten jetzt gleich** — `PUNKT_SCHRITT` für die Veteranenpunkte stand ohnehin schon auf 5.
+>
+> **Wozu der tiefere Sockel:** Ein Erstlauf-Mann soll früher sterben, damit der Veteran länger lebt. Nebenwirkung, die Absicht ist: Die Wachstumsformel gibt bei niedrigen Werten am meisten (`1,7 × Intensität × (100 − Wert)/100`), ein tieferer Sockel verlängert also zugleich die Strecke, auf der ein Mann sich noch verbessern kann. Das ist die Gegenseite zur wachsenden Konstitution.
+>
+> **Bildung bleibt bei 20, und das ist keine Ausnahme aus Bequemlichkeit.** Sie ist schon immer vom Pool ausgenommen, weil sie kein körperlicher Ausgangspunkt ist, sondern eine soziale Tatsache, und sie hat einen eigenen Weg über die Regimentsschule. Sie mitabzusenken träfe die **Rangleiter** (Fourrier braucht 35, Rang 7 braucht 50) statt der Überlebensfähigkeit — und darum geht es beim Sockel nicht.
+>
+> **Der Sollwert dafür ist Italien** *(gesetzt vom Entwickler, 29.07.2026)*: Das Lehrstück darf töten, aber **nicht mehr als 20 % im Erstlauf**. Fällt „Italien überstanden" unter 80 %, ist der Sockel zu tief. Die Zahl war als Leitzahl gestrichen worden, weil sie bei 98–100 % nichts mehr trennte; als **Abbruchkriterium** für den Sockel ist sie genau richtig.
+
+### Konstitution wächst im Lauf — und darf über 100
+
+**Der einzige Ort im Spiel, an dem ein Attribut wächst, ohne dass man etwas dafür gedrückt hat.** Er ist trotzdem verdient, denn die Bedingung ist die härteste, die es gibt: einen ganzen Feldzug überlebt zu haben.
+
+| Wo | Wieviel |
+|---|---|
+| **Am `uebergang`** zwischen zwei Feldzügen (`zeigeUebergang()`) | **+3** — sieben Übergänge sind +21 über eine volle Laufbahn |
+| **Nach überstandener Krankheit** im Lager (`abschluss.js`, nur im Erfolgszweig) | **+1** |
+
+**Gebaut gegen den schärfsten gemessenen Befund des Projekts:** Veteranenpunkte kaufen Rang und keine Strecke. Jede Progression, die über bessere Werte läuft, endet in der Ruf-Kette und damit in den Offiziersrängen mit ihren +4 bis +5 Gefahr. Diese hier läuft über die **Strecke** — man bekommt sie nur, indem man ankommt, und +21 Konstitution sind rund dreizehn Lebenspunkte.
+
+**Der Deckel bei 100 fällt — aber nur für die Konstitution und nur in `anwenden()`.** Die Asymmetrie ist keine Bequemlichkeit, sondern folgt aus zwei Formeln:
+
+| | Warum |
+|---|---|
+| **Nur Konstitution** | Sie ist der einzige Wert, der in etwas Ungeklemmtes zahlt (`lebenMax = 40 + 0,6 × roh`, linear). Bei jedem anderen Attribut wäre die 100 ohnehin tote Währung, weil die Probe bei 95 klemmt: Gegen die üblichen Schwierigkeiten 35–50 sind 85 und 100 **dieselbe Zahl** |
+| **Nur `anwenden()`, nicht `nutzen()`** | Die Wachstumsformel `(100 − Wert)/100` wird über 100 **negativ** — natürliches Üben ist dort undefiniert. **Drill plateauiert bei 100, ein Krieg nicht.** Was darüber hinausgeht, kommt ausschließlich aus überstandenen Feldzügen |
+
+> **Reihenfolge-Falle, dieselbe wie damals bei den Wunden:** Der Zuwachs steht **vor** dem Auffüllen. `lebenMax()` hängt an der Konstitution; wer davor auffüllt, füllt gegen den kleineren Vorrat.
+
+> **Was ausdrücklich nicht gebaut ist: Konstitution, die von allein je Station steigt.** Der Präzedenzfall steht mit Messwert im Abschnitt „Atem erholt sich nicht von allein" — die selbsttätige Erholung war gebaut, senkte „Kapitel 1 überstanden" von 48 auf 41 % und trieb den Caporal-Anteil von 28 auf 42 %, womit die gerade eingestellte Schwelle hinfällig war. Dazu Invariante 4: Eine Zahl, die steigt, während man nichts tut, ist ihr Gegenteil.
 - **Jede Herkunft verteilt exakt 50 Punkte netto**, nur anders gewichtet, teils mit Abzügen. Keine ist stärker. Wer eine neue Herkunft hinzufügt, hält die 50 ein.
 - **Die Obergrenze 70 gilt für den Pool und für den Veteranenpunkte-Kauf, nicht für die Herkunft.** Ein Bauernsohn darf mit Konstitution 90 anfangen — seit den Lebenspunkten ist das kein Exploit mehr, sondern zwölf Prozent mehr Zähigkeit (Exploit 2 unten).
 

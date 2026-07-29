@@ -437,11 +437,13 @@ wirken erst beim Nachschlagen, nicht auf den gespeicherten Wert.</p>
 Fouragieren · Feldchirurgie</p>
 
 <h3>Die Startverteilung</h3>
-<pre><code>const POOL = 60, SOCKEL = 20, MAXE = 70;</code></pre>
+<pre><code>const POOL = 60, SOCKEL = 15, MAXE = 70, ERSCH_SCHRITT = 5;
+const BILDUNG_SOCKEL = 20;</code></pre>
 <ul>
-<li>Sockel <b>20</b> auf allen Attributen, <b>60</b> Punkte frei zu verteilen in Zehnerschritten, Deckel 70.</li>
-<li><b>Bildung ist vom Pool ausgenommen</b> und bleibt bei 20 — sie muss im Spiel erarbeitet werden.</li>
-<li>Alle neun Fertigkeiten starten bei 10.</li>
+<li>Sockel <b>15</b> auf allen Attributen, <b>60</b> Punkte frei zu verteilen in <b>Fünferschritten</b>, Deckel 70. <i>Der Schritt musste zuerst von 10 auf 5 fallen: Von 15 aus ist die 70 in Zehnerschritten nicht erreichbar.</i></li>
+<li><b>Bildung ist vom Pool ausgenommen</b> und bleibt bei <b>20</b> — sie muss im Spiel erarbeitet werden, und sie ist auch beim Sockel die Ausnahme: Sie abzusenken träfe die Rangleiter (Fourrier 35, Rang 7 50) statt der Überlebensfähigkeit.</li>
+<li>Alle neun Fertigkeiten starten bei <b>5</b>.</li>
+<li><b>Konstitution wächst im Lauf</b> und darf über 100: +3 bei jedem Übergang zwischen zwei Feldzügen, +1 nach überstandener Krankheit. Sie ist der einzige Wert, der in etwas Ungeklemmtes zahlt (<code>lebenMax = 40 + 0,6 × roh</code>). <i>Wachsen</i> kann sie durch Übung trotzdem nur bis 100 — was darüber hinausgeht, kommt ausschließlich aus überstandenen Feldzügen.</li>
 <li>Reihenfolge: Pool → Herkunft → Kauf mit Veteranenpunkten → Ausrüstungsboni. Die Ausrüstungsboni kommen <i>nach</i> allen Kaufgrenzen und dürfen die 60 überschreiten.</li>
 <li>Startgeld 4 Francs, Rang 1, Kameradschaft 20, Atem 100, Ruf 0, Gunst 0, Belastung 0.</li>
 </ul>

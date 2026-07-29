@@ -525,7 +525,7 @@ function zeigeLaden(){
 
   <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 60</span></div>
    <div class="cb">
-    <p class="hinweis">Alle beginnen bei 10, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
+    <p class="hinweis">Alle beginnen bei 5, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
     ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
@@ -603,24 +603,47 @@ function aktualisiereLaden(){
    Progression, die das Spiel bisher nur behauptet hat: Gegner, gegen die man am
    Anfang chancenlos ist, werden später schlagbar.
 
-   Der Schritt ist 10, also muss POOL durch 10 teilbar sein — sonst lässt sich
-   der Vorrat nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
+   **Der Sockel ist am 29.07.2026 von 20 auf 15 gefallen, und der Schritt von
+   10 auf 5.** Beides gehört zusammen: Von 15 aus ist die 70 in Zehnerschritten
+   nicht erreichbar (15+50 = 65, 15+60 = 75), also musste erst der Schritt
+   feiner werden. Mit 5 geht 15 + 55 = 70 exakt auf, POOL 60 ist durch 5
+   teilbar, und **beide Hälften der Erschaffung schreiten jetzt gleich** —
+   `PUNKT_SCHRITT` für die Veteranenpunkte stand ohnehin schon auf 5.
+
+   **Wozu der tiefere Sockel:** Ein Erstlauf-Mann soll früher sterben, damit
+   der Veteran länger lebt. Die Wachstumsformel gibt bei niedrigen Werten am
+   meisten (`1,7 × Intensität × (100 − Wert)/100`), also verlängert ein
+   tieferer Sockel zugleich die Strecke, auf der ein Mann sich noch
+   verbessern kann. Das ist die Gegenseite zur wachsenden Konstitution.
+
+   **Der Sollwert dafür ist Italien** (Entscheidung des Entwicklers): Das
+   Lehrstück darf töten, aber **nicht mehr als 20 % im Erstlauf**. Fällt
+   „Italien überstanden" unter 80 %, ist der Sockel zu tief.
+
    Invariante 3 bleibt unberührt: Gekauft wird der Ausgangspunkt, nie der
    Aufstieg. */
-const POOL = 60, SOCKEL = 20, MAXE = 70;
+const POOL = 60, SOCKEL = 15, MAXE = 70, ERSCH_SCHRITT = 5;
+/* **Bildung ist die Ausnahme und bleibt bei 20.** Sie ist schon immer vom Pool
+   ausgenommen, weil sie kein körperlicher Ausgangspunkt ist, sondern eine
+   soziale Tatsache — man kann nicht lesen —, und sie hat einen eigenen Weg
+   über die Regimentsschule. Sie mit abzusenken träfe die **Rangleiter**
+   (Fourrier braucht 35, Rang 7 braucht 50) statt der Überlebensfähigkeit,
+   und darum geht es beim Sockel nicht. */
+const BILDUNG_SOCKEL = 20;
+const sockelVon = k => k==='bildung' ? BILDUNG_SOCKEL : SOCKEL;
 let ERSCH = null;
 function zeigeErschaffung(neu){
   if(neu || !ERSCH){
     ERSCH = {name:'', herkunft:null, attr:{}};
-    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
   }
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
       <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
       ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
       <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
-      <span><button class="pmbtn" onclick="stelle('${k}',-10)" id="am_${k}">−</button>
-      <button class="pmbtn" onclick="stelle('${k}',10)" id="ap_${k}">+</button></span>
+      <span><button class="pmbtn" onclick="stelle('${k}',-ERSCH_SCHRITT)" id="am_${k}">−</button>
+      <button class="pmbtn" onclick="stelle('${k}',ERSCH_SCHRITT)" id="ap_${k}">+</button></span>
     </div>`).join('');
   app.innerHTML = `
   <div class="stage">${verlauf()}
@@ -630,8 +653,8 @@ function zeigeErschaffung(neu){
       </div></div>
       <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
         <div class="cb">${zeilen}
-        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel 20 · höchstens 70 bei der Erschaffung · Bildung ist vom Pool ausgenommen.
-        Alle neun Fertigkeiten beginnen bei 10.<br>
+        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · Schritte zu ${ERSCH_SCHRITT} · höchstens ${MAXE} bei der Erschaffung · Bildung ist vom Pool ausgenommen und steht auf ${BILDUNG_SOCKEL}.
+        Alle neun Fertigkeiten beginnen bei 5.<br>
         Sechzig Punkte sind wenig, und das ist Absicht: Ein Rekrut ist kein Veteran. Was fehlt, holen die Veteranenpunkte deiner früheren Männer im nächsten Schritt.</p>
         <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
       </div></div>
@@ -651,7 +674,7 @@ function zufallsName(){
   const n=['Duval','Rey','Vasseur','Marchand','Ferrand','Bonnet','Lemoine','Charpentier','Roussel','Barbier'];
   return v[Math.floor(Math.random()*v.length)]+' '+n[Math.floor(Math.random()*n.length)];
 }
-function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-SOCKEL),0); }
+function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-sockelVon(k)),0); }
 function stelle(k,d){
   if(k==='bildung') return;
   const neu = ERSCH.attr[k]+d;
@@ -660,14 +683,14 @@ function stelle(k,d){
   ERSCH.attr[k]=neu; aktualisiereErschaffung();
 }
 function wuerfeln(){
-  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
   const frei = ATTRIBUTE.map(([k])=>k).filter(k=>k!=='bildung');
   let rest = POOL;
   const gew = frei.map(()=>Math.random()+0.35);
   while(rest>0){
     const i = gew.map((g,i)=>[g*Math.random(),i]).sort((a,b)=>b[0]-a[0])[0][1];
     const k = frei[i];
-    if(ERSCH.attr[k]+10<=MAXE){ ERSCH.attr[k]+=10; rest-=10; }
+    if(ERSCH.attr[k]+ERSCH_SCHRITT<=MAXE){ ERSCH.attr[k]+=ERSCH_SCHRITT; rest-=ERSCH_SCHRITT; }
     else { gew[i]=0; if(gew.every(g=>g===0)) break; }
   }
   aktualisiereErschaffung();
@@ -683,8 +706,8 @@ function aktualisiereErschaffung(){
   ATTRIBUTE.forEach(([k])=>{
     document.getElementById('av_'+k).textContent = ERSCH.attr[k];
     const b = document.getElementById('ab_'+k); if(b) b.querySelector('i').style.width = ERSCH.attr[k]+'%';
-    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=SOCKEL;
-    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+10>POOL;
+    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=sockelVon(k);
+    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+ERSCH_SCHRITT>POOL;
   });
   const b = document.getElementById('weiterbtn');
   if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
@@ -1305,6 +1328,30 @@ function zeigeUebergang(n){
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
+    /* ── Was ein Feldzug aus einem Körper macht ──
+
+       **Der einzige Ort im Spiel, an dem ein Attribut wächst, ohne dass man
+       etwas dafür gedrückt hat — und er ist verdient, nicht geschenkt.** Wer
+       hier steht, hat einen ganzen Feldzug überlebt; das ist die Bedingung,
+       und sie ist die härteste im Spiel.
+
+       Gebaut gegen den schärfsten gemessenen Befund: **Veteranenpunkte kaufen
+       Rang und keine Strecke** (Weite 57 / 62 / 61 bei 11 / 30 / 38 %
+       Capitaine). Jede Progression, die über bessere Werte läuft, endet in
+       der Ruf-Kette und damit in den Offiziersrängen mit ihren +4 bis +5
+       Gefahr. Diese hier läuft über die **Strecke**: Sieben Übergänge sind
+       +21 Konstitution und damit rund dreizehn Lebenspunkte, und man bekommt
+       sie nur, indem man ankommt.
+
+       **Ohne Deckel bei 100.** `lebenMax()` rechnet vom rohen Wert, linear
+       und ungeklemmt — ein Mann, der acht Feldzüge überlebt hat, darf
+       zäher sein als menschenmöglich. Natürliches Üben plateauiert dagegen
+       weiterhin bei 100, weil die Wachstumsformel darüber negativ wird.
+
+       Reihenfolge: **erst der Zuwachs, dann auffüllen.** `lebenMax()` hängt
+       an der Konstitution, und wer davor auffüllt, füllt gegen den kleineren
+       Vorrat — derselbe Fehler wie damals bei den Wunden. */
+    S.attr.konstitution = (S.attr.konstitution|0) + 3;
     // Erst die Wunden weg, dann auffüllen: `lebenMax()` schrumpft mit offenen
     // Wunden, sonst rückt der Mann mit 68 statt 82 ein, obwohl „voll" dasteht.
     S.wunden = [];
@@ -1320,7 +1367,8 @@ function zeigeUebergang(n){
         <div class="wirkung"><span>Zwischenstand</span>
           ${rangName(S.rang)} · Ruf ${S.ruf} · ${stationen()} Stationen · ${S.nennungen}× im Tagesbefehl</div>
         <div class="wirkung"><span>Ein Jahr Garnison</span>
-          Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.</div>
+          Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.
+          <b>Konstitution +3:</b> Der Körper hat sich an das Marschieren gewöhnt, an das Schlafen im Nassen und daran, mit wenig auszukommen.</div>
         </div></div>
       <div class="orders"><div class="ordbody">
         <button class="ord weiter" onclick="stationErledigt();naechster()">Weiter

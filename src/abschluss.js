@@ -85,7 +85,15 @@ const LAGER_TUN = {
       if(krank>=0){
         const p = probe('konstitution', 35, true);   // ohne Übungseffekt, siehe probe()
         if(p.erfolg){ const w=S.wunden.splice(krank,1)[0]; atemKlemmen();
-          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden</span>`; }
+          /* **Was man überstanden hat, macht härter — aber nur, was man
+             wirklich überstanden hat.** Der Punkt hängt am Erfolg der Probe,
+             nicht am Zubettgehen; wer die Ruhr weiterschleppt, bekommt
+             nichts. Die Probe selbst läuft weiterhin mit `ohneUebung`, damit
+             nicht jeder Ruhe-Abend für sich schon Konstitution trainiert —
+             das wäre die alte Falle, in der ausgerechnet der Kranke seinen
+             Lebensvorrat übt. */
+          S.attr.konstitution = (S.attr.konstitution|0) + 1;
+          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden · Konstitution +1</span>`; }
         else zusatz = ' Das Fieber bleibt. Es wird bei Dunkelheit stärker, und es wird jede Nacht bei Dunkelheit stärker. <span class="fein">Krankheit hält an</span>';
       }
       // Erst die Krankheit weg, dann heilen — sonst heilt man gegen den kleineren Vorrat.

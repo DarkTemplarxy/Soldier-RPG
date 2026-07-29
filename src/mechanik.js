@@ -239,7 +239,12 @@ function jahrVonStation(){
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
-  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 10);
+  /* Fertigkeiten beginnen bei 5, nicht mehr bei 10 (29.07.2026, zusammen mit
+     dem Attributsockel 15). Ein Rekrut hat die Muskete zweimal abgefeuert;
+     alles darüber ist etwas, das er sich verdient oder gekauft hat. Nebenbei
+     verlängert es die Strecke, auf der Übung noch etwas bringt — `nutzen()`
+     gibt bei niedrigen Werten am meisten. */
+  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 5);
   /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
      was man mitbringt, nicht das, was man sich aussucht. Das war früher der
      halbe Exploit (Konstitution 90 = unsterblich); die andere Hälfte lag in der
@@ -449,7 +454,20 @@ function anwenden(e){
   if(e.atem) S.atem = Math.max(0, Math.min(100, S.atem + e.atem));
   if(e.geld) S.geld = Math.max(0, S.geld + e.geld);
   if(e.nennung){ S.nennungen++; }
-  if(e.attr) for(const k in e.attr) S.attr[k] = Math.max(0, Math.min(100, S.attr[k] + e.attr[k]));
+  /* **Konstitution darf über 100 gehen, alles andere nicht.** Sie ist der
+     einzige Wert, der in etwas Ungeklemmtes zahlt — `lebenMax()` rechnet
+     `40 + 0,6 × roh`, linear und ohne Obergrenze. Bei jedem anderen Attribut
+     wäre die 100 ohnehin tote Währung, weil die Probe bei 95 klemmt: Gegen
+     die üblichen Schwierigkeiten 35–50 sind 85 und 100 dieselbe Zahl.
+     Wohlgemerkt hebt das nur die *Klemme*; **wachsen** kann auch die
+     Konstitution nur bis 100 (`nutzen()` steigt dort aus), denn die
+     Wachstumsformel `(100 − Wert)/100` wird darüber negativ. Was über die
+     100 hinausgeht, kommt ausschließlich aus überstandenen Feldzügen —
+     Drill plateauiert, ein Krieg nicht. */
+  if(e.attr) for(const k in e.attr){
+    const deckel = k==='konstitution' ? Infinity : 100;
+    S.attr[k] = Math.max(0, Math.min(deckel, S.attr[k] + e.attr[k]));
+  }
   if(e.fert) for(const k in e.fert) S.fert[k] = Math.max(0, Math.min(100, S.fert[k] + e.fert[k]));
   if(e.ausr) for(const k in e.ausr) S.ausr[k].zustand = Math.max(0, Math.min(100, S.ausr[k].zustand + e.ausr[k]));
   if(e.leben) S.leben = Math.max(1, Math.min(lebenMax(), S.leben + e.leben));

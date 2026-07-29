@@ -142,7 +142,10 @@ const rangKurz = r => RANG_KURZ[r] || ('R' + r);
    Für die Voltigeure (Geschick 55) reicht es nur noch mit der Herkunft — genau
    das ist der Sinn der Senkung. Kaltblütigkeit und Autorität bleiben auf dem
    Sockel und werden im Feld verdient oder mit Veteranenpunkten gekauft. */
-const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ganze Pool
+/* Seit der Sockel auf 15 steht und die Erschaffung in Fünfern schreitet:
+   45 + 15 = 60, der ganze Pool, exakt aufgehen. Vorher (Sockel 20, Zehner)
+   waren es 40 + 20. */
+const VERTEILUNG = { konstitution: 60, geschick: 30 };
 
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
@@ -197,7 +200,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
       for (const k in v){
         while (ERSCH.attr[k] < v[k]){
           const vorher = ERSCH.attr[k];
-          stelle(k, 10);
+          stelle(k, ERSCH_SCHRITT);
           if (ERSCH.attr[k] === vorher) break;
         }
       }

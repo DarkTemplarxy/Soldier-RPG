@@ -5,6 +5,28 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Früher sterben, länger leben: Sockel 15, Schritt 5, wachsende Konstitution
+
+Vier Änderungen, die dieselbe Lücke von zwei Seiten angehen — der Erstlauf wird verwundbarer, die Strecke des Veteranen länger. Zusammen gemessen, weil jede für sich im Rauschen von ±8 Punkten läge.
+
+**1 · Der Erschaffungsschritt fällt von 10 auf 5.** Er musste zuerst fallen: Von einem Sockel 15 aus ist die 70 in Zehnerschritten nicht erreichbar (15 + 50 = 65, 15 + 60 = 75). Mit 5 geht 15 + 55 = 70 exakt auf, und beide Hälften der Erschaffung schreiten jetzt gleich — `PUNKT_SCHRITT` für die Veteranenpunkte stand ohnehin auf 5.
+
+**2 · Sockel 20 → 15, Fertigkeiten 10 → 5.** Nebenwirkung, die Absicht ist: Die Wachstumsformel gibt bei niedrigen Werten am meisten, ein tieferer Sockel verlängert also die Strecke, auf der ein Mann sich noch verbessern kann.
+
+**Bildung bleibt bei 20** (`BILDUNG_SOCKEL`). Sie ist schon immer vom Pool ausgenommen, weil sie kein körperlicher Ausgangspunkt ist, sondern eine soziale Tatsache, und hat einen eigenen Weg über die Regimentsschule. Sie mitabzusenken träfe die **Rangleiter** (Fourrier 35, Rang 7 50) statt der Überlebensfähigkeit.
+
+**3 · Konstitution wächst: +3 je `uebergang`, +1 nach überstandener Krankheit.** Der einzige Ort im Spiel, an dem ein Attribut wächst, ohne dass man etwas dafür gedrückt hat — und trotzdem verdient, denn die Bedingung ist, einen ganzen Feldzug überlebt zu haben. Sieben Übergänge sind +21 und damit rund dreizehn Lebenspunkte.
+
+> **Gebaut gegen den schärfsten gemessenen Befund:** Veteranenpunkte kaufen Rang und keine Strecke. Jede Progression über bessere Werte endet in der Ruf-Kette und damit in den Offiziersrängen mit +4 bis +5 Gefahr. **Diese läuft über die Strecke** — man bekommt sie nur, indem man ankommt.
+
+**4 · Der Deckel bei 100 fällt — nur für die Konstitution und nur in `anwenden()`.** Die Asymmetrie folgt aus zwei Formeln: Konstitution ist der einzige Wert, der in etwas Ungeklemmtes zahlt (`lebenMax = 40 + 0,6 × roh`), während bei jedem anderen Attribut die 100 ohnehin tote Währung wäre — die Probe klemmt bei 95, gegen Schwierigkeit 35–50 sind 85 und 100 dieselbe Zahl. Und **wachsen** kann auch die Konstitution nur bis 100, weil `(100 − Wert)/100` darüber negativ wird. **Drill plateauiert, ein Krieg nicht.**
+
+> **Reihenfolge-Falle, dieselbe wie damals bei den Wunden:** Der Zuwachs steht vor dem Auffüllen. `lebenMax()` hängt an der Konstitution; wer davor auffüllt, füllt gegen den kleineren Vorrat.
+
+**Gegengeprüft, bevor gemessen wurde:** Pool geht mit 45 + 15 exakt auf · `anwenden()` 99 + 5 = 104 · `nutzen()` 50× bleibt bei 104 · Geschick 99 + 5 = 100 (weiter geklemmt) · Übergang 70 → 73 und das Leben füllt gegen den größeren Vorrat.
+
+**Neuer Sollwert** *(gesetzt vom Entwickler)*: Italien darf im Erstlauf töten, aber **nicht mehr als 20 %**. Fällt „Italien überstanden" unter 80 %, ist der Sockel zu tief. Die Zahl war als Leitzahl gestrichen, weil sie bei 98–100 % nichts mehr trennte — als Abbruchkriterium für den Sockel ist sie genau richtig.
+
 ## 2026-07-29 — Was ein Mann behält: eine Kaufklasse, die Strecke kauft statt Rang
 
 **Der Rekrut kauft Muskeln, der Veteran kauft Gewohnheiten.** Fünf neue Posten im Laden (`art:'zaeh'`), die ausschließlich auf die Zermürbung **zwischen** den Gefechten wirken.
