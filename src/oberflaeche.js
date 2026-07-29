@@ -1581,8 +1581,10 @@ function wahlKosten(o){
   return teile.join(' · ');
 }
 
-/* Eine Wahl als Zeile im Bogen. `roh:true` liefert ein `<div>` statt eines
-   `<button>` — für gesperrte Handlungen, die nicht fokussierbar sein sollen. */
+/* Eine Wahl als Zeile im Bogen. Gesperrte Wahlen bleiben `<button disabled>`
+   und werden **nicht** zu `<div>`: Ein deaktivierter Knopf ist ohnehin nicht
+   fokussierbar, und ein `<div>` fällt aus jedem Selektor heraus, der
+   `:not([disabled])` prüft — der Testbot klickt dann ins Leere. */
 function wahlZeile(nr, label, kosten, aufruf, opt){
   const o = opt || {};
   const attr = o.gesperrt ? ' disabled' : '';
@@ -1592,8 +1594,6 @@ function wahlZeile(nr, label, kosten, aufruf, opt){
      gewinnt `.wahl`, weil es später steht — die Klasse ist also allein für
      die Skripte da und kostet nichts. */
   const kl = `wahl ord${o.risk?' risk':''}${o.klasse?' '+o.klasse:''}`;
-  if(o.roh) return `<div class="${kl}" style="opacity:.42"><span class="nr">${nr}</span><span>
-      <span class="label">${label}</span><span class="cost">${kosten}</span></span></div>`;
   return `<button class="${kl}" onclick="${aufruf}"${attr}><span class="nr">${nr}</span><span>
       <span class="label">${label}</span><span class="cost">${kosten}</span></span></button>`;
 }

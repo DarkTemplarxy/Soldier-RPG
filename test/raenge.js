@@ -49,9 +49,16 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
     while (s++ < 220) {
       const t = await p.$eval('#app', e => e.innerText);
       if (t.includes('Nächster Mann') || t.includes('Noch einmal, besser')) break;
-      if (/RUNDE |PHASE |STUNDE |TAG /.test(t)) {
+      if (/(RUNDE|PHASE|STUNDE|TAG) \d+ VON \d+/.test(t)) {
+        /* **Die Beschriftung steht seit dem Stationsbogen in `.label`.** Vorher
+           war sie die erste Zeile des `textContent`; jetzt steht dort die
+           römische Ziffer, und die Prüfung meldete zwei fehlende Knöpfe, die
+           in Wahrheit dastanden. */
         gesehen.knoepfe = await p.evaluate(() =>
-          [...document.querySelectorAll('.ord')].map(e => e.textContent.split('\n')[0].trim()));
+          [...document.querySelectorAll('.ord')].map(e => {
+            const l = e.querySelector('.label');
+            return (l ? l.textContent : e.textContent.split('\n')[0]).trim();
+          }));
         const bilder = await p.evaluate(() => ({
           sichtfeld: !!document.querySelector('.feld svg:not([aria-label])') ||
                      !!document.querySelector('svg[aria-label^="Aufstellung"]'),
@@ -76,7 +83,7 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
     // Ein paar Runden Gefecht: jeden Offiziersknopf mindestens einmal drücken.
     for (let r = 0; r < 24; r++) {
       const t = await p.$eval('#app', e => e.innerText);
-      if (!/RUNDE |PHASE |STUNDE |TAG /.test(t)) break;
+      if (!/(RUNDE|PHASE|STUNDE|TAG) \d+ VON \d+/.test(t)) break;
       const ok = await p.evaluate(i => {
         const btn = [...document.querySelectorAll('.ord:not([disabled])')]
           .filter(e => !/Zurückweichen/.test(e.textContent));

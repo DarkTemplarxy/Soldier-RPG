@@ -1462,19 +1462,21 @@ function zeigeEreignis(e){
     const proben = o.kette
       ? ' · ' + o.kette.map(st=>wertName(st.wert)+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · ')
       : (o.probe ? ' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%' : '');
-    return `<button class="ord ${o.risk?'risk':''}" onclick="ereignisWaehlen(${i})">
-    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${proben}</span></button>`;
+    return wahlZeile(roemisch(i+1), esc(o.label),
+      esc(o.hint||'')+proben, `ereignisWaehlen(${i})`, {risk:o.risk});
   }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div><div class="card"><div class="ch"><span>${esc(e.frage)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb">${sichtfeld()}
-        <div class="prose" style="margin-top:15px">${e.text.map(t=>`<p>${t}</p>`).join('')}</div>
-        <div class="probe" style="margin-top:12px">${zeitWort()} ${K.runde} VON ${n.runden}
-          · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
-          · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}</div>
-        ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
-      </div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    <div>${bogen({ort:e.frage, datum:n.datum},
+      `<div class="stichrahmen">${sichtfeld()}</div>
+       <div class="stichzeile"><span>${esc(e.frage)}</span><span>${esc((n.lage&&n.lage.gelaende)||'')}</span></div>
+       <div class="prose">${e.text.map(t=>`<p>${t}</p>`).join('')}</div>
+       <div class="probe" style="margin-top:12px">${zeitWort()} ${K.runde} VON ${n.runden}
+         · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
+         · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}</div>
+       ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}`,
+      ['Was tust du?','Eine Frage · sie kommt einmal'],
+      opt,
+      'Im Gefecht wird nicht gesichert')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1604,11 +1606,17 @@ function bruchAnsage(){
 
 function zeigeKampf(text){
   const n = KAPITEL[LAUF.node];
-  const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
-      ${a.aus&&a.aus()?'disabled':''}>${a.label}<span class="cost">${a.cost}</span></button>`).join('');
+  /* Gesperrte Handlungen bleiben `<button disabled>` und werden nicht zu
+     `<div>`. Ein deaktivierter Knopf ist ohnehin nicht fokussierbar — und ein
+     `<div>` fällt aus jedem Selektor heraus, der `:not([disabled])` prüft:
+     Der Testbot klickte darauf ins Leere und lief 301 Schritte im Kreis. */
+  const opt = aktionen().map((a,i)=>
+    wahlZeile(roemisch(i+1), a.label, a.cost, `kampfAktion('${a.id}')`,
+      {risk:a.risk, gesperrt: !!(a.aus && a.aus())})).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
-      <div class="cb">${sichtfeld()}
+    <div>${bogen({ort:'Sichtfeld · '+((n.lage&&n.lage.stellung)||n.ort||''), datum:n.datum},
+      `<div class="stichrahmen">${sichtfeld()}</div>
+       <div class="stichzeile"><span>${esc((n.lage&&n.lage.stellung)||'Sichtfeld')}</span><span>${esc((n.lage&&n.lage.gelaende)||'')}</span></div>
         ${bruchAnsage()}
         ${(()=>{ const auf = auftragFuer(n); return auf
           ? `<div class="wirkung" style="margin-top:14px"><span>Auftrag des Chef de bataillon</span>${esc(auf.text)}</div>` : ''; })()}
@@ -1632,9 +1640,11 @@ function zeigeKampf(text){
             : S.rang===5 && K.sektion!=null ? '· DEINE SEKTION '+Math.max(0,Math.round(K.sektion/5))+' VON 20' : ''}</div>
         ${(S.rang>=12 || n.sturm) ? '' : balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         ${(S.rang>=5 && S.rang<10 && K.sektion!=null) ? balken('b-steel',Math.max(0,K.sektion),100) : ''}
-        <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
-      </div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+        <div class="protokollkopf">Protokoll</div>
+        <div class="protokollliste">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>`,
+      ['Was tust du?','Eine Handlung je Runde'],
+      opt,
+      'Im Gefecht wird nicht gesichert')}
     </div>${seitenleiste()}</div>`;
 }
 
