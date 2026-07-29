@@ -289,15 +289,14 @@ const KAPITEL7 = [
     'Bei der Musterung wird abgerechnet, was vier Jahre gekostet haben. Von der Kompanie, die 1808 über die Bidassoa marschiert ist, ist jeder Vierte noch dabei. Es hat keine Schlacht gegeben, in der sie gefallen wären.'
   ]},
 
-/* 108 */ {typ:'ende',id:'ende_spanien',datum:'Sommer 1812 · Über die Pyrenäen zurück',ort:'Was man mitnimmt',
+/* 108 */ {typ:'uebergang',id:'ende_spanien',datum:'Sommer 1812 · Über die Pyrenäen zurück',ort:'Was man mitnimmt',
   marsch:{von:'Valladolid',nach:'Über die Pyrenäen nach Osten',weg:'Zurück, wo es 1808 angefangen hat — und weiter, in eine andere Richtung'},
   text:[
     'An der Bidassoa steht keine spanische Grenzwache mehr, die das Gewehr präsentiert. Es steht überhaupt niemand da.',
     'Vier Jahre. Keine Schlacht, deren Namen man zu Hause kennt. Keine Nennung im Bulletin, kein Tagesbefehl, in dem etwas stand, das man erzählen möchte. Was du mitnimmst, sind zwei Dinge: was du kannst, und was du getan hast.',
     'Das Erste steht in den Listen. Das Zweite steht nirgends, und deshalb kann es auch niemand streichen.',
     'Es geht nach Osten. Die Männer, die 1809 aus Ostpreußen zurückgekommen sind, sagen, in Polen sei es im Winter kälter, als man es sich vorstellen könne. Man hört ihnen zu, wie man Leuten zuhört, die übertreiben.'
-  ],
-  ausblick:'<b>Hier endet der gebaute Stand.</b> Am 24. Juni 1812 gehen vierhunderttausend Mann über drei Brücken über den Njemen. Es ist die größte Armee, die Europa je gesehen hat, und es ist der letzte Tag, an dem irgendjemand sie zählen wird.'}
+  ]}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

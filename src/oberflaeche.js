@@ -1277,6 +1277,9 @@ function naechster(){
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
   else if(n.typ==='uebergang') zeigeUebergang(n);
+  /* Eine Station mit `schranke` ist ein Ende mit einer Wahl davor — sie geht
+     deshalb vor der gewöhnlichen Endstation, nicht daneben. */
+  else if(n.schranke) zeigeSchranke(n);
   else if(n.typ==='ende') zeigeKapitelende(n);
 }
 

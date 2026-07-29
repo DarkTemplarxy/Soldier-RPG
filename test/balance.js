@@ -154,7 +154,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
                 erreicht: {} };
   /* Reihenfolge der Kapitel, für die Quote je Kapitel. Muss zur Zuordnung
      unten passen (dort wird aus der Jahreszahl der Kapitelname gewonnen). */
-  const KAPITEL_FOLGE = ['Italien','Ägypten','Garnison','Austerlitz','Jena','Eylau','Spanien'];
+  const KAPITEL_FOLGE = ['Italien','Ägypten','Garnison','Austerlitz','Jena','Eylau','Spanien','Russland'];
   /* Die Gesamtzahl der Stationen kommt aus dem Spiel, nicht aus dem Skript —
      sie stand hier als „von 64" fest und war mit dem fünften Kapitel falsch. */
   let STATIONSZAHL = 0;
@@ -443,7 +443,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
          Station — und die Jahreszahl ist eindeutig. */
       const j = (d.ort.match(/1[78]\d\d/) || ['?'])[0];
       const kap = j <= '1797' ? 'Italien' : j <= '1799' ? 'Ägypten'
-                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : 'Spanien';
+                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : j <= '1811' ? 'Spanien' : 'Russland';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
       res.sterbestation.push(d.stationen);
       /* Erreicht hat er jedes Kapitel bis einschließlich dem, in dem er

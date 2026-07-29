@@ -52,6 +52,7 @@ function stationErledigt(){
      anfängt. */
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
+  aderlass(KAPITEL[LAUF.node-1]);
   const zehrung = S.wunden.reduce((sum,w)=> sum + (w.zehrt||0), 0);
   if(zehrung) S.leben = Math.max(1, S.leben - zehrung);
   else lebenAuffuellen(0.05);
@@ -85,15 +86,47 @@ function stationErledigt(){
    dafür, monatelang nichts zu sehen — barfuß, in Lumpen, siegreich. In Ägypten
    wurde in einer Münze gezahlt, die keiner kannte. In der Garnison kam der
    Sold pünktlich, und das war für viele der eigentliche Unterschied zum Krieg. */
+/* Zu welcher Kampagne eine Station gehört. Die Zuordnung lag zweimal
+   ausgeschrieben da (Sold, Zwischenfälle); seit es Kampagnenfelder gibt —
+   Sold, Aderlass, Verschleiß —, steht sie einmal hier. */
+function kampagneVon(n){
+  if(!n) return null;
+  for(const id in STATIONEN)
+    if((STATIONEN[id]||[]).some(x=>x.id===n.id)) return KAMPAGNEN.find(c=>c.id===id) || null;
+  return null;
+}
+
 function soldFaktor(){
-  const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
-  for(const id in STATIONEN){
-    if((STATIONEN[id]||[]).some(x=>x.id===n.id)){
-      const k = KAMPAGNEN.find(c=>c.id===id);
-      return k && k.sold !== undefined ? k.sold : 1;
-    }
-  }
-  return 1;
+  const k = kampagneVon(KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)]);
+  return k && k.sold !== undefined ? k.sold : 1;
+}
+
+/* ══════════════════ DER ADERLASS ══════════════════
+
+   **Manche Kriege töten in den Gefechten. Andere töten dazwischen.**
+
+   Spanien hat Frankreich dreihunderttausend Mann gekostet, und fast keiner
+   davon ist in einer Schlacht gefallen: Es waren Posten, die nicht zurückkamen,
+   Kuriere, Nachzügler, Fieber, ein Messer im Quartier. Russland hat
+   vierhunderttausend gekostet, und das Gefecht war dabei die Ausnahme.
+
+   `aderlass:n` an einer **Kampagne** — nicht an einer Station — zieht an jeder
+   Station n Lebenspunkte und ebenso viel vom Zustand der Einheit ab. Es gibt
+   keine Probe dagegen und keinen Knopf dafür. **Das ist der Punkt:** Ein
+   Aderlass ist keine Entscheidung, sondern die Eigenschaft eines Krieges.
+
+   **Er ersetzt die Zeitheilung nicht, er misst sich mit ihr.** Fünf Prozent
+   des Vorrats sind bei achtzig Lebenspunkten vier je Station; ein Aderlass von
+   2 halbiert die Erholung, einer von 3 hebt sie fast auf. In Spanien kommt man
+   also nie ganz wieder hoch, in Russland gar nicht mehr — und beides ohne eine
+   einzige Sonderregel in den Kapiteldaten. */
+function aderlass(n){
+  const k = kampagneVon(n);
+  const wert = k && k.aderlass ? k.aderlass : 0;
+  if(!wert || !S) return '';
+  S.leben = Math.max(1, S.leben - wert);
+  if(S.einheit != null) S.einheit = Math.max(0, S.einheit - wert);
+  return '';
 }
 
 /* Die Auszahlung. Gibt den Betrag zurück, damit der Aufrufer ihn anzeigen
@@ -541,9 +574,18 @@ function wundeGeben(name, abzug, zehrt){
   atemKlemmen();                       // der Vorrat ist gerade kleiner geworden
 }
 
+/* ── Doppelter Verschleiß, wo nichts nachkommt ──
+   `verschleiss:2` an einer Kampagne (Russland) verdoppelt jeden Abrieb. Das
+   ist die Hälfte der Regel; die andere steht in den Kapiteldaten, weil sie
+   dort hingehört: In Russland gibt es keine Lagerhandlung, die Schuhe oder
+   Muskete instand setzt, und keinen Marketender. **Was kaputt ist, bleibt
+   kaputt** — und der Verschleiß greift über `wert()` direkt in die Proben:
+   Konstitution verliert 18 Punkte, sobald die Schuhe unter Zustand 25 fallen. */
 function verschleiss(faktor){
-  for(const k in S.ausr){
-    const a = S.ausr[k];
+  const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
+  if(k && k.verschleiss) faktor *= k.verschleiss;
+  for(const k2 in S.ausr){
+    const a = S.ausr[k2];
     if(a.verschleiss>0) a.zustand = Math.max(0, a.zustand - Math.round(a.verschleiss*faktor));
   }
 }

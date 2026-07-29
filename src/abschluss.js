@@ -665,7 +665,34 @@ function wertung(){
   p.ruf = 5 * Math.floor(S.ruf/10);
   p.nennungen = 3 * Math.min(10, S.nennungen);
   p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
-  p.ueberleben = S.lebt ? 25 : 0;              // Platzhalter, siehe oben
+  /* ── Der Überlebensbonus, gestaffelt (KONZEPT §5) ──
+     **Bis Kapitel 8 stand hier der Platzhalter 25**, und der Kommentar dazu
+     sagte, warum: Die gestaffelten Werte ergeben erst Sinn, wenn es den
+     freiwilligen Ausstieg an den Rangschranken gibt — dann ist die Höhe des
+     Bonus die Belohnung dafür, **rechtzeitig aufzuhören**. Ohne diese
+     Entscheidung wäre er nur eine große Zahl für jeden, der nicht stirbt.
+
+     Mit Russland gibt es die Entscheidung, also fällt der Platzhalter:
+
+       180  Ruhestand nach Russland — ausgemustert oder freiwillig gegangen.
+            **Der höchste Wert des Spiels für ein Ende**, und das ist Absicht:
+            Wer 1812 lebend nach Hause geht, hat alles gesehen, was ein Mensch
+            sehen kann, und hört auf, als es noch möglich ist.
+       120  Halbsold nach 1814. Später, teurer erkauft, und man geht nicht
+            freiwillig, sondern wird gegangen.
+        70  Am Leben, ohne ein Ende gewählt zu haben — der Lauf hört auf, weil
+            der gebaute Inhalt aufhört.
+         0  tot.
+
+     **Die Reihenfolge ist keine Belohnung fürs Kneifen.** Wer bei Russland
+     aussteigt, verzichtet auf drei Kapitel Rangaufstieg, und Rang ist der
+     größte Posten der Wertung: Ein Colonel bringt 330 Punkte, ein Sergent 62.
+     Die 180 machen den Ausstieg zu einer echten Rechnung statt zu einer
+     Verlegenheit — und genau das war der Sinn. */
+  p.ueberleben = !S.lebt ? 0
+    : S.ende === 'ruhestand' ? 180
+    : S.ende === 'halbsold'  ? 120
+    : 70;
   p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
   /* ── Der Preis des Patents, erster Teil ──
      **Der gekaufte Rang zählt nicht, und die Stufe darüber auch nicht.** Ein
@@ -789,6 +816,105 @@ function todesText(){
     'Er wird in eine Grube gelegt, die vierzig andere teilen. Die Halbbrigade marschiert am Morgen weiter, und seine Muskete bekommt ein Rekrut, der noch nicht weiß, wem sie gehört hat.'
   ];
   return t[Math.floor(Math.random()*t.length)];
+}
+
+/* ══════════════════ DIE RANGSCHRANKE ══════════════════
+
+   **Die erste Stelle im Spiel, an der man freiwillig aufhören kann.**
+
+   Nach Russland verlangt der Krieg Rang 7, vor Waterloo Rang 10 (RANGLEITER §9,
+   `SCHRANKEN` in `src/kampf.js`). Wer darunter bleibt, wird ausgemustert — das
+   ist kein Scheitern, sondern das zweitbeste Ende, das dieses Spiel kennt. Wer
+   darüber liegt, bekommt eine Wahl, und sie ist echt:
+
+   | | Ausgemustert / gegangen | Weiter |
+   |---|---|---|
+   | Punkte sofort | **+180** | +70 am Ende |
+   | Was du aufgibst | drei Kapitel Rangaufstieg | nichts |
+   | Was du gewinnst | den Rest deines Lebens | den Rang, den es dafür braucht |
+
+   **Das Spiel rechnet den Erwartungswert nicht vor**, und das ist der ganze
+   Sinn der Station. Ein Colonel bringt 330 Wertungspunkte, ein Sergent 62 —
+   wer weitergeht, kann das Vielfache der 180 holen und stirbt dabei
+   wahrscheinlich. Wer aufhört, hat es sicher. Es steht nirgends, welche der
+   beiden Zahlen größer ist, weil das von einem Mann abhängt, den nur der
+   Spieler kennt.
+
+   **Angezeigt wird die Schranke wie ein Kapitelende, nicht wie eine Szene.**
+   Sie ist eines. */
+function zeigeSchranke(n){
+  const sch = SCHRANKEN[n.schranke];
+  if(!sch){ zeigeKapitelende(n); return; }
+  const durch = schrankeGeschafft(n.schranke);
+  const kopf = `<div class="ch"><span>${esc(n.ort||sch.name)}</span><span>${esc(n.datum||'')}</span></div>`;
+  const prosa = (n.text||[]).map(t=>`<p>${t}</p>`).join('');
+
+  if(!durch){
+    /* Ausgemustert. Kein Knopf, keine Wahl — die Listen werden neu
+       geschrieben, und was kein Offizier ist, steht nicht mehr darauf. */
+    S.ende = 'ruhestand';
+    schrankeEnde(n, prosa + `<p>${esc(sch.ende)}</p>`, sch.epilog);
+    return;
+  }
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>${esc(n.ort||sch.name)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="prose">${prosa}</div>
+        <div class="ergebnis gut">${esc(sch.durch)}</div>
+        <div class="wirkung"><span>Was jetzt zur Wahl steht</span>
+          Du bist ${rangName(S.rang)}. Wer geht, bekommt <b>180 Punkte</b> und hört auf.
+          Wer bleibt, behält alles, was er sich noch verdienen kann — und alles, was er verlieren kann.</div>
+      </div></div>
+      <div class="orders"><div class="ch"><span>Wie entscheidest du?</span></div><div class="ordbody">
+        <button class="ord" onclick="schrankeWeiter()">Weitermarschieren
+          <span class="cost">Der Krieg geht weiter, und er braucht dich · +70 am Ende</span></button>
+        <button class="ord" onclick="schrankeGehen()">Den Abschied nehmen
+          <span class="cost">Ruhestand · +180 Punkte · die Laufbahn endet hier</span></button>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+/* Weiter: die Station ist erledigt wie jede andere, und der Feldzug läuft. */
+function schrankeWeiter(){
+  const n = KAPITEL[LAUF.node];
+  S.log.push((n.ort||'') + ': weitermarschiert');
+  stationErledigt();
+  naechster();
+}
+
+function schrankeGehen(){
+  const n = KAPITEL[LAUF.node];
+  const sch = SCHRANKEN[n.schranke] || {};
+  S.ende = 'ruhestand';
+  S.log.push((n.ort||'') + ': den Abschied genommen');
+  schrankeEnde(n, (n.text||[]).map(t=>`<p>${t}</p>`).join('') +
+    `<p>Du meldest dich ab. Es geht schneller, als du gedacht hast — ein Formular, zwei Unterschriften, und der Adjutant sieht dabei nicht auf.</p>`,
+    sch.epilog);
+}
+
+/* Der gemeinsame Abschluss beider Wege. Wertung, Chronikeintrag, Titelrückkehr
+   — dieselbe Maschine wie `zeigeKapitelende()`, nur mit einem anderen Satz
+   darunter und ohne den Ausblick auf ein nächstes Kapitel. */
+function schrankeEnde(n, prosa, epilog){
+  const p = eintragen('Ruhestand · '+rangName(S.rang));
+  const neu = p.rekord;
+  app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
+    <div class="cb"><div class="prose">${prosa}</div>
+      <div class="ergebnis" style="margin-top:14px">${esc(epilog||'')}</div>
+      <div class="grid2" style="margin-top:18px">
+        <div>${wertungsTabelle(p)}</div>
+        <div class="note ${neu?'green':''}">
+          ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
+          <p style="margin-top:10px">Du bist nicht gefallen. Von hundert, die mit dir angefangen haben, sind sechs so weit gekommen, und die meisten davon liegen irgendwo.</p>
+        </div>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="plain" onclick="zeigeErschaffung(true)">Noch einmal, besser</button>
+        <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+        <button class="plain" onclick="speichern()">Spielstand sichern</button>
+      </div>
+    </div></div>`;
+  LAUF=null; binde(); kopfzeile();
 }
 
 function zeigeKapitelende(n){
