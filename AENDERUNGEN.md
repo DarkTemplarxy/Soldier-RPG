@@ -5,6 +5,24 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Kapitel 7: Spanien 1808–1812
+
+**Die eigene Regel: Es gibt hier keinen Ruhm. Nur Entscheidungen, bei denen niemand zusieht.** Vierzehn Stationen, fünf Gefechte, Feindgüte 8, Sold-Moral 0,7.
+
+**`stumm:true`** (`tatenBilanz()` in `src/kampf.js`): Die Leiter der Sichtbarkeit bleibt auf ihrer untersten Stufe stehen — Lob vor der Front gibt es, Nennungen und Bulletins nicht. Historisch: Über fünf Jahre Spanien gibt es kaum eine Meldung, die eine Schlacht feiert. Wer hier aufsteigen will, tut es über die Kasse, die Listen und den Einheitszustand, also die Werkzeuge des Capitaine — **der Rang, der hier wohnt, ist genau deshalb der Capitaine.**
+
+**`ueberfall:true`** (`kampfAktion()` und `kampfEnde()`): kein Linienbeschuss, und Zurückweichen kostet keinen Ruf, weil es keine Zeugen gibt. Der Blutzoll bleibt. **Der eigene Schaden steht damit zum zweiten Mal für sich allein** — das erste Mal war der gelöste Zug ab Rang 8, und dort gab es dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein Handel, sondern eine Lage.
+
+**`einheit:` als Szenenwirkung** (`anwenden()`): Die Repressalien-Entscheidungen kosten nichts, was am Mann hängt — sie schlagen sich darin nieder, wie die Kompanie hinterher funktioniert. Das ist die Währung, in der ein Capitaine bezahlt, und sie liegt zwischen Kameradschaft und Belastung.
+
+**Gefechtswerte gegen die Decke von 22 geeicht:** Saragossa 11 statt 15 (mit `haerte` und Güte also 22), die Überfälle 11 und 12 statt der 16–18 des Entwurfs. **Die Härte eines Überfalls steckt nicht in der Trefferchance, sondern in der fehlenden Linie** — das Gefecht dauert dadurch länger und bringt mehr Runden mit Treffern.
+
+**Kapitel 6 endet jetzt auf `uebergang` statt auf `ende`.**
+
+> **⚠ Eine Falle, beim Bauen gefunden:** `kampfEnde()` arbeitete auf `n.sieg` und `n.niederlage` selbst statt auf einer Kopie. Wer dort für `ueberfall` den Ruf-Abzug auf null setzt, ändert die Kapiteldaten **für jeden weiteren Lauf im selben Browserfenster** — die Sorte Fehler, die man erst nach dreißig Messläufen bemerkt, und dann als Balance-Drift missdeutet. Jetzt `Object.assign({}, …)`.
+
+**Neu: `OFFEN.md`** — ein Register für alles, was gemessen, aber nicht entschieden ist. Bis Kapitel 6 lagen diese Befunde über CLAUDE.md verstreut, jeder im Abschnitt seines Fundorts. Sieben offene Punkte stehen darin, jeder mit Messwert und Hebel; sechs erledigte mit dem Messwert, der sie geschlossen hat.
+
 ## 2026-07-29 — Kapitel 6: Eylau und Friedland 1807
 
 **Die eigene Regel: Der Winter schießt mit.** Dreizehn Stationen, drei Gefechte, Feindgüte 8 (am Hebel ausgelesen), Sold-Moral 0,6 — Polen ist arm, der Nachschub steckt im Schlamm.

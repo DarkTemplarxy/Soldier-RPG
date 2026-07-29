@@ -1985,7 +1985,15 @@ function kampfAktion(id){
      Mann, die auf eigene Rechnung schießen (Faktor 1,6 auf allen eigenen
      Schaden). Ein guter Zug gewinnt damit schneller als je zuvor; ein
      schlechter bekommt nichts geschenkt. */
-  let linie = K.geloest ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
+  /* `n.ueberfall`: **Die zweihundert anderen sind nicht da.** Ein Überfall auf
+     einer spanischen Straße wird von dreißig Mann ausgefochten; es gibt keine
+     Linie, die von allein mitschießt. Damit fällt die wichtigste Zeile des
+     Kampfsystems weg, und der eigene Schaden steht zum zweiten Mal für sich
+     allein — das erste Mal war der gelöste Zug ab Rang 8, und dort gab es
+     dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein
+     Handel, sondern eine Lage. Ausgeglichen wird über kurze Runden und
+     niedrige Feindmoral in den Daten. */
+  let linie = (K.geloest || n.ueberfall) ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */
   if(K.gelaendeVorteil > 0) schaden *= 0.8;
@@ -2473,7 +2481,12 @@ function gefallen(letzterText, todesart){
 
 function kampfEnde(sieg, letzterText){
   const n = KAPITEL[LAUF.node];
-  const erg = sieg ? n.sieg : n.niederlage;
+  /* **Eine Kopie, keine Referenz.** `n.sieg` und `n.niederlage` sind
+     Kapiteldaten und leben so lange wie die Seite; wer sie hier ändert (etwa
+     für `ueberfall`), ändert sie für jeden weiteren Lauf im selben
+     Browserfenster mit. Das wäre die Sorte Fehler, die man erst nach dreißig
+     Messläufen bemerkt. */
+  const erg = Object.assign({}, sieg ? n.sieg : n.niederlage);
 
   /* Der Rückzug kostet Blut — je mehr vom Feind noch steht, desto mehr.
      Ohne diese Zeilen war Verlieren gratis: Wer unter 40 % Leben fiel, kniete
@@ -2499,6 +2512,16 @@ function kampfEnde(sieg, letzterText){
      zahlt den Zoll nie; ein Rekrut mit Muskete 10 verliert sie und zahlt ihn
      fünfmal. Der Unterschied zwischen erstem und drittem Lauf ist damit nicht
      mehr „etwas mehr Leben", sondern „gewinnen oder nicht". */
+  /* ── `ueberfall:true` · Zurückweichen kostet keinen Ruf ──
+     **Es gibt keine Zeugen.** Ein Überfall auf einer Straße in Aragón wird von
+     dreißig Mann ausgefochten und von niemandem beobachtet; was im Bericht
+     steht, schreibt derselbe, der weggegangen ist. Deshalb fällt hier die
+     Ruf-Strafe der Niederlage weg — nicht der Blutzoll, denn eine Kolonne, die
+     rückwärts aus einem Hohlweg geht, lässt trotzdem Männer liegen.
+
+     Der zweite Teil des Schalters steht bei der Linie: Es gibt keine
+     zweihundert anderen, die von allein mitschießen. */
+  if(n.ueberfall && !sieg && erg && erg.ruf < 0) erg.ruf = 0;
   if(!sieg && S.lebt && S.leben > 0){
     const rest = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
     K.rueckzug = Math.round((5 + 13*rest) * (1 + feindGuete(n)*0.2));
@@ -2576,9 +2599,26 @@ function kampfEnde(sieg, letzterText){
       <b>Fürsprache Vernet ${ok?'+1 · Ruf +2':'−1 · Ruf −2'}</b></div>`;
   }
 
+  /* ── `stumm:true` · Die Bulletins schweigen ──
+     **Die eigene Regel von Spanien: Es gibt hier keinen Ruhm. Nur
+     Entscheidungen, bei denen niemand zusieht.** Mechanisch heißt das, dass
+     die Leiter der Sichtbarkeit auf ihrer untersten Stufe stehen bleibt: Lob
+     vor der Front gibt es, weil die Kompanie es sieht — Nennungen und
+     Bulletins nicht, weil in Paris über diesen Krieg nichts gedruckt wird,
+     was gut klänge.
+
+     **Das ist die härteste Umkehrung des Spiels**, und sie ist historisch:
+     Über fünf Jahre Spanien gibt es kaum eine Meldung, die eine Schlacht
+     feiert. Wer hier aufsteigen will, tut es über die Kasse, die Listen und
+     den Einheitszustand — die Werkzeuge des Capitaine, die anderswo Beiwerk
+     sind. Der Rang, der hier wohnt, ist genau deshalb der Capitaine. */
+  const stumm = !!n.stumm;
+  if(stumm) stufe = Math.min(stufe, 1);
+
   S.belobigungen = S.belobigungen || 0;
   S.bulletins = S.bulletins || 0;
   K.stufe = stufe;
+  K.stumm = stumm;
   if(stufe === 1) { S.belobigungen++; S.kameradschaft = Math.min(100, S.kameradschaft+4); }
   if(stufe === 2) { S.nennungen++; }
   if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; }

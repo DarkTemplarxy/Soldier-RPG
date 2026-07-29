@@ -164,7 +164,12 @@ const KAPITEL7 = [
         gelaende:'Mauern, Keller, gesprengte Wände · keine Sicht über zehn Schritt',
         stellung:'Sturmtrupp zu zwanzig, mit Pionieren'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Es dauert sechs Wochen, und am Ende zählt niemand mehr, wer gestorben ist.',
-  runden:9,feindMoral:80,gefahr:15,gelaende:'mauer',
+  /* **Gefahr 11 statt der 15 des Entwurfs.** Mit `haerte` (+3) und Güte 8 sind
+     das 22 — die Decke, die seit Kapitel 5 gilt. Die 15 hätte 26 ergeben und
+     Saragossa zum mit Abstand tödlichsten Gefecht des Spiels gemacht. Was
+     dieses Gefecht hart macht, sind neun Runden gegen Moral 80 in einer Stadt,
+     die Zimmer für Zimmer genommen wird — nicht die Trefferchance. */
+  runden:9,feindMoral:80,gefahr:11,gelaende:'mauer',
   sieg:{text:'Am 20. Februar wird kapituliert. In der Stadt liegen vierundfünfzigtausend Tote — Soldaten, Einwohner, Kinder —, und die Überlebenden marschieren zwischen zwei Reihen hindurch, die schweigen.\\n\\nEin Bulletin darüber gibt es nicht. Es gibt einen Bericht an den Kriegsminister, in dem das Wort „Beispiel" vorkommt.',ruf:6},
   niederlage:{text:'Euer Abschnitt kommt drei Wochen lang nicht über eine Straße. Was das Kloster nimmt, ist im Februar ein anderes Regiment mit mehr Pulver. Die Stadt kapituliert am 20. Februar; vierundfünfzigtausend Tote, und keiner davon gehört zu deinem Erfolg.',ruf:-3,belastung:14}},
 
@@ -183,7 +188,13 @@ const KAPITEL7 = [
         gelaende:'Straße im Talgrund, Hänge mit Ginster und Fels beidseits',
         stellung:'Dreißig Mann in Marschordnung'},
   intro:'Keine Linie hilft. Zurückweichen kostet keinen Ruf — es sieht niemand.',
-  runden:5,feindMoral:35,gefahr:17,gelaende:'wueste',
+  /* **Gefahr 12, nicht 17.** Der Entwurf nannte 16–18 für den Überfall — das
+     war vor der Güte gerechnet und ergäbe hier 25. **Die Härte eines Überfalls
+     steckt nicht in der Trefferchance, sondern in der fehlenden Linie:** Ohne
+     die zweihundert anderen sinkt die Feindmoral nur noch durch das, was man
+     selbst tut, also dauert das Gefecht länger, also kommen mehr Runden mit
+     Treffern. Ausgeglichen wird über kurze Runden und niedrige Moral. */
+  runden:5,feindMoral:35,gefahr:12,gelaende:'wueste',
   sieg:{text:'Nach vier Stunden hört es auf, weil sie weggehen, nicht weil ihr sie vertrieben hättet. Der Kurier kommt durch. Auf der Straße bleiben zwei von euch, und im Hang findet ihr eine Patronentasche und einen Schuh.\\n\\nIm Bericht steht: Depesche zugestellt. Mehr steht nicht drin, und mehr wird auch nicht gefragt.',ruf:3},
   niederlage:{text:'Ihr geht zurück auf den Posten, den ihr am Morgen verlassen habt. Der Kurier geht mit; er reitet am nächsten Tag mit einer stärkeren Bedeckung. Es steht nichts darüber in irgendeinem Bericht, und es fragt auch niemand.',ruf:0,belastung:8}},
 
@@ -244,7 +255,7 @@ const KAPITEL7 = [
         gelaende:'Straße zwischen zwei Hängen, sechzig Wagen in Kolonne',
         stellung:'Kompanie verteilt über zwei Kilometer Wagenzug'},
   intro:'Keine Linie hilft. Und der Sieg zählt nicht — die Wagen zählen.',
-  runden:5,feindMoral:40,gefahr:16,gelaende:'wueste',
+  runden:5,feindMoral:40,gefahr:11,gelaende:'wueste',
   sieg:{text:'Gegen Abend fahrt ihr weiter. Achtundvierzig Wagen von sechzig kommen an; zwölf brennen an der Straße, weil man sie nicht wieder in Gang bekommen hat.\\n\\nIn Ciudad Rodrigo zählt ein Zahlmeister die Fässer und schreibt eine Zahl auf. Er fragt nicht, wie viele Männer euch das gekostet hat, und es steht auch in keinem Formular ein Feld dafür.',ruf:5},
   niederlage:{text:'Ihr bringt die Kompanie heraus und dreiundzwanzig Wagen. Der Rest steht am nächsten Morgen noch da, ausgeräumt. In Ciudad Rodrigo wird die Ration gekürzt, und irgendwann wird jemand ausrechnen, was das gekostet hat.',ruf:-2,belastung:10}},
 

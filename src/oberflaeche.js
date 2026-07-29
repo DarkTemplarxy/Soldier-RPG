@@ -1577,7 +1577,7 @@ function waehleOption(i){
 function wirkungen(e){
   const t=[];
   const m = {ruf:'Ruf',gunst:'Gunst '+personKurz(e.gunstVon||'martel'),kameradschaft:'Kameradschaft',
-             belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben'};
+             belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben',einheit:'Zustand der Einheit'};
   for(const k in m) if(e[k]) t.push(`${m[k]} ${e[k]>0?'+':''}${e[k]}`);
   if(e.attr) for(const k in e.attr) t.push(`${wertName(k)} ${e.attr[k]>0?'+':''}${e.attr[k]}`);
   if(e.fert) for(const k in e.fert) if(e.fert[k]) t.push(`${wertName(k)} ${e.fert[k]>0?'+':''}${e.fert[k]}`);

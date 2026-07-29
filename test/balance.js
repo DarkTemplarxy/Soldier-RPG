@@ -427,7 +427,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
          Station — und die Jahreszahl ist eindeutig. */
       const j = (d.ort.match(/1[78]\d\d/) || ['?'])[0];
       const kap = j <= '1797' ? 'Italien' : j <= '1799' ? 'Ägypten'
-                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : 'Eylau';
+                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : 'Spanien';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
       res.sterbestation.push(d.stationen);
     }

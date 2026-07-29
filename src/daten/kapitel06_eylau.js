@@ -276,15 +276,14 @@ const KAPITEL6 = [
        geld:-12,belastung:-16,kameradschaft:8}}
   ]},
 
-/* 94 */ {typ:'ende',id:'ende_eylau',datum:'Sommer 1807 · Rückmarsch nach Westen',ort:'Der Friede von Tilsit',
+/* 94 */ {typ:'uebergang',id:'ende_eylau',datum:'Sommer 1807 · Rückmarsch nach Westen',ort:'Der Friede von Tilsit',
   marsch:{von:'Tilsit',nach:'Garnison in Deutschland',weg:'Ein Jahr Ruhe · das erste seit Boulogne'},
   text:[
     'Der Krieg ist zu Ende, und zwar so gründlich, wie ein Krieg nur zu Ende sein kann: Österreich geschlagen, Preußen halbiert, Russland verbündet. Auf dem Festland gibt es niemanden mehr, gegen den man Krieg führen könnte.',
     'Die Armee marschiert nach Westen und bezieht Garnisonen in Deutschland. Es wird ein Jahr, in dem nichts passiert — Wachdienst, Exerzieren, Sold, und abends ein Wirtshaus, in dem man verstanden wird, wenn man Französisch spricht.',
     'Wer 1807 überlebt hat, hat den blutigsten Tag dieses Krieges hinter sich und weiß es. Bei Eylau sind an einem Tag fünfundzwanzigtausend Männer liegen geblieben, für nichts, das man auf einer Karte zeigen könnte.',
     'Es heißt, im Süden gebe es Schwierigkeiten. Spanien sei verbündet, aber Portugal nicht, und der Kaiser habe ein Korps über die Pyrenäen geschickt. In der Kompanie hält das niemand für eine Nachricht.'
-  ],
-  ausblick:'<b>Hier endet der gebaute Stand.</b> Im Frühjahr 1808 marschiert ein Korps über die Pyrenäen, angeblich nach Portugal. Was daraus wird, dauert fünf Jahre, kostet dreihunderttausend Mann und heißt später „das spanische Geschwür". Es wird der einzige Krieg dieser Laufbahn sein, über den die Bulletins schweigen.'}
+  ]}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

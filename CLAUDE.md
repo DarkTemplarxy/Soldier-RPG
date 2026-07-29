@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)**, **Kapitel 5 (Jena–Auerstedt 1806)** und **Kapitel 6 (Eylau und Friedland 1807)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)**, **Kapitel 5 (Jena–Auerstedt 1806)** **Kapitel 6 (Eylau und Friedland 1807)** und **Kapitel 7 (Spanien 1808–12)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -64,6 +64,10 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | **Der Frost** (`frost:n`) — der Mantel wird rückwirkend wichtig | Russland in zwei Stufen |
 | **Der Sturm** (`sturm:true`) — der Feind ist nur noch eine Schätzung | |
 | **Offizier der Ehrenlegion** — der zweite Ordensgrad | Commandeur, Grand Officier |
+| **Kapitel 7 (Spanien 1808–12)**, 14 Stationen, Feindgüte 8 | Kapitel 8–11 |
+| **Der Überfall** (`ueberfall:true`) — keine Linie, keine Zeugen | |
+| **Der stumme Krieg** (`stumm:true`) — die Bulletins schweigen | |
+| **`OFFEN.md`** — ein Register für alles Gemessene, nicht Entschiedene | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -101,6 +105,7 @@ CLAUDE.md                       diese Datei — Arbeitsgedächtnis
 KONZEPT.md                      vollständiges Design, auch das Ungebaute
 RANGLEITER.md                   die vierzehn Ränge, Schwellen, Brüche, Baureihenfolge
 AENDERUNGEN.md                  Protokoll aller Balance-Änderungen
+OFFEN.md                        Register der gemessenen, aber nicht entschiedenen Punkte
 LICENSE / LICENSE-INHALTE       MIT für Code, CC BY-NC-SA für Inhalte
 entwurf/                        Konzeptgrafiken, Bildschirmfotos, GITHUB.md
 wiki.html                       Handbuch und offene Punkte, eigenständige Seite
@@ -113,6 +118,7 @@ src/daten/kapitel03_garnison.js Kapitel 3 — das Friedenskapitel, Saisons statt
 src/daten/kapitel04_austerlitz.js Kapitel 4 — die Ernte von Boulogne, Feindgüte 6
 src/daten/kapitel05_jena.js     Kapitel 5 — der Krieg mit den Beinen, Feindgüte 7
 src/daten/kapitel06_eylau.js    Kapitel 6 — der Winter schießt mit, Feindgüte 8
+src/daten/kapitel07_spanien.js  Kapitel 7 — kein Ruhm, nur Entscheidungen, Feindgüte 8
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -603,6 +609,35 @@ Bei Eylau schneite es waagerecht, und beide Armeen verloren einander. Der Schalt
 
 > **Das widersprach dem Entwurf der Stabsränge an der empfindlichsten Stelle.** Ab Rang 10 ist der Gefahrzuschlag null („du stehst nicht mehr im Feuer", RANGLEITER §8), und an seiner Stelle steht das Stabsereignis mit 8 % — selten, ohne Vorwarnung, **und man kann sich nicht hinwerfen.** Das ist die Ersatzgefahr des Stabes, und daneben gehört keine zweite. Jetzt: `rang >= 7 && rang < 10`.
 
+### Kapitel 7 — Spanien 1808–1812 (`kapitel07_spanien.js`)
+
+**Die eigene Regel: Es gibt hier keinen Ruhm. Nur Entscheidungen, bei denen niemand zusieht.** Das längste Kapitel — vier Jahre in vierzehn Stationen — und die Umkehrung von allem, was das Spiel bisher belohnt hat.
+
+| Gefecht | Runden | Feindmoral | Gefahr | Güte | dazu |
+|---|---|---|---|---|---|
+| Madrid, der zweite Mai | 6 | 45 | 12 | +8 | stumm |
+| Somosierra | 6 | 55 | 12 | +8 | stumm |
+| **Saragossa (Höhepunkt)** | 9 | 80 | 11 → 14 | +8 | stumm → **22** |
+| Die Straße, die keine ist | 5 | 35 | 12 | +8 | **Überfall** |
+| Der Konvoi | 5 | 40 | 11 | +8 | **Überfall** |
+
+### `stumm:true` — die Bulletins schweigen
+
+Die Leiter der Sichtbarkeit bleibt auf ihrer untersten Stufe stehen: **Lob vor der Front gibt es, Nennungen und Bulletins nicht.** Die Kompanie sieht, was du tust; Paris druckt über diesen Krieg nichts, was gut klänge.
+
+> **Das ist die härteste Umkehrung des Spiels, und sie ist historisch.** Über fünf Jahre Spanien gibt es kaum eine Meldung, die eine Schlacht feiert. Wer hier aufsteigen will, tut es über die Kasse, die Listen und den Einheitszustand — die Werkzeuge des Capitaine, die anderswo Beiwerk sind. **Der Rang, der hier wohnt, ist genau deshalb der Capitaine.**
+
+### `ueberfall:true` — keine Linie, keine Zeugen
+
+| Was | Warum |
+|---|---|
+| **Kein Linienbeschuss** (`linie = 0`) | Es gibt keine zweihundert anderen. Der eigene Schaden steht zum zweiten Mal für sich allein — das erste Mal war der gelöste Zug ab Rang 8, und dort gab es dafür den Faktor 1,6. **Hier gibt es ihn nicht:** Ein Überfall ist kein Handel, sondern eine Lage. |
+| **Zurückweichen kostet keinen Ruf** | Der Bericht wird von dem geschrieben, der weggegangen ist. Der Blutzoll bleibt: Eine Kolonne, die rückwärts aus einem Hohlweg geht, lässt trotzdem Männer liegen. |
+
+> **Die Härte eines Überfalls steckt nicht in der Trefferchance.** Der Entwurf nannte Gefahr 16–18 — das war vor der Güte gerechnet und ergäbe hier 24 bis 26, also weit über der Decke. Gebaut sind 11 und 12 (also 19 und 20): Was den Überfall teuer macht, ist die fehlende Linie, weil das Gefecht dadurch länger dauert und mehr Runden mit Treffern bringt.
+
+> **Und eine Falle, die beim Bauen aufgefallen ist:** `kampfEnde()` arbeitete auf `n.niederlage` selbst statt auf einer Kopie. Wer dort für `ueberfall` den Ruf-Abzug auf null setzt, ändert die Kapiteldaten **für jeden weiteren Lauf im selben Browserfenster**. Das wäre die Sorte Fehler, die man erst nach dreißig Messläufen bemerkt. Jetzt `Object.assign({}, …)`.
+
 ### Rang 6 — Sergent-major und der Zug
 
 **Die Decke des Prototyps hatte seit Boulogne ein Gesicht.** Dort stand: *„Nichts frei. Auf dem Posten sitzt Martel, zweiundvierzig und gesund."* Jetzt kommt der Feldzug, in dem eine Vakanz entstehen kann.
@@ -803,6 +838,7 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 | Caporal-fourrier | 1,20 | | Austerlitz 1805 | **0,9** |
 | Sergent | 1,50 | | Jena–Auerstedt 1806 | **0,8** |
 | Sergent-major | 2,00 | | Eylau & Friedland 1807 | **0,6** |
+| Sous-Lieutenant | 2,10 | | Spanien 1808–12 | **0,7** |
 
 > **Geeicht am Marketender, nicht am Geschichtsbuch.** Historisch bekam ein Fusilier fünf Sous am Tag — im Spiel wären das **1,4 Francs für den ganzen Italienfeldzug** gewesen: korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen: **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender kaufen** (8–18 F).
 
@@ -1444,6 +1480,14 @@ Gültige Werte in `src/stil.css`:
 **Die Probenrechnung wird nicht mehr ausgeschrieben.** Bis dahin stand da `GESCHICK 80 gegen 30 → Zielwert 95 · gewürfelt 52 · GELUNGEN`. Wert und Schwierigkeit stehen schon *vor* der Wahl auf dem Knopf — dort helfen sie beim Entscheiden. Hinterher sind Zielwert und Wurf nur noch Rechenweg, und der gehört nicht ins Spiel. Jetzt: `Geschick — gelungen`. `probe()` liefert `wurf`, `ziel` und `wertRoh` weiterhin zurück, falls man sie zum Prüfen braucht.
 
 Wer die Palette abdunkelt, macht die Hälfte der Oberfläche wieder unlesbar. Der nüchterne Ton entsteht aus den Texten, nicht aus schwachem Kontrast.
+
+---
+
+## Offene Punkte
+
+**Alles, was gemessen, aber nicht entschieden ist, steht in [`OFFEN.md`](OFFEN.md)** — mit Messwert, Hebel und Fundort. Bis Kapitel 6 lagen diese Befunde über diese Datei verstreut, jeder im Abschnitt seines Fundorts, und damit fand sie nur, wer ohnehin dort las.
+
+**Wer eine Sitzung anfängt, liest `OFFEN.md` nach dieser Datei.** Wer einen Befund macht und ihn nicht sofort löst, trägt ihn dort ein — kein Punkt ohne Zahl, kein Punkt ohne Hebel.
 
 ---
 

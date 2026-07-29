@@ -420,6 +420,13 @@ function anwenden(e){
      Dinge). Bewusst schmal: nur setzen, nie rechnen — wer eine Zahl braucht,
      nimmt eines der bestehenden Felder. */
   if(e.setzt) for(const k in e.setzt) S[k] = e.setzt[k];
+  /* Der Zustand der Einheit als Wirkung einer Szene. Gebraucht wird das zum
+     ersten Mal in Spanien: Die Repressalien-Entscheidungen kosten oder bringen
+     nichts, was am Mann hängt — sie schlagen sich darin nieder, wie die
+     Kompanie hinterher funktioniert. **Das ist die Währung, in der ein
+     Capitaine bezahlt**, und sie liegt zwischen Kameradschaft (was die Leute
+     von dir halten) und Belastung (was du selbst mit dir herumträgst). */
+  if(e.einheit) S.einheit = Math.max(0, Math.min(100, (S.einheit==null?70:S.einheit) + e.einheit));
   /* ── Ein Gegenstand, den man vorher nicht hatte ──
      `ausr:` verändert den Zustand vorhandener Ausrüstung; `ausruestung:` legt
      ein Stück neu an. Gebraucht wird das zum ersten Mal für den Mantel: Ohne
