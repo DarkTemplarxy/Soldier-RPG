@@ -137,7 +137,13 @@ const RAENGE = process.argv[3] ? [parseInt(process.argv[3], 10)] : [1, 5, 8, 12]
       { kap: KAP, ges: [...gesehen] });
 
     const sollBild = rang >= 12 ? 'karte' : rang >= 10 ? 'rechtecke' : rang >= 7 ? 'skizze' : 'sichtfeld';
-    const falschesBild = [...bilder].filter(x => x !== sollBild);
+    /* **Ab Rang 7 ist das Sichtfeld kein falsches Bild, sondern ein zweites.**
+       Bricht die Linie (`K.nahkampf`), fällt der Bildschirm zwei bis drei
+       Runden auf die Männer und den Rauch von 1796 zurück — der einzige
+       Augenblick, in dem der Säbelwert noch etwas tut. Ein Prüfstand, der das
+       als Fehler meldet, misst den Entwurf statt der Ausführung. */
+    const erlaubt = rang >= 7 && rang < 10 ? [sollBild, 'sichtfeld'] : [sollBild];
+    const falschesBild = [...bilder].filter(x => !erlaubt.includes(x));
 
     let zeile = `Rang ${String(rang).padStart(2)}: ${gesehen.size}/${start.n} Stationen · ${ende}`;
     if (bilder.size) zeile += ` · Gefechtsbild ${[...bilder].join('+')}`;

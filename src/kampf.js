@@ -382,7 +382,21 @@ function auftragFuer(n){
    (siehe `nutzen()`). Wer im Lager nie auf dem Fechtboden war, merkt genau
    hier, was zehn Jahre Schreibtisch mit einem Mann machen. */
 function nahkampfPruefen(n){
-  if(S.rang < 7 || K.nahkampf > 0) return '';
+  /* ── Nur die Ränge 7 bis 9 ──
+     **Gefunden vom Kapitelprüfstand bei Eylau:** Die Bedingung lautete
+     `rang < 7` und ließ die Linie damit bis zum Marschall brechen — ein
+     Général de brigade zog auf der Operationskarte den Säbel, weil ein
+     Karree, das er nie gesehen hat, an einer Seite nachgab.
+     `K.sektion` ist ab Rang 10 leer, also griff nur der `bestand`-Auslöser
+     nicht; die drei anderen schon.
+
+     Das widerspricht dem Entwurf der Stabsränge an der empfindlichsten
+     Stelle: Ab Rang 10 ist der Gefahrzuschlag **null** („du stehst nicht mehr
+     im Feuer", RANGLEITER §8), und an seiner Stelle steht das Stabsereignis
+     mit 8 % — ein Streuschuss, ein stürzendes Pferd, und **man kann sich
+     nicht hinwerfen.** Das ist die Ersatzgefahr des Stabes, und daneben
+     gehört keine zweite. */
+  if(S.rang < 7 || S.rang >= 10 || K.nahkampf > 0) return '';
   const kap = (typeof kapitelVon==='function') ? kapitelVon(n) : 'x';
   if((S.nahkampfKapitel||[]).includes(kap)) return '';
   let grund = '';

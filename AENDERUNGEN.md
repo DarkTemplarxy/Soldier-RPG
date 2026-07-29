@@ -5,6 +5,24 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Kapitel 6: Eylau und Friedland 1807
+
+**Die eigene Regel: Der Winter schießt mit.** Dreizehn Stationen, drei Gefechte, Feindgüte 8 (am Hebel ausgelesen), Sold-Moral 0,6 — Polen ist arm, der Nachschub steckt im Schlamm.
+
+**Der Frost** (`frost:n`, `frostWirken()` in `src/mechanik.js`): Jede Station unter freiem Himmel kostet Belastung +4 und zusätzlichen Verschleiß; ohne Mantel dazu eine zehrende Wunde, deren Zehrung die Stufe ist. Er taut auf, sobald eine Station ein Dach hat — er ist kein Fieber, sondern der Zustand, in dem man gerade lebt.
+
+> **Das ist bewusst kein neues System, sondern die Aufwertung eines alten.** Der Beutemantel liegt seit Kapitel 1 im Laden und war der unscheinbarste Posten darin. **Und er darf keine Mautstelle sein:** Wer ihn nicht gekauft hat, kann im Januar einen von einem toten Russen nehmen — schlechter, aber ein Mantel. Dafür kennt `anwenden()` jetzt `ausruestung:`, das ein Stück neu anlegt statt nur seinen Zustand zu ändern.
+
+**Der Sturm** (`sturm:true`, `feindAnzeige()` in `src/kampf.js`): Gefahr −4 und eigener Schaden ×0,8 — inklusive der Hilfe der Linie, denn ein Sturm, der nur den Feind blind macht, wäre ein Geschenk. Dazu **kein Widerstandswert und kein Balken**, sondern eine Schätzung. Es ist der vierte Bruch zehn Ränge zu früh und von außen statt von oben: Wer im Schneetreiben steht, muss entscheiden, ohne zu wissen — wie später der General mit einer vierzig Minuten alten Meldung.
+
+**Der zweite Ordensgrad**: Offizier der Ehrenlegion, ab 1807, Pension 2,0. Er setzt den ersten Grad *und* ein Patent voraus — historisch wurden Mannschaften Légionnaire und Offiziere Officier. Am Abzeichen unterscheidet ihn die Rosette im Band, der einzige Unterschied, den man auf sechsunddreißig Pixel sieht.
+
+**Gefechtswerte gegen die Regel aus Kapitel 5 geeicht:** Friedland steht auf Gefahr 11 statt der 13 des Entwurfs (mit `haerte` und Güte 8 also 22, auf der Höhe von Akkon, Austerlitz und Jena); Eylau kommt durch den Sturm auf wirksame 20. **Eylau ist nicht das Gefecht, in dem man am ehesten getroffen wird, sondern das, in dem man nicht sieht, wie es steht.**
+
+**Kapitel 5 endet jetzt auf `uebergang` statt auf `ende`.**
+
+> **⚠ Ein echter Fehler, gefunden vom Kapitelprüfstand: Der Nahkampf hörte bei Rang 14 auf statt bei Rang 9.** `nahkampfPruefen()` prüfte nur `rang < 7`. Ein Général de brigade zog auf der Operationskarte den Säbel, weil ein Karree, das er nie gesehen hat, an einer Seite nachgab — `K.sektion` ist ab Rang 10 leer, also griff der `bestand`-Auslöser nicht, die drei anderen schon. Das widersprach dem Entwurf der Stabsränge an der empfindlichsten Stelle: Ab Rang 10 ist der Gefahrzuschlag null, und an seiner Stelle steht das Stabsereignis mit 8 %. Daneben gehört keine zweite Gefahr. Jetzt `rang >= 7 && rang < 10`.
+
 ## 2026-07-29 — Kapitel 5: Jena–Auerstedt 1806
 
 **Die eigene Regel: Der Krieg wird mit den Beinen gewonnen.** Siebzehn Stationen, drei Gefechte, drei Marschentscheidungen — das Verhältnis bildet den Feldzug ab: vierzehn Tage marschiert, zwei Tage geschossen, und danach gibt es keine preußische Armee mehr.

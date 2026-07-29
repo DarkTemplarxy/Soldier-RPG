@@ -6,9 +6,11 @@
    **Der Winter schießt mit.**
 
    Das erste Kapitel, in dem das Wetter ein Gegner mit Werten ist. Jede Station
-   unter freiem Himmel trägt `frost:1` — Belastung +4, anderthalbfacher
-   Verschleiß, und wer keinen Mantel hat, bekommt eine zehrende Wunde, die erst
-   unter einem Dach wieder aufhört.
+   unter freiem Himmel trägt `frost:2` — Belastung +4, anderthalbfacher
+   Verschleiß, und wer keinen Mantel hat, bekommt eine zehrende Wunde, die zwei
+   Lebenspunkte je Station frisst und erst unter einem Dach wieder aufhört. Die
+   Stufe *ist* die Zehrung (KAMPAGNEN §2: `zehrt 2`); Russland fährt sie später
+   auf 3 und 4.
 
    **Das ist bewusst kein neues System, sondern die Aufwertung eines alten.**
    Der Beutemantel liegt seit Kapitel 1 im Kaufladen und war der unscheinbarste
@@ -44,7 +46,7 @@
 const KAPITEL6 = [
 
 /* 82 */ {typ:'szene',id:'ostpreussen',datum:'Januar 1807 · Ostpreußen',ort:'Der erste Winter',
-  frost:1,
+  frost:2,
   marsch:{von:'Winterlinie an der Weichsel',nach:'Nach Nordosten, gegen Bennigsen',weg:'200 km in vierzehn Tagen · minus fünfzehn Grad, kein Quartier'},
   zwischenfall:true,
   text:[
@@ -73,7 +75,7 @@ const KAPITEL6 = [
   rangText:{7:['Von deinen sechzig Mann haben achtzehn keinen Mantel. Du hast eine Liste, auf der das steht, und ein Formblatt, mit dem man Mäntel anfordert, und das Formblatt geht an ein Magazin, das dreihundert Kilometer hinter euch steht.']}},
 
 /* 83 */ {typ:'szene',id:'vorwerk',datum:'Anfang Februar 1807 · Ein Vorwerk am Weg',ort:'Wer kommt unters Dach',
-  frost:1,
+  frost:2,
   text:[
     'Ein Gutshof mit einem Wohnhaus, zwei Ställen und einer Scheune, achtzig Kilometer vor Eylau. Das Regiment hat ihn für eine Nacht, und in den Ställen ist Platz für zweihundert von achthundert.',
     'Der Verwalter steht in der Tür und redet auf Deutsch. Er sagt, er habe schon dreimal einquartiert und nichts mehr, und beim dritten Mal stimmte es sogar.',
@@ -99,7 +101,7 @@ const KAPITEL6 = [
   ]},
 
 /* 84 */ {typ:'kampf',id:'eylau',datum:'8. Februar 1807 · Preußisch Eylau',ort:'Der Friedhof',
-  haerte:1.4, frost:1, sturm:true,
+  haerte:1.4, frost:2, sturm:true,
   marsch:{von:'Vorwerk bei Landsberg',nach:'Preußisch Eylau',weg:'25 km durch Neuschnee · angetreten um sechs, angekommen im Dunkeln'},
   anmarschKosten:{verschleiss:0.2,atem:8,belastung:3},
   anmarsch:[
@@ -118,7 +120,7 @@ const KAPITEL6 = [
   niederlage:{text:'Der Kirchhof wechselt viermal den Besitzer, und beim vierten Mal seid ihr nicht mehr dabei. In der Nacht zieht der Feind ab, was den Tag zu einem Sieg macht, an dem du keinen Anteil hast. Auf dem Feld liegen fünfundzwanzigtausend.',ruf:-3,belastung:14}},
 
 /* 85 */ {typ:'szene',id:'morgen_danach',datum:'9. Februar 1807 · Das Feld bei Eylau',ort:'Der Morgen',
-  frost:1,
+  frost:2,
   text:[
     'Es ist hell geworden, der Schnee hat aufgehört, und man sieht zum ersten Mal seit dreißig Stunden weiter als dreißig Schritt.',
     'Auf einer Fläche von acht Quadratkilometern liegen fünfundzwanzigtausend Männer, die meisten davon dort, wo sie in Linie gestanden haben — man erkennt die Linien noch, weil sie gerade sind. Zwischen ihnen stehen Pferde, die nicht weggehen.',
@@ -233,7 +235,16 @@ const KAPITEL6 = [
         gelaende:'Getreidefelder, ein Mühlbach, dahinter die Stadt und drei Brücken',
         stellung:'Erstes Treffen, linker Flügel'},
   intro:'Das hier wird kein gewöhnliches Gefecht. Sie stehen mit dem Rücken an einem Fluss, und das weiß jeder auf beiden Seiten.',
-  runden:8,feindMoral:72,gefahr:13,gelaende:'bruecke',
+  /* **Gefahr 11 statt der 13 aus dem Entwurf.** Mit `haerte` (+3) und Güte 8
+     landet Friedland bei 22 — auf der Höhe von Akkon, Austerlitz und Jena.
+     Die 13 hätte 24 ergeben und damit die Regel gebrochen, die mit Kapitel 5
+     aufgestellt wurde: Kein Gefecht geht über 22, wenn nicht das Gefecht
+     selbst die Regel seines Kapitels ist. Die Regel dieses Kapitels ist der
+     Winter — und Eylau, das sie trägt, kommt durch den Sturm (−4) sogar auf
+     20. **Das ist Absicht: Eylau ist nicht das Gefecht, in dem man am
+     ehesten getroffen wird, sondern das, in dem man nicht sieht, wie es
+     steht.** */
+  runden:8,feindMoral:72,gefahr:11,gelaende:'bruecke',
   sieg:{text:'Um acht Uhr abends brennt Friedland, und die Brücken brennen mit. Was auf dieser Seite steht, kommt nicht mehr hinüber; ein Teil versucht die Furt und findet sie nicht.\\n\\nEs ist ein Sieg, wie es ihn seit Austerlitz nicht gegeben hat, und er ist in drei Stunden erledigt. Zwei Wochen später steht auf einem Floß in der Mitte des Njemen ein Zelt, in dem sich zwei Kaiser umarmen.',ruf:12,ruhm:true},
   niederlage:{text:'Euer Flügel kommt bis an den Mühlbach und nicht weiter. Was die Stadt nimmt, sind gegen sieben Uhr die anderen. Der Sieg ist vollständig, und dein Teil daran ist es nicht.',ruf:-4,belastung:12}},
 

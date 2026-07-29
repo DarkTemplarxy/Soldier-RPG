@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)** und **Kapitel 5 (Jena–Auerstedt 1806)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)**, **Kapitel 4 (Austerlitz 1805)**, **Kapitel 5 (Jena–Auerstedt 1806)** und **Kapitel 6 (Eylau und Friedland 1807)**, alle vierzehn Ränge, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -60,6 +60,10 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | **Die Tempowahl** — drei Marschknöpfe, forciert überspringt eine Station | Überfall, Frost, Schranken |
 | **Rangfassungen in Szenen** (`rangText`, `rangOptionen`) | |
 | **Prüfstand `test/kapitel.js`** — ein Kapitel auf vier Rängen | |
+| **Kapitel 6 (Eylau und Friedland 1807)**, 13 Stationen, Feindgüte 8 | Kapitel 7–11 |
+| **Der Frost** (`frost:n`) — der Mantel wird rückwirkend wichtig | Russland in zwei Stufen |
+| **Der Sturm** (`sturm:true`) — der Feind ist nur noch eine Schätzung | |
+| **Offizier der Ehrenlegion** — der zweite Ordensgrad | Commandeur, Grand Officier |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -108,6 +112,7 @@ src/daten/kapitel02_aegypten.js Kapitel 2 als reine Daten, hängt sich selbst an
 src/daten/kapitel03_garnison.js Kapitel 3 — das Friedenskapitel, Saisons statt Lager
 src/daten/kapitel04_austerlitz.js Kapitel 4 — die Ernte von Boulogne, Feindgüte 6
 src/daten/kapitel05_jena.js     Kapitel 5 — der Krieg mit den Beinen, Feindgüte 7
+src/daten/kapitel06_eylau.js    Kapitel 6 — der Winter schießt mit, Feindgüte 8
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -558,6 +563,46 @@ Der Boden 0,3 wird bei **Güte 4,67** erreicht. Das heißt: **Ägypten (5), Aust
 >
 > **Für die Kapitel 6 bis 11 heißt das: Die Güte allein trägt die Eskalation nicht.** Was ein spätes Kapitel hart macht, muss aus seiner eigenen Regel kommen — der Frost, der Überfall, der doppelte Verschleiß ohne Ersatz. Genau so steht es in KAMPAGNEN, und genau deshalb steht es dort.
 
+### Kapitel 6 — Eylau und Friedland 1807 (`kapitel06_eylau.js`)
+
+**Die eigene Regel: Der Winter schießt mit.** Das erste Kapitel, in dem das Wetter ein Gegner mit Werten ist — und ausdrücklich **kein neues System, sondern die Aufwertung eines alten**: Der Beutemantel liegt seit Kapitel 1 im Laden und war der unscheinbarste Posten darin. Hier wird er zum wichtigsten. Genau wie die Schuhe in der Tempowahl.
+
+| Gefecht | Runden | Feindmoral | Gefahr | Güte | dazu |
+|---|---|---|---|---|---|
+| **Eylau (Höhepunkt)** | 9 | 88 | 13 → 16 | +8 | **Sturm −4** → wirksam **20** |
+| Heilsberg | 7 | 60 | 12 | +8 | — |
+| **Friedland (Höhepunkt)** | 8 | 72 | 11 → 14 | +8 | → **22** |
+
+> **Friedland liegt bei 11, nicht bei den 13 des Entwurfs, und Eylau kommt durch den Sturm auf 20.** Beides folgt der Regel aus Kapitel 5: *Kein Gefecht geht über 22, wenn nicht das Gefecht selbst die Regel seines Kapitels ist.* Die Regel dieses Kapitels ist der Winter — und dass **Eylau nicht das Gefecht ist, in dem man am ehesten getroffen wird, sondern das, in dem man nicht sieht, wie es steht.**
+
+### Der Frost (`frostWirken()` in `src/mechanik.js`)
+
+`frost:n` an einer Station heißt: Sie wird unter freiem Himmel verbracht. **Die Stufe *ist* die Zehrung** — 2 in Ostpreußen, 3 und 4 später in Russland.
+
+| | mit Mantel | ohne |
+|---|---|---|
+| Belastung | +4 je Station | +4 |
+| Verschleiß | +0,1 je Stufe (bei Stufe 2 also ×1,5 gegenüber der Szenen-Pauschale 0,35) | dasselbe |
+| Leben | — | **eine zehrende Wunde, Zehrung = Stufe** |
+
+- **Der Frost taut auf, sobald eine Station ein Dach hat.** Er ist kein Fieber, das man mitschleppt, sondern der Zustand, in dem man gerade lebt — deshalb wird die Wunde *entfernt* und nicht geheilt. Es gibt nichts zuzunähen.
+- **Er darf keine Mautstelle sein.** Wer den Mantel nicht gekauft hat, kann ihn im Januar von einem toten Russen nehmen (`ausruestung:` in `anwenden()`, neu) — schlechter als der gekaufte, aber ein Mantel. Ein Kapitel, dessen eigene Regel nur mit Veteranenpunkten zu bestehen wäre, verstieße gegen Invariante 3.
+
+### Der Sturm (`sturm:true`, `feindAnzeige()` in `src/kampf.js`)
+
+Bei Eylau schneite es waagerecht, und beide Armeen verloren einander. Der Schalter tut zweierlei, und beides gehört zusammen:
+
+- **Gefahr −4 und eigener Schaden ×0,8** — inklusive der Hilfe der Linie. Ein Sturm, der nur den Feind blind macht, wäre ein Geschenk, und ein Geschenk ist keine eigene Regel.
+- **Kein Widerstandswert und kein Balken**, sondern eine Schätzung: „VIELLEICHT DIE HÄLFTE", „ER GIBT NACH, GLAUBT MAN".
+
+> **Das ist der vierte Bruch, zehn Ränge zu früh — und von außen statt von oben.** Ein Fusilier im Schneetreiben hat dasselbe Problem wie ein General mit einer Meldung von vor vierzig Minuten: **Er muss entscheiden, ohne zu wissen.** Dass sich zwölf Spieljahre später dieselbe Zeile wiederholt, nur weil der Rang sie erzwingt statt des Wetters, ist die Absicht.
+
+### Der Nahkampf hörte bei Rang 14 auf statt bei Rang 9
+
+**Zweiter echter Fund des Kapitelprüfstands.** `nahkampfPruefen()` prüfte `rang < 7` und ließ die Linie damit bis zum Marschall brechen: Ein Général de brigade zog auf der Operationskarte den Säbel, weil ein Karree, das er nie gesehen hat, an einer Seite nachgab. `K.sektion` ist ab Rang 10 leer, also griff nur der `bestand`-Auslöser nicht — die drei anderen schon.
+
+> **Das widersprach dem Entwurf der Stabsränge an der empfindlichsten Stelle.** Ab Rang 10 ist der Gefahrzuschlag null („du stehst nicht mehr im Feuer", RANGLEITER §8), und an seiner Stelle steht das Stabsereignis mit 8 % — selten, ohne Vorwarnung, **und man kann sich nicht hinwerfen.** Das ist die Ersatzgefahr des Stabes, und daneben gehört keine zweite. Jetzt: `rang >= 7 && rang < 10`.
+
 ### Rang 6 — Sergent-major und der Zug
 
 **Die Decke des Prototyps hatte seit Boulogne ein Gesicht.** Dort stand: *„Nichts frei. Auf dem Posten sitzt Martel, zweiundvierzig und gesund."* Jetzt kommt der Feldzug, in dem eine Vakanz entstehen kann.
@@ -757,7 +802,7 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 | Caporal | 1,00 | | Garnison 1801–04 | **1,0** |
 | Caporal-fourrier | 1,20 | | Austerlitz 1805 | **0,9** |
 | Sergent | 1,50 | | Jena–Auerstedt 1806 | **0,8** |
-| Sergent-major | 2,00 | | | |
+| Sergent-major | 2,00 | | Eylau & Friedland 1807 | **0,6** |
 
 > **Geeicht am Marketender, nicht am Geschichtsbuch.** Historisch bekam ein Fusilier fünf Sous am Tag — im Spiel wären das **1,4 Francs für den ganzen Italienfeldzug** gewesen: korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen: **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender kaufen** (8–18 F).
 

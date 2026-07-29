@@ -429,14 +429,14 @@ const KAPITEL5 = [
     'Drei Wochen unter einem Dach. Es sind die letzten drei Wochen dieser Art für lange Zeit, und das weiß in diesem Dezember niemand.'
   ]},
 
-/* 81 */ {typ:'ende',id:'ende_jena',datum:'31. Dezember 1806 · Biwak an der Weichsel',ort:'Das Jahr endet',
+/* 81 */ {typ:'uebergang',id:'ende_jena',datum:'31. Dezember 1806 · Biwak an der Weichsel',ort:'Das Jahr endet',
   text:[
     'Zwischen dem 8. Oktober und dem 7. November ist die preußische Armee verschwunden. Nicht geschlagen — verschwunden: einhundertvierzigtausend Gefangene, dreitausend Geschütze, jede Festung zwischen Elbe und Oder, und ein König, der sich nach Ostpreußen zurückgezogen hat, an das äußerste Ende seines Landes.',
     'Es hat vier Wochen gedauert. Vierzehn Tage davon sind marschiert worden, und zwei Tage ist geschossen worden.',
     'Von den Männern, die im Oktober in Bamberg mit dir angetreten sind, fehlt einer von zwölf. Es ist der billigste Feldzug, den diese Armee je geführt hat, und es wird der letzte billige sein.',
     'Am Silvesterabend steht die Kompanie in einem polnischen Dorf um ein Feuer, das aus einem abgebrochenen Zaun gemacht ist. Es ist minus zehn Grad. Man rechnet aus, wie viele Kilometer man in diesem Jahr gegangen ist, und kommt auf eine Zahl, die niemand glauben will.'
   ],
-  ausblick:'<b>Hier endet der gebaute Stand.</b> Im Januar 1807 marschiert diese Armee weiter nach Osten, gegen eine russische Armee, die nicht wegläuft und nicht kapituliert. Es gibt einen Ort in Ostpreußen, von dem noch niemand gehört hat. Er heißt Eylau.'}
+  }
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

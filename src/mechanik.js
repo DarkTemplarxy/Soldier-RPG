@@ -515,7 +515,11 @@ function frostWirken(n){
     return 'Ein Dach, ein Ofen, und es dauert zwei Tage, bis die Finger wieder etwas halten.';
   }
   S.belastung = Math.min(100, S.belastung + 4);
-  verschleiss(0.15 * stufe);
+  /* **Verschleiß ×1,5, nicht ×2.** Eine Szene kostet ohnehin 0,35; 0,1 je
+     Stufe legt bei Stufe 2 ein Fünftel darauf und trifft damit die Vorgabe aus
+     KAMPAGNEN §2. Wer hier auf 0,15 geht, verdoppelt den Verschleiß und macht
+     aus einer Regel eine Mautstelle. */
+  verschleiss(0.1 * stufe);
   const mantel = S.ausr.mantel && S.ausr.mantel.zustand >= 20;
   if(mantel || hat) return '';
   wundeGeben(FROST_WUNDE, 6, stufe);
