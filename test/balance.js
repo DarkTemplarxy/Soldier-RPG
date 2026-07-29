@@ -138,7 +138,23 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
                    oft" ist das die erste Zahl, die man braucht — und sie ist
                    billig, weil das Chronikblatt Ort und Station ohnehin
                    mitschreibt. */
-                sterbeort: {}, sterbestation: [] };
+                sterbeort: {}, sterbestation: [],
+                /* ── Die Sterblichkeit je Kapitel ──
+                   **`überlebt` läuft aus, und zwar rechnerisch.** Die Zahl ist
+                   ein Produkt: Sieben Kapitel zu je rund fünfzig Prozent
+                   ergeben einstellige Werte, bei elf wird sie für jeden
+                   Spielertyp null. Dann misst sie nur noch, dass es viele
+                   Kapitel gibt — dieselbe Alterung, die schon „höchster Rang"
+                   erwischt hat, als er den Sergent-major zählte.
+
+                   Was nicht mit dem Ausbaustand schrumpft, ist die Quote je
+                   Kapitel: **von denen, die Kapitel N erreichen, wie viele
+                   überstehen es.** Sie ist über den ganzen Ausbau vergleichbar
+                   und sagt sofort, welches Kapitel die Wand ist. */
+                erreicht: {} };
+  /* Reihenfolge der Kapitel, für die Quote je Kapitel. Muss zur Zuordnung
+     unten passen (dort wird aus der Jahreszahl der Kapitelname gewonnen). */
+  const KAPITEL_FOLGE = ['Italien','Ägypten','Garnison','Austerlitz','Jena','Eylau','Spanien'];
   /* Die Gesamtzahl der Stationen kommt aus dem Spiel, nicht aus dem Skript —
      sie stand hier als „von 64" fest und war mit dem fünften Kapitel falsch. */
   let STATIONSZAHL = 0;
@@ -430,6 +446,12 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
                 : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : 'Spanien';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
       res.sterbestation.push(d.stationen);
+      /* Erreicht hat er jedes Kapitel bis einschließlich dem, in dem er
+         gestorben ist. */
+      const bis = KAPITEL_FOLGE.indexOf(kap);
+      KAPITEL_FOLGE.slice(0, bis+1).forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
+    } else {
+      KAPITEL_FOLGE.forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     }
   }
   const pu = res.punkte.sort((a, b) => a - b);
@@ -445,6 +467,11 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   const verteilung = Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
     .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`).join(' · ');
   console.log(`Rangverteilung (höchster je Lauf): ${verteilung}`);
+  /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
+  const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])
+    .map(k => { const e = res.erreicht[k], t = res.sterbeort[k]||0;
+                return `${k} ${Math.round((1-t/e)*100)} %${e<15?' (nur '+e+')':''}`; });
+  if (jeKapitel.length) console.log(`Überstanden je Kapitel (von denen, die es erreichen): ${jeKapitel.join(' · ')}`);
   if (res.sterbestation.length) {
     const mittel = Math.round(res.sterbestation.reduce((a, x) => a + x, 0) / res.sterbestation.length * 10) / 10;
     console.log(`Gestorben in: ${Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`).join(' · ')}`
