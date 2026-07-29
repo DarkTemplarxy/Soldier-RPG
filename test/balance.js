@@ -138,7 +138,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
                    oft" ist das die erste Zahl, die man braucht — und sie ist
                    billig, weil das Chronikblatt Ort und Station ohnehin
                    mitschreibt. */
-                sterbeort: {}, sterbestation: [],
+                sterbeort: {}, sterbestation: [], weite: [],
                 /* ── Die Sterblichkeit je Kapitel ──
                    **`überlebt` läuft aus, und zwar rechnerisch.** Die Zahl ist
                    ein Produkt: Sieben Kapitel zu je rund fünfzig Prozent
@@ -446,11 +446,13 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
                 : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : j <= '1811' ? 'Spanien' : 'Russland';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
       res.sterbestation.push(d.stationen);
+      res.weite.push(d.stationen);
       /* Erreicht hat er jedes Kapitel bis einschließlich dem, in dem er
          gestorben ist. */
       const bis = KAPITEL_FOLGE.indexOf(kap);
       KAPITEL_FOLGE.slice(0, bis+1).forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     } else {
+      res.weite.push(STATIONSZAHL);
       KAPITEL_FOLGE.forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     }
   }
@@ -458,9 +460,21 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
   console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`
     + (PATENT ? ` · mit Patent (${PATENT === 'patent_lt' ? 'Lieutenant' : 'Sous-Lieutenant'})` : ''));
-  /* Die beiden Leitzahlen zuerst und für sich — sie tragen die Sollwerte.
-     Wer eine Änderung beurteilt, liest diese Zeile und sonst nichts. */
-  console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   HÖCHSTER RANG (${rangKurz(LEITRANG)}) ${q(res.leit)}\n`);
+  /* ── Die Leitzahlen ──
+     **`überlebt` ist mit acht Kapiteln ausgelaufen, und zwar rechnerisch.**
+     Sie ist das Produkt aller Kapitelquoten; bei acht Kapiteln steht sie für
+     jeden der drei gemessenen Männer auf **0 %** und trennt damit nichts mehr.
+     Genau das war vorhergesagt („eine Leitzahl, die ein Produkt ist, läuft
+     mit jedem Kapitel aus"), und sie bleibt nur noch zur Einordnung stehen.
+
+     An ihre Stelle tritt **die Weite**: wie weit der mittlere Lauf kommt, als
+     Anteil der Stationen. Sie schrumpft nicht mit dem Ausbaustand, weil sie
+     ein Median ist und kein Produkt. */
+  const we = res.weite.slice().sort((a, b) => a - b);
+  const weite = we.length ? we[Math.floor(we.length / 2)] : 0;
+  console.log(`\n  WEITE ${weite} von ${STATIONSZAHL} (${Math.round(weite/STATIONSZAHL*100)} %)`
+    + `   ·   HÖCHSTER RANG (${rangKurz(LEITRANG)}) ${q(res.leit)}\n`);
+  console.log(`Ganz durch: ${q(res.ende)} (Produktzahl, mit acht Kapiteln stumpf)`);
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
   console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);

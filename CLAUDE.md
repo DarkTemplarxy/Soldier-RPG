@@ -91,7 +91,7 @@ node test/kapitel.js jena         # ein Kapitel mit vier künstlichen Rängen du
 HAERTE=40 node test/kapitel.js russland 9   # 40 Läufe nur durch dieses Kapitel: wie tödlich ist es?
 node test/spielstand.js           # sichern, fortsetzen, sterben, alte Fassungen
 node test/durchspielen.js dist    # dasselbe mit der gebauten Einzeldatei
-node test/balance.js 80           # 80 Läufe, misst die beiden Leitzahlen
+node test/balance.js 80           # 80 Läufe, misst die beiden Leitzahlen (Weite · höchster Rang)
 node werkzeug/bauen.js            # baut dist/marschallstab.html zum Weitergeben
 ```
 
@@ -1102,14 +1102,22 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 **`balance.js` misst seit den Gefechts-Ereignissen zwei Gemüter**, weil das Spiel zwei Antworten hat. `node test/balance.js 40` ist der vorsichtige Bot: Er tritt nur vor, wo seine Werte es klar tragen. `MUT=1 node test/balance.js 40` tritt immer vor, außer es steht um sein Leben. **Der Abstand zwischen beiden Zahlen ist die Balance der Ereignisse.**
 
-### Die zwei Leitzahlen und ihre Sollwerte *(neu gesetzt am 28.07.2026)*
+### Die zwei Leitzahlen und ihre Sollwerte *(Weite neu gesetzt am 29.07.2026 mit Kapitel 8)*
 
 **Gemessen wird an zwei Zahlen, und nur an ihnen:**
 
 | | Was sie misst |
 |---|---|
-| **überlebt** | Wie viele alle gebauten Kapitel hinter sich gebracht haben — *wie hart das Spiel ist.* |
+| **Weite** | Wie weit der **mittlere** Lauf kommt, in Stationen — *wie hart das Spiel ist.* |
 | **höchster Rang** | Wie viele den höchsten gebauten Rang bekommen haben — *ob die Leiter trägt.* |
+
+> ### ⚠ `überlebt` ist mit acht Kapiteln ausgelaufen — rechnerisch, nicht durch Pech
+>
+> Gemessen nach Kapitel 8: **0 % · 0 % · 0 %** für alle drei Männer. Die Zahl trennt nichts mehr, und das war vorhergesagt: **`überlebt` ist ein Produkt.** Sie multipliziert acht Kapitelquoten miteinander, und ein Produkt aus Zahlen unter eins geht mit jedem Faktor gegen null. Bei elf Kapiteln wäre sie es erst recht. Der Trichter ist gewollt — man *soll* unterwegs sterben —, aber eine Leitzahl, die für jeden Messwert dasselbe liefert, ist keine.
+>
+> **An ihre Stelle tritt die Weite:** der Median der erreichten Stationen. Sie ist kein Produkt, sondern ein Median, und schrumpft deshalb nicht mit dem Ausbaustand — sie wandert nur mit, wie die Stationszahl wächst. Steht als `res.weite` in `test/balance.js`; `überlebt` wird als „Ganz durch" weiter mitgedruckt, trägt aber keinen Sollwert mehr.
+>
+> **Dieselbe Alterung wie schon zweimal:** „Italien überstanden" (45–55 %, liefert heute 95–100) und die Leitzahl „höchster Rang", die vom Sergent-major auf den Capitaine wandern musste. **Regel daraus: Eine Leitzahl, die ein Produkt über alle Kapitel ist, hat ein Verfallsdatum. Ein Median hat keines.**
 
 > **„Höchster Rang" ist eine Definition, kein fester Rang.** Gemeint ist der höchste Rang, den der *gebaute Inhalt* tatsächlich hergibt, und er wandert mit:
 >
@@ -1123,25 +1131,29 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 >
 > **Damit sind alle Zahlen vor dem 29.07.2026 nicht mehr unmittelbar vergleichbar.** Sie bleiben in der Verlaufstabelle stehen und sind dort als Sergent-major-Zahlen zu lesen.
 
-**Bänder für sechs Kapitel** *(neu gesetzt am 29.07.2026 mit Kapitel 6)*:
+**Gemessen mit Kapitel 8** *(Erstlauf 80 Läufe, die Veteranen je 40, alle vorsichtig)*:
 
-| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | **Veteran 400** |
+| | **Weite** (von 122) | **höchster Rang (Cpt)** | Punkte-Median |
 |---|---|---|---|
-| **überlebt** | **12–25 %** | **0–5 %** | **20–35 %** |
-| **höchster Rang (Cpt)** | **5–15 %** | **0–5 %** | **30–45 %** |
+| Erstlauf ohne Vorrat | **57,3** | **11 %** | 121 |
+| Veteran 160 | **61,9** | **30 %** | 284 |
+| Veteran 400 | **60,6** | **38 %** | 317 |
 
-> **Der Veteran wird ab jetzt mit `VP=400` gemessen, nicht mehr mit 160.** Ein Spitzenlauf bringt mit sechs Kapiteln über 500 Punkte; ein Bot mit 160 ist nicht mehr der Veteran, den das Spiel hervorbringt, sondern der aus dem zweiten Lauf. `VP=160` bleibt als dritte Messung stehen, trägt aber kein Band mehr.
+> ### ⚠ Der wichtigste Befund dieser Messreihe: Veteranenpunkte kaufen Rang, aber keine Strecke
+>
+> **Der Rang trägt: 11 → 30 → 38, also 27 Punkte** — über der selbstgesetzten Grenze von 25, die Leiter hält also.
+>
+> **Die Weite trägt nicht: 57 → 62 → 61.** Vier Stationen von hundertzweiundzwanzig, und der Vierhunderter liegt unter dem Hundertsechziger. Das ist Rauschen, keine Progression.
+>
+> **Zusammen gelesen sagen die beiden Zeilen etwas Genaueres, als jede für sich könnte:** Wer mit Vorrat einrückt, kommt **nicht weiter**, sondern **höher** — und weil die Offiziersränge die gefährlichsten des Spiels sind (+4/+5 Gefahr je Runde gegen +2 beim Unteroffizier und 0 bei der Mannschaft), frisst der Aufstieg den Vorteil genau wieder auf. Der Veteran tauscht seine Punkte gegen Epauletten, und die Epauletten zahlt er mit dem Leben zurück.
+>
+> **Das ist `OFFEN.md` Punkt 1, jetzt mit dem schärfsten Beleg, den es dafür gibt** — und es ist auch die Antwort darauf, warum „früher sterben, länger leben" (Sockel, wachsende Konstitution) genau die richtige Richtung ist: Es fehlt eine Progression, die **im Lauf** wirkt und nicht über den Rang läuft.
 
-Gemessen mit Kapitel 6 *(die Erstläufe je 80, die Veteranen je 40)*:
+**Bänder: noch nicht gesetzt.** Die Weite ist eine Messung alt. Bevor daraus ein Sollwert wird, braucht es die drei Zahlen nach dem nächsten Eingriff (Aufgabe #31) — sonst eicht man ein Band gegen einen Zwischenstand. Bis dahin ist **der Abstand** der Maßstab, wie bisher: unter 25 Punkten beim Rang trägt die Leiter nicht.
 
-| | überlebt | höchster Rang (Cpt) | Eylau tötet |
-|---|---|---|---|
-| Erstlauf vorsichtig | **19 %** | **9 %** | 11 von 26, die dort ankamen |
-| Erstlauf mutig | **0 %** | **1 %** | 1 von 1 |
-| *Veteran 160* | *15 %* | *33 %* | *10 von 16* |
-| **Veteran 400** | **25 %** | **38 %** | 3 von 13 |
+> **Der Veteran wird mit `VP=400` gemessen, nicht mehr mit 160.** Ein Spitzenlauf bringt mit acht Kapiteln über 470 Punkte; ein Bot mit 160 ist nicht mehr der Veteran, den das Spiel hervorbringt, sondern der aus dem zweiten Lauf. `VP=160` bleibt als dritte Messung stehen, trägt aber kein Band.
 
-**Der Abstand beim Rang trägt deutlich:** 29 Punkte (9 → 38). **Beim Überleben trägt er nicht mehr:** 19 → 25 sind sechs Punkte, und der Veteran mit 160 liegt mit 15 % sogar darunter. Siehe den Kasten.
+*(Zahlen von sechs Kapiteln, gegen die alte Leitzahl `überlebt` gerechnet und deshalb nicht mehr vergleichbar: Erstlauf 19 / 9 %, mutig 0 / 1 %, Veteran 160 15 / 33 %, Veteran 400 25 / 38 %.)*
 
 > ### ⚠ Die Überlebensprogression ist flach geworden — und der Verdächtige steht fest
 >

@@ -13,26 +13,29 @@
 
 ## 1 · Die Überlebensprogression ist flach *(gemessen, größte offene Frage)*
 
-**Stand nach sechs Kapiteln** — die Erstläufe je 80 Läufe, die Veteranen je 40:
+**Stand nach acht Kapiteln** — Erstlauf 80 Läufe, die Veteranen je 40, alle vorsichtig:
 
-| | überlebt | höchster Rang (Cpt) |
+| | **Weite** (von 122) | höchster Rang (Cpt) |
 |---|---|---|
-| Erstlauf vorsichtig | 19 % | 9 % |
-| Veteran 160 | 15 % | 33 % |
-| Veteran 400 | 25 % | 38 % |
+| Erstlauf ohne Vorrat | **57,3** | 11 % |
+| Veteran 160 | **61,9** | 30 % |
+| Veteran 400 | **60,6** | 38 % |
 
-**Beim Rang trägt der Abstand (29 Punkte). Beim Überleben nicht (6 Punkte).** Die eigene Regel verlangt 25. Der Veteran mit 160 VP liegt sogar unter dem Erstläufer — bei n=40 gegen n=80 ist das innerhalb des Rauschens, aber die Richtung stimmt seit zwei Kapiteln.
+**Der Rang trägt (27 Punkte), die Weite nicht (vier Stationen von 122).** Der Vierhunderter liegt sogar unter dem Hundertsechziger — das ist Rauschen, keine Progression.
 
-**Der Mechanismus ist gemessen, nicht geraten, und steht in der Rangverteilung:** Vom Veteranen mit 160 VP sind **53 % Offiziere** (Rang 7–9), vom Erstläufer **20 %**. Die Offiziersränge sind die gefährlichsten des Spiels.
+> **Damit ist der Befund schärfer als nach Kapitel 6, nicht nur neuer.** Vorher stand da eine flache Überlebensquote, die man als Trichterwirkung lesen konnte. Jetzt steht daneben eine flache **Weite** — und die ist von der Trichterwirkung unabhängig, weil sie ein Median ist. **Wer mit Vorrat einrückt, kommt nicht weiter, sondern höher.**
 
-**Zwei Hebel, beide dokumentiert, keiner gemessen:**
+**Der Mechanismus ist gemessen, nicht geraten, und steht in der Rangverteilung:** Vom Veteranen mit 160 VP sind über die Hälfte Offiziere (Rang 7–9), vom Erstläufer ein Fünftel. Und die Offiziersränge tragen **+4 bis +5 Gefahr je Runde** gegen +2 beim Unteroffizier und 0 bei der Mannschaft. Der Veteran tauscht seine Punkte gegen Epauletten, und die Epauletten zahlt er mit dem Leben zurück.
+
+**Drei Hebel, keiner gemessen:**
 
 | Hebel | Wo | Warum verdächtig |
 |---|---|---|
+| **Eine Progression, die im Lauf wirkt** | Sockel senken · Konstitution wächst am `uebergang` und nach überstandener Krankheit (Aufgabe #31) | **Der einzige Hebel, der nicht am Rang hängt.** Er belohnt den Überlebenden statt den Käufer und rührt Invariante 3 nicht an. Erste Wahl |
 | **Rangzuschlag +4/+5** | `kampfAktion()` in `src/kampf.js`, RANGLEITER §8 | Ein Fusilier steht bei Jena auf Gefahr 19, ein Capitaine auf 24 — im selben Gefecht |
-| **Ereignis-Schwelle Ruf 30** | `ereignisWuerfeln()` | Sie stammt aus der Zeit, als der Sergent die Decke war. Heute liegt **jeder** Offizier weit darüber, also hat jedes Veteranengefecht drei Ereignisse statt zwei. Dieselbe Alterung wie bei der Leitzahl „höchster Rang" — eine Schwelle, die einmal getrennt hat und jetzt nur noch durchlässt |
+| **Ereignis-Schwelle Ruf 30** | `ereignisWuerfeln()` | Sie stammt aus der Zeit, als der Sergent die Decke war. Heute liegt **jeder** Offizier weit darüber, also hat jedes Veteranengefecht drei Ereignisse statt zwei. Dieselbe Alterung wie bei den Leitzahlen — eine Schwelle, die einmal getrennt hat und jetzt nur noch durchlässt |
 
-> **Die Frage dahinter ist eine Entwurfsfrage, keine Zahlenfrage:** „Wer aufsteigt, kauft sich nicht in Sicherheit ein" ist ausdrücklich gewollt. Nur darf es nicht so stark sein, dass Veteranenpunkte für das Überleben nichts mehr kaufen — dann bricht die Schleife, auf der das ganze Spiel beruht. **Wer das anfasst, entscheidet zuerst, welche der beiden Aussagen Vorrang hat.**
+> **Die Frage dahinter ist eine Entwurfsfrage, keine Zahlenfrage:** „Wer aufsteigt, kauft sich nicht in Sicherheit ein" ist ausdrücklich gewollt. Nur darf es nicht so stark sein, dass Veteranenpunkte für das Überleben nichts mehr kaufen — dann bricht die Schleife, auf der das ganze Spiel beruht. **Wer das anfasst, entscheidet zuerst, welche der beiden Aussagen Vorrang hat.** Der erste Hebel umgeht die Frage, statt sie zu beantworten, und ist deshalb der billigste Versuch.
 
 ---
 

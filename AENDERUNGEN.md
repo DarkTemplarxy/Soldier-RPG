@@ -43,6 +43,26 @@ Am Hebel ausgelesen standen sie bei **23, 29, 27 und 28** wirksamer Gefahr — B
 >
 > **⚠ Russland liegt damit am Boden der Skala.** Bei 3 % kann der Prüfstand nicht mehr zeigen, ob eine weitere Änderung härter oder leichter macht. Wer dort noch einmal dreht, hebt zuerst den Prüfmann.
 
+### Die Leitzahl `überlebt` ist ausgelaufen und durch die Weite ersetzt
+
+Über die vollen acht Kapitel gemessen (Erstlauf 80, Veteranen je 40): **0 % · 0 % · 0 %.** Die Zahl trennt nichts mehr — und das war vorhergesagt, denn sie ist ein **Produkt** aus acht Kapitelquoten und geht mit jedem Faktor gegen null.
+
+An ihre Stelle tritt die **Weite**: der Median der erreichten Stationen. Kein Produkt, sondern ein Median, deshalb ohne Verfallsdatum. `überlebt` wird als „Ganz durch" weiter mitgedruckt, trägt aber keinen Sollwert mehr.
+
+| | Weite (von 122) | höchster Rang (Cpt) | Punkte-Median |
+|---|---|---|---|
+| Erstlauf ohne Vorrat | **57,3** | **11 %** | 121 |
+| Veteran 160 | **61,9** | **30 %** | 284 |
+| Veteran 400 | **60,6** | **38 %** | 317 |
+
+> **Der wichtigste Befund der Reihe: Veteranenpunkte kaufen Rang, aber keine Strecke.** Der Rang trägt mit 27 Punkten Abstand (11 → 38, über der Grenze von 25). Die Weite trägt nicht — vier Stationen von hundertzweiundzwanzig, und der Vierhunderter liegt unter dem Hundertsechziger.
+>
+> Zusammen gelesen: **Wer mit Vorrat einrückt, kommt nicht weiter, sondern höher** — und weil die Offiziersränge +4 bis +5 Gefahr je Runde tragen gegen +2 beim Unteroffizier, frisst der Aufstieg den Vorteil wieder auf. Das ist `OFFEN.md` Punkt 1 mit dem schärfsten Beleg, den es bisher dafür gibt, und zugleich die Begründung für den nächsten Schritt: Es fehlt eine Progression, die **im Lauf** wirkt und nicht über den Rang läuft.
+
+**Bänder sind bewusst nicht gesetzt** — die Weite ist eine Messung alt, und ein Band gegen einen Zwischenstand zu eichen ist der Fehler, vor dem die Ladensummen-Regel schon einmal gewarnt hat.
+
+*(Dritte Alterung einer Leitzahl nach „Italien überstanden" und „höchster Rang". **Regel: Eine Leitzahl, die ein Produkt über alle Kapitel ist, hat ein Verfallsdatum. Ein Median hat keines.**)*
+
 ## 2026-07-29 — Kapitel 7: Spanien 1808–1812
 
 **Die eigene Regel: Es gibt hier keinen Ruhm. Nur Entscheidungen, bei denen niemand zusieht.** Vierzehn Stationen, fünf Gefechte, Feindgüte 8, Sold-Moral 0,7.
