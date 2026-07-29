@@ -109,7 +109,14 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
      Rängen und vier Kapiteln ist genau das die Frage: Sammelt sich alles bei
      Rang 6, oder sieht überhaupt jemand ein Patent? */
   const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0,
-                punkte: [], raenge: {} };
+                punkte: [], raenge: {},
+                /* ── Wo gestorben wird ──
+                   Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
+                   **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
+                   oft" ist das die erste Zahl, die man braucht — und sie ist
+                   billig, weil das Chronikblatt Ort und Station ohnehin
+                   mitschreibt. */
+                sterbeort: {}, sterbestation: [] };
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
     /* Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0. Sonst ließe
@@ -353,6 +360,19 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     res.raenge[hoechster] = (res.raenge[hoechster] || 0) + 1;
     const t = await p.$eval('#app', e => e.innerText);
     const m = t.match(/Summe\s+(\d+)/); if (m) res.punkte.push(+m[1]);
+    const d = await p.evaluate(() => {
+      const c = META.chronik[META.chronik.length-1] || {};
+      return {gefallen: !!c.gefallen, ort: c.ort||'', stationen: c.stationen|0};
+    });
+    if (d.gefallen) {
+      /* Das Kapitel steht nicht im Blatt, wohl aber das Datum der letzten
+         Station — und die Jahreszahl ist eindeutig. */
+      const j = (d.ort.match(/1[78]\d\d/) || ['?'])[0];
+      const kap = j <= '1797' ? 'Italien' : j <= '1799' ? 'Ägypten'
+                : j <= '1804' ? 'Garnison' : 'Austerlitz';
+      res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
+      res.sterbestation.push(d.stationen);
+    }
   }
   const pu = res.punkte.sort((a, b) => a - b);
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
@@ -367,5 +387,10 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   const verteilung = Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
     .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`).join(' · ');
   console.log(`Rangverteilung (höchster je Lauf): ${verteilung}`);
+  if (res.sterbestation.length) {
+    const mittel = Math.round(res.sterbestation.reduce((a, x) => a + x, 0) / res.sterbestation.length * 10) / 10;
+    console.log(`Gestorben in: ${Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`).join(' · ')}`
+      + ` · im Schnitt bei Station ${mittel} von 64`);
+  }
   await b.close();
 })();

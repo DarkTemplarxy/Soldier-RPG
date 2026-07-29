@@ -656,7 +656,24 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 
 **Die 2 ist am Hebel gemessen, nicht geschätzt:** Gefahr +4 → 0 % überlebt · **+2 → 8 %** · +0 → 25 %. Der Zuschlag allein trug den ganzen Unterschied.
 
-**Der gekaufte Leutnant ist der härteste Weg durchs Spiel** — 8 % gegen 68 % des regulären Veteranen — und **er kann den Punktevorrat nie erhöhen**, weil der Abzug ihn unter jeden regulären Lauf drückt. Das ist Absicht und kein Fehler: Wer ein Patent kauft, spielt die Offiziershälfte zum Anschauen. Der Vorrat bleibt, wo er war, und ein schlechter Lauf kostet nichts (Invariante 2).
+**Der gekaufte Leutnant ist der härteste Weg durchs Spiel** — 8 % gegen 68 % des regulären Veteranen — und **er kann den Punktevorrat nie erhöhen**, weil der Abzug ihn unter jeden regulären Lauf drückt.
+
+> ### Woran er stirbt — gemessen, je 40 Läufe mit 260 VP
+>
+> | | überlebt | gestorben in | im Schnitt bei Station |
+> |---|---|---|---|
+> | regulär aufgestiegen | 65 % | Ägypten 10 · Austerlitz 3 · **Italien 1** | 31,6 von 64 |
+> | mit Patent | 3 % | Ägypten 20 · **Italien 14** · Austerlitz 5 | **23,5 von 64** |
+>
+> **Er stirbt in Italien, und das ist die eigentliche Auffälligkeit.** Italien ist das Lehrstück — Güte 0, Gefahr 10–15, und ein regulärer Lauf kommt zu 98 % durch. Der gekaufte Leutnant fällt dort in **vierzehn von vierzig Läufen**, also vierzehnmal so oft.
+>
+> **Drei Ursachen, alle aus dem Entwurf und keine davon ein Fehler:**
+>
+> 1. **Die Gefahr ist von der ersten Station an um 6 höher** (+4 Rang, +2 Patent). Bei Montenotte heißt das 16 statt 10 — **sechzig Prozent mehr Treffer**, und zwar in dem Kapitel, das dem Fusilier zum Lernen gedacht ist.
+> 2. **Sein Zug taugt nichts** (`sektionGuete −25`), also macht sein Feuerbefehl weniger Schaden, also dauern die Gefechte länger, also kommen mehr Runden mit Treffern — **und ein Gefecht, das nicht gewonnen wird, kostet zusätzlich Blut.** Das ist ein Verstärker, kein Summand.
+> 3. **Er kann sich schlechter ducken.** Der Fusilier darf drei Runden am Stück, der Offizier zwei, und die zweite kostet ihn Ruf.
+>
+> **Was daran zu überlegen wäre:** Ein Spieler, der 145 Veteranenpunkte ausgibt und dann bei Montenotte fällt, hat von der Offiziershälfte nichts gesehen — und genau dafür hat er bezahlt. Der schonendste Hebel wäre `sektionGuete` (−25 → −10): Er trifft ihn weiter dort, wo es hingehört (seine Leute folgen ihm schlechter), ohne die Gefechte zu verlängern und damit die Trefferzahl zu vervielfachen. **Ungemessen — wer es ändert, misst die vier Zahlen neu.** Das ist Absicht und kein Fehler: Wer ein Patent kauft, spielt die Offiziershälfte zum Anschauen. Der Vorrat bleibt, wo er war, und ein schlechter Lauf kostet nichts (Invariante 2).
 
 ### Der Sold (`SOLD` in `grundwerte.js`, `soldAuszahlen()` in `mechanik.js`)
 
