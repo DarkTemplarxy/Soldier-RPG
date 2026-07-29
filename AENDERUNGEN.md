@@ -5,6 +5,22 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Rangleiter Phase B: alle vierzehn Ränge vergebbar
+
+Einträge 7 bis 14 nach RANGLEITER §7. Schwellen 95 / 120 / 150 / 180 / 200 / 230 / 260 / 300, Patrone Berthaud → Vernet → Grandmaison, Zusatzschranken Bildung 50 · Ehrenlegion · Reiten 40 · Adler · 3 Bulletins · Grand Officier · Generalskampagne.
+
+**Die Schwellen werden gemessen, aber nicht gesenkt.** Die Leiter ist absichtlich länger als der Inhalt — mit vier Kapiteln erreicht niemand Ruf 230. Phase E löst das über die Patente, nicht über kleinere Zahlen.
+
+Zwei Einträge fordern etwas, das es noch nicht gibt (Grand Officier, Generalskampagne): programmiert und unerreichbar, bis der Inhalt nachkommt.
+
+**Die Musterung prüft jetzt sieben Schrankenarten statt drei** (`fehltWas()`), und der Nachsatz mit der fehlenden Zahl kommt aus einer Tabelle statt aus vier ausgeschriebenen Fällen.
+
+**Die zwei Rangschranken** sind gebaut, bevor die Kapitel dafür stehen: nach Russland Rang 7 (+180 VP Ruhestandsbonus), vor Waterloo Rang 10 (+120), mit Durchlass-, Ende- und Epilogtext. Kapitel 8 und 10 hängen später nur noch `schranke:` an eine Station.
+
+**Gemessen, je 40 Läufe:** überlebt **40 %**, höchster Rang **23 %**. Gegen Phase A (50 / 28) — beides im Rauschen von ±8; die Leiter über Rang 6 ist mit vier Kapiteln noch unerreichbar und kann die Zahlen nicht bewegen. Der Punkte-Höchstwert steigt von 287 auf **352**, weil `rangWert()` jetzt für die oberen Ränge nicht mehr 0 liefert.
+
+---
+
 ## 2026-07-28 — Rangleiter Phase A: Fundament für vierzehn Ränge
 
 **Nach `RANGLEITER.md` §10.** Der Grundsatz: Die Leiter ist ein System, die Kapitel sind Inhalt — eine Vakanz hängt an einer allgemeinen Regel, nicht an benannten Schlachten.

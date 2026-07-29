@@ -1156,6 +1156,29 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 | **Grandmaison**, fünfte Person, vier Stufen | Fürsprecher für Rang 10–13 |
 | Musterung **auch im Winterquartier** | Vier Kapitel haben sechs `befoerderung`-Stationen; eine vierzehnstufige Leiter verhungert daran |
 
+### Phase B: die Leiter vollständig, vierzehn Einträge
+
+**Alle vierzehn Ränge sind vergebbar** — Schwellen nach RANGLEITER §7, Fortschreibung der gebauten Reihe 30 / 35 / 52–62 / 75:
+
+| Rang | Ruf | Patron | Gunst | Zusatzschranke | Wer fällt |
+|---|---|---|---|---|---|
+| 7 Sous-Lieutenant | 95 | Berthaud | 4 | **Bildung 50** | Lieutenant Ferrand |
+| 8 Lieutenant | 120 | Vernet | 4 | — | ein Bataillonschef, Berthaud rückt auf |
+| 9 Capitaine | 150 | Vernet | 5 | **Ehrenlegion** | Capitaine Lasserre, Vernet rückt auf |
+| 10 Chef de bataillon | 180 | Grandmaison | 3 | **Reiten 40** | Chef de bataillon Aubry |
+| 11 Colonel | 200 | Grandmaison | 4 | **Adler nicht verloren** | Colonel Desmarets |
+| 12 Général de brigade | 230 | Grandmaison | 5 | **3 Bulletins** | Général Séverin |
+| 13 Général de division | 260 | Grandmaison | 5 | **Grand Officier** | Général Marchand |
+| 14 Maréchal | 300 | — | — | **Generalskampagne** | — |
+
+> **Die Schwellen werden gemessen, aber nicht gesenkt.** Die Leiter ist absichtlich länger als der Inhalt: Mit vier Kapiteln erreicht niemand Ruf 230, und das ist kein Fehler — Phase E löst es über die Patente.
+
+**Zwei Einträge fordern etwas, das es noch nicht gibt** (`orden:'legion_grand'` bei Rang 13, `generalskampagne` bei Rang 14). Sie sind programmiert und unerreichbar, bis der Inhalt nachkommt — genau so gewollt.
+
+**Die Musterung prüft jetzt sieben Schrankenarten** statt drei (`fehltWas()`), und der Nachsatz, der die fehlende Zahl beim Namen nennt, kommt aus einer Tabelle statt aus vier ausgeschriebenen Fällen. Mit vierzehn Rängen wäre das sonst eine Kette von Sonderfällen geworden.
+
+**Die zwei Rangschranken** (`SCHRANKEN` in `kampf.js`) sind gebaut, bevor die Kapitel dafür stehen: nach Russland Rang 7, vor Waterloo Rang 10, samt Durchlass-, Ende- und Epilogtext. Kapitel 8 und 10 müssen später nur noch `schranke:'russland'` an eine Station hängen.
+
 ### Die Arcole-Marke — die einzige Fernwirkung des Spiels
 
 **Du hast Grandmaison 1796 aus einem Sumpf gezogen.** Wer die Arcole-Sondermission besteht, setzt `S.arcoleMarke`; ab Rang 9 beginnt man bei ihm mit **Gunst +2** und einem Satz, der zeigt, dass er sich erinnert („Arcole", sagt er. Keine Frage, keine Erklärung). Wer sie verfehlt oder nie antritt, trifft ihn kalt bei null.

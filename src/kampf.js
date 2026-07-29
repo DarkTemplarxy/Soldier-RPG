@@ -1811,7 +1811,115 @@ const LEITER = [
    fehltGunst:'Der Capitaine weiß, wer du bist. Das ist etwas anderes, als dich zu wollen.',
    text:p=>`Die Stelle des Sergent-majors ist seit dem Gefecht nicht besetzt. Es hat drei Wochen gedauert, bis jemand die Bücher übernommen hat, und in diesen drei Wochen hat die Kompanie gemerkt, wie viel an einem Mann hängt, den niemand tagsüber sieht.
     <br><br>`+esc(p)+` unterschreibt. Du bekommst die zweite Tresse, drei Sektionen, sechzig Mann und die Fourage für sechzig Mann. Von jetzt an bist du der, den niemand tagsüber sieht.
-    <br><br><span class="fein">Seine Sachen sind schon weggeräumt. Es ging schnell, weil es immer schnell geht.</span>`}
+    <br><br><span class="fein">Seine Sachen sind schon weggeräumt. Es ging schnell, weil es immer schnell geht.</span>`},
+
+  /* ══════════════════ DIE OFFIZIERSHÄLFTE ══════════════════
+
+     Schwellen nach RANGLEITER §7, Fortschreibung der gebauten Reihe
+     (30 / 35 / 52–62 / 75). **Alle Zahlen sind Entwurf und werden gemessen —
+     aber sie werden nicht gesenkt, damit Rang 14 in vier Kapiteln erreichbar
+     wird. Die Leiter ist absichtlich länger als der Inhalt.**
+
+     Vier Einträge fordern etwas, das es noch nicht gibt (`orden:'legion_grand'`,
+     `generalskampagne`). Das ist kein Versehen: Sie sind programmiert und
+     unerreichbar, bis der Inhalt nachkommt — genau wie es der Entwurf will. */
+
+  /* ── Rang 7 · Die schärfste Kante des Spiels ──
+     Bildung 50 hat keinen zweiten Weg. Wer die Regimentsschule in der Garnison
+     vertrödelt hat, steht hier mit Ruf 100 und drei Orden — und kommt nicht
+     durch. Das ist der „Rangstillstand als Druckmittel" aus KONZEPT §9, als
+     Klinge statt als Hinweis. */
+  {rang:7, name:'Sous-Lieutenant', ruf:95, patron:'berthaud', gunst:4, bildung:50, von:[5,6],
+   vakanz:'zugfuehrer', vorschlag:'für das Patent, sobald eines frei wird',
+   stellenText:'Das Bataillon habe seine Zugführer, und alle seien im Dienst.',
+   faelltWer:'Lieutenant Ferrand', rueckt:null,
+   fallText:'Er war dreiundzwanzig und seit vier Monaten bei der Kompanie. Man findet ihn erst am Abend, weil er zwanzig Schritt vor der Linie lag, wo ein Zugführer liegt.',
+   fehltRuf:'Ein Patent bekommt, wessen Namen der Bataillonschef von selbst nennt. Deiner wird genannt, wenn man nachfragt.',
+   fehltGunst:'Zwei Unterschriften braucht ein Patent. Du hast eine.',
+   fehltBildung:'Der Capitaine legt dir ein Blatt hin und einen Federkiel. Du sollst den Empfang von vierzig Paar Schuhen quittieren. Mehr ist es nicht. Er nimmt das Blatt zurück, bevor du fertig bist.',
+   text:p=>esc(p)+` unterschreibt, und danach unterschreibt der Chef de bataillon. Zwei Namen auf einem Papier, und du bist kein Unteroffizier mehr.
+    <br><br>Du gibst die Muskete ab. Dafür bekommst du einen Degen, der nichts taugt, Epauletten, die du selbst bezahlen musst, und den Platz drei Schritt vor der Front, an dem dein Vorgänger vier Monate alt geworden ist.
+    <br><br><span class="fein">Von hier an schießt du nicht mehr. Du entscheidest.</span>`},
+
+  /* ── Rang 8 · Der ruhige Rang nach dem Bruch ── */
+  {rang:8, name:'Lieutenant', ruf:120, patron:'vernet', gunst:4, von:[6,7],
+   vakanz:'lieutenant', vorschlag:'für die Stellvertretung der Kompanie',
+   stellenText:'Die Kompanie habe ihren Lieutenant, und der sei gesund.',
+   faelltWer:'Chef de bataillon Reynaud', rueckt:'berthaud',
+   fallText:'Ein Schuss aus vierhundert Schritt, von jemandem, der nicht gezielt haben kann. So etwas passiert, und man kann nichts dagegen tun.',
+   fehltRuf:'Ein Lieutenant vertritt den Capitaine. Dafür muss die Kompanie ihn kennen, nicht nur der Capitaine.',
+   fehltGunst:'Er kennt dich. Er hält dich für ordentlich. Ordentlich reicht für einen Sous-Lieutenant.',
+   text:p=>esc(p)+` gibt dir die zweite Epaulette und einen Satz dazu: Wenn er fällt, bist du die Kompanie.
+    <br><br>Es ist kein Bild, es steht so im Reglement. Von jetzt an reitest du Meldungen zum Stab, und was du dort schreibst, liest jemand, der Divisionen bewegt.`},
+
+  /* ── Rang 9 · Die Kompanie ── */
+  {rang:9, name:'Capitaine', ruf:150, patron:'vernet', gunst:5, orden:'legion', von:[7,8],
+   vakanz:'capitaine', vorschlag:'für die Kompanie, sobald sie einen Chef braucht',
+   stellenText:'Die Kompanie habe ihren Capitaine.',
+   faelltWer:'Capitaine Lasserre', rueckt:'vernet',
+   fallText:'Er hat seine Kompanie viermal über dasselbe Feld geführt und ist beim vierten Mal geblieben. Die Kompanie war beim fünften Mal trotzdem oben.',
+   fehltRuf:'Eine Kompanie bekommt, wen das Regiment kennt.',
+   fehltGunst:'Der Chef de bataillon empfiehlt niemanden, den er nicht selbst gesehen hat.',
+   fehltOrden:'Für eine Kompanie verlangt das Regiment ein Kreuz an der Brust. Es steht in keiner Vorschrift und ist trotzdem so.',
+   text:p=>esc(p)+` übergibt dir hundertzwanzig Mann, eine Kasse und ein Buch, in dem steht, was die hundertzwanzig gekostet haben.
+    <br><br>Von jetzt an bekommst du vor jedem Gefecht einen Auftrag, und der Auftrag ist nicht dasselbe wie der Sieg. Man kann gewinnen und ihn verfehlen.`},
+
+  /* ── Ränge 10 bis 13 · Der Stab ──
+     Grandmaison ist über vier Ränge der alleinige Fürsprecher. Das ist wenig
+     Redundanz für viel Spielzeit und steht als offener Punkt in RANGLEITER §11. */
+  {rang:10, name:'Chef de bataillon', ruf:180, patron:'grandmaison', gunst:3, reiten:40, von:[8,9],
+   vakanz:'bataillon', vorschlag:'für ein Bataillon, sobald eines ohne Chef ist',
+   stellenText:'Das Regiment habe seine drei Bataillonschefs.',
+   faelltWer:'Chef de bataillon Aubry',
+   fallText:'Er ist vom Pferd gefallen, bevor ihn jemand schießen sah. Man streitet drei Tage darüber, woran er gestorben ist, und begräbt ihn währenddessen.',
+   fehltRuf:'Ein Bataillon führt, wen die Brigade kennt.',
+   fehltGunst:'Der General kennt viele Namen. Deiner ist einer davon.',
+   fehltReiten:'Ein Bataillonschef ist beritten. Du sitzt auf, und man sieht dir zu, wie du absteigst.',
+   text:p=>esc(p)+` nennt deinen Namen, und niemand widerspricht. Achthundert Mann, zwei Pferde und ein Bursche, den du bezahlst.
+    <br><br>Du siehst deine Leute ab jetzt als Rechtecke auf einer Skizze. Ob das ein Verlust ist, entscheidest du selbst.`},
+
+  {rang:11, name:'Colonel', ruf:200, patron:'grandmaison', gunst:4, adler:true, von:[9,10],
+   vakanz:'regiment', vorschlag:'für das Regiment, wenn es eines braucht',
+   stellenText:'Das Regiment habe seinen Colonel.',
+   faelltWer:'Colonel Desmarets',
+   fallText:'Er ist vorn geritten, weil ein Colonel vorn reitet, und hat es zweiundzwanzig Jahre lang überlebt. Heute nicht.',
+   fehltRuf:'Ein Regiment bekommt, wen die Armee kennt.',
+   fehltGunst:'Für ein Regiment braucht es mehr als Wohlwollen.',
+   fehltAdler:'Ein Regiment, das seinen Adler verloren hat, bekommt keinen neuen Colonel. Es bekommt gar nichts mehr.',
+   text:p=>esc(p)+` übergibt dir das Regiment und den Adler dazu.
+    <br><br>Der Adler ist kein Gegenstand, sondern eine Bedingung. Wer ihn verliert, verliert alles, was daran hängt — unabhängig davon, wie das Gefecht ausgegangen ist.`},
+
+  {rang:12, name:'Général de brigade', ruf:230, patron:'grandmaison', gunst:5, bulletins:3, von:[10,11],
+   vakanz:'brigade', vorschlag:'für eine Brigade, wenn der Kaiser zustimmt',
+   stellenText:'Die Division habe ihre Brigadegenerale.',
+   faelltWer:'Général Séverin', rueckt:'grandmaison',
+   fallText:'Er hat den Angriff angeführt, den er hätte befehlen sollen. Man wird ihn dafür in einem Bulletin loben.',
+   fehltRuf:'Eine Brigade bekommt, wen die Armee nennt.',
+   fehltGunst:'Der General empfiehlt dich. Einmal.',
+   fehltBulletins:'Für einen General reicht ein General nicht. Es braucht einen Kaiser, der den Namen schon einmal gelesen hat.',
+   text:p=>esc(p)+` schlägt dich vor, und in Paris wird unterschrieben. Vier Regimenter, ein Stab, eine Karte.
+    <br><br>Ab jetzt vergeht die Zeit in Stunden, und was du über den Feind weißt, hat jemand vor einer Stunde gesehen.`},
+
+  {rang:13, name:'Général de division', ruf:260, patron:'grandmaison', gunst:5, orden:'legion_grand', von:[11,12],
+   vakanz:'division', vorschlag:'für eine Division',
+   stellenText:'Das Korps habe seine Divisionsgenerale.',
+   faelltWer:'Général de division Marchand', rueckt:'grandmaison',
+   fallText:'Er ist an einer Wunde gestorben, die drei Wochen alt war und für harmlos galt.',
+   fehltRuf:'Eine Division führt, wen Frankreich kennt.',
+   fehltGunst:'Auch ein General hat nur eine Stimme.',
+   fehltOrden:'Für eine Division verlangt der Kaiser einen Grad, den er selbst vergibt.',
+   text:p=>esc(p)+` ist der Letzte, der dich vorschlägt. Was darüber liegt, vergibt einer allein.
+    <br><br>Eine Division, ein eigener Stab, eine Dotation, von der man in Frankreich ein Gut kaufen kann. Und Gespräche, in denen Schweigen manchmal die bessere Antwort ist.`},
+
+  /* ── Rang 14 · Praktisch nie ──
+     Kein Patron: Marschälle wurden von einem Mann allein ernannt. Die
+     Bedingung `generalskampagne` gibt es noch nicht — der Rang ist gebaut und
+     unerreichbar, und das ist der Entwurf, nicht ein Versäumnis. */
+  {rang:14, name:'Maréchal d\'Empire', ruf:300, patron:null, gunst:0,
+   generalskampagne:true, von:[13],
+   fehltRuf:'Es gibt keine Liste, auf die man sich setzen lässt. Es gibt einen Mann, der einen Namen sagt.',
+   text:()=>`Es wird nicht verlesen. Es steht im Moniteur, und jemand liest es dir vor.
+    <br><br>Vierundzwanzig Namen stehen vor deinem, und die meisten davon standen 1796 dort, wo du gestanden hast.`}
 ];
 
 /* Welche Stufe hier zur Debatte steht: **der höchste Eintrag, den man
@@ -1829,8 +1937,7 @@ function leiterZiel(){
   for(let i = passend.length-1; i >= 0; i--){
     const e = passend[i];
     const vakanz = !e.vakanz || vakanzStand(e.vakanz).tot;
-    if(S.ruf >= e.ruf && gunst(e.patron) >= e.gunst && (!e.bildung || S.attr.bildung >= e.bildung) && vakanz)
-      return e;
+    if(schwellenStimmen(e) && vakanz) return e;
   }
   return passend[0];
 }
@@ -1894,7 +2001,54 @@ function schwellenStimmen(z, stand){
   if(z.reiten && wert('reiten') < z.reiten) return false;
   if(z.orden && !hatOrden(z.orden)) return false;
   if(z.bulletins && (S.bulletins|0) < z.bulletins) return false;
+  if(z.adler && S.adlerVerloren) return false;
+  if(z.generalskampagne && !S.generalskampagne) return false;
   return true;
+}
+
+/* Welche Zusatzschranke fehlt — für den Text auf dem Musterungsbildschirm.
+   Gibt den Schlüssel zurück, nicht den Satz; den holt `zeigeBefoerderung`
+   aus dem LEITER-Eintrag (`fehltBildung`, `fehltOrden`, …). */
+function fehltWas(z){
+  if(S.ruf < z.ruf) return 'fehltRuf';
+  if(z.patron && gunst(z.patron) < z.gunst) return 'fehltGunst';
+  if(z.bildung && S.attr.bildung < z.bildung) return 'fehltBildung';
+  if(z.reiten && wert('reiten') < z.reiten) return 'fehltReiten';
+  if(z.orden && !hatOrden(z.orden)) return 'fehltOrden';
+  if(z.bulletins && (S.bulletins|0) < z.bulletins) return 'fehltBulletins';
+  if(z.adler && S.adlerVerloren) return 'fehltAdler';
+  if(z.generalskampagne && !S.generalskampagne) return 'fehltRuf';
+  return null;
+}
+
+/* ══════════════════ DIE ZWEI RANGSCHRANKEN ══════════════════
+
+   **Dein Rang entscheidet, wie viel vom Krieg du überhaupt zu sehen bekommst**
+   (KONZEPT §9, RANGLEITER §9). Nach Russland braucht es Rang 7, vor Waterloo
+   Rang 10; wer darunter bleibt, geht in den Ruhestand, und die Kampagne endet.
+
+   Beides ist historisch: Nach 1812 wurden Mannschaften und Unteroffiziere in
+   Massen ausgemustert, während erfahrene Offiziere gebraucht wurden — und als
+   Napoleon 1815 von Elba zurückkam, rief er gezielt Offiziersveteranen zurück,
+   keine Feldwebel.
+
+   **Gebaut, bevor die Kapitel dafür stehen.** Eine Station setzt
+   `schranke:'russland'` oder `'waterloo'`; die Prüfung liegt hier, damit
+   Kapitel 8 und 10 später nur noch Daten anhängen müssen. */
+const SCHRANKEN = {
+  russland:{rang:7, name:'Nach Russland', bonus:180,
+    durch:'Von der Armee, die im Juni über den Njemen ging, kommen im Dezember dreißigtausend zurück. Du bist einer davon, und du bist Offizier — also wirst du gebraucht.',
+    ende:'Die Listen werden neu geschrieben, und was kein Offizier ist, steht nicht mehr darauf. Man dankt dir, zahlt aus und schickt dich nach Hause.',
+    epilog:'Du hast alles gesehen, was ein Mensch sehen kann, und gehst nach Hause. Dass du kein Offizier geworden bist, macht das nicht kleiner: Von hundert, die mit dir über den Njemen gingen, sind sechs zurückgekommen.'},
+  waterloo:{rang:10, name:'Vor Waterloo', bonus:120,
+    durch:'Er ruft die zurück, die er kennt. Du stehst auf der Liste, weil ein Regiment ohne dich nicht marschiert.',
+    ende:'Die Armee wird aufgelöst, die Offiziere auf Halbsold gesetzt. Du bekommst ein Papier, eine Zahl und eine Adresse.',
+    epilog:'Im März 1815 liest du in der Zeitung, dass er zurück ist. Du liest es zu Ende, faltest sie und legst sie weg. Es ist die vernünftigste Entscheidung deines Lebens, und du wirst sie dreißig Jahre lang bereuen.'}
+};
+
+function schrankeGeschafft(id){
+  const sch = SCHRANKEN[id];
+  return !sch || S.rang >= sch.rang;
 }
 
 function zeigeBefoerderung(n){
@@ -1921,28 +2075,36 @@ function zeigeBefoerderung(n){
     S.befPruefungen[n.id] = {ruf:S.ruf, gunst:gunst(ziel.patron), bildung:S.attr.bildung};
   const g = S.befPruefungen[n.id];
 
-  const reichtRuf     = g.ruf >= ziel.ruf;
-  const reichtGunst   = g.gunst >= ziel.gunst;
-  const reichtBildung = !ziel.bildung || g.bildung >= ziel.bildung;
-  const vakanz        = !ziel.vakanz || vakanzStand(ziel.vakanz).tot;
-  const bekommt = reichtRuf && reichtGunst && reichtBildung && vakanz;
+  const vakanz  = !ziel.vakanz || vakanzStand(ziel.vakanz).tot;
+  const fehlt   = fehltWas(ziel);
+  const bekommt = !fehlt && vakanz;
+
+  /* Der Nachsatz, der die fehlende Zahl beim Namen nennt. Er stand früher
+     viermal ausgeschrieben; mit vierzehn Rängen und sieben Schrankenarten wäre
+     daraus eine Kette von Sonderfällen geworden. */
+  const nachsatz = {
+    fehltRuf:     () => `Für den ${esc(ziel.name)} braucht es Ruf ${ziel.ruf} — du hast ${S.ruf}.`,
+    fehltGunst:   () => `Für den ${esc(ziel.name)} braucht es die Fürsprache von ${esc(personName(ziel.patron))} — ${ziel.gunst}, du hast ${gunst(ziel.patron)}. Fürsprache sammelt sich in Abenden und Gefälligkeiten, nicht in einer einzigen Tat.`,
+    fehltBildung: () => `Für den ${esc(ziel.name)} braucht es Bildung ${ziel.bildung} — du hast ${S.attr.bildung}. Buchstaben lernt man im Lager und in der Regimentsschule, gegen Geld und gegen Zeit.`,
+    fehltReiten:  () => `Für den ${esc(ziel.name)} braucht es Reiten ${ziel.reiten} — du hast ${wert('reiten')}.`,
+    fehltOrden:   () => `Für den ${esc(ziel.name)} braucht es ${esc((ordenVon(ziel.orden)||{name:'einen Orden, den es noch nicht gibt'}).name)}.`,
+    fehltBulletins:() => `Für den ${esc(ziel.name)} braucht es ${ziel.bulletins} Nennungen im Bulletin — du hast ${S.bulletins|0}.`,
+    fehltAdler:   () => `Ein Regiment ohne Adler bekommt keinen Colonel.`
+  };
 
   let text, klasse = 'schlecht';
   if(bekommt){
     S.rang = Math.max(S.rang, ziel.rang);
     S.ruf += 5;
-    gunstGeben(ziel.patron, 1);
-    text = ziel.text(personName(ziel.patron));
+    if(ziel.patron) gunstGeben(ziel.patron, 1);
+    text = ziel.text(ziel.patron ? personName(ziel.patron) : '');
     klasse = 'gut';
   } else if(!vakanz){
-    text = 'Über dir steht ein Sergent, und über dem ein Sergent-major, und beide stehen fest. Es gibt nichts zu vergeben.'
-         + '<br><br><em>Für den Sergenten braucht es eine freie Stelle. Frei wird sie nicht, weil du bereit bist.</em>';
-  } else if(!reichtBildung){
-    text = ziel.fehltBildung + `<br><br><em>Für den ${esc(ziel.name)} braucht es Bildung ${ziel.bildung} — du hast ${g.bildung}. Buchstaben lernt man im Lager, gegen Geld.</em>`;
-  } else if(!reichtRuf){
-    text = ziel.fehltRuf + `<br><br><em>Für den ${esc(ziel.name)} braucht es Ruf ${ziel.ruf} — du hast ${g.ruf}.</em>`;
+    text = 'Die Stelle über dir ist besetzt, und der, der sie hat, steht fest. Es gibt nichts zu vergeben.'
+         + `<br><br><em>Für den ${esc(ziel.name)} braucht es eine freie Stelle. Frei wird sie nicht, weil du bereit bist.</em>`;
   } else {
-    text = ziel.fehltGunst + `<br><br><em>Für den ${esc(ziel.name)} braucht es die Fürsprache von ${esc(personName(ziel.patron))} — ${ziel.gunst}, du hast ${g.gunst}. Fürsprache sammelt sich in Abenden und Gefälligkeiten, nicht in einer einzigen Tat.</em>`;
+    text = (ziel[fehlt] || 'Man geht die Liste durch und hält bei dir nicht an.')
+         + `<br><br><em>${(nachsatz[fehlt] || nachsatz.fehltRuf)()}</em>`;
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
