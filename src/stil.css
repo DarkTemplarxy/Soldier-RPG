@@ -40,6 +40,22 @@
     /* Kanzleipapier — für alles, was ein amtliches Schriftstück *ist* */
     --papier:#f2ebda; --papier2:#e8dfc9; --tinte:#241f1a; --tinte2:#4e4335;
 
+    /* ── Die Bescheide ──
+       **Der Bogen sagt den Rang, bevor man ihn liest.** Ein Sergent bekommt
+       ein Stück Feldpergament mit einer Bruchkante; ein Marschall ein Patent
+       mit vierundzwanzig Pixel Goldgeflecht, fünf Unterschriften und drei
+       Siegeln. Dazwischen kommt je Stufe eine Zutat dazu — das ist die ganze
+       Regel, und sie braucht keine Sonderfälle.
+       Kontraste gerechnet: #1d1814 auf #f2ebda = 14,8:1 · #20304a auf #f2ebda
+       = 8,9:1 · #5f5240 auf #f2ebda = 5,6:1 · #8a6410 auf #f8f3e6 = 4,9:1. */
+    --pergament:#ddd0ae;         /* Feldpergament, Rang 5 */
+    --patent:#f7f1e2;            /* Patentbogen, Rang 7–8 */
+    --gold:#c8901f; --gold-hell:#f0dfae; --gold-dunkel:#8a6410;
+    --gold-linie:rgba(138,100,16,.5);
+    --hand:#20304a;              /* Handschrift, bläuliche Eisengallustinte */
+    --waffe-inf:#27415f; --waffe-kav:#2c4630; --waffe-art:#1e2a3f;
+    --wolle:#d08a2a; --tresse:#e8c469; --silber:#dfe3e0;
+
     /* Didone — die Schriftform der französischen Zeit um 1800: hohe
        Strichkontraste, senkrechte Achse. Nur Systemschriften, kein Download:
        Das Spiel bleibt eine Datei ohne Abhängigkeiten. Wo keine da ist,
@@ -493,3 +509,83 @@ a.plain:hover{ color:var(--brass) }
    steht auf `display:block`, weil es in der Seitenleiste allein in seiner Zelle
    sitzt; im Kartenkopf teilt es sich die Zeile mit dem Titel. */
 .ch .emblem{ display:inline-block; vertical-align:-6px; width:20px; height:20px; margin-right:7px }
+
+/* ══════════════════ DIE BESCHEIDE ══════════════════
+
+   Zehn Stufen von Rang 5 bis 14, aus dem Entwurfspaket (Bündel 3). Die Regel
+   dahinter ist eine einzige: **Je höher der Rang, desto mehr Zutaten** —
+   Papier heller, Rahmen breiter, mehr Unterschriften, größeres Siegel. Für
+   die Ränge 1 bis 4 gibt es keinen Bescheid, und das ist Absicht: Dort wird
+   nichts ausgestellt, man bekommt es gesagt. */
+
+/* Handschrift — nur Systemschriften, mit Rückfall auf Kursiv */
+.hand{ font-family:'Brush Script MT','Segoe Script','Bradley Hand',cursive;
+  color:var(--hand); line-height:1.2; font-style:italic }
+.feldzeile{ display:grid; grid-template-columns:auto 1fr; gap:8px 14px; align-items:baseline }
+.feldname{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--gold-dunkel) }
+.feldwert{ border-bottom:1px solid var(--gold-linie) }
+.unterschrift{ border-top:1px solid var(--gold-linie); margin-top:6px; padding-top:5px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:9.5px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--tinte2) }
+.bescheidkopf{ font-family:var(--didone); font-variant:small-caps; letter-spacing:.2em;
+  text-align:center; color:var(--gold-dunkel); font-size:13px; margin-bottom:2px }
+.bescheidrang{ font-family:var(--didone); text-align:center; font-size:27px;
+  color:#1d1814; margin:6px 0 2px; line-height:1.1 }
+.bescheidzusatz{ text-align:center; font-size:12.5px; color:var(--tinte2); margin-bottom:14px }
+.bescheidfuss{ display:flex; justify-content:space-between; align-items:flex-end;
+  gap:18px; margin-top:20px; flex-wrap:wrap }
+.siegelrund{ flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  border-radius:47% 53% 51% 49% / 52% 48% 52% 48%;
+  background:radial-gradient(circle at 36% 32%, #b8402c, #7e1f16 68%, #5e150e);
+  box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35),
+             inset 0 2px 3px rgba(255,255,255,.18);
+  color:rgba(255,225,210,.42); font-family:var(--didone);
+  text-shadow:0 1px 0 rgba(0,0,0,.5) }
+
+/* ── Feldpergament, nur Rang 5 ──
+   Vierzehn Punkte für die Bruchkante, kein Bild. `clip-path` schneidet den
+   Schlagschatten mit ab, deshalb sitzt der Schatten auf der Hülle. */
+.pergamenthuelle{ filter:drop-shadow(0 10px 22px rgba(0,0,0,.5)) }
+.pergament{ background:var(--pergament); color:#241f1a;
+  background-image:
+    radial-gradient(circle at 84% 12%, rgba(120,92,44,.22), transparent 26%),
+    radial-gradient(circle at 12% 78%, rgba(120,92,44,.18), transparent 30%),
+    radial-gradient(circle at 46% 40%, rgba(140,110,60,.10), transparent 55%),
+    var(--korn), var(--wolken);
+  background-blend-mode:normal,normal,normal,multiply,multiply;
+  clip-path:polygon(0.4% .8%,99.2% 0,99.6% 11%,98.7% 24%,99.7% 37%,98.5% 51%,
+    99.6% 64%,98.8% 78%,99.8% 90%,99% 100%,0.6% 99.3%,0 62%,0.7% 34%,0 14%); }
+.pergament .cb{ color:#241f1a }
+.falte{ position:absolute; pointer-events:none;
+  background:linear-gradient(90deg, rgba(80,60,30,.16), rgba(255,255,255,.34)) }
+
+/* ── Das Patent, Rang 7 aufwärts ──
+   Die Goldbordüre ist eine Hülle, kein `border-image` — sie muss auf jeder
+   Breite gleich aussehen und darf nicht kacheln. */
+.patenthuelle{ padding:7px; box-shadow:0 14px 32px rgba(0,0,0,.5);
+  background:linear-gradient(135deg,#8a6410,#e3c98c 22%,#c8901f 46%,#f0dfae 62%,#8a6410 88%,#c8901f) }
+.patent{ background:var(--patent); color:#1d1814 }
+.patent .cb{ color:#1d1814 }
+.stufe2 .patenthuelle{ padding:10px }
+.stufe3 .patenthuelle{ padding:14px }
+.stufe4 .patenthuelle{ padding:18px;
+  background:repeating-linear-gradient(45deg,#8a6410 0 4px,#e8d29a 4px 8px,#c8901f 8px 12px,#f6ecc8 12px 16px) }
+.stufe5 .patenthuelle{ padding:20px }
+.stufe6 .patenthuelle{ padding:24px }
+.stufe2 .patent{ background-color:#f8f3e6; background-image:
+  repeating-linear-gradient(45deg, rgba(138,100,16,.035) 0 2px, transparent 2px 7px),
+  repeating-linear-gradient(-45deg, rgba(138,100,16,.03) 0 2px, transparent 2px 7px) }
+.stufe3 .patent{ background-color:#faf6ea }
+.stufe4 .patent{ background-color:#fcf9ef }
+.stufe5 .patent{ background-color:#fdfbf4 }
+.stufe6 .patent{ background-color:#fefdf8 }
+/* Das rote Titelband ab Stufe 3 */
+.titelband{ background:linear-gradient(180deg,#a5301f,#7e1f16); color:#f3e2c8;
+  font-family:var(--didone); font-variant:small-caps; letter-spacing:.22em;
+  text-align:center; padding:5px 10px; margin:-4px -10px 14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.35) }
+/* Goldkugeln in den Ecken, nur Stufe 6 */
+.goldkugel{ position:absolute; width:13px; height:13px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #f6ecc8, #c8901f 62%, #8a6410);
+  box-shadow:0 1px 2px rgba(0,0,0,.45) }

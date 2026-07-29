@@ -3223,6 +3223,128 @@ function schrankeGeschafft(id){
   return !sch || S.rang >= sch.rang;
 }
 
+/* ══════════════════ DER BESCHEID ══════════════════
+
+   **Der Bogen sagt den Rang, bevor man ihn liest** (Bündel 3 des
+   Entwurfspakets). Ein Sergent bekommt ein Stück Feldpergament mit einer
+   Bruchkante und einer Unterschrift; ein Marschall ein Patent mit
+   vierundzwanzig Pixel Goldgeflecht, fünf Unterschriften und drei Siegeln.
+   Dazwischen kommt je Stufe genau eine Zutat dazu.
+
+   **Für die Ränge 1 bis 4 gibt es keinen Bescheid, und das ist Absicht:**
+   Dort wird nichts ausgestellt. Man bekommt zwei Wollstreifen an den Ärmel
+   und die Mitteilung, dass acht Mann jetzt einem gehören — auf ein Papier
+   ist das niemandem wert. Der erste Bogen kommt mit der Tresse. */
+function bescheidStufe(rang){
+  if(rang <= 5) return 'pergament';
+  if(rang === 6) return 'papier';
+  if(rang <= 8) return 'patent';
+  if(rang <= 10) return 'patent stufe2';
+  if(rang === 11) return 'patent stufe3';
+  if(rang === 12) return 'patent stufe4';
+  if(rang === 13) return 'patent stufe5';
+  return 'patent stufe6';
+}
+/* Wieviel Zierrat auf welcher Stufe. Eine Tabelle statt zehn Sonderfälle. */
+function bescheidMass(rang){
+  return {
+    siegel:  rang<=5 ? 0 : rang===6 ? 46 : rang<=8 ? 56 : rang<=10 ? 60 : rang===11 ? 66 : rang===12 ? 74 : rang===13 ? 80 : 92,
+    nebensiegel: rang>=14 ? 2 : 0,
+    unterschriften: rang<=6 ? 1 : rang<=8 ? 2 : rang<=13 ? 3 : 5,
+    titelband: rang>=11,
+    kugeln: rang>=14,
+    /* **Ab Rang 12 zeichnet der Kaiser selbst.** Der Patron rutscht dann in
+       die Gegenzeichnung — nicht weil er unwichtig würde, sondern weil über
+       einem Général de brigade nur noch einer steht. */
+    kaiser: rang>=12
+  };
+}
+/* Die Zeile über und unter dem Rangnamen. Sie steht hier und nicht in
+   `LEITER`, weil sie zum Bogen gehört und nicht zur Schwelle. */
+const BESCHEID_TEXT = {
+  5:['Ernennung zum Unteroffizier','Eine Tresse aus Metallfaden'],
+  6:['Ernennung zum Unteroffizier','Die zweite Tresse · der Zug von sechzig'],
+  7:['Patent eines Offiziers','Epauletten, ein Degen, und keine Muskete mehr'],
+  8:['Patent eines Offiziers','Die zweite Epaulette'],
+  9:['Patent eines Offiziers','Eine Kompanie von hundertzwanzig und ihre Kasse'],
+  10:['Ernennung im Namen des Kaisers','Ein Bataillon in vier Kompanien'],
+  11:['Ernennung im Namen des Kaisers','Ein Regiment und sein Adler'],
+  12:['Erhebung in den Generalsrang','Zwei Sterne · eine Brigade'],
+  13:['Erhebung in den Generalsrang','Drei Sterne · eine Division und eine Dotation'],
+  14:['Würde eines Marschalls des Kaiserreichs','Der Stab · sechsundzwanzig in zwölf Jahren']
+};
+
+/* Ein Feld auf dem Bogen: Bezeichnung in Mono, Wert in Handschrift. */
+function bescheidFeld(name, wert){
+  return `<div class="feldname">${esc(name)}</div><div class="feldwert hand" style="font-size:19px">${esc(wert)}</div>`;
+}
+
+function bescheidBogen(ziel, text, klasse, statuszeile){
+  const r = ziel.rang, m = bescheidMass(r), stufe = bescheidStufe(r);
+  const [kopf, zusatz] = BESCHEID_TEXT[r] || ['Ernennung',''];
+  const jahr = (String((KAPITEL[Math.max(0,LAUF.node-1)]||{}).datum||'').match(/1[78]\d\d/)||['1796'])[0];
+
+  /* Die Unterschriften. Die erste ist der Patron — ab Rang 12 der Kaiser,
+     und der Patron rückt eine Zeile tiefer. */
+  const namen = [];
+  if(m.kaiser){
+    namen.push({n:'Napoléon', a:'Empereur des Français', gross:true});
+    if(ziel.patron) namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+  } else if(ziel.patron){
+    namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+  }
+  const weitere = [
+    {n:'Delzons', a:'Colonel · 32ᵉ de ligne'},
+    {n:'Berthier', a:'Major général de la Grande Armée'},
+    {n:'Clarke',  a:'Ministre de la Guerre'},
+    {n:'Cambacérès', a:'Archichancelier de l\'Empire'}
+  ];
+  while(namen.length < m.unterschriften && weitere.length) namen.push(weitere.shift());
+  const unterschriften = namen.slice(0, m.unterschriften).map(u=>
+    `<div style="min-width:150px"><div class="hand" style="font-size:${u.gross?42:26}px;${u.gross?'transform:rotate(-3deg);transform-origin:left bottom;':''}">${esc(u.n)}</div>
+     <div class="unterschrift">${esc(u.a)}</div></div>`).join('');
+
+  const siegel = m.siegel ? `<div style="display:flex;gap:8px;align-items:flex-end">
+      ${Array.from({length:1+m.nebensiegel},(_,i)=>{
+        const gr = i===0 ? m.siegel : Math.round(m.siegel*0.55);
+        return `<div class="siegelrund" style="width:${gr}px;height:${gr}px;font-size:${Math.round(gr*0.42)}px${
+          r>=7?';box-shadow:0 0 0 2px var(--gold),0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35)':''}">${kaiserreich()?'N':'RF'}</div>`;
+      }).join('')}</div>` : '';
+
+  const kugeln = m.kugeln
+    ? [[6,6],[6,'auto'],['auto',6],['auto','auto']].map((_,i)=>{
+        const pos = ['top:5px;left:5px','bottom:5px;left:5px','top:5px;right:5px','bottom:5px;right:5px'][i];
+        return `<div class="goldkugel" style="${pos}"></div>`;
+      }).join('') : '';
+
+  const falten = stufe==='pergament'
+    ? `<div class="falte" style="left:33%;top:0;bottom:0;width:2px"></div>
+       <div class="falte" style="left:67%;top:0;bottom:0;width:2px"></div>
+       <div class="falte" style="top:48%;left:0;right:0;height:2px"></div>` : '';
+
+  const huelle = stufe==='pergament' ? 'pergamenthuelle' : (r>=7 ? 'patenthuelle' : '');
+  const inhalt = `<div class="card ${stufe}" style="position:relative;margin:0">
+      ${falten}${kugeln}
+      <div class="cb" style="padding:26px 30px 24px">
+        ${m.titelband?`<div class="titelband">Au nom de l'Empereur</div>`:''}
+        <div class="bescheidkopf">${esc(kopf)}</div>
+        <div class="bescheidrang">${esc(ziel.name)}</div>
+        <div class="bescheidzusatz">${esc(zusatz)}</div>
+        <div class="feldzeile" style="margin-bottom:16px">
+          ${bescheidFeld('Name', S.name)}
+          ${bescheidFeld('Einheit', '32ᵉ demi-brigade de bataille')}
+          ${bescheidFeld('Ausgefertigt', jahr)}
+        </div>
+        <div class="ergebnis ${klasse}" style="background:none;border-left:2px solid var(--gold-linie);padding-left:14px">${text}</div>
+        <div class="bescheidfuss">
+          <div style="display:flex;gap:26px;flex-wrap:wrap">${unterschriften}</div>
+          ${siegel}
+        </div>
+        <div class="probe" style="margin-top:16px">${statuszeile}</div>
+      </div></div>`;
+  return huelle ? `<div class="${huelle}" style="margin-bottom:18px">${inhalt}</div>` : inhalt;
+}
+
 function zeigeBefoerderung(n){
   /* Der Stand wird beim ersten Betreten der Station eingefroren, je Station —
      seit Kairo gibt es eine zweite Musterung, und die prüft den Stand von
@@ -3304,13 +3426,26 @@ function zeigeBefoerderung(n){
          + `<br><br><em>${(nachsatz[fehlt] || nachsatz.fehltRuf)()}</em>`;
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
-  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card papier"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+  const statuszeile = `${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}`;
+
+  /* **Ein Bescheid wird nur ausgestellt, wenn es etwas zu bescheiden gibt** —
+     und erst ab Rang 5. Wer übergangen wird oder zwei Wollstreifen bekommt,
+     sieht den gewohnten Bogen: Über eine Ernennung, die nicht stattgefunden
+     hat, schreibt keine Kanzlei ein Papier. */
+  const mitBescheid = bekommt && ziel.rang >= 5;
+  const blatt = mitBescheid
+    ? bescheidBogen(ziel, text, klasse, statuszeile)
+    : `<div class="card papier"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${vordruck(n)}<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
       <div class="rangzeile" style="margin-top:12px">${bekommt?rangabzeichen(S):''}
-        <span class="probe" style="margin:0">${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</span></div>
-      </div></div>
+        <span class="probe" style="margin:0">${statuszeile}</span></div>
+      </div></div>`;
+
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    ${mitBescheid?`<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div></div></div>`:''}
+    ${blatt}
     <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
