@@ -133,34 +133,114 @@ function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
    erkennt man an der Epaulette (Grenadier rot, Voltigeur grüngelb), die
    Unteroffiziere an den Streifen am Unterarm: Caporal zwei aus Wolle,
    Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse. */
-function rangabzeichen(mann){
-  const r = mann.rang, hoehe = 23;
-  const rahmen = i => `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>${i}</svg>`;
+/* ══════════════════ DIE RANGABZEICHEN ══════════════════
 
-  if(r===2){                                   // Epaulette auf der Schulter
-    const f = mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125';
-    const fransen = [10,14,18,22,26].map(x=>`<rect x="${x}" y="13" width="2" height="7" rx="1"/>`).join('');
-    return rahmen(`<rect x="7" y="5" width="22" height="7" rx="3.5" fill="${f}"/>
-      <g fill="${f}" opacity=".8">${fransen}</g>`);
+   **Vierzehn Ränge, drei Waffengattungen, kein einziges Bild.** Die Formen
+   stammen aus dem Entwurfspaket (`abzeichen/*.svg`); eingebaut sind sie als
+   Funktion, die einen SVG-String zurückgibt — sonst brechen `file://`, die
+   Einzeldatei-Weitergabe und `werkzeug/bauen.js`.
+
+   **Das Schildchen trägt die Farbe des Rocks**, das Metall die der Gattung:
+   Infanterie Gold auf Königsblau, Kavallerie Silber auf Dragonergrün,
+   Artillerie Gold auf Dunkelblau mit rotem Vorstoß. **Ab Rang 12 gibt es
+   keine Gattung mehr** — ein General ist keiner Waffe mehr zugeordnet, und
+   das Schildchen wird selbst golden.
+
+   Die Stufenfolge ist in allen Gattungen dieselbe und erzählt die Laufbahn:
+   leer → Epaulette der Elitekompanie → zwei Wollstreifen → plus Querstreifen
+   → eine Tresse aus Metallfaden → zwei Tressen → Epaulette mit rotem
+   Seidenstreifen → Streifen blass → Epaulette und Contre-Epaulette → dicke
+   Fransen → zwei dicke → zwei Sterne → drei Sterne → gekreuzte Stäbe. */
+const WAFFE = {
+  infanterie: {plate:'#27415f', stroke:'#16283d', wolle:'#d08a2a', tresse:'#e8c469',
+               tresseD:'#a8791a', ep:'#e0b552'},
+  kavallerie: {plate:'#2c4630', stroke:'#182a1a', wolle:'#d08a2a', tresse:'#dfe3e0',
+               tresseD:'#9aa3a0', ep:'#cfd6d2'},
+  artillerie: {plate:'#1e2a3f', stroke:'#0f1624', piping:'rgba(156,49,37,.75)',
+               wolle:'#9c3125', tresse:'#e8c469', tresseD:'#a8791a', ep:'#e0b552'}
+};
+
+/* Die drei Bausteine, aus denen jedes Abzeichen besteht. Sie stehen hier
+   einmal statt in vierzehn Vorlagen mehrfach. */
+function abzChevron(x1, f, breit){
+  const b = breit||9;
+  return `<polygon points="${x1},19 ${x1+b},5 ${x1+b+5},5 ${x1+5},19" fill="${f}"/>`;
+}
+function abzEpaulette(x, w, f, fransen, dick){
+  const n = fransen===undefined ? 5 : fransen;
+  const fy = dick ? 8 : 6.6, fw = dick ? 3.4 : 1.8, schritt = dick ? 4 : 4;
+  let out = `<rect x="${x}" y="5" width="${w}" height="7.4" rx="3.7" fill="${f}"/>`;
+  for(let i=0;i<n;i++){
+    const fx = x + 5 + i*schritt;
+    out += `<rect x="${fx}" y="13" width="${fw}" height="${fy}" rx="${fw/2}" fill="${f}" opacity=".${dick?'85':'8'}"/>`;
   }
-  if(r>=3){                                    // Streifen am Unterarm
-    const tresse = r>=5;
-    const f = tresse ? '#8a6410' : '#a86a20';  // Tresse in Metallfarbe, Wolle in Aurore
-    /* Der Sergent-major trägt **zwei** Tressen aus Metallfaden — historisch
-       genau der Unterschied zum Sergenten, und auf 36 Pixel der einzige, den
-       man sehen kann. */
-    const streifen = r>=6
-      ? `<polygon points="6,19 17,5 22,5 11,19" fill="${f}"/>
-         <polygon points="17,19 28,5 33,5 22,19" fill="${f}"/>`
-      : tresse
-      ? `<polygon points="11,19 22,5 29,5 18,19" fill="${f}"/>`
-      : `<polygon points="7,19 16,5 21,5 12,19" fill="${f}"/>
-         <polygon points="16,19 25,5 30,5 21,19" fill="${f}"/>`;
-    const quer = r===4 ? `<rect x="6" y="2.5" width="24" height="2.6" rx="1.3" fill="${f}" opacity=".85"/>` : '';
-    return rahmen(streifen + quer);
+  return out;
+}
+function abzStern(cx, gr){
+  const h = (gr||6.8)/2;
+  return `<rect x="${cx-h}" y="${12-h}" width="${gr||6.8}" height="${gr||6.8}" transform="rotate(45 ${cx} 12)" fill="url(#pgold)"/>`;
+}
+
+function rangabzeichen(mann){
+  const r = mann.rang|0;
+  if(r < 2) return '';                        // Fusilier: der Ärmel ist leer
+  const gold = r >= 12;
+  const P = WAFFE[mann.waffe || 'infanterie'] || WAFFE.infanterie;
+  const verlauf = `<defs><linearGradient id="pgold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0%" stop-color="#f6ecc8"/><stop offset="34%" stop-color="#e0b552"/>
+    <stop offset="70%" stop-color="#c8901f"/><stop offset="100%" stop-color="#8a6410"/></linearGradient></defs>`;
+  const grund = gold
+    ? `<rect x="0" y="0" width="36" height="24" rx="2" fill="url(#pgold)" stroke="#8a6410"/>
+       <rect x="1.2" y="1.2" width="33.6" height="21.6" rx="1.4" fill="none" stroke="rgba(94,66,8,.35)"/>`
+    : `<rect x="0" y="0" width="36" height="24" rx="2" fill="${P.plate}" stroke="${P.stroke}"/>
+       <rect x="1.2" y="1.2" width="33.6" height="21.6" rx="1.4" fill="none" stroke="${P.piping||'rgba(255,255,255,.10)'}"/>`;
+
+  let i = '';
+  if(r === 2){                                 // Elitekompanie: rot oder grüngelb
+    i = abzEpaulette(6, 24, mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125');
+  } else if(r === 3){                          // zwei Wollstreifen
+    i = abzChevron(6, P.wolle) + abzChevron(15, P.wolle);
+  } else if(r === 4){                          // dazu der Querstreifen des Fourriers
+    i = abzChevron(6, P.wolle) + abzChevron(15, P.wolle)
+      + `<rect x="6" y="2.4" width="24" height="2.6" rx="1.3" fill="${P.wolle}" opacity=".9"/>`;
+  } else if(r === 5){                          // eine Tresse aus Metallfaden
+    i = `<polygon points="11,19 20,5 25,5 16,19" fill="${P.tresse}"/>
+         <polygon points="11,19 20,5 21.4,5 12.4,19" fill="${P.tresseD}" opacity=".5"/>`;
+  } else if(r === 6){                          // zwei Tressen — der sichtbare Unterschied
+    i = abzChevron(5, P.tresse) + abzChevron(16, P.tresse);
+  } else if(r === 7){                          // Epaulette mit rotem Seidenstreifen
+    i = abzEpaulette(6, 24, P.ep)
+      + `<rect x="8" y="7.6" width="20" height="2" rx="1" fill="#9c3125" opacity=".9"/>`;
+  } else if(r === 8){                          // derselbe Streifen, blasser
+    i = abzEpaulette(6, 24, P.ep)
+      + `<rect x="8" y="7.6" width="20" height="1.2" rx=".6" fill="#9c3125" opacity=".55"/>`;
+  } else if(r === 9){                          // Epaulette und Contre-Epaulette
+    i = `<rect x="2" y="5" width="9" height="7.4" rx="3.7" fill="${P.ep}" opacity=".85"/>`
+      + abzEpaulette(8, 24, P.ep);
+  } else if(r === 10 || r === 11){             // dicke Fransen, ab 11 auf beiden Schultern
+    if(r === 10){
+      i = `<rect x="6" y="5" width="24" height="7.4" rx="3.7" fill="${P.ep}"/>`;
+      for(let k=0;k<5;k++) i += `<rect x="${9.6+k*4}" y="13" width="3.4" height="8" rx="1.7" fill="${P.ep}" opacity=".85"/>`;
+    } else {
+      i = '';
+      for(const x0 of [1.6, 22]){
+        i += `<rect x="${x0}" y="5" width="12" height="7.4" rx="3.7" fill="${P.ep}"/>`;
+        for(let k=0;k<3;k++) i += `<rect x="${x0+1.4+k*3.4}" y="12.4" width="3.2" height="8" rx="1.6" fill="${P.ep}" opacity=".85"/>`;
+      }
+    }
+  } else if(r === 12){                         // zwei Sterne auf dem Balken
+    i = `<rect x="5" y="9" width="26" height="6" rx="3" fill="#1e3350" opacity=".92"/>`
+      + abzStern(13) + abzStern(23);
+  } else if(r === 13){                         // drei Sterne
+    i = `<rect x="4" y="9" width="28" height="6" rx="3" fill="#1e3350" opacity=".92"/>`
+      + abzStern(11, 6.4) + abzStern(18, 6.4) + abzStern(25, 6.4);
+  } else {                                     // der Marschallstab: gekreuzte Stäbe
+    i = `<g stroke="#1e3350" stroke-width="3.4" stroke-linecap="round">
+        <line x1="9" y1="18" x2="27" y2="6"/><line x1="27" y1="18" x2="9" y2="6"/></g>`
+      + abzStern(18, 7.2)
+      + [[9,6],[27,6],[9,18],[27,18]].map(([cx,cy])=>`<circle cx="${cx}" cy="${cy}" r="1.9" fill="#1e3350"/>`).join('');
   }
-  return '';                                   // Fusilier: der Ärmel ist leer
+  return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">${verlauf}${grund}${i}</svg>`;
 }
 
 /* ══════════════════ DIE KETTE ÜBER DIR ══════════════════
