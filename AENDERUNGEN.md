@@ -35,9 +35,13 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **`VP=400` löst `VP=160` als Leitmessung des Veteranen ab.** Ein Spitzenlauf bringt mit fünf Kapiteln über 440 Punkte statt 350; 160 misst nicht mehr den Veteranen, den das Spiel hervorbringt. `VETERAN_ZIELE` ist entsprechend verlängert, sonst kann der Bot den Vorrat gar nicht ausgeben.
 
-**Gemessen** *(vorsichtig und mutig je 80 Läufe, die Veteranen je 40)*: überlebt **23 / 6 / 13 / 25 %**, höchster Rang (Cpt) **5 / 4 / 18 / 30 %**.
+**Gemessen** *(die Erstläufe je 80 Läufe, der Veteran 40)*: überlebt **24 / 5 / 53 %**, höchster Rang (Cpt) **6 / 4 / 28 %**. Abstand 29 Punkte beim Überleben, 22 beim Rang.
 
-> **⚠ Die Progression hat sich dabei einmal umgedreht, und es lag am Bot.** Der Veteran mit 160 VP überlebte seltener (13 %) als der Erstläufer ohne Vorrat (23 %) — die eine Zahl, die nie so stehen darf. Gefunden an der Sterbeort-Zeile: Der Veteran stirbt in Jena, der Erstläufer in Ägypten. Der Bot forcierte, sobald er über halbes Blut hatte, und **nur der Veteran hat überhaupt die Kraft, in die Falle zu laufen.** Die Bedingung steht jetzt auf `anteil > 0,8 && Atem > 70 && Schuhe ≥ 40`; die Nachmessung läuft. **Regel:** Wer eine Wahl einbaut, die Kraft kostet und Ruf bringt, muss dem Bot beibringen, *wann* sie sich lohnt.
+> **⚠ Die Progression hatte sich zwischendurch umgedreht, und es lag am Bot.** In der ersten Messung überlebte der Veteran mit 160 VP seltener (13 %) als der Erstläufer ohne Vorrat (23 %) — die eine Zahl, die nie so stehen darf. Gefunden an der Sterbeort-Zeile: Der Veteran starb in Jena, der Erstläufer in Ägypten. Der Bot forcierte, sobald er über halbes Blut hatte, und **nur der Veteran hat überhaupt die Kraft, in die Falle zu laufen.** Mit der schärferen Bedingung (`Blut > 80 %, Atem > 70, Schuhe ≥ 40`) steht er bei **53 %**, und die Jena-Toten fallen von 20 auf 7. **Regel:** Wer eine Wahl einbaut, die Kraft kostet und Ruf bringt, muss dem Bot beibringen, *wann* sie sich lohnt.
+
+> **⚠ Zwei Zahlen bleiben offen und stehen so in CLAUDE.md.** Erstens überlebt der Veteran mit 400 VP seltener (23 %) als der mit 160 (53 %) — Verdacht: Bei sehr hohen Werten übersteigt der Abstand `Wert − Schwierigkeit` einer riskanten Wahl auch nach dem Risikoabschlag jede sichere, der reiche Bot geht also mehr Risiken ein, weil die Formel es so ausrechnet. Zweitens ist die Achse „Mut kostet, Mut steigt auf" stumpf geworden: Der mutige Erstläufer erreicht den Capitaine nicht mehr öfter als der vorsichtige, weil er vorher in Ägypten liegt.
+
+> **Und der Befund, auf den RANGLEITER §11 gewartet hat:** „Wenn nach Rang 7 die Sterblichkeit einbricht oder explodiert, stimmt die Umstellung der Proben nicht." Mit fünf Kapiteln ist es messbar — der Erstläufer stirbt in Ägypten, der Veteran in Jena, und zwar weil er dort Rang 7 bis 9 trägt und damit +4 bis +5 Gefahr je Runde zusätzlich zur Güte 7. Ein Fusilier steht bei Jena bei Gefahr 19, ein Capitaine bei 24, im selben Gefecht. **Das ist der Entwurf, aber jetzt eine gemessene Größe statt einer Behauptung.**
 
 ## 2026-07-29 — Rangleiter Phase E: die Patente
 

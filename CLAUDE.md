@@ -949,33 +949,43 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 
 **Bänder für fünf Kapitel** *(neu gesetzt am 29.07.2026 mit Kapitel 5)*:
 
-| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 | **Veteran 400** |
-|---|---|---|---|---|
-| **überlebt** | **15–30 %** | **3–12 %** | **25–40 %** | **35–55 %** |
-| **höchster Rang (Cpt)** | **2–10 %** | **1–8 %** | **15–30 %** | **28–45 %** |
+| Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 |
+|---|---|---|---|
+| **überlebt** | **18–32 %** | **2–10 %** | **45–60 %** |
+| **höchster Rang (Cpt)** | **3–12 %** | **1–8 %** | **20–35 %** |
 
-**Der Veteran hat vier Kapitel lang 160 VP gehabt und braucht jetzt mehr.** Ein Spitzenlauf bringt mit fünf Kapiteln über 440 Punkte statt 350; ein Testwert von 160 misst deshalb nicht mehr den Veteranen, den das Spiel hervorbringt, sondern einen armen Verwandten. **`VP=400` ist ab jetzt die Leitmessung**, 160 bleibt als dritter Lauf daneben stehen. Wer ein Kapitel anbaut, prüft auch diesen Wert mit — er wächst mit dem Punktemaximum.
-
-Gemessen mit Kapitel 5 *(vorsichtig und mutig je 80 Läufe, die Veteranen je 40)*:
+Gemessen mit Kapitel 5 *(die Erstläufe je 80, der Veteran 40)*:
 
 | | überlebt | höchster Rang (Cpt) | gestorben in Jena |
 |---|---|---|---|
-| Erstlauf vorsichtig | 23 % | 5 % | 13 von 80 |
-| Erstlauf mutig | 6 % | 4 % | 8 von 80 |
-| Veteran 160 | 13 % | 18 % | 20 von 40 |
-| Veteran 400 | 25 % | 30 % | 13 von 40 |
+| Erstlauf vorsichtig | **24 %** | **6 %** | 9 von 80 |
+| Erstlauf mutig | **5 %** | **4 %** | 7 von 80 |
+| Veteran 160 | **53 %** | **28 %** | 7 von 40 |
+| *Veteran 400* | *23 %* | *25 %* | *16 von 40* |
+
+**Der Abstand trägt wieder:** 29 Punkte beim Überleben (24 → 53), 22 beim Rang (6 → 28). Der erste liegt über der selbstgesetzten Grenze von 25, der zweite knapp darunter — **mit dem nächsten Kapitel mitprüfen.**
 
 *(Zahlen von vier Kapiteln, gegen Rang 6 gerechnet und deshalb nicht vergleichbar: nach Phase E 44 / 19 / 68 % und 19 / 16 / 66 %; nach Phase D 43 / 19 / 70 % und 23 / 16 / 55 %.)*
 
-> ### ⚠ Die Progression hat sich einmal umgedreht — und es lag am Bot
+> ### ⚠ Der Veteran mit 400 VP überlebt seltener als der mit 160 — offen
 >
-> In der Messreihe oben **überlebt der Veteran mit 160 VP seltener (13 %) als der Erstläufer ohne Vorrat (23 %)**. Das ist die eine Zahl, die niemals so stehen darf: Der ganze Aufbau des Spiels ist, dass ein Vorrat etwas nützt.
+> 23 % gegen 53 %, bei je 40 Läufen. Das sind über vier Standardabweichungen; **es ist kein Rauschen, und es ist die Zahl, die als Nächstes gemessen gehört.**
 >
-> **Die Ursache ist der forcierte Marsch, und gefunden wurde sie an der Sterbeort-Zeile:** Der Veteran stirbt in Jena (20 von 40), der Erstläufer in Ägypten. Der Bot forciert, sobald er über halbes Blut und mittleren Atem hat — und **nur der Veteran hat überhaupt genug Kraft, in die Falle zu laufen.** Der arme Mann marschiert nach Vorschrift, weil er sich nichts anderes leisten kann, und lebt deshalb länger.
+> **Der Verdacht ist wieder eine Bot-Heuristik, nicht das Spiel.** Der Bot bewertet Szenenwahlen nach dem Abstand `Wert − Schwierigkeit` und zieht für riskante 20 ab. Bei sehr hohen Werten übersteigt eine riskante Wahl auch nach dem Abschlag noch jede sichere — **der reiche Veteran geht also mehr Risiken ein, nicht weil es klug wäre, sondern weil die Formel es so ausrechnet.** Ein Mensch mit Konstitution 70 und Taktik 50 würde eine Wunde nicht deshalb riskieren, weil er sie sich leisten kann.
 >
-> **Das ist keine Balance-Frage, sondern die Definition von „kundig".** Ein kundiger Spieler forciert frisch und gut beschuht, nicht angeschlagen und nicht vor einem Höhepunkt. Die Bedingung im Bot steht deshalb jetzt auf `anteil > 0,8 && Atem > 70 && Schuhe ≥ 40`. **Die Zahlen oben sind mit der alten, leichtfertigen Bedingung gemessen und werden nachgemessen.**
+> **Wer das misst, misst mit 80 Läufen und prüft zuerst den Hebel, nicht das Ergebnis** — also: wie oft nimmt der 400er-Bot eine `risk`-Wahl gegenüber dem 160er? Erst wenn dieser Zähler gleich ist und die Quote trotzdem auseinanderliegt, ist es das Spiel.
 >
-> **Regel daraus, allgemein:** Wer eine Wahl einbaut, die Kraft kostet und Ruf bringt, muss dem Bot beibringen, *wann* sie sich lohnt — sonst misst das Skript nicht die Wahl, sondern seine eigene Leichtfertigkeit. Dieselbe Lektion wie bei der Gunst, der Regimentsschule und dem stummen Filter, nur an einer neuen Stelle.
+> **Bis dahin trägt `VP=160` die Bänder.** Die Umstellung auf `VP=400` als Leitmessung ist damit ausgesetzt, nicht zurückgenommen: Der Grund dafür bleibt richtig (ein Spitzenlauf bringt über 440 Punkte), nur ist der Messwert noch nicht belastbar.
+
+> ### ⚠ Und die eigentliche Entdeckung dieser Messreihe: die Offiziersränge sind der teuerste Teil des Spiels
+>
+> RANGLEITER §11 fragte: „Wenn nach Rang 7 die Sterblichkeit einbricht oder explodiert, stimmt die Umstellung der Proben nicht." **Mit fünf Kapiteln ist das zum ersten Mal messbar, und die Antwort steht in der Sterbeort-Zeile.**
+>
+> Der Erstläufer stirbt in **Ägypten** (43 von 80). Der Veteran stirbt in **Jena** — und zwar deshalb, weil er dort Rang 7 bis 9 trägt und damit **+4 bis +5 Gefahr je Runde** zusätzlich zur Güte 7. Ein Fusilier bei Jena steht bei Gefahr 19, ein Capitaine bei 24, und beide stehen im selben Gefecht.
+>
+> **Das ist der Entwurf, nicht ein Fehler** („Wer aufsteigt, kauft sich nicht in Sicherheit ein"). Aber es ist jetzt eine gemessene Größe statt einer Behauptung, und wer an den Rangzuschlägen dreht, hat ab sofort eine Zahl, gegen die er misst.
+>
+> **Mut kostet weiterhin, aber Mut steigt nicht mehr auf.** Vorsichtig 24 % / 6 %, mutig 5 % / 4 % — der mutige Erstläufer erreicht den Capitaine nicht mehr öfter als der vorsichtige, weil er vorher in Ägypten liegt. **Diese Achse ist mit dem fünften Kapitel stumpf geworden** und gehört beim nächsten Anbau geprüft: Entweder der mutige Weg braucht wieder einen Ertrag, der die höhere Sterblichkeit aufwiegt, oder die Achse verlagert sich nach oben, wo Ereignisse und Aufträge sie tragen.
 
 > ### ⚠ Die Leitzahl „höchster Rang" ist jetzt stumpf — und diesmal ist es kein Rauschen
 >
