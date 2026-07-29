@@ -40,6 +40,31 @@ const RANG = [
   {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62},
   {n:6,name:'Sergent-major',wert:88}
 ];
+/* ══════════════════ DER SOLD ══════════════════
+
+   **Francs waren bis zum 28.07.2026 Zierde.** Es gab sie aus Szenen, und der
+   Marketender nahm sie — aber es gab keine verlässliche Quelle, also war Geld
+   eine Zahl, die man nicht planen konnte. Der Sold ist die Quelle.
+
+   `SOLD` ist der Satz **je Station** in Francs. Die historischen Zahlen: Ein
+   Fusilier bekam fünf Sous am Tag, also einen Viertelfranc — und davon ging
+   die „masse" ab, aus der Schuhe und Wäsche bezahlt wurden. Was in die Hand
+   kam, war fast nichts. Ein Sergent-major bekam gut das Dreifache.
+
+   **Das ist die eine Stelle, an der ein höherer Rang mehr Zahlen gibt statt
+   neuer Knöpfe — und sie ist dennoch richtig** (Invariante 4): Sold kauft
+   keine Fähigkeit, sondern Ausrüstung, die man auch verlieren kann, und er
+   bildet ab, was historisch der greifbarste Unterschied zwischen einem
+   Füsilier und einem Unteroffizier war. */
+/* Geeicht am Marketender, nicht am Geschichtsbuch. Die historischen fünf Sous
+   am Tag wären im Spiel 1,4 Francs für den ganzen Italienfeldzug gewesen —
+   korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen:
+   **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender
+   kaufen** (8–18 F). Bei ~16 Stationen heißt das für den Füsilier rund 11 F
+   bei voller Zahlung — und in Italien, wo zu 30 % gezahlt wird, drei. */
+const SOLD = {1:0.70, 2:0.80, 3:1.00, 4:1.20, 5:1.50, 6:2.00};
+function soldSatz(rang){ return SOLD[rang] || SOLD[6]; }
+
 function rangNameVon(mann){
   if(mann.rang===2) return mann.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
   const r=RANG.find(r=>r.n===mann.rang); return r?r.name:'Fusilier';
@@ -172,10 +197,10 @@ const HERKUENFTE = [
    sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
    davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
-  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
-  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, kurz:'Die perfekte Schlacht.'},
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, kurz:'Die perfekte Schlacht.'},
   {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
   {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
   {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},

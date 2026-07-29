@@ -56,6 +56,12 @@ function stationErledigt(){
      über ein Kapitel sind das rund zwanzig. */
   const rente = ordenPension();
   if(rente) S.geld += rente;
+  /* **Der Sold wird angeschrieben, nicht ausgezahlt.** Er sammelt sich je
+     Station an und kommt erst im Lager oder Winterquartier in die Hand — so
+     war es, und so ist es auch das bessere Spiel: Eine Zahl, die bei jeder
+     Station um 0,45 steigt, ist Rauschen; sechs Wochen Sold auf einmal sind
+     ein Moment. */
+  S.soldOffen = (S.soldOffen||0) + soldSatz(S.rang) * soldFaktor();
   /* KONZEPT §10: „Briefe von zu Hause senken Belastung." Genau ein Punkt je
      Station — kein System, ein Beiwerk, wie es dort ausdrücklich heißt. */
   if(S.verheiratet) S.belastung = Math.max(0, S.belastung - 1);
@@ -64,6 +70,32 @@ function stationErledigt(){
 }
 
 /* ══════════════════ ORDEN ══════════════════ */
+
+/* Wie zuverlässig in dieser Kampagne gezahlt wird. **Das ist der historisch
+   interessanteste Teil des Soldes:** Die Italienarmee von 1796 war berüchtigt
+   dafür, monatelang nichts zu sehen — barfuß, in Lumpen, siegreich. In Ägypten
+   wurde in einer Münze gezahlt, die keiner kannte. In der Garnison kam der
+   Sold pünktlich, und das war für viele der eigentliche Unterschied zum Krieg. */
+function soldFaktor(){
+  const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  for(const id in STATIONEN){
+    if((STATIONEN[id]||[]).some(x=>x.id===n.id)){
+      const k = KAMPAGNEN.find(c=>c.id===id);
+      return k && k.sold !== undefined ? k.sold : 1;
+    }
+  }
+  return 1;
+}
+
+/* Die Auszahlung. Gibt den Betrag zurück, damit der Aufrufer ihn anzeigen
+   kann — auf zwei Stellen gerundet, weil Sous existierten. */
+function soldAuszahlen(){
+  const offen = Math.round((S.soldOffen||0) * 100) / 100;
+  if(offen <= 0) return 0;
+  S.geld += offen;
+  S.soldOffen = 0;
+  return offen;
+}
 
 function ordenPension(){
   if(!S || !S.orden) return 0;
@@ -149,7 +181,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
-    wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
+    wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);

@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 5;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden · 5: Tatenzählung
+const LAUF_FASSUNG    = 6;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -119,6 +119,13 @@ const LAUF_WANDLER = {
       if(m.sondermissionen === undefined) m.sondermissionen = 0;
     }
     return Object.assign({}, alt, {fassung:5});
+  },
+  /* Fassung 5 kannte keinen Sold. Ein angefangener Feldzug fängt bei null an —
+     rückwirkend Sold für gelaufene Stationen gutzuschreiben wäre geraten, und
+     die nächste Auszahlung im Lager kommt ohnehin bald. */
+  5: alt => {
+    if(alt.mann && alt.mann.soldOffen === undefined) alt.mann.soldOffen = 0;
+    return Object.assign({}, alt, {fassung:6});
   }
 };
 

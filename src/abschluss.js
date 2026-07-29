@@ -169,7 +169,8 @@ function lagerHandlungen(n){
    Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
 function zeigeLager(n){
   const L = LAUF.lager;
-  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft; laufSichern(); }
+  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
+    L.sold = soldAuszahlen(); laufSichern(); }
   const opt = lagerHandlungen(n).map(id=>{
     const t = LAGER_TUN[id];
     return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
@@ -179,6 +180,7 @@ function zeigeLager(n){
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
+      ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${abendeFuer(n)}${
         abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'EIN ABEND':'ZWEI ABENDE'} MEHR ALS ${rangName(S.rang).toUpperCase()}`:''}</div>
@@ -200,6 +202,17 @@ function lagerTun(id){
   zeigeLager(KAPITEL[LAUF.node]);
 }
 function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(); naechster(); }
+
+/* Was der Zahlmeister dazu sagt. Die Höhe verrät, wie lange nicht gezahlt
+   wurde und in welcher Kampagne man steht — der Text muss das nicht erklären,
+   er muss nur den richtigen Ton haben. */
+function soldText(betrag){
+  const f = soldFaktor();
+  if(f <= 0.35) return 'Der Zahlmeister zahlt aus, was er hat, und was er hat, ist ein Bruchteil dessen, was auf der Liste steht. Es unterschreibt trotzdem jeder.';
+  if(f <= 0.6)  return 'Gezahlt wird in einer Münze, die hier gilt und zu Hause nichts wert ist. Der Fourier rechnet um, und niemand kann nachprüfen, ob er richtig rechnet.';
+  if(f >= 0.9)  return 'Der Zahlmeister sitzt an einem Tisch mit einer Kassette, ruft die Namen der Reihe nach auf und zählt vor. Es stimmt, und dass es stimmt, ist neu genug, dass man es erwähnt.';
+  return 'Sold, endlich. Man stellt sich an, unterschreibt mit einem Kreuz oder mit einem Namen, und zählt danach noch einmal nach.';
+}
 
 /* ══════════════════ WINTERQUARTIER UND SAISON ══════════════════
 
@@ -388,6 +401,7 @@ function zeigeWinter(n){
        danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
        Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
     W.atemVoll = S.atem < S.leben; S.atem = 100; atemKlemmen();
+    W.sold = soldAuszahlen();
     laufSichern();
   }
   const opt = winterHandlungen(n).map(id=>{
@@ -400,6 +414,7 @@ function zeigeWinter(n){
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
       ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
+      ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen} VON ${wochenFuer(n)}</div>
       </div></div>

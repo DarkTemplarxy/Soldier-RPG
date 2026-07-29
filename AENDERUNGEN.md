@@ -5,6 +5,29 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Der Sold: Francs sind keine Zierde mehr
+
+**Vom Entwickler gemeldet:** Es gab Francs aus siebenundzwanzig Szenen, und der Marketender nahm sie — aber keine verlässliche Quelle. Geld war eine Zahl, die man nicht planen konnte.
+
+**Der Sold wird angeschrieben, nicht ausgezahlt.** Er sammelt sich je Station in `S.soldOffen` und kommt erst im Lager oder in der Saison in die Hand. So war es historisch, und es ist das bessere Spiel: Eine Zahl, die bei jeder Station um 0,45 steigt, ist Rauschen; sechs Wochen Sold auf einmal sind ein Moment.
+
+| Rang | F je Station | | Kampagne | Zahlungsmoral |
+|---|---|---|---|---|
+| Fusilier | 0,70 | | Italien 1796/97 | 0,3 |
+| Caporal | 1,00 | | Ägypten 1798/99 | 0,5 |
+| Sergent | 1,50 | | Garnison 1801–04 | 1,0 |
+| Sergent-major | 2,00 | | Austerlitz 1805 | 0,9 |
+
+**Geeicht am Marketender, nicht am Geschichtsbuch.** Fünf Sous am Tag wären im Spiel 1,4 Francs für den ganzen Italienfeldzug gewesen — korrekt und wirkungslos. Maßstab ist stattdessen: Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender kaufen. Ergebnis: Italien 3,4 F für den Füsilier (arm, wie es sich gehört), Garnison 11,9 F, Austerlitz 8,8 F.
+
+**Die Zahlungsmoral je Kampagne ist der historisch interessanteste Teil.** Die Italienarmee war berüchtigt dafür, monatelang nichts zu sehen — barfuß, in Lumpen, siegreich; in Ägypten wurde in einer Münze gezahlt, die keiner kannte; in der Garnison kam der Sold pünktlich. Der Auszahlungstext wechselt mit dem Faktor und erklärt nichts, er klingt nur anders.
+
+Spielstand-Fassung 5 → **6** mit Wandler.
+
+> **⚠ Offen: Zwei Leitzahlen haben sich um zehn Punkte bewegt.** Erstlauf `höchster Rang` 18 → 28 %, Veteran `überlebt` 65 → 55 %. Zehn Punkte sind genau die Grenze der eigenen Prüfregel und zugleich noch im Rauschen. Der Mechanismus ist verstanden: Der Bot kauft beim Marketender, sobald er 18 F hat, und jeder Kauf kostet eine Saisonwoche, die vorher in Schule oder Ruhe ging — für den Erstläufer ein Gewinn, für den Veteranen ein Verlust. **Das ist auch ein Bot-Artefakt: Ein Mensch kauft nicht, sobald er kann.** Nachzumessen mit 80 Läufen; falls es bleibt, die Kaufregel des Bots verschärfen, nicht die Soldsätze drehen.
+
+---
+
 ## 2026-07-28 — Kapitel 4: Austerlitz 1805, Rang 6 und der Zug
 
 **Vierzehn Stationen, drei Gefechte, Feindgüte 6.** Die Ernte von Boulogne: Zwei Jahre Exerzieren, dann 700 km in fünf Wochen, Ulm ohne Schlacht, und am 2. Dezember der Pratzeberg.

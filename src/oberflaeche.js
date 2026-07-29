@@ -104,7 +104,7 @@ function kopfzeile(){
   }).join('');
   kopf.innerHTML = `<span class="kopfzeile">
     ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
-    <span class="kopfgeld">${S.geld} F</span>
+    <span class="kopfgeld">${Math.round(S.geld*100)/100} F</span>
     <span class="kopftrenner"></span>
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span>
     <span class="kopftrenner"></span>
@@ -265,7 +265,8 @@ function seitenleiste(){
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
       <div class="rule"></div>
-      <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
+      <div class="kv"><span>Geld</span><b>${Math.round(S.geld*100)/100} F</b></div>
+      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${(Math.round(S.soldOffen*100)/100).toFixed(2)} F</b></div>` : ''}
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
       ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
       ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}

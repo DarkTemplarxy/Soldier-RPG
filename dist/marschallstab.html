@@ -560,6 +560,31 @@ const RANG = [
   {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62},
   {n:6,name:'Sergent-major',wert:88}
 ];
+/* ══════════════════ DER SOLD ══════════════════
+
+   **Francs waren bis zum 28.07.2026 Zierde.** Es gab sie aus Szenen, und der
+   Marketender nahm sie — aber es gab keine verlässliche Quelle, also war Geld
+   eine Zahl, die man nicht planen konnte. Der Sold ist die Quelle.
+
+   `SOLD` ist der Satz **je Station** in Francs. Die historischen Zahlen: Ein
+   Fusilier bekam fünf Sous am Tag, also einen Viertelfranc — und davon ging
+   die „masse" ab, aus der Schuhe und Wäsche bezahlt wurden. Was in die Hand
+   kam, war fast nichts. Ein Sergent-major bekam gut das Dreifache.
+
+   **Das ist die eine Stelle, an der ein höherer Rang mehr Zahlen gibt statt
+   neuer Knöpfe — und sie ist dennoch richtig** (Invariante 4): Sold kauft
+   keine Fähigkeit, sondern Ausrüstung, die man auch verlieren kann, und er
+   bildet ab, was historisch der greifbarste Unterschied zwischen einem
+   Füsilier und einem Unteroffizier war. */
+/* Geeicht am Marketender, nicht am Geschichtsbuch. Die historischen fünf Sous
+   am Tag wären im Spiel 1,4 Francs für den ganzen Italienfeldzug gewesen —
+   korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen:
+   **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender
+   kaufen** (8–18 F). Bei ~16 Stationen heißt das für den Füsilier rund 11 F
+   bei voller Zahlung — und in Italien, wo zu 30 % gezahlt wird, drei. */
+const SOLD = {1:0.70, 2:0.80, 3:1.00, 4:1.20, 5:1.50, 6:2.00};
+function soldSatz(rang){ return SOLD[rang] || SOLD[6]; }
+
 function rangNameVon(mann){
   if(mann.rang===2) return mann.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
   const r=RANG.find(r=>r.n===mann.rang); return r?r.name:'Fusilier';
@@ -692,10 +717,10 @@ const HERKUENFTE = [
    sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
    davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
-  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
-  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, kurz:'Die perfekte Schlacht.'},
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, kurz:'Die perfekte Schlacht.'},
   {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
   {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
   {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
@@ -2160,7 +2185,7 @@ STATIONEN.austerlitz = KAPITEL4.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 5;   // 2: Lebenspunkte · 3: die Kette über dir · 4: Orden · 5: Tatenzählung
+const LAUF_FASSUNG    = 6;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -2262,6 +2287,13 @@ const LAUF_WANDLER = {
       if(m.sondermissionen === undefined) m.sondermissionen = 0;
     }
     return Object.assign({}, alt, {fassung:5});
+  },
+  /* Fassung 5 kannte keinen Sold. Ein angefangener Feldzug fängt bei null an —
+     rückwirkend Sold für gelaufene Stationen gutzuschreiben wäre geraten, und
+     die nächste Auszahlung im Lager kommt ohnehin bald. */
+  5: alt => {
+    if(alt.mann && alt.mann.soldOffen === undefined) alt.mann.soldOffen = 0;
+    return Object.assign({}, alt, {fassung:6});
   }
 };
 
@@ -2447,6 +2479,12 @@ function stationErledigt(){
      über ein Kapitel sind das rund zwanzig. */
   const rente = ordenPension();
   if(rente) S.geld += rente;
+  /* **Der Sold wird angeschrieben, nicht ausgezahlt.** Er sammelt sich je
+     Station an und kommt erst im Lager oder Winterquartier in die Hand — so
+     war es, und so ist es auch das bessere Spiel: Eine Zahl, die bei jeder
+     Station um 0,45 steigt, ist Rauschen; sechs Wochen Sold auf einmal sind
+     ein Moment. */
+  S.soldOffen = (S.soldOffen||0) + soldSatz(S.rang) * soldFaktor();
   /* KONZEPT §10: „Briefe von zu Hause senken Belastung." Genau ein Punkt je
      Station — kein System, ein Beiwerk, wie es dort ausdrücklich heißt. */
   if(S.verheiratet) S.belastung = Math.max(0, S.belastung - 1);
@@ -2455,6 +2493,32 @@ function stationErledigt(){
 }
 
 /* ══════════════════ ORDEN ══════════════════ */
+
+/* Wie zuverlässig in dieser Kampagne gezahlt wird. **Das ist der historisch
+   interessanteste Teil des Soldes:** Die Italienarmee von 1796 war berüchtigt
+   dafür, monatelang nichts zu sehen — barfuß, in Lumpen, siegreich. In Ägypten
+   wurde in einer Münze gezahlt, die keiner kannte. In der Garnison kam der
+   Sold pünktlich, und das war für viele der eigentliche Unterschied zum Krieg. */
+function soldFaktor(){
+  const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  for(const id in STATIONEN){
+    if((STATIONEN[id]||[]).some(x=>x.id===n.id)){
+      const k = KAMPAGNEN.find(c=>c.id===id);
+      return k && k.sold !== undefined ? k.sold : 1;
+    }
+  }
+  return 1;
+}
+
+/* Die Auszahlung. Gibt den Betrag zurück, damit der Aufrufer ihn anzeigen
+   kann — auf zwei Stellen gerundet, weil Sous existierten. */
+function soldAuszahlen(){
+  const offen = Math.round((S.soldOffen||0) * 100) / 100;
+  if(offen <= 0) return 0;
+  S.geld += offen;
+  S.soldOffen = 0;
+  return offen;
+}
 
 function ordenPension(){
   if(!S || !S.orden) return 0;
@@ -2540,7 +2604,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
     rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
-    wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], kaeufe:kaeufe||[], gekauft:punkte||{},
+    wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     kapitel:0, lebt:true, ende:null, log:[]
   };
   mann.leben = lebenMax(mann);
@@ -2862,7 +2926,7 @@ function kopfzeile(){
   }).join('');
   kopf.innerHTML = `<span class="kopfzeile">
     ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
-    <span class="kopfgeld">${S.geld} F</span>
+    <span class="kopfgeld">${Math.round(S.geld*100)/100} F</span>
     <span class="kopftrenner"></span>
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span>
     <span class="kopftrenner"></span>
@@ -3023,7 +3087,8 @@ function seitenleiste(){
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
       <div class="rule"></div>
-      <div class="kv"><span>Geld</span><b>${S.geld} F</b></div>
+      <div class="kv"><span>Geld</span><b>${Math.round(S.geld*100)/100} F</b></div>
+      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${(Math.round(S.soldOffen*100)/100).toFixed(2)} F</b></div>` : ''}
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
       ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
       ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}
@@ -6089,7 +6154,8 @@ function lagerHandlungen(n){
    Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
 function zeigeLager(n){
   const L = LAUF.lager;
-  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft; laufSichern(); }
+  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
+    L.sold = soldAuszahlen(); laufSichern(); }
   const opt = lagerHandlungen(n).map(id=>{
     const t = LAGER_TUN[id];
     return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
@@ -6099,6 +6165,7 @@ function zeigeLager(n){
     <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
+      ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${abendeFuer(n)}${
         abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'EIN ABEND':'ZWEI ABENDE'} MEHR ALS ${rangName(S.rang).toUpperCase()}`:''}</div>
@@ -6120,6 +6187,17 @@ function lagerTun(id){
   zeigeLager(KAPITEL[LAUF.node]);
 }
 function lagerEnde(){ LAUF.lager = {id:null, abende:0, log:[]}; stationErledigt(); naechster(); }
+
+/* Was der Zahlmeister dazu sagt. Die Höhe verrät, wie lange nicht gezahlt
+   wurde und in welcher Kampagne man steht — der Text muss das nicht erklären,
+   er muss nur den richtigen Ton haben. */
+function soldText(betrag){
+  const f = soldFaktor();
+  if(f <= 0.35) return 'Der Zahlmeister zahlt aus, was er hat, und was er hat, ist ein Bruchteil dessen, was auf der Liste steht. Es unterschreibt trotzdem jeder.';
+  if(f <= 0.6)  return 'Gezahlt wird in einer Münze, die hier gilt und zu Hause nichts wert ist. Der Fourier rechnet um, und niemand kann nachprüfen, ob er richtig rechnet.';
+  if(f >= 0.9)  return 'Der Zahlmeister sitzt an einem Tisch mit einer Kassette, ruft die Namen der Reihe nach auf und zählt vor. Es stimmt, und dass es stimmt, ist neu genug, dass man es erwähnt.';
+  return 'Sold, endlich. Man stellt sich an, unterschreibt mit einem Kreuz oder mit einem Namen, und zählt danach noch einmal nach.';
+}
 
 /* ══════════════════ WINTERQUARTIER UND SAISON ══════════════════
 
@@ -6308,6 +6386,7 @@ function zeigeWinter(n){
        danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
        Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
     W.atemVoll = S.atem < S.leben; S.atem = 100; atemKlemmen();
+    W.sold = soldAuszahlen();
     laufSichern();
   }
   const opt = winterHandlungen(n).map(id=>{
@@ -6320,6 +6399,7 @@ function zeigeWinter(n){
       <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
       ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
+      ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
       <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen} VON ${wochenFuer(n)}</div>
       </div></div>

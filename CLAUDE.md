@@ -45,7 +45,9 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, *
 | **Kapitel 3 (Garnison 1801–04)**, 17 Stationen | Kapitel 4–11 |
 | **Orden**: Ehrenwaffe und Ehrenlegion, VP + Ruf + Pension | weitere Grade, fremde Orden |
 | **Marketender**: Ausrüstung für Francs | Pferd, Fernrohr, Patente |
+| **Sold** je Rang und Kampagne, im Lager ausgezahlt | Pferd, Offizierssold |
 | Vier Garnisonssaisons mit eigenen Handlungen | |
+| **Sold** je Rang und Kampagne, im Lager ausgezahlt | Pferd, Offizierssold |
 | **Kapitel 4 (Austerlitz 1805)**, 14 Stationen, Feindgüte 6 | Kapitel 5–11 |
 | **Rang 6 (Sergent-major)** mit dem Zug als drittem Maßstab | Ränge 7–14 |
 | **Eiserne Krone** — der erste fremde Orden | zweiter fremder Orden |
@@ -505,6 +507,58 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 > **Rollendes Feuer ist der Kern und die einzige Stelle im Spiel, an der Schaden ohne eigene Handlung entsteht.** Ein Zug in drei Sektionen hört nicht auf zu schießen, nur weil sein Sergent-major gerade woanders hinsieht — das ist der Unterschied zwischen einem Mann, der die Hälfte der Zeit lädt, und einer Einheit. **Der Beitrag zählt nicht für die Sichtbarkeit:** Gezählt wird, was aus dem Stand geschieht, und das hier tut der Zug, nicht du.
 
 **Die Abrechnung skaliert mit** — dieselbe Zahl über sechzig statt zwanzig, Schwellen bei 45 % und 15 % Verlust, und Rechenschaft schuldet man jetzt Vernet statt Berthaud. Das Appell-Bild zeichnet drei Reihen zu zwanzig, mit Lücke: Es sind drei Sektionen, nicht sechzig Einzelne.
+
+### Der Sold (`SOLD` in `grundwerte.js`, `soldAuszahlen()` in `mechanik.js`)
+
+**Francs waren bis zum 28.07.2026 Zierde.** Es gab sie aus siebenundzwanzig Szenen, und der Marketender nahm sie — aber es gab keine verlässliche Quelle, also war Geld eine Zahl, die man nicht planen konnte.
+
+**Angeschrieben, nicht ausgezahlt.** Der Sold sammelt sich je Station in `S.soldOffen` und kommt erst im Lager oder Winterquartier in die Hand. So war es historisch, und es ist auch das bessere Spiel: Eine Zahl, die bei jeder Station um 0,45 steigt, ist Rauschen; sechs Wochen Sold auf einmal sind ein Moment.
+
+| Rang | F je Station | | Kampagne | Zahlungsmoral |
+|---|---|---|---|---|
+| Fusilier | 0,70 | | Italien 1796/97 | **0,3** |
+| Grenadier/Voltigeur | 0,80 | | Ägypten 1798/99 | **0,5** |
+| Caporal | 1,00 | | Garnison 1801–04 | **1,0** |
+| Caporal-fourrier | 1,20 | | Austerlitz 1805 | **0,9** |
+| Sergent | 1,50 | | | |
+| Sergent-major | 2,00 | | | |
+
+> **Geeicht am Marketender, nicht am Geschichtsbuch.** Historisch bekam ein Fusilier fünf Sous am Tag — im Spiel wären das **1,4 Francs für den ganzen Italienfeldzug** gewesen: korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen: **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender kaufen** (8–18 F).
+
+Gemessen je Kapitel: Italien **3,4 F** (Fusilier) bis **9,6 F** (Sergent-major) · Garnison **11,9** bis **34** · Austerlitz **8,8** bis **25,2**.
+
+> **⚠ Zwei Leitzahlen haben sich um zehn Punkte bewegt — offen und nicht nachgemessen.** Gegen denselben Stand ohne Sold: Erstlauf `höchster Rang` **18 → 28 %** (über dem Band 12–25), Veteran `überlebt` **65 → 55 %** (unter dem Band 60–75). Zehn Punkte sind bei 40 Läufen genau die Grenze, ab der die eigene Regel „Änderung prüfen" sagt, und zugleich noch im Rauschen (±8).
+>
+> **Der Mechanismus ist verstanden:** Der Bot kauft beim Marketender, sobald er 18 F hat — mit Sold also viel öfter. Jeder Kauf kostet eine **Saisonwoche**, die vorher in Schule, Ruhe oder Drill ging. Für den Erstläufer ist das ein Gewinn (bessere Ausrüstung, wo er vorher keine hatte), für den Veteranen ein Verlust (er hatte schon gute Ausrüstung und verliert Ruhewochen). Das ist ein echter Effekt der Änderung, kein Fehler — aber es ist auch ein **Bot-Artefakt**: Ein Mensch kauft nicht, sobald er kann.
+>
+> **Zu tun:** Mit 80 Läufen nachmessen und, falls es bleibt, die Kaufregel des Bots verschärfen (nur kaufen, wenn die Ausrüstung wirklich schlecht ist) — nicht die Soldsätze drehen. Die Bänder für vier Kapitel sind ohnehin erst **eine Messung tief**.
+
+> **Die Zahlungsmoral je Kampagne ist der historisch interessanteste Teil.** Die Italienarmee von 1796 war berüchtigt dafür, monatelang nichts zu sehen — barfuß, in Lumpen, siegreich; in Ägypten wurde in einer Münze gezahlt, die keiner kannte; in der Garnison kam der Sold pünktlich, und das war für viele der eigentliche Unterschied zum Krieg. Der Auszahlungstext wechselt mit dem Faktor und erklärt nichts, sondern klingt nur anders.
+
+> **Die eine Stelle, an der ein höherer Rang mehr Zahlen gibt statt neuer Knöpfe — und sie ist trotzdem richtig** (Invariante 4): Sold kauft keine Fähigkeit, sondern Ausrüstung, die man auch wieder verlieren kann, und er bildet ab, was historisch der greifbarste Unterschied zwischen einem Füsilier und einem Unteroffizier war.
+
+### Der Sold (`SOLD` in `grundwerte.js`, `soldAuszahlen()` in `mechanik.js`)
+
+**Francs waren bis zum 28.07.2026 Zierde.** Es gab sie aus siebenundzwanzig Szenen, und der Marketender nahm sie — aber es gab keine verlässliche Quelle, also war Geld eine Zahl, die man nicht planen konnte.
+
+**Angeschrieben, nicht ausgezahlt.** Der Sold sammelt sich je Station in `S.soldOffen` und kommt erst im Lager oder Winterquartier in die Hand. So war es historisch, und es ist auch das bessere Spiel: Eine Zahl, die bei jeder Station um 0,45 steigt, ist Rauschen; sechs Wochen Sold auf einmal sind ein Moment.
+
+| Rang | F je Station | | Kampagne | Zahlungsmoral |
+|---|---|---|---|---|
+| Fusilier | 0,70 | | Italien 1796/97 | **0,3** |
+| Grenadier/Voltigeur | 0,80 | | Ägypten 1798/99 | **0,5** |
+| Caporal | 1,00 | | Garnison 1801–04 | **1,0** |
+| Caporal-fourrier | 1,20 | | Austerlitz 1805 | **0,9** |
+| Sergent | 1,50 | | | |
+| Sergent-major | 2,00 | | | |
+
+> **Geeicht am Marketender, nicht am Geschichtsbuch.** Historisch bekam ein Fusilier fünf Sous am Tag — im Spiel wären das **1,4 Francs für den ganzen Italienfeldzug** gewesen: korrekt und wirkungslos, also weiterhin Zierde. Maßstab ist stattdessen: **Ein Kapitel voller Sold soll ungefähr einen Posten beim Marketender kaufen** (8–18 F).
+
+Gemessen je Kapitel: Italien **3,4 F** (Fusilier) bis **9,6 F** (Sergent-major) · Garnison **11,9** bis **34** · Austerlitz **8,8** bis **25,2**.
+
+> **Die Zahlungsmoral je Kampagne ist der historisch interessanteste Teil.** Die Italienarmee von 1796 war berüchtigt dafür, monatelang nichts zu sehen — barfuß, in Lumpen, siegreich; in Ägypten wurde in einer Münze gezahlt, die keiner kannte; in der Garnison kam der Sold pünktlich, und das war für viele der eigentliche Unterschied zum Krieg. Der Auszahlungstext wechselt mit dem Faktor und erklärt nichts, sondern klingt nur anders.
+
+> **Die eine Stelle, an der ein höherer Rang mehr Zahlen gibt statt neuer Knöpfe — und sie ist trotzdem richtig** (Invariante 4): Sold kauft keine Fähigkeit, sondern Ausrüstung, die man auch wieder verlieren kann, und er bildet ab, was historisch der greifbarste Unterschied zwischen einem Füsilier und einem Unteroffizier war.
 
 ### Orden und Auszeichnungen (`ORDEN` in `grundwerte.js`)
 
