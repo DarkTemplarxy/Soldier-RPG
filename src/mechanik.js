@@ -234,13 +234,49 @@ function ordenFaellig(){
   if(!hatOrden('legion_offizier') && jahr >= 1807 && hatOrden('legion') &&
      S.rang >= 7 && S.nennungen >= 8)
     return ordenVon('legion_offizier');
+
+  /* ── Die Tapferkeitsmedaillen ──
+     **Sie hängen an drei Zählern, die seit der Leiter der Sichtbarkeit
+     mitlaufen und bisher nichts ausgezahlt haben.** Gold verlangt zusätzlich
+     eine voll bestandene Sondermission — dieselbe Bedingung wie der
+     Ehrensäbel, und derselbe Gedanke: Die höchste Stufe hängt an einer
+     einzelnen, benannten Tat und nicht an einer Summe.
+
+     **Sie stapeln nicht.** Wer die nächste Stufe bekommt, legt die vorige ab
+     — im Livret steht nur die höchste. Eine Reihe von drei Scheiben derselben
+     Prägung wäre eine Sammlung, und Sammlungen gibt es hier nicht. */
+  const tapfer =
+    ((S.belobigungen|0) >= 1 && (S.bulletins|0) >= 1 && (S.sondermissionen|0) >= 1) ? 'tapfer_gold'
+    : (S.bulletins|0) >= 1 ? 'tapfer_silber'
+    : S.nennungen >= 1 ? 'tapfer_bronze' : null;
+  if(tapfer && !hatOrden(tapfer)) return ordenVon(tapfer);
   return null;
 }
 
 function ordenVerleihen(o){
   if(!o || hatOrden(o.id)) return null;
+  /* ── Eine Stufe ersetzt die vorige, und zwar in jeder Währung ──
+     **Das Ablegen steht hier und nicht bei der Prüfung**, weil es eine
+     Eigenschaft der Auszeichnung ist und keine der Vergabe: Die Scheibe kommt
+     an dieselbe Stelle des Rocks, an der die alte hing.
+
+     Der Ruf ist der Teil, der beim ersten Bauen falsch war. Livret und
+     Wertung zeigten nur die höchste Stufe, der Ruf zählte aber alle drei
+     zusammen — zwölf Punkte für eine Reihe, die höchstens sechs wert ist, und
+     das in genau der Währung, an der die ganze Leiter hängt. **Was man
+     dazubekommt, ist der Unterschied**: Man wird von Silber auf Gold gehoben,
+     nicht ein zweites Mal geehrt. */
+  const stufe = TAPFER_REIHE.indexOf(o.id);
+  let schon = 0;
+  if(stufe >= 0){
+    S.orden.forEach(x => {
+      const i = TAPFER_REIHE.indexOf(x);
+      if(i >= 0 && i < stufe) schon += (ordenVon(x)||{}).ruf || 0;
+    });
+    S.orden = S.orden.filter(x => { const i = TAPFER_REIHE.indexOf(x); return i < 0 || i > stufe; });
+  }
   S.orden.push(o.id);
-  S.ruf += o.ruf;
+  S.ruf += Math.max(0, o.ruf - schon);
   S.log.push('Ausgezeichnet: ' + o.name);
   return o;
 }

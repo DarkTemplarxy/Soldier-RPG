@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 176" role="img" aria-label="Orden"><defs><linearGradient id="g" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0%" stop-color="#f0dfae"></stop><stop offset="30%" stop-color="#e0b552"></stop>
+    <stop offset="68%" stop-color="#c8901f"></stop><stop offset="100%" stop-color="#8a6410"></stop></linearGradient></defs><rect x="14" y="30" width="92" height="116" rx="3" fill="#e9dfc6" stroke="#a89a7e"></rect>
+  <rect x="18" y="34" width="84" height="108" rx="2" fill="none" stroke="rgba(90,76,58,.4)"></rect>
+  <path d="M28 116 C 52 108, 78 84, 94 52" fill="none" stroke="#5c5446" stroke-width="7" stroke-linecap="round"></path>
+  <path d="M28 116 C 52 108, 78 84, 94 52" fill="none" stroke="#8f8878" stroke-width="2" stroke-linecap="round"></path>
+  <rect x="18" y="112" width="16" height="11" rx="5" fill="url(#g)"></rect>
+  <path d="M24 108 C 34 104, 36 122, 26 120" fill="none" stroke="url(#g)" stroke-width="4"></path>
+  <text x="60" y="136" text-anchor="middle" font-family="Didot,&#39;Bodoni 72&#39;,Georgia,serif" font-size="10" letter-spacing="2" fill="#6b4f22">ACRE · 1799</text></svg>

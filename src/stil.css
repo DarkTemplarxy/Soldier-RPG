@@ -477,6 +477,15 @@ aside.card .zust-name{ font-weight:600 }
 .kopfzeile{ display:inline-flex; align-items:center; gap:10px; justify-content:flex-end }
 .kopfgruppe{ display:inline-flex; align-items:center; gap:5px }
 .kopforden .abzeichen{ width:30px; height:20px; vertical-align:middle }
+/* ── Wie groß ein Orden ist, hängt davon ab, wo er hängt ──
+   In der Kopfzeile nebeneinander wie am Rock: dort zählt, dass man sie zählen
+   kann. Im Livret als Beleg neben dem Namen. Auf dem Verleihungsblatt einmal
+   in ganzer Größe — das ist der einzige Augenblick, an dem man ihn *ansieht*,
+   und danach ist er eine Zeile in einer Liste. */
+.kopforden .orden{ height:22px }
+.kv .orden{ height:26px }
+.ordenblatt{ text-align:center; margin:0 0 14px }
+.ordenblatt .orden{ height:132px }
 .kopfgeld{ color:#d8c79f; font-weight:700; letter-spacing:.06em }
 .kopftrenner{ width:1px; height:15px; background:#4a3a28; display:inline-block }
 
@@ -665,3 +674,12 @@ a.plain:hover{ color:var(--brass) }
 .protokollliste{ max-height:132px; overflow-y:auto }
 .protokollliste div{ font-size:14px; color:#4e4335; padding:4px 0;
   border-bottom:1px solid rgba(90,76,58,.18) }
+
+/* Die Orden sind hochkant und größer als ein Rangabzeichen — ein Kreuz am Band
+   braucht Höhe, sonst ist es ein Fleck. */
+/* **Die Höhe ist gesetzt, die Breite nicht.** Die drei Formen haben
+   verschiedene Seitenverhältnisse — ein Kreuz am Band ist schmal und lang, ein
+   Täfelchen fast quadratisch. Wer beides in dieselbe Kiste zwingt, verzerrt
+   eines von beiden. Orden hängen am Rock nebeneinander und stoßen oben an
+   derselben Kante an; genau das tut `height` mit `width:auto`. */
+.orden{ height:44px; width:auto; display:inline-block; vertical-align:middle }

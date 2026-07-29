@@ -5,6 +5,27 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Bündel 5: die Orden bekommen eine Form, und drei Medaillen dazu
+
+**Die Form trägt die Klasse** (Entwurfspaket, Bündel 5). Drei Formen, keine für eine andere verwendet: **Kreuz am Band** (Ehrenlegion, Offiziersgrad, Eiserne Krone) · **geprägte Scheibe an der Trikolore** (die Tapferkeitsmedaillen) · **Gegenstand auf graviertem Täfelchen** (Ehrenwaffe, Ehrensäbel). Man erkennt die Klasse, bevor man den Namen liest. Bis dahin trugen alle sieben Orden dieselbe 36 × 24 große Abzeichenkachel — dieselbe Form wie ein Rangstreifen, und damit gar keine.
+
+**Drei Tapferkeitsmedaillen** (`tapfer_bronze`/`_silber`/`_gold`, 4 · 8 · 12 VP, Ruf +2 · +4 · +6). Sie hängen an `S.nennungen`, `S.bulletins` und `S.belobigungen` — drei Zählern, die seit der Leiter der Sichtbarkeit mitlaufen und bisher nichts ausgezahlt haben. Damit hat zum ersten Mal **jede** der drei Sichtbarkeitsstufen eine Folge, die untere eingeschlossen.
+
+> **⚠ Der Ruf war die eine Währung, in der sie doch gestapelt haben.** Livret und Wertung zeigten längst nur die höchste Stufe; der Ruf zählte alle drei zusammen — 2 + 4 + 6 = **12** für eine Reihe, die höchstens sechs wert ist, und zwar in genau der Zahl, an der die ganze Rangleiter hängt. Jetzt gibt es nur den **Unterschied**: Man wird von Silber auf Gold gehoben, nicht ein zweites Mal geehrt. Das Ablegen sitzt dafür in `ordenVerleihen()` statt in `ordenFaellig()` — **es ist eine Eigenschaft der Auszeichnung und keine der Vergabe.**
+>
+> Dieselbe Fehlerfamilie wie der Zehrwert, der kleiner war als die Heilung: eine Regel, die an einer Stelle steht und an einer zweiten nicht mitgezogen wurde.
+
+**Zwei Zeichenfehler, beide beim Nachbauen wiederholt:**
+
+1. **Vier Balken durch den Mittelpunkt ergeben kein Kreuz, sondern ein X.** Ein Balken ist nach 180° derselbe Balken; die vier Drehungen 45° · 135° · 225° · 315° liefern deshalb zwei Striche. Jeder Arm wird jetzt **vom Mittelpunkt nach außen** gezeichnet und läuft breiter zu — die Form, die die Sterne der Zeit wirklich hatten.
+2. **Das Täfelchen war papierfarben auf Papier** und verschwand auf dem Ordensblatt bis auf seinen Rand. Es ist jetzt einen Ton dunkler: Ein Täfelchen ist ein Gegenstand und kein Loch im Bogen.
+
+**Die Höhe ist gesetzt, die Breite nicht** (`.orden{height:44px;width:auto}`) — die drei Formen haben verschiedene Seitenverhältnisse. Je Ort eine eigene Höhe: Kopfzeile 22 px, Livret 26 px, **Verleihungsblatt 132 px**. Das Verleihungsblatt zeigt den Orden jetzt einmal groß über dem Text; danach ist er eine Zeile in einer Liste.
+
+**Gravur:** Das Täfelchen trägt den Nachnamen des Mannes. Historisch stand er darauf, und es ist die einzige Stelle im Spiel, an der die eigene Ausrüstung den eigenen Namen nennt.
+
+> **⚠ Noch nicht gemessen — die Zahl steht aus.** Die Medaillen geben Ruf, und **alles, was den Ruf hebt, hebt über die Schwellen auch den Aufstieg** (die teuerste gelernte Regel des Projekts). Nach dem Differenz-Fix sind es höchstens +6 über einen ganzen Lauf gegen eine Caporal-Schwelle von 30, also erwartungsgemäß im Rauschen — **erwartet ist aber nicht gemessen.** Zu prüfen sind die beiden Leitzahlen gegen den Stand davor (Erstlauf vorsichtig, 80 Läufe: Weite **58**, Capitaine **8 %**). Bewegt sich eine um mehr als zehn Punkte, ist der Ruf der Medaillen der erste Verdächtige und der Hebel ist er auch — nicht die Wertungspunkte.
+
 ## 2026-07-29 — Kapitel 10 und 11: die Rangleiter hat jetzt einen Inhalt bis zum Ende
 
 **Alle elf Kapitel sind gebaut** — einhundertsiebenundfünfzig Stationen, einundvierzig Gefechte, Italien 1796 bis Waterloo 1815.

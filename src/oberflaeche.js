@@ -1192,6 +1192,7 @@ function zeigeOrden(o, n){
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card papier"><div class="ch"><span>${esc(o.voll)}</span><span>${esc(n.datum||'')}</span></div>
       <div class="cb">
+        <div class="ordenblatt">${ordensbild(o.id)}</div>
         <div class="prose">
           <p>${esc(o.was)}</p>
           <p>${auto
@@ -1200,7 +1201,7 @@ function zeigeOrden(o, n){
           <p>${esc(S.name)}, ${rangName(S.rang)} der 32. ${jahrVonStation()>=1803?'Linie':'Halbbrigade'}. Verliehen für: ${S.nennungen} Nennungen im Tagesbefehl.</p>
         </div>
         <div class="wirkung"><span>${esc(o.name)}</span>
-          ${ordensbild(o.id)} Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
+          Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
       </div></div>
     <div class="orders"><div class="ordbody">
       <button class="ord weiter" onclick="ordenWeiter()">Wegtreten</button>

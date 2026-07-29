@@ -484,6 +484,15 @@ aside.card .zust-name{ font-weight:600 }
 .kopfzeile{ display:inline-flex; align-items:center; gap:10px; justify-content:flex-end }
 .kopfgruppe{ display:inline-flex; align-items:center; gap:5px }
 .kopforden .abzeichen{ width:30px; height:20px; vertical-align:middle }
+/* ── Wie groß ein Orden ist, hängt davon ab, wo er hängt ──
+   In der Kopfzeile nebeneinander wie am Rock: dort zählt, dass man sie zählen
+   kann. Im Livret als Beleg neben dem Namen. Auf dem Verleihungsblatt einmal
+   in ganzer Größe — das ist der einzige Augenblick, an dem man ihn *ansieht*,
+   und danach ist er eine Zeile in einer Liste. */
+.kopforden .orden{ height:22px }
+.kv .orden{ height:26px }
+.ordenblatt{ text-align:center; margin:0 0 14px }
+.ordenblatt .orden{ height:132px }
 .kopfgeld{ color:#d8c79f; font-weight:700; letter-spacing:.06em }
 .kopftrenner{ width:1px; height:15px; background:#4a3a28; display:inline-block }
 
@@ -672,6 +681,15 @@ a.plain:hover{ color:var(--brass) }
 .protokollliste{ max-height:132px; overflow-y:auto }
 .protokollliste div{ font-size:14px; color:#4e4335; padding:4px 0;
   border-bottom:1px solid rgba(90,76,58,.18) }
+
+/* Die Orden sind hochkant und größer als ein Rangabzeichen — ein Kreuz am Band
+   braucht Höhe, sonst ist es ein Fleck. */
+/* **Die Höhe ist gesetzt, die Breite nicht.** Die drei Formen haben
+   verschiedene Seitenverhältnisse — ein Kreuz am Band ist schmal und lang, ein
+   Täfelchen fast quadratisch. Wer beides in dieselbe Kiste zwingt, verzerrt
+   eines von beiden. Orden hängen am Rock nebeneinander und stoßen oben an
+   derselben Kante an; genau das tut `height` mit `width:auto`. */
+.orden{ height:44px; width:auto; display:inline-block; vertical-align:middle }
 
 </style>
 </head>
@@ -1082,6 +1100,32 @@ const STATIONEN = {};
 
    Ein Orden ist damit die einzige Auszeichnung im Spiel, die man sich in einem
    Kapitel verdient und in einem anderen einlöst. */
+/* ══════════════════ DIE TAPFERKEITSMEDAILLEN ══════════════════
+
+   **Drei Stufen an Zählern, die es längst gibt und die bisher nichts taten.**
+   `S.nennungen`, `S.bulletins` und `S.belobigungen` liefen seit der Leiter der
+   Sichtbarkeit mit; gezählt wurde, ausgezahlt nicht. Sie sind der natürliche
+   Ort für eine Auszeichnung, die man sich im Gefecht verdient und nicht in
+   einer Kanzlei.
+
+   **Die Form trägt die Klasse** (Bündel 5 des Entwurfspakets): Ein Staatsorden
+   ist ein Kreuz am Band, eine Gefechtsauszeichnung eine geprägte Scheibe an
+   der Trikolore, eine Ehrenwaffe ein Stück auf einem gravierten Täfelchen.
+   Man erkennt die Klasse, bevor man den Namen liest — deshalb wird keine
+   dieser drei Formen für eine andere verwendet.
+
+   **Sie stapeln nicht.** Wer Silber bekommt, legt Bronze ab; im Livret steht
+   nur die höchste Stufe. Eine Reihe von drei Scheiben derselben Prägung wäre
+   eine Sammlung, und Sammlungen gibt es in diesem Spiel nicht. */
+const METALL = {
+  gold:   {hell:'#f6ecc8', mid:'#e0b552', tief:'#c8901f', dunkel:'#8a6410', tinte:'#5e4208'},
+  silber: {hell:'#f2f5f4', mid:'#dfe3e0', tief:'#c3cac7', dunkel:'#8d9794', tinte:'#41504c'},
+  bronze: {hell:'#e7c39c', mid:'#c98f5c', tief:'#a8703c', dunkel:'#7a4f28', tinte:'#4a2d16'}
+};
+/* Welche Stufe eine andere ablöst. Steht hier und nicht in `ordenFaellig()`,
+   weil es eine Eigenschaft der Auszeichnung ist und keine der Vergabe. */
+const TAPFER_REIHE = ['tapfer_bronze','tapfer_silber','tapfer_gold'];
+
 const ORDEN = [
   {id:'ehrenwaffe', name:'Ehrenwaffe', voll:'Fusil d\'honneur',
    ab:'1799', vp:10, ruf:6, pension:0.5,
@@ -1128,36 +1172,171 @@ function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
 
 /* Das Kreuz, wie es am Rock hängt. Wie die Rangabzeichen: ein Bild statt eines
    Wortes, und in derselben Größe, damit die Seitenleiste ruhig bleibt. */
+/* Die drei Tapferkeitsstufen. Sie stehen am Ende der Liste, weil sie die
+   jüngste Zutat sind — die Reihenfolge in `ORDEN` bestimmt nichts. */
+ORDEN.push(
+  {id:'tapfer_bronze', name:'Tapferkeitsmedaille in Bronze', voll:'Médaille de la valeur · bronze',
+   ab:'1796', metall:'bronze', stufe:1, vp:4, ruf:2, pension:0,
+   was:'Eine geprägte Scheibe an der Trikolore, gekreuzte Musketen darauf. Sie wird nicht verliehen, sie wird ausgegeben — der Fourrier hat einen Karton davon, und wessen Name im Tagesbefehl stand, bekommt eine.',
+   bedingung:'Einmal im Tagesbefehl genannt'},
+  {id:'tapfer_silber', name:'Tapferkeitsmedaille in Silber', voll:'Médaille de la valeur · argent',
+   ab:'1796', metall:'silber', stufe:2, vp:8, ruf:4, pension:0,
+   was:'Dieselbe Scheibe in Silber. Der Karton des Fourriers hat davon vier, und er weiß, wer sie bekommt, bevor die Liste kommt.',
+   bedingung:'Einmal im Bulletin der Großen Armee'},
+  {id:'tapfer_gold', name:'Tapferkeitsmedaille in Gold', voll:'Médaille de la valeur · or',
+   ab:'1796', metall:'gold', stufe:3, vp:12, ruf:6, pension:0.5,
+   was:'Dieselbe Scheibe in Gold. Es gibt keinen Karton dafür; sie kommt einzeln, in Papier gewickelt, und der Capitaine übergibt sie selbst.',
+   bedingung:'Lob vor der Front, ein Bulletin und eine Kette ohne einen einzigen Fehlschlag'}
+);
+
+/* ── Die geprägte Scheibe an der Trikolore ──
+   **Die Aufhängung ist die halbe Arbeit**, und kein Bauteil darf frei
+   schweben: Band → Steg → Ring → Scheibe, von oben nach unten. Die Scheibe
+   wird **zuerst** gezeichnet und Steg und Ring darauf — sonst schneidet sie
+   den Ring aus. Das war beim Entwerfen der häufigste Fehler. */
+function tapferBild(metall){
+  const M = METALL[metall] || METALL.bronze;
+  const gid = 'm'+metall;
+  return `<svg class="orden" viewBox="0 0 120 150" role="img" aria-label="Tapferkeitsmedaille">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="${M.hell}"/><stop offset="32%" stop-color="${M.mid}"/>
+      <stop offset="70%" stop-color="${M.tief}"/><stop offset="100%" stop-color="${M.dunkel}"/></linearGradient></defs>
+    <rect x="38" y="0" width="44" height="50" fill="#27415f"/>
+    <rect x="52" y="0" width="16" height="50" fill="#e8e0cd"/>
+    <rect x="68" y="0" width="14" height="50" fill="#9c3125"/>
+    <circle cx="60" cy="108" r="36" fill="url(#${gid})"/>
+    <circle cx="60" cy="108" r="29" fill="${M.mid}" opacity=".45"/>
+    <circle cx="60" cy="108" r="31.5" fill="none" stroke="${M.dunkel}" stroke-width="1.6" opacity=".55"/>
+    ${[-26,26].map(w=>`<g transform="rotate(${w} 60 108)">
+      <rect x="59.2" y="82" width="1.9" height="52" fill="${M.tinte}" opacity=".78"/>
+      <rect x="57.6" y="122" width="5" height="12" rx="2" fill="${M.tinte}" opacity=".62"/>
+      <rect x="58.4" y="78" width="3.4" height="6" rx="1.2" fill="${M.tinte}" opacity=".5"/></g>`).join('')}
+    <rect x="50" y="46" width="20" height="11" rx="2" fill="url(#${gid})"/>
+    <circle cx="60" cy="68" r="6.5" fill="none" stroke="url(#${gid})" stroke-width="3.2"/>
+  </svg>`;
+}
+
+/* ── Das Gold, in dem jede Fassung, jeder Steg und jeder Ring gezeichnet ist ──
+   Ein Verlauf je Bild, weil zwei Bilder auf derselben Seite sonst um dieselbe
+   `id` streiten. */
+function ordenGold(gid){
+  const M = METALL.gold;
+  return `<linearGradient id="${gid}" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0%" stop-color="#f0dfae"/><stop offset="30%" stop-color="${M.mid}"/>
+    <stop offset="68%" stop-color="${M.tief}"/><stop offset="100%" stop-color="${M.dunkel}"/></linearGradient>`;
+}
+
+/* ── Die Aufhängung: Band, Steg, Ring ──
+   Dieselbe Reihenfolge wie bei der Tapferkeitsscheibe und aus demselben Grund:
+   **kein Bauteil darf frei schweben.** Das Band läuft von der Oberkante bis
+   `y 56`, der Steg überlappt es, der Ring hängt am Steg, und was darunter
+   kommt, wird zuerst gezeichnet, damit es den Ring nicht ausschneidet. */
+function ordenBand(gid, rosette){
+  return `<rect x="57" y="50" width="6" height="12" rx="3" fill="url(#${gid})"/>
+    ${rosette||''}<circle cx="60" cy="62" r="7.5" fill="none" stroke="url(#${gid})" stroke-width="3.6"/>`;
+}
+
+/* ── Die vier weißen Emailarme ──
+   **Der Arm läuft nach außen breiter zu, und das ist keine Zierde, sondern der
+   Grund, warum man vier Arme sieht statt zwei.** Ein Balken, der durch die
+   Mitte geht, ist nach einer Drehung um 180° derselbe Balken; vier davon bei
+   45° · 135° · 225° · 315° ergeben deshalb ein X aus zwei Strichen und kein
+   Kreuz. Gezeichnet wird jeder Arm daher **vom Mittelpunkt nach außen** — als
+   Trapez, schmal innen, breit an der Spitze. Das ist zugleich die Form, die
+   die Sterne der Zeit wirklich hatten. */
+function ordenKreuz(cy, innen, aussen, strich){
+  const hi = innen * 1.1, ha = aussen * 0.38;
+  const punkte = `${-hi},${-innen} ${hi},${-innen} ${ha},${-aussen} ${-ha},${-aussen}`;
+  return [45,135,225,315].map(a=>`<polygon points="${punkte}" fill="#f7f4ec"
+    stroke="#8a8272" stroke-width="${strich}" stroke-linejoin="round"
+    transform="translate(60 ${cy}) rotate(${a})"/>`).join('');
+}
+
+/* ── Das gravierte Täfelchen ──
+   Eine Ehrenwaffe ist kein Orden, den man anlegt, sondern ein **Gegenstand mit
+   deinem Namen darauf**. Deshalb hängt sie an keinem Band, sondern liegt auf
+   einem Kärtchen mit Doppellinie — derselbe Vordruck wie die amtlichen Bögen,
+   nur handgroß.
+
+   **Die Gravur ist die halbe Auszeichnung, und sie nennt den Namen des Mannes,
+   der sie trägt.** Historisch stand er darauf; im Spiel ist es die einzige
+   Stelle, an der die eigene Ausrüstung den eigenen Namen sagt — und genau das
+   unterscheidet ein Täfelchen von einer Zahl in einer Liste. Wo kein Name da
+   ist, steht das, was ein Graveur ohne Namen schreiben würde. */
+function ordenGravur(){
+  const n = (S && S.name || '').trim();
+  if(!n) return 'VALEUR';
+  const kurz = n.split(/\s+/).pop().toUpperCase();
+  return kurz.length > 11 ? kurz.slice(0,11) : kurz;
+}
+/* **Das Kärtchen ist einen Ton dunkler als das Papier, auf dem es liegt.** Der
+   Entwurf gibt ihm den Papierton selbst — auf dem Ordensblatt, das denselben
+   Grund hat, verschwindet es dann bis auf seinen Rand. Ein Täfelchen ist ein
+   Gegenstand und kein Loch im Bogen. */
+function ordenTaefelchen(inhalt){
+  return `<rect x="14" y="30" width="92" height="116" rx="3" fill="#ddd0af" stroke="#9d8d6e"/>
+    <rect x="18" y="34" width="84" height="108" rx="2" fill="none" stroke="rgba(90,76,58,.45)"/>
+    ${inhalt}
+    <text x="60" y="133" text-anchor="middle" font-family="Didot,'Bodoni 72',Georgia,serif"
+      font-size="10" letter-spacing="2" fill="#6b4f22">${esc(ordenGravur())}</text>`;
+}
+
+/* **Die Form trägt die Klasse** (Entwurfspaket, Bündel 5): Ein Staatsorden ist
+   ein *Kreuz am Band*, eine Gefechtsauszeichnung eine *geprägte Scheibe an der
+   Trikolore*, eine Ehrenwaffe ein *Stück auf einem gravierten Täfelchen*. Man
+   erkennt die Klasse, bevor man den Namen liest — deshalb wird keine dieser
+   drei Formen für eine andere verwendet. */
 function ordensbild(id){
-  if(id==='ehrenwaffe') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenwaffe">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#6a6152"/>
-    <rect x="5" y="10" width="6" height="4" rx="1" fill="#6e5320"/>
-    <circle cx="27" cy="12" r="3" fill="none" stroke="#8a6410" stroke-width="1.4"/></svg>`;
-  if(id==='ehrensaebel') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrensäbel">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#5c5446" stroke-width="1.8" stroke-linecap="round"/>
-    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#8a6410"/>
-    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#8a6410" stroke-width="1.3"/></svg>`;
-  if(id==='eisenkrone') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Eiserne Krone">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-    <rect x="12" y="2" width="12" height="3.4" fill="#c8901f"/>
-    <rect x="12" y="2" width="2" height="3.4" fill="#3e5a2c"/>
-    <rect x="22" y="2" width="2" height="3.4" fill="#3e5a2c"/>
-    <path d="M18 7 L23 13 L18 19 L13 13 Z" fill="#e8e2d4" stroke="#8a8272" stroke-width=".6"/>
-    <circle cx="18" cy="13" r="2.4" fill="none" stroke="#6e5320" stroke-width="1.5"/></svg>`;
+  /* Die drei Stufen teilen sich eine Form und unterscheiden sich nur im
+     Metall — genau so, wie sie im Karton des Fourriers liegen. */
+  const t = ORDEN.find(o=>o.id===id && o.metall);
+  if(t) return tapferBild(t.metall);
+
+  const gid = 'og_' + id;
+  const bild = (label, inhalt) => `<svg class="orden" viewBox="0 0 120 176" role="img"
+    aria-label="${label}"><defs>${ordenGold(gid)}</defs>${inhalt}</svg>`;
+
+  if(id==='ehrenwaffe') return bild('Ehrenwaffe', ordenTaefelchen(
+    `<g transform="rotate(-28 60 92)">
+      <rect x="24" y="88" width="72" height="5" rx="2.5" fill="#6a6152"/>
+      <rect x="22" y="84" width="20" height="13" rx="3" fill="url(#${gid})"/>
+      <rect x="86" y="86" width="12" height="9" rx="2" fill="#8a7a58"/>
+      <circle cx="52" cy="98" r="7" fill="none" stroke="url(#${gid})" stroke-width="2.6"/></g>`));
+
+  if(id==='ehrensaebel') return bild('Ehrensäbel', ordenTaefelchen(
+    `<path d="M28 116 C 52 108, 78 84, 94 52" fill="none" stroke="#5c5446" stroke-width="7" stroke-linecap="round"/>
+     <path d="M28 116 C 52 108, 78 84, 94 52" fill="none" stroke="#8f8878" stroke-width="2" stroke-linecap="round"/>
+     <rect x="18" y="112" width="16" height="11" rx="5" fill="url(#${gid})"/>
+     <path d="M24 108 C 34 104, 36 122, 26 120" fill="none" stroke="url(#${gid})" stroke-width="4"/>`));
+
+  /* Die Eiserne Krone ist kein Malteserkreuz, sondern eine **Raute** — und in
+     ihrer Mitte liegt der eiserne Reif, der dem Orden den Namen gibt. Das Band
+     ist dunkelgelb mit grünem Rand: die Farben des Königreichs Italien, und der
+     schnellste Weg zu sehen, dass dieser Orden nicht aus Paris kommt. */
+  if(id==='eisenkrone') return bild('Eiserne Krone',
+    `<rect x="40" y="0" width="40" height="56" fill="#c8901f"/>
+     <rect x="40" y="0" width="6" height="56" fill="#3e5a2c"/>
+     <rect x="74" y="0" width="6" height="56" fill="#3e5a2c"/>
+     <polygon points="60,66 90,98 60,130 30,98" fill="#f7f4ec" stroke="#8a8272" stroke-width="1.2"/>
+     <circle cx="60" cy="98" r="13" fill="none" stroke="url(#${gid})" stroke-width="5"/>
+     <rect x="46" y="92" width="28" height="12" rx="2" fill="url(#${gid})" opacity=".9"/>
+     ${ordenBand(gid)}`);
+
   if(id==='legion' || id==='legion_offizier'){
-    /* Der zweite Grad trägt dasselbe Kreuz an einem Band mit **Rosette** — der
-       einzige Unterschied, den man auf sechsunddreißig Pixel sehen kann, und
-       historisch genau der, an dem man ihn erkannte. */
+    /* Der zweite Grad trägt dasselbe Kreuz an einem Band mit **Rosette** —
+       historisch genau der Unterschied, an dem man ihn erkannte, und der
+       einzige, der sich auf Daumengröße noch zeigen lässt. */
     const offizier = id === 'legion_offizier';
-    const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
-      fill="#f0ece2" stroke="#8a8272" stroke-width=".5" transform="rotate(${a+45} 18 12)"/>`).join('');
-    return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="${offizier?'Offizier der Ehrenlegion':'Ehrenlegion'}">
-      <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-      <rect x="13" y="2" width="10" height="4" fill="#9c3125"/>
-      ${offizier?'<circle cx="18" cy="4" r="2.6" fill="#9c3125" stroke="#6e2018" stroke-width=".6"/>':''}
-      ${arme}<circle cx="18" cy="12" r="2.6" fill="#8a6410"/></svg>`;
+    const rosette = offizier
+      ? `<circle cx="60" cy="28" r="15" fill="#7e1f16"/><circle cx="60" cy="28" r="9" fill="#b8402c"/>
+         <circle cx="60" cy="28" r="4" fill="#7e1f16"/>` : '';
+    return bild(offizier ? 'Offizier der Ehrenlegion' : 'Ehrenlegion',
+      `<rect x="40" y="0" width="40" height="56" fill="#9c3125"/>
+       ${ordenKreuz(98, 5, 32, 1.1)}
+       <circle cx="60" cy="98" r="10.5" fill="url(#${gid})"/>
+       <text x="60" y="103" text-anchor="middle" font-family="Didot,'Bodoni 72',Georgia,serif"
+         font-size="13" fill="${METALL.gold.tinte}">N</text>
+       ${ordenBand(gid, rosette)}`);
   }
   return '';
 }
@@ -5346,13 +5525,49 @@ function ordenFaellig(){
   if(!hatOrden('legion_offizier') && jahr >= 1807 && hatOrden('legion') &&
      S.rang >= 7 && S.nennungen >= 8)
     return ordenVon('legion_offizier');
+
+  /* ── Die Tapferkeitsmedaillen ──
+     **Sie hängen an drei Zählern, die seit der Leiter der Sichtbarkeit
+     mitlaufen und bisher nichts ausgezahlt haben.** Gold verlangt zusätzlich
+     eine voll bestandene Sondermission — dieselbe Bedingung wie der
+     Ehrensäbel, und derselbe Gedanke: Die höchste Stufe hängt an einer
+     einzelnen, benannten Tat und nicht an einer Summe.
+
+     **Sie stapeln nicht.** Wer die nächste Stufe bekommt, legt die vorige ab
+     — im Livret steht nur die höchste. Eine Reihe von drei Scheiben derselben
+     Prägung wäre eine Sammlung, und Sammlungen gibt es hier nicht. */
+  const tapfer =
+    ((S.belobigungen|0) >= 1 && (S.bulletins|0) >= 1 && (S.sondermissionen|0) >= 1) ? 'tapfer_gold'
+    : (S.bulletins|0) >= 1 ? 'tapfer_silber'
+    : S.nennungen >= 1 ? 'tapfer_bronze' : null;
+  if(tapfer && !hatOrden(tapfer)) return ordenVon(tapfer);
   return null;
 }
 
 function ordenVerleihen(o){
   if(!o || hatOrden(o.id)) return null;
+  /* ── Eine Stufe ersetzt die vorige, und zwar in jeder Währung ──
+     **Das Ablegen steht hier und nicht bei der Prüfung**, weil es eine
+     Eigenschaft der Auszeichnung ist und keine der Vergabe: Die Scheibe kommt
+     an dieselbe Stelle des Rocks, an der die alte hing.
+
+     Der Ruf ist der Teil, der beim ersten Bauen falsch war. Livret und
+     Wertung zeigten nur die höchste Stufe, der Ruf zählte aber alle drei
+     zusammen — zwölf Punkte für eine Reihe, die höchstens sechs wert ist, und
+     das in genau der Währung, an der die ganze Leiter hängt. **Was man
+     dazubekommt, ist der Unterschied**: Man wird von Silber auf Gold gehoben,
+     nicht ein zweites Mal geehrt. */
+  const stufe = TAPFER_REIHE.indexOf(o.id);
+  let schon = 0;
+  if(stufe >= 0){
+    S.orden.forEach(x => {
+      const i = TAPFER_REIHE.indexOf(x);
+      if(i >= 0 && i < stufe) schon += (ordenVon(x)||{}).ruf || 0;
+    });
+    S.orden = S.orden.filter(x => { const i = TAPFER_REIHE.indexOf(x); return i < 0 || i > stufe; });
+  }
   S.orden.push(o.id);
-  S.ruf += o.ruf;
+  S.ruf += Math.max(0, o.ruf - schon);
   S.log.push('Ausgezeichnet: ' + o.name);
   return o;
 }
@@ -7071,6 +7286,7 @@ function zeigeOrden(o, n){
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card papier"><div class="ch"><span>${esc(o.voll)}</span><span>${esc(n.datum||'')}</span></div>
       <div class="cb">
+        <div class="ordenblatt">${ordensbild(o.id)}</div>
         <div class="prose">
           <p>${esc(o.was)}</p>
           <p>${auto
@@ -7079,7 +7295,7 @@ function zeigeOrden(o, n){
           <p>${esc(S.name)}, ${rangName(S.rang)} der 32. ${jahrVonStation()>=1803?'Linie':'Halbbrigade'}. Verliehen für: ${S.nennungen} Nennungen im Tagesbefehl.</p>
         </div>
         <div class="wirkung"><span>${esc(o.name)}</span>
-          ${ordensbild(o.id)} Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
+          Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
       </div></div>
     <div class="orders"><div class="ordbody">
       <button class="ord weiter" onclick="ordenWeiter()">Wegtreten</button>

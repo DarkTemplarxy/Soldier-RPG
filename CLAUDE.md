@@ -77,6 +77,8 @@ Gebaut sind **alle elf Kapitel** — Italien 1796/97 bis Waterloo 1815, einhunde
 | **Die Rekruten** (`rekruten:n`) — der Exerzierplatz wird das Spiel | |
 | **Was ein Mann behält** — fünf Gewohnheiten, die Strecke kaufen | Pferd, Fernrohr |
 | **Konstitution wächst im Lauf** und darf über 100 | |
+| **Neun Orden in drei Formen** — Kreuz am Band, geprägte Scheibe, graviertes Täfelchen | Commandeur, Grand Officier, zweiter fremder Orden |
+| **Drei Tapferkeitsmedaillen**: jede Sichtbarkeitsstufe zahlt etwas aus | Schnallen mit Ort und Jahr |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -1108,12 +1110,39 @@ Gemessen je Kapitel: Italien **3,4 F** (Fusilier) bis **9,6 F** (Sergent-major) 
 | **Ehrensäbel** (Sabre d'honneur) | **eine Sondermission voll bestanden** und 5 Nennungen, 1799–1803 | 14 | +8 | 1 F je Station |
 | **Ehrenlegion** | eine Ehrenwaffe oder ein Ehrensäbel — *oder* 5 Nennungen und Ruf 45, ab 1804 | 12 | +10 | 1 F je Station |
 | **Eiserne Krone** *(fremd)* | eine Meldung an den Oberbefehl, ab 1805 | 10 | +6 | 0,5 F je Station |
+| **Offizier der Ehrenlegion** | die Ehrenlegion, ein Patent und 8 Nennungen, ab 1807 | 12 | +10 | 2 F je Station |
+| **Tapferkeitsmedaille** Bronze · Silber · Gold | 1 Nennung · 1 Bulletin · Lob + Bulletin + eine Kette ohne Fehlschlag | 4 · 8 · **12** | +2 · +4 · **+6** | — · — · 0,5 F |
+
+### Die drei Tapferkeitsmedaillen — eine Stufe, die eine andere ablöst
+
+**Sie hängen an drei Zählern, die es längst gibt und die bisher nichts ausgezahlt haben:** `S.nennungen`, `S.bulletins`, `S.belobigungen`. Damit bekommt die Leiter der Sichtbarkeit zum ersten Mal auf jeder ihrer drei Stufen eine Folge, die man sehen kann — die unterste eingeschlossen, die bis dahin nur Kameradschaft gab.
+
+**Sie stapeln nicht, und das gilt in allen drei Währungen.** Wer Silber bekommt, legt Bronze ab: im Livret steht nur die höchste Stufe, die Wertung zählt nur ihre Punkte, und **der Ruf gibt nur den Unterschied**. Eine Reihe von drei Scheiben derselben Prägung wäre eine Sammlung, und Sammlungen gibt es in diesem Spiel nicht.
+
+> **⚠ Der Ruf war beim ersten Bau die eine Währung, in der sie doch gestapelt haben** — 2 + 4 + 6 = 12 für eine Reihe, die höchstens sechs wert ist, und zwar in genau der Zahl, an der die ganze Rangleiter hängt. Livret und Wertung zeigten längst nur Gold; der Ruf zählte alle drei zusammen. **Dieselbe Familie wie der Zehrwert, der kleiner war als die Heilung** — eine Regel, die an einer Stelle steht und an einer zweiten nicht mitgezogen wurde. Das Ablegen sitzt jetzt in `ordenVerleihen()` statt in `ordenFaellig()`: **Es ist eine Eigenschaft der Auszeichnung und keine der Vergabe.**
 
 **Die Eiserne Krone ist der erste fremde Orden.** Gestiftet Juni 1805 vom Königreich Italien, dessen König Napoleon selbst war, und nach Austerlitz an Franzosen vergeben. KONZEPT §5 hält den Platz frei — „je fremdem Orden +10, höchstens zwei gewertet"; die zweite Stelle bleibt für Spanien oder Preußen offen.
 
 **Der Ehrensäbel verlangt die Kette voll, nicht die Mehrheit** — jede Stufe gelungen. Er ist die einzige Auszeichnung, die an einer einzelnen, benannten Tat hängt statt an einer Summe: Wer durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln, bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist.
 
 > **Historisch trägt sich der Bogen selbst.** Die *armes d'honneur* wurden 1799–1802 an einfache Soldaten für einzelne Taten vergeben — genau die Jahre von Ägypten. Wer eine besaß, wurde bei der Stiftung der Ehrenlegion **von Rechts wegen aufgenommen**, ohne weitere Prüfung; die erste große Verleihung war das Lager von Boulogne am 16. August 1804. **Das ist die einzige Auszeichnung im Spiel, die man sich in einem Kapitel verdient und in einem anderen einlöst.**
+
+### Die Form trägt die Klasse (`ordensbild()` in `grundwerte.js`)
+
+**Man erkennt, was für eine Auszeichnung das ist, bevor man den Namen liest.** Drei Formen, und keine wird für eine andere verwendet:
+
+| Form | Wer | Woran man sie erkennt |
+|---|---|---|
+| **Kreuz am Band** | Ehrenlegion, Offizier der Ehrenlegion, Eiserne Krone | ein Staatsorden — Band, Steg, Ring, Kreuz, Mittelstück |
+| **Geprägte Scheibe an der Trikolore** | die drei Tapferkeitsmedaillen | eine Gefechtsauszeichnung — dieselbe Prägung, nur ein anderes Metall |
+| **Gegenstand auf graviertem Täfelchen** | Ehrenwaffe, Ehrensäbel | kein Orden, sondern ein *Ding mit deinem Namen darauf* |
+
+- **Die Aufhängung ist die halbe Arbeit, und kein Bauteil darf frei schweben.** Von oben: Band → Steg → Ring → Kreuz oder Scheibe. **Was unten hängt, wird zuerst gezeichnet**, Steg und Ring darauf — sonst schneidet die Scheibe den Ring aus. Das war beim Entwerfen der häufigste Fehler und ist es beim Nachbauen wieder gewesen.
+- **Der Arm eines Kreuzes läuft nach außen breiter zu**, und das ist keine Zierde: Ein Balken durch die Mitte ist nach 180° derselbe Balken, vier davon bei 45° · 135° · 225° · 315° ergeben **ein X aus zwei Strichen**. Gezeichnet wird jeder Arm deshalb vom Mittelpunkt nach außen, als Trapez — was zugleich die Form ist, die die Sterne der Zeit wirklich hatten.
+- **Die Gravur des Täfelchens ist der Name des Mannes**, der es trägt (`ordenGravur()`). Es ist die einzige Stelle im Spiel, an der die eigene Ausrüstung den eigenen Namen nennt.
+- **Die Höhe ist gesetzt, die Breite nicht** (`.orden{height:44px;width:auto}`). Die drei Formen haben verschiedene Seitenverhältnisse; wer beide in dieselbe Kiste zwingt, verzerrt eine. Orden hängen am Rock nebeneinander und stoßen oben an derselben Kante an. Je Ort eine eigene Höhe: Kopfzeile 22 px (zählen), Livret 26 px (Beleg), **Verleihungsblatt 132 px** — der einzige Augenblick, an dem man einen Orden *ansieht*.
+
+> **Noch nicht gebaut, aber gezeichnet:** `legion_grand` (Bruststern, Schranke von Rang 13) und `saint_henri` (zweiter fremder Orden). Beide liegen als Entwurf vor; sie kommen mit den höheren Ordensgraden, nicht vorher — ein Bild ohne Orden wäre toter Code.
 
 ### Die Leiter der Sichtbarkeit (`K.zaehlung` in `src/kampf.js`)
 

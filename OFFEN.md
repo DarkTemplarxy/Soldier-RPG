@@ -91,6 +91,21 @@ Der Boden 0,3 wird bei **Güte 4,67** erreicht. Ägypten (5), Austerlitz (6), Je
 
 ---
 
+## 7 · Vier Stücke des Ordens-Entwurfs sind gezeichnet, aber nicht gebaut
+
+Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauchen alle etwas, das es im Datenmodell noch nicht gibt, und ein Bild ohne dahinterliegenden Orden wäre toter Code.
+
+| Was | Was fehlt dafür |
+|---|---|
+| `legion_grand` — der Bruststern | Der Grad selbst. **Rang 13 fordert ihn schon** (`orden:'legion_grand'` in `LEITER`) und ist damit unerreichbar, solange er fehlt |
+| `saint_henri` — der zweite fremde Orden | KONZEPT §5 hält den Platz frei („höchstens zwei gewertet"). Gehört an ein Kapitel, das ihn verdient — Preußen oder Spanien |
+| **Schnallen** im Band, je Nennung eine mit Ort und Jahr | Ein neues Feld `S.schnallen = [{ort, jahr}]`. Der Ort eines Gefechts wird bisher nirgends mitgeschrieben |
+| Die Ehrenwaffe als **Gegenstand** statt als Zeichen | `mann.waffe` gibt es nicht. Historisch war die Ehrenwaffe eine Muskete, die man trug — im Spiel ist sie ein Eintrag im Livret |
+
+**Wer die höheren Ordensgrade baut, macht die ersten beiden in einem Zug** — die Zeichnungen liegen in `entwurf/`, und `ordensbild()` hat für beide Formen (Kreuz am Band, Bruststern) schon die Bausteine.
+
+---
+
 ## Erledigt
 
 | Punkt | Wie geschlossen | Messwert |
