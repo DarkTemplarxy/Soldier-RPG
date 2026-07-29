@@ -45,7 +45,12 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
     await p.evaluate(()=>{ const b=document.querySelector('.ord:not([disabled])'); if(b) b.click(); });
     const w = await p.$('.ord.weiter'); if(w) await w.click();
   }
-  pruef((await text()).includes('VERBLEIBENDE ABENDE'), 'Depot Savona ist die erste Station');
+  /* **Geprüft wird die Frage, nicht der Zähler.** Bis zum Layoutumbau stand
+     hier `VERBLEIBENDE ABENDE` — eine Zeichenkette aus der Gestaltung, die
+     mit dem Stationsbogen zu „Verbleibend 3 von 3" wurde. Die Frage „Womit
+     verbringst du den Abend?" ist das, was ein Lager *ist*; sie ändert sich
+     nicht, wenn jemand einen Zähler umformuliert. */
+  pruef((await text()).includes('Womit verbringst du den Abend'), 'Depot Savona ist die erste Station');
   pruef(await p.evaluate(()=>!!Ablage.lies('marschallstab.lauf')), 'Spielstand liegt beim Betreten des Lagers vor');
   pruef((await text()).includes('FELDZUG GESICHERT'), 'Das Lager sagt, dass gesichert wurde');
 

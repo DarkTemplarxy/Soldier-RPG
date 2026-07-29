@@ -340,24 +340,22 @@ function zeigeLager(n){
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
     L.inspektion = inspektion();
     laufSichern(); }
-  const opt = lagerHandlungen(n).map(id=>{
+  const opt = lagerHandlungen(n).map((id,i)=>{
     const t = LAGER_TUN[id];
-    return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
-      ${t.label}<span class="cost">${t.cost}</span></button>`;
-  }).join('');
+    return wahlZeile(roemisch(i+1), t.label, t.cost, `lagerTun('${id}')`, {gesperrt:L.abende<=0});
+  }).join('')
+    + (L.abende<=0 ? wahlZeile('·','Antreten lassen','Der Abend ist vorbei','lagerEnde()',{klasse:'weiter'}) : '');
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
-      ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
-      ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
-      ${L.inspektion||''}
-      ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${abendeFuer(n)}${
-        abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'EIN ABEND':'ZWEI ABENDE'} MEHR ALS ${rangName(S.rang).toUpperCase()}`:''}</div>
-      </div></div>
-    <div class="orders"><div class="ch"><span>Womit verbringst du den Abend?</span></div><div class="ordbody">
-      ${opt}${L.abende<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
-    </div></div>
+    ${bogen(n,
+      `<div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
+       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
+       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
+       ${L.inspektion||''}
+       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+      ['Womit verbringst du den Abend?',
+       `Verbleibend ${L.abende} von ${abendeFuer(n)}${abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'ein Abend':'zwei Abende'} mehr als ${rangName(S.rang)}`:''}`],
+      opt,
+      'Es ist immer mehr zu tun als Zeit da ist')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -574,23 +572,24 @@ function zeigeWinter(n){
     W.sold = soldAuszahlen();
     laufSichern();
   }
-  const opt = winterHandlungen(n).map(id=>{
+  const opt = winterHandlungen(n).map((id,i)=>{
     const t = WINTER_TUN[id];
-    return `<button class="ord" onclick="winterTun('${id}')" ${W.wochen<=0?'disabled':''}>
-      ${t.label}<span class="cost">${t.cost}</span></button>`;
+    return wahlZeile(roemisch(i+1), t.label, t.cost, `winterTun('${id}')`, {gesperrt:W.wochen<=0});
   }).join('');
+  const schluss = W.wochen<=0
+    ? wahlZeile('·', esc(n.weiter||'Ins Feld zurück'), 'Die Wochen sind vorbei',
+        winterMusterung(n)?'winterBefoerderung()':'winterEnde()', {klasse:'weiter'})
+    : '';
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
-      ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
-      ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
-      ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
-      ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen} VON ${wochenFuer(n)}</div>
-      </div></div>
-    <div class="orders"><div class="ch"><span>${esc(n.frage||'Womit verbringst du die Woche?')}</span></div><div class="ordbody">
-      ${opt}${W.wochen<=0?`<button class="ord weiter" onclick="${winterMusterung(n)?'winterBefoerderung()':'winterEnde()'}">${esc(n.weiter||'Ins Feld zurück')}</button>`:''}
-    </div></div>
+    ${bogen(n,
+      `<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
+       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
+       ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
+       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
+       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+      [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
+      opt+schluss,
+      'Drei Wochen unter einem Dach')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }

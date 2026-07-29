@@ -589,3 +589,79 @@ a.plain:hover{ color:var(--brass) }
 .goldkugel{ position:absolute; width:13px; height:13px; border-radius:50%;
   background:radial-gradient(circle at 34% 30%, #f6ecc8, #c8901f 62%, #8a6410);
   box-shadow:0 1px 2px rgba(0,0,0,.45) }
+
+/* ══════════════════ DER STATIONSBOGEN ══════════════════
+
+   **Szene und Wahlen liegen auf einem Blatt** (Bündel 1 des Entwurfspakets).
+   Bis dahin standen sie in zwei Kästen: `.card` mit dem Text, darunter ein
+   zweiter Kasten `.orders` mit den Knöpfen. Dazwischen klaffte eine Lücke,
+   die es auf einem Kanzleibogen nicht gibt — und die Wahlen sahen aus wie
+   Schaltflächen statt wie das, was sie sind: die Punkte einer Verfügung.
+
+   Die Seitenspalten (`verlauf()`, `seitenleiste()`) bleiben unberührt. */
+.bogen{ position:relative; background:var(--papier);
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 34%),
+    radial-gradient(circle at 12% 8%, rgba(140,120,86,.10), transparent 42%),
+    radial-gradient(circle at 88% 92%, rgba(140,120,86,.09), transparent 46%),
+    var(--wolken);
+  background-blend-mode:normal,normal,normal,multiply;
+  border:1px solid #a89a7e; color:var(--tinte);
+  box-shadow:0 3px 20px rgba(0,0,0,.30), 0 0 0 1px rgba(255,255,255,.5) inset }
+.bogen::before{ content:''; position:absolute; inset:6px; pointer-events:none;
+  border:1px solid rgba(90,76,58,.55);
+  box-shadow:inset 0 0 0 3px var(--papier), inset 0 0 0 4px rgba(90,76,58,.3) }
+.bogen > .inner{ position:relative; padding:24px 36px 26px }
+
+.bogen .prose{ color:#1d1814; font-size:17.5px; line-height:1.68 }
+.bogen .prose p{ margin:0 0 13px }
+.bogen .prose p:last-child{ margin-bottom:0 }
+/* Initiale — nur im ersten Absatz einer Szene */
+.bogen .prose > p:first-child::first-letter{ font-family:var(--didone); font-size:46px;
+  line-height:.8; float:left; padding:5px 10px 0 0; color:#6b4f22 }
+.bogen .ergebnis, .bogen .note, .bogen .wirkung{ color:var(--tinte) }
+.bogen .said, .bogen .hinweis{ color:var(--tinte2) }
+
+/* Die Wahlen: keine Knöpfe mit Rahmen, sondern eine gesetzte Liste */
+.wahlkopf{ display:flex; justify-content:space-between; align-items:baseline;
+  padding:9px 0 5px; margin-top:22px; border-top:2px solid #6b4f22 }
+.wahlkopf > span:first-child{ font-family:var(--didone); font-variant:small-caps;
+  letter-spacing:.22em; font-size:15px; color:#6b4f22; font-weight:700 }
+.wahlkopf > span:last-child{ font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:#5f5240 }
+.wahl{ display:grid; grid-template-columns:30px 1fr; gap:6px; align-items:baseline;
+  width:100%; background:none; border:none; border-top:1px solid rgba(90,76,58,.28);
+  padding:12px 4px; cursor:pointer; text-align:left; font-family:inherit }
+.wahl:hover:not(:disabled){ background:rgba(120,100,70,.12) }
+.wahl:disabled{ opacity:.42; cursor:not-allowed }
+.wahl .nr{ font-family:var(--didone); font-size:17px; color:#6b4f22; font-weight:700 }
+.wahl .label{ display:block; font-size:17px; color:#1d1814; line-height:1.4; font-weight:600 }
+.wahl .cost{ display:block; font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:11.5px; letter-spacing:.03em; color:#5f5240; margin-top:4px }
+.wahl.risk .nr, .wahl.risk .cost{ color:var(--blood) }
+.wahl.risk:hover:not(:disabled){ background:rgba(143,42,30,.10) }
+
+/* Fußzeile: Stand links, Siegel rechts */
+.bogenfuss{ display:flex; justify-content:space-between; align-items:center; gap:16px;
+  margin-top:18px; padding-top:12px; border-top:1px solid rgba(90,76,58,.4);
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+  letter-spacing:.12em; text-transform:uppercase; color:#5f5240 }
+.siegel{ width:40px; height:40px; flex:0 0 auto; display:flex; align-items:center;
+  justify-content:center; border-radius:47% 53% 51% 49% / 52% 48% 52% 48%;
+  background:radial-gradient(circle at 36% 32%, #b8402c, #7e1f16 68%, #5e150e);
+  box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35),
+             inset 0 2px 3px rgba(255,255,255,.18);
+  color:rgba(255,225,210,.42); font-family:var(--didone); font-size:20px;
+  text-shadow:0 1px 0 rgba(0,0,0,.5) }
+
+/* Das Sichtfeld liegt als eingelegtes Blatt im Bogen (Bündel 2) */
+.stichrahmen{ border:1px solid rgba(90,76,58,.45); background:#e4d9bd; padding:5px;
+  margin-bottom:6px }
+.stichzeile{ display:flex; justify-content:space-between; gap:12px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+  letter-spacing:.1em; text-transform:uppercase; color:#5f5240; margin-bottom:14px }
+.protokollkopf{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10px;
+  letter-spacing:.16em; text-transform:uppercase; color:#6b4f22; margin:16px 0 4px }
+.protokollliste{ max-height:132px; overflow-y:auto }
+.protokollliste div{ font-size:14px; color:#4e4335; padding:4px 0;
+  border-bottom:1px solid rgba(90,76,58,.18) }

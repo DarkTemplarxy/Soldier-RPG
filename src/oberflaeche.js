@@ -1081,13 +1081,16 @@ function marschWuerfeln(n){
 
 function zeigeMarschEreignis(e, n){
   const offen = marschOffen(e);
-  const opt = offen.map((o,i)=>`<button class="ord ${o.risk?'risk':''}" onclick="marschWaehlen(${i})">
-    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}</span></button>`).join('');
+  const opt = offen.map((o,i)=>
+    wahlZeile(roemisch(i+1), esc(o.label), wahlKosten(o), `marschWaehlen(${i})`, {risk:o.risk})).join('');
   const gesperrt = marschVerwehrt(e).map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div>${wegband(n)}<div class="card"><div class="ch"><span>Auf dem Marsch · ${esc(e.titel)}</span><span>${esc(n.datum||'')}</span></div>
-      <div class="cb"><div class="prose">${e.text.map(t=>`<p>${t}</p>`).join('')}${gesperrt}</div></div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    <div>${wegband(n)}
+      ${bogen({ort:'Auf dem Marsch · '+e.titel, datum:n.datum||''},
+        `<div class="prose">${e.text.map(t=>`<p>${t}</p>`).join('')}${gesperrt}</div>`,
+        ['Was tust du?','Ein Zwischenfall · er zählt wie jede Wahl'],
+        opt,
+        'Zwischen zwei Stationen · der Feldzug ist gesichert')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1447,16 +1450,22 @@ function zeigeTempo(n){
        Knopf („ihr holt eine Kolonne ein, die aufgeben will"). Das Attribut
        sagt dem Testbot dasselbe, was ein Spieler liest, und ohne es misst das
        Skript wieder seine eigene Blindheit statt des Spiels. */
-    return `<button class="ord ${x.forciert?'risk':''}" onclick="waehleTempo(${i})"${
-      (x.forciert && zusatz.hint) ? ' data-gewinn="1"' : ''}>
-      ${esc(x.label)}<span class="cost">${esc(x.hint)}${uebersprungen}${zusatz.hint?' · '+esc(zusatz.hint):''}</span></button>`;
+    /* `data-gewinn` sagt dem Testbot dasselbe, was ein Spieler liest — ohne
+       es misst das Skript wieder seine eigene Blindheit statt des Spiels. */
+    const zeile = wahlZeile(roemisch(i+1), esc(x.label),
+      esc(x.hint)+uebersprungen+(zusatz.hint?' · '+esc(zusatz.hint):''),
+      `waehleTempo(${i})`, {risk:x.forciert});
+    return (x.forciert && zusatz.hint) ? zeile.replace('<button ', '<button data-gewinn="1" ') : zeile;
   }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div>${wegband(n)}<div class="card"><div class="ch"><span>Das Tempo</span><span>${esc(n.datum||'')}</span></div>
-      <div class="cb"><div class="prose">${(t.text||[
-        'Vor dem Abmarsch steht die Frage, die in diesem Feldzug jeden Tag gestellt wird und über die keine Vorschrift etwas sagt: wie schnell.'
-      ]).map(x=>`<p>${x}</p>`).join('')}</div></div></div>
-      <div class="orders"><div class="ch"><span>Wie marschiert ihr?</span></div><div class="ordbody">${opt}</div></div>
+    <div>${wegband(n)}
+      ${bogen({ort:'Das Tempo', datum:n.datum||''},
+        `<div class="prose">${(t.text||[
+          'Vor dem Abmarsch steht die Frage, die in diesem Feldzug jeden Tag gestellt wird und über die keine Vorschrift etwas sagt: wie schnell.'
+        ]).map(x=>`<p>${x}</p>`).join('')}</div>`,
+        ['Wie marschiert ihr?','Keine Probe · es gibt keine Fertigkeit dafür'],
+        opt,
+        'Vor dem Abmarsch · der Feldzug ist gesichert')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1548,17 +1557,72 @@ function szeneVerwehrt(o){
   return v < (o.ab.min|0);
 }
 
+/* ══════════════════ DER STATIONSBOGEN ══════════════════
+
+   **Szene und Wahlen auf einem Blatt** (Bündel 1 des Entwurfspakets). Bis
+   dahin standen sie in zwei Kästen — `.card` mit dem Text, darunter `.orders`
+   mit den Knöpfen — und dazwischen klaffte eine Lücke, die es auf einem
+   Kanzleibogen nicht gibt. Die Wahlen sahen außerdem aus wie Schaltflächen
+   statt wie das, was sie sind: die Punkte einer Verfügung.
+
+   `wahlListe()` und `bogen()` stehen hier einmal für alle sechs Aufrufstellen
+   — Szene, Marschereignis, Lager, Gefecht, Gefechts-Ereignis. */
+const ROEMISCH = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+function roemisch(k){ return ROEMISCH[k-1] || String(k); }
+
+/* Die Probenzeile hinter einer Wahl — Wert, Schwierigkeit und die *wirkliche*
+   Aussicht. Seit dem Wurf aus zwei Würfen ist der Zielwert nicht mehr die
+   Prozentzahl; `aussicht()` rechnet um. */
+function wahlKosten(o){
+  const teile = [];
+  if(o.kosten || o.hint) teile.push(esc(o.kosten||o.hint));
+  if(o.probe) teile.push(`${wertName(o.probe.wert)} ${wert(o.probe.wert)} gegen ${o.probe.schw} · ${aussicht(o.probe.wert,o.probe.schw)}%`);
+  if(o.kette) teile.push(o.kette.map(st=>`${wertName(st.wert)} ${wert(st.wert)} gegen ${st.schw} · ${aussicht(st.wert,st.schw)}%`).join(' · '));
+  return teile.join(' · ');
+}
+
+/* Eine Wahl als Zeile im Bogen. `roh:true` liefert ein `<div>` statt eines
+   `<button>` — für gesperrte Handlungen, die nicht fokussierbar sein sollen. */
+function wahlZeile(nr, label, kosten, aufruf, opt){
+  const o = opt || {};
+  const attr = o.gesperrt ? ' disabled' : '';
+  /* **`ord` steht mit dabei, und das ist kein Rest.** Fünf Prüfstände suchen
+     ihre Knöpfe über `.ord`; sie alle umzuschreiben, nur weil sich die
+     Gestaltung ändert, hieße die Messgeräte an die Optik zu binden. Im CSS
+     gewinnt `.wahl`, weil es später steht — die Klasse ist also allein für
+     die Skripte da und kostet nichts. */
+  const kl = `wahl ord${o.risk?' risk':''}${o.klasse?' '+o.klasse:''}`;
+  if(o.roh) return `<div class="${kl}" style="opacity:.42"><span class="nr">${nr}</span><span>
+      <span class="label">${label}</span><span class="cost">${kosten}</span></span></div>`;
+  return `<button class="${kl}" onclick="${aufruf}"${attr}><span class="nr">${nr}</span><span>
+      <span class="label">${label}</span><span class="cost">${kosten}</span></span></button>`;
+}
+
+/* Der Bogen selbst: Vordruckkopf, Fließtext, Wahlen, Fußzeile mit Siegel. */
+function bogen(n, inhalt, wahlkopf, wahlen, fuss){
+  /* **Der Kartenkopf bleibt, auch wenn der Vordruck darunter dasselbe Datum
+     noch einmal setzt.** Er trägt den *Ort*, den der Vordruck nicht kennt —
+     und fünf Prüfstände lesen die aktuelle Station aus `#app .ch span`. Ohne
+     ihn meldet `test/kapitel.js` Stationen als übersprungen, die es gerade
+     vor sich hat, und `test/spielstand.js` findet Savona nicht mehr. */
+  return `<div class="card bogen"><div class="ch"><span>${esc((n&&n.ort)||'')}</span><span>${esc((n&&n.datum)||'')}</span></div>
+    <div class="inner">
+    ${vordruck(n)}
+    ${inhalt}
+    ${wahlen ? `<div class="wahlkopf"><span>${wahlkopf[0]}</span><span>${wahlkopf[1]}</span></div>${wahlen}` : ''}
+    <div class="bogenfuss"><span>${fuss}</span>
+      <span class="siegel">${kaiserreich()?'N':'RF'}</span></div>
+  </div></div>`;
+}
+
 function zeigeSzene(n){
   const alle = szeneOptionen(n);
   const gesperrtText = alle.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
     .map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
-  const opt = alle.filter(o=>!szeneVerwehrt(o)).map((o)=>{
-    const i = alle.indexOf(o);
-    const gesperrt = o.probe && wert(o.probe.wert)<5;
-    return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
-      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}${
-        o.kette?' · '+o.kette.map(st=>wertName(st.wert)+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · '):''}</span></button>`;
-  }).join('');
+  const offen = alle.filter(o=>!szeneVerwehrt(o));
+  const opt = offen.map((o,k)=>
+    wahlZeile(roemisch(k+1), esc(o.label), wahlKosten(o), `waehleOption(${alle.indexOf(o)})`,
+      {risk:o.risk, gesperrt: o.probe && wert(o.probe.wert)<5})).join('');
   /* ── Der Notausgang ──
      **Eine Szene ohne einen einzigen drückbaren Knopf ist eine Sackgasse**, und
      der Lauf ist verloren, obwohl der Mann lebt. Das kann passieren, ohne dass
@@ -1574,12 +1638,14 @@ function zeigeSzene(n){
      vergessen wird, und sie ist absichtlich das Kärglichste, was das Spiel
      anbieten kann. */
   const notausgang = opt ? '' :
-    `<button class="ord" onclick="szeneAushalten()">Es aushalten
-      <span class="cost">Du kannst nichts von dem, was hier zu tun wäre</span></button>`;
+    wahlZeile('I','Es aushalten','Du kannst nichts von dem, was hier zu tun wäre','szeneAushalten()',{});
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${szeneText(n).map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div></div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}${notausgang}</div></div>
+    <div>${wegband(n)}
+      ${bogen(n,
+        `<div class="prose">${szeneText(n).map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div>`,
+        ['Was tust du?','Eine Wahl · sie wird nicht bewertet'],
+        opt+notausgang,
+        `Der Feldzug ist gesichert · Station ${roemisch(LAUF.node+1)} von ${KAPITEL.length}`)}
     </div>${seitenleiste()}</div>`;
   LAUF.szene = n.id;
 }
