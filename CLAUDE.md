@@ -1349,6 +1349,23 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 >
 > **Vergleiche werden deshalb nicht mehr gegen eine Zahl von gestern gezogen, sondern gegen denselben Stand, neu gemessen** — Worktree auf den Vergleichs-Commit, **derselbe** Prüfstand hinein, dann messen. Anders ist bei einem Projekt, das gleichzeitig Inhalt und Regeln ändert, nichts zu trennen.
 
+### Gemessen bei 157 Stationen, mit reparierten Prüfständen *(29.07.2026)*
+
+**Das ist der gültige Vergleichsmaßstab.** Beide Spalten mit demselben Prüfstand gemessen; die linke ist `4c749d7` (alle elf Kapitel, vor den Gestaltungsbündeln), die rechte der heutige Stand.
+
+| | **Weite** (von 157) | **höchster Rang (Cpt)** | Italien | Caporal | Punkte-Median |
+|---|---|---|---|---|---|
+| Erstlauf ohne Vorrat *(80 Läufe)* | **31** | **0 %** | 99 % | 26 % | 34 |
+| Veteran 400 · vor den Bündeln *(40)* | **70** | **25 %** | 98 % | 100 % | 307 |
+| Veteran 400 · heute *(40)* | **61** | **18 %** | 100 % | 100 % | 233 |
+
+**Der Abstand trägt weiterhin, und er trägt deutlich:** Weite 31 → 61 (dreißig Stationen), Capitaine 0 → 18 %. Die eigene Regel („unter 25 Punkten beim Rang trägt die Leiter nicht") ist erfüllt.
+
+> **Zwei Dinge sind beim Lesen wichtig, und das zweite ist ein offener Befund:**
+>
+> 1. **Die Weite steht mit ihrem Nenner da, und das ist ab jetzt Pflicht.** 31 von 157 ist nicht schlechter als 58 von 122 — es ist eine andere Größe.
+> 2. **Der Veteran hat gegenüber der 122-Stationen-Messung zwanzig Punkte Capitaine-Quote verloren, und das ist *vor* den Gestaltungsbündeln passiert** (45 % → 25 % → 18 %, wobei der letzte Schritt etwa ein Sigma ist). Der Verdächtige ist die Zwei-Würfe-Probe, die Schwache an jeder Probe härter trifft. **Steht als Punkt 8 in `OFFEN.md`, mit dem Messweg.** Nicht daran drehen, ohne ihn zuerst zu messen.
+
 > ### ✓ Eingelöst: Veteranenpunkte kaufen jetzt auch Strecke
 >
 > **Beide Leitzahlen tragen, und beide monoton:**

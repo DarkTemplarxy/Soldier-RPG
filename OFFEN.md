@@ -106,6 +106,26 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
+## 8 · Die halbe Capitaine-Quote des Veteranen ist verschwunden, und zwar vor den Gestaltungsbündeln
+
+**Gemessen, gleicher Prüfstand, gleiche 157 Stationen, Veteran 400 VP, je 40 Läufe:**
+
+| | Weite | Capitaine | Punkte-Median |
+|---|---|---|---|
+| Zielwert-Tabelle *(122 Stationen!)* | 75 | **45 %** | 369 |
+| `4c749d7` — alle elf Kapitel, **keine** Bündel | 70 | **25 %** | 307 |
+| HEAD — mit den Bündeln | 61 | 18 % | 233 |
+
+**Die Bündel erklären den Sprung nicht.** Zwischen den letzten beiden Zeilen liegt etwa ein Sigma (n = 40 → σ ≈ 6,8 Punkte auf 25 %). Zwischen den ersten beiden liegen **zwanzig Punkte**, und die sind vor jeder Gestaltungsarbeit entstanden.
+
+**Der Verdächtige ist `52211b0` „Zwei Würfe statt einem".** Er liegt genau im Fenster, und seine Wirkung passt: Der Wurf ist jetzt der Mittelwert aus zwei Würfen, also ballen sich die Ergebnisse um die Mitte — **wer unter der Aufgabe steht, scheitert deutlich öfter als vorher** (Zielwert 35: 35 % → 24 %, Zielwert 20: 20 % → 8 %). Das trifft jeden, dessen Werte nicht schon hoch sind, und es trifft ihn an *jeder* Probe eines Laufs. Die Änderung ist mit ihrer Wahrscheinlichkeitstabelle dokumentiert, aber offenbar nie gegen die beiden Leitzahlen nachgemessen worden.
+
+**Zwei Kandidaten kommen noch in Frage** und sind billiger zu prüfen als zu diskutieren: die Kapitel 10 und 11 selbst (sie hängen nur Stationen an, können eine Rangquote also eigentlich nicht senken — aber sie haben auch die zweite Rangschranke eingehängt) und `697e396` „Das Können über der Klemme", das in die andere Richtung wirken sollte.
+
+**Der Hebel ist die Messung, nicht die Formel.** Wer das anfasst, setzt einen Worktree auf `52211b0^`, kopiert den heutigen Prüfstand hinein und misst Veteran 400 und Erstlauf. **Erst wenn die Zahl dort bei 45 % liegt, ist der Zwei-Würfe-Wurf überführt** — und dann ist die Frage nicht, ob er zurückgenommen wird (die Klage, die ihn ausgelöst hat, war berechtigt), sondern ob die Schwierigkeiten in den Kapiteldaten nachziehen müssen. Der Satz „keine einzige Schwierigkeit musste angefasst werden" ist genau die Annahme, die hier auf dem Prüfstand steht.
+
+---
+
 ## Erledigt
 
 | Punkt | Wie geschlossen | Messwert |

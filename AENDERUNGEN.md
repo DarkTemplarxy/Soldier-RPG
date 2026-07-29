@@ -45,7 +45,19 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 **Gravur:** Das Täfelchen trägt den Nachnamen des Mannes. Historisch stand er darauf, und es ist die einzige Stelle im Spiel, an der die eigene Ausrüstung den eigenen Namen nennt.
 
-> **⚠ Noch nicht gemessen — die Zahl steht aus.** Die Medaillen geben Ruf, und **alles, was den Ruf hebt, hebt über die Schwellen auch den Aufstieg** (die teuerste gelernte Regel des Projekts). Nach dem Differenz-Fix sind es höchstens +6 über einen ganzen Lauf gegen eine Caporal-Schwelle von 30, also erwartungsgemäß im Rauschen — **erwartet ist aber nicht gemessen.** Zu prüfen sind die beiden Leitzahlen gegen den Stand davor (Erstlauf vorsichtig, 80 Läufe: Weite **58**, Capitaine **8 %**). Bewegt sich eine um mehr als zehn Punkte, ist der Ruf der Medaillen der erste Verdächtige und der Hebel ist er auch — nicht die Wertungspunkte.
+**Gemessen — und zwar gegen denselben Stand, neu gemessen**, nicht gegen eine Zahl von gestern: Worktree auf `4c749d7` (alle elf Kapitel, keine Gestaltungsbündel), **derselbe** reparierte Prüfstand hineinkopiert, dann beide Seiten. Nur so ist bei gleichzeitig geändertem Inhalt und geänderten Regeln überhaupt etwas zu trennen.
+
+| Veteran 400 VP · je 40 Läufe · 157 Stationen | vor den Bündeln | nach den Bündeln |
+|---|---|---|
+| Weite | 70 | **61** |
+| Capitaine | 25 % | **18 %** |
+| Italien überstanden | 98 % | 100 % |
+| Ägypten überstanden | 56 % | 53 % |
+| Punkte-Median | 307 | **233** |
+
+**Bei n = 40 ist eine Standardabweichung auf eine 25-%-Quote rund 6,8 Punkte — 25 → 18 % ist damit etwa ein Sigma, und Ägypten liegt flach.** Die Gestaltungsbündel sind in dieser Stichprobengröße **keine messbare Balance-Änderung.** Auffällig bleiben zwei Zahlen: der Punkte-Median (307 → 233) und Jena (38 → 16 %) — letzteres mit Nachbarn, die aus zwei- bis achtläufigen Stichproben bestehen, also vorerst nicht deutbar.
+
+> **⚠ Der Vergleich hat einen älteren, größeren Befund freigelegt — und er gehört nicht diesen Bündeln.** Die Zielwert-Tabelle nennt für den Veteranen 400 **75 / 45 %**. Der Stand *vor* den Bündeln liefert **70 / 25 %**. Die Hälfte der Capitaine-Quote ist also schon vorher verloren gegangen, irgendwo zwischen der Messung bei 122 Stationen und `4c749d7`. Die Kapitel 10 und 11 hängen nur Stationen an und können eine Rangquote nicht senken; der Verdächtige in diesem Fenster ist **`52211b0` „Zwei Würfe statt einem"**, dokumentiert mit seiner Wahrscheinlichkeitstabelle, aber offenbar nie gegen die beiden Leitzahlen nachgemessen. Steht als eigener Punkt in `OFFEN.md`.
 
 ## 2026-07-29 — Kapitel 10 und 11: die Rangleiter hat jetzt einen Inhalt bis zum Ende
 

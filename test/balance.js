@@ -95,7 +95,7 @@ const VETERAN_PLAN = [
   ['w','kaltbluetigkeit',60],
   ['k','zaeh_schlaf'], ['k','zaeh_narben'],
   /* Ab hier nur noch für die reichen Läufe. **Die Liste muss mit dem Inhalt
-     wachsen:** Mit acht Kapiteln bringt ein Spitzenlauf über 500 Punkte, und
+     wachsen:** Mit elf Kapiteln bringt ein Spitzenlauf über 500 Punkte, und
      ein Bot, der sie nicht ausgeben kann, misst einen ärmeren Veteranen als
      den, den das Spiel tatsächlich hervorbringt. */
   ['w','autoritaet',50], ['w','bajonett',40], ['w','drill',55],
@@ -508,19 +508,23 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     + (PATENT ? ` · mit Patent (${PATENT === 'patent_lt' ? 'Lieutenant' : 'Sous-Lieutenant'})` : ''));
   /* ── Die Leitzahlen ──
      **`überlebt` ist mit acht Kapiteln ausgelaufen, und zwar rechnerisch.**
-     Sie ist das Produkt aller Kapitelquoten; bei acht Kapiteln steht sie für
-     jeden der drei gemessenen Männer auf **0 %** und trennt damit nichts mehr.
+     Sie ist das Produkt aller Kapitelquoten; schon bei acht Kapiteln stand sie
+     für jeden der drei gemessenen Männer auf **0 %** und trennte nichts mehr.
+     Mit elf ist sie es erst recht.
      Genau das war vorhergesagt („eine Leitzahl, die ein Produkt ist, läuft
      mit jedem Kapitel aus"), und sie bleibt nur noch zur Einordnung stehen.
 
-     An ihre Stelle tritt **die Weite**: wie weit der mittlere Lauf kommt, als
-     Anteil der Stationen. Sie schrumpft nicht mit dem Ausbaustand, weil sie
-     ein Median ist und kein Produkt. */
+     An ihre Stelle tritt **die Weite**: wie weit der mittlere Lauf kommt.
+     Sie schrumpft nicht mit dem Ausbaustand, weil sie ein Median ist und kein
+     Produkt — **aber sie ist eine absolute Stationszahl und wandert deshalb
+     mit dem Nenner.** Wer sie vergleicht, vergleicht sie nur gegen eine
+     Messung mit derselben Stationszahl; deshalb steht sie hier immer mit
+     „von ${STATIONSZAHL}" daneben. */
   const we = res.weite.slice().sort((a, b) => a - b);
   const weite = we.length ? we[Math.floor(we.length / 2)] : 0;
   console.log(`\n  WEITE ${weite} von ${STATIONSZAHL} (${Math.round(weite/STATIONSZAHL*100)} %)`
     + `   ·   HÖCHSTER RANG (${rangKurz(LEITRANG)}) ${q(res.leit)}\n`);
-  console.log(`Ganz durch: ${q(res.ende)} (Produktzahl, mit acht Kapiteln stumpf)`);
+  console.log(`Ganz durch: ${q(res.ende)} (Produktzahl, mit elf Kapiteln stumpf)`);
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
   console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
