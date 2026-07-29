@@ -5,6 +5,32 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Das Können über der Klemme: das obere Ende der Skala ist keine tote Währung mehr
+
+**Der Befund, nachgerechnet und nicht vermutet:** Die Probe klemmt bei 95, also sind gegen die üblichen Schwierigkeiten 35 bis 50 **Wert 85 und Wert 100 dieselbe Zahl**. Und weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit ausschließlich Trefferwahrscheinlichkeit. Wer viele Veteranenpunkte in eine Spitze steckte, bekam dafür nichts.
+
+**Die Klemme bleibt** — fünf Prozent Fehlschlag gehören dazu, im Rauch schießt auch der beste Schütze daneben, und eine Probe, die nie misslingt, ist keine. Was die Klemme wegwirft, wird jetzt sichtbar:
+
+```
+roh    = Wert − Schwierigkeit + 50        (ungeklemmt)
+Ziel   = clamp(roh, 5, 95)
+Können = max(0, roh − 95)                 → Schaden × (1 + min(30,Können)/60)
+```
+
+| Muskete | Schw. 20 | Schw. 35 | Schw. 45 |
+|---|---|---|---|
+| 40 · 60 | — | — | — |
+| 80 | ×1,25 | — | — |
+| 100 | ×1,50 | ×1,33 | ×1,17 |
+
+**Ein Meister trifft nicht öfter, er trifft härter.** Der Erstläufer merkt davon nichts — unter Wert 60 liegt niemand über der Klemme —, und genau das war die Anforderung: ein Ertrag ausschließlich für den, der viel hat.
+
+**Der Deckel bei +50 % ist der wichtigere Teil der Zahl.** Ohne ihn liefe Wert 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die späten Gefechte wären in drei Runden vorbei.
+
+**Gebaut an einer Stelle, nicht an fünfzehn:** `PROBE_ZULETZT` merkt sich die letzte Probe, `kampfAktion()` setzt sie am Anfang auf null und legt den Faktor einmal auf den Schaden — wer eine neue Schadenszeile baut, kann ihn nicht vergessen.
+
+**Sichtbar an einem Wort:** ab fünfzehn Punkten über der Klemme „mühelos gelungen" statt „gelungen". Darunter steht nichts Besonderes — ein Wort, das immer dasteht, sagt nichts.
+
 ## 2026-07-29 — Kapitel 9: Deutschland 1813, und die Rekruten
 
 **Die eigene Regel: Deine Armee ist achtzehn Jahre alt.** Dreizehn Stationen, sechs Gefechte, Feindgüte 10, Sold-Moral 0,4.

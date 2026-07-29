@@ -433,12 +433,63 @@ function aussicht(k, schwierigkeit){
   return Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50));
 }
 
+/* ══════════════════ DIE PROBE — UND WAS ÜBER IHR LIEGT ══════════════════
+
+   ```
+   roh    = Wert − Schwierigkeit + 50        (ungeklemmt)
+   Ziel   = clamp(roh, 5, 95)
+   Können = max(0, roh − 95)
+   ```
+
+   **Die Klemme bleibt, und sie ist richtig.** Fünf Prozent Fehlschlag gehören
+   dazu: Im Rauch schießt auch der beste Schütze daneben, und eine Probe, die
+   nie misslingt, ist keine. Aber sie hatte eine Nebenwirkung, die erst mit
+   vielen Veteranenpunkten sichtbar wurde — **gegen die üblichen
+   Schwierigkeiten 35 bis 50 sind Wert 85 und Wert 100 dieselbe Zahl.** Und
+   weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit
+   ausschließlich Trefferwahrscheinlichkeit. Damit war das obere Fünftel der
+   Skala **tote Währung**: Wer seine Spitze nachschärfte, bekam dafür nichts.
+
+   `koennen` ist genau das, was die Klemme wegwirft. Es zahlt nicht mehr in
+   die Trefferchance — die bleibt bei 95 % —, sondern in die **Wirkung**.
+   Damit gilt für die ganze Skala wieder: Mehr Wert ist mehr wert; nur ändert
+   sich oben, *worin*. Ein Meister trifft nicht öfter, er trifft härter. */
+/* Die zuletzt gewürfelte Probe. `kampfAktion()` setzt sie am Anfang auf null
+   und liest sie am Ende aus, wo der Schaden verrechnet wird — so steht der
+   Meisterschaftsfaktor an **einer** Stelle statt an fünfzehn Schadenszeilen,
+   und keine davon kann ihn beim nächsten Umbau vergessen. */
+let PROBE_ZULETZT = null;
 function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
-  const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
+  const roh = w - schwierigkeit + 50;
+  const ziel = Math.max(5, Math.min(95, roh));
   const wurf = 1 + Math.floor(Math.random()*100);
   if(!ohneUebung) nutzen(k, 1);
-  return {wurf, ziel, wertRoh:w, erfolg: wurf <= ziel};
+  PROBE_ZULETZT = {wurf, ziel, wertRoh:w, roh, koennen: Math.max(0, roh - 95), erfolg: wurf <= ziel};
+  return PROBE_ZULETZT;
+}
+
+/* Der Faktor, den `koennen` auf eine Wirkung legt. **Gedeckelt bei +50 %**,
+   und der Deckel ist der wichtigere Teil der Zahl: Ohne ihn liefe ein Wert
+   von 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die
+   späten Gefechte wären in drei Runden vorbei.
+
+   30 Punkte über der Klemme sind das Maximum, das im Spiel vorkommt (Wert 100
+   gegen Schwierigkeit 35). Wer dort steht, richtet die Hälfte mehr an als
+   einer, der die Probe gerade so sicher besteht. */
+/* **Wie deutlich es gelungen ist, in einem Wort.** Ab fünfzehn Punkten über
+   der Klemme steht der Mann so weit über der Aufgabe, dass die Probe nur noch
+   Form ist — und das gehört auf den Schirm, sonst merkt niemand, wofür er
+   seine Veteranenpunkte ausgegeben hat. Unter fünfzehn steht nichts: Ein Wort,
+   das immer dasteht, sagt nichts. */
+function probeWort(p){
+  if(!p || !p.erfolg) return 'misslungen';
+  return p.koennen >= 15 ? 'mühelos gelungen' : 'gelungen';
+}
+
+function meister(p){
+  if(!p || !p.erfolg || !p.koennen) return 1;
+  return 1 + Math.min(30, p.koennen) / 60;
 }
 
 function nutzen(k, intens, fechtboden){

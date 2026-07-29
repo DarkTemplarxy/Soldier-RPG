@@ -425,10 +425,35 @@ Leben ≤ 0 → Tod
 ### Proben und Wachstum (`src/mechanik.js`)
 
 ```
-Zielwert = Wert − Schwierigkeit + 50        (begrenzt auf 5…95)
+roh      = Wert − Schwierigkeit + 50        (ungeklemmt)
+Zielwert = clamp(roh, 5, 95)
+Können   = max(0, roh − 95)
 Wurf 1–100, Erfolg wenn Wurf ≤ Zielwert
 ```
-Wert 40 gegen Schwierigkeit 40 ist also ein Münzwurf. Das ist die Eichung — Schwierigkeiten in Szenen immer gegen die erwarteten Werte des Kapitels ansetzen (Kapitel 1: Attribute 20–70, Fertigkeiten 10–50).
+Wert 40 gegen Schwierigkeit 40 ist also ein Münzwurf. Das ist die Eichung — Schwierigkeiten in Szenen immer gegen die erwarteten Werte des Kapitels ansetzen (Kapitel 1: Attribute 15–70, Fertigkeiten 5–50).
+
+### Das Können über der Klemme (`meister()` in `src/mechanik.js`)
+
+**Die Klemme bei 95 bleibt, und sie ist richtig** — fünf Prozent Fehlschlag gehören dazu, im Rauch schießt auch der beste Schütze daneben. Aber sie hatte eine Nebenwirkung, die erst mit vielen Veteranenpunkten sichtbar wurde:
+
+> **Gegen die üblichen Schwierigkeiten 35 bis 50 sind Wert 85 und Wert 100 dieselbe Zahl.** Und weil der Schaden bei Erfolg ein fester Wurf ist (`22 + Zufall·10`), kaufte eine Fertigkeit ausschließlich Trefferwahrscheinlichkeit. **Das obere Fünftel der Skala war tote Währung** — wer seine Spitze nachschärfte, bekam dafür nichts. Dieselbe Sorte Fehler wie Reiten und Kartenkunde in Exploit 3, nur am anderen Ende.
+
+`koennen` ist genau das, was die Klemme wegwirft, und es zahlt jetzt in die **Wirkung** statt in die Trefferchance: `Schaden × (1 + min(30, Können)/60)`, also höchstens +50 %.
+
+| Muskete | gegen Schw. 20 | gegen Schw. 35 | gegen Schw. 45 |
+|---|---|---|---|
+| 40 · 60 | — | — | — |
+| 80 | ×1,25 | — | — |
+| 90 | ×1,42 | ×1,17 | — |
+| 100 | ×1,50 | ×1,33 | ×1,17 |
+
+> **Der Erstläufer merkt davon nichts**, und das ist die Probe aufs Exempel: Unter Wert 60 liegt niemand über der Klemme. Es ist ausschließlich ein Ertrag für den, der viele Punkte hat — genau die Lücke, die der Entwickler benannt hat.
+>
+> **Der Deckel bei +50 % ist der wichtigere Teil der Zahl.** Ohne ihn liefe Wert 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die späten Gefechte wären in drei Runden vorbei.
+>
+> **Und es steht an einer Stelle, nicht an fünfzehn.** `PROBE_ZULETZT` merkt sich die letzte Probe, `kampfAktion()` setzt sie am Anfang auf null und legt den Faktor einmal auf den Schaden. Wer eine neue Schadenszeile baut, kann ihn nicht vergessen.
+
+**Sichtbar wird es an einem Wort:** Ab fünfzehn Punkten über der Klemme heißt es „mühelos gelungen" statt „gelungen" (`probeWort()`). Unter fünfzehn steht nichts Besonderes da — ein Wort, das immer dasteht, sagt nichts.
 
 ```
 Wachstum = 1,7 × Intensität × (100 − Wert)/100,  mit 75 % Wahrscheinlichkeit

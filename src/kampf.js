@@ -1526,8 +1526,8 @@ function ereignisWaehlen(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
-      K.protokoll.push(st.name + (p.erfolg?' — gelungen':' — misslungen'));
+        ` <span class="fein">${wertName(st.wert)} — ${probeWort(p)}${schaden?' · Leben −'+schaden:''}</span>`);
+      K.protokoll.push(st.name + (' — '+probeWort(p)));
       if(S.leben <= 0){
         gefallen(zeilen.join(' ') + ' ' + (o.tod||''),
                  o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
@@ -1546,7 +1546,7 @@ function ereignisWaehlen(i){
     const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
     w = p.erfolg ? o.erfolg : (o.misserfolg || o.erfolg);
     text = w.text;
-    K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
+    K.protokoll.push(esc(o.label) + (o.probe ? (' — '+probeWort(p)) : ''));
   }
   ereignisWirkung(w);
   /* Eine Ereignisrunde ist eine Runde: Wer vorgetreten ist, hat nicht gekniet.
@@ -1641,6 +1641,7 @@ function zeigeKampf(text){
 function kampfAktion(id){
   const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
   const zw = S.zweig;
+  PROBE_ZULETZT = null;   // siehe `meister()` — der Faktor wird unten einmal gelegt
 
   if(id==='laden'){
     const p = probe('geschick', 30);
@@ -2030,6 +2031,18 @@ function kampfAktion(id){
      dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein
      Handel, sondern eine Lage. Ausgeglichen wird über kurze Runden und
      niedrige Feindmoral in den Daten. */
+  /* ── Können über der Klemme ──
+     **Hier wird das obere Ende der Skala erst etwas wert.** Die Probe klemmt
+     bei 95, also kaufen die letzten fünfzehn bis zwanzig Punkte einer
+     Fertigkeit keine Trefferchance mehr (siehe `probe()`). Was die Klemme
+     wegwirft, legt sich stattdessen auf die **Wirkung** — bis zu +50 %.
+
+     Es steht bewusst **vor** allen übrigen Faktoren und hinter keinem: Der
+     gelöste Zug, das Gelände und der Zustand der Kompanien sind Umstände,
+     das Können ist der Mann. Multiplikativ verrechnet ist die Reihenfolge
+     zwar gleichgültig — die Anordnung sagt trotzdem, was wovon abhängt. */
+  const meisterFaktor = meister(PROBE_ZULETZT);
+  if(schaden > 0) schaden *= meisterFaktor;
   let linie = (K.geloest || n.ueberfall) ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */

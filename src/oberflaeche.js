@@ -1104,7 +1104,7 @@ function marschWaehlen(i){
     const p = probe(o.probe.wert, o.probe.schw);
     w = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
     klasse = p.erfolg ? 'gut' : 'schlecht';
-    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${probeWort(p)}</div>`;
   } else w = o.erfolg;
   anwenden(w);
   S.log.push('marsch: '+o.label);
@@ -1609,7 +1609,7 @@ function waehleOption(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+        ` <span class="fein">${wertName(st.wert)} — ${probeWort(p)}${schaden?' · Leben −'+schaden:''}</span>`);
       if(S.leben <= 0){
         S.log.push(n.id+': '+o.label);
         toetlich(o.todesart || 'Gefallen');
@@ -1627,7 +1627,7 @@ function waehleOption(i){
     klasse = p.erfolg ? 'gut' : 'schlecht';
     // Nur das Ergebnis, nicht die Rechnung: Wert und Schwierigkeit stehen schon
     // vor der Wahl auf dem Knopf, und Zielwert und Wurf sagen hinterher nichts mehr.
-    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${probeWort(p)}</div>`;
   } else { erg = o.erfolg; klasse='gut'; }
   anwenden(erg);
   verschleiss(0.35);
