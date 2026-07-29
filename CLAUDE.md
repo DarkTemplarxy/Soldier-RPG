@@ -1138,12 +1138,42 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 > **REVIEW-VORBEHALT (ausdrücklich vom Entwickler, 28.07.2026):** Sergent in zwei Kapiteln staucht die Leiter — KONZEPT sah ihn für Kapitel 6–7 vor. **Sobald Kapitel 3 (Garnison) gebaut wird, Schwellen und Fenster neu eichen** — anheben oder strecken, gemessen an den vier Zahlen. Nicht stillschweigend so lassen. Dazu gehört auch die Frage, ob der Erstlauf den Sergenten überhaupt sehen können soll (heute: vorsichtig 20 %, mutig 33 %).
 
+## Die Rangleiter als System (`RANGLEITER.md`, Phase A gebaut)
+
+**Der verbindliche Entwurf aller vierzehn Ränge steht in `RANGLEITER.md`.** Wer an der Leiter baut, liest dort zuerst.
+
+> **Der Grundsatz:** Die Leiter ist ein **System**, die Kapitel sind **Inhalt**. Eine Vakanz hängt an einer allgemeinen Regel — in jedem Gefecht kann die Stelle über dir frei werden, sobald Ruf und Fürsprache stimmen —, nicht an benannten Schlachten. Deshalb funktioniert dieselbe Leiter in vier Kapiteln wie später in elf; sie wird nur seltener durchlaufen.
+
+**Was Phase A gebaut hat:**
+
+| | Was und warum |
+|---|---|
+| `rangWert()` auf **14 Ränge** | Alles über Rang 6 lieferte **0** — eine stille Fehlwertung, die erst auffiel, als die Leiter darüber hinauswuchs. Werte 120/158/205/262/330/408/490/580 aus KONZEPT §5 |
+| `stufe` für **alle** der Kette | Bisher rückte nur Martel auf; `personName('berthaud')` sagte „Lieutenant Berthaud", während die Texte ihn Capitaine nannten. Ohne das trägt die Offiziershälfte nicht |
+| Vakanzmaschine als **Liste** | War hart auf zwei Flagpaare verdrahtet (`majorTot`/`martelTot`). Jetzt `S.vakanz[key]`, gespeist aus den `vakanz`-Feldern der LEITER-Einträge |
+| `zeigeVorschlag()` **je Eintrag** | War fest auf den Sergenten getextet, lief aber schon für Rang 6 |
+| **Sprünge** (`von` mit zwei Rängen) | Wer die Schwellen für Rang 5 erfüllt, während er Rang 3 trägt, wird Sergent. Der Mechanismus, mit dem starke Veteranen unten beschleunigen |
+| **Grandmaison**, fünfte Person, vier Stufen | Fürsprecher für Rang 10–13 |
+| Musterung **auch im Winterquartier** | Vier Kapitel haben sechs `befoerderung`-Stationen; eine vierzehnstufige Leiter verhungert daran |
+
+### Die Arcole-Marke — die einzige Fernwirkung des Spiels
+
+**Du hast Grandmaison 1796 aus einem Sumpf gezogen.** Wer die Arcole-Sondermission besteht, setzt `S.arcoleMarke`; ab Rang 9 beginnt man bei ihm mit **Gunst +2** und einem Satz, der zeigt, dass er sich erinnert („Arcole", sagt er. Keine Frage, keine Erklärung). Wer sie verfehlt oder nie antritt, trifft ihn kalt bei null.
+
+**Sie wird nirgends angekündigt** — weder im Spiel noch im Handbuch. Sie wird nur eingelöst. Wer sie erwähnt, nimmt ihr alles.
+
+### Ein teurer Fehler, nebenbei gefunden
+
+`lager_rhein` und `lager_bruenn` in Kapitel 4 forderten Handlungs-IDs, die `LAGER_TUN` nicht kennt (`schiessen`, `flicken`, `schlafen`, `feuer`, `schuster`, `oelen`), und `lagerHandlungen()` filtert Unbekanntes **stumm** weg. **Das Lager vor Austerlitz hatte dadurch zwei von acht Knöpfen — und keinen davon war `ruhe`.** Gemessen: Überleben **33 → 50 %** allein durch die Reparatur.
+
+> **Regel daraus:** Ein stummer Filter ist ein Fehlerverstecker. Wer eine Auswahl aus Daten füttert, sollte Unbekanntes melden statt weglassen — sonst kostet ein Tippfehler siebzehn Prozentpunkte, und niemand sieht ihn.
+
 ## Was als Nächstes ansteht
 
-1. **Kapitel 4, Austerlitz 1805** — nach drei Jahren Frieden das erste Gefecht der Grande Armée. Feindgüte 6. Der Ausblick am Ende von Kapitel 3 kündigt es an.
+1. **Die Rangleiter, Phasen B bis E** (`RANGLEITER.md` §10) — Einträge 7–14, der Offizier, der Stab, die Patente.
 2. **Die höheren Ordensgrade** (Officier ab 1807, Commandeur ab 1809), die **fremden Orden** (Eiserne Krone ab 1805) und die **Dotationen** ab Tilsit. Alle drei sind in KONZEPT §6 vollständig entworfen und hängen nur an Kapiteln, die es noch nicht gibt.
 3. **Auszeichnungen der Kompanie ab Rang 9** — Belobigung, Bulletin, Fahneninschrift, samt der zweiten Gefechtsachse „Auftrag erfüllt". Entworfen in KONZEPT §6; braucht den Capitaine.
-4. **Rang 6 (Sergent-major)** — die Decke des Prototyps. Sie hat in Boulogne bereits ein Gesicht (Martel sitzt darauf); was fehlt, ist die Vakanz, und die kommt erst mit einem Feldzug.
+4. **Kapitel 5 bis 11** — je Kapitel ein Rang als Wohnort (RANGLEITER §10, Phase F).
 5. **Der freiwillige Ausstieg an den Rangschranken** — daran hängt der gestaffelte Überlebensbonus (70/120/180), der in der Wertung noch als Platzhalter 25 steht.
 
 > **Erledigt am 28.07.2026:** Die volle Punkteskala ist übernommen (Punkt 3 der alten Liste), und die Sollwerte sind auf die zwei Leitzahlen `überlebt` und `Sergent erreicht` neu gesetzt (Punkt 2). Beides steht oben unter „Balance-Konstanten".

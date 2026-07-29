@@ -101,7 +101,7 @@ const KAPITEL4 = [
 
 /* 53 */ {typ:'lager',id:'lager_rhein',datum:'Anfang Oktober 1805 · Bei Donauwörth',ort:'Rast vor der Donau',
   abende:2,
-  tun:['exerzieren','bajonett','schiessen','flicken','schlafen','feuer','fouragieren'],
+  tun:['exerzieren','bajonett','scharf','instand','ruhe','leute','fouragieren'],
   text:[
     'Der Rhein ist überschritten, die Donau liegt vor euch, und zum ersten Mal seit Boulogne gibt es zwei Abende, an denen nicht marschiert wird.',
     'Die Armee ist in sieben Kolonnen über zweihundert Kilometer verteilt und zieht sich zusammen wie eine Hand. Wo genau die Österreicher stehen, weiß niemand in deiner Kompanie; dass sie irgendwo westlich der Donau sitzen und nicht mehr herauskommen, weiß jeder.',
@@ -226,7 +226,7 @@ const KAPITEL4 = [
 
 /* 59 */ {typ:'lager',id:'lager_bruenn',datum:'Ende November 1805 · Bei Brünn',ort:'Das Lager vor der Schlacht',
   abende:2,
-  tun:['exerzieren','schiessen','flicken','schuster','oelen','schlafen','feuer','fouragieren'],
+  tun:['exerzieren','scharf','instand','schuhe','waffe','ruhe','leute','fouragieren'],
   text:[
     'Die Armee liegt seit einer Woche westlich eines Dorfes namens Austerlitz und tut etwas, das keiner versteht: Sie zieht sich zurück. Eine Höhe, die Pratzeberg heißt und das ganze Gelände beherrscht, wird geräumt, ohne dass jemand darauf geschossen hätte.',
     'Es geht das Gerücht, der Kaiser habe um Waffenstillstand bitten lassen. Die Offiziere sind unruhig, die Mannschaft rechnet. Von siebzigtausend Mann sind fünfzigtausend hier; die anderen stehen zweihundert Kilometer weit weg.',

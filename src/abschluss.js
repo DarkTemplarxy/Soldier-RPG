@@ -419,7 +419,7 @@ function zeigeWinter(n){
       <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen} VON ${wochenFuer(n)}</div>
       </div></div>
     <div class="orders"><div class="ch"><span>${esc(n.frage||'Womit verbringst du die Woche?')}</span></div><div class="ordbody">
-      ${opt}${W.wochen<=0?`<button class="ord weiter" onclick="winterEnde()">${esc(n.weiter||'Ins Feld zurück')}</button>`:''}
+      ${opt}${W.wochen<=0?`<button class="ord weiter" onclick="${winterMusterung(n)?'winterBefoerderung()':'winterEnde()'}">${esc(n.weiter||'Ins Feld zurück')}</button>`:''}
     </div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
@@ -436,6 +436,35 @@ function winterTun(id){
   zeigeWinter(KAPITEL[LAUF.node]);
 }
 function winterEnde(){ LAUF.winter = {ort:null, wochen:3, log:[]}; stationErledigt(); naechster(); }
+
+/* ── Die Musterung im Winterquartier ──
+   **Sonst verhungern acht Ränge an sechs Musterungen.** Vier Kapitel haben
+   sechs `befoerderung`-Stationen; eine vierzehnstufige Leiter braucht mehr
+   Gelegenheiten als das, sonst steht ein Mann mit erfüllten Schwellen und
+   freier Stelle ein halbes Kapitel lang daneben.
+
+   Winterquartier und Saison sind der natürliche zweite Ort: Dort wird ohnehin
+   abgerechnet, es ist ruhig, und der Capitaine hat einen Tisch. Geprüft wird
+   erst beim Verlassen — wer eine Woche verbringt, soll sie erst verbringen. */
+function winterMusterung(n){
+  if(!S || !leiterZiel()) return false;
+  S.winterMusterung = S.winterMusterung || {};
+  if(S.winterMusterung[n.id]) return false;
+  S.winterMusterung[n.id] = true;
+  return true;
+}
+
+/* Die Beförderung im Winterquartier benutzt denselben Bildschirm wie die
+   Musterung — nur die Station drumherum ist eine andere. */
+function winterBefoerderung(){
+  const n = KAPITEL[LAUF.node];
+  LAUF.winter = {ort:null, wochen:3, log:[]};
+  zeigeBefoerderung(Object.assign({}, n, {
+    ort:'Musterung im Quartier',
+    text:['Bevor es zurück ins Feld geht, wird durchgezählt. Der Capitaine sitzt an einem Tisch, den jemand aus einem Bauernhaus getragen hat, und geht die Namen durch.',
+          'Es ist keine Zeremonie. Es ist Buchhaltung, und die Buchhaltung entscheidet, wer morgen was trägt.']
+  }));
+}
 
 /* ══════════════════ WERTUNG UND ENDE ══════════════════ */
 

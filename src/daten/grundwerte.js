@@ -38,7 +38,15 @@ function mitHilfe(k, beschriftung){
 const RANG = [
   {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
   {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62},
-  {n:6,name:'Sergent-major',wert:88}
+  {n:6,name:'Sergent-major',wert:88},
+  /* Die Offiziers- und Stabshälfte. Bis zum 28.07.2026 endete `RANG` bei 6,
+     und `rangWert()` lieferte für alles darüber **0** — eine stille
+     Fehlwertung, die erst auffiel, als die Leiter über Rang 6 hinauswuchs.
+     Werte aus RANGLEITER §7, identisch mit KONZEPT §5. */
+  {n:7,name:'Sous-Lieutenant',wert:120},{n:8,name:'Lieutenant',wert:158},
+  {n:9,name:'Capitaine',wert:205},{n:10,name:'Chef de bataillon',wert:262},
+  {n:11,name:'Colonel',wert:330},{n:12,name:'Général de brigade',wert:408},
+  {n:13,name:'Général de division',wert:490},{n:14,name:'Maréchal d\'Empire',wert:580}
 ];
 /* ══════════════════ DER SOLD ══════════════════
 
@@ -126,17 +134,36 @@ function rangabzeichen(mann){
 const LEUTE = [
   {id:'martel', kurz:'Martel', stufen:['Sergent','Sergent-major'],
    was:'Dein Sergent. Er hat dich im April über die Pässe gebracht und weiß, wer bei Lodi wo gestanden hat.'},
-  {id:'collot', kurz:'Collot', stufen:['Fourier','Sergent-fourrier'],
+  {id:'collot', kurz:'Collot', stufen:['Fourier','Sergent-fourrier','Adjudant'],
    was:'Der Schreiber der Kompanie. Er führt die Listen, und in den Listen steht, wer Schuhe bekommt.'},
-  {id:'berthaud', kurz:'Berthaud', stufen:['Lieutenant','Capitaine'],
+  {id:'berthaud', kurz:'Berthaud', stufen:['Lieutenant','Capitaine','Chef de bataillon'],
    was:'Der Zugführer. Er entscheidet, welche Namen der Capitaine überhaupt zu hören bekommt.'},
-  {id:'vernet', kurz:'Vernet', stufen:['Capitaine','Chef de bataillon'],
-   was:'Der Kompaniechef. Er kennt deinen Namen erst, wenn ihn jemand nennt.'}
+  {id:'vernet', kurz:'Vernet', stufen:['Capitaine','Chef de bataillon','Colonel'],
+   was:'Der Kompaniechef. Er kennt deinen Namen erst, wenn ihn jemand nennt.'},
+
+  /* ── Der fünfte Mann, und warum er dich kennt ──
+     Er kommt nicht aus dem Nichts: **Du hast ihn 1796 aus einem Sumpf
+     gezogen.** Wer die Arcole-Sondermission besteht, zieht dort nicht nur den
+     General heraus, sondern auch dessen Adjutanten — einen jungen Chef de
+     bataillon, der nichts sagt und sich den Namen aufschreibt.
+
+     Danach kommt er zwölf Spieljahre lang nicht mehr vor. Ab Rang 9 taucht er
+     wieder auf, und wer damals bestanden hat, beginnt bei ihm mit **Gunst +2**
+     und einem Satz, der zeigt, dass er sich erinnert. Wer die Kette nie
+     gespielt oder verfehlt hat, trifft ihn kalt bei null.
+
+     **Es ist die einzige Stelle im Spiel, an der eine Entscheidung aus dem
+     ersten Kapitel zwanzig Spieljahre später eine mechanische Folge hat — und
+     sie wird nirgends angekündigt.** Sie wird nur eingelöst. */
+  {id:'grandmaison', kurz:'Grandmaison', ab:9,
+   stufen:['Chef de bataillon','Colonel','Général de brigade','Général de division'],
+   was:'Der General. Ob er deinen Namen kennt, hat sich vor zwölf Jahren entschieden, an einem Damm im Sumpf.'}
 ];
 
 /* Nachrücker, wenn einer fällt. Der Nachfolger trägt denselben Posten und
    kennt dich nicht — deshalb Gunst 0 und ein eigener Satz zur Einführung. */
 const NACHFOLGER = {
+  grandmaison:[{kurz:'D\'Aubigny', satz:'Der neue Divisionsgeneral heißt d\'Aubigny, ist neunundvierzig und hat den größten Teil des Krieges in Ministerien verbracht. Er kennt deinen Namen aus einer Liste und sonst nirgendwoher.'}],
   martel:  [{kurz:'Ricard',  satz:'Ricard trägt seit heute Morgen die Streifen. Er kommt aus einem anderen Bataillon, kennt hier niemanden und lässt sich nichts sagen.'},
             {kurz:'Dupleix', satz:'Dupleix war gestern noch Caporal in der zweiten Kompanie. Er tut, als wäre er es nie gewesen.'}],
   collot:  [{kurz:'Sarrazin', satz:'Der neue Fourier heißt Sarrazin und rechnet schneller als sein Vorgänger. Das ist keine gute Nachricht für die, die auf seiner Liste stehen.'}],

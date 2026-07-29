@@ -769,8 +769,18 @@ GEFECHTS_EREIGNISSE.push(
          schlecht:'Die Kroaten haben euch im Wasser, und Wasser ist keine Deckung. Neben dir hört ein Adjutant auf zu ziehen.'}],
       tod:'Der Sumpf von Arcole gibt nicht alles zurück. Den General ziehen sie heraus; nach dir wird morgen gesucht, wenn Zeit ist.',
       todesart:'Im Sumpf von Arcole geblieben',
+      /* **Die Marke, die zwölf Spieljahre später gelesen wird.** „Jemand hat
+         deinen Namen gefragt und aufgeschrieben" — das ist Grandmaison, damals
+         ein junger Chef de bataillon und Adjutant des Generals. Ab Rang 9
+         beginnt man bei ihm mit Gunst +2 statt bei null.
+
+         **Es wird nirgends angekündigt.** Weder hier noch im Handbuch. Es wird
+         nur eingelöst — die einzige Stelle im Spiel, an der eine Entscheidung
+         aus dem ersten Kapitel eine mechanische Folge in der Offiziershälfte
+         hat. Wer die Kette verfehlt oder gar nicht erst antritt, trifft ihn in
+         zwölf Jahren kalt. */
       erfolg:{text:'Auf dem Damm sieht er dich an, einen Atemzug lang, Schlamm bis zum Kinn. Jemand hat deinen Namen gefragt und aufgeschrieben. Mehr passiert nicht, und mehr braucht es nicht.',
-              ruf:6, nennung:true, atem:-25,
+              ruf:6, nennung:true, atem:-25, setzt:{arcoleMarke:true},
               tat:'Den General aus dem Sumpf von Arcole gezogen'},
       misserfolg:{text:'Herausgezogen haben ihn andere — und dich auch. Aber du warst im Wasser, als es darauf ankam, und die auf dem Damm haben es gesehen.',
               ruf:2, atem:-30, belastung:10,
@@ -1385,45 +1395,67 @@ function kampfAktion(id){
 
 const MAJOR = 'Sergent-major Lascaux';
 
+/* Grandmaison tritt erst ab Rang 9 in Erscheinung — und was er mitbringt, hat
+   sich 1796 entschieden. Wird einmal je Lauf gerufen, sobald der Rang reicht. */
+function grandmaisonAuftritt(){
+  if(!S || !S.leute || !S.leute.grandmaison) return null;
+  if(S.rang < 9 || S.grandmaisonBekannt) return null;
+  S.grandmaisonBekannt = true;
+  if(S.arcoleMarke){
+    S.leute.grandmaison.gunst = Math.max(S.leute.grandmaison.gunst, 2);
+    return `<div class="wirkung"><span>${esc(personName('grandmaison'))}</span>
+      Er sieht dich zweimal an, bevor er etwas sagt. „Arcole", sagt er dann. Keine Frage, keine Erklärung.
+      Zwölf Jahre, und er hat den Namen nicht vergessen — weil er damals im selben Wasser lag.
+      <b>Fürsprache ${esc(personKurz('grandmaison'))} +2</b></div>`;
+  }
+  return `<div class="wirkung"><span>${esc(personName('grandmaison'))}</span>
+    Er nimmt deine Meldung entgegen, nickt und wendet sich ab. Er hat heute vierzig Meldungen entgegengenommen.
+    <b>Er kennt deinen Namen aus einer Liste und sonst nirgendwoher.</b></div>`;
+}
+
 function ketteImGefecht(n){
   if(!S.leute) return '';
   let meldung = '';
 
-  /* Der angesagte Tod: qualifiziert, also fällt der Mann, dessen Stelle
-     freiwerden muss. Erst danach kann Martel aufrücken. */
-  if(S.majorFaellt && !S.majorTot){
-    S.majorTot = true; S.majorFaellt = false;
-    const m = S.leute.martel;
-    if(m && m.lebt && m.stufe === 0){
-      m.stufe = 1;                                    // Martel wird Sergent-major
-      meldung += `<div class="wirkung"><span>${esc(MAJOR)} ist gefallen</span>
-        Vier Mann tragen ihn zurück, den Säbel quer über dem Tornister, und legen ihn zu den anderen.
-        Am Abend steht ${esc(personKurz('martel'))} vor dem Capitaine und bekommt seine Tresse.
-        <b>Damit ist die Stelle des Sergenten frei.</b></div>`;
-    } else {
-      meldung += `<div class="wirkung"><span>${esc(MAJOR)} ist gefallen</span>
-        Die Stelle wird besetzt, bevor die Kompanie ihn begraben hat. Nicht mit dir.</div>`;
+  /* ── Die angesagte Vakanz, für jeden Rang der Leiter ──
+     Qualifiziert heißt: Der Patron hat dich vorgeschlagen, und jetzt muss die
+     Stelle frei werden. **Wer fällt, steht am LEITER-Eintrag**, nicht an der
+     Schlacht — deshalb funktioniert dasselbe in Italien wie in Russland.
+
+     Zwei Formen, und der Unterschied ist der ganze Ton: Entweder fällt ein
+     Namenloser am Rand (`faelltWer`), und ein Mann der Kette rückt in seine
+     Stelle nach (`rueckt`) — dann ist *dessen* alte Stelle die deine. Oder es
+     fällt einer aus der Kette selbst; dann steht der Nachruf da, und die
+     Rechnung stellt der Spieler auf. Das Spiel spricht sie nie aus. */
+  for(const z of LEITER){
+    if(!z.vakanz) continue;
+    const v = vakanzStand(z.vakanz);
+    if(!v.faellt || v.tot) continue;
+    v.faellt = false; v.tot = true;
+
+    if(z.faelltKette){                         // einer aus der Kette fällt
+      const m = S.leute[z.faelltKette];
+      if(m && m.lebt){
+        meldung += personFaellt(z.faelltKette);
+        meldung += `<div class="wirkung"><span>${esc(z.stelle||'Die Stelle')}</span>
+          ${z.frei || 'Sie ist seit heute Morgen nicht besetzt.'} <b>Damit ist sie frei.</b></div>`;
+      }
+      continue;
     }
-  }
 
-  /* ── Martels angesagter Fall ──
-     **Die härteste Vakanz des Spiels.** Bis hierher ist jeder, dessen Stelle
-     frei wurde, ein Name am Rand gewesen — Guérin, Lascaux. Martel ist der
-     Mann, der einen 1796 über die Pässe gebracht hat und seither in jeder
-     Seitenleiste steht.
-
-     Das Spiel spricht es nicht aus. Es sagt nur, wer gefallen ist und dass die
-     Stelle frei ist; die Rechnung stellt der Spieler selbst auf. Wer den
-     Vorschlag des Capitaine bekommen hat und zwei Stationen später das hier
-     liest, weiß, wofür er ihn bekommen hat. */
-  if(S.martelFaellt && !S.martelTot){
-    S.martelTot = true; S.martelFaellt = false;
-    const m = S.leute.martel;
-    if(m && m.lebt){
-      meldung += personFaellt('martel');
-      meldung += `<div class="wirkung"><span>Die Stelle des Sergent-majors</span>
-        Die Bücher der Kompanie liegen seit dem Morgen bei niemandem.
-        <b>Damit ist die Stelle frei.</b></div>`;
+    const auf = z.rueckt ? S.leute[z.rueckt] : null;
+    const kannAuf = auf && auf.lebt &&
+      auf.stufe < ((LEUTE.find(l=>l.id===z.rueckt)||{stufen:[]}).stufen.length - 1);
+    if(kannAuf){
+      auf.stufe++;
+      meldung += `<div class="wirkung"><span>${esc(z.faelltWer)} ist gefallen</span>
+        ${z.fallText || 'Vier Mann tragen ihn zurück und legen ihn zu den anderen.'}
+        Am Abend rückt ${esc(personKurz(z.rueckt))} auf seine Stelle.
+        <b>Damit ist die Stelle darunter frei.</b></div>`;
+    } else {
+      meldung += `<div class="wirkung"><span>${esc(z.faelltWer)} ist gefallen</span>
+        ${z.fallText || 'Vier Mann tragen ihn zurück und legen ihn zu den anderen.'}
+        <b>Die Stelle ist frei.</b></div>`;
     }
   }
 
@@ -1616,7 +1648,7 @@ function kampfEnde(sieg, letzterText){
   }
 
   vakanzPruefen();                    // stimmen die Zahlen, ist der Tod angesagt
-  const ketteMeldung = ketteImGefecht(n);
+  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n);
   const kk = K; setzeKampf(null);
   stationErledigt();
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -1727,25 +1759,33 @@ const CAPORAL_RUF = 30, CAPORAL_GUNST = 4;
 
 const LEITER = [
   {rang:3, name:'Caporal', ruf:CAPORAL_RUF, patron:'martel', gunst:CAPORAL_GUNST, von:[1,2],
+   vorschlag:'für die nächste Korporalschaft, die einen Führer braucht',
    fehltRuf:'Zwei Stellen werden besetzt. Keine mit dir. Der Capitaine kennt deinen Namen nicht, und das ist die ganze Erklärung.',
    fehltGunst:'Dein Name fällt. Er fällt sogar zweimal. Aber niemand am Tisch legt die Hand für dich auf den Tisch, und ohne das geht es nicht.',
    text:p=>esc(p)+` nennt deinen Namen, und der Capitaine schreibt ihn auf. Es gibt keine Zeremonie. Du bekommst zwei Wollstreifen an den Ärmel, acht Mann und die Verantwortung dafür, dass diese acht Mann morgens da sind, Schuhe haben und ihre Musketen zünden.
     <br><br>Der Mann, dessen Stelle du bekommst, heißt Guérin. Er ist bei Castiglione geblieben.`},
 
-  {rang:4, name:'Caporal-fourrier', ruf:35, patron:'collot', gunst:3, bildung:35, von:[3],
+  {rang:4, name:'Caporal-fourrier', ruf:35, patron:'collot', gunst:3, bildung:35, von:[2,3],
+   vorschlag:'für die Listen, sobald er selbst aufrückt',
    fehltRuf:'Der Fourier sucht einen, der schreiben kann und den die Kompanie kennt. Das zweite fehlt.',
    fehltGunst:'Der Fourier sucht sich seinen Nachfolger selbst aus. Er hat sich umgesehen und ist an dir vorbeigegangen.',
    fehltBildung:'Man gibt dir eine Feder in die Hand und ein Blatt. Nach einer Minute nimmt man dir beides wieder ab. Für die Listen braucht es mehr als drei Wörter.',
    text:p=>esc(p)+` rückt selbst auf, und seine Stelle ist frei. Du bekommst einen dritten Streifen quer über die beiden, einen Bleistift, der dir gehört, und die Bestandslisten der Kompanie.
     <br><br>Von jetzt an steht dein Name auf jedem Blatt, auf dem eine Zahl nicht stimmt. Das ist der Unterschied zwischen Tragen und Verantworten, und es hat noch nie jemand gemocht.`},
 
-  {rang:5, name:'Sergent', ruf:62, patron:'berthaud', gunst:5, von:[3], vakanz:'major',
+  {rang:5, name:'Sergent', ruf:62, patron:'berthaud', gunst:5, von:[3,4], vakanz:'major',
+   vorschlag:'für die nächste Sektion, die einen Sergenten braucht',
+   faelltWer:MAJOR, rueckt:'martel',
+   fallText:'Vier Mann tragen ihn zurück, den Säbel quer über dem Tornister, und legen ihn zu den anderen.',
    fehltRuf:'Für eine Sektion braucht es einen Namen, den die Kompanie gehört hat, bevor er verlesen wird.',
    fehltGunst:'Der Lieutenant geht die Liste durch. Bei dir hält er nicht an.',
    text:p=>esc(personKurz('martel'))+` trägt seit vier Wochen die Tresse des Sergent-majors. Seine alte Stelle war seitdem nicht besetzt, weil niemand da war, der sie hätte ausfüllen können.
     <br><br>`+esc(p)+` nennt deinen Namen. Du bekommst eine Tresse aus Metallfaden, zwanzig Mann und die Frage, wie viele davon am Abend noch stehen. Es ist die erste Beförderung, bei der niemand für dich gestorben ist — dein Vorgänger ist bloß aufgerückt. <span class="fein">Weil über ihm einer gefallen war.</span>`},
 
-  {rang:5, name:'Sergent', ruf:52, patron:'berthaud', gunst:4, listenweg:true, von:[4], vakanz:'major',
+  {rang:5, name:'Sergent', ruf:52, patron:'berthaud', gunst:4, listenweg:true, von:[3,4], vakanz:'major',
+   vorschlag:'für die nächste Sektion, die einen Sergenten braucht',
+   faelltWer:MAJOR, rueckt:'martel',
+   fallText:'Vier Mann tragen ihn zurück, den Säbel quer über dem Tornister, und legen ihn zu den anderen.',
    fehltRuf:'Für eine Sektion braucht es einen Namen, den die Kompanie gehört hat, bevor er verlesen wird.',
    fehltGunst:'Der Lieutenant geht die Liste durch. Bei dir hält er nicht an.',
    text:p=>`Der Lieutenant kennt deine Handschrift, seit du die Listen führst. Das ist eine Art von Fürsprache, die nichts kostet und lange wirkt.
@@ -1763,7 +1803,10 @@ const LEITER = [
 
      Die Vakanz ist die härteste im Spiel — es ist die einzige, bei der ein
      Mann fällt, den man seit 1796 kennt. Das Spiel spricht es nie aus. */
-  {rang:6, name:'Sergent-major', ruf:75, patron:'vernet', gunst:3, von:[5], vakanz:'majormajor',
+  {rang:6, name:'Sergent-major', ruf:75, patron:'vernet', gunst:3, von:[4,5], vakanz:'majormajor',
+   vorschlag:'für die Kompanie, sobald sie einen Sergent-major braucht',
+   faelltKette:'martel', stelle:'Die Stelle des Sergent-majors',
+   frei:'Die Bücher der Kompanie liegen seit dem Morgen bei niemandem.',
    fehltRuf:'Für sechzig Mann reicht es nicht, dass die Kompanie deinen Namen kennt. Das Bataillon muss ihn kennen.',
    fehltGunst:'Der Capitaine weiß, wer du bist. Das ist etwas anderes, als dich zu wollen.',
    text:p=>`Die Stelle des Sergent-majors ist seit dem Gefecht nicht besetzt. Es hat drei Wochen gedauert, bis jemand die Bücher übernommen hat, und in diesen drei Wochen hat die Kompanie gemerkt, wie viel an einem Mann hängt, den niemand tagsüber sieht.
@@ -1785,8 +1828,7 @@ function leiterZiel(){
   if(!passend.length) return null;
   for(let i = passend.length-1; i >= 0; i--){
     const e = passend[i];
-    const vakanz = e.vakanz === 'major' ? !!S.majorTot
-                 : e.vakanz === 'majormajor' ? !!S.martelTot : true;
+    const vakanz = !e.vakanz || vakanzStand(e.vakanz).tot;
     if(S.ruf >= e.ruf && gunst(e.patron) >= e.gunst && (!e.bildung || S.attr.bildung >= e.bildung) && vakanz)
       return e;
   }
@@ -1809,23 +1851,50 @@ function leiterZiel(){
    **Und genau darin liegt Invariante 5, ohne dass sie ausgesprochen wird:**
    Berthaud sagt, dein Name stehe auf der Liste, und es sei keine Stelle frei.
    Was daraus folgt, denkt der Spieler selbst. */
+/* ══════════════════ DIE VAKANZMASCHINE ══════════════════
+
+   **Die Vakanz ist eine allgemeine Regel, keine Liste von Schlachten.** Sobald
+   Ruf und Fürsprache für einen Zielrang stimmen, schlägt der Patron dich vor —
+   und die Stelle wird im nächsten Gefecht frei, das etwas taugt. Wer fällt,
+   hängt am **Zielrang**, nicht am Ort.
+
+   Genau deshalb funktioniert die Leiter in vier Kapiteln wie später in elf: Sie
+   wird nur seltener durchlaufen. Bis zum 28.07.2026 war sie auf zwei Flagpaare
+   verdrahtet (`majorTot`/`majorFaellt`, `martelTot`/`martelFaellt`); mit acht
+   weiteren Rängen wäre daraus eine unlesbare Kette von Sonderfällen geworden.
+
+   Der Zustand liegt jetzt in `S.vakanz[key] = {faellt, tot}`, gespeist aus den
+   `vakanz`-Feldern der LEITER-Einträge. */
+function vakanzStand(key){
+  S.vakanz = S.vakanz || {};
+  return (S.vakanz[key] = S.vakanz[key] || {faellt:false, tot:false});
+}
+
 function vakanzPruefen(){
   if(!S || !S.leute) return;
-  /* Zwei Vakanzen, dieselbe Maschine. `major` ist die Stelle des Sergenten
-     (der Sergent-major fällt, Martel rückt auf); `majormajor` ist Martels
-     eigene Stelle — die letzte des Prototyps, und die einzige, bei der ein
-     Mann fällt, den man seit 1796 kennt. */
-  for(const [flagT, flagF, rang] of [['majorTot','majorFaellt',5],
-                                      ['martelTot','martelFaellt',6]]){
-    if(S[flagT] || S[flagF]) continue;
-    const z = LEITER.filter(e => e.rang === rang && e.von.indexOf(S.rang) >= 0)[0];
-    if(!z) continue;
-    if(S.ruf >= z.ruf && gunst(z.patron) >= z.gunst){
-      S[flagF] = true;
-      if(LAUF) LAUF.vorschlag = z.patron;
-      return;                              // höchstens ein Vorschlag je Gefecht
-    }
+  for(const z of LEITER){
+    if(!z.vakanz) continue;
+    if(z.von.indexOf(S.rang) < 0) continue;
+    const v = vakanzStand(z.vakanz);
+    if(v.tot || v.faellt) continue;
+    if(!schwellenStimmen(z)) continue;
+    v.faellt = true;
+    if(LAUF) LAUF.vorschlag = {patron:z.patron, rang:z.rang};
+    return;                                // höchstens ein Vorschlag je Gefecht
   }
+}
+
+/* Ob ein Eintrag der Leiter erfüllt ist — **ohne** die Vakanz. Sie wird
+   getrennt geprüft, weil sie erst durch den Vorschlag entsteht. */
+function schwellenStimmen(z, stand){
+  const g = stand || {ruf:S.ruf, gunst:gunst(z.patron), bildung:S.attr.bildung};
+  if(g.ruf < z.ruf) return false;
+  if(z.patron && g.gunst < z.gunst) return false;
+  if(z.bildung && g.bildung < z.bildung) return false;
+  if(z.reiten && wert('reiten') < z.reiten) return false;
+  if(z.orden && !hatOrden(z.orden)) return false;
+  if(z.bulletins && (S.bulletins|0) < z.bulletins) return false;
+  return true;
 }
 
 function zeigeBefoerderung(n){
@@ -1855,8 +1924,7 @@ function zeigeBefoerderung(n){
   const reichtRuf     = g.ruf >= ziel.ruf;
   const reichtGunst   = g.gunst >= ziel.gunst;
   const reichtBildung = !ziel.bildung || g.bildung >= ziel.bildung;
-  const vakanz        = ziel.vakanz === 'major' ? !!S.majorTot
-                      : ziel.vakanz === 'majormajor' ? !!S.martelTot : true;
+  const vakanz        = !ziel.vakanz || vakanzStand(ziel.vakanz).tot;
   const bekommt = reichtRuf && reichtGunst && reichtBildung && vakanz;
 
   let text, klasse = 'schlecht';

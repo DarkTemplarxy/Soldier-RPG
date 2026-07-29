@@ -5,6 +5,34 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Rangleiter Phase A: Fundament für vierzehn Ränge
+
+**Nach `RANGLEITER.md` §10.** Der Grundsatz: Die Leiter ist ein System, die Kapitel sind Inhalt — eine Vakanz hängt an einer allgemeinen Regel, nicht an benannten Schlachten.
+
+| Was | Warum |
+|---|---|
+| `rangWert()` auf **14 Ränge** (bis 580) | Alles über Rang 6 lieferte **0** — stille Fehlwertung |
+| `stufe` für Collot, Berthaud, Vernet | `personName('berthaud')` sagte „Lieutenant", die Texte „Capitaine" |
+| Vakanzmaschine als Liste (`S.vakanz[key]`) | War auf zwei Flagpaare verdrahtet; acht weitere Ränge hätten sie unlesbar gemacht |
+| `zeigeVorschlag()` je LEITER-Eintrag | War fest auf den Sergenten getextet, lief aber schon für Rang 6 |
+| Sprünge: `von` mit zwei Rängen | Wer Rang 5 erfüllt, während er Rang 3 trägt, wird Sergent |
+| Grandmaison, fünfte Person, vier Stufen | Fürsprecher für Rang 10–13 |
+| Musterung auch im Winterquartier | Sechs Musterungen tragen keine vierzehn Ränge |
+
+**Die Arcole-Marke.** Wer die Sondermission besteht, setzt `S.arcoleMarke`; ab Rang 9 beginnt Grandmaison bei **Gunst +2** statt null — die einzige Stelle im Spiel, an der eine Entscheidung aus Kapitel 1 in der Offiziershälfte mechanisch wirkt. **Nirgends angekündigt, nur eingelöst.**
+
+### Ein teurer Fehler, nebenbei gefunden
+
+`lager_rhein` und `lager_bruenn` forderten IDs, die `LAGER_TUN` nicht kennt, und `lagerHandlungen()` filtert Unbekanntes **stumm** weg. Das Lager vor Austerlitz hatte **zwei von acht Knöpfen**, keiner davon `ruhe`.
+
+**Gemessen, je 40 Läufe:** überlebt **33 → 50 %**, höchster Rang 28 → 28 %. Die siebzehn Punkte sind fast ganz die Reparatur — der Bot kann sich jetzt vor dem Höhepunktgefecht ausruhen.
+
+> **Regel daraus:** Ein stummer Filter ist ein Fehlerverstecker. Wer eine Auswahl aus Daten füttert, meldet Unbekanntes, statt es wegzulassen.
+
+Die Bänder für vier Kapitel sind damit an einem fehlerhaften Stand geeicht worden und werden nach Phase E neu gesetzt.
+
+---
+
 ## 2026-07-28 — Der Sold: Francs sind keine Zierde mehr
 
 **Vom Entwickler gemeldet:** Es gab Francs aus siebenundzwanzig Szenen, und der Marketender nahm sie — aber keine verlässliche Quelle. Geld war eine Zahl, die man nicht planen konnte.

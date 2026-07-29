@@ -995,16 +995,24 @@ function zeigeNachfolger(nf, n){
    Der Text nennt beides: dass dein Name oben liegt, und dass keine Stelle frei
    ist. **Was daraus folgt, wird nicht ausgesprochen** — das ist Invariante 5,
    und sie wird nie erklärt, nur gezeigt. */
-function zeigeVorschlag(patronId, n){
+function zeigeVorschlag(v, n){
+  const patronId = v.patron;
   const wer = personName(patronId);
+  /* Wofür er dich vorschlägt, steht am LEITER-Eintrag. Vorher war dieser
+     Bildschirm fest auf den Sergenten getextet und lief trotzdem schon für
+     Rang 6 — mit acht weiteren Rängen wäre daraus ein Text geworden, der bei
+     jedem zweiten Aufstieg das Falsche sagt. */
+  const ziel = LEITER.filter(e => e.rang === v.rang)[0] || {};
+  const wofuer = ziel.vorschlag || 'für die nächste Stelle, die frei wird';
+  const stellen = ziel.stellenText || 'Die Kompanie habe ihre Leute, und alle seien gesund.';
   laufSichern();
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card papier"><div class="ch"><span>${esc(wer)}</span><span>${esc(n.datum||'')}</span></div>
       <div class="cb">
         <div class="prose">
           <p>${esc(wer)} hält dich nach dem Appell auf. Er hat ein Blatt in der Hand, das er nicht vorzeigt.</p>
-          <p>„Ich habe deinen Namen weitergegeben", sagt er. „Für die nächste Sektion, die einen Sergenten braucht." Er sagt es so, wie man eine Bestandsmeldung vorliest.</p>
-          <p>Dann fügt er hinzu, was er hinzufügen muss: Es sei zurzeit keine Stelle frei. Die Kompanie habe ihre Sergenten, und alle drei seien gesund.</p>
+          <p>„Ich habe deinen Namen weitergegeben", sagt er. „${esc(wofuer.charAt(0).toUpperCase()+wofuer.slice(1))}." Er sagt es so, wie man eine Bestandsmeldung vorliest.</p>
+          <p>Dann fügt er hinzu, was er hinzufügen muss: Es sei zurzeit keine Stelle frei. ${esc(stellen)}</p>
           <p>Er faltet das Blatt und steckt es weg. „Halt dich bereit", sagt er noch, und geht.</p>
         </div>
         <div class="wirkung"><span>Auf der Liste</span>
@@ -1081,7 +1089,10 @@ function naechster(){
 
   /* Der Lieutenant hat deinen Namen nach oben gegeben. Das steht vor der
      nächsten Station, weil es zu dem gehört, was gerade passiert ist. */
-  if(LAUF.vorschlag){ zeigeVorschlag(LAUF.vorschlag, n); return; }
+  if(LAUF.vorschlag){
+    const v = typeof LAUF.vorschlag === 'string' ? {patron:LAUF.vorschlag} : LAUF.vorschlag;
+    zeigeVorschlag(v, n); return;
+  }
 
   /* Zwischenfall auf dem Marsch: hängt einer an (auch nach Fortsetzen), steht
      er wieder da; sonst wird beim ersten Betreten einer Station mit Marschweg
