@@ -1341,6 +1341,14 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 | Veteran 160 | **70** | 15 % | 95 % | 261 |
 | Veteran 400 | **75** | **45 %** | 100 % | 369 |
 
+> ### ⚠ Diese Tabelle ist **von 122 Stationen** und damit nicht mehr der Vergleichsmaßstab
+>
+> Sie ist gemessen, bevor die Kapitel 10 und 11 dazukamen; heute hat das Spiel **157 Stationen**. Die Weite ist eine absolute Stationszahl, kein Anteil — sie wandert also mit, sobald sich der Ausbaustand ändert, und der Kopf „von 122" ist der einzige Hinweis darauf.
+>
+> **Regel daraus: Wer die Weite als Sollwert benutzt, schreibt die Stationszahl dazu.** Ein Median von 61 aus 157 und einer von 75 aus 122 sind zwei verschiedene Größen, und der Unterschied sieht wie eine Verschlechterung aus, wenn man den Nenner wegwirft. Genau das ist beim ersten Vergleich nach den Gestaltungsbündeln passiert.
+>
+> **Vergleiche werden deshalb nicht mehr gegen eine Zahl von gestern gezogen, sondern gegen denselben Stand, neu gemessen** — Worktree auf den Vergleichs-Commit, **derselbe** Prüfstand hinein, dann messen. Anders ist bei einem Projekt, das gleichzeitig Inhalt und Regeln ändert, nichts zu trennen.
+
 > ### ✓ Eingelöst: Veteranenpunkte kaufen jetzt auch Strecke
 >
 > **Beide Leitzahlen tragen, und beide monoton:**
