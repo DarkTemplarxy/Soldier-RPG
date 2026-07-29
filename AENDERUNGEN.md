@@ -5,6 +5,14 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Rückweg zur Übersicht
+
+Aus dem laufenden Feldzug führte kein Weg zurück zu Chronik und Verlauf — man kam nur über einen Neustart des Reiters dorthin. Jetzt steht rechts oben in der Kopfzeile ein Knopf **„Übersicht"**.
+
+**Er ist gefahrlos, und genau deshalb darf es ihn geben.** Der Feldzug wird bei jedem Schritt gesichert; wer die Übersicht aufruft, findet dort „Feldzug fortsetzen" und kommt an dieselbe Station zurück. Ein Rücksetzpunkt entsteht nicht, weil der Spielstand immer auf *jetzt* zeigt und nie weiter zurück (Invariante 1). Deshalb wird auch nicht nachgefragt — es gibt nichts zu verlieren.
+
+---
+
 ## 2026-07-28 — Die Probenzeile war zu blass
 
 `.pruefung.gut` trug noch das blasse Nachtgrün `#b6c48d` und verschwand auf dem Pergament fast. Das ist die **zweite der drei Zeilen nach jeder Wahl** (was passiert · ob es gelungen ist · was sich geändert hat) — sie muss man lesen können.

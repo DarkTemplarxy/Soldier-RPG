@@ -106,7 +106,9 @@ function kopfzeile(){
     ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
     <span class="kopfgeld">${S.geld} F</span>
     <span class="kopftrenner"></span>
-    ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span></span>`;
+    ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span>
+    <span class="kopftrenner"></span>
+    <button class="zurueck" onclick="zumTitel()" title="Zur Übersicht — der Feldzug bleibt gesichert">Übersicht</button></span>`;
   const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
 }
@@ -255,6 +257,20 @@ function seitenleiste(){
 }
 
 /* ── Titelbildschirm ── */
+/* Der Weg zurück zur Übersicht — Chronik, Verlauf, Spielstand.
+
+   **Er ist gefahrlos, und das ist der Grund, warum es ihn geben darf.** Der
+   Feldzug wird bei jedem Schritt gesichert (siehe „Spielstand" in CLAUDE.md);
+   wer die Übersicht aufruft, findet dort „Feldzug fortsetzen" und kommt genau
+   dorthin zurück, wo er war. Ein Rücksetzpunkt entsteht dadurch nicht — der
+   Spielstand zeigt immer auf *jetzt*, nie weiter zurück.
+
+   Deshalb wird auch nicht nachgefragt: Es gibt nichts zu verlieren. */
+function zumTitel(){
+  if(LAUF) laufSichern();
+  zeigeTitel();
+}
+
 function zeigeTitel(){
   LAUF=null; binde(); kopfzeile();
   const offen = laufVorhanden();
