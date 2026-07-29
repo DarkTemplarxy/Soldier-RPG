@@ -37,7 +37,8 @@ function mitHilfe(k, beschriftung){
 
 const RANG = [
   {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
-  {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62}
+  {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62},
+  {n:6,name:'Sergent-major',wert:88}
 ];
 function rangNameVon(mann){
   if(mann.rang===2) return mann.zweig==='voltigeur' ? 'Voltigeur' : 'Grenadier';
@@ -65,7 +66,13 @@ function rangabzeichen(mann){
   if(r>=3){                                    // Streifen am Unterarm
     const tresse = r>=5;
     const f = tresse ? '#8a6410' : '#a86a20';  // Tresse in Metallfarbe, Wolle in Aurore
-    const streifen = tresse
+    /* Der Sergent-major trägt **zwei** Tressen aus Metallfaden — historisch
+       genau der Unterschied zum Sergenten, und auf 36 Pixel der einzige, den
+       man sehen kann. */
+    const streifen = r>=6
+      ? `<polygon points="6,19 17,5 22,5 11,19" fill="${f}"/>
+         <polygon points="17,19 28,5 33,5 22,19" fill="${f}"/>`
+      : tresse
       ? `<polygon points="11,19 22,5 29,5 18,19" fill="${f}"/>`
       : `<polygon points="7,19 16,5 21,5 12,19" fill="${f}"/>
          <polygon points="16,19 25,5 30,5 21,19" fill="${f}"/>`;
@@ -214,6 +221,15 @@ const ORDEN = [
    was:'Ein Säbel mit vergoldetem Gefäß und einer Gravur, die den Tag nennt und den Ort. Der Waffenmeister sagt, er sei zum Tragen und nicht zum Fechten, und hat unrecht: Er ist zum Angesehenwerden.',
    bedingung:'Eine Sondermission voll bestanden und fünf Nennungen'},
 
+  /* Der erste **fremde** Orden. Gestiftet im Juni 1805 vom Königreich Italien,
+     dessen König Napoleon selbst war; an Franzosen nach Austerlitz vergeben.
+     KONZEPT §5 hält den Platz frei: „je fremdem Orden +10, höchstens zwei
+     gewertet" — die zweite Stelle bleibt für Spanien oder Preußen offen. */
+  {id:'eisenkrone', name:'Eiserne Krone', voll:'Ordine della Corona Ferrea',
+   ab:'1805', fremd:true, vp:10, ruf:6, pension:0.5,
+   was:'Ein Kreuz an dunkelgelbem Band mit grünem Rand, verliehen im Namen eines Königreichs, dessen König derselbe Mann ist, der dich schon einmal ausgezeichnet hat. In der Kompanie heißt es nur „die Lombardische".',
+   bedingung:'Eine Meldung an den Oberbefehl und Austerlitz überlebt'},
+
   {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
    ab:'1804', vp:12, ruf:10, pension:1.0,
    was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
@@ -235,6 +251,13 @@ function ordensbild(id){
     <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#5c5446" stroke-width="1.8" stroke-linecap="round"/>
     <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#8a6410"/>
     <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#8a6410" stroke-width="1.3"/></svg>`;
+  if(id==='eisenkrone') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Eiserne Krone">
+    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
+    <rect x="12" y="2" width="12" height="3.4" fill="#c8901f"/>
+    <rect x="12" y="2" width="2" height="3.4" fill="#3e5a2c"/>
+    <rect x="22" y="2" width="2" height="3.4" fill="#3e5a2c"/>
+    <path d="M18 7 L23 13 L18 19 L13 13 Z" fill="#e8e2d4" stroke="#8a8272" stroke-width=".6"/>
+    <circle cx="18" cy="13" r="2.4" fill="none" stroke="#6e5320" stroke-width="1.5"/></svg>`;
   if(id==='legion'){
     const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
       fill="#f0ece2" stroke="#8a8272" stroke-width=".5" transform="rotate(${a+45} 18 12)"/>`).join('');

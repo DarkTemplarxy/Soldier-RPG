@@ -16,7 +16,7 @@ Sprache des Spiels und des Codes: **Deutsch**. Variablennamen, Kommentare, Texte
 
 ## Stand
 
-Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)** und **Kapitel 3 (Garnison 1801–04)**, Ränge 1–5, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
+Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)**, **Kapitel 3 (Garnison 1801–04)** und **Kapitel 4 (Austerlitz 1805)**, Ränge 1–6, als reine HTML/JS-Anwendung ohne Abhängigkeiten.
 
 | Fertig | Noch nicht |
 |---|---|
@@ -46,6 +46,9 @@ Gebaut sind **Kapitel 1 (Italien 1796/97)**, **Kapitel 2 (Ägypten 1798/99)** un
 | **Orden**: Ehrenwaffe und Ehrenlegion, VP + Ruf + Pension | weitere Grade, fremde Orden |
 | **Marketender**: Ausrüstung für Francs | Pferd, Fernrohr, Patente |
 | Vier Garnisonssaisons mit eigenen Handlungen | |
+| **Kapitel 4 (Austerlitz 1805)**, 14 Stationen, Feindgüte 6 | Kapitel 5–11 |
+| **Rang 6 (Sergent-major)** mit dem Zug als drittem Maßstab | Ränge 7–14 |
+| **Eiserne Krone** — der erste fremde Orden | zweiter fremder Orden |
 | Ehe als Beiwerk · Duell mit Todespfad · Übungsgefecht | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
@@ -86,6 +89,7 @@ src/daten/grundwerte.js         Attribute, Fertigkeiten, Ränge, Herkünfte, Kau
 src/daten/kapitel01_italien.js  Kapitel 1 als reine Daten
 src/daten/kapitel02_aegypten.js Kapitel 2 als reine Daten, hängt sich selbst an
 src/daten/kapitel03_garnison.js Kapitel 3 — das Friedenskapitel, Saisons statt Lager
+src/daten/kapitel04_austerlitz.js Kapitel 4 — die Ernte von Boulogne, Feindgüte 6
 src/spielstand.js               Fassungen, Wandler, Ablage, Aussetz-Spielstand
 src/mechanik.js                 Laufzustand, Proben, Wachstum, Erholung, Verschleiß, Wunden
 src/oberflaeche.js              Titel, Kaufladen, Erschaffung, Ablauf, Szenen
@@ -459,6 +463,49 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 | `zwischenfall:true` | `naechster()` | Zwischenfälle ohne Marschweg — in einer Garnison marschiert niemand |
 | `ab:` in Szenen | `szeneVerwehrt()` | dieselbe Sperr-Regel wie beim Marsch: kein Knopf, sondern ein Satz |
 
+### Kapitel 4 — Austerlitz 1805 (`kapitel04_austerlitz.js`)
+
+**Die Ernte von Boulogne.** Zwei Jahre lang hat diese Armee nichts getan als exerzieren; jetzt marschiert sie 700 km in fünf Wochen, nimmt bei Ulm eine ganze Armee gefangen, ohne zu schießen, und liefert am 2. Dezember die perfekteste Schlacht, die es je gab.
+
+**Für den Spieler heißt das: Alles, was in Nîmes und Boulogne gelernt wurde, wird hier geprüft.** Bildung, Sektionsgüte, die Beziehungen der Kette und der Drill aus vier Saisons sind genau die Werte, die zahlen — das Friedenskapitel bekommt rückwirkend seinen Ernstfall. Und die Leitzahl `überlebt` bekommt ihre Schärfe zurück, weil die Kampagne wieder auf einem gefährlichen Kapitel endet (siehe den Abstand-Befund unten).
+
+| Gefecht | Runden | Feindmoral | Gefahr | Güte | Gelände |
+|---|---|---|---|---|---|
+| Elchingen | 6 | 52 | 10 | +6 | Brücke |
+| Schöngrabern | 7 | 64 | 12 | +6 | Damm |
+| **Austerlitz (Höhepunkt)** | 9 | 80 | 13 → 16 | +6 | offen |
+
+**Feindgüte 6** — die erste Eskalationsstufe über Ägypten, und der erste Einsatz der entworfenen Kurve für ein Kapitel, das es vorher nicht gab. **Direkt am Hebel geprüft** (`feindGuete()` je Gefecht ausgelesen), nicht am Ergebnis — die teuerste Lektion des Projekts war das stumme Güte-0-Leck.
+
+**Die Sondermission ist der Pratzeberg:** drei Stufen im Nebel — der Hang (Konstitution 40), die Höhe (Bajonett 45), der Gegenstoß der russischen Garde (Kaltblütigkeit 45). Die letzte Stufe ist nicht der Aufstieg, sondern das **Halten**; der Berg wird zweimal genommen.
+
+**Die Ehe bekommt ihren Nachklang** (KONZEPT §10, „Briefe von zu Hause"): In Wien geht zum ersten Mal seit Boulogne Post nach Frankreich — aber nur für den, der in Nîmes geheiratet hat. Wer nicht, bekommt keinen Knopf, sondern einen Satz.
+
+### Rang 6 — Sergent-major und der Zug
+
+**Die Decke des Prototyps hatte seit Boulogne ein Gesicht.** Dort stand: *„Nichts frei. Auf dem Posten sitzt Martel, zweiundvierzig und gesund."* Jetzt kommt der Feldzug, in dem eine Vakanz entstehen kann.
+
+| Schritt | Was passiert |
+|---|---|
+| **Vorschlag** | Ruf 75 · Fürsprache **Vernet** ≥ 3 → der Capitaine schlägt dich vor und sagt, es sei keine Stelle frei |
+| **Vakanz** | Im nächsten Gefecht **fällt Martel** (`S.martelFaellt` → `martelTot`) |
+| **Beförderung** | Bei der Musterung nach Austerlitz bekommst du seine zweite Tresse |
+
+> **Das ist die härteste Vakanz des Spiels.** Bis hierher war jeder, dessen Stelle frei wurde, ein Name am Rand — Guérin, Lascaux. Martel ist der Mann, der einen 1796 über die Pässe gebracht hat und seither in jeder Seitenleiste steht. **Das Spiel spricht es nie aus.** Wer den Vorschlag bekommen hat und zwei Stationen später Martels Nachruf liest, stellt die Rechnung selbst auf.
+
+> **Vernet gibt dem vierten Mann der Kette endlich eine Funktion.** Seine Quellen sind knapp und bleiben es — der Capitaine kennt deinen Namen erst, wenn ihn jemand oft genug genannt hat. Die einzige, die schon einem Sergenten offensteht, ist „dem Capitaine die Berichte schreiben" in der Garnison; **deshalb muss der Bot sie verfolgen.**
+
+**Was der Rang gibt (Invariante 4): den Zug**, 60 Mann in drei Sektionen — bewusst **zwei Knöpfe, nicht vier**:
+
+| Knopf | Probe | Wirkung |
+|---|---|---|
+| **Feuer nach Sektionen** | Drill 45 | **rollendes Feuer**: drei Runden lang Schaden auch dann, wenn du nichts tust |
+| **Die Sergenten einteilen** | Autorität 50 | drei Runden halbe Verluste im ganzen Zug |
+
+> **Rollendes Feuer ist der Kern und die einzige Stelle im Spiel, an der Schaden ohne eigene Handlung entsteht.** Ein Zug in drei Sektionen hört nicht auf zu schießen, nur weil sein Sergent-major gerade woanders hinsieht — das ist der Unterschied zwischen einem Mann, der die Hälfte der Zeit lädt, und einer Einheit. **Der Beitrag zählt nicht für die Sichtbarkeit:** Gezählt wird, was aus dem Stand geschieht, und das hier tut der Zug, nicht du.
+
+**Die Abrechnung skaliert mit** — dieselbe Zahl über sechzig statt zwanzig, Schwellen bei 45 % und 15 % Verlust, und Rechenschaft schuldet man jetzt Vernet statt Berthaud. Das Appell-Bild zeichnet drei Reihen zu zwanzig, mit Lücke: Es sind drei Sektionen, nicht sechzig Einzelne.
+
 ### Orden und Auszeichnungen (`ORDEN` in `grundwerte.js`)
 
 **Nennungen im Tagesbefehl waren bis dahin eine Zahl ohne Folge.** Orden sind die Folge, und sie zahlen in drei Währungen zugleich, damit sie sich nicht wie Deko anfühlen:
@@ -468,6 +515,9 @@ Bis dahin war ein kundiger Spieler nicht zu töten: 40 von 40 überlebten beide 
 | **Ehrenwaffe** (Fusil d'honneur) | 3 Nennungen, 1799–1803 | 10 | +6 | 0,5 F je Station |
 | **Ehrensäbel** (Sabre d'honneur) | **eine Sondermission voll bestanden** und 5 Nennungen, 1799–1803 | 14 | +8 | 1 F je Station |
 | **Ehrenlegion** | eine Ehrenwaffe oder ein Ehrensäbel — *oder* 5 Nennungen und Ruf 45, ab 1804 | 12 | +10 | 1 F je Station |
+| **Eiserne Krone** *(fremd)* | eine Meldung an den Oberbefehl, ab 1805 | 10 | +6 | 0,5 F je Station |
+
+**Die Eiserne Krone ist der erste fremde Orden.** Gestiftet Juni 1805 vom Königreich Italien, dessen König Napoleon selbst war, und nach Austerlitz an Franzosen vergeben. KONZEPT §5 hält den Platz frei — „je fremdem Orden +10, höchstens zwei gewertet"; die zweite Stelle bleibt für Spanien oder Preußen offen.
 
 **Der Ehrensäbel verlangt die Kette voll, nicht die Mehrheit** — jede Stufe gelungen. Er ist die einzige Auszeichnung, die an einer einzelnen, benannten Tat hängt statt an einer Summe: Wer durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln, bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist.
 
@@ -593,16 +643,28 @@ kostenVon(a,b)                          // Summe für den Weg von a nach b
 | | Was sie misst |
 |---|---|
 | **überlebt** | Wie viele alle gebauten Kapitel hinter sich gebracht haben — *wie hart das Spiel ist.* |
-| **Sergent erreicht** | Wie viele den höchsten gebauten Rang bekommen haben — *ob die Leiter trägt.* |
+| **höchster Rang** | Wie viele den höchsten gebauten Rang bekommen haben — *ob die Leiter trägt.* |
+
+> **„Höchster Rang" ist eine Definition, kein fester Rang.** Mit Kapitel 4 ist es der **Sergent-major (6)**, vorher der Sergent (5). Die Zahl wandert mit dem Ausbaustand mit — genau deshalb veraltet sie nicht, anders als der frühere Caporal-Sollwert. *(Umbenannt am 28.07.2026 mit dem Bau von Rang 6.)*
+
+**Bänder für vier Kapitel** *(neu gesetzt am 28.07.2026)*:
 
 | Sollwert | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 |
 |---|---|---|---|
-| **überlebt** | **40–55 %** | **15–30 %** | **70–85 %** |
-| **Sergent erreicht** | **15–30 %** | **15–30 %** | **60–75 %** |
+| **überlebt** | **30–45 %** | **8–20 %** | **60–75 %** |
+| **höchster Rang** | **12–25 %** | **3–15 %** | **45–60 %** |
 
-Gemessen mit Kapitel 3, je 40 Läufe: überlebt **55 / 25 / 70 %**, Sergent **23 / 25 / 78 %**. Fünf der sechs im Band, der Sergent beim Veteranen mit 78 % knapp darüber.
+Gemessen mit Kapitel 4, je 40 Läufe: überlebt **35 / 8 / 65 %**, höchster Rang **18 / 3 / 55 %**. Alle sechs im Band.
 
-> ### ⚠ Der Überlebens-Abstand ist auf 15 Punkte gefallen — die Leitzahl trägt gerade nicht
+> ### ✓ Eingelöst mit Kapitel 4: Der Abstand ist zurück auf 30 Punkte
+>
+> **Die Vorhersage hat gehalten.** Der Befund unten sagte: „Die Leitzahl `überlebt` misst nur so scharf, wie das letzte gebaute Kapitel gefährlich ist — mit Kapitel 4 endet die Kampagne wieder auf einem gefährlichen Kapitel, und der Abstand öffnet sich von allein."
+>
+> Gemessen: **35 → 65 %, also 30 Punkte** (vorher 15). Die selbstgesetzte Grenze von 25 ist wieder überschritten, **ohne dass an einer einzigen Balance-Zahl gedreht wurde.** Der Abstand beim höchsten Rang liegt bei 37 Punkten (18 → 55).
+>
+> **Was daraus als Regel bleibt:** Wer den Ausbaustand auf einem ruhigen Kapitel enden lässt, muss damit rechnen, dass `überlebt` stumpf wird — dann ist `höchster Rang` die aussagekräftigere der beiden. Der Fall ist eingetreten und wieder vergangen; die Regel gilt weiter.
+
+> ### Der Befund von Kapitel 3, der dazu führte *(historisch)*
 >
 > **Die eigene Regel schlägt an:** „Schrumpft einer der beiden Abstände unter 25 Punkte, trägt die Leiter nicht mehr." Beim Sergenten stehen 55 Punkte (23 → 78), beim Überleben nur noch **15** (55 → 70). Vorher waren es 30.
 >
@@ -624,8 +686,9 @@ Gemessen mit Kapitel 3, je 40 Läufe: überlebt **55 / 25 / 70 %**, Sergent **23
 
 | Größe | Erstlauf vorsichtig | Erstlauf mutig | Veteran 160 VP | Veteran 260 VP |
 |---|---|---|---|---|
-| **überlebt** *(Leitzahl)* | **57 %** | **30 %** | **70 %** | 63 % |
-| **Sergent erreicht** *(Leitzahl)* | **25 %** | **28 %** | **70 %** | 78 % |
+| **überlebt** *(Leitzahl)* | **35 %** | **8 %** | **65 %** | 65 % |
+| **höchster Rang: Sergent-major** *(Leitzahl)* | **18 %** | **3 %** | **55 %** | 63 % |
+| Sergent erreicht | 23 % | 10 % | 73 % | 88 % |
 | Gestorben | 18 von 40 | **30 von 40** | 12 von 40 | 15 von 40 |
 | Italien überstanden *(Lehrstück)* | 98 % | 88 % | 100 % | 100 % |
 | Elitekompanie erreicht | 53 % | 57 % | 98 % | 98 % |
@@ -706,8 +769,10 @@ Verlauf derselben Sitzung, damit niemand die Zahlen verwechselt:
 | **volle Punkteskala (gültig) · Erstlauf v / m** | **40 / 40** | **100 / 95 %** | **38 / 55 %** | **64 / 61** |
 | **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **93 / 100 %** | **192 / 186** |
 | **Kapitel 3 gebaut · Erstlauf v / m** | 40 / 40 | 98 / 88 % | 35 / 53 % | 61 / 60 |
-| **Leiter der Sichtbarkeit (gültig) · Erstlauf v / m** | **40 / 40** | **100 / 98 %** | **45 / 53 %** | **93 / 87** |
-| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **98 / 95 %** | **203 / 211** |
+| Leiter der Sichtbarkeit · Erstlauf v / m | 40 / 40 | 100 / 98 % | 45 / 53 % | 93 / 87 |
+| dieselbe Fassung · Veteran 160 / 260 | 40 / 40 | 100 / 100 % | 98 / 95 % | 203 / 211 |
+| **Kapitel 4 + Rang 6 (gültig) · Erstlauf v / m** | **40 / 40** | **98 / 100 %** | **45 / 45 %** | **82 / 72** |
+| **dieselbe Fassung · Veteran 160 / 260** | **40 / 40** | **100 / 100 %** | **95 / 100 %** | **249 / 267** |
 
 *(Die Spalte „überstanden" zeigt Italien; die Ägypten-Quote steht in der Zielwert-Tabelle oben.)*
 

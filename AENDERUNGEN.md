@@ -5,6 +5,52 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Kapitel 4: Austerlitz 1805, Rang 6 und der Zug
+
+**Vierzehn Stationen, drei Gefechte, Feindgüte 6.** Die Ernte von Boulogne: Zwei Jahre Exerzieren, dann 700 km in fünf Wochen, Ulm ohne Schlacht, und am 2. Dezember der Pratzeberg.
+
+Für den Spieler heißt das: **Alles, was in Nîmes und Boulogne gelernt wurde, wird hier geprüft.** Das Friedenskapitel bekommt rückwirkend seinen Ernstfall.
+
+### Rang 6 — und die härteste Vakanz des Spiels
+
+Boulogne hatte es angesagt: *„Nichts frei. Auf dem Posten sitzt Martel, zweiundvierzig und gesund."* Jetzt kommt der Feldzug, in dem eine Stelle frei werden kann — über dieselbe Maschine wie beim Sergenten: **Vorschlag → Vakanz → Beförderung.** Der Capitaine schlägt vor (Ruf 75 · Vernet ≥ 3), und im nächsten Gefecht **fällt Martel**.
+
+**Das Spiel spricht es nie aus.** Bis hierher war jeder, dessen Stelle frei wurde, ein Name am Rand — Guérin, Lascaux. Martel ist der Mann, der einen 1796 über die Pässe gebracht hat. Wer den Vorschlag bekommen hat und zwei Stationen später den Nachruf liest, stellt die Rechnung selbst auf.
+
+**Der Zug** (60 Mann, drei Sektionen) ist bewusst **zwei Knöpfe, nicht vier**: *Feuer nach Sektionen* (rollendes Feuer — drei Runden Schaden auch dann, wenn man nichts tut, die einzige Stelle im Spiel, an der das passiert) und *Die Sergenten einteilen*. Die Abrechnung skaliert auf sechzig, das Appell-Bild zeichnet drei Reihen. **Der Beitrag des rollenden Feuers zählt nicht für die Sichtbarkeit** — gezählt wird, was aus dem Stand geschieht, und das tut der Zug, nicht du.
+
+**Die Eiserne Krone** ist der erste fremde Orden (eine Meldung an den Oberbefehl, ab 1805; +10 VP, Ruf +6, 0,5 F). Die zweite fremde Stelle bleibt offen.
+
+### Güte 6 — am Hebel geprüft, nicht am Ergebnis
+
+Erster Schritt nach dem Anhängen war, `feindGuete()` je Gefecht auszulesen: Kapitel 4 steht auf 6, alles davor unverändert, das Manöver korrekt auf 0. **Die teuerste Lektion des Projekts war das stumme Güte-0-Leck**, und sie wird nicht zweimal gemacht.
+
+### Gemessen, je 40 Läufe — und eine eingelöste Vorhersage
+
+| | Erstlauf v | mutig | Vet 160 | Vet 260 |
+|---|---|---|---|---|
+| **überlebt** | 35 % | 8 % | 65 % | 65 % |
+| **höchster Rang (Sergent-major)** | 18 % | 3 % | 55 % | 63 % |
+| Sergent erreicht | 23 % | 10 % | 73 % | 88 % |
+
+**Der Überlebens-Abstand ist von 15 auf 30 Punkte gesprungen** (35 → 65) und damit wieder über der selbstgesetzten Grenze von 25 — **ohne dass an einer einzigen Balance-Zahl gedreht wurde.** Genau das hatte der Kapitel-3-Befund vorhergesagt: „Die Leitzahl misst nur so scharf, wie das letzte gebaute Kapitel gefährlich ist."
+
+**Die Leitzahl heißt jetzt `höchster Rang` statt `Sergent erreicht`.** Das war schon immer ihre Definition („der höchste gebaute Rang"); mit Rang 6 ist der Name Sergent falsch geworden. So wandert sie mit dem Ausbaustand mit und veraltet nicht — anders als der frühere Caporal-Sollwert. Bänder für vier Kapitel neu gesetzt; alle sechs Werte im Band.
+
+---
+
+## 2026-07-28 — Probenanzeige: Prozent statt zweier Zahlen
+
+**Vom Spieler gemeldet:** Auf dem Knopf stand „Konstitution 40 gegen 40", die Probe misslang, und es war nicht nachvollziehbar, warum. Zwei Ursachen, beide behoben — **keine Balance-Änderung, nur Anzeige**:
+
+1. **Die zwei Zahlen sagen nicht, was sie bedeuten.** „40 gegen 40" ist nach der Eichung des Spiels ein exakter Münzwurf (`Ziel = Wert − Schwierigkeit + 50`), liest sich aber wie „reicht genau". Jetzt steht die **Aussicht in Prozent** dabei: „Konstitution 40 gegen 40 · 50 %". Dieselbe Überlegung, aus der Wert und Schwierigkeit überhaupt auf dem Knopf stehen — sie sollen beim Entscheiden helfen, und eine Zahl, die man erst umrechnen muss, tut das nicht.
+
+2. **Die Seitenleiste zeigte den rohen Wert, geprüft wurde mit dem gesenkten.** Wer eine schwere Wunde und zerrissene Schuhe hatte, las „Konstitution 70" und ging mit 52 in die Probe. Jetzt zeigt die Leiste den Wert, mit dem geprüft wird, den rohen klein daneben (`35 von 70`) — dieselbe Schreibweise wie beim Leben — und den Grund im Überfahrtext: *Wunden −14 · Belastung −3 · zerrissene Schuhe −18*.
+
+**Was einen Wert senkt** (`wert()` in `mechanik.js`): Wunden (voll auf Körperliches, ein Drittel auf Geistiges) · Belastung (−1 je 12) · verrostete Muskete unter Zustand 35 (−15) · zerrissene Schuhe unter 25 (−18, nur Konstitution).
+
+---
+
 ## 2026-07-28 — Der Lieutenant schlägt dich vor
 
 **Aus einer Schwellenprüfung wird ein Ereignis.** `vakanzPruefen()` setzte bisher stumm ein Flag, sobald Ruf und Fürsprache für den Sergenten reichten. Der Spieler erfuhr nie, dass sein Name nach oben gegangen war — die Beförderung kam zwei Stationen später aus dem Nichts.

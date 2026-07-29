@@ -34,7 +34,17 @@ function aktionen(){
      Knöpfe wechseln vollständig. Das ist der Maßstabswechsel aus KONZEPT §3:
      Nicht größere Zahlen, ein anderes Spiel. Der Caporal befiehlt eine Salve;
      der Sergent verwaltet eine Sektion, die dabei aufgebraucht wird. */
-  if(S.rang>=5){
+  /* Ab Rang 6 führt man nicht mehr zwanzig Mann, sondern die, die zwanzig Mann
+     führen. Der Zug ist bewusst **schlank** gehalten — zwei Knöpfe, nicht vier:
+     Der Sergent-major greift seltener selbst ein, er lässt eingreifen. Genau
+     das ist der Unterschied, und mehr Knöpfe würden ihn verwischen. */
+  if(S.rang>=6){
+    a.push({id:'zugfeuer',label:'Feuer nach Sektionen',
+      cost:'Drill · rollendes Feuer · der Zug schießt auch, während du nachlädst'});
+    a.push({id:'einteilen',label:'Die Sergenten einteilen',
+      cost:'Autorität · drei Runden halbe Verluste im ganzen Zug'});
+  }
+  if(S.rang===5){
     a.push({id:'sektionsalve',label:'Salve auf Kommando',
       cost:'Autorität · zwanzig Musketen auf einen Schlag · deine bleibt geladen'});
     a.push({id:'glieder',label:'Die Glieder wechseln lassen',
@@ -135,6 +145,7 @@ function starteKampf(n){
               zaehlung:{schaden:0, serie:0, bestSerie:0, ereignisse:0, vorn:false, gedeckt:0, offen:0},
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
               sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
+              rollend:0,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
   laufSichern();
   zeigeKampf(n.intro);
@@ -294,16 +305,23 @@ const STICH = {
    Die Abrechnung des Sergenten als Bild statt als Zahl: zwanzig Silhouetten,
    die Gefallenen liegend. Dieselbe Information wie „von zwanzig stehen
    vierzehn", aber man sieht die sechs. */
-function appellBild(uebrig){
+/* Der Appell als Bild: Wer steht, steht; wer fehlt, liegt. Ab Rang 6 sind es
+   sechzig statt zwanzig — dann in drei Reihen zu zwanzig, damit die Figuren
+   nicht auf Strichbreite schrumpfen, und mit einer Lücke zwischen den Reihen:
+   Es sind **drei Sektionen**, nicht sechzig Einzelne. */
+function appellBild(uebrig, kopf){
+  kopf = kopf || 20;
+  const proReihe = 20, reihen = Math.ceil(kopf/proReihe);
   const R = [];
-  for(let i=0;i<20;i++){
-    const x = 16 + i*26;
+  for(let i=0;i<kopf;i++){
+    const reihe = Math.floor(i/proReihe), spalte = i%proReihe;
+    const x = 16 + spalte*26, y = reihe*34;
     R.push(i < uebrig
-      ? `<g fill="${STICH.ZINNE}"><rect x="${x-3}" y="14" width="6" height="18" rx="2.4"/><circle cx="${x}" cy="10" r="2.6"/>
+      ? `<g fill="${STICH.ZINNE}" transform="translate(0 ${y})"><rect x="${x-3}" y="14" width="6" height="18" rx="2.4"/><circle cx="${x}" cy="10" r="2.6"/>
          <ellipse cx="${x}" cy="7" rx="5.4" ry="2" transform="rotate(-7 ${x} 7)"/></g>`
-      : `<rect x="${x-7}" y="30" width="14" height="2.6" rx="1.3" fill="${STICH.ZINNE_ROT}" opacity=".8"/>`);
+      : `<rect x="${x-7}" y="${30+y}" width="14" height="2.6" rx="1.3" fill="${STICH.ZINNE_ROT}" opacity=".8"/>`);
   }
-  return `<svg viewBox="0 0 540 40" class="appell" role="img" aria-label="Appell: ${uebrig} von 20 stehen">${R.join('')}</svg>`;
+  return `<svg viewBox="0 0 540 ${40+(reihen-1)*34}" class="appell" role="img" aria-label="Appell: ${uebrig} von ${kopf} stehen">${R.join('')}</svg>`;
 }
 
 function sichtfeld(){
@@ -451,7 +469,8 @@ function sichtfeld(){
       <rect x="${(meinX-0.8).toFixed(0)}" y="104" width="1.6" height="15" fill="${MESSING}" opacity=".7"/>
       <path d="M${meinX+1} 104 L${meinX+17} 108 L${meinX+1} 112 Z" fill="${MESSING}" opacity=".8"/>
       <text x="${l.toFixed(0)}" y="114" fill="${MESSING}" font-size="8.5" opacity=".75"
-        font-family="ui-monospace,monospace" letter-spacing=".6">${fuehrt==='sektion'
+        font-family="ui-monospace,monospace" letter-spacing=".6">${S.rang>=6 ? 'DEIN ZUG · '+Math.max(0,Math.round((K.sektion==null?100:K.sektion)*0.6))+' VON 60'
+        : fuehrt==='sektion'
           ? 'DEINE SEKTION · '+Math.max(0,Math.round((K.sektion==null?100:K.sektion)/5))+' VON 20'
           : 'DEINE KORPORALSCHAFT'}</text>`;
   }
@@ -553,6 +572,45 @@ function sichtfeld(){
    es nur, wenn der Feind schon wankt, den Sturm nur, wenn er noch steht. */
 
 const GEFECHTS_EREIGNISSE = [
+
+  /* ── Sondermission Austerlitz: der Pratzeberg ──
+     Der Moment, für den die Schlacht berühmt ist, aus der Höhe eines Mannes im
+     ersten Treffen: Man geht im Nebel bergauf gegen eine Höhe, von der man
+     nicht weiß, wie stark sie besetzt ist, und über einem reißt es auf.
+
+     Drei Stufen, wie Akkon und Lodi — und wie dort kostet jeder Fehlschlag
+     sofort Blut. Die letzte Stufe ist nicht der Aufstieg, sondern das
+     **Halten**: Der Berg wird zweimal genommen, und beim zweiten Mal kommt die
+     russische Garde. */
+  {id:'pratzen', nur:'austerlitz', frage:'Der Nebel reißt',
+   wenn:(n)=> K.runde <= 4 && K.feindMoral > n.feindMoral*0.45,
+   text:['Vor euch steigt der Hang an, und im Nebel sieht man dreißig Schritt weit. Irgendwo darüber steht der Pratzeberg, und niemand weiß, was oben noch steht, seit sie heruntergegangen sind.',
+         'Der Divisionsgeneral lässt aufschließen und sagt einen Satz, der die Runde macht: Ein scharfer Schlag, und der Krieg ist zu Ende. Dann geht die Kolonne an, ohne einen Schuss abzugeben, das Gewehr geschultert, weil Schießen im Nebel nur zeigt, wo man ist.'],
+   optionen:[
+     {label:'Mit hinauf, ohne zu schießen', hint:'Drei Stufen · der Hang, die Höhe, der Gegenstoß', risk:true,
+      kette:[
+        {name:'Der Hang', wert:'konstitution', schw:40, schaden:13,
+         gut:'Gefrorener Acker, zweihundert Meter Steigung, und über euch wird es hell, während unten der Nebel steht. Auf halber Höhe geht der erste Zug hinein, und ihr geht durch, ohne zu halten.',
+         schlecht:'Auf halber Höhe kommt Kartätschfeuer aus einer Richtung, in der nichts stehen sollte. Die Reihe vor dir bricht ein, und du gehst über Männer, die du am Morgen noch beim Namen gerufen hast.'},
+        {name:'Die Höhe', wert:'bajonett', schw:45, schaden:15,
+         gut:'Oben stehen zwei österreichische Bataillone, die nicht damit gerechnet haben, dass jemand aus dem Nebel kommt. Es dauert vier Minuten, und dann gehört euch der Berg.',
+         schlecht:'Oben steht mehr, als unten jemand gedacht hat. Es wird eine Sache auf zehn Schritt, und wer dabei stehen bleibt, hat Glück gehabt und sonst nichts.'},
+        {name:'Der Gegenstoß', wert:'kaltbluetigkeit', schw:45, schaden:16,
+         gut:'Gegen elf kommt die russische Garde den Berg herauf, in geschlossener Ordnung und ohne zu schießen, so wie ihr vor zwei Stunden. Ihr steht, wo ihr steht, und lasst sie auf sechzig Schritt herankommen, und dann fällt das Kommando.',
+         schlecht:'Die Garde kommt herauf, und die Linie links von euch weicht. Für zehn Minuten ist der Berg wieder offen, und du bist einer von denen, die in dieser Zeit nicht weglaufen, ohne genau zu wissen, warum.'}],
+      tod:'Auf dem gefrorenen Acker des Pratzebergs, dreißig Schritt unterhalb der Kuppe, in einem Nebel, der sich eine Stunde später auflöst.',
+      todesart:'Gefallen auf dem Pratzeberg',
+      erfolg:{text:'Um Mittag steht ihr oben und schießt nach beiden Seiten den Hang hinunter. Von hier sieht man, was der Plan war: eine Armee, in zwei Hälften geteilt, die einander nicht mehr erreichen. Der Divisionsgeneral reitet die Linie ab und lässt sich die Namen der Kompanien geben, die zuerst oben waren.',
+              moral:-30, ruf:8, nennung:true, atem:-22, belastung:8,
+              tat:'Auf dem Pratzeberg gestanden'},
+      misserfolg:{text:'Der Berg wird genommen, und ihr seid dabei gewesen. Was von deinem Zug oben ankommt, ist die Hälfte, und die steht nicht mehr besonders gerade. Es zählt trotzdem: Oben war, wer oben war.',
+              moral:-14, ruf:3, atem:-22, belastung:12,
+              tat:'Den Pratzeberg mit hinaufgegangen'}},
+     {label:'In der zweiten Welle nachrücken', hint:'Es geht auch ohne dich in der ersten Reihe',
+      erfolg:{text:'Du gehst mit dem zweiten Treffen, zweihundert Schritt hinter der Spitze. Als ihr oben ankommt, ist es entschieden, und man muss nur noch stehen, wo man hingestellt wird. Das ist keine Schande und wird auch nicht als eine behandelt.',
+              moral:-8, atem:-10}}
+   ]},
+
 
   {id:'freiwillige', frage:'Der Adjutant sucht acht Mann',
    wenn:(n)=> K.runde<=4 && K.feindMoral > n.feindMoral*0.5,
@@ -822,8 +880,8 @@ function zeigeEreignis(e){
   const n = KAPITEL[LAUF.node];
   const opt = e.optionen.map((o,i)=>{
     const proben = o.kette
-      ? ' · ' + o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw).join(' · ')
-      : (o.probe ? ' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw : '');
+      ? ' · ' + o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · ')
+      : (o.probe ? ' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%' : '');
     return `<button class="ord ${o.risk?'risk':''}" onclick="ereignisWaehlen(${i})">
     ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${proben}</span></button>`;
   }).join('');
@@ -945,7 +1003,8 @@ function zeigeKampf(text){
         <div class="probe" style="margin-top:12px">RUNDE ${K.runde} VON ${n.runden}
           · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
           · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}
-          ${S.rang>=5 && K.sektion!=null ? '· DEINE SEKTION '+Math.max(0,Math.round(K.sektion/5))+' VON 20' : ''}</div>
+          ${S.rang>=6 && K.sektion!=null ? '· DEIN ZUG '+Math.max(0,Math.round(K.sektion*0.6))+' VON 60'+(K.rollend>0?' · ROLLENDES FEUER':'')
+            : S.rang===5 && K.sektion!=null ? '· DEINE SEKTION '+Math.max(0,Math.round(K.sektion/5))+' VON 20' : ''}</div>
         ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         ${S.rang>=5 && K.sektion!=null ? balken('b-steel',Math.max(0,K.sektion),100) : ''}
         <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
@@ -1070,6 +1129,28 @@ function kampfAktion(id){
            + anerkennung(1,'Einen aus dem Glied geholt, bevor er lief'); }
     else { text = 'Du greifst nach ihm und bekommst nur den Tornistergurt. Er läuft trotzdem, und zwei sehen ihm nach.'; K.sektion = Math.max(0,(K.sektion||100)-10); }
   }
+  /* ── Der Zug ──
+     **Rollendes Feuer** ist der Kern: Drei Sektionen feuern nacheinander, also
+     steht immer eine geladen. Für den Spieler heißt das, was ein Zug wirklich
+     leistet — er schießt *durchgehend*, während ein einzelner Mann die Hälfte
+     der Zeit lädt. Deshalb wirkt er auch in der Runde, in der man nichts tut. */
+  else if(id==='zugfeuer'){
+    const p = probe('drill', 45);
+    const anteil = Math.max(0.35, (K.sektion||100)/100);
+    if(p.erfolg){ schaden = (30 + Math.random()*12) * anteil; K.rollend = 3; nutzen('autoritaet',1);
+      text = 'Erste Sektion Feuer, zweite Sektion Feuer, dritte Sektion Feuer, erste wieder geladen. Es hört nicht auf, und das ist der ganze Unterschied: Ein Mann schießt jede zweite Minute, ein Zug schießt immer.'
+           + anerkennung(1,'Rollendes Feuer, das nicht abriss'); }
+    else { schaden = 12 * anteil; K.sektion = Math.max(0,(K.sektion||100)-5);
+      text = 'Die zweite Sektion feuert zu früh, die dritte gar nicht, und für vier Sekunden steht der ganze Zug mit leeren Läufen da.'; }
+  }
+  else if(id==='einteilen'){
+    const p = probe('autoritaet', 50);
+    if(p.erfolg){ K.geschlossen = 3; schaden = 6;
+      K.sektion = Math.min(100,(K.sektion||100)+3);
+      text = 'Du gehst hinter der Front durch und sagst drei Sergenten je einen Satz. Mehr ist es nicht — und danach steht der Zug anders da. Man führt sechzig Mann nicht, indem man sechzig Mann etwas zuruft.'; }
+    else { text = 'Zwei von deinen Sergenten hören dich, der dritte nicht, und sein rechtes Ende steht zehn Schritt zu weit vorn. Das sieht jeder, der drüben zielt.';
+      K.sektion = Math.max(0,(K.sektion||100)-6); }
+  }
   else if(id==='halten_sektion'){
     const p = probe('drill', 40);
     if(p.erfolg){ gefahrMod = -6; K.geschlossen = 3;
@@ -1100,7 +1181,20 @@ function kampfAktion(id){
      späten Kapitel rechnerisch unmöglich (siehe „Warum so niedrig?"). */
   const guete = feindGuete(n);
   const linie = (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
-  K.feindMoral -= schaden + linie;
+
+  /* **Rollendes Feuer wirkt auch in der Runde, in der du nichts tust.** Das ist
+     der Sinn des Ranges und der einzige Ort, an dem Schaden ohne eigene
+     Handlung entsteht: Ein Zug in drei Sektionen hört nicht auf zu schießen,
+     nur weil sein Sergent-major gerade woanders hinsieht. Drei Runden lang,
+     dann muss das Kommando erneuert werden — sonst wäre es kein Befehl, sondern
+     ein Dauerzustand. Der Beitrag zählt **nicht** für die Sichtbarkeit: Gezählt
+     wird, was aus dem Stand geschieht, und das hier tut der Zug, nicht du. */
+  let rollend = 0;
+  if(K.rollend > 0){
+    rollend = (7 + Math.random()*5) * Math.max(0.35, (K.sektion||100)/100);
+    K.rollend--;
+  }
+  K.feindMoral -= schaden + linie + rollend;
 
   /* ══════════════════ DIE TATENZÄHLUNG ══════════════════
 
@@ -1312,6 +1406,27 @@ function ketteImGefecht(n){
     }
   }
 
+  /* ── Martels angesagter Fall ──
+     **Die härteste Vakanz des Spiels.** Bis hierher ist jeder, dessen Stelle
+     frei wurde, ein Name am Rand gewesen — Guérin, Lascaux. Martel ist der
+     Mann, der einen 1796 über die Pässe gebracht hat und seither in jeder
+     Seitenleiste steht.
+
+     Das Spiel spricht es nicht aus. Es sagt nur, wer gefallen ist und dass die
+     Stelle frei ist; die Rechnung stellt der Spieler selbst auf. Wer den
+     Vorschlag des Capitaine bekommen hat und zwei Stationen später das hier
+     liest, weiß, wofür er ihn bekommen hat. */
+  if(S.martelFaellt && !S.martelTot){
+    S.martelTot = true; S.martelFaellt = false;
+    const m = S.leute.martel;
+    if(m && m.lebt){
+      meldung += personFaellt('martel');
+      meldung += `<div class="wirkung"><span>Die Stelle des Sergent-majors</span>
+        Die Bücher der Kompanie liegen seit dem Morgen bei niemandem.
+        <b>Damit ist die Stelle frei.</b></div>`;
+    }
+  }
+
   /* Der ungeplante Tod. Nur in Höhepunktgefechten, höchstens einer, und nie
      der, den man gerade als Fürsprecher braucht — sonst wäre es keine
      Gefahr mehr, sondern eine Sperre. */
@@ -1473,19 +1588,31 @@ function kampfEnde(sieg, letzterText){
      eine verlorene Woche. */
   let abrechnung = '';
   if(S.rang>=5 && K.sektion != null){
-    const uebrig = Math.max(0, Math.round(K.sektion/5));      // von zwanzig
-    const verlust = 20 - uebrig;
-    if(verlust >= 9){ gunstGeben('berthaud',-1); S.belastung=Math.min(100,S.belastung+6);
+    /* Ab Rang 6 rechnet dieselbe Zahl über sechzig Mann statt über zwanzig —
+       und der, dem man Rechenschaft schuldet, ist nicht mehr der Lieutenant,
+       sondern der Capitaine. Die Schwellen skalieren mit. */
+    const zug = S.rang>=6;
+    const kopf = zug ? 60 : 20;
+    const wem = zug ? 'vernet' : 'berthaud';
+    const uebrig = Math.max(0, Math.round(K.sektion/100*kopf));
+    const verlust = kopf - uebrig;
+    if(verlust >= kopf*0.45){ gunstGeben(wem,-1); S.belastung=Math.min(100,S.belastung+6);
       abrechnung = `<div class="wirkung"><span>Appell nach dem Gefecht</span>
-        Von zwanzig stehen ${uebrig}. Der Lieutenant lässt sich die Namen der Fehlenden geben und sagt nichts weiter, und das ist schlimmer als etwas zu sagen.
-        <b>Fürsprache ${esc(personKurz('berthaud'))} −1 · Belastung +6</b></div>`; }
-    else if(verlust <= 3){ gunstGeben('berthaud',1); S.kameradschaft=Math.min(100,S.kameradschaft+5);
+        Von ${kopf==60?'sechzig':'zwanzig'} stehen ${uebrig}. ${zug
+          ? 'Der Capitaine lässt sich die Listen bringen und geht sie durch, ohne aufzusehen. Er sagt nichts, und das ist schlimmer als etwas zu sagen.'
+          : 'Der Lieutenant lässt sich die Namen der Fehlenden geben und sagt nichts weiter, und das ist schlimmer als etwas zu sagen.'}
+        <b>Fürsprache ${esc(personKurz(wem))} −1 · Belastung +6</b></div>`; }
+    else if(verlust <= kopf*0.15){ gunstGeben(wem,1); S.kameradschaft=Math.min(100,S.kameradschaft+5);
       abrechnung = `<div class="wirkung"><span>Appell nach dem Gefecht</span>
-        Von zwanzig stehen ${uebrig}. Das fällt auf, weil es sonst nicht so ist. Deine Leute merken es zuerst.
-        <b>Fürsprache ${esc(personKurz('berthaud'))} +1 · Kameradschaft +5</b></div>`; }
+        Von ${kopf==60?'sechzig':'zwanzig'} stehen ${uebrig}. Das fällt auf, weil es sonst nicht so ist. ${zug
+          ? 'Drei Sergenten haben ihre Leute beisammen, und drei Sergenten wissen, von wem sie das haben.'
+          : 'Deine Leute merken es zuerst.'}
+        <b>Fürsprache ${esc(personKurz(wem))} +1 · Kameradschaft +5</b></div>`; }
     else abrechnung = `<div class="wirkung"><span>Appell nach dem Gefecht</span>
-        Von zwanzig stehen ${uebrig}. Der Lieutenant schreibt die Zahl auf und geht zur nächsten Sektion.</div>`;
-    abrechnung = appellBild(uebrig) + abrechnung;
+        Von ${kopf==60?'sechzig':'zwanzig'} stehen ${uebrig}. ${zug
+          ? 'Der Capitaine schreibt die Zahl auf und geht zur nächsten Kompanie.'
+          : 'Der Lieutenant schreibt die Zahl auf und geht zur nächsten Sektion.'}</div>`;
+    abrechnung = appellBild(uebrig, kopf) + abrechnung;
   }
 
   vakanzPruefen();                    // stimmen die Zahlen, ist der Tod angesagt
@@ -1622,7 +1749,26 @@ const LEITER = [
    fehltRuf:'Für eine Sektion braucht es einen Namen, den die Kompanie gehört hat, bevor er verlesen wird.',
    fehltGunst:'Der Lieutenant geht die Liste durch. Bei dir hält er nicht an.',
    text:p=>`Der Lieutenant kennt deine Handschrift, seit du die Listen führst. Das ist eine Art von Fürsprache, die nichts kostet und lange wirkt.
-    <br><br>`+esc(personKurz('martel'))+` ist Sergent-major, seine Stelle ist frei, und `+esc(p)+` nennt deinen Namen. Zwanzig Mann, eine Tresse, und ein Buch weniger zu führen.`}
+    <br><br>`+esc(personKurz('martel'))+` ist Sergent-major, seine Stelle ist frei, und `+esc(p)+` nennt deinen Namen. Zwanzig Mann, eine Tresse, und ein Buch weniger zu führen.`},
+
+  /* ── Rang 6 · Sergent-major ──
+     **Die Decke des Prototyps, und sie hat ein Gesicht.** Boulogne hat es
+     angesagt: „Nichts frei. Auf dem Posten sitzt Martel, zweiundvierzig und
+     gesund." Damit ist von Anfang an klar, was frei werden müsste.
+
+     Der Fürsprecher ist **Vernet**, der Kompaniechef — und das gibt dem
+     vierten Mann der Kette endlich eine Funktion. Seine Quellen sind knapp und
+     bleiben es: Er kennt deinen Namen erst, wenn ihn jemand oft genug genannt
+     hat (KONZEPT: „Er kennt deinen Namen erst, wenn ihn jemand nennt").
+
+     Die Vakanz ist die härteste im Spiel — es ist die einzige, bei der ein
+     Mann fällt, den man seit 1796 kennt. Das Spiel spricht es nie aus. */
+  {rang:6, name:'Sergent-major', ruf:75, patron:'vernet', gunst:3, von:[5], vakanz:'majormajor',
+   fehltRuf:'Für sechzig Mann reicht es nicht, dass die Kompanie deinen Namen kennt. Das Bataillon muss ihn kennen.',
+   fehltGunst:'Der Capitaine weiß, wer du bist. Das ist etwas anderes, als dich zu wollen.',
+   text:p=>`Die Stelle des Sergent-majors ist seit dem Gefecht nicht besetzt. Es hat drei Wochen gedauert, bis jemand die Bücher übernommen hat, und in diesen drei Wochen hat die Kompanie gemerkt, wie viel an einem Mann hängt, den niemand tagsüber sieht.
+    <br><br>`+esc(p)+` unterschreibt. Du bekommst die zweite Tresse, drei Sektionen, sechzig Mann und die Fourage für sechzig Mann. Von jetzt an bist du der, den niemand tagsüber sieht.
+    <br><br><span class="fein">Seine Sachen sind schon weggeräumt. Es ging schnell, weil es immer schnell geht.</span>`}
 ];
 
 /* Welche Stufe hier zur Debatte steht: **der höchste Eintrag, den man
@@ -1639,7 +1785,8 @@ function leiterZiel(){
   if(!passend.length) return null;
   for(let i = passend.length-1; i >= 0; i--){
     const e = passend[i];
-    const vakanz = e.vakanz !== 'major' || !!S.majorTot;
+    const vakanz = e.vakanz === 'major' ? !!S.majorTot
+                 : e.vakanz === 'majormajor' ? !!S.martelTot : true;
     if(S.ruf >= e.ruf && gunst(e.patron) >= e.gunst && (!e.bildung || S.attr.bildung >= e.bildung) && vakanz)
       return e;
   }
@@ -1663,12 +1810,21 @@ function leiterZiel(){
    Berthaud sagt, dein Name stehe auf der Liste, und es sei keine Stelle frei.
    Was daraus folgt, denkt der Spieler selbst. */
 function vakanzPruefen(){
-  if(!S || !S.leute || S.majorTot || S.majorFaellt) return;
-  const z = LEITER.filter(e => e.rang === 5 && e.von.indexOf(S.rang) >= 0)[0];
-  if(!z) return;
-  if(S.ruf >= z.ruf && gunst(z.patron) >= z.gunst){
-    S.majorFaellt = true;
-    if(LAUF) LAUF.vorschlag = z.patron;
+  if(!S || !S.leute) return;
+  /* Zwei Vakanzen, dieselbe Maschine. `major` ist die Stelle des Sergenten
+     (der Sergent-major fällt, Martel rückt auf); `majormajor` ist Martels
+     eigene Stelle — die letzte des Prototyps, und die einzige, bei der ein
+     Mann fällt, den man seit 1796 kennt. */
+  for(const [flagT, flagF, rang] of [['majorTot','majorFaellt',5],
+                                      ['martelTot','martelFaellt',6]]){
+    if(S[flagT] || S[flagF]) continue;
+    const z = LEITER.filter(e => e.rang === rang && e.von.indexOf(S.rang) >= 0)[0];
+    if(!z) continue;
+    if(S.ruf >= z.ruf && gunst(z.patron) >= z.gunst){
+      S[flagF] = true;
+      if(LAUF) LAUF.vorschlag = z.patron;
+      return;                              // höchstens ein Vorschlag je Gefecht
+    }
   }
 }
 
@@ -1699,7 +1855,8 @@ function zeigeBefoerderung(n){
   const reichtRuf     = g.ruf >= ziel.ruf;
   const reichtGunst   = g.gunst >= ziel.gunst;
   const reichtBildung = !ziel.bildung || g.bildung >= ziel.bildung;
-  const vakanz        = ziel.vakanz !== 'major' || !!S.majorTot;
+  const vakanz        = ziel.vakanz === 'major' ? !!S.majorTot
+                      : ziel.vakanz === 'majormajor' ? !!S.martelTot : true;
   const bekommt = reichtRuf && reichtGunst && reichtBildung && vakanz;
 
   let text, klasse = 'schlecht';

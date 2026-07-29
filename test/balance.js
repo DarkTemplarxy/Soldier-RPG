@@ -3,7 +3,11 @@
    **Zwei Zahlen sind die Leitzahlen, alles andere ist Beiwerk:**
 
      1. `überlebt` — wie viele alle gebauten Kapitel hinter sich gebracht haben.
-     2. `Sergent erreicht` — wie viele den höchsten gebauten Rang bekommen haben.
+     2. `höchster Rang` — wie viele den höchsten gebauten Rang bekommen haben.
+        **Das ist eine Definition, kein fester Rang:** Mit Kapitel 4 ist der
+        höchste Rang der Sergent-major (6), vorher war es der Sergent (5). Die
+        Zahl wandert also mit dem Ausbaustand mit, und genau deshalb veraltet
+        sie nicht — im Gegensatz zum früheren Caporal-Sollwert.
 
    Die erste misst, wie hart das Spiel ist, die zweite, ob die Leiter trägt. Sie
    lösen „Italien überstanden" (Band 45–55 %) und den Caporal-Anteil (Sollwert
@@ -79,7 +83,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
   const p = await b.newPage();
-  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, punkte: [] };
+  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0, punkte: [] };
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
     /* Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0. Sonst ließe
@@ -163,7 +167,12 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if (!z && S.rang >= 5 && !K.sektionGelobt && K.runde <= 2) z = f(/Schließen und halten/);
           if (!z && S.rang >= 5 && K.sektion != null && K.sektion < 70) z = f(/Glieder wechseln/);
           if (!z && (anteil <= 0.35 || S.atem <= 35)) z = f(/Hinknien|Flach hinlegen/);
-          if (!z && S.rang >= 5) z = f(/Salve auf Kommando/);
+          /* Ab Rang 6 der Zug: Rollendes Feuer ist der Kern — es wirkt drei
+             Runden lang auch dann, wenn man nichts tut, also erneuert man es,
+             sobald es ausläuft, statt jede Runde etwas anderes zu drücken. */
+          if (!z && S.rang >= 6 && !(K.rollend > 0)) z = f(/Feuer nach Sektionen/);
+          if (!z && S.rang >= 6 && K.sektion != null && K.sektion < 75) z = f(/Sergenten einteilen/);
+          if (!z && S.rang === 5) z = f(/Salve auf Kommando/);
           if (!z && S.rang >= 3) z = f(/Salve befehlen/);
           if (!z) z = f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/Schnell feuern/);
           if (!z) z = f(/^Laden/);
@@ -203,6 +212,10 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if (anteil < 0.8 || S.wunden.length) z = f(/Schlafen, essen/);
           // Garnison: die Regimentsschule ist das einzige Fenster für Bildung
           if (!z && S.attr.bildung < 50) z = f(/Regimentsschule/);
+          /* Rang 6 hängt an Vernet, und die einzige Quelle, die schon einem
+             Sergenten offensteht, ist „dem Capitaine die Berichte schreiben".
+             Wer das dem Bot nicht beibringt, misst wieder seine Blindheit. */
+          if (!z && S.rang >= 5 && gunst('vernet') < 3) z = f(/Berichte schreiben/);
           if (!z && S.rang >= 5) z = f(/Rekruten des Jahrgangs|Berichte schreiben/);
           if (!z && S.rang >= 4 && gunst('collot') < 4) z = f(/Magazin verwalten/);
           if (!z && gunst('martel') < 4) z = f(/Martel|Wirtshaus/);
@@ -246,6 +259,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     if (hoechster >= 3) res.caporal++;
     if (hoechster >= 4) res.fourrier++;
     if (hoechster >= 5) res.sergent++;
+    if (hoechster >= 6) res.major++;
     const t = await p.$eval('#app', e => e.innerText);
     const m = t.match(/Summe\s+(\d+)/); if (m) res.punkte.push(+m[1]);
   }
@@ -254,9 +268,9 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
   console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`);
   /* Die beiden Leitzahlen zuerst und für sich — sie tragen die Sollwerte.
      Wer eine Änderung beurteilt, liest diese Zeile und sonst nichts. */
-  console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   SERGENT ERREICHT ${q(res.sergent)}\n`);
+  console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   HÖCHSTER RANG ${q(res.major)}\n`);
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
-  console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)}`);
+  console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
   await b.close();
 })();

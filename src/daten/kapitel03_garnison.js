@@ -347,15 +347,15 @@ const KAPITEL3 = [
     'Was in Nîmes gelernt wurde, steht hier in Zahlen. Wer lesen kann, steht anders da als vor drei Jahren. Wer es nicht gelernt hat, auch.'
   ]},
 
-/* 50 */ {typ:'ende',id:'ende_garnison',datum:'2. Dezember 1804 · Paris',ort:'Die Krönung',
+/* 50 */ {typ:'uebergang',id:'ende_garnison',datum:'2. Dezember 1804 · Paris',ort:'Die Krönung',
   marsch:{von:'Lager von Boulogne',nach:'Paris',weg:'240 km · Abordnungen aller Regimenter, für einen Tag in der Hauptstadt'},
   text:[
     'Von jedem Regiment geht eine Abordnung nach Paris. Am 2. Dezember 1804 wird in Notre-Dame ein Korse zum Kaiser der Franzosen gekrönt, und weil es kalt ist und der Weg lang, stehen die Abordnungen drei Stunden auf dem Platz, bevor etwas passiert.',
     'Sechs Tage später bekommen die Regimenter ihre neuen Fahnen: nicht mehr das Tuch von 1796, sondern ein Adler aus vergoldeter Bronze auf einem Stab, mit der Nummer des Regiments im Sockel. Der Kaiser sagt dazu einen Satz, den die vorderen Reihen hören und die hinteren später erzählt bekommen — dass man diese Adler nie aus den Augen lassen dürfe.',
     'Drei Jahre und zwei Monate Frieden. Du bist nicht besser im Schießen geworden. Was du gelernt hast, steht in Büchern, hängt an deiner Brust oder wohnt in Nîmes.',
-    'Im Sommer 1805 wird das Lager von Boulogne abgebrochen, ohne dass ein einziges Boot ausgelaufen wäre. Die Armee, die für England gebaut wurde, marschiert nach Osten — siebenhundert Kilometer in fünf Wochen, gegen Österreich und Russland. Sie heißt jetzt Grande Armée, sie ist die beste, die Frankreich je hatte, und sie hat es im Frieden von Boulogne gelernt.'
-  ],
-  ausblick:'<b>Hier endet der Prototyp.</b> Am 2. Dezember 1805, auf den Tag ein Jahr nach der Krönung, steht die Grande Armée vor einem Dorf in Mähren, das Austerlitz heißt. Kapitel 4 steht im Konzept, aber noch nicht im Code.'}
+    'Im Sommer 1805 wird das Lager von Boulogne abgebrochen, ohne dass ein einziges Boot ausgelaufen wäre. Die Armee, die für England gebaut wurde, marschiert nach Osten — siebenhundert Kilometer in fünf Wochen, gegen Österreich und Russland. Sie heißt jetzt Grande Armée, sie ist die beste, die Frankreich je hatte, und sie hat es im Frieden von Boulogne gelernt.',
+    'Am 2. Dezember 1805, auf den Tag ein Jahr nach der Krönung, wird sie vor einem Dorf in Mähren stehen, das Austerlitz heißt.'
+  ]}
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

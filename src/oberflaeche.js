@@ -210,6 +210,25 @@ function ueberDir(){
   return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}`;
 }
 
+/* Eine Zeile der Seitenleiste — und **sie zeigt den Wert, mit dem geprüft
+   wird**, nicht den rohen.
+
+   Vorher standen dort die rohen Attribute, während jede Probe mit `wert()`
+   rechnet: Wer eine schwere Wunde und zerrissene Schuhe hatte, las
+   „Konstitution 70" und ging mit 52 in die Probe. Diese Lücke war der
+   häufigste Grund, warum sich ein Fehlschlag wie Willkür anfühlte.
+
+   Ist der Wert gerade gedrückt, steht der rohe klein daneben — dieselbe
+   Schreibweise wie beim Leben („82 / 79 von 82") — und der Grund im
+   Überfahrtext. */
+function attrZeile(k, name, roh){
+  const w = wert(k);
+  if(w >= roh) return `<div class="kv"><span>${mitHilfe(k,name)}</span><b>${roh}</b></div>`;
+  const grund = abzugGrund(k).join(' · ');
+  return `<div class="kv"><span>${mitHilfe(k,name)}</span>
+    <b class="warn" title="${esc(grund)}">${w} <i class="fein">von ${roh}</i></b></div>`;
+}
+
 function seitenleiste(){
   const geladen = K ? (K.geladen?'geladen':'ungeladen') : '—';
   // Krankheiten werden ausgewiesen: Sie zehren an jeder Station weiter, Wunden nicht.
@@ -238,10 +257,10 @@ function seitenleiste(){
            <div class="kv"><span>Deckung</span><b>${K.deckung?'ja':'nein'}</b></div>`:''}
       <div class="rule"></div>
       <p class="mini">Attribute</p>
-      ${ATTRIBUTE.map(([k,n])=>`<div class="kv"><span>${mitHilfe(k,n)}</span><b>${S.attr[k]}</b></div>`).join('')}
+      ${ATTRIBUTE.map(([k,n])=>attrZeile(k,n,S.attr[k])).join('')}
       <div class="rule"></div>
       <p class="mini">Fertigkeiten</p>
-      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>`<div class="kv"><span>${mitHilfe(k,n)}</span><b>${S.fert[k]}</b></div>`).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
+      ${FERTIGKEITEN.filter(([k])=>S.fert[k]>10).map(([k,n])=>attrZeile(k,n,S.fert[k])).join('') || '<div class="kv"><span>alle bei 10</span><b>—</b></div>'}
       <div class="rule"></div>
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
@@ -906,7 +925,7 @@ function marschWuerfeln(n){
 function zeigeMarschEreignis(e, n){
   const offen = marschOffen(e);
   const opt = offen.map((o,i)=>`<button class="ord ${o.risk?'risk':''}" onclick="marschWaehlen(${i})">
-    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}</span></button>`).join('');
+    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}</span></button>`).join('');
   const gesperrt = marschVerwehrt(e).map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>Auf dem Marsch · ${esc(e.titel)}</span><span>${esc(n.datum||'')}</span></div>
@@ -1167,8 +1186,8 @@ function zeigeSzene(n){
     const i = n.optionen.indexOf(o);
     const gesperrt = o.probe && wert(o.probe.wert)<5;
     return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
-      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw:''}${
-        o.kette?' · '+o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw).join(' · '):''}</span></button>`;
+      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+NAMEN[o.probe.wert]+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}${
+        o.kette?' · '+o.kette.map(st=>NAMEN[st.wert]+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · '):''}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
     <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>

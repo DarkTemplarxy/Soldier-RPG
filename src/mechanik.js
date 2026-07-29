@@ -85,6 +85,12 @@ function ordenFaellig(){
   if(!hatOrden('ehrensaebel') && jahr >= 1799 && jahr <= 1803 &&
      (S.sondermissionen|0) >= 1 && S.nennungen >= 5)
     return ordenVon('ehrensaebel');
+  /* Der erste fremde Orden. Er verlangt eine Meldung an den Oberbefehl — also
+     die dritte Stufe der Sichtbarkeitsleiter — und dass man den Feldzug von
+     1805 überstanden hat. Höchstens zwei fremde Orden werden gewertet
+     (KONZEPT §5); der zweite Platz bleibt für später offen. */
+  if(!hatOrden('eisenkrone') && jahr >= 1805 && (S.bulletins|0) >= 1)
+    return ordenVon('eisenkrone');
   if(!hatOrden('legion') && jahr >= 1804 &&
      (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel') || (S.nennungen >= 5 && S.ruf >= 45)))
     return ordenVon('legion');
@@ -198,11 +204,40 @@ function wert(k){
   return Math.max(1, Math.round(v));
 }
 
+/* Woher der Abzug kommt, in Worten. Die Seitenleiste zeigt den **rohen**
+   Wert, geprüft wird mit `wert()` — wer eine schwere Wunde und kaputte Schuhe
+   hat, geht mit Konstitution 52 in eine Probe, während in der Leiste 70 steht.
+   Diese Lücke war unerklärt und ist der häufigste Grund, warum sich eine
+   misslungene Probe wie Willkür anfühlt. */
+function abzugGrund(k){
+  const g = [];
+  const koerperlich = ['konstitution','geschick','muskete','bajonett','reiten'].includes(k);
+  const wunden = S.wunden.reduce((sum,w)=> sum + (koerperlich ? (w.abzug||0) : Math.round((w.abzug||0)/3)), 0);
+  if(wunden) g.push(`Wunden −${wunden}`);
+  const bel = Math.floor(S.belastung/12);
+  if(bel) g.push(`Belastung −${bel}`);
+  if(k==='muskete' && S.ausr.muskete.zustand < 35) g.push('verrostete Muskete −15');
+  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) g.push('zerrissene Schuhe −18');
+  return g;
+}
+
 /* `ohneUebung` für Würfe, die keine Handlung sind, sondern ein Zustand — die
    Konstitutions-Probe gegen ein Fieber etwa. Ohne den Schalter trainierte
    ausgerechnet der Kranke bei jedem Ruhe-Abend seine Konstitution und damit
    seinen Lebensvorrat, während der Gesunde beim selben Knopf nichts bekam:
    Krankheit wäre auf Dauer ein Vorteil gewesen. */
+/* Die Aussicht einer Probe in Prozent — **dieselbe Rechnung wie `probe()`**,
+   nur ohne Wurf. Sie steht auf jedem Knopf, weil zwei nackte Zahlen
+   („Konstitution 40 gegen 40") nicht verraten, was sie bedeuten: Genau das ist
+   ein Münzwurf, und wer „40 gegen 40" liest, denkt eher „reicht genau".
+
+   Das ist dieselbe Überlegung, aus der Wert und Schwierigkeit überhaupt auf dem
+   Knopf stehen — sie sollen beim Entscheiden helfen. Eine Zahl, die man erst
+   umrechnen muss, tut das nicht. */
+function aussicht(k, schwierigkeit){
+  return Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50));
+}
+
 function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
   const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
