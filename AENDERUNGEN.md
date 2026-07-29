@@ -5,6 +5,14 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-28 — Die Probenzeile war zu blass
+
+`.pruefung.gut` trug noch das blasse Nachtgrün `#b6c48d` und verschwand auf dem Pergament fast. Das ist die **zweite der drei Zeilen nach jeder Wahl** (was passiert · ob es gelungen ist · was sich geändert hat) — sie muss man lesen können.
+
+Beide Ausgänge tragen jetzt ihre volle Bedeutungsfarbe, halbfett und mit getöntem Grund: Grün ist Zugewinn, Rot ist Kosten.
+
+---
+
 ## 2026-07-28 — Seitenspalten, Wunden, Kopfzeile — und ein Mann, der falsch anfing
 
 **Ein Fehler, vom Spieler gemeldet: Atem stand bei 100, obwohl der Deckel schon bei 82 lag.** `atemKlemmen()` lief erst bei der ersten Handlung; bis dahin zeigte die Seitenleiste einen Wert, der nicht zu den Werten des Mannes passte, und sprang beim ersten Klick nach unten. Das sah aus wie ein Fehler, weil es einer war. **Der Atem-Deckel gilt jetzt ab der ersten Sekunde** — `neuerCharakter()` klemmt selbst.

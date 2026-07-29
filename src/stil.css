@@ -301,12 +301,17 @@
   .fein{color:var(--faint);font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace}
 
   /* Ergebnis einer Probe — nur gelungen oder misslungen, nicht die Rechnung */
-  .pruefung{display:block;width:fit-content;margin-top:12px;padding:2px 8px;
-    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;
+  /* Ob die Probe gelungen ist — die zweite der drei Zeilen nach jeder Wahl
+     (was passiert · ob es gelungen ist · was sich geändert hat). Sie stand in
+     einem blassen Nachtgrün, das auf dem Pergament fast verschwand. Jetzt
+     tragen beide Ausgänge ihre volle Bedeutungsfarbe, halbfett und mit
+     getöntem Grund — Grün ist Zugewinn, Rot ist Kosten. */
+  .pruefung{display:block;width:fit-content;margin-top:12px;padding:3px 10px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;font-weight:700;
     letter-spacing:.1em;text-transform:uppercase;
     border:1px solid var(--line);background:var(--panel2);color:var(--dim)}
-  .pruefung.gut{border-color:var(--green);color:#b6c48d}
-  .pruefung.schlecht{border-color:var(--blood);color:var(--blood)}
+  .pruefung.gut{border-color:var(--green);color:var(--green);background:rgba(62,90,44,.13)}
+  .pruefung.schlecht{border-color:var(--blood);color:var(--blood);background:rgba(143,42,30,.10)}
 
   /* Was sich dadurch geändert hat — die wichtigste Zeile nach jeder Wahl */
   .wirkung{margin-top:13px;padding:9px 14px;background:rgba(120,100,70,.10);
