@@ -5,6 +5,27 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Der Bot fand das Lager nicht mehr: eine still verfälschte Messung
+
+**Keine Balance-Änderung, sondern die Reparatur des Messgeräts** — und der teuerste Fund dieser Art bisher.
+
+`balance.js` und `durchspielen.js` erkannten das Lager an der Zeichenkette `VERBLEIBENDE ABENDE`. **Der Stationsbogen (Bündel 1) hat daraus „Verbleibend 3 von 3" gemacht**, und damit hörte der Bot auf, das Lager überhaupt zu betreten: kein Ruhen, keine Fürsprache bei Martel, keine Instandhaltung. Er fiel auf den allgemeinen Klick durch und ging ungeruht in jedes Gefecht.
+
+| 80 Läufe, Erstlauf vorsichtig | blinder Bot | Vergleichsstand |
+|---|---|---|
+| Weite | **28** | 58 |
+| Caporal erreicht | **0 %** | ~28 % |
+| Italien überstanden | 91 % | 100 % |
+| Punkte-Median | 20 | 44 |
+
+**Caporal 0 % von 80 war das Signal, und es ist dieselbe Sorte Zahl wie die falschen 100 % des Härtemodus:** Eine Quote, die exakt auf null oder exakt auf hundert fällt, ist fast immer ein kaputter Prüfstand und kein Befund. Was es bewies: **Elitekompanie blieb bei 24 %** — eine Szenenwahl, die kein Lager braucht. Die Beförderungsmaschine war also intakt, ihre Voraussetzung nicht.
+
+**Jetzt verzweigen beide auf `LAUF.lager.id` und `LAUF.winter.ort`.** Beim Winterquartier hätte der Text ohnehin nie getragen: Die Frage ist über `frage:` je Kapitel überschreibbar („Zehn Wochen. Beide Seiten benutzen sie."). Dazu erkennt `durchspielen.js` das Gefecht jetzt an `K` statt an `RUNDE `.
+
+**Dritter Fund derselben Familie — ein Fließtext ist kein Zustand —, und der einzige, der eine Messung *still* verfälscht statt laut zu scheitern.** Die zwei davor: `zeigeTod()` gegen das Kapitelende (Härtemodus meldete 100 % für Russland), „gefallen" im Ruhestandstext (Vollständigkeitsmodus zählte Ausgemusterte als Tote). **Regel: an `LAUF`/`S`/`K` verzweigen, nie an gerenderten Wörtern** — Ausnahme nur, wo es keinen Zustand gibt, etwa der Todesbildschirm.
+
+> **Folge, die ausgesprochen gehört: Die Commits für Bündel 1 und 2 sind nie gegen einen funktionierenden Bot gemessen worden.** Die Zahlen dieser Sitzung nach dem Stationsbogen sind alle mit dem blinden Bot entstanden. Die Neumessung läuft.
+
 ## 2026-07-29 — Bündel 5: die Orden bekommen eine Form, und drei Medaillen dazu
 
 **Die Form trägt die Klasse** (Entwurfspaket, Bündel 5). Drei Formen, keine für eine andere verwendet: **Kreuz am Band** (Ehrenlegion, Offiziersgrad, Eiserne Krone) · **geprägte Scheibe an der Trikolore** (die Tapferkeitsmedaillen) · **Gegenstand auf graviertem Täfelchen** (Ehrenwaffe, Ehrensäbel). Man erkennt die Klasse, bevor man den Namen liest. Bis dahin trugen alle sieben Orden dieselbe 36 × 24 große Abzeichenkachel — dieselbe Form wie ein Rangstreifen, und damit gar keine.

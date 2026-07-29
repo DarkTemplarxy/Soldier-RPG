@@ -123,3 +123,4 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 | Eine Szene konnte ohne drückbaren Knopf dastehen | Regel (jede Szene braucht eine probefreie Wahl) plus Sicherung `szeneAushalten()` | — |
 | Der Nahkampf feuerte bis Rang 14 statt bis Rang 9 | `rang >= 7 && rang < 10` in `nahkampfPruefen()` | — |
 | `kampfEnde()` arbeitete auf den Kapiteldaten statt auf einer Kopie | `Object.assign({}, …)` — sonst hätte `ueberfall` die Niederlagen-Wirkung dauerhaft verändert | — |
+| **Der Bot fand das Lager nicht mehr** und ging ungeruht in jedes Gefecht | Er verzweigte auf `txt.includes('VERBLEIBENDE ABENDE')`; der Stationsbogen machte daraus „Verbleibend 3 von 3". Jetzt `LAUF.lager.id` und `LAUF.winter.ort` — **Zustand statt Fließtext**, dritter Fund derselben Art | Weite **28 statt 58**, **Caporal 0 % von 80**, Punkte-Median 20 statt 44 |

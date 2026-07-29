@@ -241,7 +241,6 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       const zug = await p.evaluate((MUT) => {
         const btn = [...document.querySelectorAll('.ord:not([disabled])')];
         const f = re => btn.find(e => re.test(e.textContent));
-        const txt = document.body.innerText;
         const anteil = S.leben / lebenMax();
         let z = null;
 
@@ -335,7 +334,23 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
           if (!z) z = f(/^Laden/);
         }
 
-        else if (txt.includes('VERBLEIBENDE ABENDE')) {
+        /* ── Lager und Winterquartier werden am Zustand erkannt, nicht am Text ──
+           **Hier stand `txt.includes('VERBLEIBENDE ABENDE')`, und der
+           Stationsbogen hat diese Zeichenkette zu „Verbleibend 3 von 3"
+           gemacht.** Der Bot hat das Lager danach nicht mehr gefunden: kein
+           Ruhen, keine Fürsprache, keine Instandhaltung — er fiel auf den
+           allgemeinen Klick durch. Gemessen wurde daraufhin **Caporal 0 % von
+           80** und Weite 28 statt 58, und beides war die Blindheit des Bots
+           und nicht das Spiel.
+
+           `LAUF.lager.id` und `LAUF.winter.ort` sind Zustände. Sie ändern sich
+           nicht, wenn jemand einen Zähler umformuliert, und beim
+           Winterquartier trägt die Frage ohnehin nicht: Sie ist über `frage:`
+           je Kapitel überschreibbar („Zehn Wochen. Beide Seiten benutzen
+           sie."). **Ein Fließtext ist kein Zustand** — dritter Fund derselben
+           Art, und der teuerste, weil er eine Messung still verfälscht statt
+           laut zu scheitern. */
+        else if (LAUF && LAUF.lager && LAUF.lager.id && LAUF.lager.abende > 0) {
           /* Lager. Erst heil werden, dann einen Fürsprecher besorgen, dann die
              Ausrüstung, dann üben. Ohne die Gunst-Regel bemühte sich der Bot nie
              um Fürsprache und würde nie befördert — gemessen würde dann nicht
@@ -369,7 +384,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
           if (!z) z = f(/Exerzieren/) || f(/Ausrüstung durchsehen/) || f(/Schlafen und liegen/);
         }
 
-        else if (txt.includes('VERBLEIBENDE WOCHEN')) {
+        else if (LAUF && LAUF.winter && LAUF.winter.ort && LAUF.winter.wochen > 0) {
           /* Winterquartier **und** Garnisonssaison — dieselbe Maschine, zwei
              sehr verschiedene Fragen. Im Winterquartier zwischen zwei Feldzügen
              geht es ums Heilwerden; in der Garnison ist der Feind die Zeit, und

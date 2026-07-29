@@ -30,11 +30,15 @@ const ziel = process.argv[2] === 'dist'
     const ok = await p.evaluate(() => {
       const btn = [...document.querySelectorAll('.ord:not([disabled])')];
       const f = re => btn.find(e => re.test(e.textContent));
-      const txt = document.body.innerText;
       let z = null;
-      if (/RUNDE |PHASE |STUNDE |TAG /.test(txt))
+      /* Gefecht und Lager werden am **Zustand** erkannt, nicht am Bildschirmtext.
+         Hier stand `txt.includes('VERBLEIBENDE ABENDE')` — eine Zeichenkette,
+         die der Stationsbogen umbenannt hat, worauf dieser Prüfstand still
+         aufhörte, den Lagerpfad überhaupt zu betreten. Derselbe Fehler wie in
+         `balance.js`, dort mit gemessenen Folgen (Caporal 0 % von 80). */
+      if (K)
         z = f(/Salve befehlen/) || f(/Sorgfältig zielen/) || f(/Anlegen und feuern/) || f(/^Laden/) || f(/Hinknien|Flach hinlegen/);
-      if (!z && txt.includes('VERBLEIBENDE ABENDE') && +(txt.match(/Gunst Martel\s+(\d+)/) || [, 0])[1] < 4)
+      if (!z && LAUF && LAUF.lager && LAUF.lager.id && LAUF.lager.abende > 0 && gunst('martel') < 4)
         z = f(/Am Feuer/);
       // Die Tempowahl: forcieren, damit der Sprung über eine Station auch
       // wirklich durchlaufen wird — ein Pfad, den sonst nichts prüft.

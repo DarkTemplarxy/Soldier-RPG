@@ -1616,6 +1616,23 @@ Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang 
 
 **Regel, die daraus folgt:** Wer eine Schwelle einführt, die mehrere Handlungen verlangt, muss dem Bot beibringen, sie zu verfolgen — sonst misst das Skript die Blindheit des Bots und nicht das Spiel. Das galt für die Gunst und gilt für jede weitere Schwelle.
 
+> ### ⚠ Der Bot erkennt Lager und Winterquartier am **Zustand**, nicht am Text — und das ist teuer bezahlt
+>
+> `balance.js` verzweigte auf `txt.includes('VERBLEIBENDE ABENDE')`. Der Stationsbogen hat diese Zeichenkette zu „Verbleibend 3 von 3" gemacht, und **damit hat der Bot das Lager nicht mehr gefunden**: kein Ruhen, keine Fürsprache, keine Instandhaltung — er fiel auf den allgemeinen Klick durch und ging ungeruht ins nächste Gefecht.
+>
+> | gemessen, 80 Läufe Erstlauf | blinder Bot | nach der Reparatur |
+> |---|---|---|
+> | Weite | **28** | 58 |
+> | Caporal erreicht | **0 %** | ~28 % |
+> | Italien überstanden | 91 % | 100 % |
+> | Punkte-Median | 20 | 44 |
+>
+> **Caporal 0 % von 80 war das Signal**, und es ist dieselbe Sorte Zahl wie die 100 % des Härtemodus: Eine Quote, die exakt auf null oder exakt auf hundert fällt, ist fast immer ein kaputter Prüfstand und kein Befund. Elitekompanie blieb bei 24 % — eine Szenenwahl, die kein Lager braucht —, und genau dieser Kontrast zeigte, dass die Beförderungsmaschine nicht gebrochen war, sondern ihre Voraussetzung.
+>
+> **Jetzt `LAUF.lager.id` und `LAUF.winter.ort`.** Beim Winterquartier trägt die Frage ohnehin nicht: Sie ist über `frage:` je Kapitel überschreibbar („Zehn Wochen. Beide Seiten benutzen sie."). **Dritter Fund derselben Art — ein Fließtext ist kein Zustand —, und der teuerste, weil er eine Messung still verfälscht statt laut zu scheitern.** Die zwei davor: `zeigeTod()` gegen das Kapitelende (Härtemodus), „gefallen" im Ruhestandstext (Vollständigkeitsmodus).
+>
+> **Regel für jeden Prüfstand: an `LAUF`/`S`/`K` verzweigen, nie an gerenderten Wörtern.** Gerenderte Wörter sind erlaubt, wo es *nur* sie gibt — der Todesbildschirm hat keinen Zustand, weil `zeigeTod()` ihn wegräumt.
+
 **Seit Phase C druckt `balance.js` eine Rangverteilung** — wie viele Läufe auf welchem Rang enden (RANGLEITER §10 verlangt sie nach jeder Phase). Die beiden Leitzahlen sagen, ob das Spiel hart genug ist und ob die Leiter trägt; sie sagen nicht, **wo** sie trägt. Mit vierzehn Rängen und vier Kapiteln ist genau das die Frage: Sammelt sich alles bei Rang 6, oder sieht überhaupt jemand ein Patent?
 
 ---
