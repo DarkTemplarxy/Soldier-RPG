@@ -7,7 +7,7 @@
 1. **Kein Punkt ohne Zahl.** Wer etwas einträgt, schreibt dazu, woran man es gemessen hat. Ein Verdacht ohne Messwert gehört in `KONZEPT.md`, nicht hierher.
 2. **Kein Punkt ohne Hebel.** Es muss dastehen, an welcher Zeile man drehen würde — sonst ist es ein Gefühl.
 3. **Erledigte Punkte werden nicht gelöscht, sondern nach unten verschoben** und mit dem Messwert versehen, der sie geschlossen hat. Das Protokoll ist der halbe Wert.
-4. **Wer einen Punkt anfasst, misst gegen die vier Zahlen** aus `CLAUDE.md` („Die zwei Leitzahlen"): Erstlauf vorsichtig, Erstlauf mutig, Veteran 160, Veteran 400.
+4. **Wer einen Punkt anfasst, misst gegen die Zahlen** aus `CLAUDE.md` („Die zwei Leitzahlen"): Erstlauf vorsichtig, Erstlauf mutig, **Veteran mit `VP=5800`**. *(Bis zum 30.07.2026 waren das 160 und 400 VP — seit der Verfünffachung der Wertung ist ein Vierhunderter nicht mehr der Veteran, den das Spiel hervorbringt, sondern der aus dem zweiten Lauf.)*
 
 ---
 
@@ -97,7 +97,7 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 | Was | Was fehlt dafür |
 |---|---|
-| `legion_grand` — der Bruststern | Der Grad selbst. **Rang 13 fordert ihn schon** (`orden:'legion_grand'` in `LEITER`) und ist damit unerreichbar, solange er fehlt |
+| ~~`legion_grand` — der Bruststern~~ | **✓ Gebaut am 30.07.2026.** Er musste es: Rang 13 forderte ihn, also waren 13 und 14 verschlossen — und die ganze VP-Ökonomie war gegen eine Decke geeicht, die niemand erreicht |
 | `saint_henri` — der zweite fremde Orden | KONZEPT §5 hält den Platz frei („höchstens zwei gewertet"). Gehört an ein Kapitel, das ihn verdient — Preußen oder Spanien |
 | **Schnallen** im Band, je Nennung eine mit Ort und Jahr | Ein neues Feld `S.schnallen = [{ort, jahr}]`. Der Ort eines Gefechts wird bisher nirgends mitgeschrieben |
 | Die Ehrenwaffe als **Gegenstand** statt als Zeichen | `mann.waffe` gibt es nicht. Historisch war die Ehrenwaffe eine Muskete, die man trug — im Spiel ist sie ein Eintrag im Livret |
@@ -106,7 +106,13 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
-## 8 · ✓ Überführt: die Zwei-Würfe-Probe hat den Erstläufer halbiert
+## 8 · ✓✓ Erledigt: die Zwei-Würfe-Probe — überführt und ersetzt
+
+> **Geschlossen am 30.07.2026.** Der Wurf mittelt jetzt **sechs** Würfe statt zwei, und der Sockel steht auf 60 statt 50 — der Umbau ist damit über den hier beschriebenen Befund hinausgegangen: Nicht einer der drei Wege unten wurde genommen, sondern beide Regler wurden neu gesetzt (siehe `AENDERUNGEN.md`, „Der Umbau"). **Der Befund selbst bleibt stehen, weil sein Lehrsatz gilt und weil der Messweg der beste ist, den dieses Projekt hat.**
+>
+> **Der Erstläufer hat davon nichts zurückbekommen — die Weite steht weiterhin bei 31.** Das ist inzwischen Absicht: Die Ansage lautet *„Am Anfang muss man sich nutzlos fühlen"*, und ein enger Wurf liefert genau das. Was der Umbau löst, ist die andere Hälfte: Der Veteran geht jetzt durch (Weite 163 von 163).
+
+### Der ursprüngliche Befund
 
 **Der Wurf ist der Mittelwert aus zwei Würfen** (`wurfZahl()` in `mechanik.js`, eingeführt in `52211b0`). Gemessen wurde damals die Wahrscheinlichkeitstabelle — **nicht die Wirkung auf die beiden Leitzahlen.** Das ist jetzt nachgeholt, und der Befund ist eindeutig.
 
@@ -154,6 +160,59 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
+## 9 · Der Erstläufer klettert zu schnell *(gemessen, größte offene Frage)*
+
+**Gemessen nach dem Umbau, 80 Läufe, Erstlauf ohne Vorrat, vorsichtig:**
+
+| | vor dem Umbau | **nach dem Umbau** |
+|---|---|---|
+| Weite (von 163) | 31 | **31** |
+| **Caporal** | 26 % | **65 %** |
+| **Sergent** | 13 % | **53 %** |
+| Patent (Rang 7+) | 0 % | **11 %** (9 von 80) |
+| Punkte-Median | 34 | 492 |
+
+**Ein Mann, der im Mittel bei Station 31 von 163 stirbt, wird zu zwei Dritteln Caporal.** Das widerspricht der Ansage, die den ganzen Umbau ausgelöst hat: *„Am Anfang muss man sich nutzlos fühlen"* und *„relativ nutzlos, bzw. ziemlich sicher sterben … man sollte im Erstlauf nie über Colonel hinauskommen."* Die Weite hält sich, der Rang nicht.
+
+**Der Mechanismus ist verstanden und nicht geraten.** Ursache ist der Fertigkeiten-Sockel 20 (vorher 5): Muskete 20 gegen Aufgabe 35 trifft zu **31 %** statt zu 8 %. Das ist die alte, teuer bezahlte Kette — *alles, was die Kampfkraft hebt, hebt über den Ruf auch den Aufstieg*:
+
+```
+mehr Treffer → mehr Schaden → Sichtbarkeitsstufe → Ruf → Beförderungsschwelle
+```
+
+| Hebel | Wo | Was er kostet |
+|---|---|---|
+| **Die Härtekurve früher ansetzen** *(empfohlen)* | `schwierigkeit:` je Kampagne in `grundwerte.js` — Italien steht auf **+0**, Ägypten auf +4 | Sie greift genau dort nicht, wo der Erstläufer lebt. Ein Zuschlag von +6 bis +8 schon in Italien trifft ihn, ohne den Veteranen zu berühren, dessen Werte über 70 liegen |
+| **Die Ruf-Schwellen unten anheben** | `LEITER` in `kampf.js`, Rang 3 steht bei 30 | Trifft sofort, aber macht die erste Beförderung spät — und die soll früh kommen |
+| **Die Sichtbarkeitsschwellen anheben** | `K.zaehlung`, Stufen bei Schaden 60 / 100 / 150 | Trifft auch den Veteranen, und zwar dort, wo seine Orden hängen |
+| ~~Den Fertigkeiten-Sockel senken~~ | `FERT_SOCKEL` | **Nicht der Hebel.** Er ist gesetzt und gehört zur Skala: Wenn ein Wert bis 100 gekauft werden kann, ist 5 kein Startwert, sondern ein Rundungsfehler |
+
+> **Der Prüfpunkt ist nicht die Weite, sondern der Abstand.** Wer die Härtekurve anhebt, misst beide Männer: Der Erstläufer soll bei Rang und Weite fallen, der Veteran bei **beiden** stehen bleiben. Wandert der Veteran mit, trifft der Hebel die Aufgabe statt den Mann — dann ist es die falsche Schraube.
+
+---
+
+## 10 · Der Marschall ist unerreichbar, und die Ökonomie hängt daran
+
+**Rang 14 verlangt `generalskampagne`**, und die Szenarien gibt es nicht. Das ist dieselbe Lage, in der Rang 13 bis zum 30.07.2026 war — mit derselben Folge: **Die Decke der VP-Ökonomie steht nicht fest.**
+
+| Erreichbare Decke | Ein perfekter Lauf bringt |
+|---|---|
+| Rang 9 · Capitaine | 3 945 VP |
+| Rang 12 · Général de brigade | 4 960 VP |
+| Rang 13 · Général de division | 5 370 VP |
+| **Rang 14 · Maréchal** | **ungerechnet** |
+
+Das Ziel *„alles auf 70+"* kostet 4 950 VP. **Solange die oberste Stufe fehlt, ist jede Eichung der Kostenkurve vorläufig.**
+
+| Hebel | Was er tut |
+|---|---|
+| **Die Generalskampagnen bauen** | Die ehrliche Antwort. KONZEPT entwirft sie als Szenarien; `META.generalskampagnen` wird ab Rang 12 längst freigeschaltet |
+| **Die Bedingung ersetzen** | Etwas fordern, das es gibt — ein zweiter fremder Orden, eine Zahl an Bulletins, ein überstandener Feldzug als Général. Billig, und der Stab bleibt die Legende, die er sein soll |
+
+> **Rang 14 feiert nichts, und das gehört zur Entscheidung.** Der Abschlusstext nennt die Namen, die vor deinem stehen, und stellt fest, dass die Liste nicht länger wird. **Eine Bedingung, die man einfach abhakt, würde dem widersprechen** — sechsundzwanzig in zwölf Jahren, unter Hunderttausenden.
+
+---
+
 ## Erledigt
 
 | Punkt | Wie geschlossen | Messwert |
@@ -166,6 +225,12 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 | Der Aderlass war kleiner als die Zeitheilung und tat nichts | Spanien 2 → **4** (hebt die Erholung auf), Russland 4 → **8** (der Vorrat fällt wirklich) | Russlands 4 gegen 4,5 Heilung = **plus ein halber Punkt je Station** |
 | Vier Gefechte in Russland standen über der Decke von 22 | Am Hebel ausgelesen: 23 / 29 / 27 / 28. Basiswerte gesenkt auf 20 / 22 / 20 / 22; die Härte steckt jetzt im Aderlass und in Borodinos Länge | Härtemodus vorher wie nachher **3 %** — dieselbe Wand, ehrliche Quelle |
 | Die Leitzahl „höchster Rang" misst den Sergent-major, während ein Drittel der Läufe ein Patent erreicht | `LEITRANG` in `test/balance.js`, auf Rang 9 (Capitaine) umgestellt und dort dokumentiert, dass er mit dem Ausbaustand wandert | Rang 9 erreichen 9 / 1 / 33 / 38 % |
+| Der Schadensbonus über der Klemme (`koennen`/`meister()`) | Ersatzlos entfernt — *„Schwachsinn"*. An seine Stelle tritt `kampagnenHaerte()`: Der Wert kauft weiterhin Trefferchance, nur wird die Aufgabe mit jedem Feldzug schwerer | **Wert 80 ist 1796 überflüssig und 1812 gerade genug** |
+| Gleich guter Wert wie Aufgabe war ein Münzwurf | Sockel 50 → **60** und der Wurf mittelt **sechs** statt zwei Würfen | Gleichstand 50 → **80 %**; „8 gegen 40" 29 → **3 %** |
+| Der Deckel bei Attribut 70 / Fertigkeit 60 machte das erklärte Ziel unerreichbar | Ein Deckel für alles: **100**. Die Bremse ist jetzt allein der Preis (`PRO_PUNKT` bis 60 VP je Punkt) | „Alles auf 70" kostet **4 950 VP**, ein perfekter Lauf bringt 4 960–5 370 |
+| Die Ruf-Leiter endete bei 300, angekommen wird mit 688 | Über die volle Strecke gespannt: 45 / 60–70 / 100 / 145 / 195 / 255 / 325 / 400 / 480 / 570 / **680** | Nach gut der halben Kampagne war die Leiter vorher aufgebraucht |
+| Die Fürsprache des Auftrags ging hart an Vernet | `beurteiler()` liefert den Patron des **nächsten** Leitereintrags — die Rolle, nie ein Name | **40 von 40** Maximalveteranen blieben Capitaine, einer mit Ruf 748 und Grandmaison 1 |
+| Fünf Kapitel hatten zu wenige Musterungen, Waterloo gar keine | Sechs Stationen dazu, **zwei je Feldzug**; dazu Feldbeförderung bis Rang 6 direkt nach dem Gefecht | Ein Mann mit erfüllten Schwellen stand bei Station 156 daneben |
 | Der Bot nahm auf der Tempowahl immer „schonend" | `f(/^Forcieren/)` traf nie — `textContent` beginnt mit dem Zeilenumbruch aus dem Markup | — |
 | Der Bot forcierte bei halbem Blut und drehte damit die Progression um | Bedingung auf `Blut > 80 %, Atem > 70, Schuhe ≥ 40` verschärft | Veteran 160: 13 → 53 % |
 | Eine Szene konnte ohne drückbaren Knopf dastehen | Regel (jede Szene braucht eine probefreie Wahl) plus Sicherung `szeneAushalten()` | — |

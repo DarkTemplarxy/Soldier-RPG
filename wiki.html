@@ -218,7 +218,7 @@ wurde beim Bau von Kapitel 3 nicht mitgezogen; sie kommt jetzt aus den Daten.
 <tr><td><b>Die Kette über dir</b></td><td>Gunst ist keine Zahl mehr, sondern eine Beziehung je Person (−5…+5). Vier Männer — Martel, Collot, Berthaud, Vernet — die ganze Laufbahn lang dieselben, weil sie mit aufsteigen.</td></tr>
 <tr><td><b>Ränge 4 und 5</b></td><td>Caporal-fourrier (Bildungsschwelle 35) und Sergent mit zwei Wegen. Ab Rang 5 wechselt das Gefecht den Maßstab: zwanzig Mann statt eines Körpers, mit eigener Abrechnung danach.</td></tr>
 <tr><td><b>Kapitel 3 — Garnison 1801–04</b></td><td>Siebzehn Stationen, Nîmes und das Lager von Boulogne. Das Friedenskapitel: vier Saisons, ein Duell, ein Manöver mit Platzpatronen.</td></tr>
-<tr><td><b>Orden</b></td><td>Neun Auszeichnungen in <b>drei Formen</b> — Kreuz am Band, geprägte Scheibe, graviertes Täfelchen —, mit Wertungspunkten, Ruf <i>und</i> einer Pension in Francs. Jede der drei Sichtbarkeitsstufen zahlt jetzt etwas aus.</td></tr>
+<tr><td><b>Orden</b></td><td>Zehn Auszeichnungen in <b>vier Formen</b> — Kreuz am Band, geprägte Scheibe, graviertes Täfelchen, Bruststern ohne Band —, mit Wertungspunkten, Ruf <i>und</i> einer Pension in Francs. Jede der drei Sichtbarkeitsstufen zahlt jetzt etwas aus.</td></tr>
 <tr><td><b>Die Leiter der Sichtbarkeit</b></td><td>Die Nennung war ein Würfelwurf; jetzt ist sie die mittlere von drei verdienten Stufen. Das Gefecht zählt Taten.</td></tr>
 <tr><td><b>Die volle Punkteskala</b></td><td>Rang und Zuschläge rechnen wieder in <i>einer</i> Skala. Je überlebtem Kapitel +8 statt je Station +2.</td></tr>
 <tr><td><b>Napoleonische Gestaltung</b></td><td>Papier für Schriftstücke, Kokarde und Adler, das Gefechtsbild nach Rang, Gelände je Gefecht.</td></tr>
@@ -240,16 +240,17 @@ wurde beim Bau von Kapitel 3 nicht mitgezogen; sie kommt jetzt aus den Daten.
 </table>
 
 <h3>Was spielbar ist</h3>
-<p><b>Einhundertfünfunddreißig Stationen, fünfunddreißig Gefechte</b> (davon eines mit Platzpatronen),
-Lager, fünf Winterquartiere, vier Garnisonssaisons. <b>Alle vierzehn Ränge sind
-gebaut</b> und spielen sich in fünf verschiedenen Maßstäben — Körper, Sektion, Zug,
-Bataillon, Operationskarte. Sechs Herkünfte, sechs Attribute, neun Fertigkeiten, ein
-Kaufladen, ein Marketender, neun Orden in drei Formen, siebzehn Zwischenfälle, Sold
-je Rang und Kampagne, Kompaniekasse, Einheitszustand, Adler und Dotation.</p>
-<p class="hinweis">Mit fünf Kapiteln erreicht ein Veteranenlauf den Capitaine (Rang 9) —
-ein Drittel der reichen Läufe kommt dorthin. Die Ränge 10 bis 14 sind gebaut und geprüft,
-aber im laufenden Spiel weiterhin nicht zu erreichen: Rang 10 verlangt Ruf 180, und dafür
-braucht es die Kapitel 8 und 9.</p>
+<p><b>Einhundertdreiundsechzig Stationen, einundvierzig Gefechte</b> (davon eines mit
+Platzpatronen), Lager, fünf Winterquartiere, vier Garnisonssaisons. <b>Alle vierzehn
+Ränge sind gebaut</b> und spielen sich in fünf verschiedenen Maßstäben — Körper,
+Sektion, Zug, Bataillon, Operationskarte. Sechs Herkünfte, sechs Attribute, neun
+Fertigkeiten, ein Kaufladen, ein Marketender, zehn Orden in vier Formen, siebzehn
+Zwischenfälle, Sold je Rang und Kampagne, Kompaniekasse, Einheitszustand, Adler und
+Dotation.</p>
+<p class="hinweis">Ein Maximalveteran geht heute durch alle elf Kapitel und endet als
+Capitaine oder darüber; ein Erstläufer stirbt im Mittel bei Station 31. <b>Nicht
+gebaut sind die Generalskampagnen</b> — und weil Rang 14 eine davon verlangt, ist
+der Marschallstab bis auf Weiteres die Legende, die er im Text ohnehin ist.</p>
 
 <h3>Was entworfen, aber nicht gebaut ist</h3>
 <p>Kapitel 8 bis 11 und das Gefecht der Ränge 10 bis 14: Kompanien als Rechtecke,
@@ -437,21 +438,28 @@ wirken erst beim Nachschlagen, nicht auf den gespeicherten Wert.</p>
 <p>Muskete · Bajonett · Reiten · Drill · Taktik · Kartenkunde · Verwaltung ·
 Fouragieren · Feldchirurgie</p>
 
-<h3>Die Startverteilung</h3>
-<pre><code>const POOL = 60, SOCKEL = 15, MAXE = 70, ERSCH_SCHRITT = 5;
-const BILDUNG_SOCKEL = 20;</code></pre>
+<h3>Die Aushebung</h3>
+<pre><code>const POOL = 60, SOCKEL = 15, MAXE = 70;
+const BILDUNG_SOCKEL = 20, FERT_SOCKEL = 20;</code></pre>
 <ul>
-<li>Sockel <b>15</b> auf allen Attributen, <b>60</b> Punkte frei zu verteilen in <b>Fünferschritten</b>, Deckel 70. <i>Der Schritt musste zuerst von 10 auf 5 fallen: Von 15 aus ist die 70 in Zehnerschritten nicht erreichbar.</i></li>
-<li><b>Bildung ist vom Pool ausgenommen</b> und bleibt bei <b>20</b> — sie muss im Spiel erarbeitet werden, und sie ist auch beim Sockel die Ausnahme: Sie abzusenken träfe die Rangleiter (Fourrier 35, Rang 7 50) statt der Überlebensfähigkeit.</li>
-<li>Alle neun Fertigkeiten starten bei <b>5</b>.</li>
+<li><b>Es gibt keine Handverteilung.</b> Man sieht sofort einen ausgewürfelten Mann und darf „Einen anderen Mann“ drücken, so oft man will. Name und Herkunft sind die einzigen Entscheidungen, die bleiben.</li>
+<li>Sockel <b>15</b> auf allen Attributen, 60 Punkte verteilt der Würfel, Höchstwert bei der Aushebung 70.</li>
+<li><b>Bildung ist ausgenommen</b> und steht fest auf <b>20</b> — man kann nicht lesen, und der Weg dahin führt über die Regimentsschule.</li>
+<li>Alle neun Fertigkeiten starten bei <b>20</b> <i>(bis 30. Juli 2026: 5)</i>.</li>
 <li><b>Konstitution wächst im Lauf</b> und darf über 100: +3 bei jedem Übergang zwischen zwei Feldzügen, +1 nach überstandener Krankheit. Sie ist der einzige Wert, der in etwas Ungeklemmtes zahlt (<code>lebenMax = 40 + 0,6 × roh</code>). <i>Wachsen</i> kann sie durch Übung trotzdem nur bis 100 — was darüber hinausgeht, kommt ausschließlich aus überstandenen Feldzügen.</li>
-<li>Reihenfolge: Pool → Herkunft → Kauf mit Veteranenpunkten → Ausrüstungsboni. Die Ausrüstungsboni kommen <i>nach</i> allen Kaufgrenzen und dürfen die 60 überschreiten.</li>
+<li>Reihenfolge: Würfel → Herkunft → Kauf mit Veteranenpunkten → Ausrüstungsboni.</li>
 <li>Startgeld 4 Francs, Rang 1, Kameradschaft 20, Atem 100, Ruf 0, Gunst 0, Belastung 0.</li>
 </ul>
 
-<div class="note">Der Pool lag bis zum 28. Juli bei 120. Gesenkt auf 60, weil ein
-Erstlauf-Mann sonst so gut war wie ein Veteran und die Veteranenpunkte reine
-Zierde blieben. Nach der Senkung trennt der Kauf 43 % von 68 % Überlebenden.</div>
+<div class="note"><b>Warum die Verteilung wegfiel</b> <i>(Ansage des Entwicklers,
+30. Juli 2026)</i>: <b>„Am Anfang muss man sich nutzlos fühlen.“</b> Wer seine
+Punkte setzen darf, baut sich einen Spezialisten und fühlt sich kompetent; wer
+einen Mann bekommt, bekommt einen Mann. <b>Das Gestalten ist die Währung der
+Veteranenpunkte</b>, und die hat der erste Lauf nicht.<br><br>
+<b>Beliebig oft neu würfeln ist Absicht und kein Kompromiss.</b> Ein einziger Wurf
+würde dazu führen, dass man den Lauf wegwirft und neu startet — dieselbe
+Optimierung, nur umständlicher. Wer neu würfeln darf, sieht trotzdem nie einen
+Mann, den er <i>entworfen</i> hat.</div>
 
 <h3>Die sechs Herkünfte</h3>
 <p>Jede verteilt netto exakt <b>+50</b> — nur die Gewichtung unterscheidet sich.</p>
@@ -474,19 +482,72 @@ Schuhe (55/25) · <i>kein Mantel</i> · Tornister (65/10).</p>
 <section id="probe">
 <h2>Die Probe</h2>
 
-<pre><code>function probe(k, schwierigkeit, ohneUebung){
-  const w = wert(k);
-  const ziel = Math.max(5, Math.min(95, w - schwierigkeit + 50));
-  const wurf = 1 + Math.floor(Math.random()*100);
+<pre><code>const PROBE_SOCKEL = 60;
+
+function probe(k, schwierigkeit, ohneUebung){
+  const w   = wert(k);
+  const roh = w - (schwierigkeit + kampagnenHaerte()) + PROBE_SOCKEL;
+  const ziel = Math.max(5, Math.min(95, roh));
+  const wurf = wurfZahl();               // Mittel aus SECHS Würfen 1–100
   if(!ohneUebung) nutzen(k, 1);
-  return {wurf, ziel, wertRoh:w, erfolg: wurf &lt;= ziel};
+  return {wurf, ziel, wertRoh:w, roh, erfolg: wurf &lt;= ziel};
 }</code></pre>
 
-<p>Die Erfolgschance in Prozent ist <code>Wert − Schwierigkeit + 50</code>, hart
-geklemmt auf 5 bis 95. Nichts ist je sicher, nichts je aussichtslos. Die
-Schwierigkeit ist so geeicht, dass Wert gleich Schwierigkeit ein Münzwurf ist.
-Im Spiel liegen die Schwierigkeiten zwischen 25 (Verbandsplatz) und 55 (bei
-Mondovì mitmachen).</p>
+<p><b>Zwei Regler, und sie tun Verschiedenes.</b> Der <i>Sockel</i> verschiebt die
+Kurve waagerecht — er bestimmt, wo „gleich gut wie die Aufgabe“ landet. Die
+<i>Wurfbreite</i> macht sie steil oder flach — sie bestimmt, wie sehr der Abstand
+zwischen Wert und Aufgabe den Ausschlag gibt.</p>
+
+<div class="scroll"><table>
+<tr><th>Abstand Wert − Aufgabe</th><th class="num">Zielwert</th><th class="num">Chance</th></tr>
+<tr><td>−32 <i>(Bajonett 8 gegen 40)</i></td><td class="num">28</td><td class="num"><b>~3 %</b></td></tr>
+<tr><td>−20</td><td class="num">40</td><td class="num">~19 %</td></tr>
+<tr><td>−10</td><td class="num">50</td><td class="num">~48 %</td></tr>
+<tr><td><b>0 · gleich gut</b></td><td class="num">60</td><td class="num"><b>~80 %</b></td></tr>
+<tr><td>+10</td><td class="num">70</td><td class="num">~95 %</td></tr>
+<tr><td>+20</td><td class="num">80</td><td class="num">~99 %</td></tr>
+</table></div>
+
+<div class="note"><b>Die alte Eichung „Wert gleich Schwierigkeit ist ein
+Münzwurf“ gilt nicht mehr.</b> Sie stand hier jahrelang und ist am 30. Juli 2026
+ersetzt worden: <i>Wer der Aufgabe gewachsen ist, besteht sie in vier von fünf
+Fällen — nicht in der Hälfte.</i> Und wer weit darunter steht, so gut wie nie:
+Aus 29 % wurden 3 %.</div>
+
+<p><b>Der enge Wurf ist der wichtigere der beiden Regler.</b> Je mehr Würfe man
+mittelt, desto enger ballt sich das Ergebnis um die Mitte — die Streuung liegt bei
+rund 12 statt bei 29 wie bei einem einzelnen Wurf. Damit entscheidet der Wurf immer
+weniger und der Abstand immer mehr. <b>Innerhalb von etwa ±12 um den Gleichstand
+entscheidet noch das Glück, darüber und darunter der Wert.</b></p>
+
+<div class="warn"><b>Der Zielwert ist nicht mehr die Prozentzahl.</b> Bei sechs
+Würfen ist die Verteilung nahezu normal (Mittel 50,5, Streuung ≈ 11,8);
+<code>chance()</code> rechnet das mit einer logistischen Näherung um — gegen
+200 000 echte Würfe geprüft, Abweichung höchstens zwei Punkte. <b>Wer eine neue
+Anzeige baut, nimmt <code>aussicht()</code>, nicht den Zielwert.</b></div>
+
+<h3>Die Aufgabe wächst mit dem Feldzug</h3>
+<p>Auf jede Schwierigkeit kommt ein Zuschlag je Kampagne — eine Zahl, genau wie
+die Feindgüte im Gefecht:</p>
+<div class="scroll"><table>
+<tr><th>Italien</th><th>Ägypten</th><th>Garnison</th><th>Austerlitz</th><th>Jena</th><th>Eylau</th><th>Spanien</th><th>Russland</th><th>1813</th><th>1814</th><th>Waterloo</th></tr>
+<tr><td class="num">+0</td><td class="num">+4</td><td class="num">+0</td><td class="num">+6</td><td class="num">+8</td><td class="num">+10</td><td class="num">+12</td><td class="num">+16</td><td class="num">+16</td><td class="num">+18</td><td class="num"><b>+20</b></td></tr>
+</table></div>
+<p>Das Spiel hat elf Kapitel und einen Spieler, der von Lauf zu Lauf besser wird.
+Bleiben die Anforderungen gleich, wird es mit jedem Lauf leichter, statt andere
+Fragen zu stellen. Die Kapiteldaten sagen weiterhin, wie schwer eine Sache
+<i>an sich</i> ist — einen Wagen aus dem Schlamm ziehen: 40 —, und der Feldzug
+sagt, unter welchen Umständen man sie tut. Derselbe Wagen, derselbe Schlamm, aber
+1812 bei minus zwanzig Grad und mit leerem Magen. <b>Die Garnison steht auf 0: Es
+ist Frieden.</b></p>
+
+<div class="note"><b>Was hier ersatzlos verschwunden ist: der Schadensbonus.</b>
+Bis zum 30. Juli 2026 legte sich alles, was die Klemme bei 95 wegwarf, als bis zu
++50 % auf die <i>Wirkung</i>. Entfernt auf Ansage — eine Muskete schießt nicht
+härter, weil der Mann besser zielt; sie trifft nur öfter. Die Frage dahinter war
+richtig (<i>was kauft ein Wert, wenn die Trefferchance schon bei 99 % steht?</i>),
+die Antwort ist jetzt der Zuschlag oben: <b>Wert 80 ist 1796 überflüssig und 1812
+gerade genug.</b></div>
 
 <h3>Was zwischen Blatt und Wurf steht</h3>
 <pre><code>const koerperlich = ['konstitution','geschick','muskete','bajonett','reiten'];
@@ -658,15 +719,72 @@ Konstitution 55, <b>Voltigeur</b> ab Geschick 55, sonst bleibt man Fusilier. Der
 Voltigeur bekommt ein anderes Minispiel — zielen, Deckung wechseln, frei bewegen
 — keine besseren Zahlen.</p>
 
+<h3>Wo befördert wird: im Hof oder auf dem Papier</h3>
+<pre><code>const FELD_RANG_MAX = 6;   // bis hierher direkt nach dem Gefecht</code></pre>
+<p><b>Rang 2 bis 6 werden direkt nach dem Gefecht vergeben</b>, sobald Zahlen und
+Vakanz stimmen — ohne Bildschirm, ohne Bescheid. <b>Rang 7 und höher nur bei
+einer Musterung</b>, mit dem vollen Auftritt. <b>Jeder Feldzug hat zwei
+Musterungen.</b></p>
+<p>Historisch ist das der eigentliche Bruch der Laufbahn: Einen Caporal ernannte
+der Capitaine im Hof und notierte es im Livret; für ein Offizierspatent brauchte
+es eine Kommission, eine Unterschrift des Kriegsministers und oft Monate.</p>
+<p><b>Das Papier kommt trotzdem.</b> Ab Rang 5 merkt sich das Spiel den Rang, und
+das nächste Lager legt den Bescheid vor — eigener Bildschirm, ein Knopf
+(„Einstecken“). <b>Man ist es sofort und hat es eine Woche später
+schriftlich.</b> Über zwei Wollstreifen stellt keine Kanzlei ein Papier aus.</p>
+
+<div class="note"><b>Die Reihenfolge im Code ist die ganze Logik.</b> Die
+Feldbeförderung läuft <i>nach</i> der Prüfung, die aus dem angesagten Tod den
+wirklichen macht. Andersherum wäre die Stelle noch besetzt: <b>Jemand fällt, und
+deshalb rückst du auf.</b></div>
+
+<h3>Die Schwellen</h3>
+<div class="scroll"><table>
+<tr><th>Rang</th><th class="num">Ruf</th><th>Fürsprecher</th><th>dazu</th></tr>
+<tr><td>3 · Caporal</td><td class="num">30</td><td>Martel ≥ 4</td><td>—</td></tr>
+<tr><td>4 · Caporal-fourrier</td><td class="num">45</td><td>Collot ≥ 3</td><td>Bildung 35</td></tr>
+<tr><td>5 · Sergent <i>(Feldweg / Listenweg)</i></td><td class="num">70 / 60</td><td>Berthaud ≥ 5 / 4</td><td>— / ab Rang 4</td></tr>
+<tr><td>6 · Sergent-major</td><td class="num">100</td><td>Vernet ≥ 3</td><td>—</td></tr>
+<tr><td>7 · Sous-Lieutenant</td><td class="num">145</td><td>Berthaud ≥ 4</td><td>Bildung 50</td></tr>
+<tr><td>8 · Lieutenant</td><td class="num">195</td><td>Vernet ≥ 4</td><td>—</td></tr>
+<tr><td>9 · Capitaine</td><td class="num">255</td><td>Vernet ≥ 5</td><td>Ehrenlegion</td></tr>
+<tr><td>10 · Chef de bataillon</td><td class="num">325</td><td>Grandmaison ≥ 3</td><td>Reiten 40</td></tr>
+<tr><td>11 · Colonel</td><td class="num">400</td><td>Grandmaison ≥ 4</td><td>Adler nicht verloren</td></tr>
+<tr><td>12 · Général de brigade</td><td class="num">480</td><td>Grandmaison ≥ 5</td><td>3 Bulletins</td></tr>
+<tr><td>13 · Général de division</td><td class="num">570</td><td>Grandmaison ≥ 5</td><td>Grand Officier</td></tr>
+<tr><td>14 · Maréchal</td><td class="num"><b>680</b></td><td>—</td><td>Generalskampagne</td></tr>
+</table></div>
+
+<div class="note"><b>Die Reihe ist am 30. Juli 2026 über die volle Strecke
+gespannt worden.</b> Sie endete bei 300, während ein Maximalveteran mit <b>688</b>
+ankommt — nach gut der halben Kampagne war die Leiter aufgebraucht und trennte
+nichts mehr. Rang 3 bleibt unangetastet: Der erste Aufstieg soll früh kommen.</div>
+
+<h3>Fürsprache sammelt man beim nächsten Beurteiler</h3>
+<p><b>Wer über deine nächste Stelle entscheidet, ist der, bei dem du sammelst</b>
+— nicht ein fester Name. Als Fusilier ist das Martel, als Capitaine Grandmaison.
+Zwei Quellen zahlen dorthin: eine <b>voll bestandene Sondermission</b> (+1) und
+der <b>erfüllte Auftrag</b> ab Rang 9 (+1, verfehlt −1).</p>
+
+<div class="warn"><b>Das ist die teuerste Fehlerfamilie dieses Projekts, und sie
+ist an einem Tag dreimal aufgetreten: eine Regel, die an einen NAMEN gebunden ist
+statt an die ROLLE.</b>
+<ol>
+<li>Alle Gunst-Quellen liefen ursprünglich an Martel — gemessen 0 % Fourrier und
+0 % Sergent in 120 Läufen.</li>
+<li>Grandmaisons Quellen setzten <i>seinen eigenen Rang</i> voraus: Man braucht
+die Fürsprache für genau den Rang, den sie verlangt.</li>
+<li>Der Auftrag gab hart an Vernet — und er ist die einzige Quelle, die
+<i>jedes</i> Gefecht liefert. Er fütterte also Gefecht um Gefecht einen Mann, der
+nichts mehr zu vergeben hatte. Gemessen: <b>40 von 40 Maximalveteranen blieben
+Capitaine</b>, einer mit Ruf 748 und Grandmaison 1 bei benötigten 3.</li>
+</ol>
+<b>Regel daraus: Eine Fürsprachequelle wird nie auf einen Namen verdrahtet.</b></div>
+
 <h3>Rang 3 — Caporal</h3>
-<pre><code>const CAPORAL_RUF = 30, CAPORAL_GUNST = 4;
-const bekommt = ruf &gt;= CAPORAL_RUF &amp;&amp; gunst &gt;= CAPORAL_GUNST;</code></pre>
-<p>Dazu die Vakanz, die im Prototyp gesetzt ist und erzählt wird: <i>„Der Mann,
-dessen Stelle du bekommst, heißt Guérin. Er ist bei Castiglione geblieben.“</i>
-Der Stand wird beim ersten Betreten je Station eingefroren, damit die zweite
-Musterung von jetzt prüft und nicht von Verona.</p>
-<p>Zwei Musterungen: <b>Verona, September 1796</b> und <b>Kairo, September
-1798</b>.</p>
+<pre><code>const CAPORAL_RUF = 30, CAPORAL_GUNST = 4;</code></pre>
+<p>Dazu die Vakanz, die erzählt wird: <i>„Der Mann, dessen Stelle du bekommst,
+heißt Guérin. Er ist bei Castiglione geblieben.“</i></p>
 
 <h3>Ruf</h3>
 <p>Aus Siegen (Montenotte +5, Lodi +16, Castiglione +8, Arcole +14, Rivoli +15,
@@ -695,7 +813,7 @@ einer aus der Kette, der Nachfolger tritt an der nächsten Station an und
 <b>fängt bei Gunst 0 an</b>. Genau deshalb pflegt man zwei Beziehungen.</p>
 
 <h3>Rang 4 — Caporal-fourrier</h3>
-<p>Ruf 35 · Fürsprache Collot 3 · <b>Bildung 35</b> · Vakanz (Collot rückt selbst auf).
+<p>Ruf 45 · Fürsprache Collot 3 · <b>Bildung 35</b> · Vakanz (Collot rückt selbst auf).
 Keine neuen Kampfknöpfe — seine Arbeit liegt im Lager: „Die Listen der Kompanie
 führen“ (Verwaltung, Fürsprache bei Collot und Berthaud, bei Misserfolg ein
 Rüffel) und „Die Ausgabe verteilen“ (Kameradschaft gegen Fürsprache — die erste
@@ -752,27 +870,45 @@ am Feuer.</div>
 <section id="punkte">
 <h2>Wertung und Veteranenpunkte</h2>
 
-<h3>Die Wertung im Prototyp</h3>
-<pre><code>rang       = rangWert(S.rang);          // 0 / 12 / 26
-stationen  = 2 * stationen();           // max. 32 Stationen = 64
-ruf        = 5 * Math.floor(S.ruf/10);
-nennungen  = 3 * Math.min(10, S.nennungen);
-ueberleben = S.lebt ? 25 : 0;          // Platzhalter für 70/120/180
-sauber     = (!S.gekniffen &amp;&amp; S.lebt) ? 20 : 0;</code></pre>
-<p><b>Kapitel statt Stationen.</b> Bis zum 28. Juli 2026 zahlte die Wertung 2 VP
-je erreichter Station — und belohnte damit den, der auf Station 30 von 32 fiel,
-fast wie den, der ankam. Jetzt zählt der Feldzug: ein halber ist keiner.</p>
+<h3>Die Wertung</h3>
+<pre><code>rang       = rangWert(S.rang);          // 0 / 60 / 130 / 210 … 2900
+kapitel    = kapitelWert(kapitelUeberlebt());   // 20 je Kapitelnummer, aufsummiert
+ruf        = 10 * Math.floor(S.ruf/10);
+nennungen  = 10 * Math.min(10, S.nennungen);
+ueberleben = 0 tot · 350 lebend · 600 Halbsold · 900 Ruhestand
+sauber     = (!S.gekniffen &amp;&amp; S.lebt) ? 100 : 0;</code></pre>
 
-<div class="warn"><b>Die alte Faustregel ist für die Prototypphase ausgesetzt</b>
-<i>(Entscheidung des Entwicklers, 28. Juli 2026)</i>. Sie lautete: „Das bloße
-Durchkommen darf nie mehr wert sein als etwa die Hälfte der Ladensumme“ — und
-setzte einen Laden voraus, der ungefähr fertig ist. Der ist er nicht: Es fehlen
-neun Kapitel und der ganze Ausrüstungsteil ab Rang 7 (Pferd, Fernrohr, Uhr,
-Schreibzeug, Offizierspatente). KONZEPT §5 rechnet für die volle Wunschliste mit
-<b>1.010 VP</b> — die 196 von heute sind ein Achtel davon. <b>Dass ein
-Spitzenlauf den Laden theoretisch leerkaufen kann, ist vorerst in Ordnung; die
-Antwort darauf sind mehr Posten, nicht eine kleinere Wertung.</b> Maßstab sind
-bis dahin die zwei Leitzahlen.</div>
+<p><b>Der Rang ist der größte Posten, und mit Abstand</b> — über die Hälfte eines
+perfekten Laufs. Das ist Absicht: Die Rangleiter <i>ist</i> das Spiel. Die Werte
+wachsen überproportional, der Schritt vom Caporal zum Fourrier bringt 80, der vom
+Colonel zum Général 390. <b>Je höher man steht, desto mehr ist der nächste Schritt
+wert.</b></p>
+
+<p><b>Die Kapitel sind gestaffelt und nicht pauschal.</b> Ein fester Betrag je
+Kapitel behandelt Russland wie Italien — dann wäre der Schritt vom zehnten zum
+elften Feldzug so viel wert wie der erste, obwohl er ungleich teurer erkauft ist.
+Italien bringt 20, Waterloo 220, alle elf zusammen <b>1 320</b>.</p>
+
+<p><b>Orden wiegen bewusst wenig</b> — sie bekamen den Faktor 3, wo alles andere
+den Faktor 5 bekam. Zehn Orden zusammen bringen 360; ein einziger Rangschritt oben
+bringt 390.</p>
+
+<div class="note"><b>Kosten und Einkommen sind ein Paar und dürfen nie einzeln
+gedreht werden.</b> Das erklärte Ziel lautet: <i>nach perfekten Läufen bis nach
+Waterloo, als General, alles auf +70 pushen können.</i> Das kostet <b>4 950 VP</b>
+— ein perfekter Lauf bringt je nach erreichbarer Decke 3 945 (Rang 9), 4 960
+(Rang 12) oder 5 370 (Rang 13). <b>Die Decke bestimmt also, ob das Ziel überhaupt
+erreichbar ist</b>, und deshalb musste der Grand Officier der Ehrenlegion gebaut
+werden, bevor die Progressionsrate feststehen konnte: Rang 13 forderte ihn, und
+es gab ihn nicht.</div>
+
+<div class="warn"><b>Die alte Faustregel bleibt ausgesetzt</b> <i>(Entscheidung
+des Entwicklers, 28. Juli 2026)</i>. Sie lautete: „Das bloße Durchkommen darf nie
+mehr wert sein als etwa die Hälfte der Ladensumme“ — und setzte einen Laden
+voraus, der ungefähr fertig ist. Der ist er nicht: Es fehlen Pferd, Fernrohr, Uhr
+und Schreibzeug. <b>Dass ein Spitzenlauf den Laden theoretisch leerkaufen kann,
+ist vorerst in Ordnung; die Antwort darauf sind mehr Posten, nicht eine kleinere
+Wertung.</b> Maßstab sind bis dahin die zwei Leitzahlen.</div>
 
 <h3>Nur der beste Lauf zählt</h3>
 <pre><code>p.rekord = p.summe &gt; META.vp;        // Vergleich VOR dem Anheben
@@ -783,21 +919,37 @@ nichts und bringt nichts — es gibt nichts zu grinden, nur den eigenen Rekord z
 schlagen.</p>
 
 <h3>Die Preistreppe</h3>
-<pre><code>const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];   // VP je Punkt nach Zehnerbereich</code></pre>
+<pre><code>const PRO_PUNKT = [1,1,2,3,5,8,15,25,40,60];   // VP je Punkt nach Zehnerbereich</code></pre>
 <div class="scroll"><table>
-<tr><th>Bereich</th><th class="num">VP je Punkt</th><th class="num">ganzer Zehner</th><th class="num">ab 0 kumuliert</th></tr>
-<tr><td>0–19</td><td class="num">1</td><td class="num">10</td><td class="num">20</td></tr>
-<tr><td>20–39</td><td class="num">2</td><td class="num">20</td><td class="num">60</td></tr>
-<tr><td>40–49</td><td class="num">3</td><td class="num">30</td><td class="num">90</td></tr>
-<tr><td>50–59</td><td class="num">4</td><td class="num">40</td><td class="num">130</td></tr>
-<tr><td>60–69</td><td class="num">6</td><td class="num">60</td><td class="num">190</td></tr>
-<tr><td>70–79</td><td class="num">8</td><td class="num">80</td><td class="num">270</td></tr>
-<tr><td>80–89</td><td class="num">11</td><td class="num">110</td><td class="num">380</td></tr>
-<tr><td>90–99</td><td class="num">15</td><td class="num">150</td><td class="num">530</td></tr>
+<tr><th>Bereich</th><th class="num">VP je Punkt</th><th class="num">ganzer Zehner</th><th class="num">ab 20 kumuliert</th></tr>
+<tr><td>20–29</td><td class="num">2</td><td class="num">20</td><td class="num">20</td></tr>
+<tr><td>30–39</td><td class="num">3</td><td class="num">30</td><td class="num">50</td></tr>
+<tr><td>40–49</td><td class="num">5</td><td class="num">50</td><td class="num">100</td></tr>
+<tr><td>50–59</td><td class="num">8</td><td class="num">80</td><td class="num">180</td></tr>
+<tr><td>60–69</td><td class="num">15</td><td class="num">150</td><td class="num">330</td></tr>
+<tr><td>70–79</td><td class="num">25</td><td class="num">250</td><td class="num">580</td></tr>
+<tr><td>80–89</td><td class="num">40</td><td class="num">400</td><td class="num">980</td></tr>
+<tr><td>90–99</td><td class="num">60</td><td class="num">600</td><td class="num"><b>1 580</b></td></tr>
 </table></div>
-<p>Spezialisierung wird teuer, Breite bezahlbar. Die rund 160 Punkte eines
-Spitzenlaufs reichen für Breite <b>oder</b> eine Spitze, nie für beides. Eine
-Fertigkeit von 10 auf 100 kostet 520.</p>
+
+<div class="scroll"><table>
+<tr><th>Weg</th><th class="num">Kosten</th></tr>
+<tr><td>ein Wert von 20 auf 70</td><td class="num"><b>330 VP</b></td></tr>
+<tr><td><b>alle fünfzehn</b> von 20 auf 70</td><td class="num"><b>4 950 VP</b></td></tr>
+<tr><td>ein Wert von 70 auf 100</td><td class="num">1 250 VP</td></tr>
+<tr><td>ein Wert von 20 auf 100</td><td class="num">1 580 VP</td></tr>
+</table></div>
+
+<p><b>Die Obergrenze ist 100, für alles</b> <i>(bis 30. Juli 2026: Attribute 70,
+Fertigkeiten 60)</i>. Der alte Deckel war richtig, solange ein Spitzenlauf 160
+Punkte brachte — man konnte sich ohnehin nur eine Spitze leisten. Mit dem Ziel
+„ein perfekter Lauf soll alles auf 70+ heben“ machte ein Deckel bei 60 dieses Ziel
+per Regel unerreichbar.</p>
+
+<div class="note"><b>Die Bremse ist jetzt allein der Preis, und das ist der Kern
+der Ökonomie.</b> Der Weg von 90 auf 100 kostet 600 VP — mehr als drei Werte von
+20 auf 70 zusammen. <b>Breite und Spitze schließen einander fast aus</b>, und
+genau das soll die Entscheidung sein.</div>
 
 <h3>Der Kaufladen (196 VP insgesamt)</h3>
 <div class="scroll"><table>
@@ -825,9 +977,9 @@ gekaufter Leutnant 760.</p>
 <tr><td>Ruf, je volle 10</td><td class="num">+5</td><td>in Betrieb</td></tr>
 <tr><td>Je Nennung im Tagesbefehl</td><td class="num">+3</td><td>in Betrieb, max. 10</td></tr>
 <tr><td>Nie gekniffen, nie desertiert</td><td class="num">+20</td><td>in Betrieb</td></tr>
-<tr><td>Orden — Ehrenwaffe / Ehrensäbel / Ehrenlegion</td><td class="num">10 / 14 / 12</td><td>in Betrieb</td></tr>
+<tr><td>Orden — Ehrenwaffe / Ehrensäbel / Ehrenlegion</td><td class="num">30 / 42 / 36</td><td>in Betrieb</td></tr>
 <tr><td>Tapferkeitsmedaille — Bronze / Silber / Gold</td><td class="num">4 / 8 / 12</td><td>in Betrieb — <b>nur die höchste zählt</b></td></tr>
-<tr><td>Höhere Grade der Ehrenlegion</td><td class="num">+12</td><td>Offizier in Betrieb · Commandeur und Grand Officier fehlen</td></tr>
+<tr><td>Höhere Grade der Ehrenlegion</td><td class="num">36 / 48</td><td>Offizier und <b>Grand Officier</b> in Betrieb · Commandeur fehlt</td></tr>
 <tr><td>Je fremdem Orden (max. 2)</td><td class="num">+10</td><td>Eiserne Krone in Betrieb · zweiter Platz frei</td></tr>
 <tr><td>Überlebensbonus</td><td class="num">+70 … +180</td><td>in Betrieb — gestaffelt seit der ersten Rangschranke</td></tr>
 </table>
@@ -1387,92 +1539,90 @@ mit ihr die Begründung — und misst nach.</p>
 <!-- ============================== ZIELWERTE ============================== -->
 <section id="zielwerte">
 <h2>Gemessene Zielwerte</h2>
-<p class="lead">Je 40 Läufe, Stand 28. Juli 2026 nach dem Bau der Ränge 4 und 5.
-Vier simulierte Spielweisen. Der Bot kauft ohne <code>VP=</code> nichts und
-<i>ist</i> damit genau der Erstlauf-Spieler.</p>
+<p class="lead">Stand 30. Juli 2026, nach dem Umbau von Probe, Ökonomie und
+Leiter. Alle elf Kapitel, <b>163 Stationen</b>. Der Bot kauft ohne
+<code>VP=</code> nichts und <i>ist</i> damit genau der Erstlauf-Spieler.</p>
 
+<h3>Die zwei Leitzahlen</h3>
 <div class="scroll"><table>
-<tr><th>Größe</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160</th><th class="num">Veteran 260</th></tr>
-<tr class="hi"><td><b>überlebt</b> · Leitzahl</td><td class="num">43 %</td><td class="num">20 %</td><td class="num">73 %</td><td class="num">68 %</td></tr>
-<tr class="hi"><td><b>Sergent erreicht</b> · Leitzahl</td><td class="num">18 %</td><td class="num">20 %</td><td class="num">70 %</td><td class="num">80 %</td></tr>
-<tr><td>Gestorben (von 40)</td><td class="num">23</td><td class="num">32</td><td class="num">11</td><td class="num">13</td></tr>
-<tr><td>Italien überstanden · Lehrstück</td><td class="num">100 %</td><td class="num">95 %</td><td class="num">100 %</td><td class="num">100 %</td></tr>
-<tr><td>Elitekompanie erreicht</td><td class="num">45 %</td><td class="num">55 %</td><td class="num">93 %</td><td class="num">100 %</td></tr>
-<tr><td>Caporal erreicht</td><td class="num">38 %</td><td class="num">55 %</td><td class="num">93 %</td><td class="num">100 %</td></tr>
-<tr><td>Caporal-fourrier erreicht</td><td class="num">18 %</td><td class="num">20 %</td><td class="num">70 %</td><td class="num">80 %</td></tr>
-<tr><td>Punkte, Median</td><td class="num">64</td><td class="num">61</td><td class="num">192</td><td class="num">186</td></tr>
+<tr><th>Leitzahl</th><th>Was sie misst</th></tr>
+<tr><td><b>Weite</b></td><td>Wie weit der <b>mittlere</b> Lauf kommt, in Stationen — <i>wie hart das Spiel ist.</i></td></tr>
+<tr><td><b>höchster Rang</b></td><td>Wie viele den höchsten gebauten Rang bekommen haben — <i>ob die Leiter trägt.</i></td></tr>
 </table></div>
 
-<h3>Die zwei Leitzahlen und ihre Sollwerte</h3>
-<p><b>Gemessen wird an zwei Zahlen, und nur an ihnen:</b> <code>überlebt</code>
-sagt, wie hart das Spiel ist; <code>Sergent erreicht</code> sagt, ob die Leiter
-trägt.</p>
-<table>
-<tr><th>Sollwert</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160</th></tr>
-<tr><td class="k">überlebt</td><td class="num">40–55 %</td><td class="num">15–30 %</td><td class="num">70–85 %</td></tr>
-<tr><td class="k">Sergent erreicht</td><td class="num">15–30 %</td><td class="num">15–30 %</td><td class="num">60–75 %</td></tr>
-</table>
-<p class="lead">Gemessen: überlebt 43 / 20 / 73 %, Sergent 18 / 20 / 70 %.
-Alle sechs im Band.</p>
-
-<div class="warn"><b>Zwei alte Sollwerte sind ersatzlos gestrichen.</b>
-„Italien überstanden“ hatte das Band 45–55 % und liefert seit den Lebenspunkten
-95–100 % — Italien ist das Lehrstück und <i>soll</i> fast jeden durchlassen. Der
-Caporal-Anteil war mit 30 % gegen ein Todesmodell geeicht, in dem ein Viertel
-der Männer die Beförderung nie erlebte; heute ist der Caporal der <i>unterste</i>
-erreichbare Aufstieg. Beide werden nur noch zur Einordnung mitgedruckt.</div>
-
-<p><b>Der Abstand ist die eigentliche Zahl.</b> Zwischen Erstlauf und Veteran
-liegen 30 Punkte beim Überleben und 52 beim Sergenten. Schrumpft einer davon
-unter 25 Punkte, trägt die Leiter nicht mehr — dann kaufen Veteranenpunkte
-keinen spürbaren Unterschied, und das ist der Kern des Spiels.</p>
-
-<p><b>Mut kostet, Mut steigt auf.</b> Der mutige Erstläufer überlebt halb so oft
-(20 gegen 43 %) und erreicht den Sergenten trotzdem etwas öfter (20 gegen 18 %).
-Dieser Kreuzungspunkt ist die Achse, um die die Ereignisse gebaut sind.</p>
-
-<p><b>Der Veteran mit 260 VP überlebt nicht besser als der mit 160</b> (68 gegen
-73 %, im Rauschen), <b>erreicht den Sergenten aber deutlich öfter</b> (80 gegen
-70 %). Das ist die Staffelung aus <code>PRO_PUNKT</code>: Die ersten 160 Punkte
-kaufen Konstitution und Muskete — Überleben. Die nächsten 100 kaufen nur noch
-das Nachschärfen einer Spitze, und die zahlt sich in Ruf aus, nicht in Blut.
-Veteranenpunkte haben eine Sättigungsgrenze beim Überleben und keine beim
-Aufstieg.</p>
-
-<p class="lead">Beide Bänder sind zwei Kapitel tief und vorläufig — sie sind an
-einem Spiel geeicht, das mit dem Sergenten endet. Mit Kapitel 3 werden sie neu
-gesetzt.</p>
+<div class="warn"><b>Die Weite steht immer mit ihrem Nenner da.</b> Sie ist eine
+absolute Stationszahl, kein Anteil — 31 von 163 ist nicht schlechter als 58 von
+122, es ist eine andere Größe. Wer den Nenner wegwirft, liest jeden Ausbau als
+Regression. <b>Und Vergleiche werden nicht gegen eine Zahl von gestern gezogen,
+sondern gegen denselben Stand, neu gemessen.</b><br><br>
+Die frühere Leitzahl <code>überlebt</code> ist ausgelaufen: Sie ist ein
+<i>Produkt</i> über alle Kapitelquoten und geht mit jedem Faktor gegen null. Bei
+elf Kapiteln liefert sie für jeden Messwert dasselbe. <b>Eine Leitzahl, die ein
+Produkt über alle Kapitel ist, hat ein Verfallsdatum. Ein Median hat keines.</b></div>
 
 <div class="scroll"><table>
-<tr><th>Größe</th><th class="num">Erstlauf vorsichtig</th><th class="num">Erstlauf mutig</th><th class="num">Veteran 160 VP</th><th class="num">Veteran 260 VP</th></tr>
-<tr><td>Italien überstanden</td><td class="num">100 %</td><td class="num">98 %</td><td class="num">100 %</td><td class="num">95 %</td></tr>
-<tr><td><b>Beide Feldzüge überstanden</b></td><td class="num"><b>50 %</b></td><td class="num"><b>18 %</b></td><td class="num"><b>68 %</b></td><td class="num"><b>68 %</b></td></tr>
-<tr><td>Gestorben</td><td class="num">20/40</td><td class="num">33/40</td><td class="num">13/40</td><td class="num">13/40</td></tr>
-<tr><td>Elitekompanie erreicht</td><td class="num">55 %</td><td class="num">48 %</td><td class="num">93 %</td><td class="num">95 %</td></tr>
-<tr><td>Caporal erreicht</td><td class="num">50 %</td><td class="num">45 %</td><td class="num">90 %</td><td class="num">98 %</td></tr>
-<tr><td>Punkte-Median</td><td class="num">121</td><td class="num">109</td><td class="num">186</td><td class="num">188</td></tr>
+<tr><th>Größe</th><th class="num">Erstlauf ohne Vorrat <i>(80 Läufe)</i></th><th class="num">Veteran 5800 VP <i>(40)</i></th></tr>
+<tr class="hi"><td><b>Weite</b> (von 163) · Leitzahl</td><td class="num"><b>31</b></td><td class="num"><b>163</b></td></tr>
+<tr class="hi"><td><b>höchster Rang (Capitaine)</b> · Leitzahl</td><td class="num"><b>4 %</b></td><td class="num"><b>98 %</b></td></tr>
+<tr><td>Ganz durch</td><td class="num">0 %</td><td class="num">80 %</td></tr>
+<tr><td>Italien überstanden · Lehrstück</td><td class="num">94 %</td><td class="num">100 %</td></tr>
+<tr><td>Ägypten überstanden</td><td class="num">43 %</td><td class="num">98 %</td></tr>
+<tr><td>Caporal erreicht</td><td class="num">65 %</td><td class="num">100 %</td></tr>
+<tr><td>Sergent erreicht</td><td class="num">53 %</td><td class="num">100 %</td></tr>
+<tr><td>Punkte, Median</td><td class="num">492</td><td class="num">4 123</td></tr>
 </table></div>
 
-<blockquote><p>Mut kostet neunmal so viele Männer wie Vorsicht — neun Tote gegen
-einen — und der mutige Lauf holt trotzdem die Spitzenwertung. <b>Vorsichtig
-überlebt, mutig steigt auf und stirbt öfter.</b></p></blockquote>
+<p><b>Der Abstand ist die eigentliche Zahl</b> — 132 Stationen und 94 Punkte beim
+Rang. Die eigene Regel lautet: <i>Schrumpft er unter 25 Punkte, trägt die Leiter
+nicht mehr</i>, denn dann kaufen Veteranenpunkte keinen spürbaren Unterschied.
+Heute lautet die Frage umgekehrt, ob der Erstläufer noch genug sieht.</p>
 
-<div class="warn"><b>Zwei Vorbehalte beim Lesen dieser Tabelle.</b> Der
-Streubereich bei 40 Läufen liegt bei ±8 Punkten — wer einen Unterschied von unter
-zehn Punkten deutet, deutet Rauschen. Und der Punkte-Median ist bei rund 50 %
-Überlebensquote unbrauchbar, weil überstandene Läufe pauschal 25 und 10 Punkte
-bekommen.</div>
+<div class="warn"><b>Zwei offene Befunde, beide gemessen und beide unentschieden.</b>
+<ol>
+<li><b>Der Erstläufer klettert zu schnell.</b> Caporal 65 %, Sergent 53 %, und in
+neun von achtzig Läufen sogar ein Offizierspatent — bei einer Weite von 31
+Stationen. Ein Mann, der im Mittel bei Station 31 von 163 stirbt, wird zu zwei
+Dritteln Caporal. Ursache ist der Fertigkeiten-Sockel 20: Muskete 20 gegen
+Aufgabe 35 trifft zu 31 % statt zu 8 %, also mehr Schaden, mehr Sichtbarkeit,
+mehr Ruf — und Ruf <i>ist</i> die Beförderungsschwelle. <b>Der Hebel dagegen ist
+nicht der Sockel, sondern die Härtekurve</b>, die in Italien auf +0 steht und
+genau dort nicht greift, wo der Erstläufer lebt.</li>
+<li><b>Der Marschall ist unerreichbar.</b> Rang 14 verlangt eine Generalskampagne,
+und die Szenarien gibt es nicht — dieselbe Lage, in der Rang 13 bis zum 30. Juli
+war. Solange die oberste Stufe fehlt, ist jede Eichung der Kostenkurve
+vorläufig.</li>
+</ol></div>
 
-<div class="note">Zwei dieser Zahlen haben derzeit <b>keinen Sollwert</b>:
-„Italien überstanden“ verfehlt das alte Zielband 45–55 % um das Doppelte, und die
-neue Leitgröße „beide Feldzüge überstanden“ wurde ausdrücklich ohne Zielband
-eingeführt. Ohne Sollwert ist nicht entscheidbar, ob eine künftige Änderung die
-Balance verbessert oder verschlechtert. Das sind die beiden ersten Punkte in der
-Liste oben.</div>
-</section>
+<h3>Der Weg dorthin, zur Einordnung</h3>
+<p>Dieselben zwei Leitzahlen zu früheren Ständen. Die Weite wandert mit dem
+Ausbaustand, deshalb steht der Nenner dabei:</p>
+<div class="scroll"><table>
+<tr><th>Stand</th><th class="num">Weite Erstlauf</th><th class="num">Weite Veteran</th><th class="num">Rang Erstlauf</th><th class="num">Rang Veteran</th></tr>
+<tr><td>acht Kapitel, 122 Stationen</td><td class="num">58</td><td class="num">75 <i>(400 VP)</i></td><td class="num">8 %</td><td class="num">45 %</td></tr>
+<tr><td>elf Kapitel, 157 Stationen</td><td class="num">31</td><td class="num">61 <i>(400 VP)</i></td><td class="num">0 %</td><td class="num">18 %</td></tr>
+<tr class="hi"><td><b>nach dem Umbau, 163 Stationen</b></td><td class="num"><b>31</b></td><td class="num"><b>163</b> <i>(5800 VP)</i></td><td class="num"><b>4 %</b></td><td class="num"><b>98 %</b></td></tr>
+</table></div>
 
-<!-- ============================== TON ============================== -->
-<section id="ton">
+<p><b>Die Punktezahlen sind nicht vergleichbar und sollen es nicht sein</b> — die
+Wertung ist absichtlich verfünffacht worden, weil die Kostenkurve es verlangt.
+Vergleichbar sind Weite und Rang, und dort steht das Ergebnis so, wie es bestellt
+war: Der Erstläufer bewegt sich nicht, der Veteran geht durch.</p>
+
+<h3>Zwei Fallen beim Messen, beide teuer bezahlt</h3>
+<ol>
+<li><b>Das Rauschen ist größer, als es sich anfühlt.</b> Bei 40 Läufen liegt eine
+Standardabweichung bei rund sieben Punkten. <b>Wer einen Unterschied von unter
+zehn Punkten deutet, deutet Rauschen.</b> Bei Zweifeln 80 Läufe.</li>
+<li><b>Ein Fließtext ist kein Zustand.</b> Dreimal hat ein Prüfstand still das
+Falsche gemessen, weil er an gerenderten Wörtern verzweigte statt an
+<code>LAUF</code>/<code>S</code>/<code>K</code> — einmal galten alle Gefallenen als
+Überlebende (100 % gemeldet, tatsächlich 3 %), einmal alle Ausgemusterten als
+gefallen, und einmal fand der Bot das Lager nicht mehr, weil eine Überschrift
+umbenannt worden war (Caporal 0 % von 80). <b>Eine Quote, die exakt auf null oder
+exakt auf hundert fällt, ist fast immer ein kaputter Prüfstand und kein
+Befund.</b></li>
+</ol>
+
 <h2>Ton und Sprache</h2>
 
 <blockquote><p><b>Gut:</b> „Guérin, der links neben dir stand, liegt seit einer

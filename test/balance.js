@@ -261,7 +261,24 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     if (!STATIONSZAHL) STATIONSZAHL = await p.evaluate(() => KAPITEL.length);
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
-    while (s++ < 600) {
+    /* ── Das Klickbudget ist ein Prüfstand-Wert und darf nie die Messung sein ──
+       **Es stand auf 600, und am 30.07.2026 wurde es zur bindenden Schranke.**
+       Der Auftrag-Fix hob die Rangdecke von 9 auf 11 — und ab Rang 10 hängt der
+       Schaden am Zustand der vier Kompanien statt an den eigenen Werten. Ein
+       Maximalveteran, der als Capitaine ein Gefecht in drei Runden entschied,
+       braucht als Colonel zehn. Die Klicks je Gefecht vervielfachen sich also
+       genau dann, wenn die Leiter endlich trägt.
+
+       Gemessen an derselben Fassung, 40 Läufe: mit 600 endeten **39 von 40**
+       Läufen ohne Todesblatt und ohne Wertung — der Median stand bei Station 32
+       und der Punktebereich bei „952–952“, also einem einzigen gewerteten Lauf.
+       **Eine Spanne von null ist dasselbe Signal wie eine Quote von exakt 100 %:
+       kein Befund, sondern ein kaputter Prüfstand.**
+
+       2500 ist bewusst weit über dem, was ein voller Lauf braucht (rund 700).
+       Ein Budget, das gerade so reicht, misst beim nächsten Kapitel wieder sich
+       selbst. */
+    while (s++ < 2500) {
       const t = await p.$eval('#app', e => e.innerText);
       // Leoben ist der Übergang: wer ihn sieht, hat Italien lebend hinter sich.
       // Achtung: Kartenköpfe werden per CSS in Großbuchstaben gesetzt, und

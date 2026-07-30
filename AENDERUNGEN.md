@@ -5,6 +5,144 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Der Umbau: Probe, Ökonomie, Leiter
+
+**Zwölf Änderungen, und keine konnte für sich allein stehen.** Sie stehen hier in der Reihenfolge, in der sie voneinander abhängen — wer eine davon zurücknimmt, nimmt die darunter mit.
+
+### 1 · Die Probe neu geeicht
+
+| | vorher | **jetzt** |
+|---|---|---|
+| Sockel | 50 | **60** |
+| Würfe (gemittelt) | 2 | **6** |
+| Streuung des Wurfs | ≈ 20 | **≈ 11,8** |
+| Gleich gut wie die Aufgabe | 50 % | **80 %** |
+| Wert 8 gegen Aufgabe 40 | 29 % | **3 %** |
+
+**Warum:** Zwei Klagen desselben Tages, beide berechtigt. *„Ich sollte bei gleich hohem Skill wie Anforderung keine 50 % Chance haben, sondern eine die Richtung 80 % geht"* — das ist der Sockel. *„Reinspieltechnisch macht es keinen Sinn, mit 8 Bajonett gegen 40 zu spielen und 30 % zu schaffen"* — das ist die Wurfbreite. **Zwei Regler, zwei Klagen, und sie tun Verschiedenes:** Der Sockel verschiebt die Kurve waagerecht, die Wurfbreite macht sie steil.
+
+> **Der Sockel allein war der falsche Weg, und das ist gemessen.** `PROBE_SOCKEL = 70` ohne engeren Wurf hob auch „8 gegen 40" auf 29 % und blies den Erstläufer auf: Capitaine 0 → **33 %**, Punkte-Median 34 → 263. Eine Verschiebung nach rechts hilft dem Schwachen genauso wie dem Starken — nur die Steilheit trennt sie.
+
+**`chance()` rechnet die Anzeige geschlossen um** (logistische Näherung der Normalverteilung, gegen 200 000 echte Würfe geprüft, Abweichung ≤ 2 Punkte). Der Zielwert *ist* bei sechs Würfen nicht mehr die Prozentzahl.
+
+### 2 · Der Schadensbonus ist ersatzlos weg
+
+`koennen` und `meister()` gaben bis zu +50 % Wirkung für alles, was die Klemme bei 95 wegwarf. Entfernt auf Ansage: *„Dass man über einem bestimmten Wert dann mehr Schaden macht, ist Schwachsinn."* **Und er hat recht — eine Muskete schießt nicht härter, weil der Mann besser zielt.**
+
+### 3 · Steigende Schwierigkeiten je Feldzug (`kampagnenHaerte()`)
+
+Ein Zuschlag auf **jede** Probe, je Kampagne eine Zahl:
+
+| Italien | Ägypten | Garnison | Austerlitz | Jena | Eylau | Spanien | Russland | 1813 | 1814 | Waterloo |
+|---|---|---|---|---|---|---|---|---|---|---|
+| +0 | +4 | +0 | +6 | +8 | +10 | +12 | +16 | +16 | +18 | **+20** |
+
+**Warum:** Das ist die *richtige* Antwort auf die Frage, die der Schadensbonus falsch beantwortet hat — *Was kauft ein Wert, wenn die Trefferchance schon bei 99 % steht?* Er kauft weiterhin Trefferchance, nur wird die Aufgabe mit jedem Feldzug schwerer. **Wert 80 ist 1796 überflüssig und 1812 gerade genug.** Die Garnison steht auf 0: Es ist Frieden.
+
+### 4 · Ein Deckel für alles, und ein höherer Sockel
+
+- Attribute und Fertigkeiten gehen bis **100** (vorher 70 / 60).
+- Fertigkeiten starten bei **20** (`FERT_SOCKEL`; vorher 5).
+
+**Warum der Deckel fiel:** Das Ziel lautet *„nach perfekten Läufen alles auf +70 pushen können"* — ein Deckel bei 60 macht das per Regel unmöglich. **Die Bremse ist jetzt allein der Preis.**
+
+### 5 · Die Aushebung statt der Verteilung
+
+**Keine Handverteilung mehr.** Man sieht einen ausgewürfelten Mann und darf „Einen anderen Mann" drücken, so oft man will. *„Am Anfang muss man sich nutzlos fühlen."* Wer seine Punkte setzen darf, baut sich einen Spezialisten; wer einen Mann bekommt, bekommt einen Mann.
+
+### 6 · Exponentielle Kosten
+
+```js
+PRO_PUNKT = [1,1,2,3,5,8,15,25,40,60]    // vorher [1,1,2,2,3,4,6,8,11,15]
+```
+
+| Weg | Kosten |
+|---|---|
+| ein Wert von 20 auf 70 | **330 VP** |
+| **alle fünfzehn** von 20 auf 70 | **4 950 VP** |
+| ein Wert von 90 auf 100 | **600 VP** |
+
+**Breite und Spitze schließen einander fast aus**, und genau das soll die Entscheidung sein.
+
+### 7 · Die Wertung ×5 — Kosten und Einkommen sind ein Paar
+
+| Posten | vorher | **jetzt** |
+|---|---|---|
+| Rang 14 | 580 | **2 900** |
+| Kapitel | 8 je Kapitel | **20 je Kapitelnummer**, aufsummiert (alle elf: 1 320) |
+| Ruf | 5 je 10 | **10 je 10** |
+| Nennungen | 3 | **10** |
+| Überleben | 70 / 120 / 180 | **350 / 600 / 900** |
+| Nie gekniffen | 20 | **100** |
+| Orden | ×1 | **×3** |
+
+**Der Rang ist der größte Posten und wächst überproportional** — *„Vor allem Beförderungen bringen mehr. Auch positiver Abschluss von Kampagnen … es soll ein spürbarer Unterschied sein."* Die Kapitel sind gestaffelt, nicht pauschal: Der elfte Feldzug ist mehr wert als der erste, weil er ungleich teurer erkauft ist. **Orden bekamen bewusst nur Faktor 3** — *„Auszeichnungen sind dabei nicht sooo wichtig."*
+
+> **Gerechnet, nicht geschätzt:** Ein perfekter Lauf bringt 3 945 (Decke Rang 9), 4 960 (Rang 12) oder 5 370 VP (Rang 13). „Alles auf 70" kostet 4 950. **Die Decke entscheidet, ob das Ziel erreichbar ist** — deshalb Punkt 12.
+
+### 8 · Ruf-Schwellen über die volle Strecke
+
+| Rang | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| alt | 35 | 52/62 | 75 | 95 | 120 | 150 | 180 | 200 | 230 | 260 | 300 |
+| **neu** | 45 | 60/70 | 100 | 145 | 195 | 255 | 325 | 400 | 480 | 570 | **680** |
+
+Sie endeten bei 300, während ein Maximalveteran mit **688** ankommt: Nach gut der halben Kampagne war die Leiter aufgebraucht. Rang 3 bleibt unangetastet — der erste Aufstieg soll früh kommen.
+
+### 9 · Gunst sammelt man beim nächsten Beurteiler (`beurteiler()`)
+
+Zwei Quellen zahlen jetzt an den Patron des **nächsten erreichbaren** Leitereintrags statt an einen festen Namen: die voll bestandene Sondermission (+1) und der erfüllte Auftrag ab Rang 9 (+1 / −1).
+
+> **⚠ Der Auftrag gab hart an Vernet.** Vernet ist Patron für 6, 8 und 9; ab Rang 9 beurteilt Grandmaison. Der Auftrag ist zugleich die einzige Quelle, die *jedes* Gefecht liefert — er fütterte also Gefecht um Gefecht einen Mann, der nichts mehr zu vergeben hatte. **Dritter Fall derselben Familie an einem Tag: eine Regel, die an einen Namen gebunden ist statt an die Rolle.**
+
+### 10 · Feldbeförderung bis Rang 6, Bescheid im nächsten Lager
+
+Rang 2–6 direkt nach dem Gefecht (`feldBefoerderung()`, `FELD_RANG_MAX = 6`), Rang 7+ nur bei der Musterung. **Der Bescheid wird nachgereicht:** `S.bescheidOffen` → `bescheidNachreichen()` → eigener Bildschirm im nächsten Lager, ab Rang 5. **Man ist es sofort und hat es eine Woche später schriftlich.**
+
+Historisch ist das der eigentliche Bruch der Laufbahn: Einen Caporal ernannte der Capitaine im Hof; für ein Offizierspatent brauchte es eine Kommission und die Unterschrift des Kriegsministers.
+
+### 11 · Zwei Musterungen in jedem Feldzug
+
+Sechs Stationen dazu, **157 → 163**. Kapitel 10 und 11 hatten zusammen **eine**, Waterloo gar keine — ein Mann mit erfüllten Schwellen stand bei Station 156 daneben.
+
+### 12 · Der Grand Officier der Ehrenlegion
+
+Rang 13 forderte `orden:'legion_grand'`, und den gab es nicht. **Damit waren Rang 13 und 14 verschlossen und die ganze VP-Ökonomie gegen eine Decke geeicht, die niemand erreicht.** Bedingungen sind Zahlen, die es schon gab: der dritte Grad, ein Regiment, fünf Bulletins. Vierte Ordensform (`ordenStern()`): achtstrahliger Bruststern, **ohne Band** — man legt ihn nicht ab.
+
+### 13 · Das Klickbudget des Prüfstands (`test/balance.js`)
+
+**600 → 2500.** Keine Balance-Zahl, aber sie hat eine Messreihe wertlos gemacht, und der Zusammenhang ist keiner, den man vorher sieht:
+
+```
+Auftrag-Fix → Rangdecke 9 → 11 → ab Rang 10 hängt der Schaden an den vier
+Kompanien statt an den eigenen Werten → Gefechte dauern länger → mehr Klicks
+```
+
+**Ein Maximalveteran, der als Capitaine ein Gefecht in drei Runden entschied, braucht als Colonel zehn.** Das Budget wurde also genau in dem Augenblick zur bindenden Schranke, in dem die Leiter zum ersten Mal trug.
+
+| Gemessen, dieselbe Fassung, 40 Läufe | Budget 600 |
+|---|---|
+| Läufe ohne Todesblatt und ohne Wertung | **39 von 40** |
+| Weite | 32 von 163 |
+| Punktebereich | **952–952** |
+
+> **Die Punktespanne von null war das Signal.** Vierzig Läufe können nicht denselben Punktwert liefern — sie sagt, dass **ein einziger** Lauf bis zu einer Wertung kam. Die Rangverteilung daneben (`11 Col 39`) war dabei echt: Sie liest `S.rang` bei jedem Klick. **Eine Zahl war richtig, die andere ein Artefakt, und beide standen nebeneinander.**
+>
+> **Regel: Ein Prüfstand mit einer Obergrenze meldet nicht, wenn er sie erreicht.** Dasselbe Muster wie die 100 % des Härtemodus und die 0 % Caporal des blinden Bots — vierter Fall in diesem Protokoll. 2500 steht bewusst weit über den rund 700, die ein voller Lauf braucht: **Ein Budget, das gerade so reicht, misst beim nächsten Kapitel wieder sich selbst.**
+
+### Gemessen — 163 Stationen, Veteran mit `VP=5800`
+
+| | **Weite** (von 163) | **höchster Rang (Cpt)** | Caporal | Punkte-Median |
+|---|---|---|---|---|
+| Erstlauf ohne Vorrat *(80 Läufe)* | **31** | **4 %** | 65 % | 492 |
+| Veteran 5800 VP *(40)* | **163** | **98 %** | 100 % | 4 123 |
+
+**Weite und Rang sind vergleichbar, die Punkte nicht** — die Wertung ist absichtlich verfünffacht. Der Erstläufer bewegt sich nicht (31 wie vorher), der Veteran geht durch.
+
+> **⚠ Zwei offene Befunde, beide in `OFFEN.md`:** Der Erstläufer klettert zu schnell (Caporal 26 → **65 %**, Nebenwirkung des Fertigkeiten-Sockels), und der Veteran stand vor der letzten Reparatur bei Rang 9 an.
+
+---
+
 ## 2026-07-29 — Überführt: die Zwei-Würfe-Probe hat den Erstläufer halbiert
 
 **Nichts geändert, nur gemessen** — aber es ist der größte Einzelbefund, den dieses Protokoll enthält.

@@ -28,7 +28,8 @@ Dazu ein paar Regeln, die das Spiel zusammenhalten:
 
 - **Der Tod ist endgültig.** Kein Weiterspielen, kein Nachfolger.
 - **Nur der beste Lauf zählt.** Veteranenpunkte sind das Maximum über alle Läufe, nie die Summe — es gibt nichts zu grinden, nur zu übertreffen.
-- **Dein erster Mann rückt mit sechzig Punkten ein und wird Ägypten sehr wahrscheinlich nicht überleben.** Das ist keine Strafe, sondern der Anfang: Was er erreicht, wird zum Startkapital des Nächsten. Gegner, gegen die du im ersten Lauf chancenlos bist, sind im dritten zu schlagen — nicht weil sie schwächer geworden sind, sondern weil du schneller lädst.
+- **Deinen ersten Mann suchst du dir nicht aus, du bekommst ihn.** Der Werber würfelt, und du darfst so oft einen anderen verlangen, wie du willst — aber verteilen darfst du nichts. Er wird Ägypten sehr wahrscheinlich nicht überleben, und das ist keine Strafe, sondern der Anfang: Was er erreicht, wird zum Startkapital des Nächsten. **Erst der zweite Mann wird gebaut**, mit dem, was der erste sich verdient hat.
+- **Wer der Aufgabe gewachsen ist, besteht sie in vier von fünf Fällen — und wer weit darunter steht, so gut wie nie.** Der Wurf entscheidet nur in einem schmalen Streifen um den Gleichstand; darüber und darunter entscheidet, was du kannst. **Aber die Aufgabe wächst mit dem Krieg:** Denselben Wagen aus demselben Schlamm zu ziehen ist 1812 bei minus zwanzig Grad etwas anderes als 1796 in Italien. Ein Wert, der in Italien überflüssig war, ist in Russland gerade genug.
 - **Beförderung braucht eine Vakanz.** Ruf und Fürsprache reichen nicht; die Stelle muss frei sein. Frei wird sie, weil jemand gestorben ist. Das Spiel sagt das nie, es zeigt es nur.
 - **Ausrüstung ist ein Zustand, kein Besitz.** Schuhe halten einen Feldzug, keine zwei.
 - **Konstitution kauft Zähigkeit, nicht Unverwundbarkeit.** Sie bestimmt, wie viele Treffer du wegsteckst — fünf bis acht, dann ist es vorbei. Die Zeit heilt, langsam; aber der Atem steigt nie über das Leben, und wer zerschossen weiterkämpft, kämpft kurzatmig.
@@ -39,7 +40,7 @@ Historische Fixpunkte, dazwischen freies Spiel: Montenotte, die Brücke von Lodi
 
 ## Stand
 
-**Alle elf Feldzüge sind spielbar** — Italien 1796/97, Ägypten 1798/99, die Garnison von Nîmes 1801–04, Austerlitz 1805, Jena–Auerstedt 1806, Eylau–Friedland 1807, Spanien 1808–12, Russland 1812, Deutschland 1813, Frankreich 1814 und die Hundert Tage 1815, zusammen einhundertsiebenundfünfzig Stationen, einundvierzig Gefechte, Lager, Winterquartiere und fünf Saisons.
+**Alle elf Feldzüge sind spielbar** — Italien 1796/97, Ägypten 1798/99, die Garnison von Nîmes 1801–04, Austerlitz 1805, Jena–Auerstedt 1806, Eylau–Friedland 1807, Spanien 1808–12, Russland 1812, Deutschland 1813, Frankreich 1814 und die Hundert Tage 1815, zusammen **einhundertdreiundsechzig Stationen**, einundvierzig Gefechte, Lager, Winterquartiere und fünf Saisons.
 
 Italien ist das Lehrstück: barfuß über die Pässe, die Brücke von Lodi, der Sumpf von Arcole. Ägypten ist etwas anderes — dort töten die Wege mehr Männer als die Gefechte. Hitzschlag im Marsch auf Damanhur, Ruhr am Sinai, das Fieber aus Jaffa auf dem Rückzug. Akkon fällt nicht, so wie es 1799 nicht gefallen ist, und nach Abukir liegt die Flotte auf dem Meeresgrund: Es gibt keinen Weg mehr nach Hause. Dann drei Jahre Frieden, in denen der Feind nicht die Kugel ist, sondern die Zeit — und danach Austerlitz, wo geprüft wird, was in diesen drei Jahren gelernt wurde.
 
@@ -61,13 +62,15 @@ Zwischen den Gefechten liegen Wege: 1 200 km von Savona bis Leoben, danach 4 000
 
 **Vier Mal in einer Laufbahn wird der Bildschirm ein anderer, und drei Mal davon verliert man dabei etwas.** Als Chef de bataillon sind Männer nur noch vier Rechtecke — und die Atemleiste, auf die man zehn Ränge lang geschaut hat, ist weg. Ersatzlos, ohne Kommentar. Als Général de brigade ist der Feind keine Zahl mehr, sondern eine Meldung mit Uhrzeit und Verlässlichkeit, und was darin steht, ist vierzig Minuten alt. Der General sieht mehr und weiß weniger; der Fusilier sah vier Männer und Rauch, aber was er sah, war wahr.
 
+**Unteroffizier wirst du im Hof, Offizier auf dem Papier.** Bis zum Sergent-major ernennt dich der Capitaine direkt nach dem Gefecht, in dem die Stelle frei geworden ist — die Urkunde reicht dir die Kanzlei eine Woche später im nächsten Lager nach. Alles darüber gibt es nur bei einer Musterung, und jeder Feldzug hat zwei davon.
+
 **Und du kommst dorthin.** Wer einmal Sergent-major war, kann sich beim nächsten Mann ein **Offizierspatent** kaufen: Er rückt 1796 in Savona mit Epauletten ein, hat nie eine Muskete abgefeuert, und niemand in der Kompanie kennt ihn. Martel, Collot, Berthaud und Vernet stehen bei null, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen. Er ist mechanisch stärker und sozial nackt — und er überlebt in acht von hundert Läufen. Der Kauf erhöht auch nie den Punktevorrat; er zeigt dir die andere Hälfte des Spiels, mehr nicht.
 
-**Und was du getan hast, steht am Rock.** Neun Auszeichnungen, und man erkennt an der Form, was für eine es ist, bevor man den Namen liest: ein Staatsorden ist ein Kreuz am Band, eine Gefechtsauszeichnung eine geprägte Scheibe an der Trikolore, eine Ehrenwaffe ein Gegenstand auf einem Täfelchen, in das dein Name graviert ist. Sie kommen nie aus einem Würfelwurf — man soll hinterher genau sagen können, wofür. Der Ehrensäbel verlangt eine Kette ohne einen einzigen Fehlschlag: Wer durch die Bresche von Akkon gegangen ist, ohne zu straucheln, bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist.
+**Und was du getan hast, steht am Rock.** Zehn Auszeichnungen, und man erkennt an der Form, was für eine es ist, bevor man den Namen liest: ein Staatsorden ist ein Kreuz am Band, eine Gefechtsauszeichnung eine geprägte Scheibe an der Trikolore, eine Ehrenwaffe ein Gegenstand auf einem Täfelchen, in das dein Name graviert ist. Der oberste Grad hängt an gar nichts — ein achtstrahliger Stern, auf den Rock genäht: Ab dort wird man nicht mehr ausgezeichnet, sondern aufgenommen, und man legt ihn nicht ab. Sie kommen nie aus einem Würfelwurf — man soll hinterher genau sagen können, wofür. Der Ehrensäbel verlangt eine Kette ohne einen einzigen Fehlschlag: Wer durch die Bresche von Akkon gegangen ist, ohne zu straucheln, bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist.
 
-Entworfen, aber noch nicht gebaut: die Generalskampagnen als eigene Szenarien. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
+Entworfen, aber noch nicht gebaut: die Generalskampagnen als eigene Szenarien — und damit ist der Marschallstab bis auf Weiteres die Legende, die er im Text ohnehin ist. Das vollständige Design steht in [`KONZEPT.md`](KONZEPT.md), die Leiter in [`RANGLEITER.md`](RANGLEITER.md).
 
-Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat einhundertsiebenundfünfzig Stationen und neunzehn Jahre hinter sich — und einen Epilog, der sagt, was aus ihm geworden ist.
+Und die Gegner wachsen mit: Jede Kampagne trägt eine Güte-Zahl, die bestimmt, wie gut der Feind schießt und wie lange er steht. Beaulieus geschlagene Kolonnen laufen von allein; Dschesärs Garnison in Akkon läuft nicht, und die russische Garde auf dem Pratzeberg auch nicht. Wer alles schafft, hat einhundertdreiundsechzig Stationen und neunzehn Jahre hinter sich — und einen Epilog, der sagt, was aus ihm geworden ist.
 
 ---
 
@@ -91,7 +94,8 @@ npm install playwright && npx playwright install chromium
 node test/durchspielen.js     # spielt einen Lauf durch, meldet Konsolenfehler
 node test/raenge.js           # alle vierzehn Ränge: stimmen Knöpfe, Bild und das, was fehlt
 node test/spielstand.js       # sichern, fortsetzen, sterben, alte Fassungen
-node test/balance.js 40       # 40 Läufe, misst die Überlebensquote
+node test/balance.js 40       # 40 Läufe, misst die beiden Leitzahlen (Weite · höchster Rang)
+node test/kapitel.js jena     # ein Kapitel auf vier Rängen durchspielen
 node werkzeug/bauen.js        # baut dist/marschallstab.html
 ```
 
