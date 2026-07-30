@@ -18,6 +18,10 @@ function setzeKampf(k){ if(LAUF) LAUF.kampf = k; K = k; }
 function neuerLauf(mann){
   LAUF = {fassung:LAUF_FASSUNG, mann, node:0, kampf:null, szene:null,
           lager:{id:null, abende:0, log:[]}, winter:{ort:null, wochen:3, log:[]},
+          /* Der Schreibtisch liegt vor den Abenden und hält über einen
+             Spielabbruch durch: Wer mitten in einem Vorgang aufhört, steht
+             beim Fortsetzen wieder davor. */
+          schreibtisch:null,
           begonnen:new Date().toISOString(), zuletzt:null};
   binde();
 }
@@ -374,7 +378,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(),
     /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
        und eine leere Liste ist ehrlicher als vier Platzhalter. */
-    unterstellte:[], unterstellteStufe:0,
+    unterstellte:[], unterstellteStufe:0, heimlich:[],
     kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
@@ -558,6 +562,49 @@ function treuePlus(i, n, satz){
 function unterstellteZehren(){
   if(!S || !S.unterstellte) return;
   S.unterstellte.forEach(u=>{ if(u.lebt) u.koennen = Math.max(0, u.koennen - 2); });
+}
+
+/* ══════════════════ DAS VERZEICHNIS ══════════════════
+
+   **Ein Risiko ohne Mitwisser ist ein Würfel. Ein Risiko mit Mitwissern ist
+   ein Verhältnis.** Bis heute hing die eine riskante Entscheidung des Spiels
+   — die Kompaniekasse — an einer einzelnen Zahl, die niemand kennt und die
+   keine Geschichte hat.
+
+   Jede riskante Handlung legt hier einen Eintrag ab: nicht eine Zahl, die
+   steigt, sondern **eine Sache, die jemand weiß.**
+
+     schwere 1  Unregelmäßigkeit   eine Bestandsmeldung geschönt
+     schwere 2  Vergehen           einen Unterstellten gedeckt
+     schwere 3  Veruntreuung       die Kompaniekasse, ein Lieferantenvertrag
+     schwere 4  mit Blut           einen Befehl umgedeutet und Männer verloren
+
+   **`mitwisser` ist der eigentliche Entwurf.** Wer dabei war, steht drin —
+   namentlich. **Angezeigt wird die Zahl, nie der Name:** Du weißt, was du
+   getan hast und wie viele dabei waren. Nicht, wer davon redet.
+
+   Das ist die bessere Aufteilung: **Menschen sind lesbar, Vergangenheit ist es
+   nicht.** Man kann einschätzen, wem man traut, und trotzdem nicht ausrechnen,
+   was auf dem Spiel steht.
+
+   *(Hier steht der Rekorder. Die fünf Entdeckungswege, die sechs Folgestufen
+   und die Verjährung kommen mit dem Risiko-System — bis dahin sammelt das
+   Verzeichnis, ohne zu strafen.)* */
+function heimlich(id, text, schwere, indizes){
+  if(!S) return;
+  if(!S.heimlich) S.heimlich = [];
+  const wer = (indizes||[]).map(i=>{
+    const u = S.unterstellte && S.unterstellte[i];
+    return u && u.lebt ? u.name : null;
+  }).filter(Boolean);
+  S.heimlich.push({id, text, schwere, mitwisser:wer, seit:(LAUF?LAUF.node:0)});
+}
+/* Wie viele Sachen noch jemand weiß. Eine Sache ohne lebende Mitwisser ist
+   sicher — **Papier verjährt nach Jahren, Menschen sofort.** */
+function heimlichOffen(){
+  if(!S || !S.heimlich) return [];
+  const lebende = (S.unterstellte||[]).filter(x=>x.lebt).map(x=>x.name);
+  return S.heimlich.filter(h => h.mitwisser.some(m => lebende.indexOf(m) >= 0));
 }
 
 function unterstellteGuete(){

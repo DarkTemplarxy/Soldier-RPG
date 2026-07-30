@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 11;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir
+const LAUF_FASSUNG    = 12;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -195,6 +195,16 @@ const LAUF_WANDLER = {
     const m = alt.mann;
     if(m && m.unterstellte === undefined){ m.unterstellte = []; m.unterstellteStufe = 0; }
     return Object.assign({}, alt, {fassung:11});
+  },
+  /* Fassung 11 kannte weder den Schreibtisch noch das Verzeichnis.
+     **Beide fangen leer an, und das ist nicht bloß bequem:** Ein Verzeichnis
+     rückwirkend zu füllen hieße, einem Mann Sachen anzudichten, die er nie
+     getan hat — und das Verzeichnis ist das eine System im Spiel, bei dem
+     genau das nie passieren darf. */
+  11: alt => {
+    if(alt.mann && alt.mann.heimlich === undefined) alt.mann.heimlich = [];
+    if(alt.schreibtisch === undefined) alt.schreibtisch = null;
+    return Object.assign({}, alt, {fassung:12});
   }
 };
 

@@ -394,8 +394,211 @@ function zeigeFeldbescheid(n){
   kopfzeile();
 }
 
+/* ══════════════════ DER SCHREIBTISCH ══════════════════
+
+   **Die Verwaltung braucht eine eigene Ebene, keinen weiteren Knopf im
+   Lager.** Sonst frisst sie die Abende — genau der Befund, der Sitzung 2
+   ausgelöst hat: Rang 5 sah 11 bis 13 Knöpfe, Rang 9 sah 15 bis 17, und jede
+   neue Verwaltungshandlung verdrängte die eigene Ausbildung.
+
+   Ab Rang 9 liegt deshalb **vor** den Abenden ein Bildschirm, der **keinen
+   Abend kostet**. Es liegen drei Vorgänge darauf, und man muss alle drei
+   erledigen — nicht auswählen, sondern durcharbeiten. Danach beginnen die
+   Abende wie gehabt.
+
+   **Warum drei und nicht fünf:** Weil die Verwaltung sich nach Pflicht
+   anfühlen soll, nicht nach Buffet. Drei Vorgänge, die man erledigen *muss*,
+   sind Verwaltung. Zwölf, aus denen man wählt, sind ein Einkaufsladen.
+
+   Ein Vorgang ist immer: ein Blatt Papier, zwei bis vier Antworten, **kein
+   Kommentar hinterher**. Das Spiel sagt nie, ob es richtig war. */
+const VORGAENGE = [
+
+  /* ── Personalvorschlag ── Die erste Stelle, an der man selbst vergibt, was
+     einem Berthaud einmal gegeben hat. Invariante 5 von der anderen Seite. */
+  {art:'personal', kopf:'Vorschlagsliste für die nächste Musterung',
+   text:u=>`Der Adjutant legt die Liste hin und wartet. Eine Stelle, zwei Namen: `
+     +`${u[0].posten} ${u[0].name}, der es kann, und ${u[1].posten} ${u[1].name}, der zu dir hält. `
+     +`Beide wissen, dass der andere daraufsteht.`,
+   wahlen:u=>[
+     {label:'Den Fähigeren vorschlagen', kosten:'Können +8 bei ihm · der andere erfährt es',
+      tu(){ koennenPlus(0,8); treuePlus(1,-2,'weiß, dass du den anderen genommen hast');
+        return 'Du schreibst den Namen hin, den du hingeschrieben hättest, wenn niemand zusähe. '
+             + `${S.unterstellte[1].name} sieht dich am Abend nicht an, und am nächsten Morgen wieder.`; }},
+     {label:'Den Treueren vorschlagen', kosten:'Treue +2 bei ihm · Können −4 in der Einheit',
+      tu(){ treuePlus(1,2,'hat bekommen, was er nicht verdient hatte'); koennenPlus(0,-4);
+        heimlich('personal_treu','Die Vorschlagsliste des Quartals',1,[1]);
+        return 'Du schreibst den anderen Namen hin. Der Adjutant liest ihn, sagt nichts und trägt ihn ein. '
+             + 'Es ist die Art von Sache, die niemand meldet und jeder weiß.'; }},
+     {label:'Niemanden vorschlagen', kosten:'die Stelle bleibt leer',
+      tu(){ treuePlus(0,-1,'hat auf die Liste gesehen und seinen Namen nicht gefunden');
+        treuePlus(1,-1,'auch nicht');
+        return 'Du gibst die Liste leer zurück. Der Adjutant sagt, dann bleibe die Stelle eben. '
+             + 'Sie bleibt sechs Wochen, und in diesen sechs Wochen macht die Arbeit, wer gerade danebensteht.'; }}]},
+
+  /* ── Zustandsfrage ── Der Gefallen ist das Leck: Wer deckt, macht den
+     Gedeckten zum Mitwisser. Das Spiel sagt das nie. */
+  {art:'zustand', kopf:'Meldung des Feldwebels',
+   text:u=>`${u[0].posten} ${u[0].name} war zweimal nicht auf dem Posten, und beide Male roch es danach, `
+     +`warum. Der Feldwebel hat es aufgeschrieben und legt es dir hin, statt es weiterzugeben. `
+     +`Das ist seine Art zu fragen, was du damit machen willst.`,
+   wahlen:u=>[
+     {label:'Weitermelden, wie es sich gehört', kosten:'Können −10 bei ihm · Ordnung in der Einheit',
+      tu(){ koennenPlus(0,-10); treuePlus(0,-2,'ist gemeldet worden, und er weiß von wem');
+        S.unterstellte[0].zustand = 'unter Verdacht';
+        S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+6);
+        return 'Du schreibst es weiter. Vierzehn Tage Arrest, und danach steht er wieder da, wo er stand, '
+             + 'nur dass jetzt alle wissen, dass er dort steht.'; }},
+     {label:'Ihn decken', kosten:'Treue +2 · und er weiß etwas über dich', risk:true,
+      tu(){ treuePlus(0,2,'weiß, dass du ihn gedeckt hast'); S.unterstellte[0].zustand = 'säuft';
+        heimlich('zustand_gedeckt','Die Meldung, die nicht weitergegangen ist',2,[0]);
+        return 'Du legst das Blatt zur Seite und sagst dem Feldwebel, du habest es gesehen. '
+             + 'Damit ist es nicht mehr seine Sache. Es ist deine.'; }},
+     {label:'Selbst mit ihm reden', kosten:'Menschenkenntnis · offen',
+      tu(){ const p = probe('menschenkenntnis', 40);
+        if(p.erfolg){ koennenPlus(0,5); treuePlus(0,1,'hat aufgehört, wenigstens vorerst');
+          S.unterstellte[0].zustand = 'dienstfähig';
+          return 'Ihr steht zwanzig Minuten hinter dem Magazin. Er sagt wenig, du auch. '
+               + 'Danach ist er sechs Wochen lang der Erste auf dem Platz.'; }
+        koennenPlus(0,-4); treuePlus(0,-1,'hat zugehört und nichts gehört');
+        S.unterstellte[0].zustand = 'säuft';
+        return 'Du redest, und er hört zu wie einer, der weiß, wie lange so etwas dauert. '
+             + 'Am Freitag ist er wieder nicht da.'; }}]},
+
+  /* ── Bestandsmeldung ── Der Ort, an dem `S.einheit` entsteht, und die
+     Gegenseite zur Kompaniekasse: Das Geld, das du abzweigst, ist genau das
+     Geld, mit dem du den Zustand hättest heben können. */
+  {art:'bestand', kopf:'Bestandsmeldung an das Bataillon',
+   text:u=>`Achtzig Paar Schuhe fehlen, und der Bogen fragt nach einer Zahl, nicht nach einer Erklärung. `
+     +`Was du hinschreibst, liest im Frühjahr jemand, der dich nicht kennt.`,
+   wahlen:u=>[
+     {label:'Die Wahrheit melden', kosten:'Rüffel jetzt · Einheitszustand +8',
+      tu(){ S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+8);
+        S.ruf = Math.max(0, S.ruf-3);
+        return 'Du schreibst achtzig hin. Es kommt ein Schreiben zurück, in dem das Wort „unzureichend" '
+             + 'zweimal vorkommt, und mit dem nächsten Konvoi kommen vierzig Paar.'; }},
+     {label:'Die Zahl schönen', kosten:'kein Rüffel · der Schreiber weiß es', risk:true,
+      tu(){ S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-4);
+        heimlich('bestand_geschoent','Die Bestandsmeldung des Quartals',1,[0]);
+        return 'Du schreibst dreißig hin. Es kommt kein Schreiben zurück, und es kommen auch keine Schuhe. '
+             + 'Der Schreiber trägt es ein, ohne aufzusehen.'; }},
+     {label:'Auf eigene Kosten beschaffen', kosten:'120 F · Einheitszustand +18',
+      ab:()=>S.geld >= 120,
+      tu(){ S.geld -= 120; S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+18);
+        treuePlus(0,1,'hat gesehen, wer die Schuhe bezahlt hat');
+        return 'Ein Händler in der Vorstadt, bar, ohne Beleg. Die Schuhe sind schlechter als die aus dem '
+             + 'Magazin und sie sind da. <span class="fein">−120 F</span>'; }}]},
+
+  /* ── Auftrag von oben ── Jede Wahl senkt das Können eines Unterstellten.
+     Es gibt keine gute Antwort, nur eine, die man verantwortet. */
+  {art:'auftrag', kopf:'Anforderung des Bataillons',
+   text:u=>`Dreißig Mann für eine Arbeitskolonne an der Straße, vierzehn Tage. `
+     +`Die Anforderung nennt die Zahl und nicht, aus welcher Abteilung sie kommen soll. `
+     +`Das ist die Höflichkeit, mit der man jemandem eine Entscheidung überlässt.`,
+   wahlen:u=>[
+     {label:`Aus ${u[0].name}s Abteilung`, kosten:'Können −7 bei ihm',
+      tu(){ koennenPlus(0,-7); treuePlus(0,-1,'hat dreißig Mann abgegeben und weiß, warum er');
+        return `Dreißig Mann von ${S.unterstellte[0].name}, weil seine Abteilung die vollzähligste ist. `
+             + 'Er sagt „zu Befehl" und nichts weiter.'; }},
+     {label:'Aus allen gleichmäßig', kosten:'Können −3 bei allen',
+      tu(){ (S.unterstellte||[]).forEach((x,i)=> koennenPlus(i,-3));
+        return 'Sieben, acht, sieben, acht. Niemand kann sich beschweren, und niemand ist zufrieden. '
+             + 'Vierzehn Tage später kommen sechsundzwanzig zurück.'; }},
+     {label:'Die Schwächsten aus jeder Abteilung', kosten:'Können −2 · Einheitszustand −6', risk:true,
+      tu(){ (S.unterstellte||[]).forEach((x,i)=> koennenPlus(i,-2));
+        S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-6);
+        heimlich('auftrag_schwaechste','Die Zusammenstellung der Arbeitskolonne',1,[0,1]);
+        return 'Du gehst die Listen durch und nimmst die, die ohnehin nichts halten. '
+             + 'An der Straße arbeiten dreißig Männer, die dafür am wenigsten taugen, und zwei davon kommen nicht zurück.'; }}]},
+
+  /* ── Zuteilung ── **Die einzige Handlung im Spiel ohne Probe.** Reine
+     Zuordnung: vier Aufgaben, vier Unterstellte, keine passt perfekt. */
+  {art:'zuteilung', kopf:'Einteilung für das Quartal',
+   text:u=>`Vier Dinge müssen laufen, und du hast genau so viele Leute, wie du hast. `
+     +`Es gibt keine Probe darauf und keinen Wurf. Du teilst ein, und danach ist es eingeteilt.`,
+   wahlen:u=>[
+     {label:`${u[0].name} auf den Exerzierplatz`, kosten:'Können +6 bei ihm · Einheitszustand −2',
+      tu(){ koennenPlus(0,6); S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-2);
+        return `${S.unterstellte[0].name} steht sechs Wochen auf dem Platz. Was daneben liegen bleibt, `
+             + 'liegt daneben.'; }},
+     {label:`${u[0].name} auf die Ausrüstung`, kosten:'Einheitszustand +10 · Können −2',
+      tu(){ koennenPlus(0,-2); S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
+        return `${S.unterstellte[0].name} zählt, sortiert und schreibt an. Es ist die Arbeit, die niemand sieht, `
+             + 'und im März sieht man sie.'; }},
+     {label:`${u[1].name} auf den Wachdienst`, kosten:'Treue +1 · Können −3 bei ihm',
+      tu(){ treuePlus(1,1,'hat den bequemen Dienst bekommen'); koennenPlus(1,-3);
+        return `${S.unterstellte[1].name} bekommt den Dienst, bei dem man nachts wach ist und tags nichts tut. `
+             + 'Er weiß, dass das ein Gefallen ist.'; }}]}
+];
+
+/* Wie viele Ausfertigungen es je Art gibt, und welche Vorgänge dieses Lager
+   bringt. **Drei Pflichtvorgänge, gezogen aus fünf Arten**, damit zwei Lager
+   hintereinander nicht dieselbe Frage stellen. */
+function schreibtischStellen(n){
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  if(S.rang < 9 || u.length < 2) return [];
+  /* Deterministisch aus der Stations-ID, damit ein Beenden und Fortsetzen
+     nicht andere Vorgänge liefert — dieselbe Regel wie bei den Ereignissen. */
+  const saat = (n.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const arten = VORGAENGE.map((v,i)=>i);
+  const raus = [];
+  for(let k=0;k<3;k++) raus.push(arten[(saat + k*2) % arten.length]);
+  return raus.filter((v,i)=>raus.indexOf(v)===i).slice(0,3);
+}
+
+/* Der Bildschirm selbst. Er sieht aus wie ein Lager, ist aber keins: kein
+   Abend, keine Auswahl, drei Blätter nacheinander. */
+function zeigeSchreibtisch(n){
+  const T = LAUF.schreibtisch;
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  const v = VORGAENGE[T.offen[0]];
+  const alle = v.wahlen(u);
+  const offen = alle.filter(w => !w.ab || w.ab());
+  const opt = offen.map((w,i)=>
+    wahlZeile(roemisch(i+1), w.label, w.kosten, `schreibtischTun(${alle.indexOf(w)})`,
+      {risk:w.risk})).join('');
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    ${bogen(n,
+      `<div class="prose"><p>${v.text(u)}</p></div>
+       ${T.log.length?`<div class="ergebnis">${T.log.join('<br><br>')}</div>`:''}`,
+      [v.kopf, `Vorgang ${T.erledigt+1} von ${T.gesamt}`],
+      opt,
+      'Der Schreibtisch kostet keinen Abend. Er ist trotzdem vor den Abenden zu erledigen.')}
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+function schreibtischTun(i){
+  const T = LAUF.schreibtisch;
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  const v = VORGAENGE[T.offen[0]];
+  const w = v.wahlen(u)[i];
+  if(!w || (w.ab && !w.ab())) return;
+  /* **Kein Kommentar hinterher.** Der Vorgang sagt, was geschehen ist, und
+     nicht, ob es richtig war — dieselbe Regel wie überall im Spiel. */
+  const text = w.tu();
+  T.log = [`<b>${esc(w.label)}</b><br>${text}`];
+  T.offen.shift(); T.erledigt++;
+  laufSichern();
+  const nn = KAPITEL[LAUF.node];
+  if(T.offen.length) zeigeSchreibtisch(nn); else zeigeLager(nn);
+}
+
 function zeigeLager(n){
   if(S && S.bescheidOffen){ zeigeFeldbescheid(n); return; }
+  /* ── Der Schreibtisch liegt vor den Abenden ──
+     Ab Rang 9, drei Pflichtvorgänge, kein Abend. Er wird je Lager einmal
+     aufgebaut und über `LAUF.schreibtisch` durchgehalten — wer mitten darin
+     aufhört, steht beim Fortsetzen wieder davor, wie bei den
+     Gefechts-Ereignissen. */
+  if(S && S.rang >= 9){
+    if(!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id){
+      const offen = schreibtischStellen(n);
+      LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+      laufSichern();
+    }
+    if(LAUF.schreibtisch.offen.length){ zeigeSchreibtisch(n); return; }
+  }
   const L = LAUF.lager;
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
     L.sold = soldAuszahlen();

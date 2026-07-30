@@ -548,6 +548,20 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
           z = bewertet.length ? bewertet[0].e : null;
         }
 
+        /* ── Der Schreibtisch (ab Rang 9) ──
+           **Ein Prüfbot, der eine Handlung meidet, misst das Strafsystem und
+           nicht das Spiel** (Regel 9). Der Bot arbeitet die Vorgänge deshalb
+           wie ein Mensch ab, der seine Leute behalten will: Er hält die
+           Einheit instand, deckt niemanden und schont sein Personal — die
+           riskanten Wege nimmt er nur, wenn `MUT=1` steht. */
+        if (!z && typeof LAUF === 'object' && LAUF && LAUF.schreibtisch
+            && LAUF.schreibtisch.offen && LAUF.schreibtisch.offen.length){
+          const riskant = btn.filter(e => e.classList.contains('risk'));
+          const brav    = btn.filter(e => !e.classList.contains('risk'));
+          z = (MUT && riskant.length) ? riskant[0]
+            : (f(/auf eigene Kosten/) || f(/Wahrheit melden/) || f(/Fähigeren/)
+               || f(/Selbst mit ihm reden/) || f(/gleichmäßig/) || brav[0] || btn[0]);
+        }
         if (!z) z = btn[0];
         if (z) z.click();
         /* ── Der risk-Zähler ──
