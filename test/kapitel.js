@@ -64,7 +64,6 @@ async function haerteLauf(b, rang) {
   await p.click('text=Neuen Mann aufstellen');
   await p.click('text=Einen anderen Mann');
   await p.click('#h_schmied');
-  await p.click('text=Weiter zu den Veteranenpunkten');
   await p.click('#startbtn');
 
   const start = await p.evaluate(({ kap, r }) => {
@@ -164,7 +163,6 @@ async function haerteLauf(b, rang) {
     await p.click('text=Neuen Mann aufstellen');
     await p.click('text=Einen anderen Mann');
     await p.click('#h_schmied');
-    await p.click('text=Weiter zu den Veteranenpunkten');
     await p.click('#startbtn');
 
     /* An den Anfang des Kapitels springen. Bildung und Fertigkeiten werden

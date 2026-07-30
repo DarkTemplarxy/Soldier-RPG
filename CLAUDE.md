@@ -96,6 +96,7 @@ Gebaut sind **alle elf Kapitel** — Italien 1796/97 bis Waterloo 1815, **einhun
 | **Aufträge mit sichtbarem Stand**, zwei widersprüchliche ab Rang 12 | |
 | **Der stehende Auftrag** je Feldzug ab Rang 10 | |
 | **Trauerblatt und Congé absolu** — die zwei Endbildschirme als Urkunde | |
+| **Feuille d’enrôlement** — Aushebung und Vorrat auf einem Bogen | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -1812,6 +1813,27 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 **Rangabzeichen** (`rangabzeichen()` in `grundwerte.js`) zeigen den Rang als Bild statt als Wort: Der Fusilier trägt nichts — das ist der Witz an ihm —, die Elitekompanien eine Epaulette (Grenadier rot, Voltigeur grüngelb), die Unteroffiziere Streifen am Unterarm (Caporal zwei aus Wolle in Aurore, Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse in Metallfarbe). Sie stehen in der Seitenleiste und dort, wo man sie bekommt: bei der Elitewahl und bei der Beförderung.
 
 ---
+
+## Die Feuille d'enrôlement — ein Bogen statt zwei Bildschirme (`zeigeErschaffung()`)
+
+**Bis zum 30.07.2026 waren Aushebung und Veteranenpunkte zwei Ansichten mit einem Knopf dazwischen.** Der zweite Schritt ist aber genau der, in dem man die Werte des ersten *bewertet* — man braucht sie nebeneinander. Entwurfspaket `12a` legt beide auf ein Blatt: links das Formular, rechts eine mitrechnende Spalte *So rückt er ein*, unten der Vorrat.
+
+| | |
+|---|---|
+| **Der Befund ist ein Befund, kein Formular** | Name, Balken, Rechnung (`45 +15 = 60`). Kein −/+, keine Punktanzeige, kein „übrig". Der einzige Knopf heißt *Einen anderen Mann* |
+| **Wo die Herkunft nichts beiträgt, steht der Wert einmal** | `30 = 30` ist keine Rechnung, sondern Rauschen |
+| **Der Vorrat ist der einzige Ort, an dem gewählt wird** | also der einzige, der laut sein darf: eigener Kasten, Bronzebalken, der Rest als große Mediävalzahl |
+| **An jeder Kaufzeile steht der Preis des nächsten Fünfers** | nicht nur das Ausgegebene — bei einer exponentiellen Kurve ist das die Zahl, nach der man entscheidet |
+| **Was der Vorrat nicht deckt, wird gesperrt statt kommentiert** | „zu teuer" am rechten Rand, die Zeile bleibt sichtbar |
+| **Ein Kauf ersetzt das Ausgabestück** | sonst steht dasselbe Paar Schuhe zweimal auf dem Blatt |
+
+**Die rechte Spalte klebt** (`position:sticky`). Das ist keine Bequemlichkeit, sondern der ganze Grund, beide Schritte auf ein Blatt zu legen: Eine Spalte, die beim dritten Kauf aus dem Bild gescrollt ist, rechnet für niemanden mehr mit.
+
+**Ein Aktualisierer für das ganze Blatt.** `aktualisiereBogen()` ersetzt `aktualisiereErschaffung()` und `aktualisiereLaden()`; beide bleiben als Weiterleitung stehen, weil `waehleHerkunft()`, `stellePunkt()` und `waehle()` sie rufen. **Auf einem Blatt gibt es nur einen Zustand, und zwei Funktionen, die dieselbe Ansicht pflegen, laufen früher oder später auseinander.** `zeigeLaden()` zeigt jetzt denselben Bogen, damit kein alter Knopf ins Leere geht.
+
+> **⚠ `AUSRUESTUNG_START` ist eine Funktion, kein Objekt.** Die erste Fassung ging mit `Object.keys()` darüber und lieferte eine leere Liste — der Abschnitt „Ausgabe · Zustand" stand mit Überschrift und ohne Inhalt auf dem Blatt. Dazu heißen die Leitern des Ladens anders als die Plätze der Ausrüstung (`waffe` gegen `muskete`); die Zuordnung steht in `einrueckSpalte()` und nicht in den Daten, weil sie nur diesen einen Bildschirm betrifft.
+
+> **⚠ Alle sechs Prüfstände klickten „Weiter zu den Veteranenpunkten".** Der Knopf gibt es nicht mehr; sie rücken jetzt direkt nach der Herkunft ein. **Wer den Startbildschirm anfasst, fasst sechs Prüfstände mit an** — `#h_<herkunft>` und `#startbtn` sind die beiden IDs, an denen sie hängen, und die bleiben.
 
 ## Die zwei Endbildschirme (`trauerblatt()`, `congeAbsolu()` in `src/abschluss.js`)
 

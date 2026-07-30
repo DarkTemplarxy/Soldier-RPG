@@ -11,7 +11,7 @@ const path = require('path');
   p.on('pageerror',e=>console.log('ERR',e.message));
   await p.goto('file://'+path.resolve(__dirname,'../index.html'));
   await p.click('text=Neuen Mann aufstellen'); await p.click('text=Einen anderen Mann');
-  await p.click('#h_schmied'); await p.click('text=Weiter zu den Veteranenpunkten'); await p.click('#startbtn');
+  await p.click('#h_schmied'); await p.click('#startbtn');
   // bis zur ersten Szene klicken
   for(let i=0;i<8;i++){
     const t = await p.$eval('#app', e=>e.innerText);

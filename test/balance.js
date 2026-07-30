@@ -291,7 +291,6 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       aktualisiereErschaffung();
     });
     await p.click('#h_' + ['bauer', 'schmied', 'wilderer', 'strasse', 'fuhrmann', 'schreiber'][r % 6]);
-    await p.click('text=Weiter zu den Veteranenpunkten');
     // Das Patent zuerst — es ist die teuerste Einzelentscheidung des Ladens.
     if (PATENT) await p.evaluate(id => waehle(id), PATENT);
     /* Der Veteran arbeitet **eine** Liste ab, abwechselnd Werte und Stücke.

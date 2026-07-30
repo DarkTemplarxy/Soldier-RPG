@@ -40,7 +40,7 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
 
   console.log('\n1 — Lauf beginnen, im Lager sichern');
   await klick('Neuen Mann aufstellen'); await klick('Einen anderen Mann');
-  await p.click('#h_schmied'); await klick('Weiter zu den Veteranenpunkten');
+  await p.click('#h_schmied');
   await p.click('#startbtn');
   const name = await p.evaluate(() => LAUF.mann.name);
   /* Auch die erste Station hat einen Marschweg, dort kann also mit 35 % ein

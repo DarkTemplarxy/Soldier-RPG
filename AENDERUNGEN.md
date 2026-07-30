@@ -5,6 +5,34 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Bündel 7: die Feuille d'enrôlement
+
+**Ein Bogen statt zwei Bildschirme** (Entwurfspaket `12a`). Aushebung und Veteranenpunkte waren zwei Ansichten mit einem Knopf dazwischen — und der zweite Schritt ist genau der, in dem man die Werte des ersten bewertet. Man braucht sie nebeneinander.
+
+Links das Formular, rechts eine mitrechnende Spalte *So rückt er ein*, unten der Vorrat in einem eigenen Kasten mit Bronzebalken.
+
+| | |
+|---|---|
+| Der Befund ist ein Befund, kein Formular | Name, Balken, Rechnung `45 +15 = 60`. Kein −/+, kein „übrig" |
+| Wo die Herkunft nichts beiträgt | steht der Wert **einmal** — `30 = 30` ist Rauschen |
+| An jeder Kaufzeile | der Preis des **nächsten Fünfers**, nicht nur das Ausgegebene |
+| Was der Vorrat nicht deckt | wird **gesperrt statt kommentiert** |
+| Ein Kauf | ersetzt das Ausgabestück, statt danebenzustehen |
+| Die rechte Spalte | klebt (`sticky`) — eine Spalte, die beim dritten Kauf aus dem Bild ist, rechnet für niemanden mit |
+
+**Ein Aktualisierer für das ganze Blatt.** `aktualisiereBogen()` löst `aktualisiereErschaffung()` und `aktualisiereLaden()` ab; beide bleiben als Weiterleitung stehen. Auf einem Blatt gibt es nur einen Zustand, und zwei Funktionen, die dieselbe Ansicht pflegen, laufen früher oder später auseinander.
+
+**Zwei veraltete Texte mitkorrigiert**, beide aus dem Handoff: Der Laden nannte in den Kartenköpfen `höchstens 70` und `höchstens 60`, während `punktGrenze()` seit dem 30.07. **100** liefert — jetzt aus der Funktion gelesen statt abgeschrieben. Und `Alle beginnen bei 5` gegen `FERT_SOCKEL = 20`.
+
+**Zwei Fehler beim Bauen:**
+
+1. `AUSRUESTUNG_START` ist eine **Funktion**, kein Objekt. `Object.keys()` darüber lieferte eine leere Liste — der Abschnitt „Ausgabe · Zustand" stand mit Überschrift und ohne Inhalt auf dem Blatt.
+2. Die Leitern des Ladens heißen anders als die Plätze der Ausrüstung (`waffe` gegen `muskete`). Ohne Zuordnung ersetzte kein Kauf sein Ausgabestück.
+
+**Alle sechs Prüfstände klickten „Weiter zu den Veteranenpunkten".** Den Knopf gibt es nicht mehr; sie rücken jetzt direkt nach der Herkunft ein. `#h_<herkunft>` und `#startbtn` bleiben.
+
+---
+
 ## 2026-07-30 — Bündel 6: die zwei Endbildschirme
 
 **Ein Mann hört auf zwei Arten auf, und beide Male entsteht dabei ein Papier.** Bisher endeten beide in einem gewöhnlichen Bogen mit einer Punktetabelle — und die Entlassungsurkunde, das amtlichste Blatt des Spiels, stand sogar auf Feldpapier statt auf Kanzleipapier.

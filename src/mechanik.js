@@ -303,11 +303,12 @@ function jahrVonStation(){
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
-  /* Fertigkeiten beginnen bei 5, nicht mehr bei 10 (29.07.2026, zusammen mit
-     dem Attributsockel 15). Ein Rekrut hat die Muskete zweimal abgefeuert;
-     alles darüber ist etwas, das er sich verdient oder gekauft hat. Nebenbei
-     verlängert es die Strecke, auf der Übung noch etwas bringt — `nutzen()`
-     gibt bei niedrigen Werten am meisten. */
+  /* Fertigkeiten beginnen bei `FERT_SOCKEL` — **20 seit dem 30.07.2026**, davor
+     5, davor 10. Der Kommentar nannte hier noch die 5 und widersprach damit der
+     Konstante zwei Zeilen darunter; die Zahl steht in `grundwerte.js` und wird
+     hier nicht mehr abgeschrieben. 20 ist das, was ein Mann mitbringt, der
+     schon einmal eine Muskete gehalten und schon einmal Hunger gehabt hat —
+     nicht Können, aber auch nicht Ahnungslosigkeit. */
   const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = FERT_SOCKEL);
   /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
      was man mitbringt, nicht das, was man sich aussucht. Das war früher der
