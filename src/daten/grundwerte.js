@@ -462,7 +462,27 @@ const ORDEN = [
   {id:'legion_offizier', name:'Offizier der Ehrenlegion', voll:'Officier de la Légion d\'honneur',
    ab:'1807', vp:36, ruf:10, pension:2.0,
    was:'Dasselbe Kreuz, größer, an einem Band mit Rosette. Zweitausend Francs im Jahr, und in einer Liste, die in Paris geführt wird, steht dein Name jetzt in der zweiten Spalte statt in der ersten.',
-   bedingung:'Die Ehrenlegion, ein Patent und acht Nennungen'}
+   bedingung:'Die Ehrenlegion, ein Patent und acht Nennungen'},
+
+  /* ── Der vierte Grad, und die Schranke von Rang 13 ──
+     **Historisch ist der Grand Officier der Grad, ab dem man nicht mehr
+     ausgezeichnet, sondern aufgenommen wird.** Die Ehrenlegion hatte fünf
+     Stufen; die oberen zwei vergab der Kaiser persönlich, und die Liste war
+     kurz genug, dass er die Namen kannte.
+
+     Im Spiel ist er die Bedingung für den Général de division (`orden:
+     'legion_grand'` in der LEITER). Bis zum 30.07.2026 war er dort gefordert
+     und nicht gebaut — Rang 13 und damit auch 14 waren verschlossen, und die
+     ganze VP-Ökonomie war gegen eine Decke geeicht, die niemand erreicht.
+
+     **Die Bedingungen sind Zahlen, die es schon gibt**, keine neuen Zähler:
+     der dritte Grad, ein Regiment (Rang 11) und fünf Bulletins. Wer so weit
+     kommt, hat den Stern verdient, bevor er ihn braucht — und genau so soll
+     eine Schranke sitzen: als Bestätigung, nicht als Mautstelle. */
+  {id:'legion_grand', name:'Grand Officier der Ehrenlegion', voll:'Grand Officier de la Légion d\'honneur',
+   ab:'1808', vp:48, ruf:14, pension:3.0,
+   was:'Ein achtstrahliger Stern, auf den Rock genäht, kein Band. Man hängt ihn nicht um und legt ihn nicht ab; er ist Teil des Mantels, in dem man vor Leute tritt. Dazu ein Betrag im Jahr, von dem eine Familie lebt, und eine Liste in Paris, die kurz genug ist, dass einer sie auswendig kann.',
+   bedingung:'Offizier der Ehrenlegion, ein Regiment und fünf Bulletins'}
 ];
 function ordenVon(id){ return ORDEN.find(o=>o.id===id) || null; }
 function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
@@ -578,6 +598,33 @@ function ordenTaefelchen(inhalt){
       font-size="10" letter-spacing="2" fill="#6b4f22">${esc(ordenGravur())}</text>`;
 }
 
+/* ── Der Bruststern ──
+   **Die einzige Auszeichnung ohne Band**, und daran erkennt man sie: Ein Stern
+   wird nicht umgehängt, er wird auf den Rock genäht. Genau deshalb ist er die
+   richtige Form für einen Grad, den man nicht mehr vorzeigt, sondern trägt.
+
+   Acht Strahlen aus vier durchgehenden Balken — **hier ist der Durchstoß
+   richtig**, anders als beim Kreuz: Ein Balken durch die Mitte gibt zwei
+   Spitzen, vier Balken geben acht, und acht Spitzen sind das, was ein Stern
+   hat. Darüber die vier verjüngten Kreuzarme aus `ordenKreuz()`, damit das
+   Kreuz auch hier vier Arme zeigt und kein X. */
+function ordenStern(gid, cy){
+  const strahlen = [22.5, 67.5, 112.5, 157.5].map(a =>
+    `<rect x="55.5" y="${cy-48}" width="9" height="96" transform="rotate(${a} 60 ${cy})" fill="url(#${gid})"/>`).join('');
+  const glanz = [33.5, 78.5, 123.5, 168.5].map(a =>
+    `<rect x="58.5" y="${cy-40}" width="3" height="80" transform="rotate(${a} 60 ${cy})" fill="#f0dfae" opacity=".55"/>`).join('');
+  /* **Das Kreuz reicht fast bis an die Strahlenspitzen.** Bleibt es deutlich
+     kürzer, überragen die Strahlen es so weit, dass das Ganze als Windrad
+     liest und nicht als Stern mit Kreuz — bei Daumengröße war genau das der
+     erste Eindruck. Vierzig gegen achtundvierzig ist das Verhältnis, das die
+     Bruststerne der Zeit hatten. */
+  return strahlen + glanz + ordenKreuz(cy, 7, 40, 1.3)
+    + `<circle cx="60" cy="${cy}" r="13" fill="url(#${gid})"/>
+       <circle cx="60" cy="${cy}" r="9.5" fill="none" stroke="${METALL.gold.dunkel}" stroke-width="1" opacity=".6"/>
+       <text x="60" y="${cy+6}" text-anchor="middle" font-family="Didot,'Bodoni 72',Georgia,serif"
+         font-size="15" fill="${METALL.gold.tinte}">N</text>`;
+}
+
 /* **Die Form trägt die Klasse** (Entwurfspaket, Bündel 5): Ein Staatsorden ist
    ein *Kreuz am Band*, eine Gefechtsauszeichnung eine *geprägte Scheibe an der
    Trikolore*, eine Ehrenwaffe ein *Stück auf einem gravierten Täfelchen*. Man
@@ -618,6 +665,8 @@ function ordensbild(id){
      <circle cx="60" cy="98" r="13" fill="none" stroke="url(#${gid})" stroke-width="5"/>
      <rect x="46" y="92" width="28" height="12" rx="2" fill="url(#${gid})" opacity=".9"/>
      ${ordenBand(gid)}`);
+
+  if(id==='legion_grand') return bild('Grand Officier der Ehrenlegion', ordenStern(gid, 88));
 
   if(id==='legion' || id==='legion_offizier'){
     /* Der zweite Grad trägt dasselbe Kreuz an einem Band mit **Rosette** —

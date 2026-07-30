@@ -333,7 +333,28 @@ function einheitZehren(){
 /* Das Lager ist der angesagte Halt: Hier wird der Feldzug gesichert und
    gesagt, dass er gesichert ist. Danach läuft die Sicherung still weiter, damit
    Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
+/* ── Die Urkunde wird im Lager nachgereicht ──
+   **Sie steht vor dem Lager und nicht darin.** Ein Bescheid ist ein Blatt, das
+   man ansieht, und kein Absatz in einer Abendplanung; im selben Bogen wie die
+   Frage „Womit verbringst du den Abend?" ginge er unter. Dieselbe Bauweise wie
+   die Ordensverleihung: eigener Bildschirm, ein Knopf, dann weiter.
+
+   Abgeräumt wird beim Anzeigen, nicht beim Wegklicken — ein Papier ist keine
+   Entscheidung, die man offen lassen könnte. */
+function zeigeFeldbescheid(n){
+  const blatt = bescheidNachreichen();
+  if(!blatt){ zeigeLager(n); return; }
+  laufSichern();
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}${blatt}
+    <div class="orders"><div class="ordbody">
+      <button class="ord weiter" onclick="zeigeLager(KAPITEL[LAUF.node])">Einstecken</button>
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 function zeigeLager(n){
+  if(S && S.bescheidOffen){ zeigeFeldbescheid(n); return; }
   const L = LAUF.lager;
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
     L.sold = soldAuszahlen();

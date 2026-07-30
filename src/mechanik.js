@@ -234,6 +234,13 @@ function ordenFaellig(){
   if(!hatOrden('legion_offizier') && jahr >= 1807 && hatOrden('legion') &&
      S.rang >= 7 && S.nennungen >= 8)
     return ordenVon('legion_offizier');
+  /* ── Der vierte Grad, Schranke von Rang 13 ──
+     Er steht **vor** den Tapferkeitsmedaillen, weil `ordenFaellig()` den ersten
+     Treffer zurückgibt: Wer den Stern verdient hat, soll ihn bekommen und nicht
+     stattdessen eine Scheibe. */
+  if(!hatOrden('legion_grand') && jahr >= 1808 && hatOrden('legion_offizier') &&
+     S.rang >= 11 && (S.bulletins|0) >= 5)
+    return ordenVon('legion_grand');
 
   /* ── Die Tapferkeitsmedaillen ──
      **Sie hängen an drei Zählern, die seit der Leiter der Sichtbarkeit

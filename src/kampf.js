@@ -3223,9 +3223,30 @@ function feldBefoerderung(){
   S.ruf += 5;
   if(ziel.patron) gunstGeben(ziel.patron, 1);
   S.log.push('Befördert zum ' + ziel.name + '.');
+  /* ── Das Papier kommt später ──
+     **Im Feld wird ernannt, ausgestellt wird im Lager.** Der Bescheid ist der
+     Auftritt, den eine Beförderung verdient — nur hat im Gefecht niemand einen
+     Tisch. `S.bescheidOffen` merkt den Rang, und das nächste Lager legt ihn
+     vor. Damit behält die Feldbeförderung ihr Tempo und verliert ihr Papier
+     nicht: Man ist es sofort, und man hat es eine Woche später schriftlich. */
+  if(ziel.rang >= 5) S.bescheidOffen = ziel.rang;
   return `<div class="wirkung"><span>Im Feld befördert</span>
     ${esc(personName(ziel.patron) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
     Eingetragen wird es später, von jemand anderem. <b>${esc(ziel.name)}</b></div>`;
+}
+
+/* Der Bescheid, den das Lager nachreicht. Gibt den fertigen Bogen zurück oder
+   '' — und räumt die Vormerkung ab, damit er nur einmal ausgestellt wird. */
+function bescheidNachreichen(){
+  if(!S || !S.bescheidOffen) return '';
+  const r = S.bescheidOffen; S.bescheidOffen = null;
+  const ziel = LEITER.find(e => e.rang === r);
+  if(!ziel) return '';
+  const text = `Der Fourrier hat den Bogen schon ausgefüllt, als du hereinkommst; er wartet nur noch auf den Namen. `
+    + `Du sagst ihn, er schreibt ihn, und dann liegt da ein Papier, auf dem steht, was seit dem Gefecht ohnehin gilt.`
+    + `<br><br>Es ändert nichts. Man hebt es trotzdem auf.`;
+  return bescheidBogen(ziel, text, 'gut',
+    `IM FELD ERNANNT · AUSGESTELLT IM LAGER · ${esc(rangName(r).toUpperCase())}`);
 }
 
 function vakanzPruefen(){
