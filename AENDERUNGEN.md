@@ -133,16 +133,30 @@ Keine Balance-Zahlen, aber sie haben Messreihen wertlos gemacht — und der zwei
 3. **Zustand, der den Messgegenstand überlebt, gehört nicht in die Messung.** Die Chronik ist absichtlich langlebig — genau deshalb darf ein Laufergebnis nicht aus ihr kommen. Schwesterregel zu „ein Fließtext ist kein Zustand": *Nicht jeder Zustand gehört diesem Lauf.*
 4. **Zwei Messungen dürfen nie in dieselbe Ausgabedatei schreiben.** Genau das ist hier passiert; der ineinandergeschriebene Bericht hat die Diagnose um eine Stunde verzögert und beinahe eine falsche Ursache ins Protokoll gebracht.
 
-### Gemessen — 163 Stationen, Veteran mit `VP=5800`### Gemessen — 163 Stationen, Veteran mit `VP=5800`
+### Gemessen — 163 Stationen, reparierter Prüfstand, null Abbrüche
 
-| | **Weite** (von 163) | **höchster Rang (Cpt)** | Caporal | Punkte-Median |
-|---|---|---|---|---|
-| Erstlauf ohne Vorrat *(80 Läufe)* | **31** | **4 %** | 65 % | 492 |
-| Veteran 5800 VP *(40)* | **163** | **98 %** | 100 % | 4 123 |
+| | **Weite** (von 163) | **höchster Rang (Cpt)** | Caporal | Ganz durch | Punkte-Median |
+|---|---|---|---|---|---|
+| Erstlauf ohne Vorrat *(80 Läufe)* | **32** | **3 %** | 59 % | 1 % | 462 |
+| Veteran 5800 VP *(40)* | **163** | **100 %** | 100 % | **98 %** | 4 728 |
 
-**Weite und Rang sind vergleichbar, die Punkte nicht** — die Wertung ist absichtlich verfünffacht. Der Erstläufer bewegt sich nicht (31 wie vorher), der Veteran geht durch.
+**Weite und Rang sind vergleichbar, die Punkte nicht** — die Wertung ist absichtlich verfünffacht. Und dort steht das Ergebnis so, wie es bestellt war: Der Erstläufer bewegt sich nicht (31 → 32, Rauschen), der Veteran geht durch.
 
-> **⚠ Zwei offene Befunde, beide in `OFFEN.md`:** Der Erstläufer klettert zu schnell (Caporal 26 → **65 %**, Nebenwirkung des Fertigkeiten-Sockels), und der Veteran stand vor der letzten Reparatur bei Rang 9 an.
+> ### Der eigentliche Befund: Das Spiel hat keine Mitte
+>
+> **Der Erstlauf ist nicht zu leicht und nicht zu hart — er ist zweigipflig.** Von achtzig Läufen sterben **47 in Ägypten** und bleiben **33 zeitlebens Fusilier**; zugleich erreichen **21 ein Offizierspatent** und einer den **Colonel** — denselben Rang wie der Maximalveteran. Die Spitze eines Erstlaufs liegt bei **4 348 Punkten**, also 92 % dessen, was ein Veteran mit 5 800 VP holt.
+>
+> Das erklärt zwei Zahlen, die sich zu widersprechen scheinen: **Caporal 59 % bei einer Weite von 32.** Beide stimmen — sie beschreiben zwei verschiedene Männer. Der mittlere Lauf stirbt in Ägypten; wer Ägypten übersteht, wird Offizier.
+>
+> | Kapitel | Italien | **Ägypten** | Garnison | Austerlitz | Jena | Eylau |
+> |---|---|---|---|---|---|---|
+> | überstanden | 95 % | **38 %** | 100 % | 86 % | 80 % | 70 % |
+>
+> **Ägypten ist keine Stufe, sondern ein Sieb.** Es entscheidet den Lauf, und danach entscheidet kaum noch etwas. Die Härtekurve steht in Italien auf **+0** und in Ägypten auf **+4** — sie greift also genau dort am schwächsten, wo der Erstläufer lebt und stirbt.
+>
+> **Am anderen Ende dasselbe in umgekehrter Richtung:** Der Veteran übersteht alle elf Feldzüge zu 98 % und endet zu 100 % als Colonel — vierzig von vierzig, keiner darüber, keiner darunter. **Beide Enden der Progression sind flach**, und beide hängen an derselben Stelle: Die Härtekurve endet bei +20, die Werte gehen bis 100.
+>
+> Steht als Punkt 9 und Punkt 11 in `OFFEN.md`, mit Messweg und Prüfpunkt.
 
 ---
 

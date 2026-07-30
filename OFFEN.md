@@ -160,36 +160,44 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
-## 9 · Der Erstläufer klettert zu schnell *(gemessen, größte offene Frage)*
+## 9 · Das Spiel hat keine Mitte — Ägypten ist ein Sieb *(gemessen, größte offene Frage)*
 
-**Gemessen nach dem Umbau, 80 Läufe, Erstlauf ohne Vorrat, vorsichtig:**
+**80 Läufe, Erstlauf ohne Vorrat, vorsichtig, reparierter Prüfstand, null Abbrüche:**
 
-| | vor dem Umbau | **nach dem Umbau** |
-|---|---|---|
-| Weite (von 163) | 31 | **31** |
-| **Caporal** | 26 % | **65 %** |
-| **Sergent** | 13 % | **53 %** |
-| Patent (Rang 7+) | 0 % | **11 %** (9 von 80) |
-| Punkte-Median | 34 | 492 |
+| | |
+|---|---|
+| **Weite** | **32 von 163** |
+| sterben in Ägypten | **47 von 80** |
+| bleiben zeitlebens Fusilier | **33** |
+| erreichen ein Offizierspatent (Rang 7+) | **21 (26 %)** |
+| erreichen den Colonel | **1** — denselben Rang wie der Maximalveteran |
+| Punkte | Median 462 · **Bereich 0–4 348** |
 
-**Ein Mann, der im Mittel bei Station 31 von 163 stirbt, wird zu zwei Dritteln Caporal.** Das widerspricht der Ansage, die den ganzen Umbau ausgelöst hat: *„Am Anfang muss man sich nutzlos fühlen"* und *„relativ nutzlos, bzw. ziemlich sicher sterben … man sollte im Erstlauf nie über Colonel hinauskommen."* Die Weite hält sich, der Rang nicht.
+**Zwei Zahlen, die sich zu widersprechen scheinen: Caporal 59 % bei einer Weite von 32.** Beide stimmen — sie beschreiben zwei verschiedene Männer. Der mittlere Lauf stirbt in Ägypten; wer Ägypten übersteht, wird Offizier.
 
-**Der Mechanismus ist verstanden und nicht geraten.** Ursache ist der Fertigkeiten-Sockel 20 (vorher 5): Muskete 20 gegen Aufgabe 35 trifft zu **31 %** statt zu 8 %. Das ist die alte, teuer bezahlte Kette — *alles, was die Kampfkraft hebt, hebt über den Ruf auch den Aufstieg*:
+**Denn dazwischen liegt fast nichts:**
 
-```
-mehr Treffer → mehr Schaden → Sichtbarkeitsstufe → Ruf → Beförderungsschwelle
-```
+| Kapitel | überstanden *(von denen, die es erreichen)* |
+|---|---|
+| Italien | 95 % |
+| **Ägypten** | **38 %** |
+| Garnison | 100 % |
+| Austerlitz | 86 % |
+| Jena | 80 % |
+| Eylau | 70 % |
+
+**Ägypten ist keine Stufe, sondern ein Sieb.** Es entscheidet den Lauf, und danach entscheidet kaum noch etwas. Die Spitze eines Erstlaufs liegt bei **4 348 Punkten** — 92 % dessen, was ein Maximalveteran mit 5 800 VP holt. **Ein Erstläufer, der Ägypten übersteht, ist kein Anfänger mehr, sondern ein zweiter Veteran.**
+
+> **Das ist die schärfere Fassung des früheren Befundes.** Er lautete „der Erstläufer klettert zu schnell" und stimmte, war aber die halbe Wahrheit: Er klettert nicht durchgehend zu schnell, sondern **er wird an genau einer Stelle sortiert**, und danach ist alles entschieden. Eine Progression, die aus einem einzigen Wurf besteht, ist keine.
 
 | Hebel | Wo | Was er kostet |
 |---|---|---|
-| **Die Härtekurve früher ansetzen** *(empfohlen)* | `schwierigkeit:` je Kampagne in `grundwerte.js` — Italien steht auf **+0**, Ägypten auf +4 | Sie greift genau dort nicht, wo der Erstläufer lebt. Ein Zuschlag von +6 bis +8 schon in Italien trifft ihn, ohne den Veteranen zu berühren, dessen Werte über 70 liegen |
-| **Die Ruf-Schwellen unten anheben** | `LEITER` in `kampf.js`, Rang 3 steht bei 30 | Trifft sofort, aber macht die erste Beförderung spät — und die soll früh kommen |
-| **Die Sichtbarkeitsschwellen anheben** | `K.zaehlung`, Stufen bei Schaden 60 / 100 / 150 | Trifft auch den Veteranen, und zwar dort, wo seine Orden hängen |
-| ~~Den Fertigkeiten-Sockel senken~~ | `FERT_SOCKEL` | **Nicht der Hebel.** Er ist gesetzt und gehört zur Skala: Wenn ein Wert bis 100 gekauft werden kann, ist 5 kein Startwert, sondern ein Rundungsfehler |
+| **Die Härtekurve früher ansetzen** *(empfohlen)* | `schwierigkeit:` je Kampagne in `grundwerte.js` — Italien **+0**, Ägypten **+4** | Sie greift genau dort am schwächsten, wo der Erstläufer lebt und stirbt. Wer sie über die ersten drei Kapitel verteilt, verteilt auch die Sterblichkeit — **und ein Trichter, der verteilt ist, hat eine Mitte** |
+| **Ägypten entschärfen** | `anmarschKosten`, Hitzschlag, Ruhr, Fieber aus Jaffa | Nimmt dem Kapitel seine eigene Regel („Krankheit ist gefährlicher als Kugeln"). **Der falsche Hebel** — das Kapitel ist nicht zu hart, die anderen sind zu weich |
+| **Die Ruf-Schwellen unten anheben** | `LEITER`, Rang 3 steht bei 30 | Trifft den Aufstieg, nicht die Sortierung. Behandelt das Symptom |
+| ~~Den Fertigkeiten-Sockel senken~~ | `FERT_SOCKEL` | **Nicht der Hebel.** Er ist gesetzt und gehört zur Skala |
 
-> **Der Prüfpunkt ist nicht die Weite, sondern der Abstand.** Wer die Härtekurve anhebt, misst beide Männer: Der Erstläufer soll bei Rang und Weite fallen, der Veteran bei **beiden** stehen bleiben. Wandert der Veteran mit, trifft der Hebel die Aufgabe statt den Mann — dann ist es die falsche Schraube.
-
----
+> **Der Prüfpunkt ist nicht die Weite, sondern die Form der Verteilung.** Wer die Härtekurve anhebt, misst die Zeile „Überstanden je Kapitel": Sie soll flacher werden — kein Kapitel unter 60 %, keines über 95 %. **Bleibt ein einzelnes Kapitel bei 38 %, während die anderen bei 80 stehen, hat sich nur der Ort des Siebs verschoben.**
 
 ## 10 · Der Marschall ist unerreichbar, und die Ökonomie hängt daran
 

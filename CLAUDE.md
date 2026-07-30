@@ -1367,17 +1367,32 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 | | **Weite** (von 163) | **höchster Rang (Cpt)** | Italien | Caporal | Ägypten | Punkte-Median |
 |---|---|---|---|---|---|---|
-| **Erstlauf ohne Vorrat** *(80 Läufe)* | **31** | **4 %** | 94 % | 65 % | 43 % | 492 |
-| **Veteran 5800 VP** *(40)* | **163** | **98 %** | 100 % | 100 % | 98 % | 4 123 |
+| **Erstlauf ohne Vorrat** *(80 Läufe)* | **32** | **3 %** | 95 % | 59 % | 38 % | 462 |
+| **Veteran 5800 VP** *(40)* | **163** | **100 %** | 100 % | 100 % | 100 % | 4 728 |
 
-> **⚠ Die Veteranenzeile ist bei einer Decke von Rang 9 gemessen und damit vorläufig.** Sie stammt von *vor* der Auftrag-Reparatur; danach steigt derselbe Mann bis **Rang 11 (Colonel)**, und ab Rang 10 hängt der Schaden an den vier Kompanien statt an den eigenen Werten — die Gefechte werden also länger, und die Zahlen wandern. **Die Nachmessung steht aus**; sie war es, die das Klickbudget des Prüfstands als bindende Schranke entlarvt hat (siehe dort).
+**Beide Berichte melden null Abbrüche** — das ist seit dem 30.07.2026 die erste Zeile, die man liest (siehe „Zwei Fehler im Prüfstand"). Rangverteilung: Erstlauf 1 Fus 33 · 3 Cap 9 · 4 Four 1 · 5 Serg 15 · 6 S-maj 1 · 7 S-Lt 16 · 8 Lt 3 · 9 Cpt 1 · 11 Col 1 · Veteran **11 Col 40**.
 
 **Der Abstand ist so groß wie nie** — 132 Stationen und 94 Punkte beim Rang. Die eigene Regel („unter 25 Punkten beim Rang trägt die Leiter nicht") ist mit Abstand erfüllt; die Frage lautet inzwischen umgekehrt, ob der Erstläufer noch genug sieht.
 
-> **⚠ Zwei Befunde aus dieser Messreihe, beide offen und beide in `OFFEN.md`:**
+> ### ⚠ Der eigentliche Befund: Das Spiel hat keine Mitte mehr
 >
-> 1. **Der Erstläufer klettert zu schnell.** Caporal **65 %**, Sergent 53 %, und in neun von achtzig Läufen sogar ein Patent — bei einer Weite von 31 Stationen. Das widerspricht der Ansage, die den ganzen Umbau ausgelöst hat (*„Am Anfang muss man sich nutzlos fühlen"*). Ursache ist der Fertigkeiten-Sockel 20: Muskete 20 gegen 35 trifft zu 31 % statt zu 8 %, also mehr Schaden, mehr Sichtbarkeit, mehr Ruf — und Ruf *ist* die Schwelle. **Der Hebel ist nicht der Sockel, sondern die Härtekurve**, die in Italien auf +0 steht und genau dort nicht greift, wo der Erstläufer lebt.
-> 2. **Der Veteran steht bei Rang 9 an.** 39 von 40 enden als Capitaine, mit Ruf weit über 700 — nicht weil die Schwellen zu hoch wären, sondern weil vier Sperren hintereinander lagen (siehe „Fürsprache sammelt man beim nächsten Beurteiler"). Drei sind behoben; ob die vierte reicht, ist die laufende Messung.
+> **Der Erstlauf ist nicht zu leicht und nicht zu hart — er ist zweigipflig.** Von achtzig Läufen:
+>
+> | | |
+> |---|---|
+> | sterben in Ägypten | **47** |
+> | bleiben zeitlebens Fusilier | **33** |
+> | erreichen ein Offizierspatent (Rang 7+) | **21 (26 %)** |
+> | erreichen den Colonel | **1** — denselben Rang wie der Maximalveteran |
+> | Punktebereich | **0 bis 4 348** — die Spitze liegt bei 92 % des Veteranen |
+>
+> **Dazwischen liegt fast nichts.** Ägypten überstehen 38 %, und wer es übersteht, kommt weit: Austerlitz 86 %, Jena 80 %, Eylau 70 %. **Ägypten ist keine Stufe, sondern ein Sieb** — es entscheidet den Lauf, und danach entscheidet kaum noch etwas.
+>
+> Das erklärt zwei Zahlen, die sich zu widersprechen scheinen: Caporal **59 %** bei einer Weite von **32**. Beides stimmt, weil es zwei verschiedene Männer beschreibt — der mittlere Lauf stirbt in Ägypten, der überlebende wird Offizier.
+>
+> **Der Hebel bleibt derselbe und wird dadurch dringender:** Die Härtekurve steht in Italien auf **+0** und in Ägypten auf **+4**. Sie greift also genau dort am schwächsten, wo der Erstläufer lebt und stirbt. Wer sie früher ansetzt, verteilt die Sterblichkeit über die ersten drei Kapitel, statt sie in einem zu bündeln — **und ein Trichter, der über mehrere Kapitel verteilt ist, hat eine Mitte.**
+
+> **Der zweite Befund steht bei Rang 11** und ist der Gegenspieler zum ersten: Der Veteran übersteht alle elf Feldzüge zu **98 %** und endet zu **100 %** als Colonel — vierzig von vierzig, keiner darüber, keiner darunter. **Beide Enden der Progression sind flach geworden**, und beide hängen an derselben Stelle: Die Härtekurve endet bei +20, die Werte gehen bis 100. Steht als Punkt 9 und Punkt 11 in `OFFEN.md`.
 
 > **Regel, die aus dieser Messreihe bleibt: Die Weite steht immer mit ihrem Nenner da.** 31 von 163 ist nicht schlechter als 58 von 122 — es ist eine andere Größe. **Vergleiche werden nicht gegen eine Zahl von gestern gezogen, sondern gegen denselben Stand, neu gemessen** — Worktree auf den Vergleichs-Commit, **derselbe** Prüfstand hinein, dann messen. Anders ist bei einem Projekt, das gleichzeitig Inhalt und Regeln ändert, nichts zu trennen.
 
@@ -1387,12 +1402,12 @@ Zwölf zusammenhängende Änderungen — Probe, Ökonomie, Leiter —, gemessen 
 
 | | vorher *(157 Stationen)* | **jetzt** *(163)* |
 |---|---|---|
-| Weite Erstlauf | 31 | **31** |
+| Weite Erstlauf | 31 | **32** |
 | Weite Veteran | 61 *(400 VP)* | **163** *(5800 VP)* |
-| Rang Erstlauf | 0 % | **4 %** |
-| Rang Veteran | 18 % | **98 %** |
-| Punkte-Median Erstlauf | 34 | **492** |
-| Punkte-Median Veteran | 233 | **4 123** |
+| Rang Erstlauf | 0 % | **3 %** |
+| Rang Veteran | 18 % | **100 %** |
+| Punkte-Median Erstlauf | 34 | **462** |
+| Punkte-Median Veteran | 233 | **4 728** |
 
 **Die Punktezahlen sind nicht vergleichbar und sollen es nicht sein** — die Wertung ist absichtlich verfünffacht worden, weil die Kostenkurve es verlangt (siehe „Die Wertung als Einkommen"). **Vergleichbar sind Weite und Rang**, und dort steht das Ergebnis so, wie es bestellt war: Der Erstläufer bewegt sich nicht, der Veteran geht durch.
 
