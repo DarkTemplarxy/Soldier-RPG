@@ -215,6 +215,9 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                    und wie viele Wahlen er insgesamt hatte. Erst das Verhältnis
                    macht `OFFEN.md` Punkt 2 entscheidbar. */
                 risk: 0, wahlen: 0,
+                /* Die drei Schranken von Rang 12, je Lauf am Ende ausgelesen —
+                   Ruf, Grandmaisons Fürsprache, Bulletins. OFFEN.md Punkt 12. */
+                schranke: {ruf: [], gm: [], bul: []},
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
                    **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
@@ -303,6 +306,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     const chronikVorher = await p.evaluate(() => META.chronik.length);
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
+    const schluss = {ruf: 0, gm: 0, bul: 0};
     /* ── Das Klickbudget ist ein Prüfstand-Wert und darf nie die Messung sein ──
        **Es stand auf 600, und am 30.07.2026 wurde es zur bindenden Schranke.**
        Der Auftrag-Fix hob die Rangdecke von 9 auf 11 — und ab Rang 10 hängt der
@@ -580,13 +584,31 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
            Gezählt wird der Knopf, den er wirklich gedrückt hat, nicht der, den er
            hätte drücken können. */
         return { ok: !!z, rang: S ? S.rang : 0, zweig: S ? S.zweig : null,
-                 risk: !!(z && z.classList && z.classList.contains('risk')) };
+                 risk: !!(z && z.classList && z.classList.contains('risk')),
+                 /* ── Die drei Schranken von Rang 12, direkt ausgelesen ──
+                    **OFFEN.md Punkt 12 verlangt genau das: erst den Hebel,
+                    dann das Ergebnis.** Vierzig von vierzig Veteranen bleiben
+                    Colonel, und welche der drei Bedingungen sie hält — Ruf
+                    480, Grandmaison 5, drei Bulletins —, war eine Vermutung.
+                    Dreimal an einem Tag war die vermutete Ursache nicht die
+                    wirkliche; eine Zeile, die die Zahlen ausgibt, ist billiger
+                    als die vierte Vermutung. */
+                 ruf: S ? (S.ruf|0) : 0,
+                 gm: S ? (typeof gunst === 'function' ? (gunst('grandmaison')|0) : 0) : 0,
+                 bul: S ? (S.bulletins|0) : 0 };
       }, MUT);
       if (zug.rang > hoechster) hoechster = zug.rang;
       if (zug.zweig) zweig = zug.zweig;
       if (zug.risk) res.risk++;
+      // Der letzte lebende Stand: nach dem Tod ist `S` null.
+      if (zug.rang) { schluss.ruf = zug.ruf; schluss.gm = zug.gm; schluss.bul = zug.bul; }
       res.wahlen++;
       if (!zug.ok) break;
+    }
+    if (schluss.ruf || schluss.bul) {
+      res.schranke.ruf.push(schluss.ruf);
+      res.schranke.gm.push(schluss.gm);
+      res.schranke.bul.push(schluss.bul);
     }
     if (zweig) res.elite++;
     if (hoechster >= 3) res.caporal++;
@@ -682,6 +704,20 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
      riskante Wahl auch nach dem Abschlag jede sichere) oder ob dieselbe Zahl
      Wahlen härter bestraft wird (dann ist es das Spiel). */
   console.log(`Riskante Wahlen: ${res.risk} von ${res.wahlen} (${res.wahlen ? Math.round(res.risk/res.wahlen*100) : 0} %)`);
+  /* ── Die drei Schranken von Rang 12 ──
+     **OFFEN.md Punkt 12: erst den Hebel auslesen, dann drehen.** Vierzig von
+     vierzig Veteranen bleiben Colonel; ob sie der Ruf hält (480), Grandmaisons
+     Fürsprache (5) oder die Bulletins (3), war bis hierher eine Vermutung.
+     Gedruckt wird der Median, weil ein Mittelwert von den frühen Toten
+     nach unten gezogen wird. */
+  if (res.schranke.ruf.length) {
+    const med = a => { const b = a.slice().sort((x,y)=>x-y); return b[Math.floor(b.length/2)]; };
+    const anteil = (a,s) => Math.round(a.filter(x=>x>=s).length / a.length * 100);
+    console.log(`Rang 12 — die drei Schranken (Median · erfüllt): `
+      + `Ruf ${med(res.schranke.ruf)} ${anteil(res.schranke.ruf,480)} % · `
+      + `Grandmaison ${med(res.schranke.gm)} ${anteil(res.schranke.gm,5)} % · `
+      + `Bulletins ${med(res.schranke.bul)} ${anteil(res.schranke.bul,3)} %`);
+  }
   /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
   const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])
     .map(k => { const e = res.erreicht[k], t = res.sterbeort[k]||0;

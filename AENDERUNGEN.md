@@ -5,6 +5,81 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Die Verwaltung: sieben Sitzungen für die obere Hälfte
+
+**Das Spiel hatte oben eine Hälfte, die nicht gespielt wurde, sondern verwaltet.** Ab Rang 9 gab es eine Kompaniekasse, einen Einheitszustand und einen Auftrag je Gefecht — drei Zahlen, die etwas taten, ohne dass jemand mit ihnen umgehen konnte. Der Leitsatz über allen sieben Sitzungen:
+
+> **Verwaltung ist kein zweiter Kampf mit anderen Zahlen. Sie ist die Frage, wen man dafür bezahlen lässt.**
+
+### 1 · Aufräumen — acht Widersprüche zwischen Code und Entwurf
+
+Keine Balance-Änderung, nur die Stellen, an denen der Code etwas anderes sagte als `KONZEPT.md` oder `RANGLEITER.md`. Die Patente sind dabei von Freischaltrang 6/8 auf **9/11** gegangen — die Abweichung war 2026 nötig, als vier Kapitel gebaut waren; mit elf ist sie es nicht mehr.
+
+### 2 · Die Zahlen geradeziehen
+
+| | Was | Warum |
+|---|---|---|
+| **`francs()`** | eine Stelle für jede Geldanzeige | `12`, `12.0` und `12,00` standen nebeneinander |
+| **`rangSetzen()`** | **die einzige Tür für jede Rangänderung** | sechs Stellen setzten `S.rang` von Hand; sie pflegt `S.hoechsterRang` und ruft `unterstellteSetzen()` |
+| **Abende nach Rang** | dritte Stufe ab Rang 9, vierte ab Rang 12 | dieselbe Begründung wie beim Caporal: sonst verdrängt die rangeigene Handlung die eigene Ausbildung |
+| **Der Abbau** | Ausrüstung, die ein Offizier nicht mehr trägt, verschwindet | sie stand als tote Zeile in der Anzeige |
+
+**Befund, der Sitzung 5 ausgelöst hat:** Verwaltung als weiterer Lagerknopf frisst die Abende. **Deshalb kostet der Schreibtisch keinen Abend.**
+
+### 3 · Der Kaufladen — 28 Posten statt 13
+
+**Güteleitern (`gruppe:`):** Muskete, Schuhe und Mantel in drei Güten, und **der teurere Kauf ersetzt den billigeren** — man besitzt eine Muskete, nicht drei. **Freischaltung durch Leistung (`frei:`, `freiKapitel:`):** zehn Posten stehen erst im Laden, wenn man etwas erreicht hat. **Nie durch Veteranenpunkte** (Invariante 3).
+
+> **Ein Posten, der 400 VP kostet, ist teuer. Ein Posten, den es erst gibt, wenn man einmal Colonel war, ist etwas anderes** — er erzählt, dass man ihn kennt.
+
+### 4 · Die Kette unter dir
+
+Vier Unterstellte ab Rang 7, jeder mit `koennen` und `treue` (−5…+5). `ausfuehrungsProbe()` würfelt gegen sein Können; ein misslungener Befehl wirkt mit **Faktor 0,55** — er wird ausgeführt, nur schlechter.
+
+> **Das ist die zweite Ohnmacht, und sie sitzt tiefer als die erste.** Ab Rang 7 gab es schon die Trennung von Entscheidung und Wirkung. Jetzt hat das Warten einen Namen: Ein gut gewählter Befehl kann daran scheitern, dass Sergent Peyron ihn ausführt.
+
+Dazu das **Pferd**: der erste Ladenposten mit laufenden Kosten (60 F je Feldzug für das Vollblut, fällig am Übergang). Wer nicht zahlen kann, verliert es.
+
+**`unterstellteSetzen()` ist selbstheilend**, und das musste es zweimal werden — `test/raenge.js` und `schreibtischStellen()` setzen den Rang von Hand, `rangSetzen()` läuft dabei nie. **Regel: Was ein Rang mitbringt, wird nicht beim Aufstieg gebaut, sondern beim Betrachten geprüft.**
+
+### 5 · Der Schreibtisch
+
+Ab Rang 9 ein **Fenster über dem Lager** (`.ueberlage`), drei Vorgänge, kein Abend, keine Auswahl — man muss alle drei erledigen. Fünf Vorgangsarten (Personalvorschlag, Zustandsfrage, Bestandsmeldung, Auftrag von oben, Zuteilung), je drei Antworten, kein Kommentar hinterher.
+
+> **Drei Vorgänge, die man erledigen muss, sind Verwaltung. Zwölf, aus denen man wählt, sind ein Einkaufsladen.**
+
+**Der Rücken der Überlage ist die Sperre, nicht das Dekor.** Alle sechs Prüfstände liefen daraufhin in einen Timeout — der Beweis, dass sie greift, und zugleich ein Fehler im Messgerät. Sie suchen ihre Knöpfe jetzt zuerst im Fenster.
+
+### 6 · Das Risiko und die Mitwisser
+
+**Sechs Folgestufen statt einer Strafe** — vom Aktenvermerk bis zu zwei Rängen zurück, und jeder bestehende Vermerk hebt die nächste Folge um eine Stufe. **Gemessen:** Schwere 1–4 ohne Vermerke → Stufe 1, 2, 3, 5; mit zwei Vermerken → 3, 4, 5, 6.
+
+**Entlassen wird man nie.** Die Armee gibt keinen Mann her, den sie noch brauchen kann — sie stellt ihn tiefer. Damit bleiben die vier Enden vier.
+
+**Stufe 3 ist die beste Strafe, die dieses Spiel haben kann:** Man wird nicht bestraft, man wird nicht befördert. Kein Bildschirm, keine Meldung. Höchstens einmal je Laufbahn.
+
+**Fünf Wege der Entdeckung**, keiner nennt den Namen: der Inspecteur · ein Unterstellter redet ((−treue) × 5 %) · **einer in Bedrängnis handelt** (35 %, unabhängig von seiner Treue) · die Aktenprüfung ab Rang 11 · der Rivale an der Musterung.
+
+**Gemessen, 200 Lager je Fall:** Treue −5 bei allen → **48 % entdeckt**; Treue +2 → **16 %**, also nur noch der Inspecteur.
+
+**Verjährung** 2 / 3 / 4 Kapitel, Schwere 4 nie. Der Aktenvermerk verjährt nicht: **Was aufgeschrieben wurde, bleibt aufgeschrieben.**
+
+> **⚠ Und wieder derselbe Fehler im Messgerät, zum vierten Mal.** Die erste Probe meldete „entdeckt in 0 von 200" — sie prüfte den *Rückgabewert*, und Stufe 3 gibt absichtlich einen leeren String zurück. **Eine Quote von exakt null ist fast immer das Messgerät.**
+
+### 7 · Aufträge nach oben
+
+| | |
+|---|---|
+| **Der Stand ist sichtbar** | „steht" / „steht nicht" neben jedem Auftrag, in jeder Runde neu |
+| **Zwei Befehle ab Rang 12** | einer vom Korps, einer aus Paris, echter Widerspruch; abgerechnet wird, ob *einer* steht |
+| **Der stehende Auftrag ab Rang 10** | drei Sorten im Wechsel, geprüft am Übergang, zahlt in Fürsprache und Bulletins — **nicht in Ruf** |
+
+**Am Hebel ausgelesen, nicht am Ergebnis geraten:** Rang 9 liefert in 40 von 40 Gefechten genau einen Auftrag, Rang 12 in allen 40 ein widersprüchliches Paar (`nehmen+schonen` ×17, `halten+nehmen` ×11, `decken+nehmen` ×8, `schonen+nehmen` ×4). Der stehende Auftrag bucht bei doppeltem Aufruf nur einmal.
+
+**`LAUF_FASSUNG` 13 → 14** mit Wandler: `LAUF.kauftrag` fängt unabgerechnet an.
+
+---
+
 ## 2026-07-30 — Der Umbau: Probe, Ökonomie, Leiter
 
 **Zwölf Änderungen, und keine konnte für sich allein stehen.** Sie stehen hier in der Reihenfolge, in der sie voneinander abhängen — wer eine davon zurücknimmt, nimmt die darunter mit.
