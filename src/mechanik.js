@@ -53,6 +53,7 @@ function stationErledigt(){
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   aderlass(KAPITEL[LAUF.node-1]);
+  unterstellteZehren();
   /* „Er weiß, welches Wasser." Halbiert wird die Zehrung, nicht abgeschafft —
      und die Sperre der Zeitheilung bleibt bestehen, solange überhaupt etwas
      zehrt. Wer krank ist, erholt sich nicht; er wird nur langsamer weniger.
@@ -370,7 +371,11 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        sinkt nie, auch wenn der Inspecteur einen Rang nimmt: Eine Bekanntschaft
        verliert man nicht durch eine Rückstufung. Gepflegt wird er an einer
        einzigen Stelle, `rangSetzen()`. */
-    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
+    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(),
+    /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
+       und eine leere Liste ist ehrlicher als vier Platzhalter. */
+    unterstellte:[], unterstellteStufe:0,
+    kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     /* Der Offizier: `einheit` bleibt null, bis es eine Kompanie gibt (Rang 9).
@@ -469,6 +474,98 @@ function francs(betrag, immerZwei){
   return s.replace('.', ',');
 }
 
+/* ══════════════════ DIE UNTERSTELLTEN ══════════════════
+
+   **Sie entstehen bei der Beförderung und rücken mit dem Rang nach.** Wer
+   Capitaine wird, bekommt drei Sergenten und einen Sous-Lieutenant; wer Chef
+   de bataillon wird, bekommt vier Capitaines — und die drei Sergenten bleiben
+   zurück, weil sie zwei Ebenen unter ihm nicht mehr vorkommen.
+
+   **Der Mitgezogene ist die Ausnahme** (`mit:true`): Einer wandert mit, wie
+   Martel es über dir tat. Er ist der einzige, dessen Treue +5 erreichen kann,
+   und der längste Mitwisser — wer alle anderen dreimal ausgetauscht hat, hat
+   immer noch ihn. Gewählt wird er beim Aufstieg zu Rang 10. */
+/* **Selbstheilend, und das ist Absicht.** `rangSetzen()` ist die vorgesehene
+   Tür, aber `S.rang` wird an anderen Stellen direkt gesetzt — von den
+   Prüfständen, von Kapiteldaten, und von jedem Code, den es noch nicht gibt.
+   Ein Zustand, der nur über eine einzige Tür entsteht, fehlt überall dort, wo
+   jemand durchs Fenster steigt. Die Funktion kehrt sofort zurück, wenn die
+   Stufe schon stimmt, also darf sie überall gerufen werden. */
+function unterstellteSetzen(){
+  if(!S) return;
+  const stufe = unterstellteStufe(S.rang);
+  if(!stufe){ S.unterstellte = []; return; }
+  if(S.unterstellteStufe === stufe.ab) return;      // schon aufgebaut
+  const alt = S.unterstellte || [];
+  const mit = alt.find(u=>u.mit && u.lebt) || null;
+  /* Namen, die schon vergeben sind, kommen nicht zweimal vor. */
+  const belegt = alt.map(u=>u.name);
+  const frei = UNTER_NAMEN.filter(n=>belegt.indexOf(n)<0);
+  const neu = [];
+  stufe.posten.forEach((posten,i)=>{
+    /* Der Mitgezogene behält Können und Treue und bekommt den neuen Posten —
+       er ist zwei bis drei Stufen unter dir aufgestiegen, nicht ersetzt worden. */
+    if(mit && i===0){ neu.push(Object.assign({}, mit, {posten})); return; }
+    neu.push({
+      name: frei[i] || UNTER_NAMEN[(i*7) % UNTER_NAMEN.length],
+      posten,
+      /* Start 35–55, gestreut: Wer neu unter dir steht, ist weder ein
+         Versager noch ein Geschenk. Ein Fremder von außen startet bei 25,
+         siehe `unterstellterFaellt()`. */
+      koennen: 35 + Math.floor(Math.random()*21),
+      treue: 0, zustand:'dienstfähig', lebt:true, mit:false, satz:''
+    });
+  });
+  S.unterstellte = neu;
+  S.unterstellteStufe = stufe.ab;
+}
+
+/* Der Nachrücker kennt dich nicht — Können 25, Treue 0. Das ist derselbe
+   Preis, den ein gefallener Fürsprecher über dir kostet, nur von unten. */
+function unterstellterFaellt(i){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return '';
+  u.lebt = false;
+  const gefallen = u.posten + ' ' + u.name;
+  const belegt = S.unterstellte.map(x=>x.name);
+  const name = UNTER_NAMEN.filter(n=>belegt.indexOf(n)<0)[0] || 'Ferrand';
+  S.unterstellte[i] = {name, posten:u.posten, koennen:25, treue:0,
+                       zustand:'dienstfähig', lebt:true, mit:false,
+                       satz:'ist seit vier Tagen da'};
+  return gefallen;
+}
+
+/* Können pflegen — die Zehrung ist die Gegenseite: **Personal, das man nicht
+   anfasst, wird schlechter.** −2 je Station, wie der Einheitszustand. */
+function koennenPlus(i, n){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return;
+  u.koennen = Math.max(0, Math.min(100, u.koennen + n));
+}
+function treuePlus(i, n, satz){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return;
+  u.treue = Math.max(-5, Math.min(u.mit ? 5 : 4, u.treue + n));
+  if(satz) u.satz = satz;
+}
+/* Der mittlere Können-Wert steht für die Güte der ganzen Einheit und löst ab
+   Rang 9 `sektionGuete` ab (VERWALTUNG §9). Solange niemand unter einem steht,
+   bleibt die alte Zahl gültig. */
+/* **Personal, das man nicht anfasst, wird schlechter.** −2 je Station, wie
+   der Einheitszustand — und aus demselben Grund: Ein Vorgesetzter, der nichts
+   tut, ist nicht neutral, er verliert. Das ist die Gegenseite zu den
+   Lagerhandlungen, die Können heben. */
+function unterstellteZehren(){
+  if(!S || !S.unterstellte) return;
+  S.unterstellte.forEach(u=>{ if(u.lebt) u.koennen = Math.max(0, u.koennen - 2); });
+}
+
+function unterstellteGuete(){
+  const u = (S && S.unterstellte || []).filter(x=>x.lebt);
+  if(!u.length) return null;
+  return Math.round(u.reduce((s,x)=>s+x.koennen,0) / u.length);
+}
+
 /* ── Die eine Stelle, an der der Rang gesetzt wird ──
    **Jeder Rangwechsel geht hier durch**, damit `hoechsterRang` nicht leckt.
    Dieselbe Regel wie bei `atemKlemmen()`: Ein Nebenwert, der an fünf Stellen
@@ -480,6 +577,9 @@ function rangSetzen(r){
   if(!S) return;
   S.rang = r;
   if((S.hoechsterRang|0) < r) S.hoechsterRang = r;
+  /* Mit dem Rang kommen die, die unter einem stehen. Ab Rang 9 haben sie
+     Namen; darunter sind es Zahlen, und das bleibt so. */
+  unterstellteSetzen();
 }
 
 /* ── Der Fourrier zieht die Muskete ein ──

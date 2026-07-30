@@ -225,7 +225,29 @@ function ueberDir(){
       p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
       <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
   };
-  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}`;
+  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}`;
+}
+
+/* ── Unter dir ──
+   **Vier Personen mit je zwei Zahlen sind acht Zahlen — und das ist die
+   Grenze dessen, was man im Blick behält, ohne eine Tabelle zu führen.**
+   Deshalb Können und Treue als Zahl, nicht als Umschreibung, und daneben ein
+   halber Satz über das letzte Ereignis: Die Zahl sagt *wie viel*, der Satz
+   sagt *woran es liegt*.
+
+   Der Mitgezogene steht zuerst und trägt ein Zeichen — er ist der einzige,
+   dessen Treue +5 erreichen kann, und der einzige, der beim Aufstieg
+   mitwandert. */
+function unterDir(){
+  unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
+  const u = (S.unterstellte||[]);
+  if(!u.length) return '';
+  const zeile = x => `<div class="kv"><span class="hilfe" data-hilfe="${
+      String(x.posten+' '+x.name+'. '+(x.zustand!=='dienstfähig'?x.zustand[0].toUpperCase()+x.zustand.slice(1)+'.':'Dienstfähig.')).replace(/"/g,'&quot;')}">${
+      x.lebt ? (x.mit?'· ':'')+esc(x.name) : '<s>'+esc(x.name)+'</s>'}${
+      x.lebt && x.zustand!=='dienstfähig' ? ' <span class="warn">!</span>' : ''}</span>
+    <b>${x.lebt ? x.koennen + ' <span class="fein">/</span> ' + (x.treue>0?'+':'') + x.treue : '†'}</b></div>`;
+  return `<p class="mini">Unter dir <span class="fein">Können / Treue</span></p>${u.map(zeile).join('')}`;
 }
 
 /* Eine Zeile der Seitenleiste — und **sie zeigt den Wert, mit dem geprüft

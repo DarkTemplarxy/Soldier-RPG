@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 10;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang
+const LAUF_FASSUNG    = 11;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -182,6 +182,19 @@ const LAUF_WANDLER = {
     const m = alt.mann;
     if(m && m.hoechsterRang === undefined) m.hoechsterRang = m.rang|0;
     return Object.assign({}, alt, {fassung:10});
+  },
+  /* Fassung 10 kannte nur die Kette **über** dir. Ab Rang 9 gibt es jetzt auch
+     eine darunter: vier benannte Personen mit Können, Treue und Zustand.
+
+     **Ein angefangener Feldzug bekommt sie neu ausgewürfelt**, nicht
+     rekonstruiert. Rekonstruieren hieße raten — es gibt keine Spur davon, wen
+     dieser Mann ausgebildet hat. Neu heißt: Er kennt sie, seit er den Rang
+     trägt, und muss sie von vorn kennenlernen. Das ist der ehrlichere von zwei
+     unehrlichen Wegen. */
+  10: alt => {
+    const m = alt.mann;
+    if(m && m.unterstellte === undefined){ m.unterstellte = []; m.unterstellteStufe = 0; }
+    return Object.assign({}, alt, {fassung:11});
   }
 };
 

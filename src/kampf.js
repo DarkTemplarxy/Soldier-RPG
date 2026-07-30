@@ -375,6 +375,7 @@ function einheitBestand(){
 }
 
 function kompanienStart(){
+  unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
   /* Die Güte kommt aus dem Lager (`S.sektionGuete`), wie schon bei Sektion und
      Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl.
      Die Rekruten schlagen auf die Haltung, nicht auf den Bestand: Ein
@@ -385,12 +386,40 @@ function kompanienStart(){
      obendrein. Wer seine Leute über elf Kapitel ausbildet, soll das bis zum
      Ende sehen: Die Wirkung läuft jetzt linear bis 100 und trägt dort 30
      Punkte Haltung statt zwanzig. */
-  const g = Math.max(-25, Math.min(30, (S.sektionGuete||0)*0.3));
+  /* **Ab Rang 9 löst das Können der Unterstellten `sektionGuete` ab.** Wer
+     seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl — nur heißen
+     sie jetzt Reynaud und Ducasse statt „1." und „2.". */
+  const eigen = unterstellteGuete();
+  const g = eigen != null ? Math.max(-25, Math.min(30, (eigen-45)*0.6))
+                          : Math.max(-25, Math.min(30, (S.sektionGuete||0)*0.3));
   const roh = rekrutenStart();
-  return ['1.','2.','3.','4.'].map((nm,i)=>({
-    name: nm+' Kompanie', kurz: nm[0],
-    bestand: einheitBestand(), haltung: Math.max(25, 70 + Math.round(g) - i*3 - (100-roh)), vorn: false
-  }));
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  /* **So viele Rechtecke, wie du Leute hast.** Ein Colonel führt drei
+     Bataillone, kein viertes — und ein Général de division fünf Verbände.
+     Vier war die Zahl des Chef de bataillon und stand hier fest, weil es
+     niemanden gab, an dem sie sich hätte ausrichten können. */
+  const namen = u.length ? u.map((x,i)=>(i+1)+'.') : ['1.','2.','3.','4.'];
+  return namen.map((nm,i)=>{
+    /* ── Wessen Kompanie bricht, hat ein Gesicht ──
+       **Die Rang-10-Frage „Welche Kompanie schickst du zuerst hinein?" hört
+       auf, eine Rechnung zu sein, sobald die Kompanien Namen haben.** Statt
+       „1. Kompanie · Bestand 100 · Haltung 78" steht dort „Capitaine Reynaud".
+       Die Haltung folgt seinem Können, nicht mehr einer Reihenfolge — wer
+       einen schlechten Chef hat, hat einen schlechten Abschnitt.
+
+       Namen gibt es nur für die **Offiziere**. Die Mannschaft wird ab Rang 10
+       zu Summen, und das bleibt so: Du hörst auf, die Soldaten zu kennen, und
+       kennst nur noch die, die sie befehligen. */
+    const chef = u[i] || null;
+    const eigenG = chef ? Math.max(-25, Math.min(30, (chef.koennen-45)*0.6)) : g;
+    return {
+      name: chef ? chef.posten+' '+chef.name : nm+' Kompanie',
+      kurz: chef ? chef.name.slice(0,2) : nm[0],
+      chef: chef ? chef.name : null, index: chef ? i : -1,
+      bestand: einheitBestand(),
+      haltung: Math.max(25, 70 + Math.round(eigenG) - (chef?0:i*3) - (100-roh)), vorn: false
+    };
+  });
 }
 
 /* Ab Rang 12 sind es keine Kompanien mehr, sondern Verbände auf einer Karte —
@@ -1181,6 +1210,38 @@ function schaetzung(ist, max){
    von Hand mitziehen muss, wird an der siebten vergessen. */
 function drillProbe(schw){ return probe('drill', schw - (gekauft('uhr') ? 4 : 0)); }
 
+/* ── Wie gut der Befehl ausgeführt wird ──
+   **Nicht ob, sondern wie gut.** Das „ob" entscheidet die eigene Probe; hier
+   entscheidet der Mann, der es tut. Der zufällig gewählte Unterstellte ist der,
+   dessen Abschnitt gerade betroffen ist — es gibt keinen Grund, dass es immer
+   derselbe wäre.
+
+   Treue unter null kostet zusätzlich sechs Punkte: Ein Unterstellter, der
+   dich nicht deckt, führt einen unbequemen Befehl langsamer aus. Ab Rang 12
+   ist es eine ganze Zeiteinheit (siehe `karte()`), hier sind es sechs Punkte
+   auf die Probe.
+
+   Ohne Unterstellte gibt es nichts zu prüfen — dann ist der Befehl so gut wie
+   der Mann, der ihn gibt, und das war er bis Rang 8 auch. */
+function ausfuehrungsProbe(schw){
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  if(!u.length) return {erfolg:true, wer:null, faktor:1};
+  const x = u[Math.floor(Math.random()*u.length)];
+  const abzug = x.treue < 0 ? 6 : 0;
+  const roh = x.koennen - (schw + kampagnenHaerte()) + PROBE_SOCKEL - abzug;
+  const ziel = Math.max(5, Math.min(95, roh));
+  const erfolg = wurfZahl() <= ziel;
+  return {erfolg, wer:x, faktor: erfolg ? 1 : 0.55};
+}
+/* Der Satz, der danebensteht. Er nennt den Namen — das ist der ganze Punkt. */
+function ausfuehrungsZeile(a){
+  if(!a || !a.wer) return '';
+  return a.erfolg
+    ? `<div class="wirkung"><span>Ausgeführt</span>${esc(a.wer.posten+' '+a.wer.name)} setzt es um, wie es gemeint war. <b>Können ${a.wer.koennen}</b></div>`
+    : `<div class="wirkung"><span>Halb ausgeführt</span>${esc(a.wer.posten+' '+a.wer.name)} macht daraus etwas anderes, als du gemeint hast. Nicht aus Trotz — er kann es nicht besser.${
+        a.wer.treue<0 ? ' Und er beeilt sich nicht dabei.' : ''} <b>Können ${a.wer.koennen}${a.wer.treue<0?' · Treue '+a.wer.treue:''}</b></div>`;
+}
+
 /* ── Das Vollblut ──
    **Man sieht dich von weitem. Das ist der Vorteil und der Preis.** Ein
    Offizier auf einem auffallenden Pferd wird gesehen — von den eigenen Leuten,
@@ -1775,6 +1836,9 @@ function zeigeKampf(text){
 
 function kampfAktion(id){
   const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
+  /* Das Ergebnis der Ausführungsprobe des Zuges — gesetzt von den Befehlen ab
+     Rang 9, gelesen beim Schaden und in der Zeile darunter. */
+  let ausfuehrung = null;
   const zw = S.zweig;
 
   if(id==='laden'){
@@ -1948,9 +2012,22 @@ function kampfAktion(id){
      merkt es hier und kann nichts dagegen tun. */
   else if(id==='vorfuehren'){
     const p = probe('autoritaet', 45);
+    /* ── Die Ausführungsprobe ──
+       **Ab Rang 9 entscheidet deine Probe, ob der Befehl ankommt — und das
+       Können dessen, der ihn ausführt, was er wert ist.** Ein Sergent mit
+       Können 30 macht aus einer guten Anordnung eine mittelmäßige. Das ist
+       die Erfahrung, die Rang 9 verkauft: *Deine Entscheidung ist gut und das
+       Ergebnis nicht, und es liegt nicht an dir.*
+
+       Gerechnet wird mit derselben Formel wie jede Probe im Spiel — Sockel 60,
+       sechs Würfe. Bei Gleichstand heißt das rund 80 %, und der enge Wurf
+       bedeutet, dass ein Unterstellter mit Können 30 gegen eine Aufgabe 45
+       **fast immer** scheitert, nicht nur häufig. Das ist die richtige Härte
+       für ein System, in dem man den Mann vorher hätte ausbilden können. */
+    ausfuehrung = ausfuehrungsProbe(45);
     const anteil = Math.max(0.35, (K.sektion||100)/100);
     K.deckung = false; gefahrMod = +8;    // du gehst voran, sonst geht niemand
-    if(p.erfolg){ schaden = (36 + Math.random()*16) * anteil;
+    if(p.erfolg){ schaden = (36 + Math.random()*16) * anteil * ausfuehrung.faktor;
       text = 'Du gehst die drei Schritte vor die Front, drehst dich nicht um und weißt trotzdem, dass sie mitkommen. Genau dafür stehst du dort: damit sechzig Männer etwas sehen, dem sie folgen können.'
            + anerkennung(2,'Den Zug selbst vorgeführt'); }
     else { schaden = 8 * anteil; K.sektion = Math.max(0,(K.sektion||100)-7);
@@ -2532,7 +2609,9 @@ function kampfAktion(id){
   }
 
   laufSichern();
-  zeigeKampf(text + treffer);
+  /* Die Ausführungszeile steht **unter** dem Rundentext: erst was du befohlen
+     hast, dann was daraus geworden ist. */
+  zeigeKampf(text + treffer + ausfuehrungsZeile(ausfuehrung));
 }
 
 /* ══════════════════ WER ÜBER DIR STIRBT ══════════════════
@@ -2569,6 +2648,31 @@ function grandmaisonAuftritt(){
   return `<div class="wirkung"><span>${esc(personName('grandmaison'))}</span>
     Er nimmt deine Meldung entgegen, nickt und wendet sich ab. Er hat heute vierzig Meldungen entgegengenommen.
     <b>Er kennt deinen Namen aus einer Liste und sonst nirgendwoher.</b></div>`;
+}
+
+/* ── Wer unter dir stirbt ──
+   **Die Kette über dir kennt das seit langem; die darunter bekommt es jetzt.**
+   In jedem Gefecht kann einer der Unterstellten fallen — 9 % im gewöhnlichen,
+   18 % im Höhepunktgefecht. Der Nachfolger beginnt bei Können 25 und Treue 0
+   und kennt dich nicht.
+
+   **Der Verlust ist doppelt und wird nie ausgesprochen:** Man verliert einen
+   Abschnitt, der jetzt schlechter geführt wird — und, sobald es das Verzeichnis
+   gibt, einen Mitwisser. Eine Sache, deren letzter Mitwisser fällt, ist sicher.
+   Papier verjährt nach Jahren, Menschen sofort. */
+function unterstellteImGefecht(n){
+  const u = (S.unterstellte||[]);
+  const lebende = u.map((x,i)=>({x,i})).filter(o=>o.x.lebt);
+  if(!lebende.length) return '';
+  if(Math.random() >= (n && n.haerte>1 ? 0.18 : 0.09)) return '';
+  const o = lebende[Math.floor(Math.random()*lebende.length)];
+  const gefallen = unterstellterFaellt(o.i);
+  if(!gefallen) return '';
+  const neu = S.unterstellte[o.i];
+  S.log.push(gefallen + ' ist nicht zurückgekommen.');
+  return `<div class="wirkung"><span>Aus deinem Stab</span>${esc(gefallen)} ist nicht zurückgekommen.
+    An seiner Stelle steht ${esc(neu.posten+' '+neu.name)}, der seit vier Tagen hier ist und dich nicht kennt.
+    <b>Können 25 · Treue 0</b></div>`;
 }
 
 function ketteImGefecht(n){
@@ -2976,7 +3080,10 @@ function kampfEnde(sieg, letzterText){
      dem angesagten Tod den wirklichen, und ohne ihn wäre die Stelle für den
      Unteroffizier noch besetzt. Die Reihenfolge ist die ganze Logik: Jemand
      fällt, und deshalb rückst du auf. */
-  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n) + feldBefoerderung();
+  /* Die Reihenfolge ist die ganze Logik: erst die Toten (über dir und unter
+     dir), dann die Beförderung. Andersherum wäre die Stelle noch besetzt. */
+  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n)
+                     + unterstellteImGefecht(n) + feldBefoerderung();
   const kk = K; setzeKampf(null);
   stationErledigt();
   app.innerHTML = `<div class="stage">${verlauf()}

@@ -325,6 +325,49 @@ function leuteStart(){
   return o;
 }
 
+/* ══════════════════ DIE KETTE UNTER DIR ══════════════════
+
+   **Der Kern der Verschiebung, und er kostet fast keine neue Maschine.** Das
+   Spiel hat ein bewährtes System für benannte Personen mit eigener Haltung,
+   Aufstieg, Tod und Nachfolge — `S.leute`, `LEUTE`, `NACHFOLGER`. Es zeigt
+   nach oben. **Hier wird dasselbe System nach unten gerichtet.**
+
+   Bis Rang 8 hat man Untergebene als *Zahl*: `K.sektion` ist eine Zahl für 20,
+   60 oder 120 Mann, die Kompanien heißen „1. Kompanie" bis „4. Kompanie", und
+   `MANNSCHAFT` liefert Namen ausschließlich für Verlustlisten. Die Texte
+   behaupteten Untergebene („drei Sergenten machen die Arbeit"), der Zustand
+   kannte sie nicht.
+
+   **Ab Rang 9 haben sie Namen.** Vier Personen, wie „Über dir" — und je Person
+   nur vier Werte, damit vier Personen überschaubar bleiben:
+
+     koennen   0–100   was seine Einheit im Gefecht leistet
+     treue    −5…+5    ob er dich deckt oder anzeigt
+     zustand           ein Problem, das auf deinem Schreibtisch landet
+     lebt              er kann fallen; der Nachfolger beginnt bei 25
+
+   **Die Zahl der Menschen, die du kennst, bleibt gleich — sie rücken nur
+   immer weiter von der Schlacht ab.** Als Fusilier kennst du vier Männer neben
+   dir. Als Général de division kennst du vier Generäle unter dir. */
+const UNTERSTELLTE_STUFEN = [
+  {ab:9,  posten:['Sergent','Sergent','Sergent','Sous-Lieutenant'], was:'deine Unteroffiziere und dein junger Offizier'},
+  {ab:10, posten:['Capitaine','Capitaine','Capitaine','Capitaine'], was:'die vier Kompaniechefs'},
+  {ab:11, posten:['Chef de bataillon','Chef de bataillon','Chef de bataillon'], was:'die Bataillonschefs deines Regiments'},
+  {ab:12, posten:['Colonel','Colonel','Colonel','Général de brigade'], was:'die Regimenter deiner Brigade'},
+  {ab:13, posten:['Général de brigade','Général de brigade','Colonel','Colonel','Colonel'], was:'die Verbände deiner Division'}
+];
+/* Welche Stufe zum Rang gehört — die höchste, die er erreicht. */
+function unterstellteStufe(rang){
+  let s = null;
+  for(const u of UNTERSTELLTE_STUFEN) if(rang >= u.ab) s = u;
+  return s;
+}
+/* Namen für die Unterstellten. Sie kommen aus derselben Liste wie die
+   Verlustmeldungen — es sind dieselben Leute, nur die, die man kennt. */
+const UNTER_NAMEN = ['Toussaint','Lavaux','Perrin','Reynaud','Ducasse','Marbot',
+  'Chevrier','Delaunay','Prevost','Ravel','Bonnet','Gerard','Lefranc','Vidal',
+  'Aubert','Chastel','Marchand','Dorsay','Villiers','Rocher'];
+
 const HERKUENFTE = [
   {id:'bauer',name:'Bauernsohn',
    text:'Konstitution +20 · Fouragieren +25 · Bajonett +15 · Bildung −10',

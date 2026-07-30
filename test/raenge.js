@@ -44,7 +44,8 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
       if(r === 2) S.zweig = 'voltigeur';
     }, rang);
 
-    let s = 0, gesehen = {knoepfe: [], sichtfeld: false, skizze: false, rechtecke: false,
+    let s = 0, gesehen = {knoepfe: [], unterDir: false, nummern: false,
+                          sichtfeld: false, skizze: false, rechtecke: false,
                           karte: false, atem: false, widerstand: false};
     while (s++ < 220) {
       const t = await p.$eval('#app', e => e.innerText);
@@ -69,6 +70,10 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
         Object.assign(gesehen, bilder);
         gesehen.atem = /\bAtem\b/.test(t);
         gesehen.widerstand = /WIDERSTAND DES FEINDES/.test(t);
+        /* Der Block „Unter dir" und die Frage, ob die Kompanien Namen tragen.
+           Eine Nummer im Knopftext heißt: Es gibt keinen Chef dafür. */
+        gesehen.unterDir = /Unter dir/i.test(t);
+        gesehen.nummern = gesehen.knoepfe.some(k => /^Die \d\. Kompanie vorgehen/.test(k));
         break;
       }
       const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
@@ -100,7 +105,10 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
     /* Je Maßstab andere Pflichtknöpfe und ein anderes Bild. Was ein Rang
        *nicht* mehr hat, ist dabei so wichtig wie das, was er bekommt. */
     const soll = rang >= 12 ? ['Aufklärung anfordern', 'Warten, bis die Meldungen kommen']
-      : rang >= 10 ? ['Die 1. Kompanie vorgehen lassen']
+      /* **Seit die Kompanien Namen tragen, heißt der Knopf nicht mehr „Die 1.
+         Kompanie".** Geprüft wird deshalb der Anfang — und darunter eigens,
+         dass wirklich ein Name dasteht und keine Nummer. */
+      : rang >= 10 ? ['Die ']
       : rang >= 7 ? ['Den Zug vorführen', 'Das Gelände nutzen', 'Die Front verkürzen lassen', 'Den Degen ziehen']
           .concat(rang >= 8 ? ['Den Zug aus der Linie lösen'] : [])
       : rang === 6 ? ['Feuer nach Sektionen', 'Die Sergenten einteilen']
@@ -124,6 +132,14 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
     if (rang >= 10 && gesehen.atem) { zeile += ' · ATEMLEISTE NOCH DA'; schlecht++; }
     if (rang < 10 && !gesehen.atem) { zeile += ' · ATEMLEISTE FEHLT'; schlecht++; }
     if (rang >= 12 && gesehen.widerstand) { zeile += ' · WIDERSTANDSWERT NOCH DA'; schlecht++; }
+    /* ── Die Kette unter dir (VERWALTUNG §2) ──
+       Ab Rang 9 muss der Seitenleistenblock stehen, und ab Rang 10 müssen die
+       Einheiten Namen tragen statt Nummern. **Ohne diese zwei Zeilen wäre die
+       ganze Sitzung gebaut und ungeprüft** — genau der Fehler, den die
+       Offiziersknöpfe schon einmal gemacht haben. */
+    if (rang >= 9 && !gesehen.unterDir) { zeile += ' · KEIN BLOCK „UNTER DIR"'; schlecht++; }
+    if (rang < 9 && gesehen.unterDir) { zeile += ' · BLOCK ZU FRÜH'; schlecht++; }
+    if (rang >= 10 && gesehen.nummern) { zeile += ' · KOMPANIEN OHNE NAMEN'; schlecht++; }
     if (!fehlt.length && bildDa) zeile += ` · ${bildName.toLowerCase()}` +
       (rang >= 7 ? ' · Muskete weg' : '') +
       (rang >= 10 ? ' · Atem weg' : '') + (rang >= 12 ? ' · Feind nur gemeldet' : '');

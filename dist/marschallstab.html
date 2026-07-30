@@ -1045,6 +1045,49 @@ function leuteStart(){
   return o;
 }
 
+/* ══════════════════ DIE KETTE UNTER DIR ══════════════════
+
+   **Der Kern der Verschiebung, und er kostet fast keine neue Maschine.** Das
+   Spiel hat ein bewährtes System für benannte Personen mit eigener Haltung,
+   Aufstieg, Tod und Nachfolge — `S.leute`, `LEUTE`, `NACHFOLGER`. Es zeigt
+   nach oben. **Hier wird dasselbe System nach unten gerichtet.**
+
+   Bis Rang 8 hat man Untergebene als *Zahl*: `K.sektion` ist eine Zahl für 20,
+   60 oder 120 Mann, die Kompanien heißen „1. Kompanie" bis „4. Kompanie", und
+   `MANNSCHAFT` liefert Namen ausschließlich für Verlustlisten. Die Texte
+   behaupteten Untergebene („drei Sergenten machen die Arbeit"), der Zustand
+   kannte sie nicht.
+
+   **Ab Rang 9 haben sie Namen.** Vier Personen, wie „Über dir" — und je Person
+   nur vier Werte, damit vier Personen überschaubar bleiben:
+
+     koennen   0–100   was seine Einheit im Gefecht leistet
+     treue    −5…+5    ob er dich deckt oder anzeigt
+     zustand           ein Problem, das auf deinem Schreibtisch landet
+     lebt              er kann fallen; der Nachfolger beginnt bei 25
+
+   **Die Zahl der Menschen, die du kennst, bleibt gleich — sie rücken nur
+   immer weiter von der Schlacht ab.** Als Fusilier kennst du vier Männer neben
+   dir. Als Général de division kennst du vier Generäle unter dir. */
+const UNTERSTELLTE_STUFEN = [
+  {ab:9,  posten:['Sergent','Sergent','Sergent','Sous-Lieutenant'], was:'deine Unteroffiziere und dein junger Offizier'},
+  {ab:10, posten:['Capitaine','Capitaine','Capitaine','Capitaine'], was:'die vier Kompaniechefs'},
+  {ab:11, posten:['Chef de bataillon','Chef de bataillon','Chef de bataillon'], was:'die Bataillonschefs deines Regiments'},
+  {ab:12, posten:['Colonel','Colonel','Colonel','Général de brigade'], was:'die Regimenter deiner Brigade'},
+  {ab:13, posten:['Général de brigade','Général de brigade','Colonel','Colonel','Colonel'], was:'die Verbände deiner Division'}
+];
+/* Welche Stufe zum Rang gehört — die höchste, die er erreicht. */
+function unterstellteStufe(rang){
+  let s = null;
+  for(const u of UNTERSTELLTE_STUFEN) if(rang >= u.ab) s = u;
+  return s;
+}
+/* Namen für die Unterstellten. Sie kommen aus derselben Liste wie die
+   Verlustmeldungen — es sind dieselben Leute, nur die, die man kennt. */
+const UNTER_NAMEN = ['Toussaint','Lavaux','Perrin','Reynaud','Ducasse','Marbot',
+  'Chevrier','Delaunay','Prevost','Ravel','Bonnet','Gerard','Lefranc','Vidal',
+  'Aubert','Chastel','Marchand','Dorsay','Villiers','Rocher'];
+
 const HERKUENFTE = [
   {id:'bauer',name:'Bauernsohn',
    text:'Konstitution +20 · Fouragieren +25 · Bajonett +15 · Bildung −10',
@@ -5309,7 +5352,7 @@ STATIONEN.hunderttage = KAPITEL11.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 10;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang
+const LAUF_FASSUNG    = 11;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -5474,6 +5517,19 @@ const LAUF_WANDLER = {
     const m = alt.mann;
     if(m && m.hoechsterRang === undefined) m.hoechsterRang = m.rang|0;
     return Object.assign({}, alt, {fassung:10});
+  },
+  /* Fassung 10 kannte nur die Kette **über** dir. Ab Rang 9 gibt es jetzt auch
+     eine darunter: vier benannte Personen mit Können, Treue und Zustand.
+
+     **Ein angefangener Feldzug bekommt sie neu ausgewürfelt**, nicht
+     rekonstruiert. Rekonstruieren hieße raten — es gibt keine Spur davon, wen
+     dieser Mann ausgebildet hat. Neu heißt: Er kennt sie, seit er den Rang
+     trägt, und muss sie von vorn kennenlernen. Das ist der ehrlichere von zwei
+     unehrlichen Wegen. */
+  10: alt => {
+    const m = alt.mann;
+    if(m && m.unterstellte === undefined){ m.unterstellte = []; m.unterstellteStufe = 0; }
+    return Object.assign({}, alt, {fassung:11});
   }
 };
 
@@ -5665,6 +5721,7 @@ function stationErledigt(){
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   aderlass(KAPITEL[LAUF.node-1]);
+  unterstellteZehren();
   /* „Er weiß, welches Wasser." Halbiert wird die Zehrung, nicht abgeschafft —
      und die Sperre der Zeitheilung bleibt bestehen, solange überhaupt etwas
      zehrt. Wer krank ist, erholt sich nicht; er wird nur langsamer weniger.
@@ -5982,7 +6039,11 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        sinkt nie, auch wenn der Inspecteur einen Rang nimmt: Eine Bekanntschaft
        verliert man nicht durch eine Rückstufung. Gepflegt wird er an einer
        einzigen Stelle, `rangSetzen()`. */
-    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
+    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(),
+    /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
+       und eine leere Liste ist ehrlicher als vier Platzhalter. */
+    unterstellte:[], unterstellteStufe:0,
+    kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     /* Der Offizier: `einheit` bleibt null, bis es eine Kompanie gibt (Rang 9).
@@ -6081,6 +6142,98 @@ function francs(betrag, immerZwei){
   return s.replace('.', ',');
 }
 
+/* ══════════════════ DIE UNTERSTELLTEN ══════════════════
+
+   **Sie entstehen bei der Beförderung und rücken mit dem Rang nach.** Wer
+   Capitaine wird, bekommt drei Sergenten und einen Sous-Lieutenant; wer Chef
+   de bataillon wird, bekommt vier Capitaines — und die drei Sergenten bleiben
+   zurück, weil sie zwei Ebenen unter ihm nicht mehr vorkommen.
+
+   **Der Mitgezogene ist die Ausnahme** (`mit:true`): Einer wandert mit, wie
+   Martel es über dir tat. Er ist der einzige, dessen Treue +5 erreichen kann,
+   und der längste Mitwisser — wer alle anderen dreimal ausgetauscht hat, hat
+   immer noch ihn. Gewählt wird er beim Aufstieg zu Rang 10. */
+/* **Selbstheilend, und das ist Absicht.** `rangSetzen()` ist die vorgesehene
+   Tür, aber `S.rang` wird an anderen Stellen direkt gesetzt — von den
+   Prüfständen, von Kapiteldaten, und von jedem Code, den es noch nicht gibt.
+   Ein Zustand, der nur über eine einzige Tür entsteht, fehlt überall dort, wo
+   jemand durchs Fenster steigt. Die Funktion kehrt sofort zurück, wenn die
+   Stufe schon stimmt, also darf sie überall gerufen werden. */
+function unterstellteSetzen(){
+  if(!S) return;
+  const stufe = unterstellteStufe(S.rang);
+  if(!stufe){ S.unterstellte = []; return; }
+  if(S.unterstellteStufe === stufe.ab) return;      // schon aufgebaut
+  const alt = S.unterstellte || [];
+  const mit = alt.find(u=>u.mit && u.lebt) || null;
+  /* Namen, die schon vergeben sind, kommen nicht zweimal vor. */
+  const belegt = alt.map(u=>u.name);
+  const frei = UNTER_NAMEN.filter(n=>belegt.indexOf(n)<0);
+  const neu = [];
+  stufe.posten.forEach((posten,i)=>{
+    /* Der Mitgezogene behält Können und Treue und bekommt den neuen Posten —
+       er ist zwei bis drei Stufen unter dir aufgestiegen, nicht ersetzt worden. */
+    if(mit && i===0){ neu.push(Object.assign({}, mit, {posten})); return; }
+    neu.push({
+      name: frei[i] || UNTER_NAMEN[(i*7) % UNTER_NAMEN.length],
+      posten,
+      /* Start 35–55, gestreut: Wer neu unter dir steht, ist weder ein
+         Versager noch ein Geschenk. Ein Fremder von außen startet bei 25,
+         siehe `unterstellterFaellt()`. */
+      koennen: 35 + Math.floor(Math.random()*21),
+      treue: 0, zustand:'dienstfähig', lebt:true, mit:false, satz:''
+    });
+  });
+  S.unterstellte = neu;
+  S.unterstellteStufe = stufe.ab;
+}
+
+/* Der Nachrücker kennt dich nicht — Können 25, Treue 0. Das ist derselbe
+   Preis, den ein gefallener Fürsprecher über dir kostet, nur von unten. */
+function unterstellterFaellt(i){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return '';
+  u.lebt = false;
+  const gefallen = u.posten + ' ' + u.name;
+  const belegt = S.unterstellte.map(x=>x.name);
+  const name = UNTER_NAMEN.filter(n=>belegt.indexOf(n)<0)[0] || 'Ferrand';
+  S.unterstellte[i] = {name, posten:u.posten, koennen:25, treue:0,
+                       zustand:'dienstfähig', lebt:true, mit:false,
+                       satz:'ist seit vier Tagen da'};
+  return gefallen;
+}
+
+/* Können pflegen — die Zehrung ist die Gegenseite: **Personal, das man nicht
+   anfasst, wird schlechter.** −2 je Station, wie der Einheitszustand. */
+function koennenPlus(i, n){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return;
+  u.koennen = Math.max(0, Math.min(100, u.koennen + n));
+}
+function treuePlus(i, n, satz){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return;
+  u.treue = Math.max(-5, Math.min(u.mit ? 5 : 4, u.treue + n));
+  if(satz) u.satz = satz;
+}
+/* Der mittlere Können-Wert steht für die Güte der ganzen Einheit und löst ab
+   Rang 9 `sektionGuete` ab (VERWALTUNG §9). Solange niemand unter einem steht,
+   bleibt die alte Zahl gültig. */
+/* **Personal, das man nicht anfasst, wird schlechter.** −2 je Station, wie
+   der Einheitszustand — und aus demselben Grund: Ein Vorgesetzter, der nichts
+   tut, ist nicht neutral, er verliert. Das ist die Gegenseite zu den
+   Lagerhandlungen, die Können heben. */
+function unterstellteZehren(){
+  if(!S || !S.unterstellte) return;
+  S.unterstellte.forEach(u=>{ if(u.lebt) u.koennen = Math.max(0, u.koennen - 2); });
+}
+
+function unterstellteGuete(){
+  const u = (S && S.unterstellte || []).filter(x=>x.lebt);
+  if(!u.length) return null;
+  return Math.round(u.reduce((s,x)=>s+x.koennen,0) / u.length);
+}
+
 /* ── Die eine Stelle, an der der Rang gesetzt wird ──
    **Jeder Rangwechsel geht hier durch**, damit `hoechsterRang` nicht leckt.
    Dieselbe Regel wie bei `atemKlemmen()`: Ein Nebenwert, der an fünf Stellen
@@ -6092,6 +6245,9 @@ function rangSetzen(r){
   if(!S) return;
   S.rang = r;
   if((S.hoechsterRang|0) < r) S.hoechsterRang = r;
+  /* Mit dem Rang kommen die, die unter einem stehen. Ab Rang 9 haben sie
+     Namen; darunter sind es Zahlen, und das bleibt so. */
+  unterstellteSetzen();
 }
 
 /* ── Der Fourrier zieht die Muskete ein ──
@@ -6800,7 +6956,29 @@ function ueberDir(){
       p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
       <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
   };
-  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}`;
+  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}`;
+}
+
+/* ── Unter dir ──
+   **Vier Personen mit je zwei Zahlen sind acht Zahlen — und das ist die
+   Grenze dessen, was man im Blick behält, ohne eine Tabelle zu führen.**
+   Deshalb Können und Treue als Zahl, nicht als Umschreibung, und daneben ein
+   halber Satz über das letzte Ereignis: Die Zahl sagt *wie viel*, der Satz
+   sagt *woran es liegt*.
+
+   Der Mitgezogene steht zuerst und trägt ein Zeichen — er ist der einzige,
+   dessen Treue +5 erreichen kann, und der einzige, der beim Aufstieg
+   mitwandert. */
+function unterDir(){
+  unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
+  const u = (S.unterstellte||[]);
+  if(!u.length) return '';
+  const zeile = x => `<div class="kv"><span class="hilfe" data-hilfe="${
+      String(x.posten+' '+x.name+'. '+(x.zustand!=='dienstfähig'?x.zustand[0].toUpperCase()+x.zustand.slice(1)+'.':'Dienstfähig.')).replace(/"/g,'&quot;')}">${
+      x.lebt ? (x.mit?'· ':'')+esc(x.name) : '<s>'+esc(x.name)+'</s>'}${
+      x.lebt && x.zustand!=='dienstfähig' ? ' <span class="warn">!</span>' : ''}</span>
+    <b>${x.lebt ? x.koennen + ' <span class="fein">/</span> ' + (x.treue>0?'+':'') + x.treue : '†'}</b></div>`;
+  return `<p class="mini">Unter dir <span class="fein">Können / Treue</span></p>${u.map(zeile).join('')}`;
 }
 
 /* Eine Zeile der Seitenleiste — und **sie zeigt den Wert, mit dem geprüft
@@ -8784,6 +8962,7 @@ function einheitBestand(){
 }
 
 function kompanienStart(){
+  unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
   /* Die Güte kommt aus dem Lager (`S.sektionGuete`), wie schon bei Sektion und
      Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl.
      Die Rekruten schlagen auf die Haltung, nicht auf den Bestand: Ein
@@ -8794,12 +8973,40 @@ function kompanienStart(){
      obendrein. Wer seine Leute über elf Kapitel ausbildet, soll das bis zum
      Ende sehen: Die Wirkung läuft jetzt linear bis 100 und trägt dort 30
      Punkte Haltung statt zwanzig. */
-  const g = Math.max(-25, Math.min(30, (S.sektionGuete||0)*0.3));
+  /* **Ab Rang 9 löst das Können der Unterstellten `sektionGuete` ab.** Wer
+     seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl — nur heißen
+     sie jetzt Reynaud und Ducasse statt „1." und „2.". */
+  const eigen = unterstellteGuete();
+  const g = eigen != null ? Math.max(-25, Math.min(30, (eigen-45)*0.6))
+                          : Math.max(-25, Math.min(30, (S.sektionGuete||0)*0.3));
   const roh = rekrutenStart();
-  return ['1.','2.','3.','4.'].map((nm,i)=>({
-    name: nm+' Kompanie', kurz: nm[0],
-    bestand: einheitBestand(), haltung: Math.max(25, 70 + Math.round(g) - i*3 - (100-roh)), vorn: false
-  }));
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  /* **So viele Rechtecke, wie du Leute hast.** Ein Colonel führt drei
+     Bataillone, kein viertes — und ein Général de division fünf Verbände.
+     Vier war die Zahl des Chef de bataillon und stand hier fest, weil es
+     niemanden gab, an dem sie sich hätte ausrichten können. */
+  const namen = u.length ? u.map((x,i)=>(i+1)+'.') : ['1.','2.','3.','4.'];
+  return namen.map((nm,i)=>{
+    /* ── Wessen Kompanie bricht, hat ein Gesicht ──
+       **Die Rang-10-Frage „Welche Kompanie schickst du zuerst hinein?" hört
+       auf, eine Rechnung zu sein, sobald die Kompanien Namen haben.** Statt
+       „1. Kompanie · Bestand 100 · Haltung 78" steht dort „Capitaine Reynaud".
+       Die Haltung folgt seinem Können, nicht mehr einer Reihenfolge — wer
+       einen schlechten Chef hat, hat einen schlechten Abschnitt.
+
+       Namen gibt es nur für die **Offiziere**. Die Mannschaft wird ab Rang 10
+       zu Summen, und das bleibt so: Du hörst auf, die Soldaten zu kennen, und
+       kennst nur noch die, die sie befehligen. */
+    const chef = u[i] || null;
+    const eigenG = chef ? Math.max(-25, Math.min(30, (chef.koennen-45)*0.6)) : g;
+    return {
+      name: chef ? chef.posten+' '+chef.name : nm+' Kompanie',
+      kurz: chef ? chef.name.slice(0,2) : nm[0],
+      chef: chef ? chef.name : null, index: chef ? i : -1,
+      bestand: einheitBestand(),
+      haltung: Math.max(25, 70 + Math.round(eigenG) - (chef?0:i*3) - (100-roh)), vorn: false
+    };
+  });
 }
 
 /* Ab Rang 12 sind es keine Kompanien mehr, sondern Verbände auf einer Karte —
@@ -9590,6 +9797,38 @@ function schaetzung(ist, max){
    von Hand mitziehen muss, wird an der siebten vergessen. */
 function drillProbe(schw){ return probe('drill', schw - (gekauft('uhr') ? 4 : 0)); }
 
+/* ── Wie gut der Befehl ausgeführt wird ──
+   **Nicht ob, sondern wie gut.** Das „ob" entscheidet die eigene Probe; hier
+   entscheidet der Mann, der es tut. Der zufällig gewählte Unterstellte ist der,
+   dessen Abschnitt gerade betroffen ist — es gibt keinen Grund, dass es immer
+   derselbe wäre.
+
+   Treue unter null kostet zusätzlich sechs Punkte: Ein Unterstellter, der
+   dich nicht deckt, führt einen unbequemen Befehl langsamer aus. Ab Rang 12
+   ist es eine ganze Zeiteinheit (siehe `karte()`), hier sind es sechs Punkte
+   auf die Probe.
+
+   Ohne Unterstellte gibt es nichts zu prüfen — dann ist der Befehl so gut wie
+   der Mann, der ihn gibt, und das war er bis Rang 8 auch. */
+function ausfuehrungsProbe(schw){
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  if(!u.length) return {erfolg:true, wer:null, faktor:1};
+  const x = u[Math.floor(Math.random()*u.length)];
+  const abzug = x.treue < 0 ? 6 : 0;
+  const roh = x.koennen - (schw + kampagnenHaerte()) + PROBE_SOCKEL - abzug;
+  const ziel = Math.max(5, Math.min(95, roh));
+  const erfolg = wurfZahl() <= ziel;
+  return {erfolg, wer:x, faktor: erfolg ? 1 : 0.55};
+}
+/* Der Satz, der danebensteht. Er nennt den Namen — das ist der ganze Punkt. */
+function ausfuehrungsZeile(a){
+  if(!a || !a.wer) return '';
+  return a.erfolg
+    ? `<div class="wirkung"><span>Ausgeführt</span>${esc(a.wer.posten+' '+a.wer.name)} setzt es um, wie es gemeint war. <b>Können ${a.wer.koennen}</b></div>`
+    : `<div class="wirkung"><span>Halb ausgeführt</span>${esc(a.wer.posten+' '+a.wer.name)} macht daraus etwas anderes, als du gemeint hast. Nicht aus Trotz — er kann es nicht besser.${
+        a.wer.treue<0 ? ' Und er beeilt sich nicht dabei.' : ''} <b>Können ${a.wer.koennen}${a.wer.treue<0?' · Treue '+a.wer.treue:''}</b></div>`;
+}
+
 /* ── Das Vollblut ──
    **Man sieht dich von weitem. Das ist der Vorteil und der Preis.** Ein
    Offizier auf einem auffallenden Pferd wird gesehen — von den eigenen Leuten,
@@ -10184,6 +10423,9 @@ function zeigeKampf(text){
 
 function kampfAktion(id){
   const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
+  /* Das Ergebnis der Ausführungsprobe des Zuges — gesetzt von den Befehlen ab
+     Rang 9, gelesen beim Schaden und in der Zeile darunter. */
+  let ausfuehrung = null;
   const zw = S.zweig;
 
   if(id==='laden'){
@@ -10357,9 +10599,22 @@ function kampfAktion(id){
      merkt es hier und kann nichts dagegen tun. */
   else if(id==='vorfuehren'){
     const p = probe('autoritaet', 45);
+    /* ── Die Ausführungsprobe ──
+       **Ab Rang 9 entscheidet deine Probe, ob der Befehl ankommt — und das
+       Können dessen, der ihn ausführt, was er wert ist.** Ein Sergent mit
+       Können 30 macht aus einer guten Anordnung eine mittelmäßige. Das ist
+       die Erfahrung, die Rang 9 verkauft: *Deine Entscheidung ist gut und das
+       Ergebnis nicht, und es liegt nicht an dir.*
+
+       Gerechnet wird mit derselben Formel wie jede Probe im Spiel — Sockel 60,
+       sechs Würfe. Bei Gleichstand heißt das rund 80 %, und der enge Wurf
+       bedeutet, dass ein Unterstellter mit Können 30 gegen eine Aufgabe 45
+       **fast immer** scheitert, nicht nur häufig. Das ist die richtige Härte
+       für ein System, in dem man den Mann vorher hätte ausbilden können. */
+    ausfuehrung = ausfuehrungsProbe(45);
     const anteil = Math.max(0.35, (K.sektion||100)/100);
     K.deckung = false; gefahrMod = +8;    // du gehst voran, sonst geht niemand
-    if(p.erfolg){ schaden = (36 + Math.random()*16) * anteil;
+    if(p.erfolg){ schaden = (36 + Math.random()*16) * anteil * ausfuehrung.faktor;
       text = 'Du gehst die drei Schritte vor die Front, drehst dich nicht um und weißt trotzdem, dass sie mitkommen. Genau dafür stehst du dort: damit sechzig Männer etwas sehen, dem sie folgen können.'
            + anerkennung(2,'Den Zug selbst vorgeführt'); }
     else { schaden = 8 * anteil; K.sektion = Math.max(0,(K.sektion||100)-7);
@@ -10941,7 +11196,9 @@ function kampfAktion(id){
   }
 
   laufSichern();
-  zeigeKampf(text + treffer);
+  /* Die Ausführungszeile steht **unter** dem Rundentext: erst was du befohlen
+     hast, dann was daraus geworden ist. */
+  zeigeKampf(text + treffer + ausfuehrungsZeile(ausfuehrung));
 }
 
 /* ══════════════════ WER ÜBER DIR STIRBT ══════════════════
@@ -10978,6 +11235,31 @@ function grandmaisonAuftritt(){
   return `<div class="wirkung"><span>${esc(personName('grandmaison'))}</span>
     Er nimmt deine Meldung entgegen, nickt und wendet sich ab. Er hat heute vierzig Meldungen entgegengenommen.
     <b>Er kennt deinen Namen aus einer Liste und sonst nirgendwoher.</b></div>`;
+}
+
+/* ── Wer unter dir stirbt ──
+   **Die Kette über dir kennt das seit langem; die darunter bekommt es jetzt.**
+   In jedem Gefecht kann einer der Unterstellten fallen — 9 % im gewöhnlichen,
+   18 % im Höhepunktgefecht. Der Nachfolger beginnt bei Können 25 und Treue 0
+   und kennt dich nicht.
+
+   **Der Verlust ist doppelt und wird nie ausgesprochen:** Man verliert einen
+   Abschnitt, der jetzt schlechter geführt wird — und, sobald es das Verzeichnis
+   gibt, einen Mitwisser. Eine Sache, deren letzter Mitwisser fällt, ist sicher.
+   Papier verjährt nach Jahren, Menschen sofort. */
+function unterstellteImGefecht(n){
+  const u = (S.unterstellte||[]);
+  const lebende = u.map((x,i)=>({x,i})).filter(o=>o.x.lebt);
+  if(!lebende.length) return '';
+  if(Math.random() >= (n && n.haerte>1 ? 0.18 : 0.09)) return '';
+  const o = lebende[Math.floor(Math.random()*lebende.length)];
+  const gefallen = unterstellterFaellt(o.i);
+  if(!gefallen) return '';
+  const neu = S.unterstellte[o.i];
+  S.log.push(gefallen + ' ist nicht zurückgekommen.');
+  return `<div class="wirkung"><span>Aus deinem Stab</span>${esc(gefallen)} ist nicht zurückgekommen.
+    An seiner Stelle steht ${esc(neu.posten+' '+neu.name)}, der seit vier Tagen hier ist und dich nicht kennt.
+    <b>Können 25 · Treue 0</b></div>`;
 }
 
 function ketteImGefecht(n){
@@ -11385,7 +11667,10 @@ function kampfEnde(sieg, letzterText){
      dem angesagten Tod den wirklichen, und ohne ihn wäre die Stelle für den
      Unteroffizier noch besetzt. Die Reihenfolge ist die ganze Logik: Jemand
      fällt, und deshalb rückst du auf. */
-  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n) + feldBefoerderung();
+  /* Die Reihenfolge ist die ganze Logik: erst die Toten (über dir und unter
+     dir), dann die Beförderung. Andersherum wäre die Stelle noch besetzt. */
+  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n)
+                     + unterstellteImGefecht(n) + feldBefoerderung();
   const kk = K; setzeKampf(null);
   stationErledigt();
   app.innerHTML = `<div class="stage">${verlauf()}
