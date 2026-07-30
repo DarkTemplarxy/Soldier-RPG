@@ -5,6 +5,511 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Der Umbau: Probe, Ökonomie, Leiter
+
+**Zwölf Änderungen, und keine konnte für sich allein stehen.** Sie stehen hier in der Reihenfolge, in der sie voneinander abhängen — wer eine davon zurücknimmt, nimmt die darunter mit.
+
+### 1 · Die Probe neu geeicht
+
+| | vorher | **jetzt** |
+|---|---|---|
+| Sockel | 50 | **60** |
+| Würfe (gemittelt) | 2 | **6** |
+| Streuung des Wurfs | ≈ 20 | **≈ 11,8** |
+| Gleich gut wie die Aufgabe | 50 % | **80 %** |
+| Wert 8 gegen Aufgabe 40 | 29 % | **3 %** |
+
+**Warum:** Zwei Klagen desselben Tages, beide berechtigt. *„Ich sollte bei gleich hohem Skill wie Anforderung keine 50 % Chance haben, sondern eine die Richtung 80 % geht"* — das ist der Sockel. *„Reinspieltechnisch macht es keinen Sinn, mit 8 Bajonett gegen 40 zu spielen und 30 % zu schaffen"* — das ist die Wurfbreite. **Zwei Regler, zwei Klagen, und sie tun Verschiedenes:** Der Sockel verschiebt die Kurve waagerecht, die Wurfbreite macht sie steil.
+
+> **Der Sockel allein war der falsche Weg, und das ist gemessen.** `PROBE_SOCKEL = 70` ohne engeren Wurf hob auch „8 gegen 40" auf 29 % und blies den Erstläufer auf: Capitaine 0 → **33 %**, Punkte-Median 34 → 263. Eine Verschiebung nach rechts hilft dem Schwachen genauso wie dem Starken — nur die Steilheit trennt sie.
+
+**`chance()` rechnet die Anzeige geschlossen um** (logistische Näherung der Normalverteilung, gegen 200 000 echte Würfe geprüft, Abweichung ≤ 2 Punkte). Der Zielwert *ist* bei sechs Würfen nicht mehr die Prozentzahl.
+
+### 2 · Der Schadensbonus ist ersatzlos weg
+
+`koennen` und `meister()` gaben bis zu +50 % Wirkung für alles, was die Klemme bei 95 wegwarf. Entfernt auf Ansage: *„Dass man über einem bestimmten Wert dann mehr Schaden macht, ist Schwachsinn."* **Und er hat recht — eine Muskete schießt nicht härter, weil der Mann besser zielt.**
+
+### 3 · Steigende Schwierigkeiten je Feldzug (`kampagnenHaerte()`)
+
+Ein Zuschlag auf **jede** Probe, je Kampagne eine Zahl:
+
+| Italien | Ägypten | Garnison | Austerlitz | Jena | Eylau | Spanien | Russland | 1813 | 1814 | Waterloo |
+|---|---|---|---|---|---|---|---|---|---|---|
+| +0 | +4 | +0 | +6 | +8 | +10 | +12 | +16 | +16 | +18 | **+20** |
+
+**Warum:** Das ist die *richtige* Antwort auf die Frage, die der Schadensbonus falsch beantwortet hat — *Was kauft ein Wert, wenn die Trefferchance schon bei 99 % steht?* Er kauft weiterhin Trefferchance, nur wird die Aufgabe mit jedem Feldzug schwerer. **Wert 80 ist 1796 überflüssig und 1812 gerade genug.** Die Garnison steht auf 0: Es ist Frieden.
+
+### 4 · Ein Deckel für alles, und ein höherer Sockel
+
+- Attribute und Fertigkeiten gehen bis **100** (vorher 70 / 60).
+- Fertigkeiten starten bei **20** (`FERT_SOCKEL`; vorher 5).
+
+**Warum der Deckel fiel:** Das Ziel lautet *„nach perfekten Läufen alles auf +70 pushen können"* — ein Deckel bei 60 macht das per Regel unmöglich. **Die Bremse ist jetzt allein der Preis.**
+
+### 5 · Die Aushebung statt der Verteilung
+
+**Keine Handverteilung mehr.** Man sieht einen ausgewürfelten Mann und darf „Einen anderen Mann" drücken, so oft man will. *„Am Anfang muss man sich nutzlos fühlen."* Wer seine Punkte setzen darf, baut sich einen Spezialisten; wer einen Mann bekommt, bekommt einen Mann.
+
+### 6 · Exponentielle Kosten
+
+```js
+PRO_PUNKT = [1,1,2,3,5,8,15,25,40,60]    // vorher [1,1,2,2,3,4,6,8,11,15]
+```
+
+| Weg | Kosten |
+|---|---|
+| ein Wert von 20 auf 70 | **330 VP** |
+| **alle fünfzehn** von 20 auf 70 | **4 950 VP** |
+| ein Wert von 90 auf 100 | **600 VP** |
+
+**Breite und Spitze schließen einander fast aus**, und genau das soll die Entscheidung sein.
+
+### 7 · Die Wertung ×5 — Kosten und Einkommen sind ein Paar
+
+| Posten | vorher | **jetzt** |
+|---|---|---|
+| Rang 14 | 580 | **2 900** |
+| Kapitel | 8 je Kapitel | **20 je Kapitelnummer**, aufsummiert (alle elf: 1 320) |
+| Ruf | 5 je 10 | **10 je 10** |
+| Nennungen | 3 | **10** |
+| Überleben | 70 / 120 / 180 | **350 / 600 / 900** |
+| Nie gekniffen | 20 | **100** |
+| Orden | ×1 | **×3** |
+
+**Der Rang ist der größte Posten und wächst überproportional** — *„Vor allem Beförderungen bringen mehr. Auch positiver Abschluss von Kampagnen … es soll ein spürbarer Unterschied sein."* Die Kapitel sind gestaffelt, nicht pauschal: Der elfte Feldzug ist mehr wert als der erste, weil er ungleich teurer erkauft ist. **Orden bekamen bewusst nur Faktor 3** — *„Auszeichnungen sind dabei nicht sooo wichtig."*
+
+> **Gerechnet, nicht geschätzt:** Ein perfekter Lauf bringt 3 945 (Decke Rang 9), 4 960 (Rang 12) oder 5 370 VP (Rang 13). „Alles auf 70" kostet 4 950. **Die Decke entscheidet, ob das Ziel erreichbar ist** — deshalb Punkt 12.
+
+### 8 · Ruf-Schwellen über die volle Strecke
+
+| Rang | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| alt | 35 | 52/62 | 75 | 95 | 120 | 150 | 180 | 200 | 230 | 260 | 300 |
+| **neu** | 45 | 60/70 | 100 | 145 | 195 | 255 | 325 | 400 | 480 | 570 | **680** |
+
+Sie endeten bei 300, während ein Maximalveteran mit **688** ankommt: Nach gut der halben Kampagne war die Leiter aufgebraucht. Rang 3 bleibt unangetastet — der erste Aufstieg soll früh kommen.
+
+### 9 · Gunst sammelt man beim nächsten Beurteiler (`beurteiler()`)
+
+Zwei Quellen zahlen jetzt an den Patron des **nächsten erreichbaren** Leitereintrags statt an einen festen Namen: die voll bestandene Sondermission (+1) und der erfüllte Auftrag ab Rang 9 (+1 / −1).
+
+> **⚠ Der Auftrag gab hart an Vernet.** Vernet ist Patron für 6, 8 und 9; ab Rang 9 beurteilt Grandmaison. Der Auftrag ist zugleich die einzige Quelle, die *jedes* Gefecht liefert — er fütterte also Gefecht um Gefecht einen Mann, der nichts mehr zu vergeben hatte. **Dritter Fall derselben Familie an einem Tag: eine Regel, die an einen Namen gebunden ist statt an die Rolle.**
+
+### 10 · Feldbeförderung bis Rang 6, Bescheid im nächsten Lager
+
+Rang 2–6 direkt nach dem Gefecht (`feldBefoerderung()`, `FELD_RANG_MAX = 6`), Rang 7+ nur bei der Musterung. **Der Bescheid wird nachgereicht:** `S.bescheidOffen` → `bescheidNachreichen()` → eigener Bildschirm im nächsten Lager, ab Rang 5. **Man ist es sofort und hat es eine Woche später schriftlich.**
+
+Historisch ist das der eigentliche Bruch der Laufbahn: Einen Caporal ernannte der Capitaine im Hof; für ein Offizierspatent brauchte es eine Kommission und die Unterschrift des Kriegsministers.
+
+### 11 · Zwei Musterungen in jedem Feldzug
+
+Sechs Stationen dazu, **157 → 163**. Kapitel 10 und 11 hatten zusammen **eine**, Waterloo gar keine — ein Mann mit erfüllten Schwellen stand bei Station 156 daneben.
+
+### 12 · Der Grand Officier der Ehrenlegion
+
+Rang 13 forderte `orden:'legion_grand'`, und den gab es nicht. **Damit waren Rang 13 und 14 verschlossen und die ganze VP-Ökonomie gegen eine Decke geeicht, die niemand erreicht.** Bedingungen sind Zahlen, die es schon gab: der dritte Grad, ein Regiment, fünf Bulletins. Vierte Ordensform (`ordenStern()`): achtstrahliger Bruststern, **ohne Band** — man legt ihn nicht ab.
+
+### 13 · Zwei Fehler im Prüfstand (`test/balance.js`)
+
+Keine Balance-Zahlen, aber sie haben Messreihen wertlos gemacht — und der zweite hat dabei **gute Nachrichten erfunden**, statt bloß zu schweigen.
+
+**Das Klickbudget: 600 → 2500.** Ein voller Lauf über 163 Stationen braucht rund 600 Klicks (ausgezählt: Station 122 nach 443 Klicks). Das Budget lag also genau auf der Grenze. Solange der Veteran unterwegs starb, fiel das nicht auf — **erst als die Rangdecke fiel und er anfing anzukommen, wurde die Grenze bindend.** Der Prüfstand ging in dem Augenblick kaputt, in dem die Leiter zum ersten Mal trug. Gemessen mit acht Läufen bei 2500: kein einziger Abbruch, Punkte 4 706–4 768.
+
+**Die fremde Chronik.** `balance.js` benutzt *eine* Seite für alle Läufe, also bleibt `localStorage` stehen und die Chronik wächst über die Läufe hinweg. Weite, Sterbeort und „Kapitel überstanden" kamen aus `META.chronik[length-1]` — und ein Lauf, der weder stirbt noch ankommt, schreibt keinen Eintrag. Gelesen wurde dann der des **vorigen** Laufs:
+
+| Stand dort zufällig… | …zählte der abgebrochene Lauf als |
+|---|---|
+| ein Überlebender | **„alle 163 Stationen erreicht, jedes Kapitel überstanden"** |
+| ein Gefallener | ein Toter in dessen Kapitel, an dessen Station |
+
+> **Das Signal stand die ganze Zeit im Bericht, in zwei Zeilen übereinander:** „gestorben **1**" neben „Gestorben in: Eylau **13**". Die eine Zahl kam vom Bildschirm, die andere aus einer fremden Chronik. **Zwei Zähler derselben Sache, die einander widersprechen, sind kein Rätsel, sondern ein Befund.**
+
+**Behoben:** `chronikVorher` merkt die Länge vor dem Lauf; gezählt wird nur, was *dieser* Lauf geschrieben hat. Alles andere ist `res.abbruch`, geht in keine Quote ein und wird laut gemeldet.
+
+**Vier Regeln daraus:**
+
+1. **Ein Lauf, der nicht zu Ende gespielt wurde, ist kein Messwert** — weder ein guter noch ein schlechter.
+2. **Ein Prüfstand mit einer Obergrenze muss melden, wenn er sie erreicht.**
+3. **Zustand, der den Messgegenstand überlebt, gehört nicht in die Messung.** Die Chronik ist absichtlich langlebig — genau deshalb darf ein Laufergebnis nicht aus ihr kommen. Schwesterregel zu „ein Fließtext ist kein Zustand": *Nicht jeder Zustand gehört diesem Lauf.*
+4. **Zwei Messungen dürfen nie in dieselbe Ausgabedatei schreiben.** Genau das ist hier passiert; der ineinandergeschriebene Bericht hat die Diagnose um eine Stunde verzögert und beinahe eine falsche Ursache ins Protokoll gebracht.
+
+### Gemessen — 163 Stationen, reparierter Prüfstand, null Abbrüche
+
+| | **Weite** (von 163) | **höchster Rang (Cpt)** | Caporal | Ganz durch | Punkte-Median |
+|---|---|---|---|---|---|
+| Erstlauf ohne Vorrat *(80 Läufe)* | **32** | **3 %** | 59 % | 1 % | 462 |
+| Veteran 5800 VP *(40)* | **163** | **100 %** | 100 % | **98 %** | 4 728 |
+
+**Weite und Rang sind vergleichbar, die Punkte nicht** — die Wertung ist absichtlich verfünffacht. Und dort steht das Ergebnis so, wie es bestellt war: Der Erstläufer bewegt sich nicht (31 → 32, Rauschen), der Veteran geht durch.
+
+> ### Der eigentliche Befund: Das Spiel hat keine Mitte
+>
+> **Der Erstlauf ist nicht zu leicht und nicht zu hart — er ist zweigipflig.** Von achtzig Läufen sterben **47 in Ägypten** und bleiben **33 zeitlebens Fusilier**; zugleich erreichen **21 ein Offizierspatent** und einer den **Colonel** — denselben Rang wie der Maximalveteran. Die Spitze eines Erstlaufs liegt bei **4 348 Punkten**, also 92 % dessen, was ein Veteran mit 5 800 VP holt.
+>
+> Das erklärt zwei Zahlen, die sich zu widersprechen scheinen: **Caporal 59 % bei einer Weite von 32.** Beide stimmen — sie beschreiben zwei verschiedene Männer. Der mittlere Lauf stirbt in Ägypten; wer Ägypten übersteht, wird Offizier.
+>
+> | Kapitel | Italien | **Ägypten** | Garnison | Austerlitz | Jena | Eylau |
+> |---|---|---|---|---|---|---|
+> | überstanden | 95 % | **38 %** | 100 % | 86 % | 80 % | 70 % |
+>
+> **Ägypten ist keine Stufe, sondern ein Sieb.** Es entscheidet den Lauf, und danach entscheidet kaum noch etwas. Die Härtekurve steht in Italien auf **+0** und in Ägypten auf **+4** — sie greift also genau dort am schwächsten, wo der Erstläufer lebt und stirbt.
+>
+> **Am anderen Ende dasselbe in umgekehrter Richtung:** Der Veteran übersteht alle elf Feldzüge zu 98 % und endet zu 100 % als Colonel — vierzig von vierzig, keiner darüber, keiner darunter. **Beide Enden der Progression sind flach**, und beide hängen an derselben Stelle: Die Härtekurve endet bei +20, die Werte gehen bis 100.
+>
+> Steht als Punkt 9 und Punkt 11 in `OFFEN.md`, mit Messweg und Prüfpunkt.
+
+---
+
+## 2026-07-29 — Überführt: die Zwei-Würfe-Probe hat den Erstläufer halbiert
+
+**Nichts geändert, nur gemessen** — aber es ist der größte Einzelbefund, den dieses Protokoll enthält.
+
+`52211b0` („Zwei Würfe statt einem") ist mit seiner Wahrscheinlichkeitstabelle dokumentiert worden, **nicht mit seiner Wirkung auf die beiden Leitzahlen.** Nachgeholt mit zwei Worktrees auf `52211b0` und `52211b0^`: benachbarte Commits, also **dieselben 148 Stationen**, in beide derselbe heutige Prüfstand, je 80 Läufe. Eine Variable.
+
+| Erstlauf ohne Vorrat · je 80 Läufe | ein Wurf | **zwei Würfe** |
+|---|---|---|
+| **Weite** | **70** von 148 | **31** von 148 |
+| **Capitaine** | **9 %** | **1 %** |
+| Caporal | 44 % | 35 % |
+| Sergent | 39 % | 24 % |
+| Ägypten überstanden | **58 %** | **42 %** |
+| Punkte-Median | **83** | **37** |
+| Ø Todesstation | 66,9 | 52,4 |
+
+**Neununddreißig Stationen Weite, acht Punkte Capitaine-Quote, Punkte-Median auf weniger als die Hälfte.** Bei n = 80 ist 9 → 1 % etwa 2,5 σ; die Weite liegt weit jenseits jeder Rauschgrenze.
+
+**Damit ist die ganze Kette erklärt.** Weite 31 steht seit `52211b0` unverändert — `52211b0` 31/148, `4c749d7` 31/157, HEAD 31/157. Drei Commits, drei Kapitel und alle Gestaltungsbündel später dieselbe Zahl. Die 58 der Zielwert-Tabelle war nie falsch: Sie ist die Zahl aus der Ein-Wurf-Zeit, und sie war zwei Messungen lang als Regression der Gestaltungsarbeit verdächtigt.
+
+> **Der Satz, der falsch war, und der Denkfehler dahinter.** In CLAUDE.md stand: *„keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden — es sind die Ränder, die sich bewegen."* **Die Ränder sind aber nicht symmetrisch bewohnt.** Der Veteran lebt am oberen Rand, der Erstläufer am unteren, und nur einer von beiden hat gewonnen: Ein Erstläufer hat Attribute 15–60 und Fertigkeiten 5, sein Zielwert liegt gegen die üblichen Schwierigkeiten bei 25–35, und dort ist der Verlust am größten (35 → 24 %, 20 → 8 %). Der Gewinn bei Zielwert 80 fällt ihm nie zu.
+>
+> **Regel daraus: Eine Verteilungsänderung, die „die Mitte unberührt lässt", ist keine neutrale Änderung, solange die Spieler nicht in der Mitte stehen.** Und: Eine Wahrscheinlichkeitstabelle ist keine Messung.
+
+**Entschieden ist nichts.** Die Klage, die den Wurf ausgelöst hat, war berechtigt, und die zwei Würfe lösen sie. Drei Wege — Schwierigkeiten nachziehen, den Wurf gewichten, den Sockel heben — stehen mit ihren Kosten in `OFFEN.md` Punkt 8, samt dem Messweg.
+
+## 2026-07-29 — Der Bot fand das Lager nicht mehr: eine still verfälschte Messung
+
+**Keine Balance-Änderung, sondern die Reparatur des Messgeräts** — und der teuerste Fund dieser Art bisher.
+
+`balance.js` und `durchspielen.js` erkannten das Lager an der Zeichenkette `VERBLEIBENDE ABENDE`. **Der Stationsbogen (Bündel 1) hat daraus „Verbleibend 3 von 3" gemacht**, und damit hörte der Bot auf, das Lager überhaupt zu betreten: kein Ruhen, keine Fürsprache bei Martel, keine Instandhaltung. Er fiel auf den allgemeinen Klick durch und ging ungeruht in jedes Gefecht.
+
+| 80 Läufe, Erstlauf vorsichtig | blinder Bot | Vergleichsstand |
+|---|---|---|
+| Weite | **28** | 58 |
+| Caporal erreicht | **0 %** | ~28 % |
+| Italien überstanden | 91 % | 100 % |
+| Punkte-Median | 20 | 44 |
+
+**Caporal 0 % von 80 war das Signal, und es ist dieselbe Sorte Zahl wie die falschen 100 % des Härtemodus:** Eine Quote, die exakt auf null oder exakt auf hundert fällt, ist fast immer ein kaputter Prüfstand und kein Befund. Was es bewies: **Elitekompanie blieb bei 24 %** — eine Szenenwahl, die kein Lager braucht. Die Beförderungsmaschine war also intakt, ihre Voraussetzung nicht.
+
+**Jetzt verzweigen beide auf `LAUF.lager.id` und `LAUF.winter.ort`.** Beim Winterquartier hätte der Text ohnehin nie getragen: Die Frage ist über `frage:` je Kapitel überschreibbar („Zehn Wochen. Beide Seiten benutzen sie."). Dazu erkennt `durchspielen.js` das Gefecht jetzt an `K` statt an `RUNDE `.
+
+**Dritter Fund derselben Familie — ein Fließtext ist kein Zustand —, und der einzige, der eine Messung *still* verfälscht statt laut zu scheitern.** Die zwei davor: `zeigeTod()` gegen das Kapitelende (Härtemodus meldete 100 % für Russland), „gefallen" im Ruhestandstext (Vollständigkeitsmodus zählte Ausgemusterte als Tote). **Regel: an `LAUF`/`S`/`K` verzweigen, nie an gerenderten Wörtern** — Ausnahme nur, wo es keinen Zustand gibt, etwa der Todesbildschirm.
+
+> **Folge, die ausgesprochen gehört: Die Commits für Bündel 1 und 2 sind nie gegen einen funktionierenden Bot gemessen worden.** Die Zahlen dieser Sitzung nach dem Stationsbogen sind alle mit dem blinden Bot entstanden. Die Neumessung läuft.
+
+## 2026-07-29 — Bündel 5: die Orden bekommen eine Form, und drei Medaillen dazu
+
+**Die Form trägt die Klasse** (Entwurfspaket, Bündel 5). Drei Formen, keine für eine andere verwendet: **Kreuz am Band** (Ehrenlegion, Offiziersgrad, Eiserne Krone) · **geprägte Scheibe an der Trikolore** (die Tapferkeitsmedaillen) · **Gegenstand auf graviertem Täfelchen** (Ehrenwaffe, Ehrensäbel). Man erkennt die Klasse, bevor man den Namen liest. Bis dahin trugen alle sieben Orden dieselbe 36 × 24 große Abzeichenkachel — dieselbe Form wie ein Rangstreifen, und damit gar keine.
+
+**Drei Tapferkeitsmedaillen** (`tapfer_bronze`/`_silber`/`_gold`, 4 · 8 · 12 VP, Ruf +2 · +4 · +6). Sie hängen an `S.nennungen`, `S.bulletins` und `S.belobigungen` — drei Zählern, die seit der Leiter der Sichtbarkeit mitlaufen und bisher nichts ausgezahlt haben. Damit hat zum ersten Mal **jede** der drei Sichtbarkeitsstufen eine Folge, die untere eingeschlossen.
+
+> **⚠ Der Ruf war die eine Währung, in der sie doch gestapelt haben.** Livret und Wertung zeigten längst nur die höchste Stufe; der Ruf zählte alle drei zusammen — 2 + 4 + 6 = **12** für eine Reihe, die höchstens sechs wert ist, und zwar in genau der Zahl, an der die ganze Rangleiter hängt. Jetzt gibt es nur den **Unterschied**: Man wird von Silber auf Gold gehoben, nicht ein zweites Mal geehrt. Das Ablegen sitzt dafür in `ordenVerleihen()` statt in `ordenFaellig()` — **es ist eine Eigenschaft der Auszeichnung und keine der Vergabe.**
+>
+> Dieselbe Fehlerfamilie wie der Zehrwert, der kleiner war als die Heilung: eine Regel, die an einer Stelle steht und an einer zweiten nicht mitgezogen wurde.
+
+**Zwei Zeichenfehler, beide beim Nachbauen wiederholt:**
+
+1. **Vier Balken durch den Mittelpunkt ergeben kein Kreuz, sondern ein X.** Ein Balken ist nach 180° derselbe Balken; die vier Drehungen 45° · 135° · 225° · 315° liefern deshalb zwei Striche. Jeder Arm wird jetzt **vom Mittelpunkt nach außen** gezeichnet und läuft breiter zu — die Form, die die Sterne der Zeit wirklich hatten.
+2. **Das Täfelchen war papierfarben auf Papier** und verschwand auf dem Ordensblatt bis auf seinen Rand. Es ist jetzt einen Ton dunkler: Ein Täfelchen ist ein Gegenstand und kein Loch im Bogen.
+
+**Die Höhe ist gesetzt, die Breite nicht** (`.orden{height:44px;width:auto}`) — die drei Formen haben verschiedene Seitenverhältnisse. Je Ort eine eigene Höhe: Kopfzeile 22 px, Livret 26 px, **Verleihungsblatt 132 px**. Das Verleihungsblatt zeigt den Orden jetzt einmal groß über dem Text; danach ist er eine Zeile in einer Liste.
+
+**Gravur:** Das Täfelchen trägt den Nachnamen des Mannes. Historisch stand er darauf, und es ist die einzige Stelle im Spiel, an der die eigene Ausrüstung den eigenen Namen nennt.
+
+**Gemessen — und zwar gegen denselben Stand, neu gemessen**, nicht gegen eine Zahl von gestern: Worktree auf `4c749d7` (alle elf Kapitel, keine Gestaltungsbündel), **derselbe** reparierte Prüfstand hineinkopiert, dann beide Seiten. Nur so ist bei gleichzeitig geändertem Inhalt und geänderten Regeln überhaupt etwas zu trennen.
+
+| Veteran 400 VP · je 40 Läufe · 157 Stationen | vor den Bündeln | nach den Bündeln |
+|---|---|---|
+| Weite | 70 | **61** |
+| Capitaine | 25 % | **18 %** |
+| Italien überstanden | 98 % | 100 % |
+| Ägypten überstanden | 56 % | 53 % |
+| Punkte-Median | 307 | **233** |
+
+| Erstlauf ohne Vorrat · je 80 Läufe | vor den Bündeln | nach den Bündeln |
+|---|---|---|
+| Weite | 31 | **31** |
+| Capitaine | 0 % | **0 %** |
+| Caporal | 34 % | 26 % |
+| Ägypten überstanden | 43 % | 34 % |
+
+**Beim Erstläufer sind beide Leitzahlen identisch — 31 und 0 %.** Das ist das sauberste Ergebnis, das dieser Prüfstand liefern kann. Beim Veteranen ist 25 → 18 % etwa ein Sigma (n = 40 → σ ≈ 6,8). **Die Gestaltungsbündel sind keine Balance-Änderung.** Am Rand des Rauschens bewegen sich Caporal (34 → 26 %) und Ägypten (43 → 34 %), beides rund 1,5 σ bei n = 80; auffällig bleiben außerdem der Punkte-Median des Veteranen und Jena (38 → 16 %), letzteres mit Nachbarn aus zwei- bis achtläufigen Stichproben und damit vorerst nicht deutbar.
+
+> **⚠ Der Vergleich hat einen älteren, größeren Befund freigelegt — und er gehört nicht diesen Bündeln.** Die Zielwert-Tabelle nennt für den Veteranen 400 **75 / 45 %**. Der Stand *vor* den Bündeln liefert **70 / 25 %**. Die Hälfte der Capitaine-Quote ist also schon vorher verloren gegangen, irgendwo zwischen der Messung bei 122 Stationen und `4c749d7`. Die Kapitel 10 und 11 hängen nur Stationen an und können eine Rangquote nicht senken; der Verdächtige in diesem Fenster ist **`52211b0` „Zwei Würfe statt einem"**, dokumentiert mit seiner Wahrscheinlichkeitstabelle, aber offenbar nie gegen die beiden Leitzahlen nachgemessen. Steht als eigener Punkt in `OFFEN.md`.
+
+## 2026-07-29 — Kapitel 10 und 11: die Rangleiter hat jetzt einen Inhalt bis zum Ende
+
+**Alle elf Kapitel sind gebaut** — einhundertsiebenundfünfzig Stationen, einundvierzig Gefechte, Italien 1796 bis Waterloo 1815.
+
+**Kapitel 11 (Die Hundert Tage 1815):** Neun Stationen, zwei Gefechte, Feindgüte 12, Sold-Moral **1,0** — Napoleon zahlt sofort und bar, und es ist das Geld eines Mannes, der keine zweite Chance bekommt. Waterloo steht bei zehn Runden gegen Feindmoral **100**, dem höchsten Wert des Spiels; seine Härte liegt in der Länge, nicht in der Trefferchance (7 + 3 + 12 = 22).
+
+**Die Ablehnung** (`S.abgelehnt`): Der Rückruf im April 1815 hat zwei Knöpfe, und beide führen zu einem vollwertigen Ende. Wer ablehnt, geht direkt in den Epilog — kein Gefecht, kein Zwischenfall, keine halbe Wertung.
+
+> **Die Prüfung steht ganz oben in `naechster()`, und das war ein echter Fund.** Die erste Fassung stand weiter unten in der Kette, hinter `typ==='szene'` — und traf deshalb **nie**, weil auf den Brief eine Szene folgt. Gemessen: `S.abgelehnt` war gesetzt, und der Mann marschierte trotzdem nach Belgien.
+
+**Der Lebensepilog** (`epilog:true`, `zeigeEpilog()`): das einzige Ende, das über den Tag hinaussieht. **Was den Text bestimmt, ist der Rang und nicht der Sieg** — Waterloo ist verloren, für alle gleich; was danach kommt, hängt davon ab, wie hoch man stand. Fünf Stufen von „ein Dorf, das kleiner ist, als du es in Erinnerung hattest" bis zur Liste, die man später Proskriptionen nennen wird.
+
+Gemessen: Colonel **678**, Marschall **928 Punkte**. Damit ist die volle Skala aus KONZEPT §5 (Maximum 918) zum ersten Mal ausgeschöpft.
+
+**Zum vierten und fünften Mal stand ein Kapitelentwurf über der Decke:** Frankreich 25/25/29/25/26, Hundert Tage 27 und 32. Alle jetzt bei 20 bis 22.
+
+**Und der Kapitelprüfstand meldete ein falsches Gefechtsbild, wo gar kein Gefecht ist:** Er suchte nach `TAG ` im Bildschirmtext, und die Station „Der Tag des Regens" steht als Kartenkopf in Großbuchstaben da. Gesucht wird jetzt die vollständige Rundenzeile `<ZEIT> n VON m`. **Dritter Fund derselben Art** — ein Fließtext ist kein Zustand.
+
+## 2026-07-29 — Zwei Würfe statt einem: Können wiegt schwerer als Glück
+
+**Die Klage war: „Manchmal schafft man eine Probe mit dem doppelten Wert nicht."** Sie war berechtigt, und der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher Wurf über 1–100 ist überall gleich wahrscheinlich; ein Zielwert von 80 ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je Kapitel fühlt sich das an, als zähle Können nicht.
+
+**Der Wurf ist jetzt der Mittelwert aus zwei Würfen.** Die Werte ballen sich um die Mitte: Wer deutlich über der Aufgabe steht, besteht fast immer; wer deutlich darunter steht, fast nie.
+
+| Zielwert | vorher | jetzt |
+|---|---|---|
+| 20 | 20 % | **8 %** |
+| 35 | 35 % | **24 %** |
+| 50 | 50 % | 50 % |
+| 65 | 65 % | **76 %** |
+| 80 | 80 % | **92 %** |
+| 95 | 95 % | **99 %** |
+
+*(Formel gegen 200 000 Würfe geprüft: 7,8 · 24,3 · 49,6 · 75,2 · 91,8 · 99,4 %.)*
+
+**Der Münzwurf in der Mitte bleibt ein Münzwurf.** Die Eichung „Wert 40 gegen Schwierigkeit 40 ist fifty-fifty" gilt unverändert, und **keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden** — es sind die Ränder, die sich bewegen.
+
+> **⚠ NACHTRAG 29.07.2026: Der vorige Absatz ist widerlegt.** Nachgemessen an diesem Commit gegen seinen eigenen Vorgänger (je 80 Läufe, dieselben 148 Stationen): Der Erstläufer verliert **39 Stationen Weite** (70 → 31) und acht Punkte Capitaine-Quote (9 → 1 %). Die Ränder sind nicht symmetrisch bewohnt — der Erstläufer wohnt ausschließlich im unteren, und nur der obere hat gewonnen. **Die Schwierigkeiten hätten nachziehen müssen.** Voller Befund oben unter „Überführt" und in `OFFEN.md` Punkt 8.
+
+**Die Oberfläche musste mit.** Der Zielwert *war* bis dahin die Prozentzahl auf dem Knopf; mit zwei Würfen ist er es nicht mehr. `chance()` rechnet ihn geschlossen um — und deckelt bei 99 statt 100, weil es keine sichere Probe gibt und „100 %" auf einem Knopf eine Lüge wäre.
+
+**Nebenwirkung, die Absicht ist:** Der Erstläufer steht härter da, weil seine niedrigen Werte jetzt seltener durchrutschen. Das ist dieselbe Richtung wie der tiefere Sockel — und die Stelle, an der Italien endlich beißen darf (Sollwert: nicht mehr als 20 % Tote im Erstlauf).
+
+## 2026-07-29 — Das Können über der Klemme: das obere Ende der Skala ist keine tote Währung mehr
+
+**Der Befund, nachgerechnet und nicht vermutet:** Die Probe klemmt bei 95, also sind gegen die üblichen Schwierigkeiten 35 bis 50 **Wert 85 und Wert 100 dieselbe Zahl**. Und weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit ausschließlich Trefferwahrscheinlichkeit. Wer viele Veteranenpunkte in eine Spitze steckte, bekam dafür nichts.
+
+**Die Klemme bleibt** — fünf Prozent Fehlschlag gehören dazu, im Rauch schießt auch der beste Schütze daneben, und eine Probe, die nie misslingt, ist keine. Was die Klemme wegwirft, wird jetzt sichtbar:
+
+```
+roh    = Wert − Schwierigkeit + 50        (ungeklemmt)
+Ziel   = clamp(roh, 5, 95)
+Können = max(0, roh − 95)                 → Schaden × (1 + min(30,Können)/60)
+```
+
+| Muskete | Schw. 20 | Schw. 35 | Schw. 45 |
+|---|---|---|---|
+| 40 · 60 | — | — | — |
+| 80 | ×1,25 | — | — |
+| 100 | ×1,50 | ×1,33 | ×1,17 |
+
+**Ein Meister trifft nicht öfter, er trifft härter.** Der Erstläufer merkt davon nichts — unter Wert 60 liegt niemand über der Klemme —, und genau das war die Anforderung: ein Ertrag ausschließlich für den, der viel hat.
+
+**Der Deckel bei +50 % ist der wichtigere Teil der Zahl.** Ohne ihn liefe Wert 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die späten Gefechte wären in drei Runden vorbei.
+
+**Gebaut an einer Stelle, nicht an fünfzehn:** `PROBE_ZULETZT` merkt sich die letzte Probe, `kampfAktion()` setzt sie am Anfang auf null und legt den Faktor einmal auf den Schaden — wer eine neue Schadenszeile baut, kann ihn nicht vergessen.
+
+**Sichtbar an einem Wort:** ab fünfzehn Punkten über der Klemme „mühelos gelungen" statt „gelungen". Darunter steht nichts Besonderes — ein Wort, das immer dasteht, sagt nichts.
+
+## 2026-07-29 — Kapitel 9: Deutschland 1813, und die Rekruten
+
+**Die eigene Regel: Deine Armee ist achtzehn Jahre alt.** Dreizehn Stationen, sechs Gefechte, Feindgüte 10, Sold-Moral 0,4.
+
+**`rekruten:25`** (`rekrutenStart()` in `src/kampf.js`): Der Startbestand der eigenen Einheit sinkt um ein Viertel. Das trifft den Schaden jedes Feuerbefehls, die Schwelle, ab der die Linie bricht (`nahkampfPruefen()` unter 40 %), die Haltung der vier Kompanien ab Rang 10 und das Bild. **Es hebt keine einzige Gefahr-Zahl** — der Feind schießt 1813 nicht besser als 1812, deine Leute halten schlechter.
+
+**Und es ist abarbeitbar, sonst wäre es eine Mautstelle** — dieselbe Überlegung wie beim Mantel im Frost. `S.sektionGuete` hebt den Startwert wieder, und der Drill zahlt in diesem Kapitel **doppelt** (`guetePlus()` in `mechanik.js`, eine Stelle für alle vier Quellen). Gemessen: ohne Drill 75, mit Güte 16 dann 91, mit Güte 40 wieder 100 — und Kapitel ohne `rekruten` bleiben bei 100.
+
+**Gefechtswerte gegen die Decke geeicht — zum dritten Mal stand der Entwurf darüber.** Am Hebel ausgelesen: 23, 23, 24, 28, 29, 24, weil die Zahlen vor der Güte gedacht waren. Jetzt 20 · 20 · 21 · 22 · 22 · 20. **Die Regel hat sich damit selbst bestätigt: Wer ein Kapitel baut, rechnet die Güte nicht im Kopf dazu, sondern liest `feindGuete()` aus.**
+
+**Russlands Schlussstation trägt jetzt `typ:'uebergang'` statt `typ:'ende'`** — und behält die Schranke. Weil die Dispatch-Reihenfolge `schranke` vor `typ` prüft, läuft `zeigeUebergang()` dort nie; die Erholung samt Konstitution +3 steht deshalb ein zweites Mal in `schrankeWeiter()`. **Ohne sie überlebt niemand 1813, der aus Russland kommt** — er käme mit vier Wunden und leerem Vorrat in ein Kapitel mit eigener Härte.
+
+## 2026-07-29 — Früher sterben, länger leben: Sockel 15, Schritt 5, wachsende Konstitution
+
+Vier Änderungen, die dieselbe Lücke von zwei Seiten angehen — der Erstlauf wird verwundbarer, die Strecke des Veteranen länger. Zusammen gemessen, weil jede für sich im Rauschen von ±8 Punkten läge.
+
+**1 · Der Erschaffungsschritt fällt von 10 auf 5.** Er musste zuerst fallen: Von einem Sockel 15 aus ist die 70 in Zehnerschritten nicht erreichbar (15 + 50 = 65, 15 + 60 = 75). Mit 5 geht 15 + 55 = 70 exakt auf, und beide Hälften der Erschaffung schreiten jetzt gleich — `PUNKT_SCHRITT` für die Veteranenpunkte stand ohnehin auf 5.
+
+**2 · Sockel 20 → 15, Fertigkeiten 10 → 5.** Nebenwirkung, die Absicht ist: Die Wachstumsformel gibt bei niedrigen Werten am meisten, ein tieferer Sockel verlängert also die Strecke, auf der ein Mann sich noch verbessern kann.
+
+**Bildung bleibt bei 20** (`BILDUNG_SOCKEL`). Sie ist schon immer vom Pool ausgenommen, weil sie kein körperlicher Ausgangspunkt ist, sondern eine soziale Tatsache, und hat einen eigenen Weg über die Regimentsschule. Sie mitabzusenken träfe die **Rangleiter** (Fourrier 35, Rang 7 50) statt der Überlebensfähigkeit.
+
+**3 · Konstitution wächst: +3 je `uebergang`, +1 nach überstandener Krankheit.** Der einzige Ort im Spiel, an dem ein Attribut wächst, ohne dass man etwas dafür gedrückt hat — und trotzdem verdient, denn die Bedingung ist, einen ganzen Feldzug überlebt zu haben. Sieben Übergänge sind +21 und damit rund dreizehn Lebenspunkte.
+
+> **Gebaut gegen den schärfsten gemessenen Befund:** Veteranenpunkte kaufen Rang und keine Strecke. Jede Progression über bessere Werte endet in der Ruf-Kette und damit in den Offiziersrängen mit +4 bis +5 Gefahr. **Diese läuft über die Strecke** — man bekommt sie nur, indem man ankommt.
+
+**4 · Der Deckel bei 100 fällt — nur für die Konstitution und nur in `anwenden()`.** Die Asymmetrie folgt aus zwei Formeln: Konstitution ist der einzige Wert, der in etwas Ungeklemmtes zahlt (`lebenMax = 40 + 0,6 × roh`), während bei jedem anderen Attribut die 100 ohnehin tote Währung wäre — die Probe klemmt bei 95, gegen Schwierigkeit 35–50 sind 85 und 100 dieselbe Zahl. Und **wachsen** kann auch die Konstitution nur bis 100, weil `(100 − Wert)/100` darüber negativ wird. **Drill plateauiert, ein Krieg nicht.**
+
+> **Reihenfolge-Falle, dieselbe wie damals bei den Wunden:** Der Zuwachs steht vor dem Auffüllen. `lebenMax()` hängt an der Konstitution; wer davor auffüllt, füllt gegen den kleineren Vorrat.
+
+**Gegengeprüft, bevor gemessen wurde:** Pool geht mit 45 + 15 exakt auf · `anwenden()` 99 + 5 = 104 · `nutzen()` 50× bleibt bei 104 · Geschick 99 + 5 = 100 (weiter geklemmt) · Übergang 70 → 73 und das Leben füllt gegen den größeren Vorrat.
+
+**Neuer Sollwert** *(gesetzt vom Entwickler)*: Italien darf im Erstlauf töten, aber **nicht mehr als 20 %**. Fällt „Italien überstanden" unter 80 %, ist der Sockel zu tief. Die Zahl war als Leitzahl gestrichen, weil sie bei 98–100 % nichts mehr trennte — als Abbruchkriterium für den Sockel ist sie genau richtig.
+
+## 2026-07-29 — Was ein Mann behält: eine Kaufklasse, die Strecke kauft statt Rang
+
+**Der Rekrut kauft Muskeln, der Veteran kauft Gewohnheiten.** Fünf neue Posten im Laden (`art:'zaeh'`), die ausschließlich auf die Zermürbung **zwischen** den Gefechten wirken.
+
+**Der Anlass ist gemessen:** Weite 57 / 62 / 61 Stationen bei 11 / 30 / 38 % Capitaine — Veteranenpunkte kaufen Rang und keine Strecke. Die Kette dahinter ist geschlossen: bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung → Offiziersränge mit +4/+5 Gefahr → tot. **Jeder Kauf, der Kampfkraft hebt, landet in dieser Kette und zahlt seinen Gewinn dort zurück.**
+
+| Kauf | Wirkung | greift in | VP |
+|---|---|---|---|
+| Füße wie Leder | Schuhverschleiß halbiert · Forcieren kostet 8 Atem weniger | `verschleiss()` · `waehleTempo()` | 30 |
+| Er weiß, welches Wasser | Krankheits- und Frostzehrung halbiert | `stationErledigt()` | 35 |
+| Er bleibt nicht zurück | Aderlass −3 je Station | `aderlass()` | 45 |
+| Er schläft im Freien | Frost eine Stufe milder | `frostWirken()` | 30 |
+| Alte Narben | Der Feldscher näht zwei Wunden statt einer | `kampfEnde()` | 40 |
+
+Zusammen 180 VP — bezahlbar mit 400, aber nicht nebenbei; sie konkurrieren mit Konstitution 70, die allein über 100 kostet.
+
+**Sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am Anfang: Italien übersteht er zu 98–100 %. Er stirbt in Ägypten (15 von 40, Hitze und Ruhr) und Jena (11 von 40, die Beine).
+
+**Drei Entscheidungen, die nicht offensichtlich sind:** „Er bleibt nicht zurück" schützt nur den Mann, nicht `S.einheit` — der Zustand der Kompanie hängt nicht daran, was *du* gelernt hast. „Er schläft im Freien" ist **kein Ersatz für den Mantel**: Bei Frost 4 bleibt auch der Gewohnte auf Stufe 3, sonst wäre die eigene Regel von Kapitel 6 entwertet. Und die Zehrungssperre bleibt — wer krank ist, bekommt weiterhin keine Zeitheilung.
+
+> **Der Prüfpunkt ist nicht, ob die Weite steigt, sondern ob sie steigt, ohne dass die Rangverteilung mitwandert.** Wandert sie mit, ist eine der fünf doch im Gefecht angekommen und der Entwurf verfehlt.
+
+**Der Testbot kauft jetzt** (`VETERAN_KAEUFE`): Mantel und Schuhe zuerst, dann die fünf. **Das erledigt `OFFEN.md` Punkt 3** — bisher kaufte er nie einen Mantel, weshalb jede Frostmessung durchweg den Ausnahmefall maß. Stücke werden vor den Punkten gekauft, weil Punkte beliebig teilbar sind und ein 30-VP-Stück sonst nie mehr hineinpasst.
+
+## 2026-07-29 — Kapitel 8: Russland 1812, die Rangschranke, und ein Prüfstand, der lügen konnte
+
+**Die eigene Regel: Das ist kein Feldzug, das ist ein Vorrat, der kleiner wird.** Vierzehn Stationen, vier Gefechte, Feindgüte 10, Sold-Moral 0,1.
+
+**`verschleiss:2` und `ersatz:false`** an der Kampagne: Ausrüstung nutzt sich doppelt ab und wird nicht ersetzt. Über die Schuhe (unter Zustand 25 kostet das 18 Konstitution) ist das ein Malus, der sich selbst verstärkt — und er greift ausgerechnet dort, wo es keinen Marketender mehr gibt.
+
+**Die Rangschranke** (`schranke:'russland'` an der letzten Station, `zeigeSchranke()` in `src/abschluss.js`): Wer lebt und unter Rang 7 steht, wird ausgemustert. Wer darüber steht, wählt. **Damit fällt der Platzhalter 25 im Überlebensbonus** und wird durch die gestaffelten **180 / 120 / 70** aus KONZEPT §5 ersetzt — `S.ende` trägt `ruhestand`, `halbsold` oder nichts. Gemessen an drei Wegen: Rang 5 ausgemustert **326**, Rang 9 geht **469**, Rang 9 marschiert weiter **359**. **Weitermarschieren kostet sofort 110 Punkte** — genau das war der Sinn der Staffelung.
+
+### Der Aderlass stand auf einer Zahl, die kleiner war als die Heilung
+
+`aderlass:n` zieht an jeder Station n Lebenspunkte und ebenso viel Einheitszustand ab. Er stand für Spanien auf **2** und für Russland auf **4** — und tat damit rechnerisch fast nichts: Die Zeitheilung gibt 5 % des Vorrats, bei neunzig Lebenspunkten also viereinhalb je Station. **Russlands 4 ergab plus einen halben Punkt.** Der Mann wurde nicht weniger, er stand still, und das Kapitel hielt nicht, was sein Kopfkommentar verspricht.
+
+> **Das ist derselbe Fehler wie damals bei der Krankheit** („Ein Kranker *gewann* einen Punkt je Station"), nur eine Ebene höher. Er fiel erst auf, als der neue Härtemodus Spanien und Russland auf dieselbe Zahl legte. **Ein Zehrwert, der kleiner ist als die Heilung, ist kein Zehrwert.**
+
+**Jetzt: Spanien 4, Russland 8.** Spaniens 4 hebt die Erholung fast genau auf — man kommt nie wieder hoch. Russlands 8 liegt darüber, und erst dadurch fällt der Vorrat wirklich.
+
+### Und die vier Gefechte kommen unter die Decke zurück
+
+Am Hebel ausgelesen standen sie bei **23, 29, 27 und 28** wirksamer Gefahr — Borodino sieben Punkte über der 22, die kein Gefecht überschreitet, wenn es nicht selbst die Regel seines Kapitels ist. Russlands Regel ist der schwindende Vorrat, nicht das Schießen. Jetzt: Smolensk 13 → **10** (wirksam 20), Krasnoi 17 → **10** (20), Borodino 16 → **9** und die Beresina 15 → **9** (mit `haerte` je 22).
+
+**Borodino trägt seine Härte in der Länge**: zehn Runden gegen Feindmoral 95, das längste und zäheste Gefecht des Spiels. Ein Tag, der nicht aufhört, ist die richtige Übersetzung für den blutigsten Tag des Jahrhunderts; eine erhöhte Trefferchance wäre nur eine größere Zahl gewesen.
+
+### Der Härtemodus — und der Fehler darin, der wie ein Erfolg aussah
+
+`HAERTE=40 node test/kapitel.js <id> 9` setzt vierzig Männer an den Anfang eines Kapitels und lässt sie ungeheilt durch. **Gebaut, weil `balance.js` die späten Kapitel nicht mehr misst:** Von achtzig Läufen erreichen Spanien zwölf und Russland drei.
+
+> **⚠ Die erste Fassung meldete für Spanien wie für Russland 100 % überstanden.** Grund: `zeigeTod()` setzt `LAUF=null` und ruft `binde()`, und das nullt auch `S` — **ein Kapitelende tut exakt dasselbe.** Am Zustand ist der Tod also nicht zu erkennen, und wer aus `!LAUF` auf „durch" schließt, zählt jeden Gefallenen als Überlebenden. Unterschieden wird jetzt am Bildschirm. **Ein Messwert von 100 % ist verdächtig, nicht erfreulich** — dieselbe Lektion wie beim stummen Güte-Leck und beim stummen Filter im Lager.
+>
+> **Der Prüfmann ist außerdem angehoben worden** (Konstitution 85, Fertigkeiten 60, Ausrüstung auf 100, Mantel dabei). Mit dem alten starben in Spanien wie in Russland siebenunddreißig von vierzig, und **zwei Kapitel, die beide 3 % liefern, sagen über ihren Unterschied nichts.** Ein Prüfstand ohne Kopfraum misst seinen eigenen Boden.
+>
+> **Und derselbe Fehler steckte ein zweites Mal im Vollständigkeitsmodus, in umgekehrter Richtung:** Er suchte nach dem Wort „gefallen" — und der Ruhestandsbildschirm sagt wörtlich *„Du bist nicht gefallen."* In Russland galten dadurch drei von vier Rängen als tot, die in Ehren ausgemustert worden waren. Erkannt wird jetzt am Knopf. **Ein Fließtext ist kein Zustand.** *(Dazu: Eine Station, die `tempo.ueberspringt` verschluckt, gilt nicht mehr als Lücke — sonst meldet der Prüfstand die Tempowahl als Fehler.)*
+
+**Gemessen, je 40 Läufe, Prüfmann auf Rang 9:** Jena **78 %** · Italien **50 %** · Eylau **38 %** · **Spanien 15 %** · **Russland 3 %**.
+
+> **Damit ist die Vorgabe erfüllt und nachweisbar: Spanien ist eine harte Wand, Russland die härtere.** Spaniens Tote verteilen sich gleichmäßig auf alle fünf Gefechte (13 · 7 · 6 · 6 · 2) — es ist der Feldzug, der tötet. In Russland tötet Borodino allein 22 von 39, und zwar bei gesenkter Trefferchance: Man steht leer davor.
+>
+> **⚠ Russland liegt damit am Boden der Skala.** Bei 3 % kann der Prüfstand nicht mehr zeigen, ob eine weitere Änderung härter oder leichter macht. Wer dort noch einmal dreht, hebt zuerst den Prüfmann.
+
+### Die Leitzahl `überlebt` ist ausgelaufen und durch die Weite ersetzt
+
+Über die vollen acht Kapitel gemessen (Erstlauf 80, Veteranen je 40): **0 % · 0 % · 0 %.** Die Zahl trennt nichts mehr — und das war vorhergesagt, denn sie ist ein **Produkt** aus acht Kapitelquoten und geht mit jedem Faktor gegen null.
+
+An ihre Stelle tritt die **Weite**: der Median der erreichten Stationen. Kein Produkt, sondern ein Median, deshalb ohne Verfallsdatum. `überlebt` wird als „Ganz durch" weiter mitgedruckt, trägt aber keinen Sollwert mehr.
+
+| | Weite (von 122) | höchster Rang (Cpt) | Punkte-Median |
+|---|---|---|---|
+| Erstlauf ohne Vorrat | **57,3** | **11 %** | 121 |
+| Veteran 160 | **61,9** | **30 %** | 284 |
+| Veteran 400 | **60,6** | **38 %** | 317 |
+
+> **Der wichtigste Befund der Reihe: Veteranenpunkte kaufen Rang, aber keine Strecke.** Der Rang trägt mit 27 Punkten Abstand (11 → 38, über der Grenze von 25). Die Weite trägt nicht — vier Stationen von hundertzweiundzwanzig, und der Vierhunderter liegt unter dem Hundertsechziger.
+>
+> Zusammen gelesen: **Wer mit Vorrat einrückt, kommt nicht weiter, sondern höher** — und weil die Offiziersränge +4 bis +5 Gefahr je Runde tragen gegen +2 beim Unteroffizier, frisst der Aufstieg den Vorteil wieder auf. Das ist `OFFEN.md` Punkt 1 mit dem schärfsten Beleg, den es bisher dafür gibt, und zugleich die Begründung für den nächsten Schritt: Es fehlt eine Progression, die **im Lauf** wirkt und nicht über den Rang läuft.
+
+**Bänder sind bewusst nicht gesetzt** — die Weite ist eine Messung alt, und ein Band gegen einen Zwischenstand zu eichen ist der Fehler, vor dem die Ladensummen-Regel schon einmal gewarnt hat.
+
+*(Dritte Alterung einer Leitzahl nach „Italien überstanden" und „höchster Rang". **Regel: Eine Leitzahl, die ein Produkt über alle Kapitel ist, hat ein Verfallsdatum. Ein Median hat keines.**)*
+
+## 2026-07-29 — Kapitel 7: Spanien 1808–1812
+
+**Die eigene Regel: Es gibt hier keinen Ruhm. Nur Entscheidungen, bei denen niemand zusieht.** Vierzehn Stationen, fünf Gefechte, Feindgüte 8, Sold-Moral 0,7.
+
+**`stumm:true`** (`tatenBilanz()` in `src/kampf.js`): Die Leiter der Sichtbarkeit bleibt auf ihrer untersten Stufe stehen — Lob vor der Front gibt es, Nennungen und Bulletins nicht. Historisch: Über fünf Jahre Spanien gibt es kaum eine Meldung, die eine Schlacht feiert. Wer hier aufsteigen will, tut es über die Kasse, die Listen und den Einheitszustand, also die Werkzeuge des Capitaine — **der Rang, der hier wohnt, ist genau deshalb der Capitaine.**
+
+**`ueberfall:true`** (`kampfAktion()` und `kampfEnde()`): kein Linienbeschuss, und Zurückweichen kostet keinen Ruf, weil es keine Zeugen gibt. Der Blutzoll bleibt. **Der eigene Schaden steht damit zum zweiten Mal für sich allein** — das erste Mal war der gelöste Zug ab Rang 8, und dort gab es dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein Handel, sondern eine Lage.
+
+**`einheit:` als Szenenwirkung** (`anwenden()`): Die Repressalien-Entscheidungen kosten nichts, was am Mann hängt — sie schlagen sich darin nieder, wie die Kompanie hinterher funktioniert. Das ist die Währung, in der ein Capitaine bezahlt, und sie liegt zwischen Kameradschaft und Belastung.
+
+**Gefechtswerte gegen die Decke von 22 geeicht:** Saragossa 11 statt 15 (mit `haerte` und Güte also 22), die Überfälle 11 und 12 statt der 16–18 des Entwurfs. **Die Härte eines Überfalls steckt nicht in der Trefferchance, sondern in der fehlenden Linie** — das Gefecht dauert dadurch länger und bringt mehr Runden mit Treffern.
+
+**Kapitel 6 endet jetzt auf `uebergang` statt auf `ende`.**
+
+> **⚠ Eine Falle, beim Bauen gefunden:** `kampfEnde()` arbeitete auf `n.sieg` und `n.niederlage` selbst statt auf einer Kopie. Wer dort für `ueberfall` den Ruf-Abzug auf null setzt, ändert die Kapiteldaten **für jeden weiteren Lauf im selben Browserfenster** — die Sorte Fehler, die man erst nach dreißig Messläufen bemerkt, und dann als Balance-Drift missdeutet. Jetzt `Object.assign({}, …)`.
+
+**Neu: `OFFEN.md`** — ein Register für alles, was gemessen, aber nicht entschieden ist. Bis Kapitel 6 lagen diese Befunde über CLAUDE.md verstreut, jeder im Abschnitt seines Fundorts. Sieben offene Punkte stehen darin, jeder mit Messwert und Hebel; sechs erledigte mit dem Messwert, der sie geschlossen hat.
+
+## 2026-07-29 — Kapitel 6: Eylau und Friedland 1807
+
+**Die eigene Regel: Der Winter schießt mit.** Dreizehn Stationen, drei Gefechte, Feindgüte 8 (am Hebel ausgelesen), Sold-Moral 0,6 — Polen ist arm, der Nachschub steckt im Schlamm.
+
+**Der Frost** (`frost:n`, `frostWirken()` in `src/mechanik.js`): Jede Station unter freiem Himmel kostet Belastung +4 und zusätzlichen Verschleiß; ohne Mantel dazu eine zehrende Wunde, deren Zehrung die Stufe ist. Er taut auf, sobald eine Station ein Dach hat — er ist kein Fieber, sondern der Zustand, in dem man gerade lebt.
+
+> **Das ist bewusst kein neues System, sondern die Aufwertung eines alten.** Der Beutemantel liegt seit Kapitel 1 im Laden und war der unscheinbarste Posten darin. **Und er darf keine Mautstelle sein:** Wer ihn nicht gekauft hat, kann im Januar einen von einem toten Russen nehmen — schlechter, aber ein Mantel. Dafür kennt `anwenden()` jetzt `ausruestung:`, das ein Stück neu anlegt statt nur seinen Zustand zu ändern.
+
+**Der Sturm** (`sturm:true`, `feindAnzeige()` in `src/kampf.js`): Gefahr −4 und eigener Schaden ×0,8 — inklusive der Hilfe der Linie, denn ein Sturm, der nur den Feind blind macht, wäre ein Geschenk. Dazu **kein Widerstandswert und kein Balken**, sondern eine Schätzung. Es ist der vierte Bruch zehn Ränge zu früh und von außen statt von oben: Wer im Schneetreiben steht, muss entscheiden, ohne zu wissen — wie später der General mit einer vierzig Minuten alten Meldung.
+
+**Der zweite Ordensgrad**: Offizier der Ehrenlegion, ab 1807, Pension 2,0. Er setzt den ersten Grad *und* ein Patent voraus — historisch wurden Mannschaften Légionnaire und Offiziere Officier. Am Abzeichen unterscheidet ihn die Rosette im Band, der einzige Unterschied, den man auf sechsunddreißig Pixel sieht.
+
+**Gefechtswerte gegen die Regel aus Kapitel 5 geeicht:** Friedland steht auf Gefahr 11 statt der 13 des Entwurfs (mit `haerte` und Güte 8 also 22, auf der Höhe von Akkon, Austerlitz und Jena); Eylau kommt durch den Sturm auf wirksame 20. **Eylau ist nicht das Gefecht, in dem man am ehesten getroffen wird, sondern das, in dem man nicht sieht, wie es steht.**
+
+**Kapitel 5 endet jetzt auf `uebergang` statt auf `ende`.**
+
+**Gemessen** *(die Erstläufe je 80 Läufe, die Veteranen je 40)*: überlebt **19 / 0 / 15 / 25 %**, höchster Rang (Cpt) **9 / 1 / 33 / 38 %**. **Der Veteran wird ab jetzt mit `VP=400` gemessen** — ein Spitzenlauf bringt über 500 Punkte, und 160 ist nicht mehr der Veteran, den das Spiel hervorbringt.
+
+> **⚠ Die Überlebensprogression ist flach geworden.** 19 % (Erstlauf) gegen 25 % (Veteran 400) sind sechs Punkte, wo die eigene Regel 25 verlangt. Es ist keine Umkehrung wie in Kapitel 5 und liegt im Rauschen — aber es ist auch keine Progression mehr. **Der Mechanismus steht in der Rangverteilung und ist gemessen, nicht geraten:** Vom Veteranen mit 160 VP sind 53 % Offiziere, vom Erstläufer 20 % — und die Offiziersränge tragen +4 bis +5 Gefahr je Runde, dazu zieht der höhere Ruf mehr Gefechts-Ereignisse an. „Wer aufsteigt, kauft sich nicht in Sicherheit ein" ist der Entwurf; mit sechs Kapiteln ist er stark genug, die Progression aufzufressen. Zwei Hebel stehen in CLAUDE.md, keiner ist gemessen — und **am Frost wird nichts gedreht, bevor der Bot einen Mantel kaufen kann.**
+
+> **⚠ Ein echter Fehler, gefunden vom Kapitelprüfstand: Der Nahkampf hörte bei Rang 14 auf statt bei Rang 9.** `nahkampfPruefen()` prüfte nur `rang < 7`. Ein Général de brigade zog auf der Operationskarte den Säbel, weil ein Karree, das er nie gesehen hat, an einer Seite nachgab — `K.sektion` ist ab Rang 10 leer, also griff der `bestand`-Auslöser nicht, die drei anderen schon. Das widersprach dem Entwurf der Stabsränge an der empfindlichsten Stelle: Ab Rang 10 ist der Gefahrzuschlag null, und an seiner Stelle steht das Stabsereignis mit 8 %. Daneben gehört keine zweite Gefahr. Jetzt `rang >= 7 && rang < 10`.
+
+## 2026-07-29 — Kapitel 5: Jena–Auerstedt 1806
+
+**Die eigene Regel: Der Krieg wird mit den Beinen gewonnen.** Siebzehn Stationen, drei Gefechte, drei Marschentscheidungen — das Verhältnis bildet den Feldzug ab: vierzehn Tage marschiert, zwei Tage geschossen, und danach gibt es keine preußische Armee mehr.
+
+**Neu und kapitelübergreifend: die Tempowahl** (`TEMPO` in `src/oberflaeche.js`). Drei Knöpfe vor jedem langen Marsch — schonend (Ruf −2), nach Vorschrift, forcieren (Verschleiß 0,5 · Atem −25 · Belastung +8 · **überspringt eine Station**). Welche Station der forcierte Marsch auslässt, steht in den Daten (`tempo.ueberspringt`), nie im Code. Sie steht in den Systemdateien, weil Russland und 1814 sie wieder brauchen (KAMPAGNEN §8).
+
+- **Ohne Probe**, wie die Rechnung des Bataillonschefs: Es gibt keine Fertigkeit, die einem abnimmt, ob man seine Leute schont oder verheizt.
+- **Die Schuhe zahlen mit** (unter Zustand 40: Atem −8, Belastung +4, wundgelaufene Füße). Rückwirkende Aufwertung eines alten Ladenpostens statt eines neuen Systems.
+- **Die übersprungene Station findet wirklich nicht statt** — kein `stationErledigt()`, also keine Zeitheilung, kein Sold, kein Chronikeintrag.
+
+**Rangfassungen in Szenen** (`rangText`, `rangOptionen`), additiv nach dem Muster von `rangTun`: KAMPAGNEN §0.3 verlangt, dass jede Station jeden Rang trägt. Additiv und nicht ersetzend, weil ein ersetzter Text eine zweite Szene unter demselben Namen wäre.
+
+**Neuer Prüfstand `test/kapitel.js`** für Grundsatz 3: springt an den Anfang eines Kapitels, setzt den Rang auf 1, 5, 8 und 12 und klickt durch — jede Station erreicht, jedes Gefecht auf dem Maßstab des Rangs, nichts in der Konsole. Geheilt wird vor jedem Schritt: gemessen wird Vollständigkeit, nicht Härte.
+
+> **Ein echter Fehler, gefunden von diesem Prüfstand: die Szene ohne drückbaren Knopf.** `wert()` zieht kaputte Schuhe ab (Konstitution −18 unter Zustand 25), und `zeigeSzene` sperrt jeden Knopf unter Wert 5. Trägt **jede** Wahl einer Szene eine Probe, steht ein abgelaufener Mann vor einer Station, an der er nichts tun kann — der Lauf ist verloren, obwohl er lebt. Zwei Antworten: die Regel (jede Szene bekommt eine Wahl ohne Probe; in Kapitel 5 an zwei Stellen nachgetragen) und die Sicherung (`szeneAushalten()`, „Es aushalten", Belastung +2, kein Gewinn). *Audit: `marsch_rhein` und `donau` in Kapitel 4 haben ebenfalls keine probefreie Wahl und hängen jetzt an der Sicherung.*
+
+> **Befund beim Eichen am Hebel: Der Linien-Hebel der Feindgüte steht seit Ägypten am Boden.** `linie *= max(0,3 ; 1 − guete·0,15)` erreicht den Boden bei Güte 4,67 — Ägypten (5), Austerlitz (6) und Jena (7) haben also **denselben** Linien-Hebel, und alle künftigen Kapitel ebenfalls. Der als „wichtigster Hebel" beschriebene Teil der Güte trennt nur die Werte 0 bis 4. Ab 5 eskaliert sie über Gefahr (+1 je Punkt) und eigene Verluste (+15 % je Punkt). **Nicht repariert:** Der Boden ist Absicht, und ihn zu senken hieße, die zwei gemessenen Kapitel neu zu eichen. Was ein spätes Kapitel hart macht, muss aus seiner eigenen Regel kommen — genau so steht es in KAMPAGNEN.
+
+**Kapitel 4 endet jetzt auf `uebergang` statt auf `ende`** (dieselbe Umstellung wie seinerzeit bei Kapitel 1 und 2). Das Jahr zwischen Preßburg und Bamberg heilt, was heilbar ist.
+
+**Ein Bot-Fehler, zwei Messreihen lang unbemerkt:** `f(/^Forcieren/)` traf nie, weil `textContent` eines Knopfes mit dem Zeilenumbruch aus dem Markup beginnt. Der Bot fiel in den Szenen-Zweig und drückte den ersten Knopf — „schonend", die eine Wahl, die ein kundiger Spieler nie trifft. Behoben; dazu trägt der forcierte Knopf jetzt `data-gewinn`, wenn das Kapitel ihm etwas anhängt. Das ist kein verstecktes Wissen: Es steht als Satz auf dem Knopf.
+
+**Sold-Moral 0,8** (Preußen ist reich, der Feldzug kurz) · **Feindgüte 7**, am Hebel geprüft (`feindGuete()` je Gefecht ausgelesen), nicht am Ergebnis geraten.
+
+**Jena: Gefahr 14 → 12.** Mit `haerte` (+3) und Güte 7 hätte der Entwurfswert 24 ergeben und Jena still zum tödlichsten Gefecht des Spiels gemacht — über Akkon und Austerlitz, die beide bei 22 liegen. **Regel daraus: Kein Gefecht geht über 22, wenn nicht das Gefecht selbst die Regel seines Kapitels ist.** Die Regel von Kapitel 5 ist der Marsch.
+
+**Die Leitzahl „höchster Rang" wandert von Rang 6 auf Rang 9** (`LEITRANG` in `test/balance.js`). Der Vorbehalt aus Phase C („Wer Phase E misst, entscheidet das neu") ist damit eingelöst: Ein Drittel der reichen Veteranenläufe erreicht den Capitaine, und eine Leitzahl, die den Sergent-major zählt, misst dann nur noch, wie viele bis zur Mitte kommen. **Alle Zahlen vor dem 29.07.2026 sind damit nicht mehr unmittelbar vergleichbar.**
+
+**`VP=400` löst `VP=160` als Leitmessung des Veteranen ab.** Ein Spitzenlauf bringt mit fünf Kapiteln über 440 Punkte statt 350; 160 misst nicht mehr den Veteranen, den das Spiel hervorbringt. `VETERAN_ZIELE` ist entsprechend verlängert, sonst kann der Bot den Vorrat gar nicht ausgeben.
+
+**Gemessen** *(die Erstläufe je 80 Läufe, der Veteran 40)*: überlebt **24 / 5 / 53 %**, höchster Rang (Cpt) **6 / 4 / 28 %**. Abstand 29 Punkte beim Überleben, 22 beim Rang.
+
+> **⚠ Die Progression hatte sich zwischendurch umgedreht, und es lag am Bot.** In der ersten Messung überlebte der Veteran mit 160 VP seltener (13 %) als der Erstläufer ohne Vorrat (23 %) — die eine Zahl, die nie so stehen darf. Gefunden an der Sterbeort-Zeile: Der Veteran starb in Jena, der Erstläufer in Ägypten. Der Bot forcierte, sobald er über halbes Blut hatte, und **nur der Veteran hat überhaupt die Kraft, in die Falle zu laufen.** Mit der schärferen Bedingung (`Blut > 80 %, Atem > 70, Schuhe ≥ 40`) steht er bei **53 %**, und die Jena-Toten fallen von 20 auf 7. **Regel:** Wer eine Wahl einbaut, die Kraft kostet und Ruf bringt, muss dem Bot beibringen, *wann* sie sich lohnt.
+
+> **⚠ Zwei Zahlen bleiben offen und stehen so in CLAUDE.md.** Erstens überlebt der Veteran mit 400 VP seltener (23 %) als der mit 160 (53 %) — Verdacht: Bei sehr hohen Werten übersteigt der Abstand `Wert − Schwierigkeit` einer riskanten Wahl auch nach dem Risikoabschlag jede sichere, der reiche Bot geht also mehr Risiken ein, weil die Formel es so ausrechnet. Zweitens ist die Achse „Mut kostet, Mut steigt auf" stumpf geworden: Der mutige Erstläufer erreicht den Capitaine nicht mehr öfter als der vorsichtige, weil er vorher in Ägypten liegt.
+
+> **Und der Befund, auf den RANGLEITER §11 gewartet hat:** „Wenn nach Rang 7 die Sterblichkeit einbricht oder explodiert, stimmt die Umstellung der Proben nicht." Mit fünf Kapiteln ist es messbar — der Erstläufer stirbt in Ägypten, der Veteran in Jena, und zwar weil er dort Rang 7 bis 9 trägt und damit +4 bis +5 Gefahr je Runde zusätzlich zur Güte 7. Ein Fusilier steht bei Jena bei Gefahr 19, ein Capitaine bei 24, im selben Gefecht. **Das ist der Entwurf, aber jetzt eine gemessene Größe statt einer Behauptung.**
+
 ## 2026-07-29 — Rangleiter Phase E: die Patente
 
 **Die einzige zugelassene Ausnahme von Invariante 3 — und die Antwort auf ein gemessenes Problem.** Mit vier Kapiteln erreichte kein Lauf Rang 10; die halbe Rangleiter war gebaut und für den Spieler unsichtbar. Die Patente lösen das ohne ein neues Kapitel: Wer eines kauft, startet 1796 in Savona als Offizier.

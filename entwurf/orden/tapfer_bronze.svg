@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150.5" role="img" aria-label="Tapferkeitsmedaille"><defs><linearGradient id="m" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0%" stop-color="#e7c39c"></stop><stop offset="32%" stop-color="#c98f5c"></stop>
+    <stop offset="70%" stop-color="#a8703c"></stop><stop offset="100%" stop-color="#7a4f28"></stop></linearGradient></defs>
+  <rect x="38" y="0" width="44" height="50" fill="#27415f"></rect><rect x="52" y="0" width="16" height="50" fill="#e8e0cd"></rect><rect x="68" y="0" width="14" height="50" fill="#9c3125"></rect>
+  <circle cx="60" cy="108.5" r="36" fill="url(#m)"></circle>
+  <circle cx="60" cy="108.5" r="29" fill="#c98f5c" opacity=".45"></circle>
+  <circle cx="60" cy="108.5" r="31.5" fill="none" stroke="#7a4f28" stroke-width="1.6" opacity=".55"></circle>
+  <g transform="rotate(-26 60 108.5)">
+    <rect x="59.2" y="82.5" width="1.9" height="52" fill="#4a2d16" opacity=".78"></rect>
+    <rect x="57.6" y="122.5" width="5" height="12" rx="2" fill="#4a2d16" opacity=".62"></rect>
+    <rect x="58.4" y="78.5" width="3.4" height="6" rx="1.2" fill="#4a2d16" opacity=".5"></rect></g><g transform="rotate(26 60 108.5)">
+    <rect x="59.2" y="82.5" width="1.9" height="52" fill="#4a2d16" opacity=".78"></rect>
+    <rect x="57.6" y="122.5" width="5" height="12" rx="2" fill="#4a2d16" opacity=".62"></rect>
+    <rect x="58.4" y="78.5" width="3.4" height="6" rx="1.2" fill="#4a2d16" opacity=".5"></rect></g><rect x="53.5" y="90" width="13" height="13" transform="rotate(45 60 96.5)" fill="#e7c39c" stroke="#7a4f28" stroke-width=".8"></rect>
+  <rect x="57" y="50" width="6" height="11" rx="3" fill="url(#m)"></rect>
+  <circle cx="60" cy="66.5" r="6.5" fill="none" stroke="url(#m)" stroke-width="3.2"></circle></svg>

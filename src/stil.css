@@ -40,6 +40,22 @@
     /* Kanzleipapier — für alles, was ein amtliches Schriftstück *ist* */
     --papier:#f2ebda; --papier2:#e8dfc9; --tinte:#241f1a; --tinte2:#4e4335;
 
+    /* ── Die Bescheide ──
+       **Der Bogen sagt den Rang, bevor man ihn liest.** Ein Sergent bekommt
+       ein Stück Feldpergament mit einer Bruchkante; ein Marschall ein Patent
+       mit vierundzwanzig Pixel Goldgeflecht, fünf Unterschriften und drei
+       Siegeln. Dazwischen kommt je Stufe eine Zutat dazu — das ist die ganze
+       Regel, und sie braucht keine Sonderfälle.
+       Kontraste gerechnet: #1d1814 auf #f2ebda = 14,8:1 · #20304a auf #f2ebda
+       = 8,9:1 · #5f5240 auf #f2ebda = 5,6:1 · #8a6410 auf #f8f3e6 = 4,9:1. */
+    --pergament:#ddd0ae;         /* Feldpergament, Rang 5 */
+    --patent:#f7f1e2;            /* Patentbogen, Rang 7–8 */
+    --gold:#c8901f; --gold-hell:#f0dfae; --gold-dunkel:#8a6410;
+    --gold-linie:rgba(138,100,16,.5);
+    --hand:#20304a;              /* Handschrift, bläuliche Eisengallustinte */
+    --waffe-inf:#27415f; --waffe-kav:#2c4630; --waffe-art:#1e2a3f;
+    --wolle:#d08a2a; --tresse:#e8c469; --silber:#dfe3e0;
+
     /* Didone — die Schriftform der französischen Zeit um 1800: hohe
        Strichkontraste, senkrechte Achse. Nur Systemschriften, kein Download:
        Das Spiel bleibt eine Datei ohne Abhängigkeiten. Wo keine da ist,
@@ -461,6 +477,15 @@ aside.card .zust-name{ font-weight:600 }
 .kopfzeile{ display:inline-flex; align-items:center; gap:10px; justify-content:flex-end }
 .kopfgruppe{ display:inline-flex; align-items:center; gap:5px }
 .kopforden .abzeichen{ width:30px; height:20px; vertical-align:middle }
+/* ── Wie groß ein Orden ist, hängt davon ab, wo er hängt ──
+   In der Kopfzeile nebeneinander wie am Rock: dort zählt, dass man sie zählen
+   kann. Im Livret als Beleg neben dem Namen. Auf dem Verleihungsblatt einmal
+   in ganzer Größe — das ist der einzige Augenblick, an dem man ihn *ansieht*,
+   und danach ist er eine Zeile in einer Liste. */
+.kopforden .orden{ height:22px }
+.kv .orden{ height:26px }
+.ordenblatt{ text-align:center; margin:0 0 14px }
+.ordenblatt .orden{ height:132px }
 .kopfgeld{ color:#d8c79f; font-weight:700; letter-spacing:.06em }
 .kopftrenner{ width:1px; height:15px; background:#4a3a28; display:inline-block }
 
@@ -493,3 +518,168 @@ a.plain:hover{ color:var(--brass) }
    steht auf `display:block`, weil es in der Seitenleiste allein in seiner Zelle
    sitzt; im Kartenkopf teilt es sich die Zeile mit dem Titel. */
 .ch .emblem{ display:inline-block; vertical-align:-6px; width:20px; height:20px; margin-right:7px }
+
+/* ══════════════════ DIE BESCHEIDE ══════════════════
+
+   Zehn Stufen von Rang 5 bis 14, aus dem Entwurfspaket (Bündel 3). Die Regel
+   dahinter ist eine einzige: **Je höher der Rang, desto mehr Zutaten** —
+   Papier heller, Rahmen breiter, mehr Unterschriften, größeres Siegel. Für
+   die Ränge 1 bis 4 gibt es keinen Bescheid, und das ist Absicht: Dort wird
+   nichts ausgestellt, man bekommt es gesagt. */
+
+/* Handschrift — nur Systemschriften, mit Rückfall auf Kursiv */
+.hand{ font-family:'Brush Script MT','Segoe Script','Bradley Hand',cursive;
+  color:var(--hand); line-height:1.2; font-style:italic }
+.feldzeile{ display:grid; grid-template-columns:auto 1fr; gap:8px 14px; align-items:baseline }
+.feldname{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--gold-dunkel) }
+.feldwert{ border-bottom:1px solid var(--gold-linie) }
+.unterschrift{ border-top:1px solid var(--gold-linie); margin-top:6px; padding-top:5px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:9.5px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--tinte2) }
+.bescheidkopf{ font-family:var(--didone); font-variant:small-caps; letter-spacing:.2em;
+  text-align:center; color:var(--gold-dunkel); font-size:13px; margin-bottom:2px }
+.bescheidrang{ font-family:var(--didone); text-align:center; font-size:27px;
+  color:#1d1814; margin:6px 0 2px; line-height:1.1 }
+.bescheidzusatz{ text-align:center; font-size:12.5px; color:var(--tinte2); margin-bottom:14px }
+.bescheidfuss{ display:flex; justify-content:space-between; align-items:flex-end;
+  gap:18px; margin-top:20px; flex-wrap:wrap }
+.siegelrund{ flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  border-radius:47% 53% 51% 49% / 52% 48% 52% 48%;
+  background:radial-gradient(circle at 36% 32%, #b8402c, #7e1f16 68%, #5e150e);
+  box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35),
+             inset 0 2px 3px rgba(255,255,255,.18);
+  color:rgba(255,225,210,.42); font-family:var(--didone);
+  text-shadow:0 1px 0 rgba(0,0,0,.5) }
+
+/* ── Feldpergament, nur Rang 5 ──
+   Vierzehn Punkte für die Bruchkante, kein Bild. `clip-path` schneidet den
+   Schlagschatten mit ab, deshalb sitzt der Schatten auf der Hülle. */
+.pergamenthuelle{ filter:drop-shadow(0 10px 22px rgba(0,0,0,.5)) }
+.pergament{ background:var(--pergament); color:#241f1a;
+  background-image:
+    radial-gradient(circle at 84% 12%, rgba(120,92,44,.22), transparent 26%),
+    radial-gradient(circle at 12% 78%, rgba(120,92,44,.18), transparent 30%),
+    radial-gradient(circle at 46% 40%, rgba(140,110,60,.10), transparent 55%),
+    var(--korn), var(--wolken);
+  background-blend-mode:normal,normal,normal,multiply,multiply;
+  clip-path:polygon(0.4% .8%,99.2% 0,99.6% 11%,98.7% 24%,99.7% 37%,98.5% 51%,
+    99.6% 64%,98.8% 78%,99.8% 90%,99% 100%,0.6% 99.3%,0 62%,0.7% 34%,0 14%); }
+.pergament .cb{ color:#241f1a }
+.falte{ position:absolute; pointer-events:none;
+  background:linear-gradient(90deg, rgba(80,60,30,.16), rgba(255,255,255,.34)) }
+
+/* ── Das Patent, Rang 7 aufwärts ──
+   Die Goldbordüre ist eine Hülle, kein `border-image` — sie muss auf jeder
+   Breite gleich aussehen und darf nicht kacheln. */
+.patenthuelle{ padding:7px; box-shadow:0 14px 32px rgba(0,0,0,.5);
+  background:linear-gradient(135deg,#8a6410,#e3c98c 22%,#c8901f 46%,#f0dfae 62%,#8a6410 88%,#c8901f) }
+.patent{ background:var(--patent); color:#1d1814 }
+.patent .cb{ color:#1d1814 }
+.stufe2 .patenthuelle{ padding:10px }
+.stufe3 .patenthuelle{ padding:14px }
+.stufe4 .patenthuelle{ padding:18px;
+  background:repeating-linear-gradient(45deg,#8a6410 0 4px,#e8d29a 4px 8px,#c8901f 8px 12px,#f6ecc8 12px 16px) }
+.stufe5 .patenthuelle{ padding:20px }
+.stufe6 .patenthuelle{ padding:24px }
+.stufe2 .patent{ background-color:#f8f3e6; background-image:
+  repeating-linear-gradient(45deg, rgba(138,100,16,.035) 0 2px, transparent 2px 7px),
+  repeating-linear-gradient(-45deg, rgba(138,100,16,.03) 0 2px, transparent 2px 7px) }
+.stufe3 .patent{ background-color:#faf6ea }
+.stufe4 .patent{ background-color:#fcf9ef }
+.stufe5 .patent{ background-color:#fdfbf4 }
+.stufe6 .patent{ background-color:#fefdf8 }
+/* Das rote Titelband ab Stufe 3 */
+.titelband{ background:linear-gradient(180deg,#a5301f,#7e1f16); color:#f3e2c8;
+  font-family:var(--didone); font-variant:small-caps; letter-spacing:.22em;
+  text-align:center; padding:5px 10px; margin:-4px -10px 14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.35) }
+/* Goldkugeln in den Ecken, nur Stufe 6 */
+.goldkugel{ position:absolute; width:13px; height:13px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #f6ecc8, #c8901f 62%, #8a6410);
+  box-shadow:0 1px 2px rgba(0,0,0,.45) }
+
+/* ══════════════════ DER STATIONSBOGEN ══════════════════
+
+   **Szene und Wahlen liegen auf einem Blatt** (Bündel 1 des Entwurfspakets).
+   Bis dahin standen sie in zwei Kästen: `.card` mit dem Text, darunter ein
+   zweiter Kasten `.orders` mit den Knöpfen. Dazwischen klaffte eine Lücke,
+   die es auf einem Kanzleibogen nicht gibt — und die Wahlen sahen aus wie
+   Schaltflächen statt wie das, was sie sind: die Punkte einer Verfügung.
+
+   Die Seitenspalten (`verlauf()`, `seitenleiste()`) bleiben unberührt. */
+.bogen{ position:relative; background:var(--papier);
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 34%),
+    radial-gradient(circle at 12% 8%, rgba(140,120,86,.10), transparent 42%),
+    radial-gradient(circle at 88% 92%, rgba(140,120,86,.09), transparent 46%),
+    var(--wolken);
+  background-blend-mode:normal,normal,normal,multiply;
+  border:1px solid #a89a7e; color:var(--tinte);
+  box-shadow:0 3px 20px rgba(0,0,0,.30), 0 0 0 1px rgba(255,255,255,.5) inset }
+.bogen::before{ content:''; position:absolute; inset:6px; pointer-events:none;
+  border:1px solid rgba(90,76,58,.55);
+  box-shadow:inset 0 0 0 3px var(--papier), inset 0 0 0 4px rgba(90,76,58,.3) }
+.bogen > .inner{ position:relative; padding:24px 36px 26px }
+
+.bogen .prose{ color:#1d1814; font-size:17.5px; line-height:1.68 }
+.bogen .prose p{ margin:0 0 13px }
+.bogen .prose p:last-child{ margin-bottom:0 }
+/* Initiale — nur im ersten Absatz einer Szene */
+.bogen .prose > p:first-child::first-letter{ font-family:var(--didone); font-size:46px;
+  line-height:.8; float:left; padding:5px 10px 0 0; color:#6b4f22 }
+.bogen .ergebnis, .bogen .note, .bogen .wirkung{ color:var(--tinte) }
+.bogen .said, .bogen .hinweis{ color:var(--tinte2) }
+
+/* Die Wahlen: keine Knöpfe mit Rahmen, sondern eine gesetzte Liste */
+.wahlkopf{ display:flex; justify-content:space-between; align-items:baseline;
+  padding:9px 0 5px; margin-top:22px; border-top:2px solid #6b4f22 }
+.wahlkopf > span:first-child{ font-family:var(--didone); font-variant:small-caps;
+  letter-spacing:.22em; font-size:15px; color:#6b4f22; font-weight:700 }
+.wahlkopf > span:last-child{ font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:#5f5240 }
+.wahl{ display:grid; grid-template-columns:30px 1fr; gap:6px; align-items:baseline;
+  width:100%; background:none; border:none; border-top:1px solid rgba(90,76,58,.28);
+  padding:12px 4px; cursor:pointer; text-align:left; font-family:inherit }
+.wahl:hover:not(:disabled){ background:rgba(120,100,70,.12) }
+.wahl:disabled{ opacity:.42; cursor:not-allowed }
+.wahl .nr{ font-family:var(--didone); font-size:17px; color:#6b4f22; font-weight:700 }
+.wahl .label{ display:block; font-size:17px; color:#1d1814; line-height:1.4; font-weight:600 }
+.wahl .cost{ display:block; font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:11.5px; letter-spacing:.03em; color:#5f5240; margin-top:4px }
+.wahl.risk .nr, .wahl.risk .cost{ color:var(--blood) }
+.wahl.risk:hover:not(:disabled){ background:rgba(143,42,30,.10) }
+
+/* Fußzeile: Stand links, Siegel rechts */
+.bogenfuss{ display:flex; justify-content:space-between; align-items:center; gap:16px;
+  margin-top:18px; padding-top:12px; border-top:1px solid rgba(90,76,58,.4);
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+  letter-spacing:.12em; text-transform:uppercase; color:#5f5240 }
+.siegel{ width:40px; height:40px; flex:0 0 auto; display:flex; align-items:center;
+  justify-content:center; border-radius:47% 53% 51% 49% / 52% 48% 52% 48%;
+  background:radial-gradient(circle at 36% 32%, #b8402c, #7e1f16 68%, #5e150e);
+  box-shadow:0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35),
+             inset 0 2px 3px rgba(255,255,255,.18);
+  color:rgba(255,225,210,.42); font-family:var(--didone); font-size:20px;
+  text-shadow:0 1px 0 rgba(0,0,0,.5) }
+
+/* Das Sichtfeld liegt als eingelegtes Blatt im Bogen (Bündel 2) */
+.stichrahmen{ border:1px solid rgba(90,76,58,.45); background:#e4d9bd; padding:5px;
+  margin-bottom:6px }
+.stichzeile{ display:flex; justify-content:space-between; gap:12px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+  letter-spacing:.1em; text-transform:uppercase; color:#5f5240; margin-bottom:14px }
+.protokollkopf{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10px;
+  letter-spacing:.16em; text-transform:uppercase; color:#6b4f22; margin:16px 0 4px }
+.protokollliste{ max-height:132px; overflow-y:auto }
+.protokollliste div{ font-size:14px; color:#4e4335; padding:4px 0;
+  border-bottom:1px solid rgba(90,76,58,.18) }
+
+/* Die Orden sind hochkant und größer als ein Rangabzeichen — ein Kreuz am Band
+   braucht Höhe, sonst ist es ein Fleck. */
+/* **Die Höhe ist gesetzt, die Breite nicht.** Die drei Formen haben
+   verschiedene Seitenverhältnisse — ein Kreuz am Band ist schmal und lang, ein
+   Täfelchen fast quadratisch. Wer beides in dieselbe Kiste zwingt, verzerrt
+   eines von beiden. Orden hängen am Rock nebeneinander und stoßen oben an
+   derselben Kante an; genau das tut `height` mit `width:auto`. */
+.orden{ height:44px; width:auto; display:inline-block; vertical-align:middle }

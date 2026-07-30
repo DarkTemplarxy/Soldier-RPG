@@ -85,7 +85,15 @@ const LAGER_TUN = {
       if(krank>=0){
         const p = probe('konstitution', 35, true);   // ohne Übungseffekt, siehe probe()
         if(p.erfolg){ const w=S.wunden.splice(krank,1)[0]; atemKlemmen();
-          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden</span>`; }
+          /* **Was man überstanden hat, macht härter — aber nur, was man
+             wirklich überstanden hat.** Der Punkt hängt am Erfolg der Probe,
+             nicht am Zubettgehen; wer die Ruhr weiterschleppt, bekommt
+             nichts. Die Probe selbst läuft weiterhin mit `ohneUebung`, damit
+             nicht jeder Ruhe-Abend für sich schon Konstitution trainiert —
+             das wäre die alte Falle, in der ausgerechnet der Kranke seinen
+             Lebensvorrat übt. */
+          S.attr.konstitution = (S.attr.konstitution|0) + 1;
+          zusatz = ` Gegen Morgen ist das Fieber weg, und du weißt nicht, warum es gegangen ist und vorher nicht. <span class="fein">„${esc(w.name)}" überstanden · Konstitution +1</span>`; }
         else zusatz = ' Das Fieber bleibt. Es wird bei Dunkelheit stärker, und es wird jede Nacht bei Dunkelheit stärker. <span class="fein">Krankheit hält an</span>';
       }
       // Erst die Krankheit weg, dann heilen — sonst heilt man gegen den kleineren Vorrat.
@@ -124,7 +132,7 @@ const LAGER_TUN = {
   rekruten:{label:'Die Rekruten für deine Sektion aussuchen',
     cost:'Menschenkenntnis · wer neben dir steht, entscheidet mit',
     tu(){ const p = probe('menschenkenntnis',40);
-      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 12 : -6);
+      guetePlus(p.erfolg ? 12 : -6);
       nutzen('autoritaet',1);
       return p.erfolg
         ? 'Du gehst die Neuen ab und siehst nicht auf die Schultern, sondern auf die Hände und auf die Augen. Zwei nimmst du, die niemand wollte, und einen Großen lässt du stehen. Man wird dich in vier Wochen dafür verstehen. <span class="fein">Deine Sektion wird besser</span>'
@@ -133,7 +141,7 @@ const LAGER_TUN = {
   sektion:{label:'Deine zwanzig Mann exerzieren lassen',
     cost:'Autorität und Drill · Ruf +1 · deine Sektion hält besser',
     tu(){ nutzen('autoritaet',2.5); nutzen('drill',2.5); S.ruf+=1;
-      S.sektionGuete = (S.sektionGuete||0) + 8;
+      guetePlus(8);
       return 'Zwanzig Mann in zwei Gliedern, Salve auf Kommando, vierzig Mal. Beim vierzigsten geht es gleichzeitig los, und das Geräusch ist ein einziges. Genau darum geht es: Zwanzig Musketen, die nacheinander knallen, sind Lärm. Zwanzig auf einmal sind eine Wand. <span class="fein">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'; }},
 
   tornister:{label:'Mit vollem Tornister auf den Hügel und zurück',
@@ -159,7 +167,7 @@ const LAGER_TUN = {
   zugfuehren:{label:'Deinen Zug selbst antreten lassen',
     cost:'Autorität und Taktik · dein Zug hält besser',
     tu(){ nutzen('autoritaet',2.5); nutzen('taktik',2);
-      S.sektionGuete = (S.sektionGuete||0) + 8;
+      guetePlus(8);
       S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+5);
       return 'Sechzig Mann, drei Sergenten, und die Sergenten machen die Arbeit. Deine besteht darin, dazustehen und an drei Stellen etwas zu sagen, das keiner der drei sagen könnte, ohne den anderen zu übergehen. <span class="fein">Autorität und Taktik steigen · dein Zug hält besser</span>'; }},
 
@@ -325,31 +333,50 @@ function einheitZehren(){
 /* Das Lager ist der angesagte Halt: Hier wird der Feldzug gesichert und
    gesagt, dass er gesichert ist. Danach läuft die Sicherung still weiter, damit
    Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
+/* ── Die Urkunde wird im Lager nachgereicht ──
+   **Sie steht vor dem Lager und nicht darin.** Ein Bescheid ist ein Blatt, das
+   man ansieht, und kein Absatz in einer Abendplanung; im selben Bogen wie die
+   Frage „Womit verbringst du den Abend?" ginge er unter. Dieselbe Bauweise wie
+   die Ordensverleihung: eigener Bildschirm, ein Knopf, dann weiter.
+
+   Abgeräumt wird beim Anzeigen, nicht beim Wegklicken — ein Papier ist keine
+   Entscheidung, die man offen lassen könnte. */
+function zeigeFeldbescheid(n){
+  const blatt = bescheidNachreichen();
+  if(!blatt){ zeigeLager(n); return; }
+  laufSichern();
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}${blatt}
+    <div class="orders"><div class="ordbody">
+      <button class="ord weiter" onclick="zeigeLager(KAPITEL[LAUF.node])">Einstecken</button>
+    </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 function zeigeLager(n){
+  if(S && S.bescheidOffen){ zeigeFeldbescheid(n); return; }
   const L = LAUF.lager;
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
     L.sold = soldAuszahlen();
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
     L.inspektion = inspektion();
     laufSichern(); }
-  const opt = lagerHandlungen(n).map(id=>{
+  const opt = lagerHandlungen(n).map((id,i)=>{
     const t = LAGER_TUN[id];
-    return `<button class="ord" onclick="lagerTun('${id}')" ${L.abende<=0?'disabled':''}>
-      ${t.label}<span class="cost">${t.cost}</span></button>`;
-  }).join('');
+    return wahlZeile(roemisch(i+1), t.label, t.cost, `lagerTun('${id}')`, {gesperrt:L.abende<=0});
+  }).join('')
+    + (L.abende<=0 ? wahlZeile('·','Antreten lassen','Der Abend ist vorbei','lagerEnde()',{klasse:'weiter'}) : '');
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
-      ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
-      ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
-      ${L.inspektion||''}
-      ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE ABENDE: ${L.abende} VON ${abendeFuer(n)}${
-        abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'EIN ABEND':'ZWEI ABENDE'} MEHR ALS ${rangName(S.rang).toUpperCase()}`:''}</div>
-      </div></div>
-    <div class="orders"><div class="ch"><span>Womit verbringst du den Abend?</span></div><div class="ordbody">
-      ${opt}${L.abende<=0?'<button class="ord weiter" onclick="lagerEnde()">Antreten lassen</button>':''}
-    </div></div>
+    ${bogen(n,
+      `<div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
+       ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
+       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
+       ${L.inspektion||''}
+       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+      ['Womit verbringst du den Abend?',
+       `Verbleibend ${L.abende} von ${abendeFuer(n)}${abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'ein Abend':'zwei Abende'} mehr als ${rangName(S.rang)}`:''}`],
+      opt,
+      'Es ist immer mehr zu tun als Zeit da ist')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -519,7 +546,7 @@ const WINTER_TUN = {
   ausbilden:{label:'Die Rekruten des Jahrgangs ausbilden', cost:'Autorität und Drill · deine Sektion wird besser',
     tu(){ const p = probe('autoritaet', 40);
       nutzen('autoritaet',3); nutzen('drill',3);
-      S.sektionGuete = (S.sektionGuete||0) + (p.erfolg ? 14 : 5);
+      guetePlus(p.erfolg ? 14 : 5);
       if(p.erfolg) S.ruf += 1;
       return p.erfolg
         ? 'Die Konskribierten des Jahrgangs XI sind achtzehn und haben noch nie einen Toten gesehen. Du hast vier Wochen, ihnen die zwölf Handgriffe beizubringen, und du nimmst dir acht. Danach laden sie im Schlaf. <span style="color:var(--faint)">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'
@@ -566,23 +593,24 @@ function zeigeWinter(n){
     W.sold = soldAuszahlen();
     laufSichern();
   }
-  const opt = winterHandlungen(n).map(id=>{
+  const opt = winterHandlungen(n).map((id,i)=>{
     const t = WINTER_TUN[id];
-    return `<button class="ord" onclick="winterTun('${id}')" ${W.wochen<=0?'disabled':''}>
-      ${t.label}<span class="cost">${t.cost}</span></button>`;
+    return wahlZeile(roemisch(i+1), t.label, t.cost, `winterTun('${id}')`, {gesperrt:W.wochen<=0});
   }).join('');
+  const schluss = W.wochen<=0
+    ? wahlZeile('·', esc(n.weiter||'Ins Feld zurück'), 'Die Wochen sind vorbei',
+        winterMusterung(n)?'winterBefoerderung()':'winterEnde()', {klasse:'weiter'})
+    : '';
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
-      ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
-      ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
-      ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
-      ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}
-      <div class="probe" style="margin-top:12px">VERBLEIBENDE WOCHEN: ${W.wochen} VON ${wochenFuer(n)}</div>
-      </div></div>
-    <div class="orders"><div class="ch"><span>${esc(n.frage||'Womit verbringst du die Woche?')}</span></div><div class="ordbody">
-      ${opt}${W.wochen<=0?`<button class="ord weiter" onclick="${winterMusterung(n)?'winterBefoerderung()':'winterEnde()'}">${esc(n.weiter||'Ins Feld zurück')}</button>`:''}
-    </div></div>
+    ${bogen(n,
+      `<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
+       ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
+       ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
+       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
+       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+      [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
+      opt+schluss,
+      'Drei Wochen unter einem Dach')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -609,7 +637,7 @@ function winterEnde(){ LAUF.winter = {ort:null, wochen:3, log:[]}; stationErledi
    abgerechnet, es ist ruhig, und der Capitaine hat einen Tisch. Geprüft wird
    erst beim Verlassen — wer eine Woche verbringt, soll sie erst verbringen. */
 function winterMusterung(n){
-  if(!S || !leiterZiel()) return false;
+  if(!S || !leiterZiel(true)) return false;   // auch hier nur Patente
   S.winterMusterung = S.winterMusterung || {};
   if(S.winterMusterung[n.id]) return false;
   S.winterMusterung[n.id] = true;
@@ -649,6 +677,17 @@ function kapitelUeberlebt(){
   return zahl;
 }
 
+/* ── Was ein überstandener Feldzug wert ist, steigt mit seiner Nummer ──
+   **20 Punkte je Kapitelnummer, aufsummiert:** Italien 20, Ägypten 40, …,
+   Waterloo 220. Wer alle elf hinter sich bringt, hat damit 1 320 Punkte.
+
+   Die Staffelung ist der Kern und keine Verzierung: Ein pauschaler Betrag je
+   Kapitel behandelt Russland wie Italien, und dann ist der Schritt von zehn auf
+   elf Feldzüge genauso viel wert wie der erste — obwohl er ungleich teurer
+   erkauft ist. **Jedes Kapitel weiter soll sich lohnen, und zwar mehr als das
+   vorige.** */
+function kapitelWert(n){ let s = 0; for(let i = 1; i <= n; i++) s += 20 * i; return s; }
+
 /* Die volle Skala aus KONZEPT §5. Die Rangwerte (0/12/26/42/62) standen schon
    immer darin; seit Rang 4 und 5 erreichbar sind, ziehen die Zuschläge nach —
    vorher rechneten Rang und Zuschläge in zwei verschiedenen Skalen, und ein
@@ -661,12 +700,39 @@ function kapitelUeberlebt(){
 function wertung(){
   const p = {};
   p.rang = rangWert(S.rang);
-  p.kapitel = 8 * kapitelUeberlebt();          // volle Skala: 8 je Kapitel, max. 11
-  p.ruf = 5 * Math.floor(S.ruf/10);
-  p.nennungen = 3 * Math.min(10, S.nennungen);
+  p.kapitel = kapitelWert(kapitelUeberlebt());   // gestaffelt, siehe kapitelWert()
+  p.ruf = 10 * Math.floor(S.ruf/10);
+  p.nennungen = 10 * Math.min(10, S.nennungen);
   p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
-  p.ueberleben = S.lebt ? 25 : 0;              // Platzhalter, siehe oben
-  p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
+  /* ── Der Überlebensbonus, gestaffelt (KONZEPT §5) ──
+     **Bis Kapitel 8 stand hier der Platzhalter 25**, und der Kommentar dazu
+     sagte, warum: Die gestaffelten Werte ergeben erst Sinn, wenn es den
+     freiwilligen Ausstieg an den Rangschranken gibt — dann ist die Höhe des
+     Bonus die Belohnung dafür, **rechtzeitig aufzuhören**. Ohne diese
+     Entscheidung wäre er nur eine große Zahl für jeden, der nicht stirbt.
+
+     Mit Russland gibt es die Entscheidung, also fällt der Platzhalter:
+
+       180  Ruhestand nach Russland — ausgemustert oder freiwillig gegangen.
+            **Der höchste Wert des Spiels für ein Ende**, und das ist Absicht:
+            Wer 1812 lebend nach Hause geht, hat alles gesehen, was ein Mensch
+            sehen kann, und hört auf, als es noch möglich ist.
+       120  Halbsold nach 1814. Später, teurer erkauft, und man geht nicht
+            freiwillig, sondern wird gegangen.
+        70  Am Leben, ohne ein Ende gewählt zu haben — der Lauf hört auf, weil
+            der gebaute Inhalt aufhört.
+         0  tot.
+
+     **Die Reihenfolge ist keine Belohnung fürs Kneifen.** Wer bei Russland
+     aussteigt, verzichtet auf drei Kapitel Rangaufstieg, und Rang ist der
+     größte Posten der Wertung: Ein Colonel bringt 330 Punkte, ein Sergent 62.
+     Die 180 machen den Ausstieg zu einer echten Rechnung statt zu einer
+     Verlegenheit — und genau das war der Sinn. */
+  p.ueberleben = !S.lebt ? 0
+    : S.ende === 'ruhestand' ? 900
+    : S.ende === 'halbsold'  ? 600
+    : 350;
+  p.sauber = (!S.gekniffen && S.lebt) ? 100 : 0;
   /* ── Der Preis des Patents, erster Teil ──
      **Der gekaufte Rang zählt nicht, und die Stufe darüber auch nicht.** Ein
      Sous-Lieutenant mit Patent zieht 158 ab — das ist der Rangwert des
@@ -789,6 +855,187 @@ function todesText(){
     'Er wird in eine Grube gelegt, die vierzig andere teilen. Die Halbbrigade marschiert am Morgen weiter, und seine Muskete bekommt ein Rekrut, der noch nicht weiß, wem sie gehört hat.'
   ];
   return t[Math.floor(Math.random()*t.length)];
+}
+
+/* ══════════════════ DIE RANGSCHRANKE ══════════════════
+
+   **Die erste Stelle im Spiel, an der man freiwillig aufhören kann.**
+
+   Nach Russland verlangt der Krieg Rang 7, vor Waterloo Rang 10 (RANGLEITER §9,
+   `SCHRANKEN` in `src/kampf.js`). Wer darunter bleibt, wird ausgemustert — das
+   ist kein Scheitern, sondern das zweitbeste Ende, das dieses Spiel kennt. Wer
+   darüber liegt, bekommt eine Wahl, und sie ist echt:
+
+   | | Ausgemustert / gegangen | Weiter |
+   |---|---|---|
+   | Punkte sofort | **+180** | +70 am Ende |
+   | Was du aufgibst | drei Kapitel Rangaufstieg | nichts |
+   | Was du gewinnst | den Rest deines Lebens | den Rang, den es dafür braucht |
+
+   **Das Spiel rechnet den Erwartungswert nicht vor**, und das ist der ganze
+   Sinn der Station. Ein Colonel bringt 330 Wertungspunkte, ein Sergent 62 —
+   wer weitergeht, kann das Vielfache der 180 holen und stirbt dabei
+   wahrscheinlich. Wer aufhört, hat es sicher. Es steht nirgends, welche der
+   beiden Zahlen größer ist, weil das von einem Mann abhängt, den nur der
+   Spieler kennt.
+
+   **Angezeigt wird die Schranke wie ein Kapitelende, nicht wie eine Szene.**
+   Sie ist eines. */
+function zeigeSchranke(n){
+  const sch = SCHRANKEN[n.schranke];
+  if(!sch){ zeigeKapitelende(n); return; }
+  const durch = schrankeGeschafft(n.schranke);
+  const kopf = `<div class="ch"><span>${esc(n.ort||sch.name)}</span><span>${esc(n.datum||'')}</span></div>`;
+  const prosa = (n.text||[]).map(t=>`<p>${t}</p>`).join('');
+
+  if(!durch){
+    /* Ausgemustert. Kein Knopf, keine Wahl — die Listen werden neu
+       geschrieben, und was kein Offizier ist, steht nicht mehr darauf. */
+    S.ende = sch.endeArt || 'ruhestand';
+    schrankeEnde(n, prosa + `<p>${esc(sch.ende)}</p>`, sch.epilog);
+    return;
+  }
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>${esc(n.ort||sch.name)}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="prose">${prosa}</div>
+        <div class="ergebnis gut">${esc(sch.durch)}</div>
+        <div class="wirkung"><span>Was jetzt zur Wahl steht</span>
+          Du bist ${rangName(S.rang)}. Wer geht, bekommt <b>${sch.bonus} Punkte</b> und hört auf.
+          Wer bleibt, behält alles, was er sich noch verdienen kann — und alles, was er verlieren kann.</div>
+      </div></div>
+      <div class="orders"><div class="ch"><span>Wie entscheidest du?</span></div><div class="ordbody">
+        <button class="ord" onclick="schrankeWeiter()">Weitermarschieren
+          <span class="cost">Der Krieg geht weiter, und er braucht dich · +70 am Ende</span></button>
+        <button class="ord" onclick="schrankeGehen()">Den Abschied nehmen
+          <span class="cost">${sch.endeArt==='halbsold'?'Halbsold':'Ruhestand'} · +${sch.bonus} Punkte · die Laufbahn endet hier</span></button>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+/* Weiter: die Station ist erledigt wie jede andere, und der Feldzug läuft. */
+function schrankeWeiter(){
+  const n = KAPITEL[LAUF.node];
+  S.log.push((n.ort||'') + ': weitermarschiert');
+  /* **Eine Schranke am Kapitelende ist auch ein Übergang.** Wer weitergeht,
+     hat denselben Winter vor sich wie jeder andere zwischen zwei Feldzügen —
+     und ohne ihn überlebt niemand 1813, der aus Russland kommt: Er käme mit
+     vier Wunden und leerem Vorrat in ein Kapitel, das seine eigene Härte
+     hat, und stürbe an Borodino statt an Leipzig.
+
+     Die Dispatch-Reihenfolge in `naechster()` prüft `schranke` **vor**
+     `typ`, also läuft `zeigeUebergang()` hier nie. Deshalb steht die
+     Erholung an dieser Stelle noch einmal — mitsamt der Konstitution, denn
+     wer Russland überlebt hat, hat sie sich verdient wie sonst nur einer,
+     der einen ganzen Feldzug hinter sich hat. Reihenfolge wie dort: erst
+     der Zuwachs, dann auffüllen. */
+  if(n.typ === 'uebergang'){
+    S.attr.konstitution = (S.attr.konstitution|0) + 3;
+    S.wunden = [];
+    S.leben = lebenMax();
+    S.atem = 100; atemKlemmen();
+    S.belastung = Math.max(0, Math.floor(S.belastung/2));
+  }
+  stationErledigt();
+  naechster();
+}
+
+function schrankeGehen(){
+  const n = KAPITEL[LAUF.node];
+  const sch = SCHRANKEN[n.schranke] || {};
+  /* Wer freiwillig geht, geht auf demselben Weg wie der Ausgemusterte — nach
+     Russland in den Ruhestand, nach 1814 auf Halbsold. Der Unterschied liegt
+     nicht in der Art des Endes, sondern darin, dass man es gewählt hat. */
+  S.ende = sch.endeArt || 'ruhestand';
+  S.log.push((n.ort||'') + ': den Abschied genommen');
+  schrankeEnde(n, (n.text||[]).map(t=>`<p>${t}</p>`).join('') +
+    `<p>Du meldest dich ab. Es geht schneller, als du gedacht hast — ein Formular, zwei Unterschriften, und der Adjutant sieht dabei nicht auf.</p>`,
+    sch.epilog);
+}
+
+/* Der gemeinsame Abschluss beider Wege. Wertung, Chronikeintrag, Titelrückkehr
+   — dieselbe Maschine wie `zeigeKapitelende()`, nur mit einem anderen Satz
+   darunter und ohne den Ausblick auf ein nächstes Kapitel. */
+/* ══════════════════ DER LEBENSEPILOG ══════════════════
+
+   **Das einzige Ende, das über den Tag hinaussieht.** Jedes andere hört auf,
+   wo der Mann aufhört — gefallen, ausgemustert, auf Halbsold. Dieses eine
+   sagt, was aus ihm geworden ist, und es sagt es in vier Zeilen, ohne zu
+   werten (Invariante 7).
+
+   **Was den Text bestimmt, ist der Rang und nicht der Sieg.** Waterloo ist
+   verloren, für alle gleich; was danach kommt, hängt davon ab, wie hoch man
+   stand, als es verloren ging. Ein Bataillonschef verschwindet in einer
+   Provinzstadt; ein Marschall steht auf einer Liste, die man später
+   Proskriptionen nennen wird.
+
+   Und wer den Rückruf abgelehnt hat, bekommt denselben Bogen mit einem
+   anderen Satz — **kein schlechteres Ende, ein anderes.** */
+const EPILOG_LEBEN = [
+  {ab:14, text:'Dein Name steht auf der Liste, die im Juli in der Zeitung erscheint. Zwei der sechsundzwanzig werden erschossen; du gehörst nicht dazu, und niemand hat dir je erklärt, warum. Du lebst noch dreißig Jahre, gibst keine Erinnerungen heraus und gehst nicht zu den Feiern. Als man dir 1840 einen Platz im Zug anbietet, der ihn zurückbringt, sagst du ab.'},
+  {ab:12, text:'Man setzt dich auf Halbsold und dann auf eine Liste. Du gehst nicht nach Amerika, obwohl es angeboten wird, sondern in eine Provinzstadt, in der niemand weiß, was ein Général ist. Vierundzwanzig Jahre später bekommst du einen Brief mit der Anrede, die du seit Waterloo nicht gelesen hast, und legst ihn weg, ohne ihn zu beantworten.'},
+  {ab:10, text:'Die Armee wird im Juli aufgelöst, und du wirst mit ihr aufgelöst: ein Papier, eine Zahl, eine Adresse. Du heiratest spät, arbeitest an etwas, das mit Krieg nichts zu tun hat, und erzählst deinen Kindern nichts. Sie erfahren es von einem Nachbarn, der auch dabei war.'},
+  {ab:7,  text:'Du bekommst Halbsold und eine Adresse, an die man ihn schickt. In den ersten Jahren kommt er unregelmäßig, dann gar nicht mehr, dann wieder. Du wirst alt, ohne dass jemand dich fragt, und einmal im Jahr, im Juni, gehst du früher schlafen als sonst.'},
+  {ab:1,  text:'Du gehst nach Hause, in ein Dorf, das kleiner ist, als du es in Erinnerung hattest. Man weiß dort, wo du warst, und fragt nicht nach. Nach ein paar Jahren fragt niemand mehr etwas, und das ist keine Kränkung, sondern nur die Zeit.'}
+];
+
+function zeigeEpilog(n){
+  const abgelehnt = !!S.abgelehnt;
+  /* Wer abgelehnt hat, bleibt auf Halbsold — er hat ihn ja nie verlassen.
+     Wer mitgegangen und lebendig geblieben ist, ebenso: 1815 gibt es keinen
+     Ruhestand mehr zu vergeben, es gibt nur noch Auflösung. */
+  S.ende = 'halbsold';
+  const leben = (EPILOG_LEBEN.find(e => S.rang >= e.ab) || EPILOG_LEBEN[EPILOG_LEBEN.length-1]).text;
+  const p = eintragen('Epilog · ' + rangName(S.rang));
+  const neu = p.rekord;
+
+  const prosa = abgelehnt
+    ? `<p>Der Feldzug findet ohne dich statt. Am 18. Juni bist du zu Hause, es regnet auch dort, und du erfährst es elf Tage später aus einer Zeitung.</p>
+       <p>Was du gelesen hast, hättest du selbst gesehen, wenn du im April zwei andere Sätze geschrieben hättest. Es steht nicht fest, ob es anders ausgegangen wäre. Es steht fest, dass du nicht dabei warst.</p>`
+    : (n.text||[]).map(t=>`<p>${t}</p>`).join('');
+
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card papier"><div class="ch"><span>${esc(n.ort||'Der Epilog')}</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb">${vordruck(n)}
+        <div class="prose">${prosa}</div>
+        <div class="ergebnis" style="margin-top:16px">${leben}</div>
+        <div class="grid2" style="margin-top:18px">
+          <div>${wertungsTabelle(p)}</div>
+          <div class="note ${neu?'green':''}">
+            ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
+            <p style="margin-top:10px">Neunzehn Jahre, ${S.kapitel|0} Feldzüge, ${stationen()} Stationen. Von hundert, die 1796 in Savona angetreten sind, steht am Ende keiner mehr in der Liste — und du bist noch da.</p>
+          </div>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="plain" onclick="zeigeErschaffung(true)">Noch einmal, besser</button>
+          <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+          <button class="plain" onclick="speichern()">Spielstand sichern</button>
+        </div>
+      </div></div>
+    </div>${seitenleiste()}</div>`;
+  LAUF=null; binde(); kopfzeile();
+}
+
+function schrankeEnde(n, prosa, epilog){
+  const p = eintragen((S.ende==='halbsold'?'Halbsold · ':'Ruhestand · ')+rangName(S.rang));
+  const neu = p.rekord;
+  app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
+    <div class="cb"><div class="prose">${prosa}</div>
+      <div class="ergebnis" style="margin-top:14px">${esc(epilog||'')}</div>
+      <div class="grid2" style="margin-top:18px">
+        <div>${wertungsTabelle(p)}</div>
+        <div class="note ${neu?'green':''}">
+          ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
+          <p style="margin-top:10px">Du bist nicht gefallen. Von hundert, die mit dir angefangen haben, sind sechs so weit gekommen, und die meisten davon liegen irgendwo.</p>
+        </div>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="plain" onclick="zeigeErschaffung(true)">Noch einmal, besser</button>
+        <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+        <button class="plain" onclick="speichern()">Spielstand sichern</button>
+      </div>
+    </div></div>`;
+  LAUF=null; binde(); kopfzeile();
 }
 
 function zeigeKapitelende(n){

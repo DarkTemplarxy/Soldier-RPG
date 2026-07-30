@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 195.5" role="img" aria-label="Tapferkeitsmedaille"><defs><linearGradient id="m" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0%" stop-color="#f6ecc8"></stop><stop offset="32%" stop-color="#e0b552"></stop>
+    <stop offset="70%" stop-color="#c8901f"></stop><stop offset="100%" stop-color="#8a6410"></stop></linearGradient></defs>
+  <rect x="38" y="0" width="44" height="50" fill="#27415f"></rect><rect x="52" y="0" width="16" height="50" fill="#e8e0cd"></rect><rect x="68" y="0" width="14" height="50" fill="#9c3125"></rect><g transform="translate(0 50)">
+    <rect x="36" y="0" width="48" height="13" rx="1.5" fill="url(#m)" stroke="#8a6410" stroke-width=".8"></rect>
+    <text x="60" y="9.4" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="6.4" letter-spacing=".6" fill="#5e4208">LODI 1796</text></g><g transform="translate(0 65)">
+    <rect x="36" y="0" width="48" height="13" rx="1.5" fill="url(#m)" stroke="#8a6410" stroke-width=".8"></rect>
+    <text x="60" y="9.4" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="6.4" letter-spacing=".6" fill="#5e4208">ARCOLE 1796</text></g><g transform="translate(0 80)">
+    <rect x="36" y="0" width="48" height="13" rx="1.5" fill="url(#m)" stroke="#8a6410" stroke-width=".8"></rect>
+    <text x="60" y="9.4" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="6.4" letter-spacing=".6" fill="#5e4208">ACRE 1799</text></g>
+  <circle cx="60" cy="153.5" r="36" fill="url(#m)"></circle>
+  <circle cx="60" cy="153.5" r="29" fill="#e0b552" opacity=".45"></circle>
+  <circle cx="60" cy="153.5" r="31.5" fill="none" stroke="#8a6410" stroke-width="1.6" opacity=".55"></circle>
+  <g transform="rotate(-26 60 153.5)">
+    <rect x="59.2" y="127.5" width="1.9" height="52" fill="#5e4208" opacity=".78"></rect>
+    <rect x="57.6" y="167.5" width="5" height="12" rx="2" fill="#5e4208" opacity=".62"></rect>
+    <rect x="58.4" y="123.5" width="3.4" height="6" rx="1.2" fill="#5e4208" opacity=".5"></rect></g><g transform="rotate(26 60 153.5)">
+    <rect x="59.2" y="127.5" width="1.9" height="52" fill="#5e4208" opacity=".78"></rect>
+    <rect x="57.6" y="167.5" width="5" height="12" rx="2" fill="#5e4208" opacity=".62"></rect>
+    <rect x="58.4" y="123.5" width="3.4" height="6" rx="1.2" fill="#5e4208" opacity=".5"></rect></g><rect x="53.5" y="135" width="13" height="13" transform="rotate(45 60 141.5)" fill="#f6ecc8" stroke="#8a6410" stroke-width=".8"></rect>
+  <rect x="57" y="95" width="6" height="11" rx="3" fill="url(#m)"></rect>
+  <circle cx="60" cy="111.5" r="6.5" fill="none" stroke="url(#m)" stroke-width="3.2"></circle></svg>

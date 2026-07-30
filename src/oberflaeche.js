@@ -451,10 +451,21 @@ function istAttribut(k){ return ATTRIBUTE.some(([a])=>a===k); }
 function istWert(k){
   const h = HERKUENFTE.find(x=>x.id===(ERSCH&&ERSCH.herkunft)) || {attr:{},fert:{}};
   return istAttribut(k)
-    ? Math.max(0, Math.min(70, (ERSCH?ERSCH.attr[k]:20) + (h.attr[k]||0)))
-    : Math.max(0, Math.min(60, 10 + (h.fert[k]||0)));
+    ? Math.max(0, Math.min(100, (ERSCH?ERSCH.attr[k]:SOCKEL) + (h.attr[k]||0)))
+    : Math.max(0, Math.min(100, FERT_SOCKEL + (h.fert[k]||0)));
 }
-function punktGrenze(k){ return istAttribut(k) ? 70 : 60; }   // darüber nur noch im Feld
+/* ── Die Obergrenze ist 100, für alles ──
+   **Bis zum 30.07.2026 lag sie bei 70 für Attribute und 60 für Fertigkeiten.**
+   Das war richtig, solange ein Spitzenlauf 160 Punkte brachte: Man konnte sich
+   ohnehin nur eine Spitze leisten, und der Deckel verhinderte, dass sie absurd
+   wird. Mit der neuen Ökonomie ist das Ziel ein anderes — **ein perfekter Lauf
+   bis Waterloo soll reichen, um alles auf 70+ zu heben** —, und ein Deckel bei
+   60 machte das per Regel unerreichbar.
+
+   **Die Bremse ist jetzt allein der Preis.** Der Weg von 90 auf 100 kostet
+   600 VP, also mehr als drei Werte von 20 auf 70 zusammen. Wer eine Hundert
+   will, bezahlt sie mit der Breite. */
+function punktGrenze(k){ return 100; }
 function punktKosten(k){ const b = istWert(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
 function gesamtKosten(){
   return AUSWAHL.reduce((s,id)=>{
@@ -503,9 +514,11 @@ function patentKarte(){
 function zeigeLaden(){
   if(!ERSCH || !ERSCH.herkunft){ zeigeErschaffung(); return; }
   AUSWAHL = []; PUNKTE = {};
-  const zeilen = LADEN.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
+  const kaufZeile = p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
     <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
-    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
+    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`;
+  const zeilen  = LADEN.filter(p=>p.art!=='zaeh').map(kaufZeile).join('');
+  const zeilenZ = LADEN.filter(p=>p.art==='zaeh').map(kaufZeile).join('');
   const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft);
   app.innerHTML = `
   <div class="card"><div class="ch"><span>Zweiter Schritt · Veteranenpunkte</span><span id="vpanz">${META.vp} verfügbar</span></div>
@@ -523,7 +536,7 @@ function zeigeLaden(){
 
   <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 60</span></div>
    <div class="cb">
-    <p class="hinweis">Alle beginnen bei 10, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
+    <p class="hinweis">Alle beginnen bei 5, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
     ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
@@ -532,6 +545,12 @@ function zeigeLaden(){
   <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
    <div class="cb">
     <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+   </div></div>
+
+  <div class="card"><div class="ch"><span>Was ein Mann behält</span><span>nicht Kraft, sondern Gewohnheit</span></div>
+   <div class="cb">
+    <p class="hinweis">Was einer aus zwei Feldzügen mitbringt, ist selten Kraft. Es ist das Wissen, wie man nicht stirbt: welches Wasser man trinkt, wie man seine Füße behält, wo man sich hinlegt, wenn es kein Dach gibt. <b>Nichts davon macht dich im Gefecht besser</b> — es hält dich nur zwischen den Gefechten aufrecht, und dort verliert man die meisten Männer.</p>
+    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilenZ}</table>
     <div style="margin-top:18px;display:flex;gap:10px">
       <button class="plain" onclick="zeigeErschaffung()">Zurück zur Erschaffung</button>
       <button class="plain haupt" id="startbtn" onclick="starte()">Einrücken</button></div>
@@ -595,24 +614,50 @@ function aktualisiereLaden(){
    Progression, die das Spiel bisher nur behauptet hat: Gegner, gegen die man am
    Anfang chancenlos ist, werden später schlagbar.
 
-   Der Schritt ist 10, also muss POOL durch 10 teilbar sein — sonst lässt sich
-   der Vorrat nie ganz verteilen und der „Weiter"-Knopf bleibt gesperrt.
+   **Der Sockel ist am 29.07.2026 von 20 auf 15 gefallen, und der Schritt von
+   10 auf 5.** Beides gehört zusammen: Von 15 aus ist die 70 in Zehnerschritten
+   nicht erreichbar (15+50 = 65, 15+60 = 75), also musste erst der Schritt
+   feiner werden. Mit 5 geht 15 + 55 = 70 exakt auf, POOL 60 ist durch 5
+   teilbar, und **beide Hälften der Erschaffung schreiten jetzt gleich** —
+   `PUNKT_SCHRITT` für die Veteranenpunkte stand ohnehin schon auf 5.
+
+   **Wozu der tiefere Sockel:** Ein Erstlauf-Mann soll früher sterben, damit
+   der Veteran länger lebt. Die Wachstumsformel gibt bei niedrigen Werten am
+   meisten (`1,7 × Intensität × (100 − Wert)/100`), also verlängert ein
+   tieferer Sockel zugleich die Strecke, auf der ein Mann sich noch
+   verbessern kann. Das ist die Gegenseite zur wachsenden Konstitution.
+
+   **Der Sollwert dafür ist Italien** (Entscheidung des Entwicklers): Das
+   Lehrstück darf töten, aber **nicht mehr als 20 % im Erstlauf**. Fällt
+   „Italien überstanden" unter 80 %, ist der Sockel zu tief.
+
    Invariante 3 bleibt unberührt: Gekauft wird der Ausgangspunkt, nie der
    Aufstieg. */
-const POOL = 60, SOCKEL = 20, MAXE = 70;
+const POOL = 60, SOCKEL = 15, MAXE = 70, ERSCH_SCHRITT = 5;
+/* **Bildung ist die Ausnahme und bleibt bei 20.** Sie ist schon immer vom Pool
+   ausgenommen, weil sie kein körperlicher Ausgangspunkt ist, sondern eine
+   soziale Tatsache — man kann nicht lesen —, und sie hat einen eigenen Weg
+   über die Regimentsschule. Sie mit abzusenken träfe die **Rangleiter**
+   (Fourrier braucht 35, Rang 7 braucht 50) statt der Überlebensfähigkeit,
+   und darum geht es beim Sockel nicht. */
+const BILDUNG_SOCKEL = 20;
+const sockelVon = k => k==='bildung' ? BILDUNG_SOCKEL : SOCKEL;
 let ERSCH = null;
 function zeigeErschaffung(neu){
   if(neu || !ERSCH){
     ERSCH = {name:'', herkunft:null, attr:{}};
-    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
+    wuerfeln(true);   // **Es steht nie ein unverteilter Mann da.** Man sieht sofort einen.
   }
+  /* **Keine Plus- und Minusknöpfe mehr.** Der erste Mann wird nicht gebaut,
+     er wird ausgehoben — man sieht, was man bekommen hat, und darf neu
+     würfeln, bis es einem passt. Was man *gestalten* kann, sind die
+     Veteranenpunkte im nächsten Schritt, und die hat der erste Mann nicht. */
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
       <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
       ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
       <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
-      <span><button class="pmbtn" onclick="stelle('${k}',-10)" id="am_${k}">−</button>
-      <button class="pmbtn" onclick="stelle('${k}',10)" id="ap_${k}">+</button></span>
     </div>`).join('');
   app.innerHTML = `
   <div class="stage">${verlauf()}
@@ -620,12 +665,12 @@ function zeigeErschaffung(neu){
       <div class="card"><div class="ch"><span>Erster Schritt · Wer bist du</span></div><div class="cb">
         <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value;aktualisiereErschaffung()">
       </div></div>
-      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
+      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">ausgehoben</span></div>
         <div class="cb">${zeilen}
-        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel 20 · höchstens 70 bei der Erschaffung · Bildung ist vom Pool ausgenommen.
-        Alle neun Fertigkeiten beginnen bei 10.<br>
-        Sechzig Punkte sind wenig, und das ist Absicht: Ein Rekrut ist kein Veteran. Was fehlt, holen die Veteranenpunkte deiner früheren Männer im nächsten Schritt.</p>
-        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
+        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · höchstens ${MAXE} bei der Aushebung · Bildung steht fest auf ${BILDUNG_SOCKEL} — du kannst nicht lesen.
+        Alle neun Fertigkeiten beginnen bei ${FERT_SOCKEL}.<br>
+        <b>Du suchst dir nicht aus, wer du bist.</b> Der Werber schreibt auf, was er sieht. Wenn dir der Mann nicht passt, kannst du einen anderen nehmen — aber besser machen kannst du ihn nicht. Das kommt erst mit den Veteranenpunkten deiner früheren Männer.</p>
+        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Einen anderen Mann</button></div>
       </div></div>
     </div>
     <div class="card"><div class="ch"><span>Herkunft</span><span>je genau 50 Punkte</span></div><div class="cb">
@@ -643,26 +688,21 @@ function zufallsName(){
   const n=['Duval','Rey','Vasseur','Marchand','Ferrand','Bonnet','Lemoine','Charpentier','Roussel','Barbier'];
   return v[Math.floor(Math.random()*v.length)]+' '+n[Math.floor(Math.random()*n.length)];
 }
-function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-SOCKEL),0); }
-function stelle(k,d){
-  if(k==='bildung') return;
-  const neu = ERSCH.attr[k]+d;
-  if(neu<SOCKEL || neu>MAXE) return;
-  if(d>0 && verteilt()+d>POOL) return;
-  ERSCH.attr[k]=neu; aktualisiereErschaffung();
-}
-function wuerfeln(){
-  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=SOCKEL);
+function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-sockelVon(k)),0); }
+/* `stille` unterdrückt das Neuzeichnen — beim ersten Aufbau ist der Bildschirm
+   noch gar nicht da, und `aktualisiereErschaffung()` liefe ins Leere. */
+function wuerfeln(stille){
+  ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
   const frei = ATTRIBUTE.map(([k])=>k).filter(k=>k!=='bildung');
   let rest = POOL;
   const gew = frei.map(()=>Math.random()+0.35);
   while(rest>0){
     const i = gew.map((g,i)=>[g*Math.random(),i]).sort((a,b)=>b[0]-a[0])[0][1];
     const k = frei[i];
-    if(ERSCH.attr[k]+10<=MAXE){ ERSCH.attr[k]+=10; rest-=10; }
+    if(ERSCH.attr[k]+ERSCH_SCHRITT<=MAXE){ ERSCH.attr[k]+=ERSCH_SCHRITT; rest-=ERSCH_SCHRITT; }
     else { gew[i]=0; if(gew.every(g=>g===0)) break; }
   }
-  aktualisiereErschaffung();
+  if(!stille) aktualisiereErschaffung();
 }
 function waehleHerkunft(id){
   ERSCH.herkunft=id;
@@ -670,16 +710,17 @@ function waehleHerkunft(id){
   aktualisiereErschaffung();
 }
 function aktualisiereErschaffung(){
-  const v = verteilt();
-  document.getElementById('poolanz').textContent = `${POOL-v} von ${POOL} übrig`;
+  const anz = document.getElementById('poolanz');
+  if(anz) anz.textContent = 'ausgehoben';
   ATTRIBUTE.forEach(([k])=>{
-    document.getElementById('av_'+k).textContent = ERSCH.attr[k];
+    const v = document.getElementById('av_'+k); if(v) v.textContent = ERSCH.attr[k];
     const b = document.getElementById('ab_'+k); if(b) b.querySelector('i').style.width = ERSCH.attr[k]+'%';
-    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=SOCKEL;
-    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+10>POOL;
   });
-  const b = document.getElementById('weiterbtn');
-  if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
+  /* **Der Pool wird nicht mehr geprüft**, weil es keinen zu verteilen gibt —
+     `wuerfeln()` legt ihn immer vollständig an. Übrig bleiben die zwei Dinge,
+     die der Spieler wirklich entscheidet: Name und Herkunft. */
+  const w = document.getElementById('weiterbtn');
+  if(w) w.disabled = !(ERSCH.herkunft && ERSCH.name.trim().length>0);
 }
 function starte(){
   laufVerwerfen();       // ein Platz, kein zweiter — der alte Feldzug ist damit vorbei
@@ -1050,13 +1091,16 @@ function marschWuerfeln(n){
 
 function zeigeMarschEreignis(e, n){
   const offen = marschOffen(e);
-  const opt = offen.map((o,i)=>`<button class="ord ${o.risk?'risk':''}" onclick="marschWaehlen(${i})">
-    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${o.probe?' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}</span></button>`).join('');
+  const opt = offen.map((o,i)=>
+    wahlZeile(roemisch(i+1), esc(o.label), wahlKosten(o), `marschWaehlen(${i})`, {risk:o.risk})).join('');
   const gesperrt = marschVerwehrt(e).map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div>${wegband(n)}<div class="card"><div class="ch"><span>Auf dem Marsch · ${esc(e.titel)}</span><span>${esc(n.datum||'')}</span></div>
-      <div class="cb"><div class="prose">${e.text.map(t=>`<p>${t}</p>`).join('')}${gesperrt}</div></div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    <div>${wegband(n)}
+      ${bogen({ort:'Auf dem Marsch · '+e.titel, datum:n.datum||''},
+        `<div class="prose">${e.text.map(t=>`<p>${t}</p>`).join('')}${gesperrt}</div>`,
+        ['Was tust du?','Ein Zwischenfall · er zählt wie jede Wahl'],
+        opt,
+        'Zwischen zwei Stationen · der Feldzug ist gesichert')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1073,7 +1117,7 @@ function marschWaehlen(i){
     const p = probe(o.probe.wert, o.probe.schw);
     w = p.erfolg ? o.erfolg : (o.misserfolg||o.erfolg);
     klasse = p.erfolg ? 'gut' : 'schlecht';
-    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${probeWort(p)}</div>`;
   } else w = o.erfolg;
   anwenden(w);
   S.log.push('marsch: '+o.label);
@@ -1158,6 +1202,7 @@ function zeigeOrden(o, n){
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
     <div class="card papier"><div class="ch"><span>${esc(o.voll)}</span><span>${esc(n.datum||'')}</span></div>
       <div class="cb">
+        <div class="ordenblatt">${ordensbild(o.id)}</div>
         <div class="prose">
           <p>${esc(o.was)}</p>
           <p>${auto
@@ -1166,7 +1211,7 @@ function zeigeOrden(o, n){
           <p>${esc(S.name)}, ${rangName(S.rang)} der 32. ${jahrVonStation()>=1803?'Linie':'Halbbrigade'}. Verliehen für: ${S.nennungen} Nennungen im Tagesbefehl.</p>
         </div>
         <div class="wirkung"><span>${esc(o.name)}</span>
-          ${ordensbild(o.id)} Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
+          Ruf +${o.ruf}${o.pension?` · Pension ${o.pension===1?'ein Franc':'ein halber Franc'} je Station`:''} · ${o.vp} Punkte in der Wertung</div>
       </div></div>
     <div class="orders"><div class="ordbody">
       <button class="ord weiter" onclick="ordenWeiter()">Wegtreten</button>
@@ -1180,6 +1225,16 @@ function naechster(){
   if(!S.lebt){ zeigeTod(); return; }
   if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
   const n = KAPITEL[LAUF.node];
+  /* ── Der forcierte Marsch hat diese Station überholt ──
+     Übersprungen heißt: Sie findet nicht statt. Kein `stationErledigt()`, also
+     keine Zeitheilung, kein Sold, kein Chronikeintrag — man war nicht da. Das
+     ist der Preis auf der anderen Seite des Handels und der Grund, warum
+     Forcieren nicht immer richtig ist. */
+  if(LAUF.ueberspringen && n.id === LAUF.ueberspringen){
+    LAUF.ueberspringen = null;
+    LAUF.node++; laufSichern();
+    naechster(); return;
+  }
   if(n.datum && n.id && LAUF.gezaehlt !== n.id){
     LAUF.gezaehlt = n.id;                 // beim Fortsetzen nicht doppelt zählen
     const b = META.bestKapitel[n.id] || {mal:0,rangN:0,rang:''};
@@ -1233,6 +1288,24 @@ function naechster(){
     if(me){ zeigeMarschEreignis(me, n); return; }
     LAUF.marsch = null;
   }
+  /* Das Tempo wird vor dem Marsch gewählt, nicht auf ihm — also vor dem
+     Zwischenfall-Wurf, aber nach einer noch offenen Frage von vorhin. */
+  if(n.tempo && LAUF.tempo !== n.id){ zeigeTempo(n); return; }
+  /* ── Wer den Rückruf abgelehnt hat, marschiert nicht mit ──
+     **Ganz oben, vor allem anderen.** Die Ablehnung im April 1815 ist eine
+     echte Wahl mit einem vollwertigen Ende, kein schlechteres — deshalb
+     überspringt sie alles, was noch käme, und geht direkt in den Epilog. Ein
+     Mann, der zu Hause bleibt, steht nicht bei Ligny und begegnet auch keinem
+     Zwischenfall auf einem Marsch, den er nicht mitmacht.
+
+     Die erste Fassung stand weiter unten in der Kette, hinter `typ==='szene'`
+     — und traf deshalb nie, weil auf den Brief eine Szene folgt. */
+  if(S && S.abgelehnt && !n.epilog){
+    const i = KAPITEL.findIndex(x=>x.epilog);
+    if(i >= 0 && LAUF.node !== i){ LAUF.node = i; laufSichern(); naechster(); return; }
+    zeigeEpilog(KAPITEL[i] || n); return;
+  }
+
   /* Gewürfelt wird auf Stationen mit Marschweg — und seit Kapitel 3 auch auf
      solchen, die es ausdrücklich anfordern (`zwischenfall:true`). In einer
      Garnison marschiert niemand, und ohne diese zweite Tür hätten die vier
@@ -1260,10 +1333,14 @@ function naechster(){
     else if(K) zeigeKampf('Das Gefecht geht weiter, wo du es verlassen hast.');
     else starteKampf(n);
   }
+  else if(n.epilog) zeigeEpilog(n);
   else if(n.typ==='befoerderung') zeigeBefoerderung(n);
   else if(n.typ==='elite') zeigeElite(n);
   else if(n.typ==='winter') zeigeWinter(n);
   else if(n.typ==='uebergang') zeigeUebergang(n);
+  /* Eine Station mit `schranke` ist ein Ende mit einer Wahl davor — sie geht
+     deshalb vor der gewöhnlichen Endstation, nicht daneben. */
+  else if(n.schranke) zeigeSchranke(n);
   else if(n.typ==='ende') zeigeKapitelende(n);
 }
 
@@ -1281,6 +1358,30 @@ function zeigeUebergang(n){
      stirbt in Ägypten niemand an Ägypten, sondern an Arcole. */
   if(LAUF.erholt !== n.id){
     LAUF.erholt = n.id;
+    /* ── Was ein Feldzug aus einem Körper macht ──
+
+       **Der einzige Ort im Spiel, an dem ein Attribut wächst, ohne dass man
+       etwas dafür gedrückt hat — und er ist verdient, nicht geschenkt.** Wer
+       hier steht, hat einen ganzen Feldzug überlebt; das ist die Bedingung,
+       und sie ist die härteste im Spiel.
+
+       Gebaut gegen den schärfsten gemessenen Befund: **Veteranenpunkte kaufen
+       Rang und keine Strecke** (Weite 57 / 62 / 61 bei 11 / 30 / 38 %
+       Capitaine). Jede Progression, die über bessere Werte läuft, endet in
+       der Ruf-Kette und damit in den Offiziersrängen mit ihren +4 bis +5
+       Gefahr. Diese hier läuft über die **Strecke**: Sieben Übergänge sind
+       +21 Konstitution und damit rund dreizehn Lebenspunkte, und man bekommt
+       sie nur, indem man ankommt.
+
+       **Ohne Deckel bei 100.** `lebenMax()` rechnet vom rohen Wert, linear
+       und ungeklemmt — ein Mann, der acht Feldzüge überlebt hat, darf
+       zäher sein als menschenmöglich. Natürliches Üben plateauiert dagegen
+       weiterhin bei 100, weil die Wachstumsformel darüber negativ wird.
+
+       Reihenfolge: **erst der Zuwachs, dann auffüllen.** `lebenMax()` hängt
+       an der Konstitution, und wer davor auffüllt, füllt gegen den kleineren
+       Vorrat — derselbe Fehler wie damals bei den Wunden. */
+    S.attr.konstitution = (S.attr.konstitution|0) + 3;
     // Erst die Wunden weg, dann auffüllen: `lebenMax()` schrumpft mit offenen
     // Wunden, sonst rückt der Mann mit 68 statt 82 ein, obwohl „voll" dasteht.
     S.wunden = [];
@@ -1296,7 +1397,8 @@ function zeigeUebergang(n){
         <div class="wirkung"><span>Zwischenstand</span>
           ${rangName(S.rang)} · Ruf ${S.ruf} · ${stationen()} Stationen · ${S.nennungen}× im Tagesbefehl</div>
         <div class="wirkung"><span>Ein Jahr Garnison</span>
-          Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.</div>
+          Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.
+          <b>Konstitution +3:</b> Der Körper hat sich an das Marschieren gewöhnt, an das Schlafen im Nassen und daran, mit wenig auszukommen.</div>
         </div></div>
       <div class="orders"><div class="ordbody">
         <button class="ord weiter" onclick="stationErledigt();naechster()">Weiter
@@ -1306,7 +1408,151 @@ function zeigeUebergang(n){
   kopfzeile();
 }
 
+/* ══════════════════ DIE TEMPOWAHL ══════════════════
+
+   **Der Krieg wird mit den Beinen gewonnen** — die eigene Regel von Kapitel 5
+   (KAMPAGNEN §1). Die Grande Armée schlägt Preußen in vier Wochen, und sie tut
+   es durch Marschleistung: Wer zuerst da ist, gewinnt, bevor geschossen wird.
+   Damit das nicht bloß im Text steht, bekommt der Marsch selbst eine
+   Entscheidung — drei Knöpfe an jeder Station, die `tempo` trägt.
+
+   **Der forcierte Marsch ist der einzige Knopf im Spiel, der Spielzeit
+   überspringt.** Welche Station er auslässt, sagen die Daten
+   (`tempo.ueberspringt`), nicht der Code: Ein Tempo, das wahllos die nächste
+   Station verschluckt, träfe irgendwann ein Gefecht oder ein Lager, und beides
+   wäre falsch. Was übersprungen wird, ist immer eine Szene — und eine, in der
+   etwas zu holen gewesen wäre. Das ist der Handel: **Zeit gegen Substanz.**
+
+   **Warum ohne Probe.** Wie die Rechnung des Bataillonschefs („welche Kompanie
+   geht zuerst hinein") ist das keine Frage des Könnens, sondern eine, für die
+   man bezahlt. Es gibt keine Fertigkeit, die einem abnimmt, ob man seine Leute
+   schont oder verheizt.
+
+   **Die Schuhe zahlen mit.** Wer forciert marschiert und schlechte Schuhe hat,
+   zahlt doppelt. Das ist die rückwirkende Aufwertung des unscheinbarsten
+   Ladenpostens — dieselbe Idee, mit der später der Mantel im Frost zum
+   wichtigsten Gegenstand des Spiels wird, ohne dass ein System dazukommt.
+
+   Datenformat an der Station:
+     tempo:{ ueberspringt:'stations-id',        // optional
+             forciert:{text:'…', ruf:6},        // optionale Zusatzwirkung
+             normal:{…}, schonend:{…} }                                     */
+const TEMPO = [
+  {id:'schonend', label:'Schonend marschieren',
+   hint:'Ruf −2 · es wird aufgeschrieben, wer wann eintrifft',
+   verschleiss:0.08, atem:-2, belastung:1, ruf:-2,
+   text:'Du lässt die Kolonne in ihrem Schritt. Am Abend steht, wer morgens angetreten ist, und am Straßenrand liegt keiner von euch. Am Etappenort steht ein Adjutant mit einer Uhr und schreibt auf, welches Bataillon wann eintrifft. Er schreibt es für jemanden auf, den du nie zu sehen bekommst.'},
+  {id:'normal', label:'Nach Vorschrift marschieren',
+   hint:'Dreißig Kilometer, zwei Rasten, abends Quartier',
+   verschleiss:0.15, atem:-6, belastung:2,
+   text:'Dreißig Kilometer, zwei Rasten, abends Quartier. Es ist die Leistung, für die dieses Heer gebaut worden ist, und sie fühlt sich nach nichts Besonderem an, solange man sie erbringt.'},
+  {id:'forciert', label:'Forcieren',
+   hint:'Doppelter Verschleiß · Atem −25 · du kommst an, bevor der Weg zu Ende ist',
+   verschleiss:0.5, atem:-25, belastung:8, forciert:true,
+   text:'Losgehen um drei, Rast im Stehen, weiter im Dunkeln. Die letzten Stunden geht die Kolonne, ohne dass jemand redet. Wer liegen bleibt, bleibt liegen; die Gendarmerie sammelt ihn ein, wenn sie kann, und wenn nicht, dann nicht.'}
+];
+
+function zeigeTempo(n){
+  const t = n.tempo || {};
+  const opt = TEMPO.map((x,i)=>{
+    const zusatz = t[x.id] || {};
+    const uebersprungen = (x.forciert && t.ueberspringt) ? ' · eine Station bleibt liegen' : '';
+    /* `data-gewinn` ist kein verstecktes Wissen — es steht als Satz auf dem
+       Knopf („ihr holt eine Kolonne ein, die aufgeben will"). Das Attribut
+       sagt dem Testbot dasselbe, was ein Spieler liest, und ohne es misst das
+       Skript wieder seine eigene Blindheit statt des Spiels. */
+    /* `data-gewinn` sagt dem Testbot dasselbe, was ein Spieler liest — ohne
+       es misst das Skript wieder seine eigene Blindheit statt des Spiels. */
+    const zeile = wahlZeile(roemisch(i+1), esc(x.label),
+      esc(x.hint)+uebersprungen+(zusatz.hint?' · '+esc(zusatz.hint):''),
+      `waehleTempo(${i})`, {risk:x.forciert});
+    return (x.forciert && zusatz.hint) ? zeile.replace('<button ', '<button data-gewinn="1" ') : zeile;
+  }).join('');
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}
+      ${bogen({ort:'Das Tempo', datum:n.datum||''},
+        `<div class="prose">${(t.text||[
+          'Vor dem Abmarsch steht die Frage, die in diesem Feldzug jeden Tag gestellt wird und über die keine Vorschrift etwas sagt: wie schnell.'
+        ]).map(x=>`<p>${x}</p>`).join('')}</div>`,
+        ['Wie marschiert ihr?','Keine Probe · es gibt keine Fertigkeit dafür'],
+        opt,
+        'Vor dem Abmarsch · der Feldzug ist gesichert')}
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+function waehleTempo(i){
+  const n = KAPITEL[LAUF.node];
+  if(!n || !n.tempo || LAUF.tempo === n.id) return;   // Wächter gegen den zweiten Klick
+  const t = TEMPO[i]; if(!t) return;
+  LAUF.tempo = n.id;
+  const zusatz = n.tempo[t.id] || {};
+
+  /* Grund- und Kapitelwirkung landen in **einem** Kasten: Der Spieler soll
+     nicht zwei Rechnungen lesen, sondern eine. */
+  const w = Object.assign({}, zusatz);
+  delete w.text; delete w.hint;
+  w.atem = (w.atem||0) + t.atem;
+  w.belastung = (w.belastung||0) + t.belastung;
+  if(t.ruf) w.ruf = (w.ruf||0) + t.ruf;
+
+  let schuhe = '';
+  if(t.forciert && S.ausr.schuhe && S.ausr.schuhe.zustand < 40){
+    w.atem -= 8; w.belastung += 4;
+    if(!w.wunde) w.wunde = 'Wundgelaufene Füße';
+    schuhe = ' Deine Schuhe halten das nicht. Am dritten Tag gehst du auf etwas, das keine Sohle mehr hat.';
+  }
+  /* „Füße wie Leder", zweite Hälfte. Der forcierte Marsch bleibt teuer — er
+     kostet weiterhin Verschleiß, Belastung und eine übersprungene Station.
+     Was ein Gewohnter spart, ist Luft: acht von fünfundzwanzig. Das reicht,
+     um ihn nicht unter die Warnschwelle 35 zu drücken, und ändert nichts
+     daran, dass Forcieren eine Entscheidung mit Preis bleibt. */
+  if(t.forciert && zaeh('zaeh_fuesse')){
+    w.atem += 8;
+    schuhe += ' Du gehst, wie man geht, wenn man es oft genug getan hat: kurze Schritte, und die Füße bleiben trocken.';
+  }
+
+  verschleiss(t.verschleiss);
+  anwenden(w);
+  if(t.forciert && n.tempo.ueberspringt) LAUF.ueberspringen = n.tempo.ueberspringt;
+  S.log.push((n.ort||'') + ': ' + t.label);
+  laufSichern();
+
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>Das Tempo</span><span>${esc(n.datum||'')}</span></div>
+      <div class="cb"><div class="prose"><p class="said">${esc(t.label)}</p></div>
+        <div class="ergebnis ${t.forciert?'schlecht':'gut'}">${t.text}${schuhe}${zusatz.text?'<br><br>'+zusatz.text:''}</div>
+        ${wirkungen(w)}</div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 /* ── Szene ── */
+/* ── Rangfassungen (KAMPAGNEN §0.3) ──
+   „Jede Station trägt jeden Rang." Eine Szene, die 1806 geschrieben ist, muss
+   für einen Caporal stimmen und für einen Colonel — und wo das mit einem Text
+   nicht geht, bekommt sie eine zweite Lage. Beides ist **additiv**, nach dem
+   Muster von `rangTun` im Lager:
+
+     rangText:{7:['…']}       zusätzliche Absätze ab Rang 7
+     rangOptionen:{7:[{…}]}   zusätzliche Knöpfe ab Rang 7
+
+   **Additiv und nicht ersetzend, aus einem Grund:** Ein ersetzter Text wäre
+   eine zweite Szene unter demselben Namen, und dann hätte man zwei zu pflegen.
+   Ein zusätzlicher Absatz sagt, was der Höhergestellte *mehr* sieht — und das
+   ist ohnehin die Wahrheit über Ränge. Wer eine Wahl nur unten oder nur oben
+   haben will, nimmt weiterhin `ab:{wert:'rang',min:n,sonst:'…'}`; das sperrt
+   mit einem Satz statt mit einem grauen Knopf. */
+function rangZusatz(o){
+  if(!o) return [];
+  const raus = [];
+  for(const r in o) if(S.rang >= +r) raus.push(...o[r]);
+  return raus;
+}
+function szeneText(n){ return (n.text||[]).concat(rangZusatz(n.rangText)); }
+function szeneOptionen(n){ return (n.optionen||[]).concat(rangZusatz(n.rangOptionen)); }
+
 /* Ob eine Szenenwahl überhaupt offensteht. Dieselbe Sperr-Regel wie bei den
    Marsch-Zwischenfällen (CLAUDE.md): **Wer eine Probe erkennbar nicht bestehen
    kann, bekommt keinen Knopf, sondern einen Satz.** Ein stummer gesperrter
@@ -1322,25 +1568,117 @@ function szeneVerwehrt(o){
   return v < (o.ab.min|0);
 }
 
+/* ══════════════════ DER STATIONSBOGEN ══════════════════
+
+   **Szene und Wahlen auf einem Blatt** (Bündel 1 des Entwurfspakets). Bis
+   dahin standen sie in zwei Kästen — `.card` mit dem Text, darunter `.orders`
+   mit den Knöpfen — und dazwischen klaffte eine Lücke, die es auf einem
+   Kanzleibogen nicht gibt. Die Wahlen sahen außerdem aus wie Schaltflächen
+   statt wie das, was sie sind: die Punkte einer Verfügung.
+
+   `wahlListe()` und `bogen()` stehen hier einmal für alle sechs Aufrufstellen
+   — Szene, Marschereignis, Lager, Gefecht, Gefechts-Ereignis. */
+const ROEMISCH = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+function roemisch(k){ return ROEMISCH[k-1] || String(k); }
+
+/* Die Probenzeile hinter einer Wahl — Wert, Schwierigkeit und die *wirkliche*
+   Aussicht. Seit dem Wurf aus zwei Würfen ist der Zielwert nicht mehr die
+   Prozentzahl; `aussicht()` rechnet um. */
+function wahlKosten(o){
+  const teile = [];
+  if(o.kosten || o.hint) teile.push(esc(o.kosten||o.hint));
+  if(o.probe) teile.push(`${wertName(o.probe.wert)} ${wert(o.probe.wert)} gegen ${o.probe.schw} · ${aussicht(o.probe.wert,o.probe.schw)}%`);
+  if(o.kette) teile.push(o.kette.map(st=>`${wertName(st.wert)} ${wert(st.wert)} gegen ${st.schw} · ${aussicht(st.wert,st.schw)}%`).join(' · '));
+  return teile.join(' · ');
+}
+
+/* Eine Wahl als Zeile im Bogen. Gesperrte Wahlen bleiben `<button disabled>`
+   und werden **nicht** zu `<div>`: Ein deaktivierter Knopf ist ohnehin nicht
+   fokussierbar, und ein `<div>` fällt aus jedem Selektor heraus, der
+   `:not([disabled])` prüft — der Testbot klickt dann ins Leere. */
+function wahlZeile(nr, label, kosten, aufruf, opt){
+  const o = opt || {};
+  const attr = o.gesperrt ? ' disabled' : '';
+  /* **`ord` steht mit dabei, und das ist kein Rest.** Fünf Prüfstände suchen
+     ihre Knöpfe über `.ord`; sie alle umzuschreiben, nur weil sich die
+     Gestaltung ändert, hieße die Messgeräte an die Optik zu binden. Im CSS
+     gewinnt `.wahl`, weil es später steht — die Klasse ist also allein für
+     die Skripte da und kostet nichts. */
+  const kl = `wahl ord${o.risk?' risk':''}${o.klasse?' '+o.klasse:''}`;
+  return `<button class="${kl}" onclick="${aufruf}"${attr}><span class="nr">${nr}</span><span>
+      <span class="label">${label}</span><span class="cost">${kosten}</span></span></button>`;
+}
+
+/* Der Bogen selbst: Vordruckkopf, Fließtext, Wahlen, Fußzeile mit Siegel. */
+function bogen(n, inhalt, wahlkopf, wahlen, fuss){
+  /* **Der Kartenkopf bleibt, auch wenn der Vordruck darunter dasselbe Datum
+     noch einmal setzt.** Er trägt den *Ort*, den der Vordruck nicht kennt —
+     und fünf Prüfstände lesen die aktuelle Station aus `#app .ch span`. Ohne
+     ihn meldet `test/kapitel.js` Stationen als übersprungen, die es gerade
+     vor sich hat, und `test/spielstand.js` findet Savona nicht mehr. */
+  return `<div class="card bogen"><div class="ch"><span>${esc((n&&n.ort)||'')}</span><span>${esc((n&&n.datum)||'')}</span></div>
+    <div class="inner">
+    ${vordruck(n)}
+    ${inhalt}
+    ${wahlen ? `<div class="wahlkopf"><span>${wahlkopf[0]}</span><span>${wahlkopf[1]}</span></div>${wahlen}` : ''}
+    <div class="bogenfuss"><span>${fuss}</span>
+      <span class="siegel">${kaiserreich()?'N':'RF'}</span></div>
+  </div></div>`;
+}
+
 function zeigeSzene(n){
-  const gesperrtText = n.optionen.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
+  const alle = szeneOptionen(n);
+  const gesperrtText = alle.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
     .map(o=>`<p>${esc(o.ab.sonst)}</p>`).join('');
-  const opt = n.optionen.filter(o=>!szeneVerwehrt(o)).map((o)=>{
-    const i = n.optionen.indexOf(o);
-    const gesperrt = o.probe && wert(o.probe.wert)<5;
-    return `<button class="ord ${o.risk?'risk':''}" onclick="waehleOption(${i})" ${gesperrt?'disabled':''}>
-      ${esc(o.label)}<span class="cost">${esc(o.kosten||o.hint||'')}${o.probe?' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%':''}${
-        o.kette?' · '+o.kette.map(st=>wertName(st.wert)+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · '):''}</span></button>`;
-  }).join('');
+  const offen = alle.filter(o=>!szeneVerwehrt(o));
+  const opt = offen.map((o,k)=>
+    wahlZeile(roemisch(k+1), esc(o.label), wahlKosten(o), `waehleOption(${alle.indexOf(o)})`,
+      {risk:o.risk, gesperrt: o.probe && wert(o.probe.wert)<5})).join('');
+  /* ── Der Notausgang ──
+     **Eine Szene ohne einen einzigen drückbaren Knopf ist eine Sackgasse**, und
+     der Lauf ist verloren, obwohl der Mann lebt. Das kann passieren, ohne dass
+     es jemand beim Schreiben der Daten sieht: `wert()` zieht Wunden, Belastung
+     und kaputte Schuhe ab (Konstitution −18 unter Zustand 25), und wer unter 5
+     fällt, dessen Knopf wird gesperrt. Trägt jede Wahl der Szene eine Probe,
+     bleibt nichts übrig.
+
+     Gefunden beim Rangdurchlauf von Kapitel 5 (`test/kapitel.js`): ein
+     Fusilier mit durchgelaufenen Schuhen stand vor der Verfolgung und konnte
+     nichts mehr tun. **Die Regel bleibt, dass jede Szene eine Wahl ohne Probe
+     haben soll** — dies hier ist die Sicherung dagegen, dass sie einmal
+     vergessen wird, und sie ist absichtlich das Kärglichste, was das Spiel
+     anbieten kann. */
+  const notausgang = opt ? '' :
+    wahlZeile('I','Es aushalten','Du kannst nichts von dem, was hier zu tun wäre','szeneAushalten()',{});
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div>${wegband(n)}<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb"><div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div></div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    <div>${wegband(n)}
+      ${bogen(n,
+        `<div class="prose">${szeneText(n).map(t=>`<p>${t}</p>`).join('')}${gesperrtText}</div>`,
+        ['Was tust du?','Eine Wahl · sie wird nicht bewertet'],
+        opt+notausgang,
+        `Der Feldzug ist gesichert · Station ${roemisch(LAUF.node+1)} von ${KAPITEL.length}`)}
     </div>${seitenleiste()}</div>`;
   LAUF.szene = n.id;
 }
+/* Der Notausgang aus `zeigeSzene`: keine Probe, keine Wirkung außer der, die
+   ohnehin da ist. Er kostet einen Punkt Belastung, damit er kein Schlupfloch
+   ist — aber er tut auch nicht so, als sei Nichtstun eine Leistung. */
+function szeneAushalten(){
+  const n = KAPITEL[LAUF.node];
+  const erg = {text:'Es gibt an diesem Tag nichts, was du tun kannst. Du gehst mit, du stehst dabei, und am Abend ist es vorbei, ohne dass jemand deinen Namen genannt hätte.', belastung:2};
+  anwenden(erg);
+  S.log.push(n.id + ': ausgehalten');
+  stationErledigt();
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div><div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="ergebnis">${erg.text}</div>${wirkungen(erg)}</div></div>
+      <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
 function waehleOption(i){
-  const n = KAPITEL[LAUF.node], o = n.optionen[i];
+  const n = KAPITEL[LAUF.node], o = szeneOptionen(n)[i];
   let erg, klasse='', probeText='', kettenText='';
 
   /* ── Ketten in Szenen ──
@@ -1364,7 +1702,7 @@ function waehleOption(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
+        ` <span class="fein">${wertName(st.wert)} — ${probeWort(p)}${schaden?' · Leben −'+schaden:''}</span>`);
       if(S.leben <= 0){
         S.log.push(n.id+': '+o.label);
         toetlich(o.todesart || 'Gefallen');
@@ -1382,7 +1720,7 @@ function waehleOption(i){
     klasse = p.erfolg ? 'gut' : 'schlecht';
     // Nur das Ergebnis, nicht die Rechnung: Wert und Schwierigkeit stehen schon
     // vor der Wahl auf dem Knopf, und Zielwert und Wurf sagen hinterher nichts mehr.
-    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${p.erfolg?'gelungen':'misslungen'}</div>`;
+    probeText = `<div class="pruefung ${klasse}">${wertName(o.probe.wert)} — ${probeWort(p)}</div>`;
   } else { erg = o.erfolg; klasse='gut'; }
   anwenden(erg);
   verschleiss(0.35);
@@ -1400,7 +1738,7 @@ function waehleOption(i){
 function wirkungen(e){
   const t=[];
   const m = {ruf:'Ruf',gunst:'Gunst '+personKurz(e.gunstVon||'martel'),kameradschaft:'Kameradschaft',
-             belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben'};
+             belastung:'Belastung',atem:'Atem',geld:'Francs',leben:'Leben',einheit:'Zustand der Einheit'};
   for(const k in m) if(e[k]) t.push(`${m[k]} ${e[k]>0?'+':''}${e[k]}`);
   if(e.attr) for(const k in e.attr) t.push(`${wertName(k)} ${e.attr[k]>0?'+':''}${e.attr[k]}`);
   if(e.fert) for(const k in e.fert) if(e.fert[k]) t.push(`${wertName(k)} ${e.fert[k]>0?'+':''}${e.fert[k]}`);

@@ -61,16 +61,62 @@ const VP  = parseInt(process.env.VP || '0', 10);   // Vorrat des Veteranen, 0 = 
    reicht — sonst misst man, ob der Bot sparen kann, und nicht das Spiel. */
 const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
 
-/* Wofür ein Veteran seinen Vorrat ausgibt, in dieser Reihenfolge. Konstitution
-   zuerst, weil sie der Lebensvorrat *und* die Elitegrenze ist; dann Geschick
-   für den Voltigeur; dann die Muskete, weil kürzere Gefechte weniger Treffer
-   heißen. Was danach kommt, kauft nur ein reicher Lauf. */
-const VETERAN_ZIELE = [['konstitution',70],['geschick',70],['muskete',60],
-                       ['bildung',40],['kaltbluetigkeit',60],['autoritaet',50],['bajonett',40]];
-/* Bildung 40 steht bewusst vor Kaltblütigkeit: Sie ist die Schwelle zum
-   Caporal-fourrier (35) und damit der einzige Weg, den ein Veteran *kaufen*
-   kann — im Feld kostet sie Lagerabende und Geld. KONZEPT nennt sie „den
-   eigentlichen Flaschenhals dieses Spiels". */
+/* ── Die Einkaufsliste des Veteranen, eine einzige Reihenfolge ──
+
+   **Punkte und Stücke stehen in *einer* Liste, und das ist der Kern.** Die
+   erste Fassung trennte beides: erst alle Stücke, dann die Punkte. Gemessen
+   war das ein Bot-Artefakt und keine Balance — ein Veteran mit 160 VP gab
+   135 davon für Mantel, Schuhe und zwei Gewohnheiten aus und hatte für
+   Konstitution **fünfundzwanzig** übrig. Er lief also mit den Attributen
+   eines Erstläufers und guten Angewohnheiten los, und die Rangquote fiel von
+   30 auf 15 %. Kein Mensch kauft so.
+
+   Umgekehrt geht es auch nicht — wer zuerst alle Punkte verteilt, hat für
+   ein Stück mit festem Preis nie wieder genug übrig, weil Punkte beliebig
+   teilbar sind und Stücke nicht.
+
+   **Also abwechselnd, in der Reihenfolge, in der ein Mann es täte, der weiß,
+   woran er zuletzt gestorben ist:** zuerst der Lebensvorrat, dann der Mantel,
+   dann das, was ihn durch Ägypten bringt, und der Rest, wenn noch etwas da
+   ist. `['k', id]` ist ein Stück, `['w', name, bis]` ein Wert. */
+const VETERAN_PLAN = [
+  ['w','konstitution',70],      // der Lebensvorrat zuerst — er ist die Schwelle des Todes
+  ['k','mantel_gut'],           // Eylau und Russland, und er kostet nur 30
+  ['w','geschick',70],          // Voltigeur, und die zweite Elitegrenze
+  ['k','zaeh_wasser'],          // Ägypten tötet mehr Veteranen als jedes andere Kapitel
+  ['w','muskete',60],           // kürzere Gefechte heißen weniger Runden mit Treffern
+  ['k','schuhe_gut'], ['k','zaeh_fuesse'],
+  /* Bildung 40 steht bewusst hier: Sie ist die Schwelle zum Caporal-fourrier
+     (35) und der einzige Weg, den ein Veteran *kaufen* kann — im Feld kostet
+     sie Lagerabende und Geld. KONZEPT nennt sie „den eigentlichen Flaschenhals
+     dieses Spiels". */
+  ['w','bildung',40],
+  ['k','zaeh_nachzuegler'],     // Spanien und Russland
+  ['w','kaltbluetigkeit',60],
+  ['k','zaeh_schlaf'], ['k','zaeh_narben'],
+  /* Ab hier nur noch für die reichen Läufe. **Die Liste muss mit dem Inhalt
+     wachsen:** Mit elf Kapiteln bringt ein Spitzenlauf über 500 Punkte, und
+     ein Bot, der sie nicht ausgeben kann, misst einen ärmeren Veteranen als
+     den, den das Spiel tatsächlich hervorbringt. */
+  ['w','autoritaet',50], ['w','bajonett',40], ['w','drill',55],
+  ['w','taktik',50], ['w','verwaltung',50], ['w','menschenkenntnis',60],
+  /* ── Die zweite Runde: alles auf 70 ──
+     **Das ist das erklärte Ziel der neuen Ökonomie** — ein perfekter Lauf bis
+     Waterloo soll reichen, um jeden Wert auf 70 zu heben (4 950 VP für alle
+     fünfzehn). Die Liste geht deshalb ein zweites Mal durch, jetzt in die
+     Breite statt in die Spitze: Erst die Werte, an denen ein Mann stirbt, dann
+     die, an denen er scheitert.
+
+     **Die Reihenfolge ist die Antwort auf einen gemessenen Befund:** Ägypten
+     tötet Veteranen an ihren *Lücken* (Fouragieren, Feldchirurgie), nicht an
+     ihren Spitzen. Wer nur Muskete und Konstitution kauft, marschiert in
+     dieselbe Wand wie vorher. */
+  ['w','konstitution',85], ['w','fouragieren',70], ['w','feldchirurgie',70],
+  ['w','geschick',80],     ['w','muskete',80],     ['w','kaltbluetigkeit',75],
+  ['w','bildung',70],      ['w','drill',70],       ['w','autoritaet',70],
+  ['w','menschenkenntnis',70], ['w','taktik',70],  ['w','verwaltung',70],
+  ['w','bajonett',70],     ['w','reiten',70],      ['w','kartenkunde',70]
+];
 const ziel = path.resolve(__dirname, '../index.html');
 
 /* Kurzname je Rang — das Skript kennt `grundwerte.js` nicht, weil es im Browser
@@ -78,6 +124,21 @@ const ziel = path.resolve(__dirname, '../index.html');
    eine Brücke zwischen beiden Welten. */
 const RANG_KURZ = ['', 'Fus', 'Elite', 'Cap', 'Four', 'Serg', 'S-maj', 'S-Lt',
                    'Lt', 'Cpt', 'Chef', 'Col', 'GdB', 'GdD', 'Mar'];
+
+/* ── Welcher Rang die zweite Leitzahl trägt ──
+   **Eine Definition, kein fester Rang** (so steht es oben): gemeint ist der
+   höchste Rang, den der *gebaute Inhalt* tatsächlich hergibt. Er wandert mit:
+
+     zwei Kapitel   → 5, Sergent
+     vier Kapitel   → 6, Sergent-major
+     fünf Kapitel   → 9, Capitaine
+
+   Mit Kapitel 5 erreicht ein Drittel der reichen Veteranenläufe den Capitaine;
+   eine Leitzahl, die weiterhin den Sergent-major zählt, misst dann nur noch,
+   wie viele überhaupt bis zur Mitte kommen. **Wer ein Kapitel anbaut, prüft
+   diese Zahl mit** — und trägt die alte in CLAUDE.md nach, sonst ist der
+   Vergleich mit den früheren Messreihen verloren. */
+const LEITRANG = 9;
 const rangKurz = r => RANG_KURZ[r] || ('R' + r);
 
 /* ── Die Punkteverteilung ──
@@ -97,7 +158,12 @@ const rangKurz = r => RANG_KURZ[r] || ('R' + r);
    Für die Voltigeure (Geschick 55) reicht es nur noch mit der Herkunft — genau
    das ist der Sinn der Senkung. Kaltblütigkeit und Autorität bleiben auf dem
    Sockel und werden im Feld verdient oder mit Veteranenpunkten gekauft. */
-const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ganze Pool
+/* Seit der Sockel auf 15 steht und die Erschaffung in Fünfern schreitet:
+   45 + 15 = 60, der ganze Pool, exakt aufgehen. Vorher (Sockel 20, Zehner)
+   waren es 40 + 20. */
+/* Steht nur noch als Erinnerung da, wonach der Bot beim Würfeln aussucht —
+   verteilt wird nichts mehr, siehe den Kommentar bei `wuerfeln()` unten. */
+const VERTEILUNG = { konstitution: 60, geschick: 30 };
 
 (async () => {
   const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
@@ -108,15 +174,39 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
      ob die Leiter trägt — sie sagen nicht, **wo** sie trägt. Mit vierzehn
      Rängen und vier Kapiteln ist genau das die Frage: Sammelt sich alles bei
      Rang 6, oder sieht überhaupt jemand ein Patent? */
-  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0,
+  const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0, leit: 0,
                 punkte: [], raenge: {},
+                /* Läufe, die weder gestorben noch angekommen sind — Klickbudget
+                   erschöpft oder kein Knopf mehr da. Sie gehen in keine Quote
+                   ein und werden laut gemeldet: **Ein Prüfstand, der seine
+                   eigene Obergrenze verschweigt, misst sich selbst.** */
+                abbruch: 0,
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
                    **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
                    oft" ist das die erste Zahl, die man braucht — und sie ist
                    billig, weil das Chronikblatt Ort und Station ohnehin
                    mitschreibt. */
-                sterbeort: {}, sterbestation: [] };
+                sterbeort: {}, sterbestation: [], weite: [],
+                /* ── Die Sterblichkeit je Kapitel ──
+                   **`überlebt` läuft aus, und zwar rechnerisch.** Die Zahl ist
+                   ein Produkt: Sieben Kapitel zu je rund fünfzig Prozent
+                   ergeben einstellige Werte, bei elf wird sie für jeden
+                   Spielertyp null. Dann misst sie nur noch, dass es viele
+                   Kapitel gibt — dieselbe Alterung, die schon „höchster Rang"
+                   erwischt hat, als er den Sergent-major zählte.
+
+                   Was nicht mit dem Ausbaustand schrumpft, ist die Quote je
+                   Kapitel: **von denen, die Kapitel N erreichen, wie viele
+                   überstehen es.** Sie ist über den ganzen Ausbau vergleichbar
+                   und sagt sofort, welches Kapitel die Wand ist. */
+                erreicht: {} };
+  /* Reihenfolge der Kapitel, für die Quote je Kapitel. Muss zur Zuordnung
+     unten passen (dort wird aus der Jahreszahl der Kapitelname gewonnen). */
+  const KAPITEL_FOLGE = ['Italien','Ägypten','Garnison','Austerlitz','Jena','Eylau','Spanien','Russland'];
+  /* Die Gesamtzahl der Stationen kommt aus dem Spiel, nicht aus dem Skript —
+     sie stand hier als „von 64" fest und war mit dem fünften Kapitel falsch. */
+  let STATIONSZAHL = 0;
   for (let r = 0; r < N; r++) {
     await p.goto('file://' + ziel);
     /* Der Vorrat wird bei **jedem** Lauf neu gesetzt, auch auf 0. Sonst ließe
@@ -126,25 +216,44 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     // Die Patente sind erst ab einem einmal getragenen Rang im Laden sichtbar.
     if (PATENT) await p.evaluate(() => { META.bestRang = 8; });
     await p.click('text=Neuen Mann aufstellen');
-    /* Die Abbruchbedingung prüft, ob sich etwas bewegt hat — `stelle()` weigert
-       sich stumm, wenn der Pool leer ist, und eine Prüfung auf den Zielwert
-       allein hinge dann für immer. */
-    await p.evaluate(v => {
-      for (const k in v){
-        while (ERSCH.attr[k] < v[k]){
-          const vorher = ERSCH.attr[k];
-          stelle(k, 10);
-          if (ERSCH.attr[k] === vorher) break;
-        }
+    /* ── Der Bot würfelt jetzt, weil der Spieler auch würfelt ──
+       **Bis zum 30.07.2026 verteilte er von Hand** (`stelle()`), und das war
+       richtig, solange es eine Handverteilung gab: Auswürfeln maß vor allem
+       den Zufallsgenerator. Seit die Erschaffung nur noch würfelt, gibt es
+       `stelle()` nicht mehr — und ein Bot, der einen Mann baut, den kein
+       Spieler bauen kann, misst nicht das Spiel.
+
+       **Der Preis ist bekannt und eingepreist:** Die Streuung kommt zurück,
+       weil der Lebensvorrat an der ausgewürfelten Konstitution hängt. Deshalb
+       würfelt der Bot mehrfach und nimmt den besten Wurf — genau das tut ein
+       Spieler auch, der auf „Einen anderen Mann" drücken darf, bis ihm der
+       Mann passt. Gemessen wird damit der kundige Spieler, nicht der
+       gleichgültige. */
+    await p.evaluate(() => {
+      let bester = null, bestwert = -1;
+      for (let i = 0; i < 12; i++){
+        wuerfeln();
+        /* Konstitution ist der Lebensvorrat und damit die Todesschwelle;
+           Geschick öffnet die Voltigeure. Dieselbe Rangfolge wie früher die
+           feste Verteilung, nur als Auswahlkriterium statt als Vorgabe. */
+        const w = ERSCH.attr.konstitution * 2 + ERSCH.attr.geschick;
+        if (w > bestwert){ bestwert = w; bester = Object.assign({}, ERSCH.attr); }
       }
-    }, VERTEILUNG);
+      ERSCH.attr = bester;
+      aktualisiereErschaffung();
+    });
     await p.click('#h_' + ['bauer', 'schmied', 'wilderer', 'strasse', 'fuhrmann', 'schreiber'][r % 6]);
     await p.click('text=Weiter zu den Veteranenpunkten');
     // Das Patent zuerst — es ist die teuerste Einzelentscheidung des Ladens.
     if (PATENT) await p.evaluate(id => waehle(id), PATENT);
-    // Der Veteran gibt seinen Vorrat nach fester Rangfolge aus; bei VP=0 nichts.
-    if (VP > 0) await p.evaluate(ziele => {
-      for (const [k, bis] of ziele){
+    /* Der Veteran arbeitet **eine** Liste ab, abwechselnd Werte und Stücke.
+       Beides greift auf denselben Vorrat zu; was nicht mehr hineinpasst, fällt
+       von allein weg, weil `waehle()` und `stellePunkt()` beide prüfen. Bei
+       VP=0 wird nichts gekauft — dann *ist* der Bot der Erstlauf-Spieler. */
+    if (VP > 0) await p.evaluate(plan => {
+      for (const eintrag of plan){
+        if (eintrag[0] === 'k'){ waehle(eintrag[1]); continue; }
+        const k = eintrag[1], bis = eintrag[2];
         for(;;){
           if (istWert(k) + (PUNKTE[k]||0) + PUNKT_SCHRITT > bis) break;
           const vorher = PUNKTE[k]||0;
@@ -152,11 +261,32 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if ((PUNKTE[k]||0) === vorher) break;      // der Vorrat reicht nicht mehr
         }
       }
-    }, VETERAN_ZIELE);
+    }, VETERAN_PLAN);
     await p.click('#startbtn');
+    if (!STATIONSZAHL) STATIONSZAHL = await p.evaluate(() => KAPITEL.length);
+    /* Wie lang die Chronik VOR diesem Lauf war — daran erkennt man unten, ob
+       der Eintrag am Ende von diesem Lauf stammt oder vom vorigen. */
+    const chronikVorher = await p.evaluate(() => META.chronik.length);
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
-    while (s++ < 600) {
+    /* ── Das Klickbudget ist ein Prüfstand-Wert und darf nie die Messung sein ──
+       **Es stand auf 600, und am 30.07.2026 wurde es zur bindenden Schranke.**
+       Der Auftrag-Fix hob die Rangdecke von 9 auf 11 — und ab Rang 10 hängt der
+       Schaden am Zustand der vier Kompanien statt an den eigenen Werten. Ein
+       Maximalveteran, der als Capitaine ein Gefecht in drei Runden entschied,
+       braucht als Colonel zehn. Die Klicks je Gefecht vervielfachen sich also
+       genau dann, wenn die Leiter endlich trägt.
+
+       Gemessen an derselben Fassung, 40 Läufe: mit 600 endeten **39 von 40**
+       Läufen ohne Todesblatt und ohne Wertung — der Median stand bei Station 32
+       und der Punktebereich bei „952–952“, also einem einzigen gewerteten Lauf.
+       **Eine Spanne von null ist dasselbe Signal wie eine Quote von exakt 100 %:
+       kein Befund, sondern ein kaputter Prüfstand.**
+
+       2500 ist bewusst weit über dem, was ein voller Lauf braucht (rund 700).
+       Ein Budget, das gerade so reicht, misst beim nächsten Kapitel wieder sich
+       selbst. */
+    while (s++ < 2500) {
       const t = await p.$eval('#app', e => e.innerText);
       // Leoben ist der Übergang: wer ihn sieht, hat Italien lebend hinter sich.
       // Achtung: Kartenköpfe werden per CSS in Großbuchstaben gesetzt, und
@@ -168,7 +298,6 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
       const zug = await p.evaluate((MUT) => {
         const btn = [...document.querySelectorAll('.ord:not([disabled])')];
         const f = re => btn.find(e => re.test(e.textContent));
-        const txt = document.body.innerText;
         const anteil = S.leben / lebenMax();
         let z = null;
 
@@ -262,7 +391,23 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if (!z) z = f(/^Laden/);
         }
 
-        else if (txt.includes('VERBLEIBENDE ABENDE')) {
+        /* ── Lager und Winterquartier werden am Zustand erkannt, nicht am Text ──
+           **Hier stand `txt.includes('VERBLEIBENDE ABENDE')`, und der
+           Stationsbogen hat diese Zeichenkette zu „Verbleibend 3 von 3"
+           gemacht.** Der Bot hat das Lager danach nicht mehr gefunden: kein
+           Ruhen, keine Fürsprache, keine Instandhaltung — er fiel auf den
+           allgemeinen Klick durch. Gemessen wurde daraufhin **Caporal 0 % von
+           80** und Weite 28 statt 58, und beides war die Blindheit des Bots
+           und nicht das Spiel.
+
+           `LAUF.lager.id` und `LAUF.winter.ort` sind Zustände. Sie ändern sich
+           nicht, wenn jemand einen Zähler umformuliert, und beim
+           Winterquartier trägt die Frage ohnehin nicht: Sie ist über `frage:`
+           je Kapitel überschreibbar („Zehn Wochen. Beide Seiten benutzen
+           sie."). **Ein Fließtext ist kein Zustand** — dritter Fund derselben
+           Art, und der teuerste, weil er eine Messung still verfälscht statt
+           laut zu scheitern. */
+        else if (LAUF && LAUF.lager && LAUF.lager.id && LAUF.lager.abende > 0) {
           /* Lager. Erst heil werden, dann einen Fürsprecher besorgen, dann die
              Ausrüstung, dann üben. Ohne die Gunst-Regel bemühte sich der Bot nie
              um Fürsprache und würde nie befördert — gemessen würde dann nicht
@@ -296,7 +441,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if (!z) z = f(/Exerzieren/) || f(/Ausrüstung durchsehen/) || f(/Schlafen und liegen/);
         }
 
-        else if (txt.includes('VERBLEIBENDE WOCHEN')) {
+        else if (LAUF && LAUF.winter && LAUF.winter.ort && LAUF.winter.wochen > 0) {
           /* Winterquartier **und** Garnisonssaison — dieselbe Maschine, zwei
              sehr verschiedene Fragen. Im Winterquartier zwischen zwei Feldzügen
              geht es ums Heilwerden; in der Garnison ist der Feind die Zeit, und
@@ -320,6 +465,37 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
           if (!z && S.ausr.schuhe.zustand < 70) z = f(/Ausrüstung instand/);
           if (!z && S.geld < 20) z = f(/Nebenher arbeiten/);
           if (!z) z = f(/Drillen/) || f(/Fechtboden/) || f(/Schlafen, essen/);
+        }
+
+        /* ── Die Tempowahl (ab Kapitel 5) ──
+           **Schonend nimmt der Bot nie.** Ruf −2 ist die Währung, in der die
+           ganze Leiter rechnet; ein Bot, der sie verschenkt, misst nicht das
+           Spiel, sondern seine eigene Vorsicht. Die Frage ist also nur, ob
+           forciert oder nach Vorschrift — und die entscheidet der Zustand:
+           Atem −25 und doppelter Verschleiß sind bezahlbar, solange Blut und
+           Luft da sind, und ruinös, wenn nicht.
+
+           Der mutige Bot forciert fast immer. Der Abstand zwischen beiden
+           Gemütern *ist* die Balance dieser Wahl. */
+        else if (f(/Forcieren/)) {
+          /* `^Forcieren` traf nie: `textContent` eines Knopfes beginnt mit dem
+             Zeilenumbruch aus dem Markup. Der Bot fiel deshalb in den
+             Szenen-Zweig und drückte immer den ersten Knopf — also „schonend",
+             die eine Wahl, die ein kundiger Spieler nie trifft. Zwei Messreihen
+             lang war das die Blindheit des Bots und nicht das Spiel. */
+          const fz = f(/Forcieren/);
+          const lohnt = fz.hasAttribute('data-gewinn');    // steht als Satz auf dem Knopf
+          /* **Der Vorsichtige forciert nur, wenn es billig ist.** Die erste
+             Fassung ließ ihn bei halbem Blut losmarschieren — gemessen
+             überlebte der Veteran mit 160 VP damit seltener (13 %) als der
+             Erstläufer ohne Vorrat (23 %), weil nur der Veteran überhaupt die
+             Kraft hat, in die Falle zu laufen. **Eine Progression, die sich
+             umdreht, misst nicht das Spiel, sondern die Leichtfertigkeit des
+             Bots.** Ein kundiger Spieler forciert frisch und gut beschuht,
+             nicht angeschlagen und nicht vor einem Höhepunkt. */
+          const frisch = anteil > 0.8 && S.atem > 70 && S.ausr.schuhe.zustand >= 40;
+          const tragfaehig = MUT ? anteil > 0.35 : (lohnt && frisch);
+          z = tragfaehig ? fz : f(/Nach Vorschrift/);
         }
 
         else if (f(/Zu den Voltigeuren/) || f(/Zu den Grenadieren/)) {
@@ -357,40 +533,97 @@ const VERTEILUNG = { konstitution: 60, geschick: 40 };   // 40 + 20 = 60, der ga
     if (hoechster >= 4) res.fourrier++;
     if (hoechster >= 5) res.sergent++;
     if (hoechster >= 6) res.major++;
+    if (hoechster >= LEITRANG) res.leit++;
     res.raenge[hoechster] = (res.raenge[hoechster] || 0) + 1;
     const t = await p.$eval('#app', e => e.innerText);
     const m = t.match(/Summe\s+(\d+)/); if (m) res.punkte.push(+m[1]);
-    const d = await p.evaluate(() => {
+    /* ── Die Chronik überlebt den Lauf, der Lauf überlebt die Chronik nicht ──
+       **Der Prüfstand benutzt EINE Seite für alle Läufe** (`newPage()` einmal,
+       `goto()` je Lauf), also bleibt `localStorage` stehen und die Chronik
+       wächst über die Läufe hinweg. Ein Lauf, der weder stirbt noch endet —
+       weil er am Klickbudget hängenbleibt oder keinen Knopf mehr findet —
+       schreibt **keinen** Eintrag. `META.chronik[length-1]` lieferte dann den
+       Eintrag des *vorigen* Laufs.
+
+       **Und das erfand gute Nachrichten.** Stand dort zufällig ein Überlebender
+       (`gefallen:false`), zählte der Zweig unten den abgebrochenen Lauf als
+       „alle 163 Stationen erreicht, jedes Kapitel überstanden". Gemessen kam so
+       eine Weite von 163 bei einer einzigen tatsächlich beendeten Wertung
+       heraus — und eine Zeile „gestorben 1" direkt neben „Gestorben in:
+       Eylau 13", weil die eine Zahl vom Bildschirm kam und die andere aus der
+       fremden Chronik.
+
+       Gezählt wird jetzt nur ein Eintrag, den **dieser** Lauf geschrieben hat;
+       alles andere ist `abbruch` und geht in keine Quote ein. **Ein Lauf, der
+       nicht zu Ende gespielt wurde, ist kein Messwert — weder ein guter noch
+       ein schlechter.** */
+    const d = await p.evaluate(vorher => {
+      if (META.chronik.length <= vorher) return null;   // dieser Lauf hat nichts geschrieben
       const c = META.chronik[META.chronik.length-1] || {};
       return {gefallen: !!c.gefallen, ort: c.ort||'', stationen: c.stationen|0};
-    });
+    }, chronikVorher);
+    if (!d) { res.abbruch++; continue; }
     if (d.gefallen) {
       /* Das Kapitel steht nicht im Blatt, wohl aber das Datum der letzten
          Station — und die Jahreszahl ist eindeutig. */
       const j = (d.ort.match(/1[78]\d\d/) || ['?'])[0];
       const kap = j <= '1797' ? 'Italien' : j <= '1799' ? 'Ägypten'
-                : j <= '1804' ? 'Garnison' : 'Austerlitz';
+                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : j <= '1811' ? 'Spanien' : 'Russland';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
       res.sterbestation.push(d.stationen);
+      res.weite.push(d.stationen);
+      /* Erreicht hat er jedes Kapitel bis einschließlich dem, in dem er
+         gestorben ist. */
+      const bis = KAPITEL_FOLGE.indexOf(kap);
+      KAPITEL_FOLGE.slice(0, bis+1).forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
+    } else {
+      res.weite.push(STATIONSZAHL);
+      KAPITEL_FOLGE.forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     }
   }
   const pu = res.punkte.sort((a, b) => a - b);
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
   console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`
     + (PATENT ? ` · mit Patent (${PATENT === 'patent_lt' ? 'Lieutenant' : 'Sous-Lieutenant'})` : ''));
-  /* Die beiden Leitzahlen zuerst und für sich — sie tragen die Sollwerte.
-     Wer eine Änderung beurteilt, liest diese Zeile und sonst nichts. */
-  console.log(`\n  ÜBERLEBT ${q(res.ende)}   ·   HÖCHSTER RANG ${q(res.major)}\n`);
+  /* ── Die Leitzahlen ──
+     **`überlebt` ist mit acht Kapiteln ausgelaufen, und zwar rechnerisch.**
+     Sie ist das Produkt aller Kapitelquoten; schon bei acht Kapiteln stand sie
+     für jeden der drei gemessenen Männer auf **0 %** und trennte nichts mehr.
+     Mit elf ist sie es erst recht.
+     Genau das war vorhergesagt („eine Leitzahl, die ein Produkt ist, läuft
+     mit jedem Kapitel aus"), und sie bleibt nur noch zur Einordnung stehen.
+
+     An ihre Stelle tritt **die Weite**: wie weit der mittlere Lauf kommt.
+     Sie schrumpft nicht mit dem Ausbaustand, weil sie ein Median ist und kein
+     Produkt — **aber sie ist eine absolute Stationszahl und wandert deshalb
+     mit dem Nenner.** Wer sie vergleicht, vergleicht sie nur gegen eine
+     Messung mit derselben Stationszahl; deshalb steht sie hier immer mit
+     „von ${STATIONSZAHL}" daneben. */
+  const we = res.weite.slice().sort((a, b) => a - b);
+  const weite = we.length ? we[Math.floor(we.length / 2)] : 0;
+  console.log(`\n  WEITE ${weite} von ${STATIONSZAHL} (${Math.round(weite/STATIONSZAHL*100)} %)`
+    + `   ·   HÖCHSTER RANG (${rangKurz(LEITRANG)}) ${q(res.leit)}\n`);
+  /* **Laut, nicht am Rand.** Ein abgebrochener Lauf ist kein Messwert, und ein
+     Prüfstand, der seine eigene Obergrenze verschweigt, misst irgendwann sich
+     selbst statt des Spiels. Genau das ist am 30.07.2026 passiert. */
+  if (res.abbruch) console.log(`  ⚠ ABGEBROCHEN: ${q(res.abbruch)} — weder gestorben noch angekommen.`
+    + `\n    Klickbudget erschöpft oder kein Knopf mehr. Diese Läufe gehen in KEINE Quote unten ein.\n`);
+  console.log(`Ganz durch: ${q(res.ende)} (Produktzahl, mit elf Kapiteln stumpf)`);
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
   console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
   const verteilung = Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
     .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`).join(' · ');
   console.log(`Rangverteilung (höchster je Lauf): ${verteilung}`);
+  /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
+  const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])
+    .map(k => { const e = res.erreicht[k], t = res.sterbeort[k]||0;
+                return `${k} ${Math.round((1-t/e)*100)} %${e<15?' (nur '+e+')':''}`; });
+  if (jeKapitel.length) console.log(`Überstanden je Kapitel (von denen, die es erreichen): ${jeKapitel.join(' · ')}`);
   if (res.sterbestation.length) {
     const mittel = Math.round(res.sterbestation.reduce((a, x) => a + x, 0) / res.sterbestation.length * 10) / 10;
     console.log(`Gestorben in: ${Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`).join(' · ')}`
-      + ` · im Schnitt bei Station ${mittel} von 64`);
+      + ` · im Schnitt bei Station ${mittel} von ${STATIONSZAHL}`);
   }
   await b.close();
 })();

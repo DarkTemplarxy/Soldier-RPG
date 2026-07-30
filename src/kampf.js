@@ -277,7 +277,16 @@ function starteKampf(n){
                  die Ruf-Ereignisse (Text), `zaehlung` sind die Zahlen dahinter. */
               zaehlung:{schaden:0, serie:0, bestSerie:0, ereignisse:0, vorn:false, gedeckt:0, offen:0},
               ereignis:null, ereignisZahl:0, gesehen:[], gefahrPlus:0, duckFolge:0,
-              sektion:100, sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
+              /* **`rekruten` — die eigene Regel von 1813.** Deine Leute treten
+                 nicht mit voller Zahl an, sondern mit dem, was von einem
+                 Verband übrig ist, den es vor sechs Wochen noch nicht gab.
+                 Das trifft alles, was am Bestand hängt: den Schaden der
+                 Feuerbefehle (`anteil`), die Schwelle, ab der die Linie
+                 bricht, und das Bild. **Es hebt keine einzige Gefahr-Zahl** —
+                 die Härte kommt aus dem eigenen Zustand, nicht aus einem
+                 besseren Feind. Abarbeitbar: Drill im Lager zahlt hier
+                 doppelt, und `S.sektionGuete` hebt den Startwert wieder. */
+              sektion:rekrutenStart(), sektionStart:100, sektionGelobt:false, offizierGesehen:false, blitz:false,
               rollend:0,
               /* Der Offizier: gelöster Zug, Geländevorteil, gezogener Degen —
                  und `nahkampf`, die Runden, in denen das alles nichts gilt. */
@@ -308,13 +317,41 @@ function starteKampf(n){
    Buchstaben. Genau darin liegt der Unterschied zu allen Rängen davor: Bis
    Rang 9 hast du entschieden, was **du** tust. Ab hier entscheidest du, wer
    stirbt. */
+/* ══════════════════ DIE REKRUTEN (1813) ══════════════════
+
+   **Deine Armee ist achtzehn Jahre alt.** Die alte liegt in Russland; was
+   1813 antritt, sind Konskribierte des Jahrgangs 1814, vorzeitig eingezogen,
+   und viele halten die Muskete zum ersten Mal, als man sie ihnen aushändigt.
+
+   `rekruten:n` an der **Kampagne** senkt den Startbestand deiner Einheit um n
+   Prozent. Mehr nicht — und das ist der Punkt: **Es wird keine Gefahr-Zahl
+   angefasst.** Der Feind schießt 1813 nicht besser als 1812; deine Leute
+   halten schlechter. Das trifft genau die Größen, die ohnehin am Bestand
+   hängen — den Schaden jedes Feuerbefehls, die Schwelle, ab der die Linie
+   bricht (`nahkampfPruefen()` bei unter 40), und das Bild.
+
+   **Und es ist abarbeitbar, sonst wäre es eine Mautstelle:** `S.sektionGuete`
+   aus den Lagerabenden hebt den Startwert wieder an, und der Drill zahlt in
+   diesem Kapitel doppelt. Damit wird der Exerzierplatz zum eigentlichen
+   Spiel — dasselbe Exerzieren wie in Savona 1796, nur stehst du jetzt auf
+   der anderen Seite. */
+function rekrutenStart(){
+  const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
+  const roh = (k && k.rekruten) | 0;
+  if(!roh) return 100;
+  return Math.max(40, 100 - roh + Math.min(roh, (S.sektionGuete||0)));
+}
+
 function kompanienStart(){
   /* Die Güte kommt aus dem Lager (`S.sektionGuete`), wie schon bei Sektion und
-     Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl. */
+     Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl.
+     Die Rekruten schlagen auf die Haltung, nicht auf den Bestand: Ein
+     Bataillon aus Achtzehnjährigen ist vollzählig und hält trotzdem nicht. */
   const g = Math.min(20, (S.sektionGuete||0)/2);
+  const roh = rekrutenStart();
   return ['1.','2.','3.','4.'].map((nm,i)=>({
     name: nm+' Kompanie', kurz: nm[0],
-    bestand: 100, haltung: 70 + Math.round(g) - i*3, vorn: false
+    bestand: 100, haltung: Math.max(25, 70 + Math.round(g) - i*3 - (100-roh)), vorn: false
   }));
 }
 
@@ -382,7 +419,21 @@ function auftragFuer(n){
    (siehe `nutzen()`). Wer im Lager nie auf dem Fechtboden war, merkt genau
    hier, was zehn Jahre Schreibtisch mit einem Mann machen. */
 function nahkampfPruefen(n){
-  if(S.rang < 7 || K.nahkampf > 0) return '';
+  /* ── Nur die Ränge 7 bis 9 ──
+     **Gefunden vom Kapitelprüfstand bei Eylau:** Die Bedingung lautete
+     `rang < 7` und ließ die Linie damit bis zum Marschall brechen — ein
+     Général de brigade zog auf der Operationskarte den Säbel, weil ein
+     Karree, das er nie gesehen hat, an einer Seite nachgab.
+     `K.sektion` ist ab Rang 10 leer, also griff nur der `bestand`-Auslöser
+     nicht; die drei anderen schon.
+
+     Das widerspricht dem Entwurf der Stabsränge an der empfindlichsten
+     Stelle: Ab Rang 10 ist der Gefahrzuschlag **null** („du stehst nicht mehr
+     im Feuer", RANGLEITER §8), und an seiner Stelle steht das Stabsereignis
+     mit 8 % — ein Streuschuss, ein stürzendes Pferd, und **man kann sich
+     nicht hinwerfen.** Das ist die Ersatzgefahr des Stabes, und daneben
+     gehört keine zweite. */
+  if(S.rang < 7 || S.rang >= 10 || K.nahkampf > 0) return '';
   const kap = (typeof kapitelVon==='function') ? kapitelVon(n) : 'x';
   if((S.nahkampfKapitel||[]).includes(kap)) return '';
   let grund = '';
@@ -1022,7 +1073,75 @@ function sichtfeld(){
    `wenn(n)` entscheidet, ob ein Ereignis zur Lage passt — die Verfolgung gibt
    es nur, wenn der Feind schon wankt, den Sturm nur, wenn er noch steht. */
 
+/* ══════════════════ WIE DER FEIND DASTEHT ══════════════════
+
+   Drei Fassungen derselben Zeile, und der Unterschied zwischen ihnen ist das
+   ganze Spiel:
+
+     bis Rang 11   eine Zahl. Was du siehst, ist wahr.
+     `sturm:true`  eine Schätzung. Du siehst, aber du siehst nicht genug.
+     ab Rang 12    eine Meldung. Du siehst gar nichts, du bekommst gesagt.
+
+   **Der Sturm von Eylau ist der Vorgeschmack auf den vierten Bruch**, zehn
+   Ränge bevor er zum System wird — und er kommt von außen statt von oben.
+   Ein Fusilier in einem Schneetreiben, in dem beide Armeen einander verlieren,
+   hat dasselbe Problem wie ein General mit einer Meldung von vor vierzig
+   Minuten: **Er muss entscheiden, ohne zu wissen.** Dass es sich zwölf Jahre
+   später wiederholt, mit demselben Wortlaut in der Zeile, ist die Absicht.
+
+   Der Balken fällt bei Sturm mit weg. Ein Balken *ist* eine Zahl. */
+function schaetzung(ist, max){
+  const a = Math.max(0, ist) / Math.max(1, max);
+  return a > 0.85 ? 'STEHT, WIE ER STAND'
+       : a > 0.65 ? 'NICHT ERSCHÜTTERT, SOWEIT MAN SIEHT'
+       : a > 0.45 ? 'VIELLEICHT DIE HÄLFTE'
+       : a > 0.25 ? 'ER GIBT NACH, GLAUBT MAN'
+       : a > 0.08 ? 'KAUM NOCH ETWAS'
+                  : 'NICHTS MEHR, SOWEIT MAN SIEHT';
+}
+function feindAnzeige(n){
+  if(S.rang >= 12) return '· DER FEIND: SIEHE MELDUNG';
+  if(n && n.sturm) return '· DER FEIND: ' + schaetzung(K.feindMoral, n.feindMoral);
+  return '· WIDERSTAND DES FEINDES ' + Math.max(0, Math.round(K.feindMoral));
+}
+
 const GEFECHTS_EREIGNISSE = [
+
+  /* ── Sondermission Jena: die Geschütze im Nebel ──
+     Die eigene Regel von Kapitel 5 lautet, dass dieser Krieg mit den Beinen
+     gewonnen wird. Also ist auch die Sondermission des Höhepunktgefechts
+     **keine Waffentat**: Man zieht Geschütze an Seilen durch einen Hohlweg, in
+     dem zwei Männer nebeneinander nicht vorbeikommen, im Dunkeln, bergauf.
+
+     Zwei Stufen statt drei — Konstitution und Drill —, und beide sind
+     Arbeitsproben. Es ist die einzige Kette im Spiel, in der niemand auf
+     einen schießt und in der man trotzdem sterben kann: Ein Achtpfünder, der
+     an einer engen Stelle zurückrutscht, fragt nicht, wer dahintersteht. */
+  {id:'geschuetze', nur:'jena', frage:'Die Geschütze stehen im Hohlweg',
+   wenn:(n)=> K.runde <= 4 && K.feindMoral > n.feindMoral*0.5,
+   text:['Der Nebel steht so dicht, dass die Bataillone einander an den Trommeln finden müssten, und die Trommeln sind verboten. Aus dem Hohlweg hinter euch kommt kein Ton, der dorthin gehört — kein Rollen, kein Kommando, nichts.',
+         'Ein Artillerieoffizier kommt zu Fuß nach vorn und sucht Leute. Sechs Geschütze stecken auf halber Höhe fest, die Bespannung kommt nicht durch, und ohne sie steht die Division in einer Ebene, deren Breite niemand kennt.'],
+   optionen:[
+     {label:'Mit an die Seile', hint:'Zwei Stufen · im Dunkeln, bergauf, an nassem Hanf', risk:true,
+      kette:[
+        {name:'Der Hohlweg', wert:'konstitution', schw:40, schaden:14,
+         gut:'Zwanzig Mann an einem Seil, einer zählt, und bei jedem dritten Zug rollt der Achtpfünder eine Handbreit weiter. Der Karren schleift links und rechts an der Wand, und was an Farbe daran war, ist nach hundert Metern nicht mehr daran.',
+         schlecht:'An der engsten Stelle rutscht es zurück, und der Mann hinter dir bekommt die Deichsel gegen die Brust. Man zieht weiter, weil hinter euch fünf weitere stehen und der Weg nur in eine Richtung geht.'},
+        {name:'Die Kuppe', wert:'drill', schw:45, schaden:15,
+         gut:'Oben wird abgeprotzt, ausgerichtet und geladen, in einer Ordnung, die im Dunkeln nur geht, wenn die Handgriffe von allein gehen. Als es hell wird, stehen sechs Geschütze da, wo drüben niemand mit welchen rechnet.',
+         schlecht:'Oben wird es hell, bevor die Geschütze stehen, und in den ersten zwanzig Minuten steht ihr im Freien und richtet aus, während drüben jemand die Entfernung schätzt und dann nicht mehr schätzt.'}],
+      tod:'Im Hohlweg unterhalb des Landgrafenbergs, unter einem Achtpfünder, der in der Dunkelheit zurückgerutscht ist. Der Bericht wird das Geschütz erwähnen.',
+      todesart:'Erdrückt im Hohlweg von Jena',
+      erfolg:{text:'Um zehn reißt der Nebel auf, und die sechs Geschütze stehen richtig. Was sie zwei Stunden lang in eine Linie hineinschießen, die in vollkommener Ordnung stehen bleibt und wartet, wird später in keinem Bericht als Handwerk beschrieben, sondern als Sieg. Der Artillerieoffizier lässt sich die Namen der Mannschaft geben.',
+              moral:-26, ruf:7, nennung:true, atem:-20, belastung:8,
+              tat:'Die Geschütze auf den Landgrafenberg gebracht'},
+      misserfolg:{text:'Die Geschütze stehen, und sie stehen zu spät. Zwei Stunden lang war die Ebene offen, und was in diesen zwei Stunden vor dem Dorf gelegen hat, hat dort ohne Artillerie gelegen. Hinaufgebracht habt ihr sie trotzdem.',
+              moral:-10, ruf:3, atem:-20, belastung:12,
+              tat:'An den Seilen im Hohlweg gezogen'}},
+     {label:'In der Linie bleiben', hint:'Dafür ist die Artillerie da, und du bist es nicht',
+      erfolg:{text:'Du bleibst, wo du stehst, und schießt in eine Richtung, in der etwas sein könnte. Zwei Stunden später kommen die Geschütze doch noch die Höhe herauf, gezogen von anderen. Es ändert für dich nichts, außer dass deine Schultern es nicht waren.',
+              moral:-6}}
+   ]},
 
   /* ── Sondermission Austerlitz: der Pratzeberg ──
      Der Moment, für den die Schlacht berühmt ist, aus der Höhe eines Mannes im
@@ -1343,19 +1462,21 @@ function zeigeEreignis(e){
     const proben = o.kette
       ? ' · ' + o.kette.map(st=>wertName(st.wert)+' '+wert(st.wert)+' gegen '+st.schw+' · '+aussicht(st.wert,st.schw)+'%').join(' · ')
       : (o.probe ? ' · '+wertName(o.probe.wert)+' '+wert(o.probe.wert)+' gegen '+o.probe.schw+' · '+aussicht(o.probe.wert,o.probe.schw)+'%' : '');
-    return `<button class="ord ${o.risk?'risk':''}" onclick="ereignisWaehlen(${i})">
-    ${esc(o.label)}<span class="cost">${esc(o.hint||'')}${proben}</span></button>`;
+    return wahlZeile(roemisch(i+1), esc(o.label),
+      esc(o.hint||'')+proben, `ereignisWaehlen(${i})`, {risk:o.risk});
   }).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div><div class="card"><div class="ch"><span>${esc(e.frage)}</span><span>${esc(n.datum)}</span></div>
-      <div class="cb">${sichtfeld()}
-        <div class="prose" style="margin-top:15px">${e.text.map(t=>`<p>${t}</p>`).join('')}</div>
-        <div class="probe" style="margin-top:12px">${zeitWort()} ${K.runde} VON ${n.runden}
-          · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
-          · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}</div>
-        ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
-      </div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+    <div>${bogen({ort:e.frage, datum:n.datum},
+      `<div class="stichrahmen">${sichtfeld()}</div>
+       <div class="stichzeile"><span>${esc(e.frage)}</span><span>${esc((n.lage&&n.lage.gelaende)||'')}</span></div>
+       <div class="prose">${e.text.map(t=>`<p>${t}</p>`).join('')}</div>
+       <div class="probe" style="margin-top:12px">${zeitWort()} ${K.runde} VON ${n.runden}
+         · WIDERSTAND DES FEINDES ${Math.max(0,Math.round(K.feindMoral))}
+         · EURE LINIE ${Math.max(0,Math.round(K.eigen==null?100:K.eigen))}</div>
+       ${balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}`,
+      ['Was tust du?','Eine Frage · sie kommt einmal'],
+      opt,
+      'Im Gefecht wird nicht gesichert')}
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
@@ -1407,8 +1528,8 @@ function ereignisWaehlen(i){
       else { schaden = st.schaden + Math.floor(Math.random()*5); S.leben = Math.max(0, S.leben - schaden); }
       atemKlemmen();
       zeilen.push((p.erfolg?st.gut:st.schlecht) +
-        ` <span class="fein">${wertName(st.wert)} — ${p.erfolg?'gelungen':'misslungen'}${schaden?' · Leben −'+schaden:''}</span>`);
-      K.protokoll.push(st.name + (p.erfolg?' — gelungen':' — misslungen'));
+        ` <span class="fein">${wertName(st.wert)} — ${probeWort(p)}${schaden?' · Leben −'+schaden:''}</span>`);
+      K.protokoll.push(st.name + (' — '+probeWort(p)));
       if(S.leben <= 0){
         gefallen(zeilen.join(' ') + ' ' + (o.tod||''),
                  o.todesart || ('Gefallen bei '+n.datum.split(' · ')[1]));
@@ -1422,12 +1543,29 @@ function ereignisWaehlen(i){
        Wer durch die Bresche von Akkon gegangen ist, ohne einmal zu straucheln,
        soll nicht dasselbe bekommen wie einer, der dreimal aufgefallen ist. */
     if(treffer === o.kette.length){ S.sondermissionen = (S.sondermissionen|0) + 1; K.kette = true; }
+    /* ── Wer zusieht, ist der, der über deine nächste Stelle entscheidet ──
+       **Die Sondermission ist die einzige Tat im Spiel, die einen Namen hat**,
+       und sie war bisher die einzige, die keine Fürsprache einbrachte. Das war
+       ein Henne-Ei-Fehler auf jeder Stufe der Leiter: Die Quellen der Gunst
+       hingen am Rang, und der Rang hing an der Gunst.
+
+       `beurteiler()` liefert deshalb den Patron des **nächsten** Eintrags —
+       nicht einen festen Namen. Wer als Fusilier durch die Brücke von Lodi
+       geht, verpflichtet damit Martel; wer als Capitaine auf den Pratzeberg
+       steigt, Grandmaison. Man sammelt immer bei dem, der einen als Nächstes
+       vorschlagen kann, und das ist zugleich die Fiktion: Ein Vorgesetzter
+       empfiehlt den, den er gesehen hat.
+
+       Die Mehrheit reicht nicht — es muss **jede Stufe** gelungen sein. Wer
+       strauchelt, ist hingegangen und bekommt dafür Ruf; empfohlen wird, wer
+       es sauber gemacht hat. */
+    if(treffer === o.kette.length) gunstGeben(beurteiler(), 1);
     text = zeilen.join(' ') + '<br><br>' + w.text;
   } else {
     const p = o.probe ? probe(o.probe.wert, o.probe.schw) : {erfolg:true};
     w = p.erfolg ? o.erfolg : (o.misserfolg || o.erfolg);
     text = w.text;
-    K.protokoll.push(esc(o.label) + (o.probe ? (p.erfolg?' — gelungen':' — misslungen') : ''));
+    K.protokoll.push(esc(o.label) + (o.probe ? (' — '+probeWort(p)) : ''));
   }
   ereignisWirkung(w);
   /* Eine Ereignisrunde ist eine Runde: Wer vorgetreten ist, hat nicht gekniet.
@@ -1485,11 +1623,17 @@ function bruchAnsage(){
 
 function zeigeKampf(text){
   const n = KAPITEL[LAUF.node];
-  const opt = aktionen().map(a=>`<button class="ord ${a.risk?'risk':''}" onclick="kampfAktion('${a.id}')"
-      ${a.aus&&a.aus()?'disabled':''}>${a.label}<span class="cost">${a.cost}</span></button>`).join('');
+  /* Gesperrte Handlungen bleiben `<button disabled>` und werden nicht zu
+     `<div>`. Ein deaktivierter Knopf ist ohnehin nicht fokussierbar — und ein
+     `<div>` fällt aus jedem Selektor heraus, der `:not([disabled])` prüft:
+     Der Testbot klickte darauf ins Leere und lief 301 Schritte im Kreis. */
+  const opt = aktionen().map((a,i)=>
+    wahlZeile(roemisch(i+1), a.label, a.cost, `kampfAktion('${a.id}')`,
+      {risk:a.risk, gesperrt: !!(a.aus && a.aus())})).join('');
   app.innerHTML = `<div class="stage">${verlauf()}
-    <div><div class="card"><div class="ch"><span>Sichtfeld</span><span>${esc(n.datum)}</span></div>
-      <div class="cb">${sichtfeld()}
+    <div>${bogen({ort:'Sichtfeld · '+((n.lage&&n.lage.stellung)||n.ort||''), datum:n.datum},
+      `<div class="stichrahmen">${sichtfeld()}</div>
+       <div class="stichzeile"><span>${esc((n.lage&&n.lage.stellung)||'Sichtfeld')}</span><span>${esc((n.lage&&n.lage.gelaende)||'')}</span></div>
         ${bruchAnsage()}
         ${(()=>{ const auf = auftragFuer(n); return auf
           ? `<div class="wirkung" style="margin-top:14px"><span>Auftrag des Chef de bataillon</span>${esc(auf.text)}</div>` : ''; })()}
@@ -1503,8 +1647,7 @@ function zeigeKampf(text){
           ${/* **Ab Rang 12 gibt es keinen Widerstandswert mehr.** Der Feind ist
                eine Vermutung, und eine Vermutung hat keinen Balken. Wer sie hier
                doch anzeigt, hat den Rang nicht gebaut. */''}
-          ${S.rang>=12 ? '· DER FEIND: SIEHE MELDUNG'
-            : '· WIDERSTAND DES FEINDES '+Math.max(0,Math.round(K.feindMoral))}
+          ${feindAnzeige(n)}
           ${S.rang>=10 ? '' : '· EURE LINIE '+Math.max(0,Math.round(K.eigen==null?100:K.eigen))}
           ${/* Der Kopf zählt in der Größe, die man führt: zwanzig, sechzig, hundertzwanzig. */''}
           ${S.rang>=12 ? '· '+(K.verbaende||[]).length+' VERBÄNDE'
@@ -1512,11 +1655,13 @@ function zeigeKampf(text){
             : S.rang>=9 && K.sektion!=null ? '· DEINE KOMPANIE '+Math.max(0,Math.round(K.sektion*1.2))+' VON 120'
             : S.rang>=6 && K.sektion!=null ? '· DEIN ZUG '+Math.max(0,Math.round(K.sektion*0.6))+' VON 60'+(K.rollend>0?' · ROLLENDES FEUER':'')
             : S.rang===5 && K.sektion!=null ? '· DEINE SEKTION '+Math.max(0,Math.round(K.sektion/5))+' VON 20' : ''}</div>
-        ${S.rang>=12 ? '' : balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
+        ${(S.rang>=12 || n.sturm) ? '' : balken('b-red',Math.max(0,K.feindMoral),n.feindMoral)}
         ${(S.rang>=5 && S.rang<10 && K.sektion!=null) ? balken('b-steel',Math.max(0,K.sektion),100) : ''}
-        <div class="log" style="margin-top:14px">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>
-      </div></div>
-      <div class="orders"><div class="ch"><span>Was tust du?</span></div><div class="ordbody">${opt}</div></div>
+        <div class="protokollkopf">Protokoll</div>
+        <div class="protokollliste">${K.protokoll.slice(-5).reverse().map(z=>`<div>${z}</div>`).join('')}</div>`,
+      ['Was tust du?','Eine Handlung je Runde'],
+      opt,
+      'Im Gefecht wird nicht gesichert')}
     </div>${seitenleiste()}</div>`;
 }
 
@@ -1904,7 +2049,27 @@ function kampfAktion(id){
      Mann, die auf eigene Rechnung schießen (Faktor 1,6 auf allen eigenen
      Schaden). Ein guter Zug gewinnt damit schneller als je zuvor; ein
      schlechter bekommt nichts geschenkt. */
-  const linie = K.geloest ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
+  /* `n.ueberfall`: **Die zweihundert anderen sind nicht da.** Ein Überfall auf
+     einer spanischen Straße wird von dreißig Mann ausgefochten; es gibt keine
+     Linie, die von allein mitschießt. Damit fällt die wichtigste Zeile des
+     Kampfsystems weg, und der eigene Schaden steht zum zweiten Mal für sich
+     allein — das erste Mal war der gelöste Zug ab Rang 8, und dort gab es
+     dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein
+     Handel, sondern eine Lage. Ausgeglichen wird über kurze Runden und
+     niedrige Feindmoral in den Daten. */
+  /* ── Hier stand einmal ein Schadensbonus für hohe Werte ──
+     **Er ist am 30.07.2026 ersatzlos entfernt worden**, auf ausdrückliche
+     Ansage des Entwicklers: *„Dass man über einem bestimmten Wert dann mehr
+     Schaden macht, ist Schwachsinn."* Und er hatte recht — eine Muskete
+     schießt nicht härter, weil der Mann dahinter besser zielt; sie trifft nur
+     öfter. Der Bonus war eine Krücke gegen ein anderes Problem: dass hohe
+     Werte gegen immer dieselben Schwierigkeiten irgendwann nichts mehr kaufen.
+
+     **Dieses Problem ist jetzt an seiner Wurzel gelöst**, nämlich dadurch,
+     dass die Aufgaben mit dem Feldzug härter werden (`schwierigkeit` je
+     Kampagne, siehe `probe()`). Wert 80 kauft wieder Trefferchance — nur eben
+     gegen Schwierigkeit 65 statt gegen 40. */
+  let linie = (K.geloest || n.ueberfall) ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */
   if(K.gelaendeVorteil > 0) schaden *= 0.8;
@@ -1929,6 +2094,10 @@ function kampfAktion(id){
     rollend = (7 + Math.random()*5) * Math.max(0.35, (K.sektion||100)/100);
     K.rollend--;
   }
+  /* Die zweite Hälfte des Sturms: Wer nicht sieht, trifft nicht — auch du
+     nicht. Ohne diesen Abzug wäre der Schneesturm ein Vorteil, und ein
+     Vorteil ist keine eigene Regel (siehe den Gefahr-Abzug oben). */
+  if(n.sturm){ schaden *= 0.8; linie *= 0.8; }
   K.feindMoral -= schaden + linie + rollend;
 
   /* ══════════════════ DIE TATENZÄHLUNG ══════════════════
@@ -2097,6 +2266,13 @@ function kampfAktion(id){
      damit ein Gefecht mit einem einzigen Feld zum Höhepunkt wird. */
   if(n.haerte > 1) gefahr += 3;
   gefahr += feindGuete(n);      // bessere Truppen treffen öfter
+  /* ── Der Sturm senkt die Trefferchance beider Seiten ──
+     Bei Eylau schneite es waagerecht, und beide Armeen verloren einander. Wer
+     nicht sieht, trifft nicht — das gilt für die drüben und für dich, und
+     deshalb steht der Abzug hier (Gefahr) *und* unten beim eigenen Schaden.
+     **Ein Sturm, der nur den Feind blind macht, wäre ein Geschenk**, und ein
+     Geschenk ist keine eigene Regel. */
+  if(n.sturm) gefahr -= 4;
   gefahr = S.rang>=10 ? 0 : Math.max(4, gefahr);
   let treffer = '';
   /* Das Stabsereignis: einmal je Gefecht gewürfelt, ohne Ankündigung und ohne
@@ -2381,7 +2557,12 @@ function gefallen(letzterText, todesart){
 
 function kampfEnde(sieg, letzterText){
   const n = KAPITEL[LAUF.node];
-  const erg = sieg ? n.sieg : n.niederlage;
+  /* **Eine Kopie, keine Referenz.** `n.sieg` und `n.niederlage` sind
+     Kapiteldaten und leben so lange wie die Seite; wer sie hier ändert (etwa
+     für `ueberfall`), ändert sie für jeden weiteren Lauf im selben
+     Browserfenster mit. Das wäre die Sorte Fehler, die man erst nach dreißig
+     Messläufen bemerkt. */
+  const erg = Object.assign({}, sieg ? n.sieg : n.niederlage);
 
   /* Der Rückzug kostet Blut — je mehr vom Feind noch steht, desto mehr.
      Ohne diese Zeilen war Verlieren gratis: Wer unter 40 % Leben fiel, kniete
@@ -2407,9 +2588,38 @@ function kampfEnde(sieg, letzterText){
      zahlt den Zoll nie; ein Rekrut mit Muskete 10 verliert sie und zahlt ihn
      fünfmal. Der Unterschied zwischen erstem und drittem Lauf ist damit nicht
      mehr „etwas mehr Leben", sondern „gewinnen oder nicht". */
+  /* ── `ueberfall:true` · Zurückweichen kostet keinen Ruf ──
+     **Es gibt keine Zeugen.** Ein Überfall auf einer Straße in Aragón wird von
+     dreißig Mann ausgefochten und von niemandem beobachtet; was im Bericht
+     steht, schreibt derselbe, der weggegangen ist. Deshalb fällt hier die
+     Ruf-Strafe der Niederlage weg — nicht der Blutzoll, denn eine Kolonne, die
+     rückwärts aus einem Hohlweg geht, lässt trotzdem Männer liegen.
+
+     Der zweite Teil des Schalters steht bei der Linie: Es gibt keine
+     zweihundert anderen, die von allein mitschießen. */
+  if(n.ueberfall && !sieg && erg && erg.ruf < 0) erg.ruf = 0;
   if(!sieg && S.lebt && S.leben > 0){
     const rest = Math.max(0, Math.min(1, K.feindMoral / n.feindMoral));
-    K.rueckzug = Math.round((5 + 13*rest) * (1 + feindGuete(n)*0.2));
+    /* ── Beim Überfall gibt es keinen Güte-Faktor auf den Rückzugszoll ──
+       **Der Faktor existiert, weil manche Gegner verfolgen** — Dschesärs
+       Garnison tut es, Beaulieus geschlagene Kolonnen nicht. Guerrilleros in
+       den Hügeln verfolgen keine Kompanie über offenes Land; sie lösen sich
+       auf. Genau das sagt der Gefechtstext selbst: „Nach vier Stunden hört es
+       auf, weil sie weggehen, nicht weil ihr sie vertrieben hättet."
+
+       **Gemessen war es die Wand des Kapitels.** Ein Überfall hat keine Linie,
+       die von allein mitschießt; der eigene Schaden muss die volle Feindmoral
+       tragen, also endet er meistens als Niederlage. Mit dem Faktor 2,6 bei
+       Güte 8 kostete jede dieser Niederlagen dreißig bis vierzig Lebenspunkte,
+       zweimal im Kapitel, zusätzlich zu drei gewöhnlichen Gefechten. Spanien
+       tötete dadurch 64 bis 77 % derer, die es erreichten — mehr als jedes
+       andere Kapitel, Ägypten eingeschlossen.
+
+       **Der Zoll selbst bleibt.** Eine Kolonne, die rückwärts aus einem
+       Hohlweg geht, lässt Männer liegen; nur wird sie nicht auch noch
+       eingeholt. */
+    const verfolgt = n.ueberfall ? 1 : (1 + feindGuete(n)*0.2);
+    K.rueckzug = Math.round((5 + 13*rest) * verfolgt);
     S.leben = Math.max(0, S.leben - K.rueckzug);
     if(S.leben <= 0){
       gefallen(letzterText + ' Ihr geht rückwärts aus dem Feuer, und das Feuer geht mit. Dich trägt niemand.',
@@ -2428,9 +2638,18 @@ function kampfEnde(sieg, letzterText){
      Läufe beide Feldzüge — bei rund neun Treffern im ganzen Spiel wiegt jede
      geschenkte Genesung schwerer als der Schaden. Wer wieder auf die Beine
      will, verbringt einen Lagerabend oder eine Winterwoche damit. */
+  /* „Alte Narben": zwei statt einer. Der Feldscher wird dadurch nicht besser —
+     der Mann ist es. Wer schon dreimal zugenäht worden ist, hält still, weiß,
+     was er zeigen muss, und kommt an die Reihe, ehe der Karren voll ist.
+     Es bleibt die schwächste der fünf Gewohnheiten, weil sie nur greift, wenn
+     überhaupt zwei leichte Wunden offen sind — dafür greift sie in jedem
+     Kapitel und nicht nur in Frost oder Aderlass. */
   // Krankheiten kann er nicht: eine Ruhr näht man nicht zu (`!w.zehrt`)
-  const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
-  if(leicht>=0){ S.wunden.splice(leicht,1); atemKlemmen(); }   // der Vorrat wächst wieder
+  for(let i = zaeh('zaeh_narben') ? 2 : 1; i > 0; i--){
+    const leicht = S.wunden.findIndex(w=>w.abzug<=8 && !w.zehrt);
+    if(leicht<0) break;
+    S.wunden.splice(leicht,1); atemKlemmen();                  // der Vorrat wächst wieder
+  }
   if(sieg && n.ruhm && S.ruf>=20 && Math.random()<0.6){ S.nennungen++; }
 
   /* ══════════════════ DIE LEITER DER SICHTBARKEIT ══════════════════
@@ -2477,16 +2696,47 @@ function kampfEnde(sieg, letzterText){
     const ok = auftrag.erfuellt(n);
     K.auftragErfuellt = ok;
     if(!ok) stufe = Math.min(stufe, 1);
-    if(ok){ gunstGeben('vernet',1); S.ruf += 2; }
-    else { gunstGeben('vernet',-1); S.ruf = Math.max(0,S.ruf-2); }
+    /* ── Die Fürsprache geht an den, der über die nächste Stelle entscheidet ──
+       **Hier stand hart `'vernet'`, und das war der teuerste Fehler der oberen
+       Leiter.** Vernet ist Patron für die Ränge 6, 8 und 9; ab Rang 9 beurteilt
+       Grandmaison. Der Auftrag — die einzige Quelle, die *jedes* Gefecht
+       liefert — fütterte also weiter einen Mann, der nichts mehr zu vergeben
+       hatte, während der, auf den es ankam, bei eins stehen blieb.
+       Gemessen: Ein Maximalveteran erreichte Station 156 mit Ruf 748 und
+       Grandmaison 1, wo 3 nötig waren, und blieb Capitaine — vierzig von
+       vierzig Läufen.
+
+       Dieselbe Fehlerfamilie wie das Henne-Ei bei Collot und Berthaud: eine
+       Fürsprachequelle, die an einen **Namen** gebunden ist statt an die
+       **Rolle**. `beurteiler()` liefert die Rolle. */
+    const wer = beurteiler() || 'vernet';
+    if(ok){ gunstGeben(wer,1); S.ruf += 2; }
+    else { gunstGeben(wer,-1); S.ruf = Math.max(0,S.ruf-2); }
     auftragZeile = `<div class="wirkung"><span>Der Auftrag${ok?' — erfüllt':' — verfehlt'}</span>
       ${esc(auftrag.text)} ${esc(ok?auftrag.gut:auftrag.schlecht)}
-      <b>Fürsprache Vernet ${ok?'+1 · Ruf +2':'−1 · Ruf −2'}</b></div>`;
+      <b>Fürsprache ${esc(personKurz(wer))} ${ok?'+1 · Ruf +2':'−1 · Ruf −2'}</b></div>`;
   }
+
+  /* ── `stumm:true` · Die Bulletins schweigen ──
+     **Die eigene Regel von Spanien: Es gibt hier keinen Ruhm. Nur
+     Entscheidungen, bei denen niemand zusieht.** Mechanisch heißt das, dass
+     die Leiter der Sichtbarkeit auf ihrer untersten Stufe stehen bleibt: Lob
+     vor der Front gibt es, weil die Kompanie es sieht — Nennungen und
+     Bulletins nicht, weil in Paris über diesen Krieg nichts gedruckt wird,
+     was gut klänge.
+
+     **Das ist die härteste Umkehrung des Spiels**, und sie ist historisch:
+     Über fünf Jahre Spanien gibt es kaum eine Meldung, die eine Schlacht
+     feiert. Wer hier aufsteigen will, tut es über die Kasse, die Listen und
+     den Einheitszustand — die Werkzeuge des Capitaine, die anderswo Beiwerk
+     sind. Der Rang, der hier wohnt, ist genau deshalb der Capitaine. */
+  const stumm = !!n.stumm;
+  if(stumm) stufe = Math.min(stufe, 1);
 
   S.belobigungen = S.belobigungen || 0;
   S.bulletins = S.bulletins || 0;
   K.stufe = stufe;
+  K.stumm = stumm;
   if(stufe === 1) { S.belobigungen++; S.kameradschaft = Math.min(100, S.kameradschaft+4); }
   if(stufe === 2) { S.nennungen++; }
   if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; }
@@ -2600,7 +2850,11 @@ function kampfEnde(sieg, letzterText){
   }
 
   vakanzPruefen();                    // stimmen die Zahlen, ist der Tod angesagt
-  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n);
+  /* **Erst die Vakanz auflösen, dann befördern** — `ketteImGefecht()` macht aus
+     dem angesagten Tod den wirklichen, und ohne ihn wäre die Stelle für den
+     Unteroffizier noch besetzt. Die Reihenfolge ist die ganze Logik: Jemand
+     fällt, und deshalb rückst du auf. */
+  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n) + feldBefoerderung();
   const kk = K; setzeKampf(null);
   stationErledigt();
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -2717,7 +2971,7 @@ const LEITER = [
    text:p=>esc(p)+` nennt deinen Namen, und der Capitaine schreibt ihn auf. Es gibt keine Zeremonie. Du bekommst zwei Wollstreifen an den Ärmel, acht Mann und die Verantwortung dafür, dass diese acht Mann morgens da sind, Schuhe haben und ihre Musketen zünden.
     <br><br>Der Mann, dessen Stelle du bekommst, heißt Guérin. Er ist bei Castiglione geblieben.`},
 
-  {rang:4, name:'Caporal-fourrier', ruf:35, patron:'collot', gunst:3, bildung:35, von:[2,3],
+  {rang:4, name:'Caporal-fourrier', ruf:45, patron:'collot', gunst:3, bildung:35, von:[2,3],
    vorschlag:'für die Listen, sobald er selbst aufrückt',
    fehltRuf:'Der Fourier sucht einen, der schreiben kann und den die Kompanie kennt. Das zweite fehlt.',
    fehltGunst:'Der Fourier sucht sich seinen Nachfolger selbst aus. Er hat sich umgesehen und ist an dir vorbeigegangen.',
@@ -2725,7 +2979,7 @@ const LEITER = [
    text:p=>esc(p)+` rückt selbst auf, und seine Stelle ist frei. Du bekommst einen dritten Streifen quer über die beiden, einen Bleistift, der dir gehört, und die Bestandslisten der Kompanie.
     <br><br>Von jetzt an steht dein Name auf jedem Blatt, auf dem eine Zahl nicht stimmt. Das ist der Unterschied zwischen Tragen und Verantworten, und es hat noch nie jemand gemocht.`},
 
-  {rang:5, name:'Sergent', ruf:62, patron:'berthaud', gunst:5, von:[3,4], vakanz:'major',
+  {rang:5, name:'Sergent', ruf:70, patron:'berthaud', gunst:5, von:[3,4], vakanz:'major',
    vorschlag:'für die nächste Sektion, die einen Sergenten braucht',
    faelltWer:MAJOR, rueckt:'martel',
    fallText:'Vier Mann tragen ihn zurück, den Säbel quer über dem Tornister, und legen ihn zu den anderen.',
@@ -2734,7 +2988,7 @@ const LEITER = [
    text:p=>esc(personKurz('martel'))+` trägt seit vier Wochen die Tresse des Sergent-majors. Seine alte Stelle war seitdem nicht besetzt, weil niemand da war, der sie hätte ausfüllen können.
     <br><br>`+esc(p)+` nennt deinen Namen. Du bekommst eine Tresse aus Metallfaden, zwanzig Mann und die Frage, wie viele davon am Abend noch stehen. Es ist die erste Beförderung, bei der niemand für dich gestorben ist — dein Vorgänger ist bloß aufgerückt. <span class="fein">Weil über ihm einer gefallen war.</span>`},
 
-  {rang:5, name:'Sergent', ruf:52, patron:'berthaud', gunst:4, listenweg:true, von:[3,4], vakanz:'major',
+  {rang:5, name:'Sergent', ruf:60, patron:'berthaud', gunst:4, listenweg:true, von:[3,4], vakanz:'major',
    vorschlag:'für die nächste Sektion, die einen Sergenten braucht',
    faelltWer:MAJOR, rueckt:'martel',
    fallText:'Vier Mann tragen ihn zurück, den Säbel quer über dem Tornister, und legen ihn zu den anderen.',
@@ -2755,7 +3009,7 @@ const LEITER = [
 
      Die Vakanz ist die härteste im Spiel — es ist die einzige, bei der ein
      Mann fällt, den man seit 1796 kennt. Das Spiel spricht es nie aus. */
-  {rang:6, name:'Sergent-major', ruf:75, patron:'vernet', gunst:3, von:[4,5], vakanz:'majormajor',
+  {rang:6, name:'Sergent-major', ruf:100, patron:'vernet', gunst:3, von:[4,5], vakanz:'majormajor',
    vorschlag:'für die Kompanie, sobald sie einen Sergent-major braucht',
    faelltKette:'martel', stelle:'Die Stelle des Sergent-majors',
    frei:'Die Bücher der Kompanie liegen seit dem Morgen bei niemandem.',
@@ -2781,7 +3035,7 @@ const LEITER = [
      vertrödelt hat, steht hier mit Ruf 100 und drei Orden — und kommt nicht
      durch. Das ist der „Rangstillstand als Druckmittel" aus KONZEPT §9, als
      Klinge statt als Hinweis. */
-  {rang:7, name:'Sous-Lieutenant', ruf:95, patron:'berthaud', gunst:4, bildung:50, von:[5,6],
+  {rang:7, name:'Sous-Lieutenant', ruf:145, patron:'berthaud', gunst:4, bildung:50, von:[5,6],
    vakanz:'zugfuehrer', vorschlag:'für das Patent, sobald eines frei wird',
    stellenText:'Das Bataillon habe seine Zugführer, und alle seien im Dienst.',
    faelltWer:'Lieutenant Ferrand', rueckt:null,
@@ -2794,7 +3048,7 @@ const LEITER = [
     <br><br><span class="fein">Von hier an schießt du nicht mehr. Du entscheidest.</span>`},
 
   /* ── Rang 8 · Der ruhige Rang nach dem Bruch ── */
-  {rang:8, name:'Lieutenant', ruf:120, patron:'vernet', gunst:4, von:[6,7],
+  {rang:8, name:'Lieutenant', ruf:195, patron:'vernet', gunst:4, von:[6,7],
    vakanz:'lieutenant', vorschlag:'für die Stellvertretung der Kompanie',
    stellenText:'Die Kompanie habe ihren Lieutenant, und der sei gesund.',
    faelltWer:'Chef de bataillon Reynaud', rueckt:'berthaud',
@@ -2805,7 +3059,7 @@ const LEITER = [
     <br><br>Es ist kein Bild, es steht so im Reglement. Von jetzt an reitest du Meldungen zum Stab, und was du dort schreibst, liest jemand, der Divisionen bewegt.`},
 
   /* ── Rang 9 · Die Kompanie ── */
-  {rang:9, name:'Capitaine', ruf:150, patron:'vernet', gunst:5, orden:'legion', von:[7,8],
+  {rang:9, name:'Capitaine', ruf:255, patron:'vernet', gunst:5, orden:'legion', von:[7,8],
    vakanz:'capitaine', vorschlag:'für die Kompanie, sobald sie einen Chef braucht',
    stellenText:'Die Kompanie habe ihren Capitaine.',
    faelltWer:'Capitaine Lasserre', rueckt:'vernet',
@@ -2819,7 +3073,7 @@ const LEITER = [
   /* ── Ränge 10 bis 13 · Der Stab ──
      Grandmaison ist über vier Ränge der alleinige Fürsprecher. Das ist wenig
      Redundanz für viel Spielzeit und steht als offener Punkt in RANGLEITER §11. */
-  {rang:10, name:'Chef de bataillon', ruf:180, patron:'grandmaison', gunst:3, reiten:40, von:[8,9],
+  {rang:10, name:'Chef de bataillon', ruf:325, patron:'grandmaison', gunst:3, reiten:40, von:[8,9],
    vakanz:'bataillon', vorschlag:'für ein Bataillon, sobald eines ohne Chef ist',
    stellenText:'Das Regiment habe seine drei Bataillonschefs.',
    faelltWer:'Chef de bataillon Aubry',
@@ -2830,7 +3084,7 @@ const LEITER = [
    text:p=>esc(p)+` nennt deinen Namen, und niemand widerspricht. Achthundert Mann, zwei Pferde und ein Bursche, den du bezahlst.
     <br><br>Du siehst deine Leute ab jetzt als Rechtecke auf einer Skizze. Ob das ein Verlust ist, entscheidest du selbst.`},
 
-  {rang:11, name:'Colonel', ruf:200, patron:'grandmaison', gunst:4, adler:true, von:[9,10],
+  {rang:11, name:'Colonel', ruf:400, patron:'grandmaison', gunst:4, adler:true, von:[9,10],
    vakanz:'regiment', vorschlag:'für das Regiment, wenn es eines braucht',
    stellenText:'Das Regiment habe seinen Colonel.',
    faelltWer:'Colonel Desmarets',
@@ -2841,7 +3095,7 @@ const LEITER = [
    text:p=>esc(p)+` übergibt dir das Regiment und den Adler dazu.
     <br><br>Der Adler ist kein Gegenstand, sondern eine Bedingung. Wer ihn verliert, verliert alles, was daran hängt — unabhängig davon, wie das Gefecht ausgegangen ist.`},
 
-  {rang:12, name:'Général de brigade', ruf:230, patron:'grandmaison', gunst:5, bulletins:3, von:[10,11],
+  {rang:12, name:'Général de brigade', ruf:480, patron:'grandmaison', gunst:5, bulletins:3, von:[10,11],
    vakanz:'brigade', vorschlag:'für eine Brigade, wenn der Kaiser zustimmt',
    stellenText:'Die Division habe ihre Brigadegenerale.',
    faelltWer:'Général Séverin', rueckt:'grandmaison',
@@ -2852,7 +3106,7 @@ const LEITER = [
    text:p=>esc(p)+` schlägt dich vor, und in Paris wird unterschrieben. Vier Regimenter, ein Stab, eine Karte.
     <br><br>Ab jetzt vergeht die Zeit in Stunden, und was du über den Feind weißt, hat jemand vor einer Stunde gesehen.`},
 
-  {rang:13, name:'Général de division', ruf:260, patron:'grandmaison', gunst:5, orden:'legion_grand', von:[11,12],
+  {rang:13, name:'Général de division', ruf:570, patron:'grandmaison', gunst:5, orden:'legion_grand', von:[11,12],
    vakanz:'division', vorschlag:'für eine Division',
    stellenText:'Das Korps habe seine Divisionsgenerale.',
    faelltWer:'Général de division Marchand', rueckt:'grandmaison',
@@ -2867,7 +3121,7 @@ const LEITER = [
      Kein Patron: Marschälle wurden von einem Mann allein ernannt. Die
      Bedingung `generalskampagne` gibt es noch nicht — der Rang ist gebaut und
      unerreichbar, und das ist der Entwurf, nicht ein Versäumnis. */
-  {rang:14, name:'Maréchal d\'Empire', ruf:300, patron:null, gunst:0,
+  {rang:14, name:'Maréchal d\'Empire', ruf:680, patron:null, gunst:0,
    generalskampagne:true, von:[13],
    fehltRuf:'Es gibt keine Liste, auf die man sich setzen lässt. Es gibt einen Mann, der einen Namen sagt.',
    text:()=>`Es wird nicht verlesen. Es steht im Moniteur, und jemand liest es dir vor.
@@ -2883,8 +3137,29 @@ const LEITER = [
    Sergent-Stelle (Feldweg); wem dafür der Ruf fehlt, dem bietet dieselbe
    Musterung die Listen an (Listenweg). Niemand muss wählen — man merkt an dem,
    was einem angeboten wird, welchen Weg man ohnehin geht. */
-function leiterZiel(){
-  const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0);
+/* ── Wer über deine nächste Stelle entscheidet ──
+   **Der Patron des nächsten Leitereintrags, egal wie weit der noch weg ist.**
+   `leiterZiel()` bietet nur an, was man schon *erfüllt*; für die Frage „wen
+   muss ich beeindrucken" ist das zu spät — dann hätte man die Gunst ja schon.
+   Deshalb geht `beurteiler()` von den Einträgen aus, die vom aktuellen Rang
+   überhaupt erreichbar sind (`von`), und nimmt den **niedrigsten** davon: den
+   nächsten Schritt, nicht den weitesten Sprung.
+
+   Fällt nichts aus (Rang 14, oder eine Lücke in der Leiter), gibt es niemanden
+   zu beeindrucken — dann liefert die Funktion null, und `gunstGeben()` läuft
+   ins Leere, was es ohnehin gefahrlos tut. */
+function beurteiler(){
+  const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0 && e.patron);
+  if(!passend.length) return null;
+  return passend.reduce((a, b) => (b.rang < a.rang ? b : a)).patron;
+}
+
+/* `nurOffizier` blendet die Unteroffiziersränge aus — die vergibt seit dem
+   30.07.2026 das Feld nach dem Gefecht, nicht mehr der Tisch. Ohne den Schalter
+   böte die Musterung sie ein zweites Mal an und der Bescheid käme doppelt. */
+function leiterZiel(nurOffizier){
+  const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0
+                                  && (!nurOffizier || e.rang > FELD_RANG_MAX));
   if(!passend.length) return null;
   for(let i = passend.length-1; i >= 0; i--){
     const e = passend[i];
@@ -2927,6 +3202,65 @@ function leiterZiel(){
 function vakanzStand(key){
   S.vakanz = S.vakanz || {};
   return (S.vakanz[key] = S.vakanz[key] || {faellt:false, tot:false});
+}
+
+/* ══════════════ WER IM FELD BEFÖRDERT WIRD UND WER NICHT ══════════════
+
+   **Unteroffiziere macht der Kompaniechef, Offiziere macht Paris.** Das ist
+   historisch der eigentliche Bruch der Laufbahn und nicht der Maßstabswechsel
+   im Gefecht: Einen Caporal ernannte der Capitaine im Hof, notierte es im
+   Livret, fertig. Für ein Offizierspatent brauchte es eine Kommission, eine
+   Unterschrift des Kriegsministers und oft Monate.
+
+   Mechanisch löst dieselbe Trennung ein Problem, das sich gemessen gezeigt
+   hat: Die Leiter hat vierzehn Stufen, die Kapitel bieten aber nur ein bis
+   zwei Musterungen. Ein Mann mit erfüllten Schwellen stand deshalb halbe
+   Kapitel lang daneben — bei den unteren Rängen, wo es schnell gehen soll,
+   genauso wie oben, wo es das nicht soll.
+
+   Ab jetzt: **Rang 2 bis 6 wird nach jedem Gefecht vergeben**, sobald Zahlen
+   und Vakanz stimmen. **Rang 7 und höher nur bei der Musterung.** Der Aufstieg
+   durch die Unteroffiziersränge wird dadurch spürbar schneller, der Weg in die
+   Offiziershälfte bleibt ein Ereignis mit eigenem Bildschirm und Bescheid. */
+const FELD_RANG_MAX = 6;
+
+/* Die Beförderung im Feld, direkt nach dem Gefecht. Gibt die Meldung zurück
+   oder '' — den großen Auftritt mit Bescheid behält die Musterung. */
+function feldBefoerderung(){
+  if(!S || !S.lebt) return '';
+  const ziel = leiterZiel();
+  if(!ziel || ziel.rang > FELD_RANG_MAX) return '';
+  if(fehltWas(ziel)) return '';
+  if(ziel.vakanz && !vakanzStand(ziel.vakanz).tot) return '';
+
+  S.rang = Math.max(S.rang, ziel.rang);
+  S.ruf += 5;
+  if(ziel.patron) gunstGeben(ziel.patron, 1);
+  S.log.push('Befördert zum ' + ziel.name + '.');
+  /* ── Das Papier kommt später ──
+     **Im Feld wird ernannt, ausgestellt wird im Lager.** Der Bescheid ist der
+     Auftritt, den eine Beförderung verdient — nur hat im Gefecht niemand einen
+     Tisch. `S.bescheidOffen` merkt den Rang, und das nächste Lager legt ihn
+     vor. Damit behält die Feldbeförderung ihr Tempo und verliert ihr Papier
+     nicht: Man ist es sofort, und man hat es eine Woche später schriftlich. */
+  if(ziel.rang >= 5) S.bescheidOffen = ziel.rang;
+  return `<div class="wirkung"><span>Im Feld befördert</span>
+    ${esc(personName(ziel.patron) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
+    Eingetragen wird es später, von jemand anderem. <b>${esc(ziel.name)}</b></div>`;
+}
+
+/* Der Bescheid, den das Lager nachreicht. Gibt den fertigen Bogen zurück oder
+   '' — und räumt die Vormerkung ab, damit er nur einmal ausgestellt wird. */
+function bescheidNachreichen(){
+  if(!S || !S.bescheidOffen) return '';
+  const r = S.bescheidOffen; S.bescheidOffen = null;
+  const ziel = LEITER.find(e => e.rang === r);
+  if(!ziel) return '';
+  const text = `Der Fourrier hat den Bogen schon ausgefüllt, als du hereinkommst; er wartet nur noch auf den Namen. `
+    + `Du sagst ihn, er schreibt ihn, und dann liegt da ein Papier, auf dem steht, was seit dem Gefecht ohnehin gilt.`
+    + `<br><br>Es ändert nichts. Man hebt es trotzdem auf.`;
+  return bescheidBogen(ziel, text, 'gut',
+    `IM FELD ERNANNT · AUSGESTELLT IM LAGER · ${esc(rangName(r).toUpperCase())}`);
 }
 
 function vakanzPruefen(){
@@ -2987,12 +3321,22 @@ function fehltWas(z){
    **Gebaut, bevor die Kapitel dafür stehen.** Eine Station setzt
    `schranke:'russland'` oder `'waterloo'`; die Prüfung liegt hier, damit
    Kapitel 8 und 10 später nur noch Daten anhängen müssen. */
+/* `endeArt` sagt, **wie** ein Lauf endet, der hier aufhört, und `wertung()`
+   rechnet danach (180 / 120 / 70 aus KONZEPT §5). Die beiden Schranken enden
+   verschieden, und das ist kein Zahlenspiel:
+
+   **Nach Russland ist es ein Ruhestand** — man hat zwanzig Jahre gedient, wird
+   ausgemustert, dankt ab und bekommt eine Pension. **Nach 1814 ist es
+   Halbsold** — die Armee wird aufgelöst, niemand dankt jemandem, und man
+   bekommt ein Papier, eine Zahl und eine Adresse. Sechzig Punkte weniger,
+   weil es das schlechtere Ende ist; und weil es das schlechtere ist, zieht
+   die zweite Schranke stärker zum Weitermachen als die erste. */
 const SCHRANKEN = {
-  russland:{rang:7, name:'Nach Russland', bonus:180,
+  russland:{rang:7, name:'Nach Russland', bonus:180, endeArt:'ruhestand',
     durch:'Von der Armee, die im Juni über den Njemen ging, kommen im Dezember dreißigtausend zurück. Du bist einer davon, und du bist Offizier — also wirst du gebraucht.',
     ende:'Die Listen werden neu geschrieben, und was kein Offizier ist, steht nicht mehr darauf. Man dankt dir, zahlt aus und schickt dich nach Hause.',
     epilog:'Du hast alles gesehen, was ein Mensch sehen kann, und gehst nach Hause. Dass du kein Offizier geworden bist, macht das nicht kleiner: Von hundert, die mit dir über den Njemen gingen, sind sechs zurückgekommen.'},
-  waterloo:{rang:10, name:'Vor Waterloo', bonus:120,
+  waterloo:{rang:10, name:'Vor Waterloo', bonus:120, endeArt:'halbsold',
     durch:'Er ruft die zurück, die er kennt. Du stehst auf der Liste, weil ein Regiment ohne dich nicht marschiert.',
     ende:'Die Armee wird aufgelöst, die Offiziere auf Halbsold gesetzt. Du bekommst ein Papier, eine Zahl und eine Adresse.',
     epilog:'Im März 1815 liest du in der Zeitung, dass er zurück ist. Du liest es zu Ende, faltest sie und legst sie weg. Es ist die vernünftigste Entscheidung deines Lebens, und du wirst sie dreißig Jahre lang bereuen.'}
@@ -3003,12 +3347,134 @@ function schrankeGeschafft(id){
   return !sch || S.rang >= sch.rang;
 }
 
+/* ══════════════════ DER BESCHEID ══════════════════
+
+   **Der Bogen sagt den Rang, bevor man ihn liest** (Bündel 3 des
+   Entwurfspakets). Ein Sergent bekommt ein Stück Feldpergament mit einer
+   Bruchkante und einer Unterschrift; ein Marschall ein Patent mit
+   vierundzwanzig Pixel Goldgeflecht, fünf Unterschriften und drei Siegeln.
+   Dazwischen kommt je Stufe genau eine Zutat dazu.
+
+   **Für die Ränge 1 bis 4 gibt es keinen Bescheid, und das ist Absicht:**
+   Dort wird nichts ausgestellt. Man bekommt zwei Wollstreifen an den Ärmel
+   und die Mitteilung, dass acht Mann jetzt einem gehören — auf ein Papier
+   ist das niemandem wert. Der erste Bogen kommt mit der Tresse. */
+function bescheidStufe(rang){
+  if(rang <= 5) return 'pergament';
+  if(rang === 6) return 'papier';
+  if(rang <= 8) return 'patent';
+  if(rang <= 10) return 'patent stufe2';
+  if(rang === 11) return 'patent stufe3';
+  if(rang === 12) return 'patent stufe4';
+  if(rang === 13) return 'patent stufe5';
+  return 'patent stufe6';
+}
+/* Wieviel Zierrat auf welcher Stufe. Eine Tabelle statt zehn Sonderfälle. */
+function bescheidMass(rang){
+  return {
+    siegel:  rang<=5 ? 0 : rang===6 ? 46 : rang<=8 ? 56 : rang<=10 ? 60 : rang===11 ? 66 : rang===12 ? 74 : rang===13 ? 80 : 92,
+    nebensiegel: rang>=14 ? 2 : 0,
+    unterschriften: rang<=6 ? 1 : rang<=8 ? 2 : rang<=13 ? 3 : 5,
+    titelband: rang>=11,
+    kugeln: rang>=14,
+    /* **Ab Rang 12 zeichnet der Kaiser selbst.** Der Patron rutscht dann in
+       die Gegenzeichnung — nicht weil er unwichtig würde, sondern weil über
+       einem Général de brigade nur noch einer steht. */
+    kaiser: rang>=12
+  };
+}
+/* Die Zeile über und unter dem Rangnamen. Sie steht hier und nicht in
+   `LEITER`, weil sie zum Bogen gehört und nicht zur Schwelle. */
+const BESCHEID_TEXT = {
+  5:['Ernennung zum Unteroffizier','Eine Tresse aus Metallfaden'],
+  6:['Ernennung zum Unteroffizier','Die zweite Tresse · der Zug von sechzig'],
+  7:['Patent eines Offiziers','Epauletten, ein Degen, und keine Muskete mehr'],
+  8:['Patent eines Offiziers','Die zweite Epaulette'],
+  9:['Patent eines Offiziers','Eine Kompanie von hundertzwanzig und ihre Kasse'],
+  10:['Ernennung im Namen des Kaisers','Ein Bataillon in vier Kompanien'],
+  11:['Ernennung im Namen des Kaisers','Ein Regiment und sein Adler'],
+  12:['Erhebung in den Generalsrang','Zwei Sterne · eine Brigade'],
+  13:['Erhebung in den Generalsrang','Drei Sterne · eine Division und eine Dotation'],
+  14:['Würde eines Marschalls des Kaiserreichs','Der Stab · sechsundzwanzig in zwölf Jahren']
+};
+
+/* Ein Feld auf dem Bogen: Bezeichnung in Mono, Wert in Handschrift. */
+function bescheidFeld(name, wert){
+  return `<div class="feldname">${esc(name)}</div><div class="feldwert hand" style="font-size:19px">${esc(wert)}</div>`;
+}
+
+function bescheidBogen(ziel, text, klasse, statuszeile){
+  const r = ziel.rang, m = bescheidMass(r), stufe = bescheidStufe(r);
+  const [kopf, zusatz] = BESCHEID_TEXT[r] || ['Ernennung',''];
+  const jahr = (String((KAPITEL[Math.max(0,LAUF.node-1)]||{}).datum||'').match(/1[78]\d\d/)||['1796'])[0];
+
+  /* Die Unterschriften. Die erste ist der Patron — ab Rang 12 der Kaiser,
+     und der Patron rückt eine Zeile tiefer. */
+  const namen = [];
+  if(m.kaiser){
+    namen.push({n:'Napoléon', a:'Empereur des Français', gross:true});
+    if(ziel.patron) namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+  } else if(ziel.patron){
+    namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+  }
+  const weitere = [
+    {n:'Delzons', a:'Colonel · 32ᵉ de ligne'},
+    {n:'Berthier', a:'Major général de la Grande Armée'},
+    {n:'Clarke',  a:'Ministre de la Guerre'},
+    {n:'Cambacérès', a:'Archichancelier de l\'Empire'}
+  ];
+  while(namen.length < m.unterschriften && weitere.length) namen.push(weitere.shift());
+  const unterschriften = namen.slice(0, m.unterschriften).map(u=>
+    `<div style="min-width:150px"><div class="hand" style="font-size:${u.gross?42:26}px;${u.gross?'transform:rotate(-3deg);transform-origin:left bottom;':''}">${esc(u.n)}</div>
+     <div class="unterschrift">${esc(u.a)}</div></div>`).join('');
+
+  const siegel = m.siegel ? `<div style="display:flex;gap:8px;align-items:flex-end">
+      ${Array.from({length:1+m.nebensiegel},(_,i)=>{
+        const gr = i===0 ? m.siegel : Math.round(m.siegel*0.55);
+        return `<div class="siegelrund" style="width:${gr}px;height:${gr}px;font-size:${Math.round(gr*0.42)}px${
+          r>=7?';box-shadow:0 0 0 2px var(--gold),0 1px 3px rgba(0,0,0,.4), inset 0 -2px 4px rgba(0,0,0,.35)':''}">${kaiserreich()?'N':'RF'}</div>`;
+      }).join('')}</div>` : '';
+
+  const kugeln = m.kugeln
+    ? [[6,6],[6,'auto'],['auto',6],['auto','auto']].map((_,i)=>{
+        const pos = ['top:5px;left:5px','bottom:5px;left:5px','top:5px;right:5px','bottom:5px;right:5px'][i];
+        return `<div class="goldkugel" style="${pos}"></div>`;
+      }).join('') : '';
+
+  const falten = stufe==='pergament'
+    ? `<div class="falte" style="left:33%;top:0;bottom:0;width:2px"></div>
+       <div class="falte" style="left:67%;top:0;bottom:0;width:2px"></div>
+       <div class="falte" style="top:48%;left:0;right:0;height:2px"></div>` : '';
+
+  const huelle = stufe==='pergament' ? 'pergamenthuelle' : (r>=7 ? 'patenthuelle' : '');
+  const inhalt = `<div class="card ${stufe}" style="position:relative;margin:0">
+      ${falten}${kugeln}
+      <div class="cb" style="padding:26px 30px 24px">
+        ${m.titelband?`<div class="titelband">Au nom de l'Empereur</div>`:''}
+        <div class="bescheidkopf">${esc(kopf)}</div>
+        <div class="bescheidrang">${esc(ziel.name)}</div>
+        <div class="bescheidzusatz">${esc(zusatz)}</div>
+        <div class="feldzeile" style="margin-bottom:16px">
+          ${bescheidFeld('Name', S.name)}
+          ${bescheidFeld('Einheit', '32ᵉ demi-brigade de bataille')}
+          ${bescheidFeld('Ausgefertigt', jahr)}
+        </div>
+        <div class="ergebnis ${klasse}" style="background:none;border-left:2px solid var(--gold-linie);padding-left:14px">${text}</div>
+        <div class="bescheidfuss">
+          <div style="display:flex;gap:26px;flex-wrap:wrap">${unterschriften}</div>
+          ${siegel}
+        </div>
+        <div class="probe" style="margin-top:16px">${statuszeile}</div>
+      </div></div>`;
+  return huelle ? `<div class="${huelle}" style="margin-bottom:18px">${inhalt}</div>` : inhalt;
+}
+
 function zeigeBefoerderung(n){
   /* Der Stand wird beim ersten Betreten der Station eingefroren, je Station —
      seit Kairo gibt es eine zweite Musterung, und die prüft den Stand von
      jetzt, nicht den von Verona. */
   S.befPruefungen = S.befPruefungen || {};
-  const ziel = leiterZiel();
+  const ziel = leiterZiel(true);   // die Musterung vergibt nur noch Patente
 
   if(!ziel){
     stationErledigt();
@@ -3084,13 +3550,26 @@ function zeigeBefoerderung(n){
          + `<br><br><em>${(nachsatz[fehlt] || nachsatz.fehltRuf)()}</em>`;
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
-  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    <div class="card papier"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+  const statuszeile = `${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}`;
+
+  /* **Ein Bescheid wird nur ausgestellt, wenn es etwas zu bescheiden gibt** —
+     und erst ab Rang 5. Wer übergangen wird oder zwei Wollstreifen bekommt,
+     sieht den gewohnten Bogen: Über eine Ernennung, die nicht stattgefunden
+     hat, schreibt keine Kanzlei ein Papier. */
+  const mitBescheid = bekommt && ziel.rang >= 5;
+  const blatt = mitBescheid
+    ? bescheidBogen(ziel, text, klasse, statuszeile)
+    : `<div class="card papier"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
       <div class="cb">${vordruck(n)}<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
       <div class="ergebnis ${klasse}">${text}</div>
       <div class="rangzeile" style="margin-top:12px">${bekommt?rangabzeichen(S):''}
-        <span class="probe" style="margin:0">${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}</span></div>
-      </div></div>
+        <span class="probe" style="margin:0">${statuszeile}</span></div>
+      </div></div>`;
+
+  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
+    ${mitBescheid?`<div class="card"><div class="ch"><span>${esc(n.ort)}</span><span>${esc(n.datum)}</span></div>
+      <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div></div></div>`:''}
+    ${blatt}
     <div class="orders"><div class="ordbody"><button class="ord weiter" onclick="naechster()">Weiter</button></div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();

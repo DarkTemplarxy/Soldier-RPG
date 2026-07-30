@@ -48,18 +48,30 @@ function mitHilfe(k, beschriftung){
   return e ? `<span class="hilfe" data-hilfe="${String(e).replace(/"/g,'&quot;')}">${beschriftung}</span>` : beschriftung;
 }
 
+/* ══════════════════ WAS EIN RANG IN DER WERTUNG WIEGT ══════════════════
+
+   **Der Rang ist der größte Posten der Wertung, und mit Abstand.** Ein
+   perfekter Lauf bis Waterloo bringt rund 5 000 Punkte; davon kommen 2 900 —
+   also über die Hälfte — allein aus dem Marschallstab. Das ist Absicht: Die
+   Rangleiter *ist* das Spiel, und jede Beförderung soll sich in der Wertung
+   anfühlen wie das, was sie im Leben des Mannes war.
+
+   Die Werte sind das Fünffache der früheren Skala (KONZEPT §5), und sie
+   wachsen überproportional: Der Schritt vom Caporal zum Fourrier bringt 80,
+   der vom Colonel zum Général 390. **Je höher man steht, desto mehr ist der
+   nächste Schritt wert** — weil er ungleich schwerer zu erreichen ist. */
 const RANG = [
-  {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
-  {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62},
-  {n:6,name:'Sergent-major',wert:88},
+  {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:60},{n:3,name:'Caporal',wert:130},
+  {n:4,name:'Caporal-fourrier',wert:210},{n:5,name:'Sergent',wert:310},
+  {n:6,name:'Sergent-major',wert:440},
   /* Die Offiziers- und Stabshälfte. Bis zum 28.07.2026 endete `RANG` bei 6,
      und `rangWert()` lieferte für alles darüber **0** — eine stille
      Fehlwertung, die erst auffiel, als die Leiter über Rang 6 hinauswuchs.
      Werte aus RANGLEITER §7, identisch mit KONZEPT §5. */
-  {n:7,name:'Sous-Lieutenant',wert:120},{n:8,name:'Lieutenant',wert:158},
-  {n:9,name:'Capitaine',wert:205},{n:10,name:'Chef de bataillon',wert:262},
-  {n:11,name:'Colonel',wert:330},{n:12,name:'Général de brigade',wert:408},
-  {n:13,name:'Général de division',wert:490},{n:14,name:'Maréchal d\'Empire',wert:580}
+  {n:7,name:'Sous-Lieutenant',wert:600},{n:8,name:'Lieutenant',wert:790},
+  {n:9,name:'Capitaine',wert:1025},{n:10,name:'Chef de bataillon',wert:1310},
+  {n:11,name:'Colonel',wert:1650},{n:12,name:'Général de brigade',wert:2040},
+  {n:13,name:'Général de division',wert:2450},{n:14,name:'Maréchal d\'Empire',wert:2900}
 ];
 /* ══════════════════ DER SOLD ══════════════════
 
@@ -133,34 +145,114 @@ function rangWert(n){ const r=RANG.find(r=>r.n===n); return r?r.wert:0; }
    erkennt man an der Epaulette (Grenadier rot, Voltigeur grüngelb), die
    Unteroffiziere an den Streifen am Unterarm: Caporal zwei aus Wolle,
    Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse. */
-function rangabzeichen(mann){
-  const r = mann.rang, hoehe = 23;
-  const rahmen = i => `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>${i}</svg>`;
+/* ══════════════════ DIE RANGABZEICHEN ══════════════════
 
-  if(r===2){                                   // Epaulette auf der Schulter
-    const f = mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125';
-    const fransen = [10,14,18,22,26].map(x=>`<rect x="${x}" y="13" width="2" height="7" rx="1"/>`).join('');
-    return rahmen(`<rect x="7" y="5" width="22" height="7" rx="3.5" fill="${f}"/>
-      <g fill="${f}" opacity=".8">${fransen}</g>`);
+   **Vierzehn Ränge, drei Waffengattungen, kein einziges Bild.** Die Formen
+   stammen aus dem Entwurfspaket (`abzeichen/*.svg`); eingebaut sind sie als
+   Funktion, die einen SVG-String zurückgibt — sonst brechen `file://`, die
+   Einzeldatei-Weitergabe und `werkzeug/bauen.js`.
+
+   **Das Schildchen trägt die Farbe des Rocks**, das Metall die der Gattung:
+   Infanterie Gold auf Königsblau, Kavallerie Silber auf Dragonergrün,
+   Artillerie Gold auf Dunkelblau mit rotem Vorstoß. **Ab Rang 12 gibt es
+   keine Gattung mehr** — ein General ist keiner Waffe mehr zugeordnet, und
+   das Schildchen wird selbst golden.
+
+   Die Stufenfolge ist in allen Gattungen dieselbe und erzählt die Laufbahn:
+   leer → Epaulette der Elitekompanie → zwei Wollstreifen → plus Querstreifen
+   → eine Tresse aus Metallfaden → zwei Tressen → Epaulette mit rotem
+   Seidenstreifen → Streifen blass → Epaulette und Contre-Epaulette → dicke
+   Fransen → zwei dicke → zwei Sterne → drei Sterne → gekreuzte Stäbe. */
+const WAFFE = {
+  infanterie: {plate:'#27415f', stroke:'#16283d', wolle:'#d08a2a', tresse:'#e8c469',
+               tresseD:'#a8791a', ep:'#e0b552'},
+  kavallerie: {plate:'#2c4630', stroke:'#182a1a', wolle:'#d08a2a', tresse:'#dfe3e0',
+               tresseD:'#9aa3a0', ep:'#cfd6d2'},
+  artillerie: {plate:'#1e2a3f', stroke:'#0f1624', piping:'rgba(156,49,37,.75)',
+               wolle:'#9c3125', tresse:'#e8c469', tresseD:'#a8791a', ep:'#e0b552'}
+};
+
+/* Die drei Bausteine, aus denen jedes Abzeichen besteht. Sie stehen hier
+   einmal statt in vierzehn Vorlagen mehrfach. */
+function abzChevron(x1, f, breit){
+  const b = breit||9;
+  return `<polygon points="${x1},19 ${x1+b},5 ${x1+b+5},5 ${x1+5},19" fill="${f}"/>`;
+}
+function abzEpaulette(x, w, f, fransen, dick){
+  const n = fransen===undefined ? 5 : fransen;
+  const fy = dick ? 8 : 6.6, fw = dick ? 3.4 : 1.8, schritt = dick ? 4 : 4;
+  let out = `<rect x="${x}" y="5" width="${w}" height="7.4" rx="3.7" fill="${f}"/>`;
+  for(let i=0;i<n;i++){
+    const fx = x + 5 + i*schritt;
+    out += `<rect x="${fx}" y="13" width="${fw}" height="${fy}" rx="${fw/2}" fill="${f}" opacity=".${dick?'85':'8'}"/>`;
   }
-  if(r>=3){                                    // Streifen am Unterarm
-    const tresse = r>=5;
-    const f = tresse ? '#8a6410' : '#a86a20';  // Tresse in Metallfarbe, Wolle in Aurore
-    /* Der Sergent-major trägt **zwei** Tressen aus Metallfaden — historisch
-       genau der Unterschied zum Sergenten, und auf 36 Pixel der einzige, den
-       man sehen kann. */
-    const streifen = r>=6
-      ? `<polygon points="6,19 17,5 22,5 11,19" fill="${f}"/>
-         <polygon points="17,19 28,5 33,5 22,19" fill="${f}"/>`
-      : tresse
-      ? `<polygon points="11,19 22,5 29,5 18,19" fill="${f}"/>`
-      : `<polygon points="7,19 16,5 21,5 12,19" fill="${f}"/>
-         <polygon points="16,19 25,5 30,5 21,19" fill="${f}"/>`;
-    const quer = r===4 ? `<rect x="6" y="2.5" width="24" height="2.6" rx="1.3" fill="${f}" opacity=".85"/>` : '';
-    return rahmen(streifen + quer);
+  return out;
+}
+function abzStern(cx, gr){
+  const h = (gr||6.8)/2;
+  return `<rect x="${cx-h}" y="${12-h}" width="${gr||6.8}" height="${gr||6.8}" transform="rotate(45 ${cx} 12)" fill="url(#pgold)"/>`;
+}
+
+function rangabzeichen(mann){
+  const r = mann.rang|0;
+  if(r < 2) return '';                        // Fusilier: der Ärmel ist leer
+  const gold = r >= 12;
+  const P = WAFFE[mann.waffe || 'infanterie'] || WAFFE.infanterie;
+  const verlauf = `<defs><linearGradient id="pgold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0%" stop-color="#f6ecc8"/><stop offset="34%" stop-color="#e0b552"/>
+    <stop offset="70%" stop-color="#c8901f"/><stop offset="100%" stop-color="#8a6410"/></linearGradient></defs>`;
+  const grund = gold
+    ? `<rect x="0" y="0" width="36" height="24" rx="2" fill="url(#pgold)" stroke="#8a6410"/>
+       <rect x="1.2" y="1.2" width="33.6" height="21.6" rx="1.4" fill="none" stroke="rgba(94,66,8,.35)"/>`
+    : `<rect x="0" y="0" width="36" height="24" rx="2" fill="${P.plate}" stroke="${P.stroke}"/>
+       <rect x="1.2" y="1.2" width="33.6" height="21.6" rx="1.4" fill="none" stroke="${P.piping||'rgba(255,255,255,.10)'}"/>`;
+
+  let i = '';
+  if(r === 2){                                 // Elitekompanie: rot oder grüngelb
+    i = abzEpaulette(6, 24, mann.zweig==='voltigeur' ? '#6f7d33' : '#9c3125');
+  } else if(r === 3){                          // zwei Wollstreifen
+    i = abzChevron(6, P.wolle) + abzChevron(15, P.wolle);
+  } else if(r === 4){                          // dazu der Querstreifen des Fourriers
+    i = abzChevron(6, P.wolle) + abzChevron(15, P.wolle)
+      + `<rect x="6" y="2.4" width="24" height="2.6" rx="1.3" fill="${P.wolle}" opacity=".9"/>`;
+  } else if(r === 5){                          // eine Tresse aus Metallfaden
+    i = `<polygon points="11,19 20,5 25,5 16,19" fill="${P.tresse}"/>
+         <polygon points="11,19 20,5 21.4,5 12.4,19" fill="${P.tresseD}" opacity=".5"/>`;
+  } else if(r === 6){                          // zwei Tressen — der sichtbare Unterschied
+    i = abzChevron(5, P.tresse) + abzChevron(16, P.tresse);
+  } else if(r === 7){                          // Epaulette mit rotem Seidenstreifen
+    i = abzEpaulette(6, 24, P.ep)
+      + `<rect x="8" y="7.6" width="20" height="2" rx="1" fill="#9c3125" opacity=".9"/>`;
+  } else if(r === 8){                          // derselbe Streifen, blasser
+    i = abzEpaulette(6, 24, P.ep)
+      + `<rect x="8" y="7.6" width="20" height="1.2" rx=".6" fill="#9c3125" opacity=".55"/>`;
+  } else if(r === 9){                          // Epaulette und Contre-Epaulette
+    i = `<rect x="2" y="5" width="9" height="7.4" rx="3.7" fill="${P.ep}" opacity=".85"/>`
+      + abzEpaulette(8, 24, P.ep);
+  } else if(r === 10 || r === 11){             // dicke Fransen, ab 11 auf beiden Schultern
+    if(r === 10){
+      i = `<rect x="6" y="5" width="24" height="7.4" rx="3.7" fill="${P.ep}"/>`;
+      for(let k=0;k<5;k++) i += `<rect x="${9.6+k*4}" y="13" width="3.4" height="8" rx="1.7" fill="${P.ep}" opacity=".85"/>`;
+    } else {
+      i = '';
+      for(const x0 of [1.6, 22]){
+        i += `<rect x="${x0}" y="5" width="12" height="7.4" rx="3.7" fill="${P.ep}"/>`;
+        for(let k=0;k<3;k++) i += `<rect x="${x0+1.4+k*3.4}" y="12.4" width="3.2" height="8" rx="1.6" fill="${P.ep}" opacity=".85"/>`;
+      }
+    }
+  } else if(r === 12){                         // zwei Sterne auf dem Balken
+    i = `<rect x="5" y="9" width="26" height="6" rx="3" fill="#1e3350" opacity=".92"/>`
+      + abzStern(13) + abzStern(23);
+  } else if(r === 13){                         // drei Sterne
+    i = `<rect x="4" y="9" width="28" height="6" rx="3" fill="#1e3350" opacity=".92"/>`
+      + abzStern(11, 6.4) + abzStern(18, 6.4) + abzStern(25, 6.4);
+  } else {                                     // der Marschallstab: gekreuzte Stäbe
+    i = `<g stroke="#1e3350" stroke-width="3.4" stroke-linecap="round">
+        <line x1="9" y1="18" x2="27" y2="6"/><line x1="27" y1="18" x2="9" y2="6"/></g>`
+      + abzStern(18, 7.2)
+      + [[9,6],[27,6],[9,18],[27,18]].map(([cx,cy])=>`<circle cx="${cx}" cy="${cy}" r="1.9" fill="#1e3350"/>`).join('');
   }
-  return '';                                   // Fusilier: der Ärmel ist leer
+  return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Rangabzeichen">${verlauf}${grund}${i}</svg>`;
 }
 
 /* ══════════════════ DIE KETTE ÜBER DIR ══════════════════
@@ -272,17 +364,17 @@ const HERKUENFTE = [
    sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
    davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
-  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
-  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, kurz:'Die perfekte Schlacht.'},
-  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
-  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
-  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
-  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, kurz:'Kein Feldzug, ein Überlebensspiel.'},
-  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
-  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, kurz:'Verteidigung der Heimat, Abdankung.'},
-  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, kurz:'Waterloo. Epilog je nach Rang.'}
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, schwierigkeit:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, schwierigkeit:4, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, schwierigkeit:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, schwierigkeit:6, kurz:'Die perfekte Schlacht.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, schwierigkeit:8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, sold:0.6, schwierigkeit:10, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, schwierigkeit:12, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, schwierigkeit:16, kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, schwierigkeit:16, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, schwierigkeit:18, kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, sold:1.0, schwierigkeit:20, kurz:'Waterloo. Epilog je nach Rang.'}
 ];
 const STATIONEN = {};
 
@@ -305,9 +397,35 @@ const STATIONEN = {};
 
    Ein Orden ist damit die einzige Auszeichnung im Spiel, die man sich in einem
    Kapitel verdient und in einem anderen einlöst. */
+/* ══════════════════ DIE TAPFERKEITSMEDAILLEN ══════════════════
+
+   **Drei Stufen an Zählern, die es längst gibt und die bisher nichts taten.**
+   `S.nennungen`, `S.bulletins` und `S.belobigungen` liefen seit der Leiter der
+   Sichtbarkeit mit; gezählt wurde, ausgezahlt nicht. Sie sind der natürliche
+   Ort für eine Auszeichnung, die man sich im Gefecht verdient und nicht in
+   einer Kanzlei.
+
+   **Die Form trägt die Klasse** (Bündel 5 des Entwurfspakets): Ein Staatsorden
+   ist ein Kreuz am Band, eine Gefechtsauszeichnung eine geprägte Scheibe an
+   der Trikolore, eine Ehrenwaffe ein Stück auf einem gravierten Täfelchen.
+   Man erkennt die Klasse, bevor man den Namen liest — deshalb wird keine
+   dieser drei Formen für eine andere verwendet.
+
+   **Sie stapeln nicht.** Wer Silber bekommt, legt Bronze ab; im Livret steht
+   nur die höchste Stufe. Eine Reihe von drei Scheiben derselben Prägung wäre
+   eine Sammlung, und Sammlungen gibt es in diesem Spiel nicht. */
+const METALL = {
+  gold:   {hell:'#f6ecc8', mid:'#e0b552', tief:'#c8901f', dunkel:'#8a6410', tinte:'#5e4208'},
+  silber: {hell:'#f2f5f4', mid:'#dfe3e0', tief:'#c3cac7', dunkel:'#8d9794', tinte:'#41504c'},
+  bronze: {hell:'#e7c39c', mid:'#c98f5c', tief:'#a8703c', dunkel:'#7a4f28', tinte:'#4a2d16'}
+};
+/* Welche Stufe eine andere ablöst. Steht hier und nicht in `ordenFaellig()`,
+   weil es eine Eigenschaft der Auszeichnung ist und keine der Vergabe. */
+const TAPFER_REIHE = ['tapfer_bronze','tapfer_silber','tapfer_gold'];
+
 const ORDEN = [
   {id:'ehrenwaffe', name:'Ehrenwaffe', voll:'Fusil d\'honneur',
-   ab:'1799', vp:10, ruf:6, pension:0.5,
+   ab:'1799', vp:30, ruf:6, pension:0.5,
    was:'Eine Muskete mit graviertem Schloss und deinem Namen darauf, verliehen im Namen der Konsuln. Sie schießt nicht besser. Sie sagt nur jedem, der sie sieht, was du getan hast.',
    bedingung:'Drei Nennungen im Tagesbefehl'},
 
@@ -317,7 +435,7 @@ const ORDEN = [
      endlich einen eigenen Preis: Wer durch die Bresche von Akkon gegangen ist,
      bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist. */
   {id:'ehrensaebel', name:'Ehrensäbel', voll:'Sabre d\'honneur',
-   ab:'1799', vp:14, ruf:8, pension:1.0,
+   ab:'1799', vp:42, ruf:8, pension:1.0,
    was:'Ein Säbel mit vergoldetem Gefäß und einer Gravur, die den Tag nennt und den Ort. Der Waffenmeister sagt, er sei zum Tragen und nicht zum Fechten, und hat unrecht: Er ist zum Angesehenwerden.',
    bedingung:'Eine Sondermission voll bestanden und fünf Nennungen'},
 
@@ -326,45 +444,245 @@ const ORDEN = [
      KONZEPT §5 hält den Platz frei: „je fremdem Orden +10, höchstens zwei
      gewertet" — die zweite Stelle bleibt für Spanien oder Preußen offen. */
   {id:'eisenkrone', name:'Eiserne Krone', voll:'Ordine della Corona Ferrea',
-   ab:'1805', fremd:true, vp:10, ruf:6, pension:0.5,
+   ab:'1805', fremd:true, vp:30, ruf:6, pension:0.5,
    was:'Ein Kreuz an dunkelgelbem Band mit grünem Rand, verliehen im Namen eines Königreichs, dessen König derselbe Mann ist, der dich schon einmal ausgezeichnet hat. In der Kompanie heißt es nur „die Lombardische".',
    bedingung:'Eine Meldung an den Oberbefehl und Austerlitz überlebt'},
 
   {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
-   ab:'1804', vp:12, ruf:10, pension:1.0,
+   ab:'1804', vp:36, ruf:10, pension:1.0,
    was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
-   bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'}
+   bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'},
+
+  /* Der zweite Grad. Historisch war der Sprung vom Légionnaire zum Officier an
+     den Rang gebunden: Mannschaften wurden Légionnaire, Offiziere Officier.
+     Deshalb setzt er den ersten Grad *und* ein Patent voraus — er ist keine
+     zweite Auszeichnung, sondern dieselbe eine Stufe höher. Die Pension
+     verdoppelt sich, und das war der eigentliche Unterschied: zweitausend
+     Francs im Jahr statt fünfhundert. */
+  {id:'legion_offizier', name:'Offizier der Ehrenlegion', voll:'Officier de la Légion d\'honneur',
+   ab:'1807', vp:36, ruf:10, pension:2.0,
+   was:'Dasselbe Kreuz, größer, an einem Band mit Rosette. Zweitausend Francs im Jahr, und in einer Liste, die in Paris geführt wird, steht dein Name jetzt in der zweiten Spalte statt in der ersten.',
+   bedingung:'Die Ehrenlegion, ein Patent und acht Nennungen'},
+
+  /* ── Der vierte Grad, und die Schranke von Rang 13 ──
+     **Historisch ist der Grand Officier der Grad, ab dem man nicht mehr
+     ausgezeichnet, sondern aufgenommen wird.** Die Ehrenlegion hatte fünf
+     Stufen; die oberen zwei vergab der Kaiser persönlich, und die Liste war
+     kurz genug, dass er die Namen kannte.
+
+     Im Spiel ist er die Bedingung für den Général de division (`orden:
+     'legion_grand'` in der LEITER). Bis zum 30.07.2026 war er dort gefordert
+     und nicht gebaut — Rang 13 und damit auch 14 waren verschlossen, und die
+     ganze VP-Ökonomie war gegen eine Decke geeicht, die niemand erreicht.
+
+     **Die Bedingungen sind Zahlen, die es schon gibt**, keine neuen Zähler:
+     der dritte Grad, ein Regiment (Rang 11) und fünf Bulletins. Wer so weit
+     kommt, hat den Stern verdient, bevor er ihn braucht — und genau so soll
+     eine Schranke sitzen: als Bestätigung, nicht als Mautstelle. */
+  {id:'legion_grand', name:'Grand Officier der Ehrenlegion', voll:'Grand Officier de la Légion d\'honneur',
+   ab:'1808', vp:48, ruf:14, pension:3.0,
+   was:'Ein achtstrahliger Stern, auf den Rock genäht, kein Band. Man hängt ihn nicht um und legt ihn nicht ab; er ist Teil des Mantels, in dem man vor Leute tritt. Dazu ein Betrag im Jahr, von dem eine Familie lebt, und eine Liste in Paris, die kurz genug ist, dass einer sie auswendig kann.',
+   bedingung:'Offizier der Ehrenlegion, ein Regiment und fünf Bulletins'}
 ];
 function ordenVon(id){ return ORDEN.find(o=>o.id===id) || null; }
 function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
 
 /* Das Kreuz, wie es am Rock hängt. Wie die Rangabzeichen: ein Bild statt eines
    Wortes, und in derselben Größe, damit die Seitenleiste ruhig bleibt. */
+/* Die drei Tapferkeitsstufen. Sie stehen am Ende der Liste, weil sie die
+   jüngste Zutat sind — die Reihenfolge in `ORDEN` bestimmt nichts. */
+ORDEN.push(
+  {id:'tapfer_bronze', name:'Tapferkeitsmedaille in Bronze', voll:'Médaille de la valeur · bronze',
+   ab:'1796', metall:'bronze', stufe:1, vp:12, ruf:2, pension:0,
+   was:'Eine geprägte Scheibe an der Trikolore, gekreuzte Musketen darauf. Sie wird nicht verliehen, sie wird ausgegeben — der Fourrier hat einen Karton davon, und wessen Name im Tagesbefehl stand, bekommt eine.',
+   bedingung:'Einmal im Tagesbefehl genannt'},
+  {id:'tapfer_silber', name:'Tapferkeitsmedaille in Silber', voll:'Médaille de la valeur · argent',
+   ab:'1796', metall:'silber', stufe:2, vp:24, ruf:4, pension:0,
+   was:'Dieselbe Scheibe in Silber. Der Karton des Fourriers hat davon vier, und er weiß, wer sie bekommt, bevor die Liste kommt.',
+   bedingung:'Einmal im Bulletin der Großen Armee'},
+  {id:'tapfer_gold', name:'Tapferkeitsmedaille in Gold', voll:'Médaille de la valeur · or',
+   ab:'1796', metall:'gold', stufe:3, vp:36, ruf:6, pension:0.5,
+   was:'Dieselbe Scheibe in Gold. Es gibt keinen Karton dafür; sie kommt einzeln, in Papier gewickelt, und der Capitaine übergibt sie selbst.',
+   bedingung:'Lob vor der Front, ein Bulletin und eine Kette ohne einen einzigen Fehlschlag'}
+);
+
+/* ── Die geprägte Scheibe an der Trikolore ──
+   **Die Aufhängung ist die halbe Arbeit**, und kein Bauteil darf frei
+   schweben: Band → Steg → Ring → Scheibe, von oben nach unten. Die Scheibe
+   wird **zuerst** gezeichnet und Steg und Ring darauf — sonst schneidet sie
+   den Ring aus. Das war beim Entwerfen der häufigste Fehler. */
+function tapferBild(metall){
+  const M = METALL[metall] || METALL.bronze;
+  const gid = 'm'+metall;
+  return `<svg class="orden" viewBox="0 0 120 150" role="img" aria-label="Tapferkeitsmedaille">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="${M.hell}"/><stop offset="32%" stop-color="${M.mid}"/>
+      <stop offset="70%" stop-color="${M.tief}"/><stop offset="100%" stop-color="${M.dunkel}"/></linearGradient></defs>
+    <rect x="38" y="0" width="44" height="50" fill="#27415f"/>
+    <rect x="52" y="0" width="16" height="50" fill="#e8e0cd"/>
+    <rect x="68" y="0" width="14" height="50" fill="#9c3125"/>
+    <circle cx="60" cy="108" r="36" fill="url(#${gid})"/>
+    <circle cx="60" cy="108" r="29" fill="${M.mid}" opacity=".45"/>
+    <circle cx="60" cy="108" r="31.5" fill="none" stroke="${M.dunkel}" stroke-width="1.6" opacity=".55"/>
+    ${[-26,26].map(w=>`<g transform="rotate(${w} 60 108)">
+      <rect x="59.2" y="82" width="1.9" height="52" fill="${M.tinte}" opacity=".78"/>
+      <rect x="57.6" y="122" width="5" height="12" rx="2" fill="${M.tinte}" opacity=".62"/>
+      <rect x="58.4" y="78" width="3.4" height="6" rx="1.2" fill="${M.tinte}" opacity=".5"/></g>`).join('')}
+    <rect x="50" y="46" width="20" height="11" rx="2" fill="url(#${gid})"/>
+    <circle cx="60" cy="68" r="6.5" fill="none" stroke="url(#${gid})" stroke-width="3.2"/>
+  </svg>`;
+}
+
+/* ── Das Gold, in dem jede Fassung, jeder Steg und jeder Ring gezeichnet ist ──
+   Ein Verlauf je Bild, weil zwei Bilder auf derselben Seite sonst um dieselbe
+   `id` streiten. */
+function ordenGold(gid){
+  const M = METALL.gold;
+  return `<linearGradient id="${gid}" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0%" stop-color="#f0dfae"/><stop offset="30%" stop-color="${M.mid}"/>
+    <stop offset="68%" stop-color="${M.tief}"/><stop offset="100%" stop-color="${M.dunkel}"/></linearGradient>`;
+}
+
+/* ── Die Aufhängung: Band, Steg, Ring ──
+   Dieselbe Reihenfolge wie bei der Tapferkeitsscheibe und aus demselben Grund:
+   **kein Bauteil darf frei schweben.** Das Band läuft von der Oberkante bis
+   `y 56`, der Steg überlappt es, der Ring hängt am Steg, und was darunter
+   kommt, wird zuerst gezeichnet, damit es den Ring nicht ausschneidet. */
+function ordenBand(gid, rosette){
+  return `<rect x="57" y="50" width="6" height="12" rx="3" fill="url(#${gid})"/>
+    ${rosette||''}<circle cx="60" cy="62" r="7.5" fill="none" stroke="url(#${gid})" stroke-width="3.6"/>`;
+}
+
+/* ── Die vier weißen Emailarme ──
+   **Der Arm läuft nach außen breiter zu, und das ist keine Zierde, sondern der
+   Grund, warum man vier Arme sieht statt zwei.** Ein Balken, der durch die
+   Mitte geht, ist nach einer Drehung um 180° derselbe Balken; vier davon bei
+   45° · 135° · 225° · 315° ergeben deshalb ein X aus zwei Strichen und kein
+   Kreuz. Gezeichnet wird jeder Arm daher **vom Mittelpunkt nach außen** — als
+   Trapez, schmal innen, breit an der Spitze. Das ist zugleich die Form, die
+   die Sterne der Zeit wirklich hatten. */
+function ordenKreuz(cy, innen, aussen, strich){
+  const hi = innen * 1.1, ha = aussen * 0.38;
+  const punkte = `${-hi},${-innen} ${hi},${-innen} ${ha},${-aussen} ${-ha},${-aussen}`;
+  return [45,135,225,315].map(a=>`<polygon points="${punkte}" fill="#f7f4ec"
+    stroke="#8a8272" stroke-width="${strich}" stroke-linejoin="round"
+    transform="translate(60 ${cy}) rotate(${a})"/>`).join('');
+}
+
+/* ── Das gravierte Täfelchen ──
+   Eine Ehrenwaffe ist kein Orden, den man anlegt, sondern ein **Gegenstand mit
+   deinem Namen darauf**. Deshalb hängt sie an keinem Band, sondern liegt auf
+   einem Kärtchen mit Doppellinie — derselbe Vordruck wie die amtlichen Bögen,
+   nur handgroß.
+
+   **Die Gravur ist die halbe Auszeichnung, und sie nennt den Namen des Mannes,
+   der sie trägt.** Historisch stand er darauf; im Spiel ist es die einzige
+   Stelle, an der die eigene Ausrüstung den eigenen Namen sagt — und genau das
+   unterscheidet ein Täfelchen von einer Zahl in einer Liste. Wo kein Name da
+   ist, steht das, was ein Graveur ohne Namen schreiben würde. */
+function ordenGravur(){
+  const n = (S && S.name || '').trim();
+  if(!n) return 'VALEUR';
+  const kurz = n.split(/\s+/).pop().toUpperCase();
+  return kurz.length > 11 ? kurz.slice(0,11) : kurz;
+}
+/* **Das Kärtchen ist einen Ton dunkler als das Papier, auf dem es liegt.** Der
+   Entwurf gibt ihm den Papierton selbst — auf dem Ordensblatt, das denselben
+   Grund hat, verschwindet es dann bis auf seinen Rand. Ein Täfelchen ist ein
+   Gegenstand und kein Loch im Bogen. */
+function ordenTaefelchen(inhalt){
+  return `<rect x="14" y="30" width="92" height="116" rx="3" fill="#ddd0af" stroke="#9d8d6e"/>
+    <rect x="18" y="34" width="84" height="108" rx="2" fill="none" stroke="rgba(90,76,58,.45)"/>
+    ${inhalt}
+    <text x="60" y="133" text-anchor="middle" font-family="Didot,'Bodoni 72',Georgia,serif"
+      font-size="10" letter-spacing="2" fill="#6b4f22">${esc(ordenGravur())}</text>`;
+}
+
+/* ── Der Bruststern ──
+   **Die einzige Auszeichnung ohne Band**, und daran erkennt man sie: Ein Stern
+   wird nicht umgehängt, er wird auf den Rock genäht. Genau deshalb ist er die
+   richtige Form für einen Grad, den man nicht mehr vorzeigt, sondern trägt.
+
+   Acht Strahlen aus vier durchgehenden Balken — **hier ist der Durchstoß
+   richtig**, anders als beim Kreuz: Ein Balken durch die Mitte gibt zwei
+   Spitzen, vier Balken geben acht, und acht Spitzen sind das, was ein Stern
+   hat. Darüber die vier verjüngten Kreuzarme aus `ordenKreuz()`, damit das
+   Kreuz auch hier vier Arme zeigt und kein X. */
+function ordenStern(gid, cy){
+  const strahlen = [22.5, 67.5, 112.5, 157.5].map(a =>
+    `<rect x="55.5" y="${cy-48}" width="9" height="96" transform="rotate(${a} 60 ${cy})" fill="url(#${gid})"/>`).join('');
+  const glanz = [33.5, 78.5, 123.5, 168.5].map(a =>
+    `<rect x="58.5" y="${cy-40}" width="3" height="80" transform="rotate(${a} 60 ${cy})" fill="#f0dfae" opacity=".55"/>`).join('');
+  /* **Das Kreuz reicht fast bis an die Strahlenspitzen.** Bleibt es deutlich
+     kürzer, überragen die Strahlen es so weit, dass das Ganze als Windrad
+     liest und nicht als Stern mit Kreuz — bei Daumengröße war genau das der
+     erste Eindruck. Vierzig gegen achtundvierzig ist das Verhältnis, das die
+     Bruststerne der Zeit hatten. */
+  return strahlen + glanz + ordenKreuz(cy, 7, 40, 1.3)
+    + `<circle cx="60" cy="${cy}" r="13" fill="url(#${gid})"/>
+       <circle cx="60" cy="${cy}" r="9.5" fill="none" stroke="${METALL.gold.dunkel}" stroke-width="1" opacity=".6"/>
+       <text x="60" y="${cy+6}" text-anchor="middle" font-family="Didot,'Bodoni 72',Georgia,serif"
+         font-size="15" fill="${METALL.gold.tinte}">N</text>`;
+}
+
+/* **Die Form trägt die Klasse** (Entwurfspaket, Bündel 5): Ein Staatsorden ist
+   ein *Kreuz am Band*, eine Gefechtsauszeichnung eine *geprägte Scheibe an der
+   Trikolore*, eine Ehrenwaffe ein *Stück auf einem gravierten Täfelchen*. Man
+   erkennt die Klasse, bevor man den Namen liest — deshalb wird keine dieser
+   drei Formen für eine andere verwendet. */
 function ordensbild(id){
-  if(id==='ehrenwaffe') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenwaffe">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-    <rect x="6" y="11.2" width="24" height="1.6" rx=".8" fill="#6a6152"/>
-    <rect x="5" y="10" width="6" height="4" rx="1" fill="#6e5320"/>
-    <circle cx="27" cy="12" r="3" fill="none" stroke="#8a6410" stroke-width="1.4"/></svg>`;
-  if(id==='ehrensaebel') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrensäbel">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-    <path d="M8 17 C 16 15, 24 11, 29 6" fill="none" stroke="#5c5446" stroke-width="1.8" stroke-linecap="round"/>
-    <rect x="5" y="15" width="5" height="3.4" rx="1.7" fill="#8a6410"/>
-    <path d="M7 14.4 C 10 13, 11 16, 8 17.4" fill="none" stroke="#8a6410" stroke-width="1.3"/></svg>`;
-  if(id==='eisenkrone') return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Eiserne Krone">
-    <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-    <rect x="12" y="2" width="12" height="3.4" fill="#c8901f"/>
-    <rect x="12" y="2" width="2" height="3.4" fill="#3e5a2c"/>
-    <rect x="22" y="2" width="2" height="3.4" fill="#3e5a2c"/>
-    <path d="M18 7 L23 13 L18 19 L13 13 Z" fill="#e8e2d4" stroke="#8a8272" stroke-width=".6"/>
-    <circle cx="18" cy="13" r="2.4" fill="none" stroke="#6e5320" stroke-width="1.5"/></svg>`;
-  if(id==='legion'){
-    const arme = [0,90,180,270].map(a=>`<rect x="16.6" y="6" width="2.8" height="12" rx="1.4"
-      fill="#f0ece2" stroke="#8a8272" stroke-width=".5" transform="rotate(${a+45} 18 12)"/>`).join('');
-    return `<svg class="abzeichen" viewBox="0 0 36 24" role="img" aria-label="Ehrenlegion">
-      <rect x="0" y="0" width="36" height="24" rx="2" fill="#ddd0af" stroke="#b3a382"/>
-      <rect x="13" y="2" width="10" height="4" fill="#9c3125"/>
-      ${arme}<circle cx="18" cy="12" r="2.6" fill="#8a6410"/></svg>`;
+  /* Die drei Stufen teilen sich eine Form und unterscheiden sich nur im
+     Metall — genau so, wie sie im Karton des Fourriers liegen. */
+  const t = ORDEN.find(o=>o.id===id && o.metall);
+  if(t) return tapferBild(t.metall);
+
+  const gid = 'og_' + id;
+  const bild = (label, inhalt) => `<svg class="orden" viewBox="0 0 120 176" role="img"
+    aria-label="${label}"><defs>${ordenGold(gid)}</defs>${inhalt}</svg>`;
+
+  if(id==='ehrenwaffe') return bild('Ehrenwaffe', ordenTaefelchen(
+    `<g transform="rotate(-28 60 92)">
+      <rect x="24" y="88" width="72" height="5" rx="2.5" fill="#6a6152"/>
+      <rect x="22" y="84" width="20" height="13" rx="3" fill="url(#${gid})"/>
+      <rect x="86" y="86" width="12" height="9" rx="2" fill="#8a7a58"/>
+      <circle cx="52" cy="98" r="7" fill="none" stroke="url(#${gid})" stroke-width="2.6"/></g>`));
+
+  if(id==='ehrensaebel') return bild('Ehrensäbel', ordenTaefelchen(
+    `<path d="M28 116 C 52 108, 78 84, 94 52" fill="none" stroke="#5c5446" stroke-width="7" stroke-linecap="round"/>
+     <path d="M28 116 C 52 108, 78 84, 94 52" fill="none" stroke="#8f8878" stroke-width="2" stroke-linecap="round"/>
+     <rect x="18" y="112" width="16" height="11" rx="5" fill="url(#${gid})"/>
+     <path d="M24 108 C 34 104, 36 122, 26 120" fill="none" stroke="url(#${gid})" stroke-width="4"/>`));
+
+  /* Die Eiserne Krone ist kein Malteserkreuz, sondern eine **Raute** — und in
+     ihrer Mitte liegt der eiserne Reif, der dem Orden den Namen gibt. Das Band
+     ist dunkelgelb mit grünem Rand: die Farben des Königreichs Italien, und der
+     schnellste Weg zu sehen, dass dieser Orden nicht aus Paris kommt. */
+  if(id==='eisenkrone') return bild('Eiserne Krone',
+    `<rect x="40" y="0" width="40" height="56" fill="#c8901f"/>
+     <rect x="40" y="0" width="6" height="56" fill="#3e5a2c"/>
+     <rect x="74" y="0" width="6" height="56" fill="#3e5a2c"/>
+     <polygon points="60,66 90,98 60,130 30,98" fill="#f7f4ec" stroke="#8a8272" stroke-width="1.2"/>
+     <circle cx="60" cy="98" r="13" fill="none" stroke="url(#${gid})" stroke-width="5"/>
+     <rect x="46" y="92" width="28" height="12" rx="2" fill="url(#${gid})" opacity=".9"/>
+     ${ordenBand(gid)}`);
+
+  if(id==='legion_grand') return bild('Grand Officier der Ehrenlegion', ordenStern(gid, 88));
+
+  if(id==='legion' || id==='legion_offizier'){
+    /* Der zweite Grad trägt dasselbe Kreuz an einem Band mit **Rosette** —
+       historisch genau der Unterschied, an dem man ihn erkannte, und der
+       einzige, der sich auf Daumengröße noch zeigen lässt. */
+    const offizier = id === 'legion_offizier';
+    const rosette = offizier
+      ? `<circle cx="60" cy="28" r="15" fill="#7e1f16"/><circle cx="60" cy="28" r="9" fill="#b8402c"/>
+         <circle cx="60" cy="28" r="4" fill="#7e1f16"/>` : '';
+    return bild(offizier ? 'Offizier der Ehrenlegion' : 'Ehrenlegion',
+      `<rect x="40" y="0" width="40" height="56" fill="#9c3125"/>
+       ${ordenKreuz(98, 5, 32, 1.1)}
+       <circle cx="60" cy="98" r="10.5" fill="url(#${gid})"/>
+       <text x="60" y="103" text-anchor="middle" font-family="Didot,'Bodoni 72',Georgia,serif"
+         font-size="13" fill="${METALL.gold.tinte}">N</text>
+       ${ordenBand(gid, rosette)}`);
   }
   return '';
 }
@@ -377,8 +695,43 @@ const AUSRUESTUNG_START = () => ({
   tornister:{name:'Ausgabetornister',zustand:65,verschleiss:10}
 });
 
-// Kaufkosten: Preis je Punkt nach Zehnerbereich
-const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];
+/* ── Der Fertigkeiten-Sockel ──
+   **Alle neun Fertigkeiten beginnen bei 20, nicht mehr bei 5.** Die Skala geht
+   0–100, und 20 ist das, was ein Mann mitbringt, der schon einmal eine Muskete
+   gehalten und schon einmal Hunger gehabt hat — nicht Können, aber auch nicht
+   Ahnungslosigkeit.
+
+   **Der Sinn ist nicht, den Anfänger stärker zu machen.** Gegen die üblichen
+   Schwierigkeiten steht er mit 20 weiterhin weit unten und scheitert; er
+   scheitert nur nicht mehr *absolut*. Die Zahl gehört zur Skala: Wenn ein Wert
+   bis 100 gekauft werden kann, ist 5 kein Startwert, sondern ein Rundungsfehler.
+
+   **Steht in `grundwerte.js` und nicht bei den übrigen Erschaffungszahlen**,
+   weil `mechanik.js` (`neuerCharakter`) ihn braucht und **vor** `oberflaeche.js`
+   geladen wird. Eine Konstante, die zwei Dateien teilen, gehört in die, die
+   zuerst kommt — sonst hängt sie an der Ladereihenfolge. */
+const FERT_SOCKEL = 20;
+
+/* ══════════════════ WAS EIN PUNKT KOSTET ══════════════════
+
+   Preis je Punkt nach Zehnerbereich — `PRO_PUNKT[Math.floor(wert/10)]`.
+
+   **Die Kurve ist exponentiell, und das ist der Bremsklotz der ganzen
+   Ökonomie.** Seit die Obergrenze bei 100 liegt und ein perfekter Lauf ein
+   Vielfaches der früheren Punkte bringt, muss die Bremse aus dem Preis kommen
+   und nicht mehr aus einem Deckel:
+
+   | Weg | Kosten |
+   |---|---|
+   | ein Wert von 20 auf 70 | 330 VP |
+   | **alle fünfzehn** von 20 auf 70 | **4 950 VP** |
+   | ein Wert von 70 auf 100 | 1 250 VP |
+   | ein Wert von 20 auf 100 | 1 580 VP |
+
+   Damit ist „alles auf 70" das Ziel eines perfekten Laufs, und „eine Hundert"
+   kostet so viel wie drei Werte auf 70 — **Breite und Spitze schließen einander
+   fast aus**, und genau das soll die Entscheidung sein. */
+const PRO_PUNKT = [1,1,2,3,5,8,15,25,40,60];
 function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,Math.floor(x/10))]; return t; }
 
 /* ══════════════════ DIE OFFIZIERSPATENTE ══════════════════
@@ -406,18 +759,25 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
         Gunst 0, und die Quellen, aus denen sich Gunst sonst speist — Abende am
         Feuer, Listen führen, den Tornister eines Erschöpften tragen —, sind für
         ihn geschlossen. Er ist mechanisch stärker und **sozial nackt**.
-     3. **Die ersten vier Kapitel werden härter** (`guetePlus`): +8 auf die
-        Feindgüte. Ein Offizier kommt nicht in dieselben Gefechte wie ein
-        Fusilier; er kommt in die, die man einem Offizier gibt.
+     3. **Man steht sichtbarer.** Der Gefahrzuschlag des Patents ist **+2** je
+        Runde, zusätzlich zu den +4/+5 des Offiziersrangs — Epauletten an einem
+        Mann, den in dieser Kompanie niemand kennt.
+
+   **Was hier ausdrücklich nicht steht: ein Güte-Zuschlag.** Die erste Fassung
+   erhöhte die Feindgüte der ersten vier Kapitel um 8, und das Ergebnis waren
+   40 Tote in 40 Läufen. Der Grund stand längst in CLAUDE.md und wurde
+   übersehen: `guete` schrumpft die Hilfe der eigenen Linie, und bei 8 sitzt
+   dieser Hebel am Boden (0,3) — damit ist kein Gefecht mehr zu gewinnen, und
+   jedes verlorene kostet Blut. **`guete` ist kein Schwierigkeitsregler.**
 
    Erzählt wird es als das, was es historisch war: der Sohn eines
    zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
    der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
 const PATENTE = [
-  {id:'patent_sl', rang:7, vp:110, frei:6, abzug:158,
+  {id:'patent_sl', rang:7, vp:550, frei:6, abzug:790,
    label:'Patent als Sous-Lieutenant',
    beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
-  {id:'patent_lt', rang:8, vp:145, frei:8, abzug:205,
+  {id:'patent_lt', rang:8, vp:725, frei:8, abzug:1025,
    label:'Patent als Lieutenant',
    beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
 ];
@@ -427,12 +787,50 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
 
 const LADEN = [
-  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:40},
-  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},
-  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:24},
-  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:20},
-  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:30},
-  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
-  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:15},
-  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12}
+  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
+  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:120},
+  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
+  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
+  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
+  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:60},
+
+  /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
+
+     **Der Rekrut kauft Muskeln, der Veteran kauft Gewohnheiten.**
+
+     Gemessen kaufen Veteranenpunkte heute **Rang und keine Strecke** — Weite
+     57 / 62 / 61 Stationen bei 11 / 30 / 38 % Capitaine. Die Ursache ist eine
+     Kette: bessere Werte → kürzere Gefechte → mehr Ruf → schnellere
+     Beförderung → Offiziersränge mit +4 bis +5 Gefahr je Runde. **Jeder Kauf,
+     der die Kampfkraft hebt, landet am Ende in dieser Kette und zahlt seinen
+     Gewinn dort wieder zurück.**
+
+     Diese fünf können das nicht. Sie wirken ausschließlich auf die
+     Zermürbung **zwischen** den Gefechten — Verschleiß, Krankheit, Aderlass,
+     Frost, alte Wunden. Sie machen zäher, ohne sichtbarer zu machen, und
+     erzeugen deshalb keinen Ruf.
+
+     **Und sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am
+     Anfang: Italien übersteht er zu 98 bis 100 %. Er stirbt in Ägypten an
+     Hitze und Ruhr und in Jena an den Beinen. Genau davon handelt jede
+     einzelne.
+
+     Inhaltlich ist das, was ein Mann aus zwei Feldzügen mitbringt, ohnehin
+     nicht Kraft, sondern das Wissen, wie man nicht stirbt: welches Wasser
+     man trinkt, wie man seine Füße behält, wann man sich hinlegt. */
+  {id:'zaeh_fuesse',art:'zaeh',label:'Füße wie Leder',
+   beschr:'Schuhe halten doppelt so lange, und ein forcierter Marsch nimmt dir weniger Luft',vp:150},
+  {id:'zaeh_wasser',art:'zaeh',label:'Er weiß, welches Wasser',
+   beschr:'Ruhr, Fieber und Sumpffieber zehren nur halb so stark',vp:175},
+  {id:'zaeh_nachzuegler',art:'zaeh',label:'Er bleibt nicht zurück',
+   beschr:'In Kriegen, die zwischen den Gefechten töten, kostet dich jede Station drei Punkte weniger',vp:225},
+  {id:'zaeh_schlaf',art:'zaeh',label:'Er schläft im Freien',
+   beschr:'Der Frost trifft dich eine Stufe milder, als er ist',vp:150},
+  {id:'zaeh_narben',art:'zaeh',label:'Alte Narben',
+   beschr:'Der Feldscher näht dir nach jedem Gefecht zwei Wunden zu statt einer',vp:200}
 ];
+/* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
+   gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */
+function zaeh(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }

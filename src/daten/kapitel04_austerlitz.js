@@ -182,6 +182,18 @@ const KAPITEL4 = [
        wunde:'Husten vom Donaumarsch',zehrt:3,atem:-14,belastung:8}}
   ]},
 
+/* Zweite Musterung des Feldzugs, vor Austerlitz statt nur danach. Ulm hat
+   dreißigtausend Gefangene gebracht und fast keine eigenen Verluste — die
+   Stellen, die hier frei werden, sind es durch Krankheit und den Marsch, nicht
+   durch Feuer. Das Kapitel sagt das in einem Nebensatz und geht weiter. */
+{typ:'befoerderung',id:'musterung_donau',datum:'November 1805 · An der Donau',ort:'Was der Marsch gekostet hat',
+  text:[
+    'Siebenhundert Kilometer in fünf Wochen, und die Rechnung dafür steht in einem Buch, das der Fourrier führt. Sie ist nicht kleiner als die einer Schlacht, sie ist nur langsamer entstanden.',
+    'Vierzehn aus der Kompanie sind unterwegs geblieben — zurückgeblieben, ins Lazarett, einer im Wasser bei Günzburg. Keiner davon ist beschossen worden.',
+    'Der Capitaine setzt sich an einen Tisch in einem Bauernhaus und geht die Liste durch, während draußen weitermarschiert wird.'
+  ],
+  keinZiel:'Er kommt an deinem Namen vorbei, hält kurz und geht weiter. Es ist nichts frei, was du haben könntest.'},
+
 /* 57 */ {typ:'szene',id:'wien',datum:'13. November 1805 · Wien',ort:'Eine Hauptstadt ohne Schuss',
   zwischenfall:true,
   text:[
@@ -309,7 +321,7 @@ const KAPITEL4 = [
     'Was hier zählt, ist, wer am 2. Dezember auf dem Berg gestanden hat und wer nicht.'
   ]},
 
-/* 64 */ {typ:'ende',id:'ende_austerlitz',datum:'26. Dezember 1805 · Preßburg',ort:'Der Friede',
+/* 64 */ {typ:'uebergang',id:'ende_austerlitz',datum:'26. Dezember 1805 · Preßburg',ort:'Der Friede',
   marsch:{von:'Brünn',nach:'Winterquartier in Mähren',weg:'Vier Wochen Ruhe in einem Land, das Frieden geschlossen hat'},
   text:[
     'Am 26. Dezember wird in Preßburg Friede geschlossen. Österreich verliert ein Sechstel seiner Bevölkerung und tritt aus dem Krieg aus; Russland zieht nach Osten ab, ohne etwas zu unterschreiben.',
@@ -317,7 +329,7 @@ const KAPITEL4 = [
     'Du bist bei Austerlitz gewesen. Das ist ein Satz, den du für den Rest deines Lebens sagen können wirst, und man wird ihn dir jedes Mal glauben.',
     'Von den Männern, die im August in Boulogne mit dir angetreten sind, ist einer von sechs nicht mehr da. Es war der kürzeste Feldzug, den diese Armee je geführt hat, und in vier Monaten hat sie zwei Armeen vernichtet.'
   ],
-  ausblick:'<b>Hier endet der Prototyp.</b> Im Oktober 1806 marschiert dieselbe Armee gegen Preußen — Jena und Auerstedt am selben Tag, und danach vierzehn Tage Verfolgung bis Berlin. Kapitel 5 steht im Konzept, aber noch nicht im Code.'}
+  }
 ];
 
 /* Anmeldung: an das laufende Band anhängen und beim Verlauf eintragen.

@@ -146,6 +146,18 @@ const KAPITEL = [
 /* 7 */ {typ:'elite',id:'mailand',datum:'15. Mai 1796 · Mailand',ort:'Einzug in die Lombardei',
   marsch:{von:'Lodi',nach:'Mailand',weg:'30 km nach Nordwesten · zwei Tage, zum ersten Mal auf einer gepflasterten Straße'}},
 
+/* Die erste Musterung des Spiels. **Sie kommt bewusst früh** — nach Lodi und
+   der Elitewahl, also an der Stelle, an der ein Mann zum ersten Mal etwas
+   vorzuweisen hat. Bis zum 30.07.2026 hatte Italien nur eine, in Verona, und
+   damit fiel der erste Aufstieg spät. Die Regel lautet jetzt: zwei je Feldzug. */
+{typ:'befoerderung',id:'mailand_liste',datum:'Mai 1796 · Mailand',ort:'Der Einzug und die Listen danach',
+  text:[
+    'Die Stadt empfängt eine Armee, die seit sechs Wochen nicht aus den Kleidern gekommen ist. Es gibt Wein an den Straßenrändern und Frauen auf den Balkonen, und am Nachmittag stehen dieselben Männer im Hof einer Kaserne und werden gezählt.',
+    'Von der Kompanie, die im April über die Pässe ging, fehlen einunddreißig. Vier davon waren Unteroffiziere.',
+    'Der Capitaine hat eine Liste und einen Bleistift und wenig Zeit. Er fragt Martel, und Martel sagt Namen.'
+  ],
+  keinZiel:'Es werden vier Namen gerufen, und deiner ist keiner davon. Martel sagt nichts dazu, und das ist die Auskunft.'},
+
 /* 8 */ {typ:'lager',id:'kantonierung',datum:'Ende Mai 1796 · vor Mailand',ort:'Kantonierung in Corsico',
   marsch:{von:'Mailand',nach:'Corsico',weg:'8 km vor die Stadt · Quartier in Scheunen, zwei Wochen'},
   abende:2,
