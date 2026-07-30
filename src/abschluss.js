@@ -682,6 +682,11 @@ function zeigeLager(n){
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
     L.sold = soldAuszahlen();
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
+    /* Sechs Wochen unter demselben Offizier: Die Kette unter dir wird von
+       allein ein wenig besser. Hier und nicht je Station, weil das Lager
+       auch der Ort ist, an dem man gezielt nachhilft — beides gehört an
+       dieselbe Stelle, sonst rechnet man gegen sich selbst. */
+    unterstellteReifen();
     L.inspektion = inspektion();
     laufSichern(); }
   const opt = lagerHandlungen(n).map((id,i)=>{
@@ -926,6 +931,7 @@ function zeigeWinter(n){
        danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
        Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
     W.atemVoll = S.atem < S.leben; S.atem = 100; atemKlemmen();
+    unterstellteReifen();                   // wie im Lager: Zeit unter demselben Offizier
     W.sold = soldAuszahlen();
     laufSichern();
   }

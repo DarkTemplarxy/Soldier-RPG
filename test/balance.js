@@ -77,6 +77,8 @@ const VP  = parseInt(process.env.VP || '0', 10);   // Vorrat des Veteranen, 0 = 
    Rang 8 hinauskommt. Der Vorrat wird dabei so gesetzt, dass er für das Patent
    reicht — sonst misst man, ob der Bot sparen kann, und nicht das Spiel. */
 const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
+/* HEBEL=1 hängt Zähler um Fürsprache, Auftrag und Folgen — siehe unten. */
+const HEBEL = process.env.HEBEL === '1';
 
 /* ── Die Einkaufsliste des Veteranen, eine einzige Reihenfolge ──
 
@@ -304,6 +306,35 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     /* Wie lang die Chronik VOR diesem Lauf war — daran erkennt man unten, ob
        der Eintrag am Ende von diesem Lauf stammt oder vom vorigen. */
     const chronikVorher = await p.evaluate(() => META.chronik.length);
+    /* ── HEBEL=1 · den Mechanismus auslesen statt das Ergebnis deuten ──
+       **Die eigene Regel des Projekts, in ein Werkzeug gegossen.** Wenn eine
+       Zahl unerklärlich dasteht — Grandmaison im Median bei −5, wo 5 nötig
+       wären —, ist die erste Frage nicht „welcher Regler", sondern „wer zieht
+       daran". Diese Klammer zählt, wer wie oft an einer Fürsprache dreht, wie
+       oft ein Auftrag steht, und wie oft eine Folge aus dem Verzeichnis
+       zuschlägt. Sie hängt sich um die vorhandenen Funktionen, ändert also
+       nichts am Lauf. */
+    if (HEBEL) await p.evaluate(() => {
+      window.__z = window.__z || {folge:0, stufen:{}, auftragOk:0, auftragNein:0, gm:{}};
+      if (window.__hebelDrin) return;
+      window.__hebelDrin = true;
+      const oFolge = folgeAnwenden;
+      folgeAnwenden = function(st, sa){ window.__z.folge++;
+        window.__z.stufen[st] = (window.__z.stufen[st]||0)+1; return oFolge(st, sa); };
+      const oGunst = gunstGeben;
+      gunstGeben = function(id, n){
+        if (id === 'grandmaison') {
+          const z = String((new Error()).stack||'').split('\n')[2] || '?';
+          const wer = (z.match(/at (\w+)/) || [0,'?'])[1] + (n>0 ? ' +' : ' −');
+          window.__z.gm[wer] = (window.__z.gm[wer]||0) + Math.abs(n);
+        }
+        return oGunst(id, n);
+      };
+      const oAuf = auftragFuer;
+      auftragFuer = function(n){ const a = oAuf(n);
+        if (a && K && K.auftragErfuellt !== undefined) {}
+        return a; };
+    });
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
     const schluss = {ruf: 0, gm: 0, bul: 0};
@@ -663,6 +694,9 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       KAPITEL_FOLGE.forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     }
   }
+  /* Die Zähler leben in der Seite und überstehen `goto()`, weil `balance.js`
+     EINE Seite für alle Läufe benutzt — hier werden sie einmal abgeholt. */
+  if (HEBEL) res.hebel = await p.evaluate(() => window.__z || null);
   const pu = res.punkte.sort((a, b) => a - b);
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
   console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`
@@ -717,6 +751,13 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       + `Ruf ${med(res.schranke.ruf)} ${anteil(res.schranke.ruf,480)} % · `
       + `Grandmaison ${med(res.schranke.gm)} ${anteil(res.schranke.gm,5)} % · `
       + `Bulletins ${med(res.schranke.bul)} ${anteil(res.schranke.bul,3)} %`);
+  }
+  if (HEBEL && res.hebel) {
+    const z = res.hebel;
+    console.log(`Hebel · Folgen aus dem Verzeichnis: ${z.folge} (Stufen ${
+      Object.keys(z.stufen||{}).sort().map(k=>k+': '+z.stufen[k]).join(' · ') || '—'})`);
+    console.log(`Hebel · Wer an Grandmaisons Fürsprache dreht: ${
+      Object.keys(z.gm||{}).sort((a,b)=>z.gm[b]-z.gm[a]).map(k=>k+' '+z.gm[k]).join(' · ') || '—'}`);
   }
   /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
   const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])

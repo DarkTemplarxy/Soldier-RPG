@@ -57,7 +57,6 @@ function stationErledigt(){
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   aderlass(KAPITEL[LAUF.node-1]);
-  unterstellteZehren();
   /* „Er weiß, welches Wasser." Halbiert wird die Zehrung, nicht abgeschafft —
      und die Sperre der Zeitheilung bleibt bestehen, solange überhaupt etwas
      zehrt. Wer krank ist, erholt sich nicht; er wird nur langsamer weniger.
@@ -523,7 +522,16 @@ function unterstellteSetzen(){
     /* Der Mitgezogene behält Kennung, Können und Treue und bekommt den neuen
        Posten — er ist mit aufgestiegen, nicht ersetzt worden. */
     if(mit && i===0){ neu.push(Object.assign({}, mit, {posten})); return; }
-    neu.push(neuerUnterstellter(posten, 35 + Math.floor(Math.random()*21)));
+    /* ── Wer neu unter dich tritt, hängt von der Höhe ab ──
+       **Die Leute unter einem Général sind keine Anfänger.** Die erste
+       Fassung gab auf jeder Stufe dieselben 35 bis 55 — damit setzte jede
+       Beförderung die ganze Kette auf Rekrutenmaß zurück, und die Erfahrung,
+       die sie sammeln, kam nie an. Fünf Punkte je Stufe: unter dem Capitaine
+       35–55, unter dem Général de division 55–75.
+       **Der Mitgezogene steht trotzdem über ihnen** — er bringt mit, was er
+       seit Rang 9 gelernt hat, und das ist der Sinn der Wahl. */
+    const sockel = 35 + 5 * Math.max(0, stufe.ab - 9);
+    neu.push(neuerUnterstellter(posten, sockel + Math.floor(Math.random()*21)));
   });
   S.unterstellte = neu;
   S.unterstellteStufe = stufe.ab;
@@ -578,13 +586,64 @@ function treuePlus(i, n, satz){
 /* Der mittlere Können-Wert steht für die Güte der ganzen Einheit und löst ab
    Rang 9 `sektionGuete` ab (VERWALTUNG §9). Solange niemand unter einem steht,
    bleibt die alte Zahl gültig. */
-/* **Personal, das man nicht anfasst, wird schlechter.** −2 je Station, wie
-   der Einheitszustand — und aus demselben Grund: Ein Vorgesetzter, der nichts
-   tut, ist nicht neutral, er verliert. Das ist die Gegenseite zu den
-   Lagerhandlungen, die Können heben. */
-function unterstellteZehren(){
+/* ── Sie werden besser, und zwar von allein ──
+
+   ⚠ **Hier stand eine Zehrung: −2 je Station, „Personal, das man nicht
+   anfasst, wird schlechter".** Der Satz klang richtig und die Zahl war es
+   nicht — gemessen fiel das Können von 44 auf 24 auf 5 auf **0** nach dreißig
+   Stationen. Der Vergleich mit dem Einheitszustand, auf den sie sich berief,
+   trägt nicht: `S.einheit` ist **eine** Zahl, die je Lager um bis zu 25
+   aufgefüllt wird; das Können sind **vier** Zahlen, und ein Lagerabend hebt
+   genau **eine** davon um 6 bis 8.
+
+   **Und was daran hing, war kein Anzeigewert** (am Hebel ausgelesen, nicht
+   geraten):
+
+     Können 0  →  `unterstellteGuete()` 0  →  `(0−45)×0,6` = **−25 Haltung und
+     Bestand in jedem Gefecht ab Rang 9** — derselbe Malus, den der gekaufte
+     Leutnant als Strafe trägt und der dort die Überlebensquote von 65 auf 3 %
+     gedrückt hat.
+
+     Längere Gefechte  →  der Auftrag „die Stellung nehmen" wird nicht erfüllt
+     →  **Grandmaison −1 je Gefecht.** Gemessen über zwölf Veteranenläufe zog
+     `kampfEnde` **26 Punkte ab und gab 9**; er stand im Median bei **−5**, wo
+     Rang 12 eine **+5** verlangt. Die Wand vor dem General war also nicht die
+     Fürsprache, sondern das Können der Leute, die seine Befehle ausführen.
+
+   **Die richtige Richtung ist die andere** *(Ansage des Entwicklers,
+   30.07.2026)*: *„Das Können der Untergebenen steigt automatisch leicht an —
+   weshalb ich sie mitziehen möchte, und sie sammeln ja Erfahrung im Laufe der
+   Zeit — und ich kann sie aber auch aktiv ausbilden."*
+
+   Zwei Quellen also, und sie sind verschieden:
+
+   | | |
+   |---|---|
+   | **Erfahrung** | von allein, je Lager, mit abnehmendem Ertrag — dieselbe Kurve wie beim eigenen Üben |
+   | **Ausbildung** | die Lagerabende und der Schreibtisch, gezielt auf einen Mann |
+
+   **Deshalb lohnt der Mitgezogene.** Bei jedem Aufstieg wechselt die ganze
+   Kette — nur er bleibt, und nur bei ihm summiert sich, was er gelernt hat.
+   Das ist der mechanische Grund für eine Entscheidung, die bisher nur eine
+   Beziehung war. */
+function unterstellteReifen(){
   if(!S || !S.unterstellte) return;
-  S.unterstellte.forEach(u=>{ if(u.lebt) u.koennen = Math.max(0, u.koennen - 2); });
+  /* ── Erfahrung bringt einen Mann bis zur Routine, nicht zur Meisterschaft ──
+     **Die Decke bei 60 ist der ganze Regler, und sie ist gemessen.** Ohne sie
+     erreichte die Kette von allein 76 (Haltungsbonus +19), und ein
+     Ausbildungsabend in jedem Lager legte nur noch 7 Punkte drauf — damit
+     wäre das Ausbilden eine Zeremonie ohne Wirkung gewesen.
+
+     Mit der Decke: von allein 45 → 60 über rund fünfzehn Lager, also sechs
+     Feldzüge, und dort bleibt es. **Alles darüber kostet Abende.**
+
+     Es ist dieselbe Asymmetrie, die das Spiel bei der Konstitution schon
+     kennt: `nutzen()` plateauiert, `anwenden()` geht darüber hinaus. Was von
+     selbst kommt, hat eine Grenze; was man tut, nicht. */
+  S.unterstellte.forEach(u=>{
+    if(!u.lebt || u.koennen >= 60) return;
+    u.koennen = Math.min(60, u.koennen + Math.max(1, Math.round((60 - u.koennen) / 12)));
+  });
 }
 
 /* ══════════════════ DAS VERZEICHNIS ══════════════════
