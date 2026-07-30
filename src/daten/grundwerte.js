@@ -41,6 +41,10 @@ function wertName(k){
   return NAMEN[k] || k;
 }
 const ERKLAERUNG = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,,e])=>(o[k]=e||'',o),{});
+/* Werte, die keine Attribute und keine Fertigkeiten sind, aber in der
+   Seitenleiste stehen und deshalb einen Satz brauchen. **Ein Wert ohne
+   Erklärung ist eine Zahl, die der Spieler abschreibt statt versteht.** */
+ERKLAERUNG.sektionGuete = 'Wie gut deine Leute ausgebildet sind. Sie kommt aus dem Lager — exerzieren, den Zug antreten lassen, Rekruten aussuchen — und entscheidet, wie viele antreten, wie lange sie halten und wie schnell sie wegschmelzen. Ein gekauftes Patent fängt hier bei −25 an: Seine Leute wissen nicht, wer er ist.';
 
 /* Ein Wort mit Erklärung beim Überfahren. Reines CSS, keine Abhängigkeit. */
 function mitHilfe(k, beschriftung){

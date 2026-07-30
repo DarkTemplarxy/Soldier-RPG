@@ -352,16 +352,36 @@ function rekrutenStart(){
   return Math.max(40, 100 - roh + Math.min(roh, (S.sektionGuete||0)));
 }
 
+/* ── Was ein vernachlässigtes Bataillon vor dem ersten Schuss kostet ──
+   **`S.einheit` hatte in `kampf.js` null Leser.** „Sorge dafür, dass deine
+   Leute ausgestattet sind" kostete Fürsprache und zwei Sätze — und im Gefecht
+   nichts. Damit war die Kompaniekasse eine Entscheidung ohne Gegenseite: Das
+   Geld war sofort da, der Preis nirgends.
+
+   Jetzt tritt die Einheit mit `70 + einheit·0,3` an: 91 bei Einheit 70 (dem
+   Startwert), 100 bei 100, **76 bei 20**. Wer abzweigt, hat vierundzwanzig
+   Mann weniger, bevor der erste Schuss fällt. */
+function einheitBestand(){
+  const e = (S.einheit==null ? 70 : S.einheit);
+  return Math.max(50, Math.min(100, Math.round(70 + e*0.3)));
+}
+
 function kompanienStart(){
   /* Die Güte kommt aus dem Lager (`S.sektionGuete`), wie schon bei Sektion und
      Zug — wer seine Leute ausgebildet hat, hat sie hier in vierfacher Zahl.
      Die Rekruten schlagen auf die Haltung, nicht auf den Bestand: Ein
      Bataillon aus Achtzehnjährigen ist vollzählig und hält trotzdem nicht. */
-  const g = Math.min(20, (S.sektionGuete||0)/2);
+  /* ── Die Sättigung ist weg ──
+     **`Math.min(20, guete/2)` klemmte bei Güte 40**, und vier Lagerhandlungen
+     speisten damit eine Zahl, die ab dort nichts mehr tat — unsichtbar
+     obendrein. Wer seine Leute über elf Kapitel ausbildet, soll das bis zum
+     Ende sehen: Die Wirkung läuft jetzt linear bis 100 und trägt dort 30
+     Punkte Haltung statt zwanzig. */
+  const g = Math.max(-25, Math.min(30, (S.sektionGuete||0)*0.3));
   const roh = rekrutenStart();
   return ['1.','2.','3.','4.'].map((nm,i)=>({
     name: nm+' Kompanie', kurz: nm[0],
-    bestand: 100, haltung: Math.max(25, 70 + Math.round(g) - i*3 - (100-roh)), vorn: false
+    bestand: einheitBestand(), haltung: Math.max(25, 70 + Math.round(g) - i*3 - (100-roh)), vorn: false
   }));
 }
 
@@ -392,9 +412,36 @@ function verbaendeStart(){
    Der Auftrag steht **vor** der ersten Runde auf dem Schirm und wird nie
    nachträglich geändert. Ein verstecktes Ziel wäre eine Falle, und Fallen sind
    nicht das, was dieser Rang verkauft. */
+/* ── Woran ein Auftrag gemessen wird, muss sichtbar sein ──
+   **Bis zum 30.07.2026 prüften drei der vier Aufträge Zahlen, die ab Rang 10
+   ausgeblendet sind** (`K.sektion`, `K.eigen`) — und `stabAktionen()` bot
+   keinen einzigen Knopf, der auf eine der beiden wirkt, während `K.sektion`
+   weiter je Runde abgezehrt wurde. Der Spieler wurde also an etwas gemessen,
+   das er weder sah noch beeinflussen konnte. **Ein Auftrag, dessen
+   Erfüllungsstand man nicht sehen kann, ist eine Lotterie.**
+
+   `eigeneKraft()` liefert deshalb je nach Maßstab die Zahl, die auf dem
+   Bildschirm steht: die Sektion bis Rang 9, den mittleren Kompaniebestand ab
+   Rang 10, die gemeldete Stärke der Verbände ab Rang 12. */
+function eigeneKraft(){
+  if(K.kompanien && K.kompanien.length)
+    return Math.round(K.kompanien.reduce((s,k)=>s+k.bestand,0) / K.kompanien.length);
+  if(K.verbaende && K.verbaende.length)
+    return Math.round(K.verbaende.reduce((s,v)=>s+(v.gemeldet||0),0) / K.verbaende.length);
+  return K.sektion==null ? 100 : K.sektion;
+}
+/* Die Haltung ist das Gegenstück: Ein Abschnitt gibt nicht auf, weil er Männer
+   verliert, sondern weil er aufhört zu glauben. Bis Rang 9 gibt es sie nicht
+   getrennt — dort steht die eigene Linie dafür. */
+function eigeneHaltung(){
+  if(K.kompanien && K.kompanien.length)
+    return Math.round(K.kompanien.reduce((s,k)=>s+k.haltung,0) / K.kompanien.length);
+  return K.eigen==null ? 100 : K.eigen;
+}
+
 const AUFTRAEGE = [
   {id:'halten', text:'Die Kompanie hält den Abschnitt, bis das zweite Bataillon durch ist.',
-   erfuellt:(n)=> (K.sektion==null?100:K.sektion) >= 50,
+   erfuellt:(n)=> eigeneKraft() >= 50,
    gut:'Das zweite Bataillon ist durch. Der Abschnitt hat gehalten, weil hundertzwanzig Mann dort gestanden sind, wo sie stehen sollten.',
    schlecht:'Das zweite Bataillon ist durch, aber nicht dort, wo es durch sollte, weil dein Abschnitt vorher aufgemacht hat.'},
   {id:'nehmen', text:'Die Kompanie nimmt die Stellung, ehe es dunkel wird.',
@@ -402,11 +449,11 @@ const AUFTRAEGE = [
    gut:'Die Stellung ist genommen, und sie ist vor der Dämmerung genommen. Mehr stand nicht im Befehl.',
    schlecht:'Es wird dunkel, und die Stellung ist nicht genommen. Was im Befehl stand, steht am Morgen unverändert wieder da.'},
   {id:'decken', text:'Die Kompanie deckt die linke Flanke der Brigade. Vorgehen ist nicht befohlen.',
-   erfuellt:(n)=> (K.eigen==null?100:K.eigen) >= 45,
+   erfuellt:(n)=> eigeneHaltung() >= 45,
    gut:'Die Flanke steht. Von der Brigade hat es niemand gesehen, und das ist bei einer gedeckten Flanke die Regel.',
    schlecht:'Die Flanke ist aufgegangen. Was hindurchkam, kam der Brigade in den Rücken, und das hat jemand gesehen.'},
   {id:'schonen', text:'Die Kompanie hält den Abschnitt und schont ihre Leute. Man braucht sie übermorgen.',
-   erfuellt:(n)=> (K.sektion==null?100:K.sektion) >= 70,
+   erfuellt:(n)=> eigeneKraft() >= 70,
    gut:'Übermorgen steht die Kompanie da, wo man sie braucht, und sie steht vollzählig genug, um etwas damit anzufangen.',
    schlecht:'Übermorgen fehlt der Kompanie ein Drittel. Der Befehl hat das ausdrücklich verhindern wollen.'}
 ];
@@ -2146,7 +2193,10 @@ function kampfAktion(id){
      musst sie hinterher verantworten. Eine gut ausgesuchte und gedrillte
      Sektion (`S.sektionGuete` aus dem Lager) hält länger. */
   if(S.rang>=5 && K.sektion != null){
-    const guete2 = 1 - Math.min(0.4, (S.sektionGuete||0)/100);
+    /* Auch hier klemmte es bei Güte 40 (`Math.min(0.4, …)`). Der Boden bei
+       0,45 bleibt: Eine Sektion, die *gar* keine Verluste mehr nimmt, wäre
+       kein gut ausgebildeter Zug, sondern ein unsichtbarer. */
+    const guete2 = Math.max(0.45, 1 - (S.sektionGuete||0)/180);
     K.sektion = Math.max(0, K.sektion - (2 + Math.random()*3) * (1 + guete*0.15) * guete2
       * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
     /* Der gezogene Degen hält den Zug zusammen — nicht heil, aber beisammen.

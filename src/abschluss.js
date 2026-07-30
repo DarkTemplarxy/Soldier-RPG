@@ -215,7 +215,7 @@ const LAGER_TUN = {
     cost:'+150 F · Einheitszustand + · es kann auffallen',
     tu(){ S.kasseQuartal = true; S.geld += 150;
       S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
-      S.kasseRisiko = (S.kasseRisiko||0) + 15;
+      S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 15);
       return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger. <span class="fein">+150 F · Einheitszustand +10</span>'; }},
 
   /* ── Ab Rang 11: die Lieferantenverträge ──
@@ -232,14 +232,14 @@ const LAGER_TUN = {
     cost:'+600 F · Einheitszustand − · es fällt wahrscheinlich auf',
     tu(){ S.kasseQuartal = true; S.geld += 600;
       S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
-      S.kasseRisiko = (S.kasseRisiko||0) + 35;
+      S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 35);
       return 'Er kommt selbst, im eigenen Wagen, und er redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt. <span class="fein">+600 F · Einheitszustand −15</span>'; }},
 
   kasse_voll:{label:'Kräftig zulangen',
     cost:'+400 F · Einheitszustand − · es fällt wahrscheinlich auf',
     tu(){ S.kasseQuartal = true; S.geld += 400;
       S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
-      S.kasseRisiko = (S.kasseRisiko||0) + 40;
+      S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 40);
       return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat. <span class="fein">+400 F · Einheitszustand −10</span>'; }}
 };
 
@@ -248,7 +248,21 @@ const LAGER_TUN = {
    Hals. Ein Rang gibt also nicht nur einen Knopf mehr, sondern auch den Abend,
    an dem man ihn drücken kann; sonst verdrängt die Dienstpflicht die eigene
    Ausbildung. Ab Sergent noch einen. */
-function abendeFuer(n){ return n.abende + (S.rang>=5 ? 2 : S.rang>=3 ? 1 : 0); }
+/* ── Die dritte und vierte Stufe ──
+   **Der Deckel lag bei Rang 5, und damit hatte ein Marschall genau so viele
+   Abende wie ein Sergent — vier.** Die Knöpfe wuchsen aber weiter: Rang 5 sah
+   11 bis 13, Rang 9 sah 15 bis 17. Jede neue Verwaltungshandlung *verdrängte*
+   damit die eigene Ausbildung, statt eine Ebene daneben zu sein — genau das,
+   wovor der Kommentar darüber warnt.
+
+   **Ein Capitaine hat Zeit, weil er Leute hat, die für ihn arbeiten.** Das ist
+   die Begründung im Spiel und zugleich die im Entwurf: Ohne den Abend
+   verdrängt die Dienstpflicht die Ausbildung, und der Rang fühlt sich an wie
+   eine Strafe. Ab Rang 12 kommt ein vierter dazu — ein General teilt seine
+   Zeit selbst ein. */
+function abendeFuer(n){
+  return n.abende + (S.rang>=12 ? 4 : S.rang>=9 ? 3 : S.rang>=5 ? 2 : S.rang>=3 ? 1 : 0);
+}
 
 function lagerHandlungen(n){
   const ids = (n.tun||[]).slice();
@@ -265,11 +279,29 @@ function lagerHandlungen(n){
   if(S.rang>=11 && !S.kasseQuartal) ids.push('vertrag_sauber','vertrag_still');
   if(S.zweig==='grenadier') ids.push('tornister');
   if(S.zweig==='voltigeur') ids.push('gelaende');
-  /* Ein Offizier exerziert nicht mehr selbst und trägt keine Muskete mehr —
-     die Lagerhandlungen, die daran hängen, verschwinden mit ihr. */
-  if(S.rang>=7) return ids.filter(id=>LAGER_TUN[id]
-    && !['exerzieren','bajonett','scharf','waffe','gelaende','tornister'].includes(id));
-  return ids.filter(id=>LAGER_TUN[id]);
+  /* ── Der Abbau ──
+     **Ohne Abbau gibt es keine Verschiebung, sondern Anhäufung.** Bis zum
+     30.07.2026 fiel ab Rang 7 nur weg, was die Muskete betraf; alles andere
+     blieb kumulativ stehen. Ein **Général de division** hatte weiterhin „Deine
+     acht Mann drillen" und „Deine zwanzig Mann exerzieren lassen" — die
+     Sektion, die er vor sechs Rängen abgegeben hat.
+
+     Jeder Zugewinn kostet etwas. Das ist die Regel der ganzen Rangleiter, und
+     im Lager wurde sie ab Rang 7 nicht mehr angewandt. */
+  const weg = [];
+  if(S.rang>=7)  weg.push('exerzieren','bajonett','scharf','waffe','gelaende','tornister');
+  /* Ab 9: Du hast keine acht Mann und keine zwanzig. Du hast Sergenten, die
+     acht Mann haben. */
+  if(S.rang>=9)  weg.push('korporalschaft','sektion','rekruten');
+  /* Ab 10: Ein Bataillonschef führt keine Listen und trägt keine Schuhe zum
+     Schuster. Das machen die, die er dafür einteilt. */
+  if(S.rang>=10) weg.push('listen','ausgabe','fouragieren','schuhe');
+  /* Ab 11: Der Zug ist drei Ebenen weg. */
+  if(S.rang>=11) weg.push('zugfuehren');
+  /* Nie weg: `instand`, `ruhe`, `leute`, `lesen`, `fechtboden`, `karten` —
+     der eigene Körper, der eigene Kopf, der eigene Säbel und die eigenen
+     Karten bleiben immer die eigene Sache. */
+  return ids.filter(id=>LAGER_TUN[id] && weg.indexOf(id) < 0);
 }
 
 /* ══════════════════ DER INSPECTEUR AUX REVUES ══════════════════
@@ -298,7 +330,16 @@ function inspektion(){
       Er rechnet die Ausgabelisten gegen die Bestandslisten und braucht dafür einen Vormittag. Am Nachmittag steht er auf und geht zum Chef de bataillon, ohne dich anzusehen. Was danach passiert, passiert schnell und ohne Verhandlung.
       <b>Rang zurück · Ruf −20 · Fürsprache Vernet −4</b></div>`;
   } else {
-    S.kasseRisiko = Math.max(0, risiko-10);
+    /* ── Abkühlung −10 → −4, und ein Deckel ──
+       **Die kleine Kassenwahl war faktisch straffrei:** +15 Risiko gegen −10
+       Abkühlung je Lager sind netto +5 für 150 Francs. Mit −4 bleiben elf
+       stehen, und wer dreimal zulangt, sitzt bei über dreißig.
+
+       Der Deckel bei 85 ist die Gegenrichtung: Ohne ihn wächst das Risiko ins
+       Unbegrenzte, und `kasse_voll` (+40) wäre nach dem dritten Mal eine
+       sichere Entdeckung statt einer Entscheidung. Erwischt werden soll
+       wahrscheinlich sein, nicht gewiss. */
+    S.kasseRisiko = Math.max(0, risiko-4);
     const wem = 'vernet';
     if(z>=75){ gunstGeben(wem,1);
       t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>

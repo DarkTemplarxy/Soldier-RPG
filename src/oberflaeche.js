@@ -298,6 +298,19 @@ function seitenleiste(){
       ${S.adler?`<div class="kv"><span>Der Adler</span><b class="${S.adler==='verloren'?'warn':''}">${
         S.adler==='verloren'?'verloren':S.adler==='gerettet'?'gerettet':'getragen'}</b></div>`:''}
       ${(S.rang>=13&&S.dotation)?`<div class="kv"><span>Dotation</span><b>${S.dotation} F je Station</b></div>`:''}
+      ${/* ── Die Ausbildung, endlich sichtbar ──
+           **`sektionGuete` hatte kein einziges Vorkommen in `oberflaeche.js`.**
+           Vier Lagerhandlungen speisten sie, sie entschied über Haltung,
+           Verluste und den Startbestand — und der Spieler sah nie eine Zahl.
+           Ein Wert mit vier Zuflüssen und keiner Anzeige ist ein
+           Konstruktionsfehler, kein Detail.
+
+           Sie steht ab Rang 2 da, weil die Sektion dort anfängt zu zählen,
+           und sie darf negativ sein: Der gekaufte Leutnant startet bei −25,
+           und **genau das soll er sehen.** */''}
+      ${S.rang>=2?`<div class="kv"><span>${mitHilfe('sektionGuete','Ausbildung der Einheit')}</span><b class="${
+        (S.sektionGuete||0)<0?'warn':((S.sektionGuete||0)>=30?'ok':'')}">${
+        (S.sektionGuete||0)>0?'+':''}${S.sektionGuete||0}</b></div>`:''}
       ${S.rang>=9?`<div class="stat"><div class="statlab"><span>Einheitszustand</span><span class="${(S.einheit==null?70:S.einheit)<40?'warn':''}">${Math.round(S.einheit==null?70:S.einheit)}</span></div>${balken((S.einheit==null?70:S.einheit)<40?'b-red':'b-steel',(S.einheit==null?70:S.einheit),100)}
         ${(S.einheit!=null&&S.einheit<40)?`<p class="warnung">Deine Kompanie hat nichts an den Füßen.${S.einheit<20?' Jeder Marsch kostet Männer, die niemand beschossen hat.':' Der Feldscher meldet mehr Kranke, als er sollte.'}</p>`:''}</div>`:''}
       ${K?`<div class="rule"></div>${S.rang>=7?'':`<div class="kv"><span>Muskete</span><b>${geladen}</b></div>`}
