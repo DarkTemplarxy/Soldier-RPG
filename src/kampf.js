@@ -1651,7 +1651,6 @@ function zeigeKampf(text){
 function kampfAktion(id){
   const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
   const zw = S.zweig;
-  PROBE_ZULETZT = null;   // siehe `meister()` — der Faktor wird unten einmal gelegt
 
   if(id==='laden'){
     const p = probe('geschick', 30);
@@ -2041,18 +2040,18 @@ function kampfAktion(id){
      dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein
      Handel, sondern eine Lage. Ausgeglichen wird über kurze Runden und
      niedrige Feindmoral in den Daten. */
-  /* ── Können über der Klemme ──
-     **Hier wird das obere Ende der Skala erst etwas wert.** Die Probe klemmt
-     bei 95, also kaufen die letzten fünfzehn bis zwanzig Punkte einer
-     Fertigkeit keine Trefferchance mehr (siehe `probe()`). Was die Klemme
-     wegwirft, legt sich stattdessen auf die **Wirkung** — bis zu +50 %.
+  /* ── Hier stand einmal ein Schadensbonus für hohe Werte ──
+     **Er ist am 30.07.2026 ersatzlos entfernt worden**, auf ausdrückliche
+     Ansage des Entwicklers: *„Dass man über einem bestimmten Wert dann mehr
+     Schaden macht, ist Schwachsinn."* Und er hatte recht — eine Muskete
+     schießt nicht härter, weil der Mann dahinter besser zielt; sie trifft nur
+     öfter. Der Bonus war eine Krücke gegen ein anderes Problem: dass hohe
+     Werte gegen immer dieselben Schwierigkeiten irgendwann nichts mehr kaufen.
 
-     Es steht bewusst **vor** allen übrigen Faktoren und hinter keinem: Der
-     gelöste Zug, das Gelände und der Zustand der Kompanien sind Umstände,
-     das Können ist der Mann. Multiplikativ verrechnet ist die Reihenfolge
-     zwar gleichgültig — die Anordnung sagt trotzdem, was wovon abhängt. */
-  const meisterFaktor = meister(PROBE_ZULETZT);
-  if(schaden > 0) schaden *= meisterFaktor;
+     **Dieses Problem ist jetzt an seiner Wurzel gelöst**, nämlich dadurch,
+     dass die Aufgaben mit dem Feldzug härter werden (`schwierigkeit` je
+     Kampagne, siehe `probe()`). Wert 80 kauft wieder Trefferchance — nur eben
+     gegen Schwierigkeit 65 statt gegen 40. */
   let linie = (K.geloest || n.ueberfall) ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */

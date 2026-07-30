@@ -297,7 +297,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
      alles darüber ist etwas, das er sich verdient oder gekauft hat. Nebenbei
      verlängert es die Strecke, auf der Übung noch etwas bringt — `nutzen()`
      gibt bei niedrigen Werten am meisten. */
-  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 5);
+  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = FERT_SOCKEL);
   /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
      was man mitbringt, nicht das, was man sich aussucht. Das war früher der
      halbe Exploit (Konstitution 90 = unsterblich); die andere Hälfte lag in der
@@ -496,8 +496,12 @@ const PROBE_SOCKEL = 60;
    Das ist dieselbe Überlegung, aus der Wert und Schwierigkeit überhaupt auf dem
    Knopf stehen — sie sollen beim Entscheiden helfen. Eine Zahl, die man erst
    umrechnen muss, tut das nicht. */
+/* **Der Kampagnenzuschlag muss hier mitgerechnet werden, sonst lügt der Knopf.**
+   `aussicht()` und `probe()` sind dieselbe Rechnung, einmal mit und einmal ohne
+   Wurf — wer in der einen einen Summanden ergänzt und in der anderen nicht,
+   baut eine Anzeige, die etwas anderes verspricht als das, was passiert. */
 function aussicht(k, schwierigkeit){
-  return chance(Math.max(5, Math.min(95, wert(k) - schwierigkeit + PROBE_SOCKEL)));
+  return chance(Math.max(5, Math.min(95, wert(k) - (schwierigkeit + kampagnenHaerte()) + PROBE_SOCKEL)));
 }
 
 /* ══════════════════ DER ENGE WURF — KÖNNEN STATT GLÜCK ══════════════════
@@ -552,79 +556,74 @@ function chance(ziel){
   return Math.min(99, Math.max(1, Math.round(p * 100)));
 }
 
-/* ══════════════════ DIE PROBE — UND WAS ÜBER IHR LIEGT ══════════════════
+/* ══════════════════ DIE PROBE ══════════════════
 
    ```
-   roh    = Wert − Schwierigkeit + PROBE_SOCKEL   (ungeklemmt, Sockel = 60)
-   Ziel   = clamp(roh, 5, 95)                     (die Trefferchance)
-   Können = max(0, roh − KOENNEN_AB)              (die Wirkung, ab Abstand +20)
-   Wurf   = Mittel aus sechs d100 (eng, siehe wurfZahl)
+   Aufgabe = Schwierigkeit + kampagnenHaerte()    (der Feldzug macht sie härter)
+   roh     = Wert − Aufgabe + PROBE_SOCKEL        (ungeklemmt, Sockel = 60)
+   Ziel    = clamp(roh, 5, 95)
+   Wurf    = Mittel aus sechs d100 (eng, siehe wurfZahl)
    ```
 
    **Die Klemme bleibt, und sie ist richtig.** Fünf Prozent Fehlschlag gehören
    dazu: Im Rauch schießt auch der beste Schütze daneben, und eine Probe, die
-   nie misslingt, ist keine. Aber sie hat eine Nebenwirkung — **gegen die
-   üblichen Schwierigkeiten sind irgendwann alle hohen Werte dieselbe Zahl**,
-   und weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit
-   dort ausschließlich Trefferwahrscheinlichkeit, die es nicht mehr zu kaufen
-   gab. Das obere Ende der Skala war **tote Währung**.
+   nie misslingt, ist keine.
 
-   `koennen` ist genau das, was die Klemme wegwirft: Es zahlt nicht in die
-   Trefferchance, sondern in die **Wirkung**. Ein Meister trifft nicht öfter,
-   er trifft härter.
-
-   > **⚠ KOENNEN_AB und die Klemme sind zwei Zahlen, nicht eine — und dass sie
-   > früher beide 95 waren, war Zufall, nicht Absicht.** Mit dem engen Wurf
-   > sättigt die Trefferchance schon bei **Abstand +20** (99 %), aber `roh − 95`
-   > hätte den Schadensbonus erst ab Abstand +35 anspringen lassen. Dazwischen
-   > lag ein Loch: **kein Treffer mehr zu holen, kein Schaden noch zu holen.**
-   > Gemessen an den Kaufkosten war das die Rückkehr der toten Währung — der
-   > Schritt von Wert 60 auf 65 kostete 30 VP und brachte **+0,7 %**, der von
-   > 75 auf 80 kostete 40 VP und brachte **null**.
+   > **Hier stand einmal `koennen` — ein Schadensbonus für alles über der
+   > Klemme.** Er ist am 30.07.2026 ersatzlos entfernt worden, weil er die
+   > falsche Antwort auf eine richtige Frage war. Die Frage lautete: *Was kauft
+   > ein Wert, wenn die Trefferchance schon bei 99 % steht?* Die Antwort des
+   > Bonus war „mehr Schaden", und das ist unsinnig — eine Muskete schießt
+   > nicht härter, weil der Mann besser zielt.
    >
-   > `KOENNEN_AB` sitzt deshalb dort, wo die Kurve *sättigt*, und wandert mit
-   > dem Sockel: **Wer den Sockel ändert, prüft diese Zahl mit.** Die Regel
-   > lautet `PROBE_SOCKEL + 20` — bis dorthin kauft man Treffer, darüber
-   > Wirkung, und dazwischen ist kein Loch. */
-const KOENNEN_AB = PROBE_SOCKEL + 20;
-/* Die zuletzt gewürfelte Probe. `kampfAktion()` setzt sie am Anfang auf null
-   und liest sie am Ende aus, wo der Schaden verrechnet wird — so steht der
-   Meisterschaftsfaktor an **einer** Stelle statt an fünfzehn Schadenszeilen,
-   und keine davon kann ihn beim nächsten Umbau vergessen. */
-let PROBE_ZULETZT = null;
+   > **Die Antwort ist jetzt `kampagnenHaerte()`:** Der Wert kauft weiterhin
+   > Trefferchance, nur wird die Aufgabe mit jedem Feldzug schwerer. Wert 80
+   > ist 1796 überflüssig und 1812 gerade genug. */
+
+/* ── Wie viel härter die Aufgaben in diesem Feldzug sind ──
+   **Ein Regler je Kampagne, genau wie `guete` beim Gefecht** — und aus
+   demselben Grund: Das Spiel hat elf Kapitel und einen Spieler, der von Lauf
+   zu Lauf besser wird. Bleiben die Anforderungen gleich, wird es mit jedem
+   Lauf leichter, statt andere Fragen zu stellen.
+
+   **Warum ein Zuschlag und nicht höhere Zahlen in den Kapiteldaten:** Die
+   Schwierigkeiten dort spannen in *jedem* Kapitel 30–55, an rund
+   einhundertfünfzig Stellen. Sie einzeln anzuheben wäre dieselbe Änderung,
+   nur hundertfünfzigmal abgeschrieben und beim nächsten Mal wieder. Der
+   Zuschlag steht an *einer* Stelle und ist eine Zahl je Feldzug.
+
+   Der Nebeneffekt ist Absicht: Die Kapiteldaten sagen weiterhin, wie schwer
+   eine Sache *an sich* ist (einen Wagen aus dem Schlamm ziehen: 40), und der
+   Feldzug sagt, unter welchen Umständen man sie tut. Derselbe Wagen, derselbe
+   Schlamm — aber 1812 bei minus zwanzig Grad und mit leerem Magen. */
+function kampagnenHaerte(){
+  if(typeof LAUF === 'undefined' || !LAUF) return 0;
+  const n = KAPITEL[Math.min(LAUF.node, KAPITEL.length - 1)];
+  if(!n) return 0;
+  for(const k of KAMPAGNEN){
+    const st = STATIONEN[k.id];
+    if(st && st.indexOf(n) >= 0) return k.schwierigkeit || 0;
+  }
+  return 0;
+}
+
 function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
-  const roh = w - schwierigkeit + PROBE_SOCKEL;
+  const roh = w - (schwierigkeit + kampagnenHaerte()) + PROBE_SOCKEL;
   const ziel = Math.max(5, Math.min(95, roh));
-  const wurf = wurfZahl();   // Mittel aus sechs Würfen, siehe oben
+  const wurf = wurfZahl();
   if(!ohneUebung) nutzen(k, 1);
-  PROBE_ZULETZT = {wurf, ziel, wertRoh:w, roh, koennen: Math.max(0, roh - KOENNEN_AB), erfolg: wurf <= ziel};
-  return PROBE_ZULETZT;
+  return {wurf, ziel, wertRoh:w, roh, erfolg: wurf <= ziel};
 }
 
-/* Der Faktor, den `koennen` auf eine Wirkung legt. **Gedeckelt bei +50 %**,
-   und der Deckel ist der wichtigere Teil der Zahl: Ohne ihn liefe ein Wert
-   von 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die
-   späten Gefechte wären in drei Runden vorbei.
-
-   Der Deckel wird bei **Abstand +50** erreicht (`koennen` 30, also etwa Wert 90
-   gegen Schwierigkeit 40). Dazwischen wächst er stetig: Ab Abstand +20 fängt
-   er bei null an, und jeder weitere Punkt zahlt ein. **Genau das ist die
-   Strecke, auf der ein Veteran seine Überschüsse los wird** — vorher endete
-   sie im Nichts. */
-/* **Wie deutlich es gelungen ist, in einem Wort.** Ab fünfzehn Punkten über
-   der Klemme steht der Mann so weit über der Aufgabe, dass die Probe nur noch
-   Form ist — und das gehört auf den Schirm, sonst merkt niemand, wofür er
-   seine Veteranenpunkte ausgegeben hat. Unter fünfzehn steht nichts: Ein Wort,
-   das immer dasteht, sagt nichts. */
+/* **Wie deutlich es gelungen ist, in einem Wort.** Wer die Aufgabe um mehr als
+   dreissig Punkte übertrifft, für den ist sie nur noch Form — und das gehört
+   auf den Schirm, sonst merkt niemand, wofür er seine Veteranenpunkte
+   ausgegeben hat. Darunter steht nichts Besonderes: Ein Wort, das immer
+   dasteht, sagt nichts. */
 function probeWort(p){
   if(!p || !p.erfolg) return 'misslungen';
-  return p.koennen >= 15 ? 'mühelos gelungen' : 'gelungen';
-}
-
-function meister(p){
-  if(!p || !p.erfolg || !p.koennen) return 1;
-  return 1 + Math.min(30, p.koennen) / 60;
+  return (p.roh - PROBE_SOCKEL) >= 30 ? 'mühelos gelungen' : 'gelungen';
 }
 
 function nutzen(k, intens, fechtboden){

@@ -99,7 +99,23 @@ const VETERAN_PLAN = [
      ein Bot, der sie nicht ausgeben kann, misst einen ärmeren Veteranen als
      den, den das Spiel tatsächlich hervorbringt. */
   ['w','autoritaet',50], ['w','bajonett',40], ['w','drill',55],
-  ['w','taktik',50], ['w','verwaltung',50], ['w','menschenkenntnis',60]
+  ['w','taktik',50], ['w','verwaltung',50], ['w','menschenkenntnis',60],
+  /* ── Die zweite Runde: alles auf 70 ──
+     **Das ist das erklärte Ziel der neuen Ökonomie** — ein perfekter Lauf bis
+     Waterloo soll reichen, um jeden Wert auf 70 zu heben (4 950 VP für alle
+     fünfzehn). Die Liste geht deshalb ein zweites Mal durch, jetzt in die
+     Breite statt in die Spitze: Erst die Werte, an denen ein Mann stirbt, dann
+     die, an denen er scheitert.
+
+     **Die Reihenfolge ist die Antwort auf einen gemessenen Befund:** Ägypten
+     tötet Veteranen an ihren *Lücken* (Fouragieren, Feldchirurgie), nicht an
+     ihren Spitzen. Wer nur Muskete und Konstitution kauft, marschiert in
+     dieselbe Wand wie vorher. */
+  ['w','konstitution',85], ['w','fouragieren',70], ['w','feldchirurgie',70],
+  ['w','geschick',80],     ['w','muskete',80],     ['w','kaltbluetigkeit',75],
+  ['w','bildung',70],      ['w','drill',70],       ['w','autoritaet',70],
+  ['w','menschenkenntnis',70], ['w','taktik',70],  ['w','verwaltung',70],
+  ['w','bajonett',70],     ['w','reiten',70],      ['w','kartenkunde',70]
 ];
 const ziel = path.resolve(__dirname, '../index.html');
 
@@ -145,6 +161,8 @@ const rangKurz = r => RANG_KURZ[r] || ('R' + r);
 /* Seit der Sockel auf 15 steht und die Erschaffung in Fünfern schreitet:
    45 + 15 = 60, der ganze Pool, exakt aufgehen. Vorher (Sockel 20, Zehner)
    waren es 40 + 20. */
+/* Steht nur noch als Erinnerung da, wonach der Bot beim Würfeln aussucht —
+   verteilt wird nichts mehr, siehe den Kommentar bei `wuerfeln()` unten. */
 const VERTEILUNG = { konstitution: 60, geschick: 30 };
 
 (async () => {
@@ -193,18 +211,32 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     // Die Patente sind erst ab einem einmal getragenen Rang im Laden sichtbar.
     if (PATENT) await p.evaluate(() => { META.bestRang = 8; });
     await p.click('text=Neuen Mann aufstellen');
-    /* Die Abbruchbedingung prüft, ob sich etwas bewegt hat — `stelle()` weigert
-       sich stumm, wenn der Pool leer ist, und eine Prüfung auf den Zielwert
-       allein hinge dann für immer. */
-    await p.evaluate(v => {
-      for (const k in v){
-        while (ERSCH.attr[k] < v[k]){
-          const vorher = ERSCH.attr[k];
-          stelle(k, ERSCH_SCHRITT);
-          if (ERSCH.attr[k] === vorher) break;
-        }
+    /* ── Der Bot würfelt jetzt, weil der Spieler auch würfelt ──
+       **Bis zum 30.07.2026 verteilte er von Hand** (`stelle()`), und das war
+       richtig, solange es eine Handverteilung gab: Auswürfeln maß vor allem
+       den Zufallsgenerator. Seit die Erschaffung nur noch würfelt, gibt es
+       `stelle()` nicht mehr — und ein Bot, der einen Mann baut, den kein
+       Spieler bauen kann, misst nicht das Spiel.
+
+       **Der Preis ist bekannt und eingepreist:** Die Streuung kommt zurück,
+       weil der Lebensvorrat an der ausgewürfelten Konstitution hängt. Deshalb
+       würfelt der Bot mehrfach und nimmt den besten Wurf — genau das tut ein
+       Spieler auch, der auf „Einen anderen Mann" drücken darf, bis ihm der
+       Mann passt. Gemessen wird damit der kundige Spieler, nicht der
+       gleichgültige. */
+    await p.evaluate(() => {
+      let bester = null, bestwert = -1;
+      for (let i = 0; i < 12; i++){
+        wuerfeln();
+        /* Konstitution ist der Lebensvorrat und damit die Todesschwelle;
+           Geschick öffnet die Voltigeure. Dieselbe Rangfolge wie früher die
+           feste Verteilung, nur als Auswahlkriterium statt als Vorgabe. */
+        const w = ERSCH.attr.konstitution * 2 + ERSCH.attr.geschick;
+        if (w > bestwert){ bestwert = w; bester = Object.assign({}, ERSCH.attr); }
       }
-    }, VERTEILUNG);
+      ERSCH.attr = bester;
+      aktualisiereErschaffung();
+    });
     await p.click('#h_' + ['bauer', 'schmied', 'wilderer', 'strasse', 'fuhrmann', 'schreiber'][r % 6]);
     await p.click('text=Weiter zu den Veteranenpunkten');
     // Das Patent zuerst — es ist die teuerste Einzelentscheidung des Ladens.

@@ -451,10 +451,21 @@ function istAttribut(k){ return ATTRIBUTE.some(([a])=>a===k); }
 function istWert(k){
   const h = HERKUENFTE.find(x=>x.id===(ERSCH&&ERSCH.herkunft)) || {attr:{},fert:{}};
   return istAttribut(k)
-    ? Math.max(0, Math.min(70, (ERSCH?ERSCH.attr[k]:20) + (h.attr[k]||0)))
-    : Math.max(0, Math.min(60, 10 + (h.fert[k]||0)));
+    ? Math.max(0, Math.min(100, (ERSCH?ERSCH.attr[k]:SOCKEL) + (h.attr[k]||0)))
+    : Math.max(0, Math.min(100, FERT_SOCKEL + (h.fert[k]||0)));
 }
-function punktGrenze(k){ return istAttribut(k) ? 70 : 60; }   // darüber nur noch im Feld
+/* ── Die Obergrenze ist 100, für alles ──
+   **Bis zum 30.07.2026 lag sie bei 70 für Attribute und 60 für Fertigkeiten.**
+   Das war richtig, solange ein Spitzenlauf 160 Punkte brachte: Man konnte sich
+   ohnehin nur eine Spitze leisten, und der Deckel verhinderte, dass sie absurd
+   wird. Mit der neuen Ökonomie ist das Ziel ein anderes — **ein perfekter Lauf
+   bis Waterloo soll reichen, um alles auf 70+ zu heben** —, und ein Deckel bei
+   60 machte das per Regel unerreichbar.
+
+   **Die Bremse ist jetzt allein der Preis.** Der Weg von 90 auf 100 kostet
+   600 VP, also mehr als drei Werte von 20 auf 70 zusammen. Wer eine Hundert
+   will, bezahlt sie mit der Breite. */
+function punktGrenze(k){ return 100; }
 function punktKosten(k){ const b = istWert(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
 function gesamtKosten(){
   return AUSWAHL.reduce((s,id)=>{
@@ -636,14 +647,17 @@ function zeigeErschaffung(neu){
   if(neu || !ERSCH){
     ERSCH = {name:'', herkunft:null, attr:{}};
     ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
+    wuerfeln(true);   // **Es steht nie ein unverteilter Mann da.** Man sieht sofort einen.
   }
+  /* **Keine Plus- und Minusknöpfe mehr.** Der erste Mann wird nicht gebaut,
+     er wird ausgehoben — man sieht, was man bekommen hat, und darf neu
+     würfeln, bis es einem passt. Was man *gestalten* kann, sind die
+     Veteranenpunkte im nächsten Schritt, und die hat der erste Mann nicht. */
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
       <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
       ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
       <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
-      <span><button class="pmbtn" onclick="stelle('${k}',-ERSCH_SCHRITT)" id="am_${k}">−</button>
-      <button class="pmbtn" onclick="stelle('${k}',ERSCH_SCHRITT)" id="ap_${k}">+</button></span>
     </div>`).join('');
   app.innerHTML = `
   <div class="stage">${verlauf()}
@@ -651,12 +665,12 @@ function zeigeErschaffung(neu){
       <div class="card"><div class="ch"><span>Erster Schritt · Wer bist du</span></div><div class="cb">
         <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value;aktualisiereErschaffung()">
       </div></div>
-      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
+      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">ausgehoben</span></div>
         <div class="cb">${zeilen}
-        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · Schritte zu ${ERSCH_SCHRITT} · höchstens ${MAXE} bei der Erschaffung · Bildung ist vom Pool ausgenommen und steht auf ${BILDUNG_SOCKEL}.
-        Alle neun Fertigkeiten beginnen bei 5.<br>
-        Sechzig Punkte sind wenig, und das ist Absicht: Ein Rekrut ist kein Veteran. Was fehlt, holen die Veteranenpunkte deiner früheren Männer im nächsten Schritt.</p>
-        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
+        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · höchstens ${MAXE} bei der Aushebung · Bildung steht fest auf ${BILDUNG_SOCKEL} — du kannst nicht lesen.
+        Alle neun Fertigkeiten beginnen bei ${FERT_SOCKEL}.<br>
+        <b>Du suchst dir nicht aus, wer du bist.</b> Der Werber schreibt auf, was er sieht. Wenn dir der Mann nicht passt, kannst du einen anderen nehmen — aber besser machen kannst du ihn nicht. Das kommt erst mit den Veteranenpunkten deiner früheren Männer.</p>
+        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Einen anderen Mann</button></div>
       </div></div>
     </div>
     <div class="card"><div class="ch"><span>Herkunft</span><span>je genau 50 Punkte</span></div><div class="cb">
@@ -675,14 +689,9 @@ function zufallsName(){
   return v[Math.floor(Math.random()*v.length)]+' '+n[Math.floor(Math.random()*n.length)];
 }
 function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-sockelVon(k)),0); }
-function stelle(k,d){
-  if(k==='bildung') return;
-  const neu = ERSCH.attr[k]+d;
-  if(neu<SOCKEL || neu>MAXE) return;
-  if(d>0 && verteilt()+d>POOL) return;
-  ERSCH.attr[k]=neu; aktualisiereErschaffung();
-}
-function wuerfeln(){
+/* `stille` unterdrückt das Neuzeichnen — beim ersten Aufbau ist der Bildschirm
+   noch gar nicht da, und `aktualisiereErschaffung()` liefe ins Leere. */
+function wuerfeln(stille){
   ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
   const frei = ATTRIBUTE.map(([k])=>k).filter(k=>k!=='bildung');
   let rest = POOL;
@@ -693,7 +702,7 @@ function wuerfeln(){
     if(ERSCH.attr[k]+ERSCH_SCHRITT<=MAXE){ ERSCH.attr[k]+=ERSCH_SCHRITT; rest-=ERSCH_SCHRITT; }
     else { gew[i]=0; if(gew.every(g=>g===0)) break; }
   }
-  aktualisiereErschaffung();
+  if(!stille) aktualisiereErschaffung();
 }
 function waehleHerkunft(id){
   ERSCH.herkunft=id;
@@ -701,16 +710,17 @@ function waehleHerkunft(id){
   aktualisiereErschaffung();
 }
 function aktualisiereErschaffung(){
-  const v = verteilt();
-  document.getElementById('poolanz').textContent = `${POOL-v} von ${POOL} übrig`;
+  const anz = document.getElementById('poolanz');
+  if(anz) anz.textContent = 'ausgehoben';
   ATTRIBUTE.forEach(([k])=>{
-    document.getElementById('av_'+k).textContent = ERSCH.attr[k];
+    const v = document.getElementById('av_'+k); if(v) v.textContent = ERSCH.attr[k];
     const b = document.getElementById('ab_'+k); if(b) b.querySelector('i').style.width = ERSCH.attr[k]+'%';
-    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=sockelVon(k);
-    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+ERSCH_SCHRITT>POOL;
   });
-  const b = document.getElementById('weiterbtn');
-  if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
+  /* **Der Pool wird nicht mehr geprüft**, weil es keinen zu verteilen gibt —
+     `wuerfeln()` legt ihn immer vollständig an. Übrig bleiben die zwei Dinge,
+     die der Spieler wirklich entscheidet: Name und Herkunft. */
+  const w = document.getElementById('weiterbtn');
+  if(w) w.disabled = !(ERSCH.herkunft && ERSCH.name.trim().length>0);
 }
 function starte(){
   laufVerwerfen();       // ein Platz, kein zweiter — der alte Feldzug ist damit vorbei

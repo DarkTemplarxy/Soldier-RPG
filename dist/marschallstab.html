@@ -763,18 +763,30 @@ function mitHilfe(k, beschriftung){
   return e ? `<span class="hilfe" data-hilfe="${String(e).replace(/"/g,'&quot;')}">${beschriftung}</span>` : beschriftung;
 }
 
+/* ══════════════════ WAS EIN RANG IN DER WERTUNG WIEGT ══════════════════
+
+   **Der Rang ist der größte Posten der Wertung, und mit Abstand.** Ein
+   perfekter Lauf bis Waterloo bringt rund 5 000 Punkte; davon kommen 2 900 —
+   also über die Hälfte — allein aus dem Marschallstab. Das ist Absicht: Die
+   Rangleiter *ist* das Spiel, und jede Beförderung soll sich in der Wertung
+   anfühlen wie das, was sie im Leben des Mannes war.
+
+   Die Werte sind das Fünffache der früheren Skala (KONZEPT §5), und sie
+   wachsen überproportional: Der Schritt vom Caporal zum Fourrier bringt 80,
+   der vom Colonel zum Général 390. **Je höher man steht, desto mehr ist der
+   nächste Schritt wert** — weil er ungleich schwerer zu erreichen ist. */
 const RANG = [
-  {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
-  {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62},
-  {n:6,name:'Sergent-major',wert:88},
+  {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:60},{n:3,name:'Caporal',wert:130},
+  {n:4,name:'Caporal-fourrier',wert:210},{n:5,name:'Sergent',wert:310},
+  {n:6,name:'Sergent-major',wert:440},
   /* Die Offiziers- und Stabshälfte. Bis zum 28.07.2026 endete `RANG` bei 6,
      und `rangWert()` lieferte für alles darüber **0** — eine stille
      Fehlwertung, die erst auffiel, als die Leiter über Rang 6 hinauswuchs.
      Werte aus RANGLEITER §7, identisch mit KONZEPT §5. */
-  {n:7,name:'Sous-Lieutenant',wert:120},{n:8,name:'Lieutenant',wert:158},
-  {n:9,name:'Capitaine',wert:205},{n:10,name:'Chef de bataillon',wert:262},
-  {n:11,name:'Colonel',wert:330},{n:12,name:'Général de brigade',wert:408},
-  {n:13,name:'Général de division',wert:490},{n:14,name:'Maréchal d\'Empire',wert:580}
+  {n:7,name:'Sous-Lieutenant',wert:600},{n:8,name:'Lieutenant',wert:790},
+  {n:9,name:'Capitaine',wert:1025},{n:10,name:'Chef de bataillon',wert:1310},
+  {n:11,name:'Colonel',wert:1650},{n:12,name:'Général de brigade',wert:2040},
+  {n:13,name:'Général de division',wert:2450},{n:14,name:'Maréchal d\'Empire',wert:2900}
 ];
 /* ══════════════════ DER SOLD ══════════════════
 
@@ -1067,17 +1079,17 @@ const HERKUENFTE = [
    sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
    davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
-  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
-  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, kurz:'Die perfekte Schlacht.'},
-  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
-  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, sold:0.6, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
-  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
-  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, kurz:'Kein Feldzug, ein Überlebensspiel.'},
-  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
-  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, kurz:'Verteidigung der Heimat, Abdankung.'},
-  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, sold:1.0, kurz:'Waterloo. Epilog je nach Rang.'}
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, schwierigkeit:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, schwierigkeit:4, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, schwierigkeit:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, schwierigkeit:6, kurz:'Die perfekte Schlacht.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, schwierigkeit:8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, sold:0.6, schwierigkeit:10, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, schwierigkeit:12, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, schwierigkeit:16, kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, schwierigkeit:16, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, schwierigkeit:18, kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, sold:1.0, schwierigkeit:20, kurz:'Waterloo. Epilog je nach Rang.'}
 ];
 const STATIONEN = {};
 
@@ -1128,7 +1140,7 @@ const TAPFER_REIHE = ['tapfer_bronze','tapfer_silber','tapfer_gold'];
 
 const ORDEN = [
   {id:'ehrenwaffe', name:'Ehrenwaffe', voll:'Fusil d\'honneur',
-   ab:'1799', vp:10, ruf:6, pension:0.5,
+   ab:'1799', vp:30, ruf:6, pension:0.5,
    was:'Eine Muskete mit graviertem Schloss und deinem Namen darauf, verliehen im Namen der Konsuln. Sie schießt nicht besser. Sie sagt nur jedem, der sie sieht, was du getan hast.',
    bedingung:'Drei Nennungen im Tagesbefehl'},
 
@@ -1138,7 +1150,7 @@ const ORDEN = [
      endlich einen eigenen Preis: Wer durch die Bresche von Akkon gegangen ist,
      bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist. */
   {id:'ehrensaebel', name:'Ehrensäbel', voll:'Sabre d\'honneur',
-   ab:'1799', vp:14, ruf:8, pension:1.0,
+   ab:'1799', vp:42, ruf:8, pension:1.0,
    was:'Ein Säbel mit vergoldetem Gefäß und einer Gravur, die den Tag nennt und den Ort. Der Waffenmeister sagt, er sei zum Tragen und nicht zum Fechten, und hat unrecht: Er ist zum Angesehenwerden.',
    bedingung:'Eine Sondermission voll bestanden und fünf Nennungen'},
 
@@ -1147,12 +1159,12 @@ const ORDEN = [
      KONZEPT §5 hält den Platz frei: „je fremdem Orden +10, höchstens zwei
      gewertet" — die zweite Stelle bleibt für Spanien oder Preußen offen. */
   {id:'eisenkrone', name:'Eiserne Krone', voll:'Ordine della Corona Ferrea',
-   ab:'1805', fremd:true, vp:10, ruf:6, pension:0.5,
+   ab:'1805', fremd:true, vp:30, ruf:6, pension:0.5,
    was:'Ein Kreuz an dunkelgelbem Band mit grünem Rand, verliehen im Namen eines Königreichs, dessen König derselbe Mann ist, der dich schon einmal ausgezeichnet hat. In der Kompanie heißt es nur „die Lombardische".',
    bedingung:'Eine Meldung an den Oberbefehl und Austerlitz überlebt'},
 
   {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
-   ab:'1804', vp:12, ruf:10, pension:1.0,
+   ab:'1804', vp:36, ruf:10, pension:1.0,
    was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
    bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'},
 
@@ -1163,7 +1175,7 @@ const ORDEN = [
      verdoppelt sich, und das war der eigentliche Unterschied: zweitausend
      Francs im Jahr statt fünfhundert. */
   {id:'legion_offizier', name:'Offizier der Ehrenlegion', voll:'Officier de la Légion d\'honneur',
-   ab:'1807', vp:12, ruf:10, pension:2.0,
+   ab:'1807', vp:36, ruf:10, pension:2.0,
    was:'Dasselbe Kreuz, größer, an einem Band mit Rosette. Zweitausend Francs im Jahr, und in einer Liste, die in Paris geführt wird, steht dein Name jetzt in der zweiten Spalte statt in der ersten.',
    bedingung:'Die Ehrenlegion, ein Patent und acht Nennungen'}
 ];
@@ -1176,15 +1188,15 @@ function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
    jüngste Zutat sind — die Reihenfolge in `ORDEN` bestimmt nichts. */
 ORDEN.push(
   {id:'tapfer_bronze', name:'Tapferkeitsmedaille in Bronze', voll:'Médaille de la valeur · bronze',
-   ab:'1796', metall:'bronze', stufe:1, vp:4, ruf:2, pension:0,
+   ab:'1796', metall:'bronze', stufe:1, vp:12, ruf:2, pension:0,
    was:'Eine geprägte Scheibe an der Trikolore, gekreuzte Musketen darauf. Sie wird nicht verliehen, sie wird ausgegeben — der Fourrier hat einen Karton davon, und wessen Name im Tagesbefehl stand, bekommt eine.',
    bedingung:'Einmal im Tagesbefehl genannt'},
   {id:'tapfer_silber', name:'Tapferkeitsmedaille in Silber', voll:'Médaille de la valeur · argent',
-   ab:'1796', metall:'silber', stufe:2, vp:8, ruf:4, pension:0,
+   ab:'1796', metall:'silber', stufe:2, vp:24, ruf:4, pension:0,
    was:'Dieselbe Scheibe in Silber. Der Karton des Fourriers hat davon vier, und er weiß, wer sie bekommt, bevor die Liste kommt.',
    bedingung:'Einmal im Bulletin der Großen Armee'},
   {id:'tapfer_gold', name:'Tapferkeitsmedaille in Gold', voll:'Médaille de la valeur · or',
-   ab:'1796', metall:'gold', stufe:3, vp:12, ruf:6, pension:0.5,
+   ab:'1796', metall:'gold', stufe:3, vp:36, ruf:6, pension:0.5,
    was:'Dieselbe Scheibe in Gold. Es gibt keinen Karton dafür; sie kommt einzeln, in Papier gewickelt, und der Capitaine übergibt sie selbst.',
    bedingung:'Lob vor der Front, ein Bulletin und eine Kette ohne einen einzigen Fehlschlag'}
 );
@@ -1349,8 +1361,43 @@ const AUSRUESTUNG_START = () => ({
   tornister:{name:'Ausgabetornister',zustand:65,verschleiss:10}
 });
 
-// Kaufkosten: Preis je Punkt nach Zehnerbereich
-const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];
+/* ── Der Fertigkeiten-Sockel ──
+   **Alle neun Fertigkeiten beginnen bei 20, nicht mehr bei 5.** Die Skala geht
+   0–100, und 20 ist das, was ein Mann mitbringt, der schon einmal eine Muskete
+   gehalten und schon einmal Hunger gehabt hat — nicht Können, aber auch nicht
+   Ahnungslosigkeit.
+
+   **Der Sinn ist nicht, den Anfänger stärker zu machen.** Gegen die üblichen
+   Schwierigkeiten steht er mit 20 weiterhin weit unten und scheitert; er
+   scheitert nur nicht mehr *absolut*. Die Zahl gehört zur Skala: Wenn ein Wert
+   bis 100 gekauft werden kann, ist 5 kein Startwert, sondern ein Rundungsfehler.
+
+   **Steht in `grundwerte.js` und nicht bei den übrigen Erschaffungszahlen**,
+   weil `mechanik.js` (`neuerCharakter`) ihn braucht und **vor** `oberflaeche.js`
+   geladen wird. Eine Konstante, die zwei Dateien teilen, gehört in die, die
+   zuerst kommt — sonst hängt sie an der Ladereihenfolge. */
+const FERT_SOCKEL = 20;
+
+/* ══════════════════ WAS EIN PUNKT KOSTET ══════════════════
+
+   Preis je Punkt nach Zehnerbereich — `PRO_PUNKT[Math.floor(wert/10)]`.
+
+   **Die Kurve ist exponentiell, und das ist der Bremsklotz der ganzen
+   Ökonomie.** Seit die Obergrenze bei 100 liegt und ein perfekter Lauf ein
+   Vielfaches der früheren Punkte bringt, muss die Bremse aus dem Preis kommen
+   und nicht mehr aus einem Deckel:
+
+   | Weg | Kosten |
+   |---|---|
+   | ein Wert von 20 auf 70 | 330 VP |
+   | **alle fünfzehn** von 20 auf 70 | **4 950 VP** |
+   | ein Wert von 70 auf 100 | 1 250 VP |
+   | ein Wert von 20 auf 100 | 1 580 VP |
+
+   Damit ist „alles auf 70" das Ziel eines perfekten Laufs, und „eine Hundert"
+   kostet so viel wie drei Werte auf 70 — **Breite und Spitze schließen einander
+   fast aus**, und genau das soll die Entscheidung sein. */
+const PRO_PUNKT = [1,1,2,3,5,8,15,25,40,60];
 function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,Math.floor(x/10))]; return t; }
 
 /* ══════════════════ DIE OFFIZIERSPATENTE ══════════════════
@@ -1393,10 +1440,10 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
    zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
    der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
 const PATENTE = [
-  {id:'patent_sl', rang:7, vp:110, frei:6, abzug:158,
+  {id:'patent_sl', rang:7, vp:550, frei:6, abzug:790,
    label:'Patent als Sous-Lieutenant',
    beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
-  {id:'patent_lt', rang:8, vp:145, frei:8, abzug:205,
+  {id:'patent_lt', rang:8, vp:725, frei:8, abzug:1025,
    label:'Patent als Lieutenant',
    beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
 ];
@@ -1406,14 +1453,14 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
 
 const LADEN = [
-  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:40},
-  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},
-  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:24},
-  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:20},
-  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:30},
-  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
-  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:15},
-  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12},
+  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
+  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:120},
+  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
+  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
+  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
+  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:60},
 
   /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
 
@@ -1440,15 +1487,15 @@ const LADEN = [
      nicht Kraft, sondern das Wissen, wie man nicht stirbt: welches Wasser
      man trinkt, wie man seine Füße behält, wann man sich hinlegt. */
   {id:'zaeh_fuesse',art:'zaeh',label:'Füße wie Leder',
-   beschr:'Schuhe halten doppelt so lange, und ein forcierter Marsch nimmt dir weniger Luft',vp:30},
+   beschr:'Schuhe halten doppelt so lange, und ein forcierter Marsch nimmt dir weniger Luft',vp:150},
   {id:'zaeh_wasser',art:'zaeh',label:'Er weiß, welches Wasser',
-   beschr:'Ruhr, Fieber und Sumpffieber zehren nur halb so stark',vp:35},
+   beschr:'Ruhr, Fieber und Sumpffieber zehren nur halb so stark',vp:175},
   {id:'zaeh_nachzuegler',art:'zaeh',label:'Er bleibt nicht zurück',
-   beschr:'In Kriegen, die zwischen den Gefechten töten, kostet dich jede Station drei Punkte weniger',vp:45},
+   beschr:'In Kriegen, die zwischen den Gefechten töten, kostet dich jede Station drei Punkte weniger',vp:225},
   {id:'zaeh_schlaf',art:'zaeh',label:'Er schläft im Freien',
-   beschr:'Der Frost trifft dich eine Stufe milder, als er ist',vp:30},
+   beschr:'Der Frost trifft dich eine Stufe milder, als er ist',vp:150},
   {id:'zaeh_narben',art:'zaeh',label:'Alte Narben',
-   beschr:'Der Feldscher näht dir nach jedem Gefecht zwei Wunden zu statt einer',vp:40}
+   beschr:'Der Feldscher näht dir nach jedem Gefecht zwei Wunden zu statt einer',vp:200}
 ];
 /* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
    gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */
@@ -5588,7 +5635,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
      alles darüber ist etwas, das er sich verdient oder gekauft hat. Nebenbei
      verlängert es die Strecke, auf der Übung noch etwas bringt — `nutzen()`
      gibt bei niedrigen Werten am meisten. */
-  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = 5);
+  const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = FERT_SOCKEL);
   /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
      was man mitbringt, nicht das, was man sich aussucht. Das war früher der
      halbe Exploit (Konstitution 90 = unsterblich); die andere Hälfte lag in der
@@ -5748,124 +5795,173 @@ function abzugGrund(k){
    ausgerechnet der Kranke bei jedem Ruhe-Abend seine Konstitution und damit
    seinen Lebensvorrat, während der Gesunde beim selben Knopf nichts bekam:
    Krankheit wäre auf Dauer ein Vorteil gewesen. */
+/* ══════════════════ DER PROBEN-SOCKEL — WO DIE KURVE STEHT ══════════════════
+
+   Die Probe hat seit dem 30.07.2026 **zwei** Regler, und sie tun Verschiedenes:
+
+     • `PROBE_SOCKEL` verschiebt die Kurve waagerecht — *wo* „gleich gut wie die
+       Aufgabe" landet.
+     • Die Wurfbreite (`wurfZahl()`) macht die Kurve steil oder flach — *wie
+       sehr* der Abstand zwischen Wert und Aufgabe den Ausschlag gibt.
+
+   **Der Sockel bestimmt den Nullpunkt.** `Ziel = Wert − Schwierigkeit + SOCKEL`;
+   bei Wert == Schwierigkeit ist das Ziel genau der Sockel. Er steht auf **60**,
+   und der enge Wurf macht daraus **rund 80 %**: Wer der Aufgabe gewachsen ist,
+   besteht sie in vier von fünf Fällen, nicht im Münzwurf.
+
+   Bis dahin stand er auf 50 und der Wurf war weit (Mittel aus *zwei* Würfen).
+   Das hatte zwei Fehler in einem:
+     1. „Gleich gut" war ein Münzwurf — reinspieltechnisch unsinnig.
+     2. Der weite Wurf gab **jedem** eine Restchance, auch bei großem Abstand:
+        *Bajonett 8 gegen Schwierigkeit 40* bestand zu 29 %. Ein Mann, der die
+        Sache nicht kann, sollte sie nicht in fast jedem dritten Versuch schaffen.
+
+   **Beide Regler zusammen ergeben eine Leiter statt eines Rauschens:** Früh, mit
+   kleinen Werten, besteht man die 30er-Proben und scheitert an den 50ern; später,
+   mit gewachsenen Werten, öffnen sich die 50er. Die Schwierigkeiten in den
+   Kapiteln müssen dafür *nicht* mit dem Verlauf steigen (sie tun es nicht — alle
+   Kapitel spannen 30–55) — die steile Kurve macht den eigenen Wert zur Schranke.
+
+   Wer den Sockel ändert, misst gegen die vier Leitzahlen und trägt die neue
+   Eichung in `CLAUDE.md` nach — „Wert 40 gegen Schwierigkeit 40" ist kein
+   Münzwurf mehr, sondern vier von fünf. */
+const PROBE_SOCKEL = 60;
+
 /* Die Aussicht einer Probe in Prozent — **dieselbe Rechnung wie `probe()`**,
    nur ohne Wurf. Sie steht auf jedem Knopf, weil zwei nackte Zahlen
-   („Konstitution 40 gegen 40") nicht verraten, was sie bedeuten: Genau das ist
-   ein Münzwurf, und wer „40 gegen 40" liest, denkt eher „reicht genau".
+   („Konstitution 40 gegen 40") nicht verraten, was sie bedeuten.
 
    Das ist dieselbe Überlegung, aus der Wert und Schwierigkeit überhaupt auf dem
    Knopf stehen — sie sollen beim Entscheiden helfen. Eine Zahl, die man erst
    umrechnen muss, tut das nicht. */
+/* **Der Kampagnenzuschlag muss hier mitgerechnet werden, sonst lügt der Knopf.**
+   `aussicht()` und `probe()` sind dieselbe Rechnung, einmal mit und einmal ohne
+   Wurf — wer in der einen einen Summanden ergänzt und in der anderen nicht,
+   baut eine Anzeige, die etwas anderes verspricht als das, was passiert. */
 function aussicht(k, schwierigkeit){
-  return chance(Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50)));
+  return chance(Math.max(5, Math.min(95, wert(k) - (schwierigkeit + kampagnenHaerte()) + PROBE_SOCKEL)));
 }
 
-/* ══════════════════ ZWEI WÜRFE STATT EINEM ══════════════════
+/* ══════════════════ DER ENGE WURF — KÖNNEN STATT GLÜCK ══════════════════
 
-   **Der Wurf ist der Mittelwert aus zwei Würfen über 1–100, nicht ein
-   einzelner.** Das ist die wichtigste Änderung am Probensystem seit seiner
-   Einführung, und sie behebt eine Klage, die man beim Spielen sofort hat:
-   *Manchmal schafft man eine Probe mit dem doppelten Wert nicht.*
+   **Der Wurf ist der Mittelwert aus sechs Würfen über 1–100.** Sechs, nicht
+   einer und nicht zwei, und die Zahl ist der ganze Punkt: Je mehr Würfe man
+   mittelt, desto enger ballt sich das Ergebnis um die Mitte (Streuung ~12 statt
+   ~29 bei einem Wurf). **Der Wurf entscheidet dadurch immer weniger; der
+   Abstand zwischen Wert und Aufgabe immer mehr.**
 
-   Der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher
-   Wurf über hundert ist überall gleich wahrscheinlich; ein Zielwert von 80
-   ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je
-   Kapitel fühlt sich das an, als zähle Können nicht. **Der Mittelwert aus
-   zwei Würfen ballt sich um die Mitte** — wer deutlich über der Aufgabe
-   steht, besteht fast immer; wer deutlich darunter steht, fast nie.
+   Das ist die Antwort auf „reinspieltechnisch unsinnig": Ein weiter Wurf gibt
+   auch dem, der weit unter der Aufgabe steht, eine dicke Restchance. Ein enger
+   nimmt sie ihm. Gemessen an der Trefferchance (Sockel 60):
 
-   | Zielwert | vorher | jetzt |
+   | Abstand Wert−Aufgabe | Ziel | Chance |
    |---|---|---|
-   | 20 | 20 % | **8 %** |
-   | 35 | 35 % | **25 %** |
-   | 50 | 50 % | 50 % |
-   | 65 | 65 % | **75 %** |
-   | 80 | 80 % | **92 %** |
-   | 95 | 95 % | **99 %** |
+   | −32 (Bajonett 8 gegen 40) | 28 | **~3 %** |
+   | −20 | 40 | ~19 % |
+   | −10 | 50 | ~48 % |
+   | **0 (gleich gut)** | **60** | **~80 %** |
+   | +10 | 70 | ~95 % |
+   | +20 | 80 | ~99 % |
 
-   **Der Münzwurf in der Mitte bleibt ein Münzwurf** — die Eichung „Wert 40
-   gegen Schwierigkeit 40 ist fifty-fifty" gilt unverändert, und keine einzige
-   Schwierigkeit in den Kapiteldaten musste angefasst werden. Was sich ändert,
-   sind die Ränder: **Können und Unvermögen wiegen beide schwerer.**
+   **Die Kurve ist jetzt eine Leiter:** Innerhalb von etwa ±12 um „gleich gut"
+   entscheidet noch das Glück; darüber und darunter der Wert. Wer der Aufgabe
+   gewachsen ist, besteht; wer es nicht ist, besteht nicht — und dazwischen ist
+   ein schmaler Streifen, in dem es spannend bleibt.
 
-   Dass der Erstläufer damit härter dasteht, ist gewollt und Teil derselben
-   Richtung wie der tiefere Sockel — und es ist die Stelle, an der Italien
-   endlich beißen darf (Sollwert: nicht mehr als 20 % Tote im Erstlauf). */
+   > **Woher die sechs kommen:** Der frühere Wurf (Mittel aus *zwei*) war zu
+   > weit und hat, kombiniert mit dem Sockel 50, den Erstläufer halbiert — der
+   > teuerste gemessene Verlust des Projekts (`OFFEN.md` Punkt 8). Er wohnt am
+   > unteren Rand, und ein weiter Wurf trifft ihn dort am härtesten. Der enge
+   > Wurf plus der höhere Sockel richten beides zugleich: „gleich gut" steigt
+   > auf 80 %, „weit darunter" fällt auf fast nichts. */
 function wurfZahl(){
-  return Math.round((1 + Math.floor(Math.random()*100) + 1 + Math.floor(Math.random()*100)) / 2);
+  let s = 0;
+  for(let i = 0; i < 6; i++) s += 1 + Math.floor(Math.random() * 100);
+  return Math.round(s / 6);
 }
 
-/* Die Wahrscheinlichkeit, einen Zielwert zu erreichen — geschlossen gerechnet,
-   damit auf dem Knopf steht, was wirklich passiert. **Ohne diese Umrechnung
-   löge die Oberfläche:** Der Zielwert *war* bis dahin die Prozentzahl, und mit
-   zwei Würfen ist er es nicht mehr. */
+/* Die Wahrscheinlichkeit, einen Zielwert zu erreichen — damit auf dem Knopf
+   steht, was wirklich passiert. **Ohne diese Umrechnung löge die Oberfläche:**
+   Der Zielwert ist bei sechs Würfen nicht die Prozentzahl. Das Mittel aus sechs
+   Gleichverteilungen ist nach dem zentralen Grenzwertsatz nahezu normal
+   (Mittel 50,5, Streuung ≈ 11,8); die logistische Näherung der Normalverteilung
+   ist auf einem Knopf mehr als genau genug. */
 function chance(ziel){
-  const t = Math.max(0, Math.min(100, ziel)) / 100;
-  const p = t <= 0.5 ? 2*t*t : 1 - 2*(1-t)*(1-t);
-  /* **Nie 100, nie 0.** Beim geklemmten Zielwert 95 sind es rechnerisch 99,4 %,
-     und „100 %" auf einem Knopf wäre eine Lüge — es gibt keine sichere Probe.
-     Am unteren Ende dasselbe: Wer bei 5 steht, hat 0,5 %, und das ist nicht
-     nichts. Gerundet würde beides zu einer Zahl, die etwas verspricht. */
-  return Math.min(99, Math.max(1, Math.round(p*100)));
+  const x = (Math.max(0, Math.min(100, ziel)) - 50.5) / 11.79;
+  const p = 1 / (1 + Math.exp(-1.702 * x));
+  /* **Nie 100, nie 0.** Es gibt keine sichere Probe und keine unmögliche —
+     „100 %" oder „0 %" auf einem Knopf wären eine Lüge. */
+  return Math.min(99, Math.max(1, Math.round(p * 100)));
 }
 
-/* ══════════════════ DIE PROBE — UND WAS ÜBER IHR LIEGT ══════════════════
+/* ══════════════════ DIE PROBE ══════════════════
 
    ```
-   roh    = Wert − Schwierigkeit + 50        (ungeklemmt)
-   Ziel   = clamp(roh, 5, 95)
-   Können = max(0, roh − 95)
+   Aufgabe = Schwierigkeit + kampagnenHaerte()    (der Feldzug macht sie härter)
+   roh     = Wert − Aufgabe + PROBE_SOCKEL        (ungeklemmt, Sockel = 60)
+   Ziel    = clamp(roh, 5, 95)
+   Wurf    = Mittel aus sechs d100 (eng, siehe wurfZahl)
    ```
 
    **Die Klemme bleibt, und sie ist richtig.** Fünf Prozent Fehlschlag gehören
    dazu: Im Rauch schießt auch der beste Schütze daneben, und eine Probe, die
-   nie misslingt, ist keine. Aber sie hatte eine Nebenwirkung, die erst mit
-   vielen Veteranenpunkten sichtbar wurde — **gegen die üblichen
-   Schwierigkeiten 35 bis 50 sind Wert 85 und Wert 100 dieselbe Zahl.** Und
-   weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit
-   ausschließlich Trefferwahrscheinlichkeit. Damit war das obere Fünftel der
-   Skala **tote Währung**: Wer seine Spitze nachschärfte, bekam dafür nichts.
+   nie misslingt, ist keine.
 
-   `koennen` ist genau das, was die Klemme wegwirft. Es zahlt nicht mehr in
-   die Trefferchance — die bleibt bei 95 % —, sondern in die **Wirkung**.
-   Damit gilt für die ganze Skala wieder: Mehr Wert ist mehr wert; nur ändert
-   sich oben, *worin*. Ein Meister trifft nicht öfter, er trifft härter. */
-/* Die zuletzt gewürfelte Probe. `kampfAktion()` setzt sie am Anfang auf null
-   und liest sie am Ende aus, wo der Schaden verrechnet wird — so steht der
-   Meisterschaftsfaktor an **einer** Stelle statt an fünfzehn Schadenszeilen,
-   und keine davon kann ihn beim nächsten Umbau vergessen. */
-let PROBE_ZULETZT = null;
+   > **Hier stand einmal `koennen` — ein Schadensbonus für alles über der
+   > Klemme.** Er ist am 30.07.2026 ersatzlos entfernt worden, weil er die
+   > falsche Antwort auf eine richtige Frage war. Die Frage lautete: *Was kauft
+   > ein Wert, wenn die Trefferchance schon bei 99 % steht?* Die Antwort des
+   > Bonus war „mehr Schaden", und das ist unsinnig — eine Muskete schießt
+   > nicht härter, weil der Mann besser zielt.
+   >
+   > **Die Antwort ist jetzt `kampagnenHaerte()`:** Der Wert kauft weiterhin
+   > Trefferchance, nur wird die Aufgabe mit jedem Feldzug schwerer. Wert 80
+   > ist 1796 überflüssig und 1812 gerade genug. */
+
+/* ── Wie viel härter die Aufgaben in diesem Feldzug sind ──
+   **Ein Regler je Kampagne, genau wie `guete` beim Gefecht** — und aus
+   demselben Grund: Das Spiel hat elf Kapitel und einen Spieler, der von Lauf
+   zu Lauf besser wird. Bleiben die Anforderungen gleich, wird es mit jedem
+   Lauf leichter, statt andere Fragen zu stellen.
+
+   **Warum ein Zuschlag und nicht höhere Zahlen in den Kapiteldaten:** Die
+   Schwierigkeiten dort spannen in *jedem* Kapitel 30–55, an rund
+   einhundertfünfzig Stellen. Sie einzeln anzuheben wäre dieselbe Änderung,
+   nur hundertfünfzigmal abgeschrieben und beim nächsten Mal wieder. Der
+   Zuschlag steht an *einer* Stelle und ist eine Zahl je Feldzug.
+
+   Der Nebeneffekt ist Absicht: Die Kapiteldaten sagen weiterhin, wie schwer
+   eine Sache *an sich* ist (einen Wagen aus dem Schlamm ziehen: 40), und der
+   Feldzug sagt, unter welchen Umständen man sie tut. Derselbe Wagen, derselbe
+   Schlamm — aber 1812 bei minus zwanzig Grad und mit leerem Magen. */
+function kampagnenHaerte(){
+  if(typeof LAUF === 'undefined' || !LAUF) return 0;
+  const n = KAPITEL[Math.min(LAUF.node, KAPITEL.length - 1)];
+  if(!n) return 0;
+  for(const k of KAMPAGNEN){
+    const st = STATIONEN[k.id];
+    if(st && st.indexOf(n) >= 0) return k.schwierigkeit || 0;
+  }
+  return 0;
+}
+
 function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
-  const roh = w - schwierigkeit + 50;
+  const roh = w - (schwierigkeit + kampagnenHaerte()) + PROBE_SOCKEL;
   const ziel = Math.max(5, Math.min(95, roh));
-  const wurf = wurfZahl();   // Mittel aus zwei Würfen, siehe oben
+  const wurf = wurfZahl();
   if(!ohneUebung) nutzen(k, 1);
-  PROBE_ZULETZT = {wurf, ziel, wertRoh:w, roh, koennen: Math.max(0, roh - 95), erfolg: wurf <= ziel};
-  return PROBE_ZULETZT;
+  return {wurf, ziel, wertRoh:w, roh, erfolg: wurf <= ziel};
 }
 
-/* Der Faktor, den `koennen` auf eine Wirkung legt. **Gedeckelt bei +50 %**,
-   und der Deckel ist der wichtigere Teil der Zahl: Ohne ihn liefe ein Wert
-   von 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die
-   späten Gefechte wären in drei Runden vorbei.
-
-   30 Punkte über der Klemme sind das Maximum, das im Spiel vorkommt (Wert 100
-   gegen Schwierigkeit 35). Wer dort steht, richtet die Hälfte mehr an als
-   einer, der die Probe gerade so sicher besteht. */
-/* **Wie deutlich es gelungen ist, in einem Wort.** Ab fünfzehn Punkten über
-   der Klemme steht der Mann so weit über der Aufgabe, dass die Probe nur noch
-   Form ist — und das gehört auf den Schirm, sonst merkt niemand, wofür er
-   seine Veteranenpunkte ausgegeben hat. Unter fünfzehn steht nichts: Ein Wort,
-   das immer dasteht, sagt nichts. */
+/* **Wie deutlich es gelungen ist, in einem Wort.** Wer die Aufgabe um mehr als
+   dreissig Punkte übertrifft, für den ist sie nur noch Form — und das gehört
+   auf den Schirm, sonst merkt niemand, wofür er seine Veteranenpunkte
+   ausgegeben hat. Darunter steht nichts Besonderes: Ein Wort, das immer
+   dasteht, sagt nichts. */
 function probeWort(p){
   if(!p || !p.erfolg) return 'misslungen';
-  return p.koennen >= 15 ? 'mühelos gelungen' : 'gelungen';
-}
-
-function meister(p){
-  if(!p || !p.erfolg || !p.koennen) return 1;
-  return 1 + Math.min(30, p.koennen) / 60;
+  return (p.roh - PROBE_SOCKEL) >= 30 ? 'mühelos gelungen' : 'gelungen';
 }
 
 function nutzen(k, intens, fechtboden){
@@ -6545,10 +6641,21 @@ function istAttribut(k){ return ATTRIBUTE.some(([a])=>a===k); }
 function istWert(k){
   const h = HERKUENFTE.find(x=>x.id===(ERSCH&&ERSCH.herkunft)) || {attr:{},fert:{}};
   return istAttribut(k)
-    ? Math.max(0, Math.min(70, (ERSCH?ERSCH.attr[k]:20) + (h.attr[k]||0)))
-    : Math.max(0, Math.min(60, 10 + (h.fert[k]||0)));
+    ? Math.max(0, Math.min(100, (ERSCH?ERSCH.attr[k]:SOCKEL) + (h.attr[k]||0)))
+    : Math.max(0, Math.min(100, FERT_SOCKEL + (h.fert[k]||0)));
 }
-function punktGrenze(k){ return istAttribut(k) ? 70 : 60; }   // darüber nur noch im Feld
+/* ── Die Obergrenze ist 100, für alles ──
+   **Bis zum 30.07.2026 lag sie bei 70 für Attribute und 60 für Fertigkeiten.**
+   Das war richtig, solange ein Spitzenlauf 160 Punkte brachte: Man konnte sich
+   ohnehin nur eine Spitze leisten, und der Deckel verhinderte, dass sie absurd
+   wird. Mit der neuen Ökonomie ist das Ziel ein anderes — **ein perfekter Lauf
+   bis Waterloo soll reichen, um alles auf 70+ zu heben** —, und ein Deckel bei
+   60 machte das per Regel unerreichbar.
+
+   **Die Bremse ist jetzt allein der Preis.** Der Weg von 90 auf 100 kostet
+   600 VP, also mehr als drei Werte von 20 auf 70 zusammen. Wer eine Hundert
+   will, bezahlt sie mit der Breite. */
+function punktGrenze(k){ return 100; }
 function punktKosten(k){ const b = istWert(k); return kostenVon(b, b + (PUNKTE[k]||0)); }
 function gesamtKosten(){
   return AUSWAHL.reduce((s,id)=>{
@@ -6730,14 +6837,17 @@ function zeigeErschaffung(neu){
   if(neu || !ERSCH){
     ERSCH = {name:'', herkunft:null, attr:{}};
     ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
+    wuerfeln(true);   // **Es steht nie ein unverteilter Mann da.** Man sieht sofort einen.
   }
+  /* **Keine Plus- und Minusknöpfe mehr.** Der erste Mann wird nicht gebaut,
+     er wird ausgehoben — man sieht, was man bekommen hat, und darf neu
+     würfeln, bis es einem passt. Was man *gestalten* kann, sind die
+     Veteranenpunkte im nächsten Schritt, und die hat der erste Mann nicht. */
   const zeilen = ATTRIBUTE.map(([k,n])=>`
     <div class="attrrow">
       <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
       ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
       <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
-      <span><button class="pmbtn" onclick="stelle('${k}',-ERSCH_SCHRITT)" id="am_${k}">−</button>
-      <button class="pmbtn" onclick="stelle('${k}',ERSCH_SCHRITT)" id="ap_${k}">+</button></span>
     </div>`).join('');
   app.innerHTML = `
   <div class="stage">${verlauf()}
@@ -6745,12 +6855,12 @@ function zeigeErschaffung(neu){
       <div class="card"><div class="ch"><span>Erster Schritt · Wer bist du</span></div><div class="cb">
         <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value;aktualisiereErschaffung()">
       </div></div>
-      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">${POOL} Punkte zu verteilen</span></div>
+      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">ausgehoben</span></div>
         <div class="cb">${zeilen}
-        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · Schritte zu ${ERSCH_SCHRITT} · höchstens ${MAXE} bei der Erschaffung · Bildung ist vom Pool ausgenommen und steht auf ${BILDUNG_SOCKEL}.
-        Alle neun Fertigkeiten beginnen bei 5.<br>
-        Sechzig Punkte sind wenig, und das ist Absicht: Ein Rekrut ist kein Veteran. Was fehlt, holen die Veteranenpunkte deiner früheren Männer im nächsten Schritt.</p>
-        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Auswürfeln</button></div>
+        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · höchstens ${MAXE} bei der Aushebung · Bildung steht fest auf ${BILDUNG_SOCKEL} — du kannst nicht lesen.
+        Alle neun Fertigkeiten beginnen bei ${FERT_SOCKEL}.<br>
+        <b>Du suchst dir nicht aus, wer du bist.</b> Der Werber schreibt auf, was er sieht. Wenn dir der Mann nicht passt, kannst du einen anderen nehmen — aber besser machen kannst du ihn nicht. Das kommt erst mit den Veteranenpunkten deiner früheren Männer.</p>
+        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Einen anderen Mann</button></div>
       </div></div>
     </div>
     <div class="card"><div class="ch"><span>Herkunft</span><span>je genau 50 Punkte</span></div><div class="cb">
@@ -6769,14 +6879,9 @@ function zufallsName(){
   return v[Math.floor(Math.random()*v.length)]+' '+n[Math.floor(Math.random()*n.length)];
 }
 function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-sockelVon(k)),0); }
-function stelle(k,d){
-  if(k==='bildung') return;
-  const neu = ERSCH.attr[k]+d;
-  if(neu<SOCKEL || neu>MAXE) return;
-  if(d>0 && verteilt()+d>POOL) return;
-  ERSCH.attr[k]=neu; aktualisiereErschaffung();
-}
-function wuerfeln(){
+/* `stille` unterdrückt das Neuzeichnen — beim ersten Aufbau ist der Bildschirm
+   noch gar nicht da, und `aktualisiereErschaffung()` liefe ins Leere. */
+function wuerfeln(stille){
   ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
   const frei = ATTRIBUTE.map(([k])=>k).filter(k=>k!=='bildung');
   let rest = POOL;
@@ -6787,7 +6892,7 @@ function wuerfeln(){
     if(ERSCH.attr[k]+ERSCH_SCHRITT<=MAXE){ ERSCH.attr[k]+=ERSCH_SCHRITT; rest-=ERSCH_SCHRITT; }
     else { gew[i]=0; if(gew.every(g=>g===0)) break; }
   }
-  aktualisiereErschaffung();
+  if(!stille) aktualisiereErschaffung();
 }
 function waehleHerkunft(id){
   ERSCH.herkunft=id;
@@ -6795,16 +6900,17 @@ function waehleHerkunft(id){
   aktualisiereErschaffung();
 }
 function aktualisiereErschaffung(){
-  const v = verteilt();
-  document.getElementById('poolanz').textContent = `${POOL-v} von ${POOL} übrig`;
+  const anz = document.getElementById('poolanz');
+  if(anz) anz.textContent = 'ausgehoben';
   ATTRIBUTE.forEach(([k])=>{
-    document.getElementById('av_'+k).textContent = ERSCH.attr[k];
+    const v = document.getElementById('av_'+k); if(v) v.textContent = ERSCH.attr[k];
     const b = document.getElementById('ab_'+k); if(b) b.querySelector('i').style.width = ERSCH.attr[k]+'%';
-    document.getElementById('am_'+k).disabled = (k==='bildung')||ERSCH.attr[k]<=sockelVon(k);
-    document.getElementById('ap_'+k).disabled = (k==='bildung')||ERSCH.attr[k]>=MAXE||v+ERSCH_SCHRITT>POOL;
   });
-  const b = document.getElementById('weiterbtn');
-  if(b) b.disabled = !(ERSCH.herkunft && v===POOL && ERSCH.name.trim().length>0);
+  /* **Der Pool wird nicht mehr geprüft**, weil es keinen zu verteilen gibt —
+     `wuerfeln()` legt ihn immer vollständig an. Übrig bleiben die zwei Dinge,
+     die der Spieler wirklich entscheidet: Name und Herkunft. */
+  const w = document.getElementById('weiterbtn');
+  if(w) w.disabled = !(ERSCH.herkunft && ERSCH.name.trim().length>0);
 }
 function starte(){
   laufVerwerfen();       // ein Platz, kein zweiter — der alte Feldzug ist damit vorbei
@@ -9486,7 +9592,6 @@ function zeigeKampf(text){
 function kampfAktion(id){
   const n = KAPITEL[LAUF.node]; let text = '', schaden = 0, gefahrMod = 0;
   const zw = S.zweig;
-  PROBE_ZULETZT = null;   // siehe `meister()` — der Faktor wird unten einmal gelegt
 
   if(id==='laden'){
     const p = probe('geschick', 30);
@@ -9876,18 +9981,18 @@ function kampfAktion(id){
      dafür den Faktor 1,6. Hier gibt es ihn nicht: Ein Überfall ist kein
      Handel, sondern eine Lage. Ausgeglichen wird über kurze Runden und
      niedrige Feindmoral in den Daten. */
-  /* ── Können über der Klemme ──
-     **Hier wird das obere Ende der Skala erst etwas wert.** Die Probe klemmt
-     bei 95, also kaufen die letzten fünfzehn bis zwanzig Punkte einer
-     Fertigkeit keine Trefferchance mehr (siehe `probe()`). Was die Klemme
-     wegwirft, legt sich stattdessen auf die **Wirkung** — bis zu +50 %.
+  /* ── Hier stand einmal ein Schadensbonus für hohe Werte ──
+     **Er ist am 30.07.2026 ersatzlos entfernt worden**, auf ausdrückliche
+     Ansage des Entwicklers: *„Dass man über einem bestimmten Wert dann mehr
+     Schaden macht, ist Schwachsinn."* Und er hatte recht — eine Muskete
+     schießt nicht härter, weil der Mann dahinter besser zielt; sie trifft nur
+     öfter. Der Bonus war eine Krücke gegen ein anderes Problem: dass hohe
+     Werte gegen immer dieselben Schwierigkeiten irgendwann nichts mehr kaufen.
 
-     Es steht bewusst **vor** allen übrigen Faktoren und hinter keinem: Der
-     gelöste Zug, das Gelände und der Zustand der Kompanien sind Umstände,
-     das Können ist der Mann. Multiplikativ verrechnet ist die Reihenfolge
-     zwar gleichgültig — die Anordnung sagt trotzdem, was wovon abhängt. */
-  const meisterFaktor = meister(PROBE_ZULETZT);
-  if(schaden > 0) schaden *= meisterFaktor;
+     **Dieses Problem ist jetzt an seiner Wurzel gelöst**, nämlich dadurch,
+     dass die Aufgaben mit dem Feldzug härter werden (`schwierigkeit` je
+     Kampagne, siehe `probe()`). Wert 80 kauft wieder Trefferchance — nur eben
+     gegen Schwierigkeit 65 statt gegen 40. */
   let linie = (K.geloest || n.ueberfall) ? 0 : (2 + Math.random()*4) * Math.max(0.3, 1 - guete*0.15);
   if(K.geloest) schaden *= 1.6;
   /* Wer im Gelände liegt, trifft schlechter. Der Handel des Taktikers. */
@@ -11955,6 +12060,17 @@ function kapitelUeberlebt(){
   return zahl;
 }
 
+/* ── Was ein überstandener Feldzug wert ist, steigt mit seiner Nummer ──
+   **20 Punkte je Kapitelnummer, aufsummiert:** Italien 20, Ägypten 40, …,
+   Waterloo 220. Wer alle elf hinter sich bringt, hat damit 1 320 Punkte.
+
+   Die Staffelung ist der Kern und keine Verzierung: Ein pauschaler Betrag je
+   Kapitel behandelt Russland wie Italien, und dann ist der Schritt von zehn auf
+   elf Feldzüge genauso viel wert wie der erste — obwohl er ungleich teurer
+   erkauft ist. **Jedes Kapitel weiter soll sich lohnen, und zwar mehr als das
+   vorige.** */
+function kapitelWert(n){ let s = 0; for(let i = 1; i <= n; i++) s += 20 * i; return s; }
+
 /* Die volle Skala aus KONZEPT §5. Die Rangwerte (0/12/26/42/62) standen schon
    immer darin; seit Rang 4 und 5 erreichbar sind, ziehen die Zuschläge nach —
    vorher rechneten Rang und Zuschläge in zwei verschiedenen Skalen, und ein
@@ -11967,9 +12083,9 @@ function kapitelUeberlebt(){
 function wertung(){
   const p = {};
   p.rang = rangWert(S.rang);
-  p.kapitel = 8 * kapitelUeberlebt();          // volle Skala: 8 je Kapitel, max. 11
-  p.ruf = 5 * Math.floor(S.ruf/10);
-  p.nennungen = 3 * Math.min(10, S.nennungen);
+  p.kapitel = kapitelWert(kapitelUeberlebt());   // gestaffelt, siehe kapitelWert()
+  p.ruf = 10 * Math.floor(S.ruf/10);
+  p.nennungen = 10 * Math.min(10, S.nennungen);
   p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
   /* ── Der Überlebensbonus, gestaffelt (KONZEPT §5) ──
      **Bis Kapitel 8 stand hier der Platzhalter 25**, und der Kommentar dazu
@@ -11996,10 +12112,10 @@ function wertung(){
      Die 180 machen den Ausstieg zu einer echten Rechnung statt zu einer
      Verlegenheit — und genau das war der Sinn. */
   p.ueberleben = !S.lebt ? 0
-    : S.ende === 'ruhestand' ? 180
-    : S.ende === 'halbsold'  ? 120
-    : 70;
-  p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
+    : S.ende === 'ruhestand' ? 900
+    : S.ende === 'halbsold'  ? 600
+    : 350;
+  p.sauber = (!S.gekniffen && S.lebt) ? 100 : 0;
   /* ── Der Preis des Patents, erster Teil ──
      **Der gekaufte Rang zählt nicht, und die Stufe darüber auch nicht.** Ein
      Sous-Lieutenant mit Patent zieht 158 ab — das ist der Rangwert des

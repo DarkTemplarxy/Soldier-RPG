@@ -56,7 +56,7 @@ async function haerteLauf(b, rang) {
   p.on('pageerror', e => errs.push(e.message));
   await p.goto('file://' + ziel);
   await p.click('text=Neuen Mann aufstellen');
-  await p.click('text=Auswürfeln');
+  await p.click('text=Einen anderen Mann');
   await p.click('#h_schmied');
   await p.click('text=Weiter zu den Veteranenpunkten');
   await p.click('#startbtn');
@@ -156,7 +156,7 @@ async function haerteLauf(b, rang) {
 
     await p.goto('file://' + ziel);
     await p.click('text=Neuen Mann aufstellen');
-    await p.click('text=Auswürfeln');
+    await p.click('text=Einen anderen Mann');
     await p.click('#h_schmied');
     await p.click('text=Weiter zu den Veteranenpunkten');
     await p.click('#startbtn');

@@ -656,6 +656,17 @@ function kapitelUeberlebt(){
   return zahl;
 }
 
+/* ── Was ein überstandener Feldzug wert ist, steigt mit seiner Nummer ──
+   **20 Punkte je Kapitelnummer, aufsummiert:** Italien 20, Ägypten 40, …,
+   Waterloo 220. Wer alle elf hinter sich bringt, hat damit 1 320 Punkte.
+
+   Die Staffelung ist der Kern und keine Verzierung: Ein pauschaler Betrag je
+   Kapitel behandelt Russland wie Italien, und dann ist der Schritt von zehn auf
+   elf Feldzüge genauso viel wert wie der erste — obwohl er ungleich teurer
+   erkauft ist. **Jedes Kapitel weiter soll sich lohnen, und zwar mehr als das
+   vorige.** */
+function kapitelWert(n){ let s = 0; for(let i = 1; i <= n; i++) s += 20 * i; return s; }
+
 /* Die volle Skala aus KONZEPT §5. Die Rangwerte (0/12/26/42/62) standen schon
    immer darin; seit Rang 4 und 5 erreichbar sind, ziehen die Zuschläge nach —
    vorher rechneten Rang und Zuschläge in zwei verschiedenen Skalen, und ein
@@ -668,9 +679,9 @@ function kapitelUeberlebt(){
 function wertung(){
   const p = {};
   p.rang = rangWert(S.rang);
-  p.kapitel = 8 * kapitelUeberlebt();          // volle Skala: 8 je Kapitel, max. 11
-  p.ruf = 5 * Math.floor(S.ruf/10);
-  p.nennungen = 3 * Math.min(10, S.nennungen);
+  p.kapitel = kapitelWert(kapitelUeberlebt());   // gestaffelt, siehe kapitelWert()
+  p.ruf = 10 * Math.floor(S.ruf/10);
+  p.nennungen = 10 * Math.min(10, S.nennungen);
   p.orden = (S.orden||[]).reduce((sum,id)=>{ const o=ordenVon(id); return sum+(o?o.vp:0); },0);
   /* ── Der Überlebensbonus, gestaffelt (KONZEPT §5) ──
      **Bis Kapitel 8 stand hier der Platzhalter 25**, und der Kommentar dazu
@@ -697,10 +708,10 @@ function wertung(){
      Die 180 machen den Ausstieg zu einer echten Rechnung statt zu einer
      Verlegenheit — und genau das war der Sinn. */
   p.ueberleben = !S.lebt ? 0
-    : S.ende === 'ruhestand' ? 180
-    : S.ende === 'halbsold'  ? 120
-    : 70;
-  p.sauber = (!S.gekniffen && S.lebt) ? 20 : 0;
+    : S.ende === 'ruhestand' ? 900
+    : S.ende === 'halbsold'  ? 600
+    : 350;
+  p.sauber = (!S.gekniffen && S.lebt) ? 100 : 0;
   /* ── Der Preis des Patents, erster Teil ──
      **Der gekaufte Rang zählt nicht, und die Stufe darüber auch nicht.** Ein
      Sous-Lieutenant mit Patent zieht 158 ab — das ist der Rangwert des

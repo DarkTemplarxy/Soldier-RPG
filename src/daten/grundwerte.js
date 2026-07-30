@@ -48,18 +48,30 @@ function mitHilfe(k, beschriftung){
   return e ? `<span class="hilfe" data-hilfe="${String(e).replace(/"/g,'&quot;')}">${beschriftung}</span>` : beschriftung;
 }
 
+/* ══════════════════ WAS EIN RANG IN DER WERTUNG WIEGT ══════════════════
+
+   **Der Rang ist der größte Posten der Wertung, und mit Abstand.** Ein
+   perfekter Lauf bis Waterloo bringt rund 5 000 Punkte; davon kommen 2 900 —
+   also über die Hälfte — allein aus dem Marschallstab. Das ist Absicht: Die
+   Rangleiter *ist* das Spiel, und jede Beförderung soll sich in der Wertung
+   anfühlen wie das, was sie im Leben des Mannes war.
+
+   Die Werte sind das Fünffache der früheren Skala (KONZEPT §5), und sie
+   wachsen überproportional: Der Schritt vom Caporal zum Fourrier bringt 80,
+   der vom Colonel zum Général 390. **Je höher man steht, desto mehr ist der
+   nächste Schritt wert** — weil er ungleich schwerer zu erreichen ist. */
 const RANG = [
-  {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:12},{n:3,name:'Caporal',wert:26},
-  {n:4,name:'Caporal-fourrier',wert:42},{n:5,name:'Sergent',wert:62},
-  {n:6,name:'Sergent-major',wert:88},
+  {n:1,name:'Fusilier',wert:0},{n:2,name:'Grenadier',wert:60},{n:3,name:'Caporal',wert:130},
+  {n:4,name:'Caporal-fourrier',wert:210},{n:5,name:'Sergent',wert:310},
+  {n:6,name:'Sergent-major',wert:440},
   /* Die Offiziers- und Stabshälfte. Bis zum 28.07.2026 endete `RANG` bei 6,
      und `rangWert()` lieferte für alles darüber **0** — eine stille
      Fehlwertung, die erst auffiel, als die Leiter über Rang 6 hinauswuchs.
      Werte aus RANGLEITER §7, identisch mit KONZEPT §5. */
-  {n:7,name:'Sous-Lieutenant',wert:120},{n:8,name:'Lieutenant',wert:158},
-  {n:9,name:'Capitaine',wert:205},{n:10,name:'Chef de bataillon',wert:262},
-  {n:11,name:'Colonel',wert:330},{n:12,name:'Général de brigade',wert:408},
-  {n:13,name:'Général de division',wert:490},{n:14,name:'Maréchal d\'Empire',wert:580}
+  {n:7,name:'Sous-Lieutenant',wert:600},{n:8,name:'Lieutenant',wert:790},
+  {n:9,name:'Capitaine',wert:1025},{n:10,name:'Chef de bataillon',wert:1310},
+  {n:11,name:'Colonel',wert:1650},{n:12,name:'Général de brigade',wert:2040},
+  {n:13,name:'Général de division',wert:2450},{n:14,name:'Maréchal d\'Empire',wert:2900}
 ];
 /* ══════════════════ DER SOLD ══════════════════
 
@@ -352,17 +364,17 @@ const HERKUENFTE = [
    sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
    davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
-  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
-  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
-  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, kurz:'Die perfekte Schlacht.'},
-  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
-  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, sold:0.6, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
-  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
-  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, kurz:'Kein Feldzug, ein Überlebensspiel.'},
-  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
-  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, kurz:'Verteidigung der Heimat, Abdankung.'},
-  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, sold:1.0, kurz:'Waterloo. Epilog je nach Rang.'}
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, schwierigkeit:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, schwierigkeit:4, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
+  {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, schwierigkeit:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
+  {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, schwierigkeit:6, kurz:'Die perfekte Schlacht.'},
+  {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, schwierigkeit:8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
+  {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, sold:0.6, schwierigkeit:10, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
+  {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, schwierigkeit:12, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, schwierigkeit:16, kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, schwierigkeit:16, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
+  {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, schwierigkeit:18, kurz:'Verteidigung der Heimat, Abdankung.'},
+  {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, sold:1.0, schwierigkeit:20, kurz:'Waterloo. Epilog je nach Rang.'}
 ];
 const STATIONEN = {};
 
@@ -413,7 +425,7 @@ const TAPFER_REIHE = ['tapfer_bronze','tapfer_silber','tapfer_gold'];
 
 const ORDEN = [
   {id:'ehrenwaffe', name:'Ehrenwaffe', voll:'Fusil d\'honneur',
-   ab:'1799', vp:10, ruf:6, pension:0.5,
+   ab:'1799', vp:30, ruf:6, pension:0.5,
    was:'Eine Muskete mit graviertem Schloss und deinem Namen darauf, verliehen im Namen der Konsuln. Sie schießt nicht besser. Sie sagt nur jedem, der sie sieht, was du getan hast.',
    bedingung:'Drei Nennungen im Tagesbefehl'},
 
@@ -423,7 +435,7 @@ const ORDEN = [
      endlich einen eigenen Preis: Wer durch die Bresche von Akkon gegangen ist,
      bekommt nicht dasselbe wie einer, der dreimal aufgefallen ist. */
   {id:'ehrensaebel', name:'Ehrensäbel', voll:'Sabre d\'honneur',
-   ab:'1799', vp:14, ruf:8, pension:1.0,
+   ab:'1799', vp:42, ruf:8, pension:1.0,
    was:'Ein Säbel mit vergoldetem Gefäß und einer Gravur, die den Tag nennt und den Ort. Der Waffenmeister sagt, er sei zum Tragen und nicht zum Fechten, und hat unrecht: Er ist zum Angesehenwerden.',
    bedingung:'Eine Sondermission voll bestanden und fünf Nennungen'},
 
@@ -432,12 +444,12 @@ const ORDEN = [
      KONZEPT §5 hält den Platz frei: „je fremdem Orden +10, höchstens zwei
      gewertet" — die zweite Stelle bleibt für Spanien oder Preußen offen. */
   {id:'eisenkrone', name:'Eiserne Krone', voll:'Ordine della Corona Ferrea',
-   ab:'1805', fremd:true, vp:10, ruf:6, pension:0.5,
+   ab:'1805', fremd:true, vp:30, ruf:6, pension:0.5,
    was:'Ein Kreuz an dunkelgelbem Band mit grünem Rand, verliehen im Namen eines Königreichs, dessen König derselbe Mann ist, der dich schon einmal ausgezeichnet hat. In der Kompanie heißt es nur „die Lombardische".',
    bedingung:'Eine Meldung an den Oberbefehl und Austerlitz überlebt'},
 
   {id:'legion', name:'Ehrenlegion', voll:'Légionnaire de la Légion d\'honneur',
-   ab:'1804', vp:12, ruf:10, pension:1.0,
+   ab:'1804', vp:36, ruf:10, pension:1.0,
    was:'Ein weißes Emailkreuz an rotem Band, fünfhundert Francs im Jahr und das Recht, vor jedem Offizier gegrüßt zu werden, der es nicht trägt.',
    bedingung:'Eine Ehrenwaffe — oder fünf Nennungen und Ruf 45'},
 
@@ -448,7 +460,7 @@ const ORDEN = [
      verdoppelt sich, und das war der eigentliche Unterschied: zweitausend
      Francs im Jahr statt fünfhundert. */
   {id:'legion_offizier', name:'Offizier der Ehrenlegion', voll:'Officier de la Légion d\'honneur',
-   ab:'1807', vp:12, ruf:10, pension:2.0,
+   ab:'1807', vp:36, ruf:10, pension:2.0,
    was:'Dasselbe Kreuz, größer, an einem Band mit Rosette. Zweitausend Francs im Jahr, und in einer Liste, die in Paris geführt wird, steht dein Name jetzt in der zweiten Spalte statt in der ersten.',
    bedingung:'Die Ehrenlegion, ein Patent und acht Nennungen'}
 ];
@@ -461,15 +473,15 @@ function hatOrden(id){ return !!(S && S.orden && S.orden.includes(id)); }
    jüngste Zutat sind — die Reihenfolge in `ORDEN` bestimmt nichts. */
 ORDEN.push(
   {id:'tapfer_bronze', name:'Tapferkeitsmedaille in Bronze', voll:'Médaille de la valeur · bronze',
-   ab:'1796', metall:'bronze', stufe:1, vp:4, ruf:2, pension:0,
+   ab:'1796', metall:'bronze', stufe:1, vp:12, ruf:2, pension:0,
    was:'Eine geprägte Scheibe an der Trikolore, gekreuzte Musketen darauf. Sie wird nicht verliehen, sie wird ausgegeben — der Fourrier hat einen Karton davon, und wessen Name im Tagesbefehl stand, bekommt eine.',
    bedingung:'Einmal im Tagesbefehl genannt'},
   {id:'tapfer_silber', name:'Tapferkeitsmedaille in Silber', voll:'Médaille de la valeur · argent',
-   ab:'1796', metall:'silber', stufe:2, vp:8, ruf:4, pension:0,
+   ab:'1796', metall:'silber', stufe:2, vp:24, ruf:4, pension:0,
    was:'Dieselbe Scheibe in Silber. Der Karton des Fourriers hat davon vier, und er weiß, wer sie bekommt, bevor die Liste kommt.',
    bedingung:'Einmal im Bulletin der Großen Armee'},
   {id:'tapfer_gold', name:'Tapferkeitsmedaille in Gold', voll:'Médaille de la valeur · or',
-   ab:'1796', metall:'gold', stufe:3, vp:12, ruf:6, pension:0.5,
+   ab:'1796', metall:'gold', stufe:3, vp:36, ruf:6, pension:0.5,
    was:'Dieselbe Scheibe in Gold. Es gibt keinen Karton dafür; sie kommt einzeln, in Papier gewickelt, und der Capitaine übergibt sie selbst.',
    bedingung:'Lob vor der Front, ein Bulletin und eine Kette ohne einen einzigen Fehlschlag'}
 );
@@ -634,8 +646,43 @@ const AUSRUESTUNG_START = () => ({
   tornister:{name:'Ausgabetornister',zustand:65,verschleiss:10}
 });
 
-// Kaufkosten: Preis je Punkt nach Zehnerbereich
-const PRO_PUNKT = [1,1,2,2,3,4,6,8,11,15];
+/* ── Der Fertigkeiten-Sockel ──
+   **Alle neun Fertigkeiten beginnen bei 20, nicht mehr bei 5.** Die Skala geht
+   0–100, und 20 ist das, was ein Mann mitbringt, der schon einmal eine Muskete
+   gehalten und schon einmal Hunger gehabt hat — nicht Können, aber auch nicht
+   Ahnungslosigkeit.
+
+   **Der Sinn ist nicht, den Anfänger stärker zu machen.** Gegen die üblichen
+   Schwierigkeiten steht er mit 20 weiterhin weit unten und scheitert; er
+   scheitert nur nicht mehr *absolut*. Die Zahl gehört zur Skala: Wenn ein Wert
+   bis 100 gekauft werden kann, ist 5 kein Startwert, sondern ein Rundungsfehler.
+
+   **Steht in `grundwerte.js` und nicht bei den übrigen Erschaffungszahlen**,
+   weil `mechanik.js` (`neuerCharakter`) ihn braucht und **vor** `oberflaeche.js`
+   geladen wird. Eine Konstante, die zwei Dateien teilen, gehört in die, die
+   zuerst kommt — sonst hängt sie an der Ladereihenfolge. */
+const FERT_SOCKEL = 20;
+
+/* ══════════════════ WAS EIN PUNKT KOSTET ══════════════════
+
+   Preis je Punkt nach Zehnerbereich — `PRO_PUNKT[Math.floor(wert/10)]`.
+
+   **Die Kurve ist exponentiell, und das ist der Bremsklotz der ganzen
+   Ökonomie.** Seit die Obergrenze bei 100 liegt und ein perfekter Lauf ein
+   Vielfaches der früheren Punkte bringt, muss die Bremse aus dem Preis kommen
+   und nicht mehr aus einem Deckel:
+
+   | Weg | Kosten |
+   |---|---|
+   | ein Wert von 20 auf 70 | 330 VP |
+   | **alle fünfzehn** von 20 auf 70 | **4 950 VP** |
+   | ein Wert von 70 auf 100 | 1 250 VP |
+   | ein Wert von 20 auf 100 | 1 580 VP |
+
+   Damit ist „alles auf 70" das Ziel eines perfekten Laufs, und „eine Hundert"
+   kostet so viel wie drei Werte auf 70 — **Breite und Spitze schließen einander
+   fast aus**, und genau das soll die Entscheidung sein. */
+const PRO_PUNKT = [1,1,2,3,5,8,15,25,40,60];
 function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,Math.floor(x/10))]; return t; }
 
 /* ══════════════════ DIE OFFIZIERSPATENTE ══════════════════
@@ -678,10 +725,10 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
    zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
    der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
 const PATENTE = [
-  {id:'patent_sl', rang:7, vp:110, frei:6, abzug:158,
+  {id:'patent_sl', rang:7, vp:550, frei:6, abzug:790,
    label:'Patent als Sous-Lieutenant',
    beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
-  {id:'patent_lt', rang:8, vp:145, frei:8, abzug:205,
+  {id:'patent_lt', rang:8, vp:725, frei:8, abzug:1025,
    label:'Patent als Lieutenant',
    beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
 ];
@@ -691,14 +738,14 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
 
 const LADEN = [
-  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:40},
-  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:40},
-  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:24},
-  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:20},
-  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:30},
-  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:15},
-  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:15},
-  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:12},
+  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
+  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:120},
+  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
+  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
+  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
+  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+  {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:60},
 
   /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
 
@@ -725,15 +772,15 @@ const LADEN = [
      nicht Kraft, sondern das Wissen, wie man nicht stirbt: welches Wasser
      man trinkt, wie man seine Füße behält, wann man sich hinlegt. */
   {id:'zaeh_fuesse',art:'zaeh',label:'Füße wie Leder',
-   beschr:'Schuhe halten doppelt so lange, und ein forcierter Marsch nimmt dir weniger Luft',vp:30},
+   beschr:'Schuhe halten doppelt so lange, und ein forcierter Marsch nimmt dir weniger Luft',vp:150},
   {id:'zaeh_wasser',art:'zaeh',label:'Er weiß, welches Wasser',
-   beschr:'Ruhr, Fieber und Sumpffieber zehren nur halb so stark',vp:35},
+   beschr:'Ruhr, Fieber und Sumpffieber zehren nur halb so stark',vp:175},
   {id:'zaeh_nachzuegler',art:'zaeh',label:'Er bleibt nicht zurück',
-   beschr:'In Kriegen, die zwischen den Gefechten töten, kostet dich jede Station drei Punkte weniger',vp:45},
+   beschr:'In Kriegen, die zwischen den Gefechten töten, kostet dich jede Station drei Punkte weniger',vp:225},
   {id:'zaeh_schlaf',art:'zaeh',label:'Er schläft im Freien',
-   beschr:'Der Frost trifft dich eine Stufe milder, als er ist',vp:30},
+   beschr:'Der Frost trifft dich eine Stufe milder, als er ist',vp:150},
   {id:'zaeh_narben',art:'zaeh',label:'Alte Narben',
-   beschr:'Der Feldscher näht dir nach jedem Gefecht zwei Wunden zu statt einer',vp:40}
+   beschr:'Der Feldscher näht dir nach jedem Gefecht zwei Wunden zu statt einer',vp:200}
 ];
 /* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
    gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */

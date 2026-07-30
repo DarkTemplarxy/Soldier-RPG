@@ -31,7 +31,7 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
     await p.goto('file://' + ziel);
     await p.click('text=Neuen Mann aufstellen');
-    await p.click('text=Auswürfeln');
+    await p.click('text=Einen anderen Mann');
     await p.click('#h_schmied');
     await p.click('text=Weiter zu den Veteranenpunkten');
     await p.click('#startbtn');
