@@ -57,6 +57,7 @@ function stationErledigt(){
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   aderlass(KAPITEL[LAUF.node-1]);
+  burscheSorgt();      // ab Rang 8: was abgenutzt ist, ist am Morgen wieder brauchbar
   /* „Er weiß, welches Wasser." Halbiert wird die Zehrung, nicht abgeschafft —
      und die Sperre der Zeitheilung bleibt bestehen, solange überhaupt etwas
      zehrt. Wer krank ist, erholt sich nicht; er wird nur langsamer weniger.
@@ -1360,7 +1361,50 @@ function wundeGeben(name, abzug, zehrt){
    Muskete instand setzt, und keinen Marketender. **Was kaputt ist, bleibt
    kaputt** — und der Verschleiß greift über `wert()` direkt in die Proben:
    Konstitution verliert 18 Punkte, sobald die Schuhe unter Zustand 25 fallen. */
+/* ══════════════════ DER BURSCHE ══════════════════
+
+   **Ab Lieutenant kümmert sich jemand anders um deine Sachen.** Jeder Offizier
+   hatte einen *domestique* — einen Mann, der die Stiefel putzt, den Rock
+   ausbessert und dafür sorgt, dass am Morgen alles da ist, wo es sein soll.
+   Im Spiel heißt das: **Der Verschleiß hört auf, und der Knopf „Ausrüstung
+   durchsehen und flicken" verschwindet.**
+
+   Es ist dieselbe Idee wie die verschwundene Atemleiste ab Rang 10: **Größe
+   zeigt sich daran, was aufhört, dich zu betreffen.** Ein Zugewinn, der als
+   Wegfall daherkommt — und es steht nirgends, dass es aufgehört hat.
+
+   **Der Mantel gehört dazu.** Ein Offizier hat einen; wer bis dahin keinen
+   gekauft hat, bekommt einen gestellt. Das nimmt dem Frost seinen Zahn — aber
+   nur dort, wo es etwas zu stellen gibt.
+
+   **Und genau dort hört es auf: `ersatz:false`.** In Russland gibt es nichts
+   zu flicken und nichts zu ersetzen, auch nicht für einen General. Der
+   Bursche steht mit denselben leeren Händen da wie alle anderen, der doppelte
+   Verschleiß greift wieder, und ein Mantel, der dort kaputtgeht, bleibt
+   kaputt. **Die eigene Regel des Kapitels schlägt den Rang** — sonst wäre
+   Russland ab Rang 8 abgeschaltet. */
+function ohneErsatz(){
+  const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
+  return !!(k && k.ersatz === false);
+}
+function burscheHaelt(){ return !!S && S.rang >= 8 && !ohneErsatz(); }
+/* Je Station: Was abgenutzt ist, ist am Morgen wieder brauchbar — nicht neu,
+   aber brauchbar. Die 80 ist bewusst kein Höchstwert: Ein gekauftes Stück
+   bleibt besser als ein geflicktes. */
+function burscheSorgt(){
+  if(!burscheHaelt()) return;
+  for(const k in S.ausr){
+    const a = S.ausr[k];
+    if(a.verschleiss > 0) a.zustand = Math.max(a.zustand, 80);
+  }
+  const m = S.ausr.mantel;
+  if(!m || m.zustand < 20) S.ausr.mantel = {name:'Offiziersmantel', zustand:85, verschleiss:6};
+}
+
 function verschleiss(faktor){
+  /* Der Bursche hält, was abgenutzt wird — außer dort, wo es nichts zu halten
+     gibt. */
+  if(burscheHaelt()) return;
   const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
   if(k && k.verschleiss) faktor *= k.verschleiss;
   for(const k2 in S.ausr){

@@ -65,7 +65,6 @@ const KAPITEL9 = [
 /* 124 */ {typ:'lager',id:'drilllager',datum:'April 1813 · Drilllager am Rhein',ort:'Drei Wochen, um aus Jungen eine Linie zu machen',
   abende:3,
   tun:['exerzieren','bajonett','scharf','instand','schuhe','waffe','ruhe','leute'],
-  rangTun:{3:['korporalschaft'],4:['listen'],5:['sektion','rekruten'],7:['fechtboden','zugfuehren','karten','adjutant'],9:['kasse_ganz','kasse_ueblich','kasse_voll']},
   text:[
     'Drei Wochen. In drei Wochen macht man aus einem Achtzehnjährigen keinen Soldaten; man macht aus ihm jemanden, der in der Reihe stehen bleibt, wenn geschossen wird, und das ist alles, was gebraucht wird.',
     'Geübt wird das Nötigste: laden, in Linie gehen, Karree formieren, und vor allem stehen bleiben. Zielen wird nicht geübt, weil dafür Pulver fehlt und weil es auf zweihundert Schritt ohnehin keine Rolle spielt.',

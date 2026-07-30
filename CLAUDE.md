@@ -1814,6 +1814,52 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 
 ---
 
+## Das Lager ist der Abend, der Schreibtisch ist die Arbeit (30.07.2026)
+
+**Rang 9 hatte zwölf Knöpfe auf drei Abende, drei davon waren die Kompaniekasse in drei Varianten.** Verwaltung verdrängte damit die eigene Ausbildung — genau das, wovor der Kommentar über `abendeFuer()` seit Sitzung 2 warnt. Der Schreibtisch war gebaut, aber die Verwaltung lag weiterhin daneben im Lager.
+
+| Rang | vorher | jetzt |
+|---|---|---|
+| 5 · Sergent | 11 | **9** |
+| 7 · Sous-Lieutenant | 11 | **7** |
+| 8 · Lieutenant | 12 | **6** |
+| **9 · Capitaine** | **12** | **5** + drei Vorgänge |
+| 11 · Colonel | 8 | **4** + drei Vorgänge |
+
+**Was Papier ist, liegt auf dem Schreibtisch und kostet keinen Abend. Was der eigene Körper, der eigene Kopf oder die eigenen Leute sind, bleibt ein Abend.**
+
+### Die drei Ebenen (`ebene` in `VORGAENGE`, `EBENE_WORT`)
+
+**Bis dahin waren es drei Ziehungen aus fünf Arten** — der Spieler bekam drei Blätter und wusste bei keinem, wie weit seine Entscheidung reicht. Jetzt kommt aus jeder Ebene genau eines, immer in derselben Reihenfolge, und **über jedem Blatt steht, welche es ist:**
+
+| Ebene | Wie weit sie reicht | Vorgänge |
+|---|---|---|
+| **Was heute entschieden wird** | sofort und sichtbar | Zustandsfrage · Bestandsmeldung · Arbeitskolonne · Zuteilung |
+| **Was den Feldzug trägt** | bis zum Kapitelende, zahlt auf den stehenden Auftrag ein | **Kasse und Lieferantenvertrag** · Ausbildungsplan · Quartiere |
+| **Was bleibt** | darüber hinaus | Personalvorschlag · **Adjutantenauftrag** · Beurteilung · der Mitgezogene |
+
+> **Der eigentliche Gewinn ist die Beschriftung.** Man weiß beim Entscheiden, wie weit die Entscheidung reicht — und bei der dritten sagt das Spiel nie, ob es richtig war.
+
+**Die Kasse ist damit unausweichlich geworden**, und das ist Absicht: Vorher konnte man den Knopf einfach nicht drücken. Jetzt liegt sie jedes Quartal auf dem Tisch. Ehrlich ausgeben ist eine der Antworten — aber es ist eine Antwort und kein Nichtstun.
+
+> **⚠ Zwei Reihenfolge-Fallen beim Bauen.** Erstens stand der Schreibtisch **vor** dem Zurücksetzen von `S.kasseQuartal` — der `ab:`-Filter prüfte gegen den Wert des *vorigen* Lagers, und die Kasse lag damit nie auf dem Tisch. Zweitens fiel mit dem Versatz `k*3` jede Ziehung auf dieselbe Restklasse: Die Kasse kam **immer** zusammen mit dem Adjutanten, der Ausbildungsplan **immer** mit der Vorschlagsliste. `k*7` ist teilerfremd zu allen drei Listenlängen.
+
+### Der Bursche (`burscheHaelt()`, `burscheSorgt()` in `mechanik.js`)
+
+**Ab Lieutenant kümmert sich jemand anders um deine Sachen.** Jeder Offizier hatte einen *domestique*. Im Spiel heißt das: Der Verschleiß hört auf, „Ausrüstung durchsehen und flicken" und der Schuster verschwinden, und was abgenutzt ist, ist am Morgen wieder brauchbar (Zustand mindestens 80). Wer keinen Mantel hat, bekommt einen gestellt.
+
+Es ist dieselbe Idee wie die verschwundene Atemleiste ab Rang 10: **Größe zeigt sich daran, was aufhört, dich zu betreffen.**
+
+> **Und genau dort hört es auf: `ersatz:false`.** In Russland gibt es nichts zu flicken und nichts zu ersetzen, auch nicht für einen General — der doppelte Verschleiß greift wieder, und ein Mantel, der dort kaputtgeht, bleibt kaputt. **Die eigene Regel des Kapitels schlägt den Rang**, sonst wäre Russland ab Rang 8 abgeschaltet. Das Feld stand seit Kapitel 8 im Kommentar und war nie gesetzt; jetzt ist es das.
+
+### Zwei Knöpfe wurden einer
+
+`listen` + `ausgabe` → **`schreibarbeit`** (Rang 4–8): eine Probe, beide Folgen. Wer die Liste im Griff hat, kann sie auch gegen das Dienstalter lesen; wer nicht, gibt der Reihe nach aus und drei Mann gehen weiter barfuß.
+
+`rekruten` + `sektion` → **`zwanzig`** (Rang 5–6): die Auswahl entscheidet die Probe, das Exerzieren kommt in jedem Fall. Beide fallen ab Rang 7 weg — ein Sous-Lieutenant führt einen Zug, er drillt keine acht Mann und keine zwanzig mehr.
+
+> **⚠ Und wieder ein stummer Filter.** `rangTun` an einer **Lagerstation** liest niemand — die Rangregeln stehen in `lagerHandlungen()` und nirgends sonst. Sechs Lager trugen die Liste trotzdem, und sie hat nie etwas getan; sie sind entfernt. Dieselbe Familie wie die zwei Lager in Kapitel 4, die siebzehn Prozentpunkte gekostet haben. **`lagerHandlungen()` und `winterHandlungen()` melden Unbekanntes jetzt in die Konsole, statt es wegzulassen.**
+
 ## Die Feuille d'enrôlement — ein Bogen statt zwei Bildschirme (`zeigeErschaffung()`)
 
 **Bis zum 30.07.2026 waren Aushebung und Veteranenpunkte zwei Ansichten mit einem Knopf dazwischen.** Der zweite Schritt ist aber genau der, in dem man die Werte des ersten *bewertet* — man braucht sie nebeneinander. Entwurfspaket `12a` legt beide auf ein Blatt: links das Formular, rechts eine mitrechnende Spalte *So rückt er ein*, unten der Vorrat.

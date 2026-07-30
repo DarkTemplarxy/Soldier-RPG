@@ -155,7 +155,6 @@ const KAPITEL8 = [
 /* 113 */ {typ:'lager',id:'lager_moskaustrasse',datum:'Ende August 1812 · An der Straße nach Moskau',ort:'Das letzte volle Lager',
   abende:2,
   tun:['exerzieren','instand','waffe','ruhe','leute','fouragieren'],
-  rangTun:{5:['sektion'],7:['fechtboden','zugfuehren','karten'],9:['kasse_ganz','kasse_ueblich','kasse_voll']},
   text:[
     'Zwei Abende an der Straße nach Moskau, dreihundert Kilometer vor der Stadt. Es ist das letzte Lager, in dem es noch etwas gibt — und man merkt es daran, was fehlt: kein Schuster, kein Marketender, keine Ausgabe.',
     'Von den vierhunderttausend, die im Juni über den Njemen gingen, marschieren auf dieser Straße noch hundertdreißigtausend. Der Rest steht auf Etappen, liegt in Lazaretten oder ist weg, und geschossen worden ist erst einmal.',

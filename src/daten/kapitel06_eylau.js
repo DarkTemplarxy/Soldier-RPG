@@ -195,7 +195,6 @@ const KAPITEL6 = [
 /* 89 */ {typ:'lager',id:'lager_heilsberg',datum:'Anfang Juni 1807 · Vor Heilsberg',ort:'Das letzte Lager vor dem Sommer',
   abende:2,
   tun:['exerzieren','bajonett','scharf','instand','schuhe','waffe','ruhe','leute','fouragieren'],
-  rangTun:{3:['korporalschaft'],4:['listen'],5:['sektion','rekruten'],7:['fechtboden','zugfuehren','karten','adjutant'],9:['kasse_ganz','kasse_ueblich','kasse_voll']},
   text:[
     'Es ist Juni geworden, und Ostpreußen im Juni sieht aus wie ein anderes Land: Getreide, Laubwald, Wärme, und die Wege sind trocken. Es ist schwer zu glauben, dass hier vor vier Monaten Männer erfroren sind.',
     'Die Armee ist aufgefüllt worden — Konskribierte aus Frankreich, Bataillone aus Italien, Polen, die freiwillig gekommen sind, weil ihnen jemand etwas versprochen hat. Ein Drittel der Kompanie hat Eylau nicht mitgemacht und weiß nur, was erzählt wird.',

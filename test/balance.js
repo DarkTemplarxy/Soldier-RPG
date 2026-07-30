@@ -513,17 +513,17 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
              die Entscheidung ist eine moralische, nicht eine optimale. Wer die
              andere Seite messen will, ändert diese eine Zeile und sagt dazu,
              dass er es getan hat. */
-          if (!z && S.rang >= 9) z = f(/Kasse ausgeben, wie sie vorgesehen/);
-          if (!z && S.rang >= 8 && gunst('vernet') < 4) z = f(/Auftrag des Bataillons/);
+          /* Kasse und Adjutantenauftrag liegen seit dem 30.07.2026 auf dem
+             Schreibtisch und nicht mehr im Lager — sie stehen weiter unten. */
           if (!z && S.rang >= 7) z = f(/Fechtboden/) || f(/Zug selbst antreten/) || f(/Karten des Abschnitts/);
           if (!z && gunst('martel') < 4) z = f(/Am Feuer/);
           /* Die Leiter verlangt jetzt verschiedene Fürsprecher und Bildung 35.
              Wem man das nicht beibringt, der misst wieder die Blindheit des
              Bots statt der Schwelle — dieselbe Lektion wie bei der Gunst. */
-          if (!z && S.rang >= 5) z = f(/zwanzig Mann exerzieren|Rekruten für deine Sektion/);
-          if (!z && S.rang >= 4) z = f(/Listen der Kompanie/);
+          if (!z && S.rang >= 5) z = f(/Deine zwanzig Mann/);
+          if (!z && S.rang >= 4) z = f(/Schreibarbeit der Kompanie/);
           if (!z && S.rang === 3 && S.attr.bildung < 35 && S.geld >= 5) z = f(/Buchstaben lernen/);
-          if (!z && S.rang >= 3 && gunst('berthaud') < 4) z = f(/acht Mann drillen|Listen der Kompanie/);
+          if (!z && S.rang >= 3 && gunst('berthaud') < 4) z = f(/acht Mann drillen|Schreibarbeit der Kompanie/);
           if (!z && S.atem < 55) z = f(/Schlafen und liegen/);
           if (!z && S.ausr.muskete.zustand < 55) z = f(/Muskete zerlegen/);
           if (!z && S.ausr.schuhe.zustand < 40 && S.geld >= 6) z = f(/Schuster/);
@@ -621,8 +621,11 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
           const riskant = btn.filter(e => e.classList.contains('risk'));
           const brav    = btn.filter(e => !e.classList.contains('risk'));
           z = (MUT && riskant.length) ? riskant[0]
-            : (f(/auf eigene Kosten/) || f(/Wahrheit melden/) || f(/Fähigeren/)
-               || f(/Selbst mit ihm reden/) || f(/gleichmäßig/) || brav[0] || btn[0]);
+            : (f(/Kasse ausgeben, wie sie vorgesehen/) || f(/an den vergeben, der liefert/)
+               || f(/auf eigene Kosten/) || f(/Wahrheit melden/) || f(/Fähigeren/)
+               || f(/Selbst mit ihm reden/) || f(/gleichmäßig/) || f(/Unteroffiziere selbst unterrichten/)
+               || f(/Eng legen/) || f(/Schreiben, was er kann/) || f(/Stellung erkunden/)
+               || brav[0] || btn[0]);
         }
         if (!z) z = btn[0];
         if (z) z.click();

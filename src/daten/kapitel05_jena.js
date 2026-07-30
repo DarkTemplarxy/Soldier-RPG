@@ -176,7 +176,6 @@ const KAPITEL5 = [
 /* 69 */ {typ:'lager',id:'lager_landgrafenberg',datum:'13. Oktober 1806, nachts · Am Landgrafenberg',ort:'Die Nacht vor der Schlacht',
   abende:2,
   tun:['exerzieren','instand','schuhe','waffe','ruhe','leute','fouragieren'],
-  rangTun:{5:['sektion'],6:['sektion'],7:['fechtboden','zugfuehren','karten'],9:['kasse_ganz','kasse_ueblich','kasse_voll']},
   text:[
     'Auf dem Plateau über Jena stehen bis zum Morgen dreißigtausend Mann auf einer Fläche, auf der eigentlich fünftausend Platz haben. Man liegt aneinander, weil man nicht anders liegen kann, und es ist die wärmste Nacht seit Bamberg.',
     'Feuer sind verboten. Der Kaiser geht zwischen den Männern durch, mit einer Laterne, und lässt sich von einem Pfarrer den Weg durch den Hohlweg erklären. Wer wach ist, sieht ihn; wer schläft, wird nicht geweckt.',
@@ -368,7 +367,6 @@ const KAPITEL5 = [
 /* 77 */ {typ:'lager',id:'quartier_berlin',datum:'November 1806 · Quartier in Berlin',ort:'Drei Wochen in einer fremden Stadt',
   abende:3,
   tun:['exerzieren','bajonett','scharf','instand','schuhe','waffe','lesen','ruhe','leute','fouragieren'],
-  rangTun:{3:['korporalschaft'],4:['listen'],5:['sektion','rekruten'],7:['fechtboden','zugfuehren','karten','adjutant'],9:['kasse_ganz','kasse_ueblich','kasse_voll']},
   text:[
     'Drei Wochen Quartier in einer Stadt, die alles hat und nichts hergeben will. Man wohnt bei Leuten, die einen nicht wollen und höflich sind, weil ihnen nichts anderes übrig bleibt.',
     'Es gibt Fechtböden, weil preußische Offiziere Fechtböden hatten. Es gibt Buchbinder, Schuster, Uhrmacher und einen Waffenschmied in der Klosterstraße, der französisch spricht und dafür das Doppelte nimmt.',

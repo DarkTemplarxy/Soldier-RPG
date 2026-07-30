@@ -5,6 +5,54 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Das Lager ist der Abend, der Schreibtisch ist die Arbeit
+
+**Rang 9 hatte zwölf Knöpfe auf drei Abende, drei davon die Kompaniekasse in drei Varianten.** Der Schreibtisch war seit Sitzung 5 gebaut, die Verwaltung lag trotzdem weiter daneben im Lager — und verdrängte damit genau das, wovor der Kommentar über `abendeFuer()` warnt.
+
+| Rang | vorher | jetzt |
+|---|---|---|
+| 5 · Sergent | 11 | **9** |
+| 7 · Sous-Lieutenant | 11 | **7** |
+| 8 · Lieutenant | 12 | **6** |
+| **9 · Capitaine** | **12** | **5** + drei Vorgänge |
+| 11 · Colonel | 8 | **4** + drei Vorgänge |
+
+### Drei Ebenen statt drei Ziehungen
+
+Kasse, Lieferantenvertrag und Adjutantenauftrag sind auf den Schreibtisch gezogen, und die Vorgänge haben eine Struktur bekommen — je einer aus jeder Ebene, in dieser Reihenfolge, **mit der Ebene über dem Blatt:**
+
+| Ebene | Reicht bis | Vorgänge |
+|---|---|---|
+| **Was heute entschieden wird** | sofort | Zustandsfrage · Bestandsmeldung · Arbeitskolonne · Zuteilung |
+| **Was den Feldzug trägt** | Kapitelende, zahlt auf den stehenden Auftrag ein | **Kasse / Vertrag** · Ausbildungsplan · Quartiere |
+| **Was bleibt** | darüber hinaus | Personalvorschlag · **Adjutantenauftrag** · Beurteilung · der Mitgezogene |
+
+Drei neue Vorgänge dafür: **Ausbildungsplan** (die Unteroffiziere selbst unterrichten oder die Mannschaft exerzieren lassen), **Quartierverteilung** (eng legen, nach Vorschrift, oder requirieren) und **Beurteilung für die Personalakte** — der einzige Vorgang, bei dem man über einen anderen schreibt, und der schärfste: Dort wählt man nicht zwischen zweien, sondern schreibt einen Satz, der jemandem folgt.
+
+**Die Kasse ist damit unausweichlich.** Vorher konnte man den Knopf einfach nicht drücken; jetzt liegt sie jedes Quartal auf dem Tisch. Ehrlich ausgeben ist eine Antwort, kein Nichtstun.
+
+**Der Adjutantenauftrag ging bisher hart an `'vernet'`** — dieselbe Fehlerfamilie wie viermal zuvor. Er geht jetzt an `beurteiler()`.
+
+### Der Bursche ab Lieutenant
+
+`instand` und `schuhe` fallen ab Rang 8 weg, der Verschleiß greift nicht mehr, und was abgenutzt ist, ist am Morgen wieder brauchbar (Zustand mindestens 80). Wer keinen Mantel hat, bekommt einen gestellt. Dieselbe Idee wie die verschwundene Atemleiste: **Größe zeigt sich daran, was aufhört, dich zu betreffen.**
+
+**Ausgenommen ist `ersatz:false`** — in Russland gibt es nichts zu flicken, auch nicht für einen General. Das Feld stand seit Kapitel 8 im Kommentar und war nie gesetzt; jetzt ist es das.
+
+### Zwei Knöpfe wurden einer
+
+`listen`+`ausgabe` → **`schreibarbeit`**, `rekruten`+`sektion` → **`zwanzig`**. Beide fallen ab Rang 7 weg: Ein Sous-Lieutenant führt einen Zug, er drillt keine acht Mann und keine zwanzig mehr.
+
+### Drei Fehler beim Bauen
+
+1. Der Schreibtisch stand **vor** dem Zurücksetzen von `S.kasseQuartal` — der `ab:`-Filter prüfte gegen den Wert des *vorigen* Lagers, und die Kasse lag damit nie auf dem Tisch.
+2. Mit dem Versatz `k*3` fiel jede Ziehung auf dieselbe Restklasse: Die Kasse kam **immer** mit dem Adjutanten, der Ausbildungsplan **immer** mit der Vorschlagsliste. `k*7` ist teilerfremd zu allen drei Längen.
+3. **`rangTun` an einer Lagerstation liest niemand.** Sechs Lager trugen die Liste, und sie hat nie etwas getan — dieselbe Familie wie die zwei Lager in Kapitel 4, die siebzehn Prozentpunkte gekostet haben. Entfernt, und beide Handlungsfilter melden Unbekanntes jetzt in die Konsole.
+
+**Balance-Wirkung: ungemessen.** Der Bot ist auf die neuen Beschriftungen umgestellt und nimmt die Kasse weiterhin ehrlich; die drei Leitmessungen müssen wiederholt werden.
+
+---
+
 ## 2026-07-30 — Bündel 7: die Feuille d'enrôlement
 
 **Ein Bogen statt zwei Bildschirme** (Entwurfspaket `12a`). Aushebung und Veteranenpunkte waren zwei Ansichten mit einem Knopf dazwischen — und der zweite Schritt ist genau der, in dem man die Werte des ersten bewertet. Man braucht sie nebeneinander.
