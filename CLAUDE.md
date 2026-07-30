@@ -766,6 +766,25 @@ Bei Eylau schneite es waagerecht, und beide Armeen verloren einander. Der Schalt
 
 > **Das widersprach dem Entwurf der Stabsränge an der empfindlichsten Stelle.** Ab Rang 10 ist der Gefahrzuschlag null („du stehst nicht mehr im Feuer", RANGLEITER §8), und an seiner Stelle steht das Stabsereignis mit 8 % — selten, ohne Vorwarnung, **und man kann sich nicht hinwerfen.** Das ist die Ersatzgefahr des Stabes, und daneben gehört keine zweite. Jetzt: `rang >= 7 && rang < 10`.
 
+### Die erste Kompanie zählte nicht als gewählt (`stabAktionen()`)
+
+**Wer bei Rang 10 oder 11 die erste seiner Kompanien nach vorn schickte, bekam die fünf Befehle des Bataillonschefs nie zu sehen** — nur, Runde um Runde, dieselbe Frage noch einmal. `K.vorhut` ist ein **Index**, und `if(!K.vorhut)` hält die Null für „keine gewählt".
+
+Der Rest der Datei rechnete längst richtig: `K.vorhut != null` in Bild und Verlustmeldung, und wenn die vorderste Kompanie bricht, wird ausdrücklich `K.vorhut = null` gesetzt. **Genau diese eine Stelle nahm „keine gewählt" und „die erste gewählt" für dasselbe.** `staffeln` konnte es mitten im Gefecht ein zweites Mal auslösen, weil es die stärkste Kompanie sucht und bei `best = 0` anfängt.
+
+> **Ein Viertel aller Wahlen schaltete damit den Rang ab, für den Phase D gebaut wurde** — Staffeln, Schwerpunkt, Sammeln, Verstärkung und der Adler. Und der Bot wählt „die Kompanie mit der besten Haltung", die zu Beginn oft die erste ist; die Rang-10/11-Zahlen aller bisherigen Messreihen sind damit angeschlagen.
+>
+> **Regel: Ein Index wird gegen `null` geprüft, nie auf Wahrheit.** Dieselbe Familie wie „ein Fließtext ist kein Zustand" — ein Wert, der etwas bedeutet, wird mit etwas verwechselt, das nur so aussieht.
+
+**Und der Rangprüfstand hat ihn nicht gefunden, obwohl er dafür da ist.** Zwei Gründe, beide behoben:
+
+| | Was |
+|---|---|
+| Der Schnappschuss stand in der **ersten** Runde | Dort fragt der Bataillonschef nur, wer zuerst hineingeht — seine Befehle gibt es erst danach. Sie wurden **nie** geprüft. Jetzt sammelt `gesehen.alle` jeden Knopf, der im Gefecht je dastand |
+| Die Pflichtliste war `['Die ']` | Das passt auf „**Die** 1. Kompanie vorgehen lassen" ebenso wie auf „**Die** Kompanien staffeln" — sie konnte gar nicht ausschlagen |
+
+**Reihum klicken genügt hier trotzdem nicht**, und das ist der eigentliche Lehrsatz: Der Bot wählt irgendwann eine Kompanie ungleich der ersten, und danach sieht er die Befehle. Kaputt war aber **Index 0**. Der Prüfstand setzt ihn deshalb von Hand und sieht nach, ob die Frage verschwindet — und **gegengeprüft, dass er mit dem wiederhergestellten Fehler auch wirklich ausschlägt.** Ein Prüfpunkt, der nie anschlägt, ist keiner.
+
 ### Kapitel 7 — Spanien 1808–1812 (`kapitel07_spanien.js`)
 
 **Die eigene Regel: Es gibt hier keinen Ruhm. Nur Entscheidungen, bei denen niemand zusieht.** Das längste Kapitel — vier Jahre in vierzehn Stationen — und die Umkehrung von allem, was das Spiel bisher belohnt hat.

@@ -49,7 +49,7 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
       if(r === 2) S.zweig = 'voltigeur';
     }, rang);
 
-    let s = 0, gesehen = {knoepfe: [], unterDir: false, nummern: false,
+    let s = 0, zeileNull = '', gesehen = {knoepfe: [], unterDir: false, nummern: false,
                           sichtfeld: false, skizze: false, rechtecke: false,
                           karte: false, atem: false, widerstand: false};
     while (s++ < 220) {
@@ -91,9 +91,43 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
     }
 
     // Ein paar Runden Gefecht: jeden Offiziersknopf mindestens einmal drücken.
+    /* ── Was erst nach einer Wahl erscheint, muss auch nach ihr geprüft werden ──
+       Der Schnappschuss oben steht in der **ersten** Runde, und dort fragt der
+       Bataillonschef nur, welche Kompanie zuerst hineingeht — seine fünf
+       Befehle gibt es erst danach. Geprüft wurden sie deshalb nie, und der
+       Fehler `if(!K.vorhut)` (die erste Kompanie zählte als „keine gewählt")
+       stand ungesehen im Code, obwohl dieser Prüfstand ihn hätte fangen
+       sollen. `alle` sammelt jeden Knopf, der im Gefecht je dastand. */
+    gesehen.alle = new Set(gesehen.knoepfe);
+
+    /* ── Und die erste Kompanie eigens ──
+       Reihum klicken genügt hier nicht: Der Bot wählt irgendwann eine
+       Kompanie ungleich der ersten, und danach sieht er die Befehle. Kaputt
+       war aber genau **Index 0** (`if(!K.vorhut)` hielt ihn für „keine
+       gewählt"). Deshalb wird er von Hand gesetzt und nachgesehen, ob die
+       Frage verschwindet und die Befehle kommen — dieselbe Machart wie der
+       von Hand gesetzte Rang darüber. */
+    if (rang >= 10 && rang < 12) {
+      const nach = await p.evaluate(() => {
+        if (!K || !K.kompanien) return null;
+        K.vorhut = 0; K.kompanien[0].vorn = true;
+        zeigeKampf('Prüfstand: die erste Kompanie ist vorn.');
+        return [...document.querySelectorAll('.ord .label')].map(e => e.textContent.trim());
+      });
+      if (!nach) { zeileNull = ' · KEIN KAMPFZUSTAND'; }
+      else {
+        nach.forEach(k => gesehen.alle.add(k));
+        if (nach.some(k => /vorgehen lassen$/.test(k))) zeileNull = ' · ERSTE KOMPANIE ZÄHLT NICHT ALS GEWÄHLT';
+      }
+    }
     for (let r = 0; r < 24; r++) {
       const t = await p.$eval('#app', e => e.innerText);
       if (!/(RUNDE|PHASE|STUNDE|TAG) \d+ VON \d+/.test(t)) break;
+      (await p.evaluate(() =>
+        [...document.querySelectorAll('.ord')].map(e => {
+          const l = e.querySelector('.label');
+          return (l ? l.textContent : e.textContent.split('\n')[0]).trim();
+        }))).forEach(k => gesehen.alle.add(k));
       const ok = await p.evaluate(i => {
         const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')]
           .filter(e => !/Zurückweichen/.test(e.textContent));
@@ -122,6 +156,16 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
       : rang === 2 ? ['Sorgfältig zielen und feuern', 'Deckung wechseln']
       : ['Laden', 'Anlegen und feuern'];
     const fehlt = soll.filter(x => !gesehen.knoepfe.some(k => k.startsWith(x)));
+
+    /* Die Befehle des Bataillonschefs stehen erst hinter der ersten Wahl,
+       also werden sie gegen alles geprüft, was im Gefecht je dastand. Ohne
+       diese Zeile ist Phase D auf zwei Rängen gebaut und ungeprüft. */
+    const spaet = rang >= 10 && rang < 12
+      ? ['Die Kompanien staffeln', 'Den Schwerpunkt verlegen', 'Die Gebrochenen sammeln lassen']
+          .concat(rang >= 11 ? ['Den Adler nach vorn tragen lassen'] : [])
+          .filter(x => ![...(gesehen.alle || [])].some(k => k.startsWith(x)))
+      : [];
+    if (spaet.length) { schlecht++; }
     const musketeDa = gesehen.knoepfe.some(k => /^Laden$|Anlegen und feuern|Sorgfältig zielen/.test(k));
     const bildDa = rang >= 12 ? gesehen.karte : rang >= 10 ? gesehen.rechtecke
       : rang >= 7 ? gesehen.skizze : gesehen.sichtfeld;
@@ -130,6 +174,8 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
     let zeile = `Rang ${String(rang).padStart(2)}: ${String(gesehen.knoepfe.length).padStart(2)} Knöpfe`;
     if (fehlt.length) { zeile += ` · FEHLT: ${fehlt.join(', ')}`; schlecht++; }
+    if (spaet.length) zeile += ` · NIE ERSCHIENEN: ${spaet.join(', ')}`;
+    if (zeileNull) { zeile += zeileNull; schlecht++; }
     // Ab Rang 7 muss die Muskete weg sein, darunter muss sie da sein.
     if (rang >= 7 && musketeDa) { zeile += ' · MUSKETE NOCH DA'; schlecht++; }
     if (rang < 7 && !musketeDa) { zeile += ' · MUSKETE FEHLT'; schlecht++; }

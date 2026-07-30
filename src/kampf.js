@@ -141,7 +141,19 @@ function aktionen(){
    Rechtecke. Der erste ist die Rechnung: **Wen schickst du zuerst hinein?** */
 function stabAktionen(){
   const a = [], K1 = K.kompanien || [];
-  if(!K.vorhut){
+  /* ⚠ **`K.vorhut` ist ein Index, und der erste Index ist null wert.** Die
+     erste Fassung fragte `if(!K.vorhut)` — wer die **erste** Kompanie nach
+     vorn schickte, bekam die Frage in jeder weiteren Runde noch einmal und
+     die fünf Befehle des Bataillonschefs **nie**. Ein Viertel aller Wahlen
+     schaltete damit den ganzen Rang ab, und `staffeln` konnte durch
+     `best = 0` mitten im Gefecht dasselbe auslösen.
+
+     Der Rest der Datei rechnet längst richtig (`K.vorhut != null` in Bild
+     und Verlustmeldung, `K.vorhut = null`, wenn die vorderste bricht) — nur
+     diese eine Stelle nahm „keine gewählt" und „die erste gewählt" für
+     dasselbe. **Regel: Ein Index wird gegen `null` geprüft, nie auf
+     Wahrheit.** */
+  if(K.vorhut == null){
     K1.forEach((k,i)=> a.push({id:'vorhut'+i, label:'Die '+k.name+' vorgehen lassen',
       cost:'Bestand '+Math.round(k.bestand)+' · Haltung '+Math.round(k.haltung)+
            ' · sie geht als erste hinein', risk:true}));

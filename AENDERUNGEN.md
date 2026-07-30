@@ -5,6 +5,18 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Die erste Kompanie zählte nicht als gewählt
+
+**`stabAktionen()` fragte `if(!K.vorhut)`, und `K.vorhut` ist ein Index.** Wer bei Rang 10 oder 11 die **erste** Kompanie nach vorn schickte, bekam die fünf Befehle des Bataillonschefs nie — Staffeln, Schwerpunkt, Sammeln, Verstärkung, Adler —, sondern in jeder Runde noch einmal dieselbe Frage. `staffeln` konnte es über `best = 0` mitten im Gefecht wiederholen. Ein Viertel aller Wahlen schaltete damit den Rang ab, für den Phase D gebaut wurde.
+
+Der Rest der Datei rechnete richtig (`K.vorhut != null`, und `= null`, wenn die vorderste bricht). Jetzt `if(K.vorhut == null)`. **Regel: Ein Index wird gegen `null` geprüft, nie auf Wahrheit.**
+
+**`test/raenge.js` hat ihn nicht gefunden, obwohl er dafür da ist** — sein Schnappschuss stand in der ersten Runde, wo es die Befehle noch gar nicht gibt, und seine Pflichtliste `['Die ']` passte auf beide Knopfsorten. Jetzt sammelt er jeden Knopf des Gefechts, verlangt die drei bzw. vier Befehle namentlich und setzt **Index 0 von Hand**, weil Reihumklicken den kaputten Fall überspringt. Gegengeprüft: Mit wiederhergestelltem Fehler meldet er `ERSTE KOMPANIE ZÄHLT NICHT ALS GEWÄHLT` auf Rang 10 und 11.
+
+**Nicht gemessen, aber angeschlagen:** Die Rang-10/11-Zahlen aller bisherigen Messreihen entstanden unter diesem Fehler; der Bot wählt „die Kompanie mit der besten Haltung", die zu Beginn oft die erste ist. Die Schlussmessung der drei Bots läuft deshalb neu.
+
+---
+
 ## 2026-07-30 — Die Protektion eines Marschalls, und Rang 14 ist erreichbar
 
 **Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine Zugehörigkeit.** Grandmaison war Patron für die Ränge 10 bis 13 — ein Mann, vier Stufen, zwei Gunstquellen. **Gemessen: vierzig von vierzig Maximalveteranen blieben Colonel**, Median −2 bei geforderten +5, während Ruf zu 93 % und Bulletins zu 80 % erfüllt waren. Nicht die Schwelle war zu hoch, die Mechanik war zu dünn.
