@@ -121,6 +121,17 @@ const KAPITEL10 = [
   sieg:{text:'Um sechs Uhr abends ist das Feld leer. Viertausend Gefangene, alle Geschütze, und die Straße nach Osten offen.\\n\\nDie Garde marschiert zurück in ihr Biwak, in Ordnung, ohne dass jemand ein Kommando gegeben hätte. Ein Bataillon von euch nimmt beim Vorbeimarsch von allein das Gewehr über — das ist nicht vorgeschrieben und wird auch nicht gerügt.',ruf:12,ruhm:true},
   niederlage:{text:'Euer Flügel kommt nicht über den Graben am Gehöft. Was durchbricht, ist die Garde, und die tut es allein. Am Abend ist die Straße offen und ihr steht noch da, wo ihr um zwei gestanden habt.',ruf:-4,belastung:14}},
 
+/* Die erste Musterung von 1814, mitten im Sechs-Tage-Feldzug. Sie steht hier
+   und nicht später, weil danach nichts mehr kommt, was einer Beförderung
+   ähnlich sieht: Nach Laon geht es nur noch abwärts. */
+{typ:'befoerderung',id:'musterung_montmirail',datum:'Februar 1814 · Zwischen zwei Märschen',ort:'Zwei Siege in zwei Tagen',
+  text:[
+    'Champaubert am Zehnten, Montmirail am Elften. Zwei Armeen getrennt geschlagen, von einer, die halb so groß ist wie jede von beiden. Es ist militärisch das Beste, was dieser Mann je gemacht hat, und es ändert nichts.',
+    'Zwischen den Märschen wird eine Stunde gehalten. Der Chef de bataillon geht die Kompanien ab und macht dabei die Beförderungen, weil es keine andere Gelegenheit geben wird.',
+    'Er hat keine Liste. Er hat die Namen im Kopf, weil es nicht mehr viele sind.'
+  ],
+  keinZiel:'Er geht an dir vorbei und nickt. Es gibt nichts zu vergeben, das über dem liegt, was du trägst.'},
+
 /* 140 */ {typ:'szene',id:'dritter_marsch',datum:'12.–13. Februar 1814 · Nachts zwischen zwei Schlachten',ort:'Der dritte Marsch bei Nacht',
   frost:1,
   marsch:{von:'Montmirail',nach:'Vauchamps',weg:'Der dritte Nachtmarsch in vier Tagen'},

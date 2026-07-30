@@ -268,6 +268,18 @@ const KAPITEL8 = [
        atem:-8,belastung:8}}
   ]},
 
+/* Die zweite Musterung Russlands, und sie ist die trostloseste des Spiels:
+   Es wird nicht befördert, weil jemand sich hervorgetan hat, sondern weil die
+   Stellen leer sind und irgendjemand die Kolonne führen muss. Die Vakanz, die
+   sonst erzählt werden muss, liegt hier offen auf der Straße. */
+{typ:'befoerderung',id:'musterung_smolensk_rueck',datum:'November 1812 · Wieder in Smolensk',ort:'Was von den Kompanien übrig ist',
+  text:[
+    'Die Stadt, an der ihr im August vorbeigekommen seid, ist ausgebrannt und voll. In den Magazinen liegt Mehl für zwei Tage, und es wird an dem Tag verteilt, an dem die Nachhut noch nicht da ist.',
+    'Es wird gezählt. Von den Kompanien sind Nummern übrig und keine Verbände; drei werden zu einer zusammengelegt, und die zusammengelegte hat weniger Männer als eine hatte, als ihr aufgebrochen seid.',
+    'Wer eine Stelle bekommt, bekommt sie, weil niemand mehr darauf steht.'
+  ],
+  keinZiel:'Man legt zusammen, was übrig ist, und du bleibst, was du bist. Es ist keine Entscheidung, es ist eine Zahl.'},
+
 /* 119 */ {typ:'kampf',id:'krasnoi',datum:'17. November 1812 · Krasnoi',ort:'Die Nachhut',
   ueberfall:true, frost:3,
   marsch:{von:'Smolensk',nach:'Krasnoi',weg:'45 km · und die russische Armee steht auf der Straße, nicht daneben'},

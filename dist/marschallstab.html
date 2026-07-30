@@ -1650,6 +1650,18 @@ const KAPITEL = [
 /* 7 */ {typ:'elite',id:'mailand',datum:'15. Mai 1796 · Mailand',ort:'Einzug in die Lombardei',
   marsch:{von:'Lodi',nach:'Mailand',weg:'30 km nach Nordwesten · zwei Tage, zum ersten Mal auf einer gepflasterten Straße'}},
 
+/* Die erste Musterung des Spiels. **Sie kommt bewusst früh** — nach Lodi und
+   der Elitewahl, also an der Stelle, an der ein Mann zum ersten Mal etwas
+   vorzuweisen hat. Bis zum 30.07.2026 hatte Italien nur eine, in Verona, und
+   damit fiel der erste Aufstieg spät. Die Regel lautet jetzt: zwei je Feldzug. */
+{typ:'befoerderung',id:'mailand_liste',datum:'Mai 1796 · Mailand',ort:'Der Einzug und die Listen danach',
+  text:[
+    'Die Stadt empfängt eine Armee, die seit sechs Wochen nicht aus den Kleidern gekommen ist. Es gibt Wein an den Straßenrändern und Frauen auf den Balkonen, und am Nachmittag stehen dieselben Männer im Hof einer Kaserne und werden gezählt.',
+    'Von der Kompanie, die im April über die Pässe ging, fehlen einunddreißig. Vier davon waren Unteroffiziere.',
+    'Der Capitaine hat eine Liste und einen Bleistift und wenig Zeit. Er fragt Martel, und Martel sagt Namen.'
+  ],
+  keinZiel:'Es werden vier Namen gerufen, und deiner ist keiner davon. Martel sagt nichts dazu, und das ist die Auskunft.'},
+
 /* 8 */ {typ:'lager',id:'kantonierung',datum:'Ende Mai 1796 · vor Mailand',ort:'Kantonierung in Corsico',
   marsch:{von:'Mailand',nach:'Corsico',weg:'8 km vor die Stadt · Quartier in Scheunen, zwei Wochen'},
   abende:2,
@@ -2684,6 +2696,18 @@ const KAPITEL4 = [
      misserfolg:{text:'In der dritten Woche wirst du krank wie alle anderen. Es geht nicht weg; es wird nur bei jedem Schritt ein bisschen schlimmer.',
        wunde:'Husten vom Donaumarsch',zehrt:3,atem:-14,belastung:8}}
   ]},
+
+/* Zweite Musterung des Feldzugs, vor Austerlitz statt nur danach. Ulm hat
+   dreißigtausend Gefangene gebracht und fast keine eigenen Verluste — die
+   Stellen, die hier frei werden, sind es durch Krankheit und den Marsch, nicht
+   durch Feuer. Das Kapitel sagt das in einem Nebensatz und geht weiter. */
+{typ:'befoerderung',id:'musterung_donau',datum:'November 1805 · An der Donau',ort:'Was der Marsch gekostet hat',
+  text:[
+    'Siebenhundert Kilometer in fünf Wochen, und die Rechnung dafür steht in einem Buch, das der Fourrier führt. Sie ist nicht kleiner als die einer Schlacht, sie ist nur langsamer entstanden.',
+    'Vierzehn aus der Kompanie sind unterwegs geblieben — zurückgeblieben, ins Lazarett, einer im Wasser bei Günzburg. Keiner davon ist beschossen worden.',
+    'Der Capitaine setzt sich an einen Tisch in einem Bauernhaus und geht die Liste durch, während draußen weitermarschiert wird.'
+  ],
+  keinZiel:'Er kommt an deinem Namen vorbei, hält kurz und geht weiter. Es ist nichts frei, was du haben könntest.'},
 
 /* 57 */ {typ:'szene',id:'wien',datum:'13. November 1805 · Wien',ort:'Eine Hauptstadt ohne Schuss',
   zwischenfall:true,
@@ -4151,6 +4175,18 @@ const KAPITEL8 = [
        atem:-8,belastung:8}}
   ]},
 
+/* Die zweite Musterung Russlands, und sie ist die trostloseste des Spiels:
+   Es wird nicht befördert, weil jemand sich hervorgetan hat, sondern weil die
+   Stellen leer sind und irgendjemand die Kolonne führen muss. Die Vakanz, die
+   sonst erzählt werden muss, liegt hier offen auf der Straße. */
+{typ:'befoerderung',id:'musterung_smolensk_rueck',datum:'November 1812 · Wieder in Smolensk',ort:'Was von den Kompanien übrig ist',
+  text:[
+    'Die Stadt, an der ihr im August vorbeigekommen seid, ist ausgebrannt und voll. In den Magazinen liegt Mehl für zwei Tage, und es wird an dem Tag verteilt, an dem die Nachhut noch nicht da ist.',
+    'Es wird gezählt. Von den Kompanien sind Nummern übrig und keine Verbände; drei werden zu einer zusammengelegt, und die zusammengelegte hat weniger Männer als eine hatte, als ihr aufgebrochen seid.',
+    'Wer eine Stelle bekommt, bekommt sie, weil niemand mehr darauf steht.'
+  ],
+  keinZiel:'Man legt zusammen, was übrig ist, und du bleibst, was du bist. Es ist keine Entscheidung, es ist eine Zahl.'},
+
 /* 119 */ {typ:'kampf',id:'krasnoi',datum:'17. November 1812 · Krasnoi',ort:'Die Nachhut',
   ueberfall:true, frost:3,
   marsch:{von:'Smolensk',nach:'Krasnoi',weg:'45 km · und die russische Armee steht auf der Straße, nicht daneben'},
@@ -4608,6 +4644,17 @@ const KAPITEL10 = [
   sieg:{text:'Um sechs Uhr abends ist das Feld leer. Viertausend Gefangene, alle Geschütze, und die Straße nach Osten offen.\\n\\nDie Garde marschiert zurück in ihr Biwak, in Ordnung, ohne dass jemand ein Kommando gegeben hätte. Ein Bataillon von euch nimmt beim Vorbeimarsch von allein das Gewehr über — das ist nicht vorgeschrieben und wird auch nicht gerügt.',ruf:12,ruhm:true},
   niederlage:{text:'Euer Flügel kommt nicht über den Graben am Gehöft. Was durchbricht, ist die Garde, und die tut es allein. Am Abend ist die Straße offen und ihr steht noch da, wo ihr um zwei gestanden habt.',ruf:-4,belastung:14}},
 
+/* Die erste Musterung von 1814, mitten im Sechs-Tage-Feldzug. Sie steht hier
+   und nicht später, weil danach nichts mehr kommt, was einer Beförderung
+   ähnlich sieht: Nach Laon geht es nur noch abwärts. */
+{typ:'befoerderung',id:'musterung_montmirail',datum:'Februar 1814 · Zwischen zwei Märschen',ort:'Zwei Siege in zwei Tagen',
+  text:[
+    'Champaubert am Zehnten, Montmirail am Elften. Zwei Armeen getrennt geschlagen, von einer, die halb so groß ist wie jede von beiden. Es ist militärisch das Beste, was dieser Mann je gemacht hat, und es ändert nichts.',
+    'Zwischen den Märschen wird eine Stunde gehalten. Der Chef de bataillon geht die Kompanien ab und macht dabei die Beförderungen, weil es keine andere Gelegenheit geben wird.',
+    'Er hat keine Liste. Er hat die Namen im Kopf, weil es nicht mehr viele sind.'
+  ],
+  keinZiel:'Er geht an dir vorbei und nickt. Es gibt nichts zu vergeben, das über dem liegt, was du trägst.'},
+
 /* 140 */ {typ:'szene',id:'dritter_marsch',datum:'12.–13. Februar 1814 · Nachts zwischen zwei Schlachten',ort:'Der dritte Marsch bei Nacht',
   frost:1,
   marsch:{von:'Montmirail',nach:'Vauchamps',weg:'Der dritte Nachtmarsch in vier Tagen'},
@@ -4874,6 +4921,19 @@ const KAPITEL11 = [
        fert:{taktik:5},belastung:-8,attr:{menschenkenntnis:3}}}
   ]},
 
+/* Die erste von zwei Musterungen dieses Feldzugs. **Sie ist historisch die
+   ehrlichste im ganzen Spiel:** 1815 wurden die Stellen nicht besetzt, weil
+   jemand sie verdient hatte, sondern weil sie leer waren. Die Hälfte des
+   Offizierskorps hatte 1814 auf den König geschworen und stand jetzt entweder
+   nicht zur Verfügung oder unter Verdacht. */
+{typ:'befoerderung',id:'listen_avesnes',datum:'10. Juni 1815 · Avesnes',ort:'Die Listen werden neu geschrieben',
+  text:[
+    'Vor dem Stabsquartier stehen Tische im Freien, weil im Haus kein Platz ist. An jedem sitzt ein Schreiber mit einer Liste, und die Listen sind älter als der Krieg, für den sie gebraucht werden.',
+    'Es fehlen Offiziere. Nicht ein paar — es fehlt ein Drittel. Die einen haben im vorigen Jahr auf den König geschworen und wollen nicht zweimal in vierzehn Monaten den Eid wechseln; die anderen wollen schon, und man traut ihnen nicht.',
+    'Was übrig bleibt, sind die, die durchgehend gedient haben, und die stehen an diesem Vormittag in einer Reihe im Hof und werden der Reihe nach aufgerufen.'
+  ],
+  keinZiel:'Man geht die Liste durch, findet deinen Namen und den Vermerk daneben, und beides stimmt. Es ändert sich nichts. In vier Tagen geht es über die Sambre.'},
+
 /* 151 */ {typ:'szene',id:'grenzuebertritt',datum:'15. Juni 1815 · Über die Sambre',ort:'Der letzte Marsch',
   marsch:{von:'Beaumont',nach:'Über die Sambre bei Charleroi',weg:'Der letzte Grenzübertritt dieser Laufbahn'},
   tempo:{
@@ -4947,6 +5007,17 @@ const KAPITEL11 = [
   runden:8,feindMoral:74,gefahr:10,gelaende:'damm',
   sieg:{text:'Um halb neun ist das Dorf euer und die preußische Mitte durchbrochen. Blücher wird unter seinem toten Pferd hervorgezogen und weggebracht; die Armee zieht in der Nacht ab.\\n\\nSie zieht nach **Norden** ab, nicht nach Osten. Das ist der ganze Unterschied dieses Feldzugs, und niemand auf dieser Seite bemerkt es bis übermorgen nachmittags um halb fünf.',ruf:12,ruhm:true},
   niederlage:{text:'Das Dorf wechselt sechsmal, und beim sechsten Mal steht ihr nicht mehr darin. Was durchbricht, ist um halb acht die Garde. Die preußische Armee zieht in der Nacht ab — nach Norden, was hier niemandem auffällt.',ruf:-4,belastung:14}},
+
+/* Die zweite Musterung, und sie hat den kürzesten Weg von einer Vakanz zu
+   ihrer Besetzung, den das Spiel kennt: Wer bei Ligny gefallen ist, wird noch
+   in derselben Nacht ersetzt, weil übermorgen wieder geschlagen wird. */
+{typ:'befoerderung',id:'nacht_nach_ligny',datum:'16. Juni 1815, nachts · bei Ligny',ort:'Die Stellen der Gefallenen',
+  text:[
+    'Die Verlustlisten werden bei Kerzenlicht geschrieben, und der Adjutant, der sie schreibt, macht daneben eine zweite Liste: wer die Stellen übernimmt.',
+    'Er fragt nicht nach Verdiensten. Er fragt, wer noch steht und wer lesen kann.',
+    'Es ist zwei Uhr nachts. Um vier wird angetreten.'
+  ],
+  keinZiel:'Der Adjutant liest deinen Namen, sieht auf, sieht wieder hin und geht weiter. Die Stelle über dir hat jemanden, und er lebt.'},
 
 /* 154 */ {typ:'szene',id:'tag_des_regens',datum:'17. Juni 1815 · Auf der Straße nach Brüssel',ort:'Der Tag des Regens',
   text:[
@@ -10777,7 +10848,11 @@ function kampfEnde(sieg, letzterText){
   }
 
   vakanzPruefen();                    // stimmen die Zahlen, ist der Tod angesagt
-  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n);
+  /* **Erst die Vakanz auflösen, dann befördern** — `ketteImGefecht()` macht aus
+     dem angesagten Tod den wirklichen, und ohne ihn wäre die Stelle für den
+     Unteroffizier noch besetzt. Die Reihenfolge ist die ganze Logik: Jemand
+     fällt, und deshalb rückst du auf. */
+  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n) + feldBefoerderung();
   const kk = K; setzeKampf(null);
   stationErledigt();
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -11077,8 +11152,12 @@ function beurteiler(){
   return passend.reduce((a, b) => (b.rang < a.rang ? b : a)).patron;
 }
 
-function leiterZiel(){
-  const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0);
+/* `nurOffizier` blendet die Unteroffiziersränge aus — die vergibt seit dem
+   30.07.2026 das Feld nach dem Gefecht, nicht mehr der Tisch. Ohne den Schalter
+   böte die Musterung sie ein zweites Mal an und der Bescheid käme doppelt. */
+function leiterZiel(nurOffizier){
+  const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0
+                                  && (!nurOffizier || e.rang > FELD_RANG_MAX));
   if(!passend.length) return null;
   for(let i = passend.length-1; i >= 0; i--){
     const e = passend[i];
@@ -11121,6 +11200,44 @@ function leiterZiel(){
 function vakanzStand(key){
   S.vakanz = S.vakanz || {};
   return (S.vakanz[key] = S.vakanz[key] || {faellt:false, tot:false});
+}
+
+/* ══════════════ WER IM FELD BEFÖRDERT WIRD UND WER NICHT ══════════════
+
+   **Unteroffiziere macht der Kompaniechef, Offiziere macht Paris.** Das ist
+   historisch der eigentliche Bruch der Laufbahn und nicht der Maßstabswechsel
+   im Gefecht: Einen Caporal ernannte der Capitaine im Hof, notierte es im
+   Livret, fertig. Für ein Offizierspatent brauchte es eine Kommission, eine
+   Unterschrift des Kriegsministers und oft Monate.
+
+   Mechanisch löst dieselbe Trennung ein Problem, das sich gemessen gezeigt
+   hat: Die Leiter hat vierzehn Stufen, die Kapitel bieten aber nur ein bis
+   zwei Musterungen. Ein Mann mit erfüllten Schwellen stand deshalb halbe
+   Kapitel lang daneben — bei den unteren Rängen, wo es schnell gehen soll,
+   genauso wie oben, wo es das nicht soll.
+
+   Ab jetzt: **Rang 2 bis 6 wird nach jedem Gefecht vergeben**, sobald Zahlen
+   und Vakanz stimmen. **Rang 7 und höher nur bei der Musterung.** Der Aufstieg
+   durch die Unteroffiziersränge wird dadurch spürbar schneller, der Weg in die
+   Offiziershälfte bleibt ein Ereignis mit eigenem Bildschirm und Bescheid. */
+const FELD_RANG_MAX = 6;
+
+/* Die Beförderung im Feld, direkt nach dem Gefecht. Gibt die Meldung zurück
+   oder '' — den großen Auftritt mit Bescheid behält die Musterung. */
+function feldBefoerderung(){
+  if(!S || !S.lebt) return '';
+  const ziel = leiterZiel();
+  if(!ziel || ziel.rang > FELD_RANG_MAX) return '';
+  if(fehltWas(ziel)) return '';
+  if(ziel.vakanz && !vakanzStand(ziel.vakanz).tot) return '';
+
+  S.rang = Math.max(S.rang, ziel.rang);
+  S.ruf += 5;
+  if(ziel.patron) gunstGeben(ziel.patron, 1);
+  S.log.push('Befördert zum ' + ziel.name + '.');
+  return `<div class="wirkung"><span>Im Feld befördert</span>
+    ${esc(personName(ziel.patron) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
+    Eingetragen wird es später, von jemand anderem. <b>${esc(ziel.name)}</b></div>`;
 }
 
 function vakanzPruefen(){
@@ -11334,7 +11451,7 @@ function zeigeBefoerderung(n){
      seit Kairo gibt es eine zweite Musterung, und die prüft den Stand von
      jetzt, nicht den von Verona. */
   S.befPruefungen = S.befPruefungen || {};
-  const ziel = leiterZiel();
+  const ziel = leiterZiel(true);   // die Musterung vergibt nur noch Patente
 
   if(!ziel){
     stationErledigt();
@@ -12054,7 +12171,7 @@ function winterEnde(){ LAUF.winter = {ort:null, wochen:3, log:[]}; stationErledi
    abgerechnet, es ist ruhig, und der Capitaine hat einen Tisch. Geprüft wird
    erst beim Verlassen — wer eine Woche verbringt, soll sie erst verbringen. */
 function winterMusterung(n){
-  if(!S || !leiterZiel()) return false;
+  if(!S || !leiterZiel(true)) return false;   // auch hier nur Patente
   S.winterMusterung = S.winterMusterung || {};
   if(S.winterMusterung[n.id]) return false;
   S.winterMusterung[n.id] = true;

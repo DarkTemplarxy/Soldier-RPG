@@ -616,7 +616,7 @@ function winterEnde(){ LAUF.winter = {ort:null, wochen:3, log:[]}; stationErledi
    abgerechnet, es ist ruhig, und der Capitaine hat einen Tisch. Geprüft wird
    erst beim Verlassen — wer eine Woche verbringt, soll sie erst verbringen. */
 function winterMusterung(n){
-  if(!S || !leiterZiel()) return false;
+  if(!S || !leiterZiel(true)) return false;   // auch hier nur Patente
   S.winterMusterung = S.winterMusterung || {};
   if(S.winterMusterung[n.id]) return false;
   S.winterMusterung[n.id] = true;

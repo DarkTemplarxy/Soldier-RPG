@@ -2836,7 +2836,11 @@ function kampfEnde(sieg, letzterText){
   }
 
   vakanzPruefen();                    // stimmen die Zahlen, ist der Tod angesagt
-  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n);
+  /* **Erst die Vakanz auflösen, dann befördern** — `ketteImGefecht()` macht aus
+     dem angesagten Tod den wirklichen, und ohne ihn wäre die Stelle für den
+     Unteroffizier noch besetzt. Die Reihenfolge ist die ganze Logik: Jemand
+     fällt, und deshalb rückst du auf. */
+  const ketteMeldung = (grandmaisonAuftritt() || '') + ketteImGefecht(n) + feldBefoerderung();
   const kk = K; setzeKampf(null);
   stationErledigt();
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -3136,8 +3140,12 @@ function beurteiler(){
   return passend.reduce((a, b) => (b.rang < a.rang ? b : a)).patron;
 }
 
-function leiterZiel(){
-  const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0);
+/* `nurOffizier` blendet die Unteroffiziersränge aus — die vergibt seit dem
+   30.07.2026 das Feld nach dem Gefecht, nicht mehr der Tisch. Ohne den Schalter
+   böte die Musterung sie ein zweites Mal an und der Bescheid käme doppelt. */
+function leiterZiel(nurOffizier){
+  const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0
+                                  && (!nurOffizier || e.rang > FELD_RANG_MAX));
   if(!passend.length) return null;
   for(let i = passend.length-1; i >= 0; i--){
     const e = passend[i];
@@ -3180,6 +3188,44 @@ function leiterZiel(){
 function vakanzStand(key){
   S.vakanz = S.vakanz || {};
   return (S.vakanz[key] = S.vakanz[key] || {faellt:false, tot:false});
+}
+
+/* ══════════════ WER IM FELD BEFÖRDERT WIRD UND WER NICHT ══════════════
+
+   **Unteroffiziere macht der Kompaniechef, Offiziere macht Paris.** Das ist
+   historisch der eigentliche Bruch der Laufbahn und nicht der Maßstabswechsel
+   im Gefecht: Einen Caporal ernannte der Capitaine im Hof, notierte es im
+   Livret, fertig. Für ein Offizierspatent brauchte es eine Kommission, eine
+   Unterschrift des Kriegsministers und oft Monate.
+
+   Mechanisch löst dieselbe Trennung ein Problem, das sich gemessen gezeigt
+   hat: Die Leiter hat vierzehn Stufen, die Kapitel bieten aber nur ein bis
+   zwei Musterungen. Ein Mann mit erfüllten Schwellen stand deshalb halbe
+   Kapitel lang daneben — bei den unteren Rängen, wo es schnell gehen soll,
+   genauso wie oben, wo es das nicht soll.
+
+   Ab jetzt: **Rang 2 bis 6 wird nach jedem Gefecht vergeben**, sobald Zahlen
+   und Vakanz stimmen. **Rang 7 und höher nur bei der Musterung.** Der Aufstieg
+   durch die Unteroffiziersränge wird dadurch spürbar schneller, der Weg in die
+   Offiziershälfte bleibt ein Ereignis mit eigenem Bildschirm und Bescheid. */
+const FELD_RANG_MAX = 6;
+
+/* Die Beförderung im Feld, direkt nach dem Gefecht. Gibt die Meldung zurück
+   oder '' — den großen Auftritt mit Bescheid behält die Musterung. */
+function feldBefoerderung(){
+  if(!S || !S.lebt) return '';
+  const ziel = leiterZiel();
+  if(!ziel || ziel.rang > FELD_RANG_MAX) return '';
+  if(fehltWas(ziel)) return '';
+  if(ziel.vakanz && !vakanzStand(ziel.vakanz).tot) return '';
+
+  S.rang = Math.max(S.rang, ziel.rang);
+  S.ruf += 5;
+  if(ziel.patron) gunstGeben(ziel.patron, 1);
+  S.log.push('Befördert zum ' + ziel.name + '.');
+  return `<div class="wirkung"><span>Im Feld befördert</span>
+    ${esc(personName(ziel.patron) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
+    Eingetragen wird es später, von jemand anderem. <b>${esc(ziel.name)}</b></div>`;
 }
 
 function vakanzPruefen(){
@@ -3393,7 +3439,7 @@ function zeigeBefoerderung(n){
      seit Kairo gibt es eine zweite Musterung, und die prüft den Stand von
      jetzt, nicht den von Verona. */
   S.befPruefungen = S.befPruefungen || {};
-  const ziel = leiterZiel();
+  const ziel = leiterZiel(true);   // die Musterung vergibt nur noch Patente
 
   if(!ziel){
     stationErledigt();

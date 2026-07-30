@@ -74,6 +74,19 @@ const KAPITEL11 = [
        fert:{taktik:5},belastung:-8,attr:{menschenkenntnis:3}}}
   ]},
 
+/* Die erste von zwei Musterungen dieses Feldzugs. **Sie ist historisch die
+   ehrlichste im ganzen Spiel:** 1815 wurden die Stellen nicht besetzt, weil
+   jemand sie verdient hatte, sondern weil sie leer waren. Die Hälfte des
+   Offizierskorps hatte 1814 auf den König geschworen und stand jetzt entweder
+   nicht zur Verfügung oder unter Verdacht. */
+{typ:'befoerderung',id:'listen_avesnes',datum:'10. Juni 1815 · Avesnes',ort:'Die Listen werden neu geschrieben',
+  text:[
+    'Vor dem Stabsquartier stehen Tische im Freien, weil im Haus kein Platz ist. An jedem sitzt ein Schreiber mit einer Liste, und die Listen sind älter als der Krieg, für den sie gebraucht werden.',
+    'Es fehlen Offiziere. Nicht ein paar — es fehlt ein Drittel. Die einen haben im vorigen Jahr auf den König geschworen und wollen nicht zweimal in vierzehn Monaten den Eid wechseln; die anderen wollen schon, und man traut ihnen nicht.',
+    'Was übrig bleibt, sind die, die durchgehend gedient haben, und die stehen an diesem Vormittag in einer Reihe im Hof und werden der Reihe nach aufgerufen.'
+  ],
+  keinZiel:'Man geht die Liste durch, findet deinen Namen und den Vermerk daneben, und beides stimmt. Es ändert sich nichts. In vier Tagen geht es über die Sambre.'},
+
 /* 151 */ {typ:'szene',id:'grenzuebertritt',datum:'15. Juni 1815 · Über die Sambre',ort:'Der letzte Marsch',
   marsch:{von:'Beaumont',nach:'Über die Sambre bei Charleroi',weg:'Der letzte Grenzübertritt dieser Laufbahn'},
   tempo:{
@@ -147,6 +160,17 @@ const KAPITEL11 = [
   runden:8,feindMoral:74,gefahr:10,gelaende:'damm',
   sieg:{text:'Um halb neun ist das Dorf euer und die preußische Mitte durchbrochen. Blücher wird unter seinem toten Pferd hervorgezogen und weggebracht; die Armee zieht in der Nacht ab.\\n\\nSie zieht nach **Norden** ab, nicht nach Osten. Das ist der ganze Unterschied dieses Feldzugs, und niemand auf dieser Seite bemerkt es bis übermorgen nachmittags um halb fünf.',ruf:12,ruhm:true},
   niederlage:{text:'Das Dorf wechselt sechsmal, und beim sechsten Mal steht ihr nicht mehr darin. Was durchbricht, ist um halb acht die Garde. Die preußische Armee zieht in der Nacht ab — nach Norden, was hier niemandem auffällt.',ruf:-4,belastung:14}},
+
+/* Die zweite Musterung, und sie hat den kürzesten Weg von einer Vakanz zu
+   ihrer Besetzung, den das Spiel kennt: Wer bei Ligny gefallen ist, wird noch
+   in derselben Nacht ersetzt, weil übermorgen wieder geschlagen wird. */
+{typ:'befoerderung',id:'nacht_nach_ligny',datum:'16. Juni 1815, nachts · bei Ligny',ort:'Die Stellen der Gefallenen',
+  text:[
+    'Die Verlustlisten werden bei Kerzenlicht geschrieben, und der Adjutant, der sie schreibt, macht daneben eine zweite Liste: wer die Stellen übernimmt.',
+    'Er fragt nicht nach Verdiensten. Er fragt, wer noch steht und wer lesen kann.',
+    'Es ist zwei Uhr nachts. Um vier wird angetreten.'
+  ],
+  keinZiel:'Der Adjutant liest deinen Namen, sieht auf, sieht wieder hin und geht weiter. Die Stelle über dir hat jemanden, und er lebt.'},
 
 /* 154 */ {typ:'szene',id:'tag_des_regens',datum:'17. Juni 1815 · Auf der Straße nach Brüssel',ort:'Der Tag des Regens',
   text:[

@@ -182,6 +182,18 @@ const KAPITEL4 = [
        wunde:'Husten vom Donaumarsch',zehrt:3,atem:-14,belastung:8}}
   ]},
 
+/* Zweite Musterung des Feldzugs, vor Austerlitz statt nur danach. Ulm hat
+   dreißigtausend Gefangene gebracht und fast keine eigenen Verluste — die
+   Stellen, die hier frei werden, sind es durch Krankheit und den Marsch, nicht
+   durch Feuer. Das Kapitel sagt das in einem Nebensatz und geht weiter. */
+{typ:'befoerderung',id:'musterung_donau',datum:'November 1805 · An der Donau',ort:'Was der Marsch gekostet hat',
+  text:[
+    'Siebenhundert Kilometer in fünf Wochen, und die Rechnung dafür steht in einem Buch, das der Fourrier führt. Sie ist nicht kleiner als die einer Schlacht, sie ist nur langsamer entstanden.',
+    'Vierzehn aus der Kompanie sind unterwegs geblieben — zurückgeblieben, ins Lazarett, einer im Wasser bei Günzburg. Keiner davon ist beschossen worden.',
+    'Der Capitaine setzt sich an einen Tisch in einem Bauernhaus und geht die Liste durch, während draußen weitermarschiert wird.'
+  ],
+  keinZiel:'Er kommt an deinem Namen vorbei, hält kurz und geht weiter. Es ist nichts frei, was du haben könntest.'},
+
 /* 57 */ {typ:'szene',id:'wien',datum:'13. November 1805 · Wien',ort:'Eine Hauptstadt ohne Schuss',
   zwischenfall:true,
   text:[
