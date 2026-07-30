@@ -10764,11 +10764,25 @@ function kampfEnde(sieg, letzterText){
     const ok = auftrag.erfuellt(n);
     K.auftragErfuellt = ok;
     if(!ok) stufe = Math.min(stufe, 1);
-    if(ok){ gunstGeben('vernet',1); S.ruf += 2; }
-    else { gunstGeben('vernet',-1); S.ruf = Math.max(0,S.ruf-2); }
+    /* ── Die Fürsprache geht an den, der über die nächste Stelle entscheidet ──
+       **Hier stand hart `'vernet'`, und das war der teuerste Fehler der oberen
+       Leiter.** Vernet ist Patron für die Ränge 6, 8 und 9; ab Rang 9 beurteilt
+       Grandmaison. Der Auftrag — die einzige Quelle, die *jedes* Gefecht
+       liefert — fütterte also weiter einen Mann, der nichts mehr zu vergeben
+       hatte, während der, auf den es ankam, bei eins stehen blieb.
+       Gemessen: Ein Maximalveteran erreichte Station 156 mit Ruf 748 und
+       Grandmaison 1, wo 3 nötig waren, und blieb Capitaine — vierzig von
+       vierzig Läufen.
+
+       Dieselbe Fehlerfamilie wie das Henne-Ei bei Collot und Berthaud: eine
+       Fürsprachequelle, die an einen **Namen** gebunden ist statt an die
+       **Rolle**. `beurteiler()` liefert die Rolle. */
+    const wer = beurteiler() || 'vernet';
+    if(ok){ gunstGeben(wer,1); S.ruf += 2; }
+    else { gunstGeben(wer,-1); S.ruf = Math.max(0,S.ruf-2); }
     auftragZeile = `<div class="wirkung"><span>Der Auftrag${ok?' — erfüllt':' — verfehlt'}</span>
       ${esc(auftrag.text)} ${esc(ok?auftrag.gut:auftrag.schlecht)}
-      <b>Fürsprache Vernet ${ok?'+1 · Ruf +2':'−1 · Ruf −2'}</b></div>`;
+      <b>Fürsprache ${esc(personKurz(wer))} ${ok?'+1 · Ruf +2':'−1 · Ruf −2'}</b></div>`;
   }
 
   /* ── `stumm:true` · Die Bulletins schweigen ──
