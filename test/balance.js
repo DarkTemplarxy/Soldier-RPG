@@ -2,18 +2,25 @@
 
    **Zwei Zahlen sind die Leitzahlen, alles andere ist Beiwerk:**
 
-     1. `überlebt` — wie viele alle gebauten Kapitel hinter sich gebracht haben.
-     2. `höchster Rang` — wie viele den höchsten gebauten Rang bekommen haben.
-        **Das ist eine Definition, kein fester Rang:** Mit Kapitel 4 ist der
-        höchste Rang der Sergent-major (6), vorher war es der Sergent (5). Die
-        Zahl wandert also mit dem Ausbaustand mit, und genau deshalb veraltet
-        sie nicht — im Gegensatz zum früheren Caporal-Sollwert.
+     1. `Weite` — der **Median der erreichten Stationen**, immer mit Nenner.
+        Sie hat `überlebt` abgelöst: Das war ein *Produkt* über alle
+        Kapitelquoten und geht mit jedem Kapitel gegen null — bei elf liefert es
+        für jeden Spielertyp dasselbe. Ein Median hat kein Verfallsdatum, aber
+        er ist eine absolute Stationszahl und wandert mit dem Ausbaustand.
+        **32 von 163 ist nicht schlechter als 58 von 122, sondern etwas
+        anderes.**
+     2. `höchster Rang` — wie viele `LEITRANG` erreicht haben. **Das ist eine
+        Definition, kein fester Rang:** Er steht heute auf **9 (Capitaine)** und
+        wandert mit dem gebauten Inhalt. Wer ein Kapitel anbaut, prüft ihn mit.
 
    Die erste misst, wie hart das Spiel ist, die zweite, ob die Leiter trägt. Sie
    lösen „Italien überstanden" (Band 45–55 %) und den Caporal-Anteil (Sollwert
    30 %) ab: Italien ist inzwischen das Lehrstück und lässt 90–100 % durch, und
    der Caporal ist der *unterste* erreichbare Aufstieg — beide sagen nichts mehr
    über den Stand des Spiels. Die Sollwerte stehen in CLAUDE.md.
+
+   `überlebt` wird als „Ganz durch" weiter mitgedruckt, trägt aber keinen
+   Sollwert mehr.
 
    Erreicht, nicht überlebt — gezählt wird der höchste Rang, den ein Mann
    je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das
@@ -44,10 +51,20 @@
    misst damit die Offiziershälfte, die ein Lauf mit vier Kapiteln sonst nie
    sieht — mit vier Kapiteln endet jeder Aufstieg spätestens bei Rang 8.
 
-   Aufruf:  node test/balance.js [anzahl]              erster Lauf, ohne Vorrat
-            MUT=1 node test/balance.js [anzahl]        derselbe Mann, aber mutig
-            VP=160 node test/balance.js [anzahl]       dritter Lauf, mit Vorrat
-            PATENT=lt VP=260 node test/balance.js 40   der gekaufte Leutnant  */
+   Aufruf:  node test/balance.js 80                    erster Lauf, ohne Vorrat
+            MUT=1 node test/balance.js 80              derselbe Mann, aber mutig
+            VP=5800 node test/balance.js 80            der Maximalveteran
+            PATENT=lt VP=5800 node test/balance.js 40  der gekaufte Leutnant
+
+   **80 Läufe sind der Normalfall.** Die Regel „bei Zweifeln 80" hat mehrfach
+   eine Fehldeutung verhindert; bei 40 liegt eine Standardabweichung schon bei
+   rund sieben Punkten.  */
+/* ── Das Fenster über dem Bildschirm ──
+   **Liegt ein Blatt obenauf (`.ueberlage`), ist nur dieses bedienbar.** Der
+   Rücken fängt jeden Klick ab — ein Prüfstand, der dahinter klickt, läuft
+   entweder in einen Timeout oder, schlimmer, drückt einen Knopf, den ein
+   Spieler gar nicht erreichen kann. Deshalb sucht jeder Prüfstand seine
+   Knöpfe **zuerst im Fenster**. */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const N = parseInt(process.argv[2] || '40', 10);
@@ -60,6 +77,8 @@ const VP  = parseInt(process.env.VP || '0', 10);   // Vorrat des Veteranen, 0 = 
    Rang 8 hinauskommt. Der Vorrat wird dabei so gesetzt, dass er für das Patent
    reicht — sonst misst man, ob der Bot sparen kann, und nicht das Spiel. */
 const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
+/* HEBEL=1 hängt Zähler um Fürsprache, Auftrag und Folgen — siehe unten. */
+const HEBEL = process.env.HEBEL === '1';
 
 /* ── Die Einkaufsliste des Veteranen, eine einzige Reihenfolge ──
 
@@ -80,11 +99,19 @@ const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
    dann das, was ihn durch Ägypten bringt, und der Rest, wenn noch etwas da
    ist. `['k', id]` ist ein Stück, `['w', name, bis]` ein Wert. */
 const VETERAN_PLAN = [
+  /* ── Die billigen Leiterstufen zuerst ──
+     **Seit dem Umbau des Ladens beginnt er nicht mehr bei 200.** Muskete und
+     Schuhe auf Stufe 2 kosten zusammen 165 VP; für einen Veteranen ist das
+     Kleingeld, und für die Messung ist es der Posten, der zuerst greift.
+     Das Schreibzeug steht früh, weil Bildung die Schwelle zum Fourrier (35)
+     und zum Sous-Lieutenant (50) ist und im Feld einen Lagerabend kostet. */
+  ['k','muskete_depot'], ['k','schuhe_neu'], ['k','schreibzeug'],
   ['w','konstitution',70],      // der Lebensvorrat zuerst — er ist die Schwelle des Todes
-  ['k','mantel_gut'],           // Eylau und Russland, und er kostet nur 30
+  ['k','mantel_gut'],           // Eylau und Russland
   ['w','geschick',70],          // Voltigeur, und die zweite Elitegrenze
   ['k','zaeh_wasser'],          // Ägypten tötet mehr Veteranen als jedes andere Kapitel
   ['w','muskete',60],           // kürzere Gefechte heißen weniger Runden mit Treffern
+  ['k','muskete_gut'],          // Stufe 3 ersetzt Stufe 2 — der Laden räumt selbst auf
   ['k','schuhe_gut'], ['k','zaeh_fuesse'],
   /* Bildung 40 steht bewusst hier: Sie ist die Schwelle zum Caporal-fourrier
      (35) und der einzige Weg, den ein Veteran *kaufen* kann — im Feld kostet
@@ -100,6 +127,11 @@ const VETERAN_PLAN = [
      den, den das Spiel tatsächlich hervorbringt. */
   ['w','autoritaet',50], ['w','bajonett',40], ['w','drill',55],
   ['w','taktik',50], ['w','verwaltung',50], ['w','menschenkenntnis',60],
+  /* Die oberen Leiterstufen und die Freischaltungen. Was gesperrt ist, fällt
+     in `waehle()` von allein weg — der Bot muss nichts davon wissen. */
+  ['k','uniform_gut'], ['k','besteck'], ['k','amulett'], ['k','tornister_gut'],
+  ['k','uhr'], ['k','fernrohr'], ['k','degen'], ['k','geld_gross'],
+  ['k','muskete_manu'], ['k','stiefel'], ['k','winter'], ['k','pferd_kav'],
   /* ── Die zweite Runde: alles auf 70 ──
      **Das ist das erklärte Ziel der neuen Ökonomie** — ein perfekter Lauf bis
      Waterloo soll reichen, um jeden Wert auf 70 zu heben (4 950 VP für alle
@@ -181,13 +213,20 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                    ein und werden laut gemeldet: **Ein Prüfstand, der seine
                    eigene Obergrenze verschweigt, misst sich selbst.** */
                 abbruch: 0,
+                /* Wie oft der Bot eine als riskant markierte Wahl genommen hat,
+                   und wie viele Wahlen er insgesamt hatte. Erst das Verhältnis
+                   macht `OFFEN.md` Punkt 2 entscheidbar. */
+                risk: 0, wahlen: 0,
+                /* Die drei Schranken von Rang 12, je Lauf am Ende ausgelesen —
+                   Ruf, Grandmaisons Fürsprache, Bulletins. OFFEN.md Punkt 12. */
+                schranke: {ruf: [], gm: [], bul: []},
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
                    **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
                    oft" ist das die erste Zahl, die man braucht — und sie ist
                    billig, weil das Chronikblatt Ort und Station ohnehin
                    mitschreibt. */
-                sterbeort: {}, sterbestation: [], weite: [],
+                sterbeort: {}, sterbeplatz: {}, sterbestation: [], weite: [],
                 /* ── Die Sterblichkeit je Kapitel ──
                    **`überlebt` läuft aus, und zwar rechnerisch.** Die Zahl ist
                    ein Produkt: Sieben Kapitel zu je rund fünfzig Prozent
@@ -203,7 +242,16 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                 erreicht: {} };
   /* Reihenfolge der Kapitel, für die Quote je Kapitel. Muss zur Zuordnung
      unten passen (dort wird aus der Jahreszahl der Kapitelname gewonnen). */
-  const KAPITEL_FOLGE = ['Italien','Ägypten','Garnison','Austerlitz','Jena','Eylau','Spanien','Russland'];
+  /* ── Die Kapitelliste kommt aus dem Spiel, nicht aus dem Skript ──
+     ⚠ **Sie stand hier als fester Satz von ACHT Namen, während elf gebaut
+     sind.** Und die Zuordnung lief über die Jahreszahl im Stationsdatum, mit
+     `<= '1811' ? 'Spanien' : 'Russland'` als letztem Zweig — **jeder Tote von
+     1813, 1814 und 1815 wurde damit als Russland gezählt.** Leipzig, Laon und
+     Waterloo gab es in dieser Statistik nicht.
+     Dieselbe Fehlerfamilie wie dreimal zuvor: aus einem gerenderten Text
+     (hier: einer Jahreszahl) auf einen Zustand schließen, statt den Zustand zu
+     lesen. Die Stationsnummer ist eindeutig, das Datum ist es nicht. */
+  let KAPITEL_FOLGE = [], KAPITEL_GRENZE = [], ORTE = [];
   /* Die Gesamtzahl der Stationen kommt aus dem Spiel, nicht aus dem Skript —
      sie stand hier als „von 64" fest und war mit dem fünften Kapitel falsch. */
   let STATIONSZAHL = 0;
@@ -243,7 +291,6 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       aktualisiereErschaffung();
     });
     await p.click('#h_' + ['bauer', 'schmied', 'wilderer', 'strasse', 'fuhrmann', 'schreiber'][r % 6]);
-    await p.click('text=Weiter zu den Veteranenpunkten');
     // Das Patent zuerst — es ist die teuerste Einzelentscheidung des Ladens.
     if (PATENT) await p.evaluate(id => waehle(id), PATENT);
     /* Der Veteran arbeitet **eine** Liste ab, abwechselnd Werte und Stücke.
@@ -263,12 +310,55 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       }
     }, VETERAN_PLAN);
     await p.click('#startbtn');
-    if (!STATIONSZAHL) STATIONSZAHL = await p.evaluate(() => KAPITEL.length);
+    if (!STATIONSZAHL) {
+      const k = await p.evaluate(() => {
+        const namen = [], grenzen = []; let summe = 0;
+        for (const kam of KAMPAGNEN) {
+          const st = STATIONEN[kam.id];
+          if (!st || !st.length) continue;      // ungebaute Kapitel zählen nicht
+          summe += st.length; namen.push(kam.name); grenzen.push(summe);
+        }
+        return {gesamt: KAPITEL.length, namen, grenzen,
+                orte: KAPITEL.map(n => (n.typ==='kampf' ? '⚔ ' : '') + (n.ort || n.id || '?'))};
+      });
+      STATIONSZAHL = k.gesamt; KAPITEL_FOLGE = k.namen; KAPITEL_GRENZE = k.grenzen;
+      ORTE = k.orte;
+    }
     /* Wie lang die Chronik VOR diesem Lauf war — daran erkennt man unten, ob
        der Eintrag am Ende von diesem Lauf stammt oder vom vorigen. */
     const chronikVorher = await p.evaluate(() => META.chronik.length);
+    /* ── HEBEL=1 · den Mechanismus auslesen statt das Ergebnis deuten ──
+       **Die eigene Regel des Projekts, in ein Werkzeug gegossen.** Wenn eine
+       Zahl unerklärlich dasteht — Grandmaison im Median bei −5, wo 5 nötig
+       wären —, ist die erste Frage nicht „welcher Regler", sondern „wer zieht
+       daran". Diese Klammer zählt, wer wie oft an einer Fürsprache dreht, wie
+       oft ein Auftrag steht, und wie oft eine Folge aus dem Verzeichnis
+       zuschlägt. Sie hängt sich um die vorhandenen Funktionen, ändert also
+       nichts am Lauf. */
+    if (HEBEL) await p.evaluate(() => {
+      window.__z = window.__z || {folge:0, stufen:{}, auftragOk:0, auftragNein:0, gm:{}};
+      if (window.__hebelDrin) return;
+      window.__hebelDrin = true;
+      const oFolge = folgeAnwenden;
+      folgeAnwenden = function(st, sa){ window.__z.folge++;
+        window.__z.stufen[st] = (window.__z.stufen[st]||0)+1; return oFolge(st, sa); };
+      const oGunst = gunstGeben;
+      gunstGeben = function(id, n){
+        if (id === 'grandmaison') {
+          const z = String((new Error()).stack||'').split('\n')[2] || '?';
+          const wer = (z.match(/at (\w+)/) || [0,'?'])[1] + (n>0 ? ' +' : ' −');
+          window.__z.gm[wer] = (window.__z.gm[wer]||0) + Math.abs(n);
+        }
+        return oGunst(id, n);
+      };
+      const oAuf = auftragFuer;
+      auftragFuer = function(n){ const a = oAuf(n);
+        if (a && K && K.auftragErfuellt !== undefined) {}
+        return a; };
+    });
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
+    const schluss = {ruf: 0, gm: 0, bul: 0};
     /* ── Das Klickbudget ist ein Prüfstand-Wert und darf nie die Messung sein ──
        **Es stand auf 600, und am 30.07.2026 wurde es zur bindenden Schranke.**
        Der Auftrag-Fix hob die Rangdecke von 9 auf 11 — und ab Rang 10 hängt der
@@ -294,9 +384,9 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       if (!italienGeschafft && /vorfrieden/i.test(t)) { italienGeschafft = true; res.italien++; }
       if (t.includes('Nächster Mann')) { res.tot++; break; }
       if (t.includes('Noch einmal, besser')) { res.ende++; break; }
-      const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+      const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
       const zug = await p.evaluate((MUT) => {
-        const btn = [...document.querySelectorAll('.ord:not([disabled])')];
+        const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')];
         const f = re => btn.find(e => re.test(e.textContent));
         const anteil = S.leben / lebenMax();
         let z = null;
@@ -423,17 +513,17 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
              die Entscheidung ist eine moralische, nicht eine optimale. Wer die
              andere Seite messen will, ändert diese eine Zeile und sagt dazu,
              dass er es getan hat. */
-          if (!z && S.rang >= 9) z = f(/Kasse ausgeben, wie sie vorgesehen/);
-          if (!z && S.rang >= 8 && gunst('vernet') < 4) z = f(/Auftrag des Bataillons/);
+          /* Kasse und Adjutantenauftrag liegen seit dem 30.07.2026 auf dem
+             Schreibtisch und nicht mehr im Lager — sie stehen weiter unten. */
           if (!z && S.rang >= 7) z = f(/Fechtboden/) || f(/Zug selbst antreten/) || f(/Karten des Abschnitts/);
           if (!z && gunst('martel') < 4) z = f(/Am Feuer/);
           /* Die Leiter verlangt jetzt verschiedene Fürsprecher und Bildung 35.
              Wem man das nicht beibringt, der misst wieder die Blindheit des
              Bots statt der Schwelle — dieselbe Lektion wie bei der Gunst. */
-          if (!z && S.rang >= 5) z = f(/zwanzig Mann exerzieren|Rekruten für deine Sektion/);
-          if (!z && S.rang >= 4) z = f(/Listen der Kompanie/);
+          if (!z && S.rang >= 5) z = f(/Deine zwanzig Mann/);
+          if (!z && S.rang >= 4) z = f(/Schreibarbeit der Kompanie/);
           if (!z && S.rang === 3 && S.attr.bildung < 35 && S.geld >= 5) z = f(/Buchstaben lernen/);
-          if (!z && S.rang >= 3 && gunst('berthaud') < 4) z = f(/acht Mann drillen|Listen der Kompanie/);
+          if (!z && S.rang >= 3 && gunst('berthaud') < 4) z = f(/acht Mann drillen|Schreibarbeit der Kompanie/);
           if (!z && S.atem < 55) z = f(/Schlafen und liegen/);
           if (!z && S.ausr.muskete.zustand < 55) z = f(/Muskete zerlegen/);
           if (!z && S.ausr.schuhe.zustand < 40 && S.geld >= 6) z = f(/Schuster/);
@@ -520,13 +610,70 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
           z = bewertet.length ? bewertet[0].e : null;
         }
 
+        /* ── Der Schreibtisch (ab Rang 9) ──
+           **Ein Prüfbot, der eine Handlung meidet, misst das Strafsystem und
+           nicht das Spiel** (Regel 9). Der Bot arbeitet die Vorgänge deshalb
+           wie ein Mensch ab, der seine Leute behalten will: Er hält die
+           Einheit instand, deckt niemanden und schont sein Personal — die
+           riskanten Wege nimmt er nur, wenn `MUT=1` steht. */
+        if (!z && typeof LAUF === 'object' && LAUF && LAUF.schreibtisch
+            && LAUF.schreibtisch.offen && LAUF.schreibtisch.offen.length){
+          const riskant = btn.filter(e => e.classList.contains('risk'));
+          const brav    = btn.filter(e => !e.classList.contains('risk'));
+          /* ── Die Wahl des Patrons ist eine Charakterfrage, keine Optimierung ──
+             **Die beiden Gemüter wählen verschieden, und das ist der Sinn.**
+             Der vorsichtige Bot nimmt die Kasse ehrlich, erfüllt Aufträge und
+             hält seine Bücher sauber — das ist Davouts Währung. Der mutige
+             tritt vor die Linie und sammelt Bulletins — das ist Neys.
+             Masséna wählt keiner von beiden: Seine Währung ist Unterschlagung,
+             und ein Bot, der unterschlägt, misst das Strafsystem statt des
+             Spiels. **Wer Massénas Weg messen will, ändert diese Zeile und
+             sagt dazu, dass er es getan hat.** */
+          z = f(MUT ? /Maréchal Ney/ : /Maréchal Davout/)
+            || ((MUT && riskant.length) ? riskant[0]
+            : (f(/Kasse ausgeben, wie sie vorgesehen/) || f(/an den vergeben, der liefert/)
+               || f(/auf eigene Kosten/) || f(/Wahrheit melden/) || f(/Fähigeren/)
+               || f(/Selbst mit ihm reden/) || f(/gleichmäßig/) || f(/Unteroffiziere selbst unterrichten/)
+               || f(/Eng legen/) || f(/Schreiben, was er kann/) || f(/Stellung erkunden/)
+               || brav[0] || btn[0]));
+        }
         if (!z) z = btn[0];
         if (z) z.click();
-        return { ok: !!z, rang: S ? S.rang : 0, zweig: S ? S.zweig : null };
+        /* ── Der risk-Zähler ──
+           `OFFEN.md` Punkt 2 fragt seit Tagen, ob der reiche Veteran wirklich
+           gefährlicher lebt oder ob nur die Bot-Formel ihn dorthin rechnet: Bei
+           sehr hohen Werten übersteigt eine riskante Wahl auch nach dem Abschlag
+           von 20 noch jede sichere. **Solange niemand zählt, wie oft er zugreift,
+           misst man das Ergebnis und nicht den Hebel** — derselbe Fehler wie beim
+           stummen Güte-Leck.
+           Gezählt wird der Knopf, den er wirklich gedrückt hat, nicht der, den er
+           hätte drücken können. */
+        return { ok: !!z, rang: S ? S.rang : 0, zweig: S ? S.zweig : null,
+                 risk: !!(z && z.classList && z.classList.contains('risk')),
+                 /* ── Die drei Schranken von Rang 12, direkt ausgelesen ──
+                    **OFFEN.md Punkt 12 verlangt genau das: erst den Hebel,
+                    dann das Ergebnis.** Vierzig von vierzig Veteranen bleiben
+                    Colonel, und welche der drei Bedingungen sie hält — Ruf
+                    480, Grandmaison 5, drei Bulletins —, war eine Vermutung.
+                    Dreimal an einem Tag war die vermutete Ursache nicht die
+                    wirkliche; eine Zeile, die die Zahlen ausgibt, ist billiger
+                    als die vierte Vermutung. */
+                 ruf: S ? (S.ruf|0) : 0,
+                 gm: S ? (typeof gunst === 'function' ? (gunst('grandmaison')|0) : 0) : 0,
+                 bul: S ? (S.bulletins|0) : 0 };
       }, MUT);
       if (zug.rang > hoechster) hoechster = zug.rang;
       if (zug.zweig) zweig = zug.zweig;
+      if (zug.risk) res.risk++;
+      // Der letzte lebende Stand: nach dem Tod ist `S` null.
+      if (zug.rang) { schluss.ruf = zug.ruf; schluss.gm = zug.gm; schluss.bul = zug.bul; }
+      res.wahlen++;
       if (!zug.ok) break;
+    }
+    if (schluss.ruf || schluss.bul) {
+      res.schranke.ruf.push(schluss.ruf);
+      res.schranke.gm.push(schluss.gm);
+      res.schranke.bul.push(schluss.bul);
     }
     if (zweig) res.elite++;
     if (hoechster >= 3) res.caporal++;
@@ -564,23 +711,29 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     }, chronikVorher);
     if (!d) { res.abbruch++; continue; }
     if (d.gefallen) {
-      /* Das Kapitel steht nicht im Blatt, wohl aber das Datum der letzten
-         Station — und die Jahreszahl ist eindeutig. */
-      const j = (d.ort.match(/1[78]\d\d/) || ['?'])[0];
-      const kap = j <= '1797' ? 'Italien' : j <= '1799' ? 'Ägypten'
-                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : j <= '1811' ? 'Spanien' : 'Russland';
+      /* Aus der Stationsnummer, nicht aus dem Datum: Sie ist der Zustand. */
+      let bisIdx = KAPITEL_GRENZE.findIndex(g => d.stationen <= g);
+      if (bisIdx < 0) bisIdx = KAPITEL_FOLGE.length - 1;
+      const kap = KAPITEL_FOLGE[bisIdx] || '?';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
+      /* **Und woran genau.** Das Kapitel sagt, in welchem Krieg er geblieben
+         ist; die Station sagt, an welchem Tag. Für jede Frage der Art „woran
+         stirbt dieser Mann" ist das die Zahl, die man wirklich braucht. */
+      const ort = ORTE[d.stationen-1] || ('Station ' + d.stationen);
+      res.sterbeplatz[ort] = (res.sterbeplatz[ort]||0) + 1;
       res.sterbestation.push(d.stationen);
       res.weite.push(d.stationen);
       /* Erreicht hat er jedes Kapitel bis einschließlich dem, in dem er
          gestorben ist. */
-      const bis = KAPITEL_FOLGE.indexOf(kap);
-      KAPITEL_FOLGE.slice(0, bis+1).forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
+      KAPITEL_FOLGE.slice(0, bisIdx+1).forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     } else {
       res.weite.push(STATIONSZAHL);
       KAPITEL_FOLGE.forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     }
   }
+  /* Die Zähler leben in der Seite und überstehen `goto()`, weil `balance.js`
+     EINE Seite für alle Läufe benutzt — hier werden sie einmal abgeholt. */
+  if (HEBEL) res.hebel = await p.evaluate(() => window.__z || null);
   const pu = res.punkte.sort((a, b) => a - b);
   const q = n => `${n} (${Math.round(n / N * 100)} %)`;
   console.log(`${N} Läufe · ${VP?`Veteran mit ${VP} VP`:'erster Lauf, ohne Vorrat'} · ${MUT?'mutig':'vorsichtig'}`
@@ -615,6 +768,34 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
   const verteilung = Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
     .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`).join(' · ');
   console.log(`Rangverteilung (höchster je Lauf): ${verteilung}`);
+  /* ── Wie oft der Bot ins Risiko gegangen ist ──
+     `OFFEN.md` Punkt 2 lässt sich nur mit dieser Zeile entscheiden: Wenn der
+     reiche Veteran seltener überlebt als der ärmere, muss man wissen, ob er
+     **öfter zugreift** (Bot-Artefakt — bei hohen Werten übersteigt eine
+     riskante Wahl auch nach dem Abschlag jede sichere) oder ob dieselbe Zahl
+     Wahlen härter bestraft wird (dann ist es das Spiel). */
+  console.log(`Riskante Wahlen: ${res.risk} von ${res.wahlen} (${res.wahlen ? Math.round(res.risk/res.wahlen*100) : 0} %)`);
+  /* ── Die drei Schranken von Rang 12 ──
+     **OFFEN.md Punkt 12: erst den Hebel auslesen, dann drehen.** Vierzig von
+     vierzig Veteranen bleiben Colonel; ob sie der Ruf hält (480), Grandmaisons
+     Fürsprache (5) oder die Bulletins (3), war bis hierher eine Vermutung.
+     Gedruckt wird der Median, weil ein Mittelwert von den frühen Toten
+     nach unten gezogen wird. */
+  if (res.schranke.ruf.length) {
+    const med = a => { const b = a.slice().sort((x,y)=>x-y); return b[Math.floor(b.length/2)]; };
+    const anteil = (a,s) => Math.round(a.filter(x=>x>=s).length / a.length * 100);
+    console.log(`Rang 12 — die drei Schranken (Median · erfüllt): `
+      + `Ruf ${med(res.schranke.ruf)} ${anteil(res.schranke.ruf,480)} % · `
+      + `Grandmaison ${med(res.schranke.gm)} ${anteil(res.schranke.gm,5)} % · `
+      + `Bulletins ${med(res.schranke.bul)} ${anteil(res.schranke.bul,3)} %`);
+  }
+  if (HEBEL && res.hebel) {
+    const z = res.hebel;
+    console.log(`Hebel · Folgen aus dem Verzeichnis: ${z.folge} (Stufen ${
+      Object.keys(z.stufen||{}).sort().map(k=>k+': '+z.stufen[k]).join(' · ') || '—'})`);
+    console.log(`Hebel · Wer an Grandmaisons Fürsprache dreht: ${
+      Object.keys(z.gm||{}).sort((a,b)=>z.gm[b]-z.gm[a]).map(k=>k+' '+z.gm[k]).join(' · ') || '—'}`);
+  }
   /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
   const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])
     .map(k => { const e = res.erreicht[k], t = res.sterbeort[k]||0;
@@ -622,6 +803,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
   if (jeKapitel.length) console.log(`Überstanden je Kapitel (von denen, die es erreichen): ${jeKapitel.join(' · ')}`);
   if (res.sterbestation.length) {
     const mittel = Math.round(res.sterbestation.reduce((a, x) => a + x, 0) / res.sterbestation.length * 10) / 10;
+    const plaetze = Object.keys(res.sterbeplatz).sort((a,b)=>res.sterbeplatz[b]-res.sterbeplatz[a]).slice(0,6);
+    console.log(`Gestorben wo genau: ${plaetze.map(k=>`${k} ${res.sterbeplatz[k]}`).join(' · ')}`);
     console.log(`Gestorben in: ${Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`).join(' · ')}`
       + ` · im Schnitt bei Station ${mittel} von ${STATIONSZAHL}`);
   }

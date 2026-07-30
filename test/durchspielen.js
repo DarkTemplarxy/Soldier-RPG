@@ -1,6 +1,12 @@
 /* Klickt einen kompletten Lauf durch und meldet Konsolenfehler.
    Aufruf:  node test/durchspielen.js          (aufgeteilte Fassung)
             node test/durchspielen.js dist     (gebaute Einzeldatei)  */
+/* ── Das Fenster über dem Bildschirm ──
+   **Liegt ein Blatt obenauf (`.ueberlage`), ist nur dieses bedienbar.** Der
+   Rücken fängt jeden Klick ab — ein Prüfstand, der dahinter klickt, läuft
+   entweder in einen Timeout oder, schlimmer, drückt einen Knopf, den ein
+   Spieler gar nicht erreichen kann. Deshalb sucht jeder Prüfstand seine
+   Knöpfe **zuerst im Fenster**. */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const ziel = process.argv[2] === 'dist'
@@ -18,7 +24,6 @@ const ziel = process.argv[2] === 'dist'
   await p.click('text=Neuen Mann aufstellen');
   await p.click('text=Einen anderen Mann');
   await p.click('#h_schmied');
-  await p.click('text=Weiter zu den Veteranenpunkten');
   await p.click('#startbtn');
 
   let s = 0, ende = 'Limit erreicht';
@@ -26,9 +31,9 @@ const ziel = process.argv[2] === 'dist'
     const t = await p.$eval('#app', e => e.innerText);
     if (t.includes('Nächster Mann')) { ende = 'gestorben'; break; }
     if (t.includes('Noch einmal, besser')) { ende = 'Kapitel überstanden'; break; }
-    const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+    const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
     const ok = await p.evaluate(() => {
-      const btn = [...document.querySelectorAll('.ord:not([disabled])')];
+      const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')];
       const f = re => btn.find(e => re.test(e.textContent));
       let z = null;
       /* Gefecht und Lager werden am **Zustand** erkannt, nicht am Bildschirmtext.

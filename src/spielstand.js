@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 9;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente
+const LAUF_FASSUNG    = 16;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -167,6 +167,121 @@ const LAUF_WANDLER = {
   8: alt => {
     if(alt.mann && alt.mann.patent === undefined) alt.mann.patent = null;
     return Object.assign({}, alt, {fassung:9});
+  },
+  /* Fassung 9 merkte sich nicht, wie hoch einer schon einmal stand.
+     Gebraucht wird das, seit die Seitenleiste `ab:` auswertet: Wer über dir
+     steht, erscheint erst, wenn dein Rang ihn erreicht — und **ein
+     zurückgestufter Offizier darf seinen Fürsprecher nicht verlieren.** Der
+     Inspecteur nimmt einen Rang, nicht eine Bekanntschaft; Gunst liefe sonst
+     unsichtbar weiter.
+
+     Für einen angefangenen Feldzug ist der heutige Rang die einzige ehrliche
+     Auskunft — höher stand er vielleicht, aber raten wäre schlechter als
+     untertreiben. */
+  9: alt => {
+    const m = alt.mann;
+    if(m && m.hoechsterRang === undefined) m.hoechsterRang = m.rang|0;
+    return Object.assign({}, alt, {fassung:10});
+  },
+  /* Fassung 10 kannte nur die Kette **über** dir. Ab Rang 9 gibt es jetzt auch
+     eine darunter: vier benannte Personen mit Können, Treue und Zustand.
+
+     **Ein angefangener Feldzug bekommt sie neu ausgewürfelt**, nicht
+     rekonstruiert. Rekonstruieren hieße raten — es gibt keine Spur davon, wen
+     dieser Mann ausgebildet hat. Neu heißt: Er kennt sie, seit er den Rang
+     trägt, und muss sie von vorn kennenlernen. Das ist der ehrlichere von zwei
+     unehrlichen Wegen. */
+  10: alt => {
+    const m = alt.mann;
+    if(m && m.unterstellte === undefined){ m.unterstellte = []; m.unterstellteStufe = 0; }
+    return Object.assign({}, alt, {fassung:11});
+  },
+  /* Fassung 11 kannte weder den Schreibtisch noch das Verzeichnis.
+     **Beide fangen leer an, und das ist nicht bloß bequem:** Ein Verzeichnis
+     rückwirkend zu füllen hieße, einem Mann Sachen anzudichten, die er nie
+     getan hat — und das Verzeichnis ist das eine System im Spiel, bei dem
+     genau das nie passieren darf. */
+  11: alt => {
+    if(alt.mann && alt.mann.heimlich === undefined) alt.mann.heimlich = [];
+    if(alt.schreibtisch === undefined) alt.schreibtisch = null;
+    return Object.assign({}, alt, {fassung:12});
+  },
+  /* Fassung 12 hatte das Verzeichnis, aber noch keine Folgen. Beide Zähler
+     fangen bei null an — **rückwirkend einen Aktenvermerk einzutragen wäre
+     eine Bestrafung für nichts**, und „übergangen" ist ohnehin ein Zustand,
+     der genau einmal eintritt. */
+  12: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.vermerke === undefined) m.vermerke = 0;
+      if(m.uebergangen === undefined) m.uebergangen = false;
+      /* Wer schon über Rang 10 steht, hat die Wahl in dieser Fassung nie
+         bekommen — sie wird ihm nicht nachgereicht, sondern gilt als
+         getroffen. Einen Mitgezogenen rückwirkend zu bestimmen hieße, eine
+         Beziehung zu erfinden, die nie stattgefunden hat. */
+      if(m.mitgewaehlt === undefined) m.mitgewaehlt = (m.rang >= 10);
+    }
+    return Object.assign({}, alt, {fassung:13});
+  },
+  /* Fassung 13 kannte den stehenden Auftrag über den Feldzug noch nicht.
+     **Er fängt unabgerechnet an, und das ist die richtige Fassung:** Er wird
+     am Übergang geprüft, also gegen den Zustand, in dem der Mann dort
+     ankommt — nicht gegen eine Vergangenheit, von der der Spielstand nichts
+     weiß. Wer mitten im Feldzug fortsetzt, bekommt ihn beim nächsten
+     Übergang zum ersten Mal abgerechnet, und zwar vollständig. */
+  13: alt => {
+    if(alt.kauftrag === undefined) alt.kauftrag = null;
+    return Object.assign({}, alt, {fassung:14});
+  },
+  /* Fassung 14 führte die Mitwisser über ihren **Namen**, und daran hingen
+     zwei stille Fehler: Jede Beförderung baute die Unterstellten neu auf und
+     löschte damit das ganze Verzeichnis, und Namen wiederholten sich zwischen
+     den Stufen, sodass ein Fremder eine Sache erben konnte, von der er nichts
+     weiß. Ab hier trägt jeder eine Kennung.
+
+     **Namen, die kein heutiger Unterstellter trägt, fallen aus der Mitwisser-
+     liste.** Das ist keine Nachsicht, sondern genau das Verhalten der alten
+     Fassung: Dort galt eine Sache ohne aktuellen Träger ohnehin als
+     geschlossen. Sie rückwirkend wieder zu öffnen hieße, einen Spielstand
+     strenger zu machen, als er gespielt wurde. */
+  14: alt => {
+    const m = alt.mann;
+    if(m){
+      let z = 0;
+      const nachName = {};
+      (m.unterstellte||[]).forEach(u=>{
+        if(u.id === undefined) u.id = ++z;
+        else z = Math.max(z, u.id);
+        nachName[u.name] = u.id;
+      });
+      if(m.unterId === undefined) m.unterId = z;
+      if(m.unterTot === undefined) m.unterTot = [];
+      if(m.unterNamen === undefined) m.unterNamen = (m.unterstellte||[]).map(u=>u.name);
+      (m.heimlich||[]).forEach(h=>{
+        h.mitwisser = (h.mitwisser||[]).map(w =>
+          typeof w === 'number' ? w : nachName[w]).filter(x => x != null);
+      });
+    }
+    return Object.assign({}, alt, {fassung:15});
+  },
+  /* Fassung 15 kannte die drei Marschälle noch nicht. **Sie kommen in die
+     Personenkartei, aber ohne Wahl** — `S.patron` bleibt leer, und der
+     Schreibtisch legt sie beim nächsten Lager vor. Einen Patron rückwirkend
+     zuzuweisen hieße, eine Zugehörigkeit zu erfinden, die es nie gegeben hat;
+     bis zur Wahl fällt `beurteiler()` auf Grandmaison zurück, so wie es
+     vorher immer war. */
+  15: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.patron === undefined) m.patron = null;
+      if(m.leute) PATRONE.forEach(x=>{
+        if(!m.leute[x.id]){
+          const d = LEUTE.find(l=>l.id===x.id) || {};
+          m.leute[x.id] = {gunst:0, stufe:0, lebt:true, kurz:d.kurz};
+        }
+      });
+    }
+    return Object.assign({}, alt, {fassung:16});
   }
 };
 

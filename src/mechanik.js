@@ -18,6 +18,10 @@ function setzeKampf(k){ if(LAUF) LAUF.kampf = k; K = k; }
 function neuerLauf(mann){
   LAUF = {fassung:LAUF_FASSUNG, mann, node:0, kampf:null, szene:null,
           lager:{id:null, abende:0, log:[]}, winter:{ort:null, wochen:3, log:[]},
+          /* Der Schreibtisch liegt vor den Abenden und hält über einen
+             Spielabbruch durch: Wer mitten in einem Vorgang aufhört, steht
+             beim Fortsetzen wieder davor. */
+          schreibtisch:null,
           begonnen:new Date().toISOString(), zuletzt:null};
   binde();
 }
@@ -53,6 +57,7 @@ function stationErledigt(){
   const kalt = frostWirken(KAPITEL[LAUF.node-1]);
   if(kalt) S.log.push(((KAPITEL[LAUF.node-1]||{}).ort||'') + ': ' + kalt);
   aderlass(KAPITEL[LAUF.node-1]);
+  burscheSorgt();      // ab Rang 8: was abgenutzt ist, ist am Morgen wieder brauchbar
   /* „Er weiß, welches Wasser." Halbiert wird die Zehrung, nicht abgeschafft —
      und die Sperre der Zeitheilung bleibt bestehen, solange überhaupt etwas
      zehrt. Wer krank ist, erholt sich nicht; er wird nur langsamer weniger.
@@ -299,11 +304,12 @@ function jahrVonStation(){
 function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const h = HERKUENFTE.find(x=>x.id===herkunftId);
   const attr = {}; ATTRIBUTE.forEach(([k])=> attr[k] = attrVerteilung[k]);
-  /* Fertigkeiten beginnen bei 5, nicht mehr bei 10 (29.07.2026, zusammen mit
-     dem Attributsockel 15). Ein Rekrut hat die Muskete zweimal abgefeuert;
-     alles darüber ist etwas, das er sich verdient oder gekauft hat. Nebenbei
-     verlängert es die Strecke, auf der Übung noch etwas bringt — `nutzen()`
-     gibt bei niedrigen Werten am meisten. */
+  /* Fertigkeiten beginnen bei `FERT_SOCKEL` — **20 seit dem 30.07.2026**, davor
+     5, davor 10. Der Kommentar nannte hier noch die 5 und widersprach damit der
+     Konstante zwei Zeilen darunter; die Zahl steht in `grundwerte.js` und wird
+     hier nicht mehr abgeschrieben. 20 ist das, was ein Mann mitbringt, der
+     schon einmal eine Muskete gehalten und schon einmal Hunger gehabt hat —
+     nicht Können, aber auch nicht Ahnungslosigkeit. */
   const fert = {}; FERTIGKEITEN.forEach(([k])=> fert[k] = FERT_SOCKEL);
   /* Die Herkunft darf über die 70 der Poolverteilung hinausgehen — sie ist das,
      was man mitbringt, nicht das, was man sich aussucht. Das war früher der
@@ -325,17 +331,57 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const ausr = AUSRUESTUNG_START();
   const hoch = (k,n)=>{ fert[k] = Math.min(100, fert[k] + n); };
   let geld = 4;
+  const hochAttr = (k,n)=>{ attr[k] = Math.min(100, (attr[k]||0) + n); };
   (kaeufe||[]).forEach(id=>{
+    /* ── Die Waffe ── Jede Stufe kostet mehr und bringt weniger Zuwachs. */
+    if(id==='muskete_depot'){ ausr.muskete={name:'Ausgesuchte Muskete',zustand:85,verschleiss:14}; hoch('muskete',4); }
     if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+    if(id==='muskete_manu'){ ausr.muskete={name:'Manufakturmuskete, Versailles',zustand:100,verschleiss:10}; hoch('muskete',12); }
+    /* Der Stutzen ist kein Aufstieg, sondern ein anderer Weg: Er lädt
+       langsamer und trifft weiter. Der Abschlag auf das schnelle Feuern steht
+       in `kampfAktion()`, nicht hier. */
+    if(id==='stutzen'){ ausr.muskete={name:'Gezogener Stutzen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+
+    /* ── Die Seitenwaffe ── */
     if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; hoch('bajonett',5); }
+    if(id==='sabre'){ ausr.seitenwaffe={name:'Sabre briquet',zustand:95,verschleiss:7}; hoch('bajonett',4); }
+    if(id==='degen'){ ausr.seitenwaffe={name:'Offiziersdegen',zustand:95,verschleiss:6}; hoch('bajonett',4); }
+
+    /* ── Die Schuhe ── Stufe 4 verschiebt zusätzlich die Schwelle, ab der
+       kaputte Schuhe die Konstitution kosten (siehe `wert()`). */
+    if(id==='schuhe_neu'){ ausr.schuhe={name:'Neue Schuhe, passend',zustand:80,verschleiss:20}; }
     if(id==='schuhe_gut'){ ausr.schuhe={name:'Doppelt besohlte Schuhe',zustand:100,verschleiss:12}; }
+    if(id==='stiefel'){ ausr.schuhe={name:'Marschstiefel, Maßarbeit',zustand:100,verschleiss:8}; }
+
     if(id==='tornister_gut'){ ausr.tornister={name:'Verstärkter Tornister',zustand:100,verschleiss:8}; }
+
+    /* ── Uniform und Mantel ── */
     if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
+    if(id==='uniform_gut'){ ausr.mantel={name:'Capote zur guten Uniform',zustand:95,verschleiss:6}; hochAttr('autoritaet',4); }
+    if(id==='winter'){ ausr.mantel={name:'Pelzgefütterter Mantel',zustand:95,verschleiss:6}; hochAttr('autoritaet',4); }
+
+    /* ── Kleinkram ── */
+    if(id==='amulett'){ hochAttr('kaltbluetigkeit',5); }
+    if(id==='besteck'){ hoch('feldchirurgie',5); }
+    if(id==='fernrohr'){ hoch('taktik',4); }
+
+    /* ── Bares ── */
     if(id==='geld'){ geld += 50; }
+    if(id==='geld_gross'){ geld += 200; }
   });
   const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
-    rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
+    /* `hoechsterRang` ist der höchste je getragene Rang. Er entscheidet, wen
+       die Seitenleiste unter „Über dir" zeigt (`kenntPerson()`) — und er
+       sinkt nie, auch wenn der Inspecteur einen Rang nimmt: Eine Bekanntschaft
+       verliert man nicht durch eine Rückstufung. Gepflegt wird er an einer
+       einzigen Stelle, `rangSetzen()`. */
+    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(), patron:null,
+    /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
+       und eine leere Liste ist ehrlicher als vier Platzhalter. */
+    unterstellte:[], unterstellteStufe:0, unterId:0, unterTot:[], unterNamen:[], unterstellteVorher:null,
+    heimlich:[], vermerke:0, uebergangen:false, mitgewaehlt:false,
+    kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     /* Der Offizier: `einheit` bleibt null, bis es eine Kompanie gibt (Rang 9).
@@ -416,9 +462,506 @@ function gunstGeben(id, n){
   p.gunst = Math.max(-5, Math.min(5, p.gunst + n));
 }
 
+/* ── Was der Patron sieht ──
+   **Drei Marschälle, drei Vorstellungen davon, was ein guter Untergebener
+   ist — und keine davon ist die richtige.** Dieselben Ereignisse zählen bei
+   jedem anders; wer Davouts Mann ist, sammelt mit sauberen Büchern, wer Neys
+   Mann ist, mit Bulletins, wer Massénas Mann ist, mit Geld.
+
+   **Das ist der Kern der Wahl:** Nicht wie viel Fürsprache man bekommt, sondern
+   wofür. Ein Lauf, der unter Davout mustergültig ist, steht unter Ney bei null
+   — und umgekehrt.
+
+   Es ist eine Stelle für alle drei, weil ein Zuschlag, den man an sechs
+   Stellen von Hand mitziehen muss, an der siebten vergessen wird. */
+const PATRON_ZAEHLT = {
+  ordnung: {auftragJa:1, auftragNein:-1, einheitGut:1, verzeichnis:-2},
+  tapfer:  {bulletin:1, unsichtbar:-1, vorn:1},
+  geld:    {gierig:1, ehrlich:-1, bar:1}
+};
+function patronMerkt(was, mal){
+  if(!S || !S.patron) return;
+  const p = (typeof patronVon==='function') ? patronVon(S.patron) : null;
+  if(!p) return;
+  const d = (PATRON_ZAEHLT[p.will] || {})[was];
+  if(d) gunstGeben(S.patron, d * (mal || 1));
+}
+
 /* Anrede mit Rang: „Sergent Martel", nach seinem Aufstieg „Sergent-major
    Martel". Dieselbe Person, andere Anrede — KONZEPT §3 („Kostet nichts, wirkt
    enorm"), nur in die andere Richtung. */
+/* ── Francs, überall gleich geschrieben ──
+   **Vier Stellen, drei Schreibweisen.** `Math.round(g*100)/100` liefert
+   „4" und „12.5", `toFixed(2)` liefert „4.00" — mit Dezimal*punkt*, in einem
+   Spiel, dessen Texte durchgehend deutsch gesetzt sind. Ein Betrag, der
+   einmal „12.5 F" und zwei Zeilen tiefer „12,50 F" heißt, sieht nach zwei
+   verschiedenen Zahlen aus.
+
+   Ganze Beträge stehen ohne Nachkommastellen da — „4 F", nicht „4,00 F".
+   Der Sold ist der einzige Ort, an dem Zentimes zählen, und dort hat er sie. */
+function francs(betrag, immerZwei){
+  const b = Math.round((betrag || 0) * 100) / 100;
+  const s = (immerZwei || b % 1 !== 0) ? b.toFixed(2) : String(b);
+  return s.replace('.', ',');
+}
+
+/* ══════════════════ DIE UNTERSTELLTEN ══════════════════
+
+   **Sie entstehen bei der Beförderung und rücken mit dem Rang nach.** Wer
+   Capitaine wird, bekommt drei Sergenten und einen Sous-Lieutenant; wer Chef
+   de bataillon wird, bekommt vier Capitaines — und die drei Sergenten bleiben
+   zurück, weil sie zwei Ebenen unter ihm nicht mehr vorkommen.
+
+   **Der Mitgezogene ist die Ausnahme** (`mit:true`): Einer wandert mit, wie
+   Martel es über dir tat. Er ist der einzige, dessen Treue +5 erreichen kann,
+   und der längste Mitwisser — wer alle anderen dreimal ausgetauscht hat, hat
+   immer noch ihn. Gewählt wird er beim Aufstieg zu Rang 10. */
+/* **Selbstheilend, und das ist Absicht.** `rangSetzen()` ist die vorgesehene
+   Tür, aber `S.rang` wird an anderen Stellen direkt gesetzt — von den
+   Prüfständen, von Kapiteldaten, und von jedem Code, den es noch nicht gibt.
+   Ein Zustand, der nur über eine einzige Tür entsteht, fehlt überall dort, wo
+   jemand durchs Fenster steigt. Die Funktion kehrt sofort zurück, wenn die
+   Stufe schon stimmt, also darf sie überall gerufen werden. */
+function unterstellteSetzen(){
+  if(!S) return;
+  const stufe = unterstellteStufe(S.rang);
+  /* **Die Stufe muss mit zurückgesetzt werden, nicht nur die Liste.** Sonst
+     sperrt eine Rückstufung die Unterstellten dauerhaft aus: Rang 9 → 8 leert
+     die Liste, lässt aber `unterstellteStufe = 9` stehen — und der Weg zurück
+     auf 9 springt oben früh heraus, weil die Stufe „schon aufgebaut" meldet.
+     Gemessen: 4 Unterstellte → 0 → **0**. Der Mann führt danach ein Bataillon
+     ohne einen einzigen Untergebenen, und `ausfuehrungsProbe()` gibt ihm
+     stillschweigend immer recht. */
+  if(!stufe){ S.unterstellte = []; S.unterstellteStufe = 0; return; }
+  if(S.unterstellteStufe === stufe.ab) return;      // schon aufgebaut
+  const alt = S.unterstellte || [];
+  const mit = alt.find(u=>u.mit && u.lebt) || null;
+  /* ── Die Wahl des Mitgezogenen bekommt die Alten vorgelegt, nicht die Neuen ──
+     **Der Text sagt „die Sergenten bleiben bei der Kompanie, einen darfst du
+     mitnehmen" — und angeboten wurden die vier Capitaines**, weil dieser
+     Umbau beim Aufstieg längst gelaufen war, ehe der Schreibtisch fragte. Man
+     nahm einen Fremden mit, den man in derselben Minute kennengelernt hatte.
+     Deshalb bleibt die alte Liste liegen, bis die Wahl getroffen ist. */
+  if(!mit && !S.mitgewaehlt && stufe.ab >= 10 && alt.length)
+    S.unterstellteVorher = alt.filter(u=>u.lebt);
+  const neu = [];
+  stufe.posten.forEach((posten,i)=>{
+    /* Der Mitgezogene behält Kennung, Können und Treue und bekommt den neuen
+       Posten — er ist mit aufgestiegen, nicht ersetzt worden. */
+    if(mit && i===0){ neu.push(Object.assign({}, mit, {posten})); return; }
+    /* ── Wer neu unter dich tritt, hängt von der Höhe ab ──
+       **Die Leute unter einem Général sind keine Anfänger.** Die erste
+       Fassung gab auf jeder Stufe dieselben 35 bis 55 — damit setzte jede
+       Beförderung die ganze Kette auf Rekrutenmaß zurück, und die Erfahrung,
+       die sie sammeln, kam nie an. Fünf Punkte je Stufe: unter dem Capitaine
+       35–55, unter dem Général de division 55–75.
+       **Der Mitgezogene steht trotzdem über ihnen** — er bringt mit, was er
+       seit Rang 9 gelernt hat, und das ist der Sinn der Wahl. */
+    const sockel = 35 + 5 * Math.max(0, stufe.ab - 9);
+    neu.push(neuerUnterstellter(posten, sockel + Math.floor(Math.random()*21)));
+  });
+  S.unterstellte = neu;
+  S.unterstellteStufe = stufe.ab;
+}
+
+/* ── Kennung und Name ──
+   **Ein Mitwisser wird über seine Kennung geführt, nie über seinen Namen.**
+   Namen wiederholen sich: Ausgeschlossen wurde nur die *vorige* Liste, also
+   konnte ein Sergent von 1805 als Colonel von 1813 wiederkommen — und mit ihm
+   eine Sache, von der der neue Mann nichts weiß. `S.unterNamen` merkt sich
+   jeden vergebenen Namen für den ganzen Lauf. */
+function neuerUnterstellter(posten, koennen){
+  if(!S.unterNamen) S.unterNamen = [];
+  const frei = UNTER_NAMEN.filter(n => S.unterNamen.indexOf(n) < 0);
+  const name = frei.length ? frei[0] : UNTER_NAMEN[S.unterNamen.length % UNTER_NAMEN.length];
+  S.unterNamen.push(name);
+  S.unterId = (S.unterId|0) + 1;
+  return {id:S.unterId, name, posten, koennen, treue:0,
+          zustand:'dienstfähig', lebt:true, mit:false, satz:''};
+}
+
+/* Der Nachrücker kennt dich nicht — Können 25, Treue 0. Das ist derselbe
+   Preis, den ein gefallener Fürsprecher über dir kostet, nur von unten. */
+function unterstellterFaellt(i){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return '';
+  u.lebt = false;
+  /* **Nur der Tote nimmt seinen Teil mit.** Hier und nirgends sonst wird eine
+     Kennung als erloschen vermerkt — eine Versetzung, eine Beförderung und
+     eine Rückstufung tun das ausdrücklich nicht. */
+  if(!S.unterTot) S.unterTot = [];
+  if(u.id) S.unterTot.push(u.id);
+  const gefallen = u.posten + ' ' + u.name;
+  S.unterstellte[i] = Object.assign(neuerUnterstellter(u.posten, 25),
+                                    {satz:'ist seit vier Tagen da'});
+  return gefallen;
+}
+
+/* Können pflegen — die Zehrung ist die Gegenseite: **Personal, das man nicht
+   anfasst, wird schlechter.** −2 je Station, wie der Einheitszustand. */
+function koennenPlus(i, n){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return;
+  u.koennen = Math.max(0, Math.min(100, u.koennen + n));
+}
+function treuePlus(i, n, satz){
+  const u = S.unterstellte && S.unterstellte[i];
+  if(!u || !u.lebt) return;
+  u.treue = Math.max(-5, Math.min(u.mit ? 5 : 4, u.treue + n));
+  if(satz) u.satz = satz;
+}
+/* Der mittlere Können-Wert steht für die Güte der ganzen Einheit und löst ab
+   Rang 9 `sektionGuete` ab (VERWALTUNG §9). Solange niemand unter einem steht,
+   bleibt die alte Zahl gültig. */
+/* ── Sie werden besser, und zwar von allein ──
+
+   ⚠ **Hier stand eine Zehrung: −2 je Station, „Personal, das man nicht
+   anfasst, wird schlechter".** Der Satz klang richtig und die Zahl war es
+   nicht — gemessen fiel das Können von 44 auf 24 auf 5 auf **0** nach dreißig
+   Stationen. Der Vergleich mit dem Einheitszustand, auf den sie sich berief,
+   trägt nicht: `S.einheit` ist **eine** Zahl, die je Lager um bis zu 25
+   aufgefüllt wird; das Können sind **vier** Zahlen, und ein Lagerabend hebt
+   genau **eine** davon um 6 bis 8.
+
+   **Und was daran hing, war kein Anzeigewert** (am Hebel ausgelesen, nicht
+   geraten):
+
+     Können 0  →  `unterstellteGuete()` 0  →  `(0−45)×0,6` = **−25 Haltung und
+     Bestand in jedem Gefecht ab Rang 9** — derselbe Malus, den der gekaufte
+     Leutnant als Strafe trägt und der dort die Überlebensquote von 65 auf 3 %
+     gedrückt hat.
+
+     Längere Gefechte  →  der Auftrag „die Stellung nehmen" wird nicht erfüllt
+     →  **Grandmaison −1 je Gefecht.** Gemessen über zwölf Veteranenläufe zog
+     `kampfEnde` **26 Punkte ab und gab 9**; er stand im Median bei **−5**, wo
+     Rang 12 eine **+5** verlangt. Die Wand vor dem General war also nicht die
+     Fürsprache, sondern das Können der Leute, die seine Befehle ausführen.
+
+   **Die richtige Richtung ist die andere** *(Ansage des Entwicklers,
+   30.07.2026)*: *„Das Können der Untergebenen steigt automatisch leicht an —
+   weshalb ich sie mitziehen möchte, und sie sammeln ja Erfahrung im Laufe der
+   Zeit — und ich kann sie aber auch aktiv ausbilden."*
+
+   Zwei Quellen also, und sie sind verschieden:
+
+   | | |
+   |---|---|
+   | **Erfahrung** | von allein, je Lager, mit abnehmendem Ertrag — dieselbe Kurve wie beim eigenen Üben |
+   | **Ausbildung** | die Lagerabende und der Schreibtisch, gezielt auf einen Mann |
+
+   **Deshalb lohnt der Mitgezogene.** Bei jedem Aufstieg wechselt die ganze
+   Kette — nur er bleibt, und nur bei ihm summiert sich, was er gelernt hat.
+   Das ist der mechanische Grund für eine Entscheidung, die bisher nur eine
+   Beziehung war. */
+function unterstellteReifen(){
+  if(!S || !S.unterstellte) return;
+  /* ── Erfahrung bringt einen Mann bis zur Routine, nicht zur Meisterschaft ──
+     **Die Decke bei 60 ist der ganze Regler, und sie ist gemessen.** Ohne sie
+     erreichte die Kette von allein 76 (Haltungsbonus +19), und ein
+     Ausbildungsabend in jedem Lager legte nur noch 7 Punkte drauf — damit
+     wäre das Ausbilden eine Zeremonie ohne Wirkung gewesen.
+
+     Mit der Decke: von allein 45 → 60 über rund fünfzehn Lager, also sechs
+     Feldzüge, und dort bleibt es. **Alles darüber kostet Abende.**
+
+     Es ist dieselbe Asymmetrie, die das Spiel bei der Konstitution schon
+     kennt: `nutzen()` plateauiert, `anwenden()` geht darüber hinaus. Was von
+     selbst kommt, hat eine Grenze; was man tut, nicht. */
+  S.unterstellte.forEach(u=>{
+    if(!u.lebt || u.koennen >= 60) return;
+    u.koennen = Math.min(60, u.koennen + Math.max(1, Math.round((60 - u.koennen) / 12)));
+  });
+}
+
+/* ══════════════════ DAS VERZEICHNIS ══════════════════
+
+   **Ein Risiko ohne Mitwisser ist ein Würfel. Ein Risiko mit Mitwissern ist
+   ein Verhältnis.** Bis heute hing die eine riskante Entscheidung des Spiels
+   — die Kompaniekasse — an einer einzelnen Zahl, die niemand kennt und die
+   keine Geschichte hat.
+
+   Jede riskante Handlung legt hier einen Eintrag ab: nicht eine Zahl, die
+   steigt, sondern **eine Sache, die jemand weiß.**
+
+     schwere 1  Unregelmäßigkeit   eine Bestandsmeldung geschönt
+     schwere 2  Vergehen           einen Unterstellten gedeckt
+     schwere 3  Veruntreuung       die Kompaniekasse, ein Lieferantenvertrag
+     schwere 4  mit Blut           einen Befehl umgedeutet und Männer verloren
+
+   **`mitwisser` ist der eigentliche Entwurf.** Wer dabei war, steht drin —
+   namentlich. **Angezeigt wird die Zahl, nie der Name:** Du weißt, was du
+   getan hast und wie viele dabei waren. Nicht, wer davon redet.
+
+   Das ist die bessere Aufteilung: **Menschen sind lesbar, Vergangenheit ist es
+   nicht.** Man kann einschätzen, wem man traut, und trotzdem nicht ausrechnen,
+   was auf dem Spiel steht.
+
+   *(Hier steht der Rekorder. Die fünf Entdeckungswege, die sechs Folgestufen
+   und die Verjährung kommen mit dem Risiko-System — bis dahin sammelt das
+   Verzeichnis, ohne zu strafen.)* */
+function heimlich(id, text, schwere, indizes){
+  if(!S) return;
+  if(!S.heimlich) S.heimlich = [];
+  /* Gespeichert wird die **Kennung**, nicht der Name — siehe
+     `neuerUnterstellter()`. Der Name steht daneben, damit ein Blick in den
+     Spielstand lesbar bleibt; gerechnet wird nie mit ihm. */
+  const wer = (indizes||[]).map(i=>{
+    const u = S.unterstellte && S.unterstellte[i];
+    return u && u.lebt ? u.id : null;
+  }).filter(x => x != null);
+  /* **Davout sieht jeden Eintrag, und er sieht ihn doppelt.** Nicht erst bei
+     der Entdeckung — schon beim Anlegen: Es gibt ihn, also stimmt etwas nicht,
+     und das genügt ihm. */
+  patronMerkt('verzeichnis');
+  S.heimlich.push({id, text, schwere, mitwisser:wer,
+                   seit:(LAUF?LAUF.node:0), kapitel:kapitelNummer()});
+}
+/* Wie viele Sachen noch jemand weiß. Eine Sache ohne lebende Mitwisser ist
+   sicher — **Papier verjährt nach Jahren, Menschen sofort.**
+
+   ⚠ **Die erste Fassung suchte die Mitwisser in der *aktuellen* Liste, und das
+   war die stillste Lücke des ganzen Systems.** `UNTERSTELLTE_STUFEN` baut die
+   Liste bei **jedem** Rang von 9 bis 13 neu — also löschte jede Beförderung
+   das Verzeichnis. Gemessen: offen 1 → **0** beim Aufstieg 9 → 10. Wer
+   riskierte und danach befördert wurde, war die Sache los; **die Beförderung
+   wusch, und genau für sie hatte man riskiert.**
+
+   Jetzt zählt allein, ob die Kennung erloschen ist. Ein Mann, der nicht mehr
+   unter dir steht, lebt weiter, ist irgendwo und weiß es weiter. Nur der Tote
+   nimmt seinen Teil mit. */
+function heimlichOffen(){
+  if(!S || !S.heimlich) return [];
+  const tot = S.unterTot || [];
+  return S.heimlich.filter(h => (h.mitwisser||[]).some(m => tot.indexOf(m) < 0));
+}
+/* Wer von den Mitwissern einer Sache heute noch unter einem steht — nur die
+   können reden, weil nur sie in `heimlichPruefen()` vorkommen. Die anderen
+   wissen es trotzdem und zählen für `heimlichOffen()` mit. */
+function mitwisserHier(h){
+  return (S.unterstellte||[]).filter(u => u.lebt && (h.mitwisser||[]).indexOf(u.id) >= 0);
+}
+
+/* ── Verjährung ──
+   **Ohne sie wächst das Verzeichnis über elf Kapitel ins Unspielbare**, und
+   die späten Kapitel wären für jeden verloren, der früh etwas riskiert hat.
+
+     Schwere 1  dieses Kapitel und das nächste
+     Schwere 2  drei Kapitel
+     Schwere 3  vier Kapitel
+     Schwere 4  nie — ein Dienstvergehen mit Blut bleibt bis zum Ende
+
+   Der **Aktenvermerk** verjährt nicht. Was aufgeschrieben wurde, bleibt
+   aufgeschrieben; nur was niemand aufgeschrieben hat, kann vergessen werden. */
+const VERJAEHRUNG = {1:2, 2:3, 3:4, 4:99};
+function heimlichVerjaehren(){
+  if(!S || !S.heimlich || !S.heimlich.length) return;
+  const jetzt = kapitelNummer();
+  S.heimlich = S.heimlich.filter(h => {
+    const von = h.kapitel != null ? h.kapitel : jetzt;
+    return (jetzt - von) < (VERJAEHRUNG[h.schwere] || 2);
+  });
+}
+/* Die laufende Kapitelnummer — die Verjährung rechnet in Feldzügen, nicht in
+   Stationen. Ein Kapitel ist die Zeiteinheit, in der Akten durchgesehen
+   werden. */
+function kapitelNummer(){
+  const n = KAPITEL[LAUF ? Math.min(LAUF.node, KAPITEL.length-1) : 0];
+  for(let i=0;i<KAMPAGNEN.length;i++){
+    const st = STATIONEN[KAMPAGNEN[i].id];
+    if(st && st.indexOf(n) >= 0) return i;
+  }
+  return 0;
+}
+
+/* ══════════════════ DIE FOLGEN, GESTAFFELT ══════════════════
+
+   **Bisher gab es genau eine: ein Rang zurück, Ruf −20.** Das ist zu grob, um
+   daraus Entscheidungen zu machen — wer einmal zulangt, riskiert dasselbe wie
+   einer, der es dreimal getan hat.
+
+     1  Aktenvermerk   jetzt nichts. Die nächste Folge ist eine Stufe härter
+     2  Rüffel         Fürsprecher schlechter, Ruf −8
+     3  Übergangen     die nächste verdiente Beförderung geht an einen anderen
+     4  Versetzung     neue Einheit, alle Unterstellten weg, Zustand 40
+     5  Ein Rang zurück
+     6  Zwei Ränge zurück, dazu alle Unterstellten weg
+
+   **Entlassen wird man nie.** Die Armee gibt keinen Mann her, den sie noch
+   brauchen kann — sie stellt ihn tiefer. Das hält auch die vier Enden intakt.
+
+   **Und es gibt keinen Boden.** Wer als Colonel dreimal auffällt, dient als
+   Sergent-major weiter, und wer alles falsch macht, steht wieder in der Linie
+   — mit einem Musketenwert von vor zehn Jahren.
+
+   **Stufe 3 ist die beste Strafe, die dieses Spiel haben kann**, weil sie dem
+   Ton entspricht: Man wird nicht bestraft, man wird nicht befördert. Kein
+   Bildschirm, keine Meldung, kein Vorwurf. Nur eine Musterung, an der nichts
+   passiert. */
+function folgeStufe(schwere){
+  const vermerke = (S.vermerke|0);
+  /* Schwere 1 gibt einen Vermerk, 2 einen Rüffel, 3 „übergangen" oder
+     Versetzung, 4 einen Rang zurück — und jeder bestehende Aktenvermerk hebt
+     das um eine Stufe. */
+  let stufe = schwere === 1 ? 1 : schwere === 2 ? 2 : schwere === 3 ? 3 : 5;
+  stufe += vermerke;
+  /* Stufe 3 höchstens einmal je Laufbahn: Sie ist absichtlich stumm, und wer
+     zweimal ohne Erklärung übergangen wird, hält die Leiter für kaputt statt
+     sich selbst für erwischt. */
+  if(stufe === 3 && S.uebergangen) stufe = 4;
+  return Math.min(6, stufe);
+}
+
+function folgeAnwenden(stufe, sache){
+  const was = sache ? sache.text : 'eine Sache aus dem Verzeichnis';
+  if(stufe <= 1){
+    S.vermerke = (S.vermerke|0) + 1;
+    return {kopf:'Ein Aktenvermerk', text:`Es steht jetzt in einer Akte, und in der Akte steht auch, wer es hineingeschrieben hat. `
+      + `Sonst passiert nichts. <span class="fein">${esc(was)}</span>`, wirkung:'Aktenvermerk'};
+  }
+  if(stufe === 2){
+    S.ruf = Math.max(0, S.ruf - 8);
+    gunstGeben(beurteiler() || 'vernet', -2);
+    return {kopf:'Ein Rüffel', text:'Du stehst zwölf Minuten vor einem Schreibtisch und hörst zu. Danach ist es erledigt, '
+      + 'und es ist nicht erledigt.', wirkung:'Ruf −8 · Fürsprache −2'};
+  }
+  if(stufe === 3){
+    S.uebergangen = true;
+    /* **Kein Bildschirm.** Das ist der ganze Punkt: Der Spieler erfährt es
+       nicht, er merkt es an einer Musterung, an der nichts passiert. */
+    return null;
+  }
+  if(stufe === 4){
+    S.unterstellte = []; S.unterstellteStufe = 0; unterstellteSetzen();
+    S.einheit = 40;
+    return {kopf:'Versetzung', text:'Ein anderes Bataillon, dieselbe Armee. Niemand hier kennt dich, und niemand hier '
+      + 'weiß, warum du gekommen bist. Deine Mitwisser bleiben, wo sie sind — die Sachen von damals sind weiter dort bekannt.',
+      wirkung:'Neue Einheit · Einheitszustand 40'};
+  }
+  if(stufe === 5){
+    rangSetzen(Math.max(1, S.rang-1)); S.ruf = Math.max(0, S.ruf-20);
+    gunstGeben(beurteiler() || 'vernet', -4);
+    return {kopf:'Ein Rang zurück', text:'Was danach passiert, passiert schnell und ohne Verhandlung.',
+      wirkung:'Rang zurück · Ruf −20 · Fürsprache −4'};
+  }
+  rangSetzen(Math.max(1, S.rang-2)); S.ruf = Math.max(0, S.ruf-30);
+  S.unterstellte = []; S.unterstellteStufe = 0; unterstellteSetzen();
+  gunstGeben(beurteiler() || 'vernet', -5);
+  return {kopf:'Zwei Ränge zurück', text:'Man gibt dir deine Muskete zurück. Sie ist nicht die, die du hattest, '
+    + 'und du hast seit zehn Jahren nicht mehr geladen.', wirkung:'Zwei Ränge zurück · Ruf −30 · alle Unterstellten weg'};
+}
+
+/* ── Fünf Wege, wie es herauskommt ──
+   **Kein einziger nennt den Namen des Verräters.** Du erfährst, dass etwas
+   bekannt ist — nie von wem. Das ist die Tonregel dieses ganzen Systems. */
+function heimlichPruefen(){
+  if(!S || S.rang < 9) return '';
+  heimlichVerjaehren();
+  const offen = heimlichOffen();
+  if(!offen.length) return '';
+  const lebende = (S.unterstellte||[]).filter(x=>x.lebt);
+
+  /* 1 · Der Inspecteur findet nur, was auf Papier steht (Schwere 1–3).
+         Summe der Schweren × 6 %, minus Verwaltung/20. Ein Mitwisser mit
+         Treue ≤ 0 hebt es um 8 Punkte, weil er nicht für dich lügt. */
+  const papier = offen.filter(h => h.schwere <= 3);
+  if(papier.length){
+    const summe = papier.reduce((a,h)=>a+h.schwere, 0);
+    const kalt = lebende.some(u => u.treue <= 0 && papier.some(h => (h.mitwisser||[]).indexOf(u.id)>=0));
+    const p = summe*6 - wert('verwaltung')/20 + (kalt ? 8 : 0);
+    if(Math.random()*100 < p) return heimlichAufgeflogen(papier[0],
+      'Der Inspecteur aux revues rechnet die Listen gegeneinander und braucht dafür einen Vormittag.');
+  }
+  /* 2 · Ein Unterstellter redet: (−treue) × 5 % je Mitwisser. Ab Treue +1
+         sagt er nie etwas; bei 0 lügt er auch nicht für dich. */
+  for(const u of lebende){
+    if(u.treue >= 1) continue;
+    const seine = offen.filter(h => (h.mitwisser||[]).indexOf(u.id) >= 0);
+    if(!seine.length) continue;
+    if(Math.random()*100 < (-u.treue)*5) return heimlichAufgeflogen(seine[0],
+      'Irgendwer hat geredet. Es steht in keinem Bericht, wer.');
+  }
+  /* 3 · Einer in Bedrängnis handelt — 35 %, unabhängig von seiner Treue.
+         **Der Gefallen ist das Leck:** Du hast ihn gedeckt, das machte ihn zum
+         Mitwisser, und jetzt gibt er eine Sache her, um seine eigene
+         loszuwerden. Das Spiel sagt das nie. */
+  /* **Der in Bedrängnis ist der Gedeckte, nicht der Gemeldete.** Die erste
+     Fassung prüfte `'unter Verdacht'` — und das bekommt, wen man
+     *weitergemeldet* hat. Der hat seine vierzehn Tage Arrest hinter sich,
+     ist mit nichts mehr erpressbar und ist Mitwisser von gar nichts, weil
+     Melden keinen Eintrag anlegt. **Der Weg konnte damit nie auslösen** —
+     ausgerechnet der, um den der ganze Entwurf gebaut ist.
+     Bedrängt ist der, dessen eigene Sache noch offen liegt: `'säuft'`, nach
+     dem Gefallen, den du ihm getan hast. Genau er steht im Verzeichnis. */
+  for(const u of lebende){
+    if(u.zustand !== 'säuft' && u.zustand !== 'unter Verdacht') continue;
+    const seine = offen.filter(h => (h.mitwisser||[]).indexOf(u.id) >= 0);
+    if(!seine.length) continue;
+    if(Math.random() < 0.35) return heimlichAufgeflogen(seine[0],
+      'Jemand, der selbst in Bedrängnis war, hatte etwas anzubieten.');
+  }
+  return '';
+}
+
+function heimlichAufgeflogen(sache, wie){
+  S.heimlich = S.heimlich.filter(h => h !== sache);
+  const stufe = folgeStufe(sache.schwere);
+  const f = folgeAnwenden(stufe, sache);
+  S.log.push('Aufgeflogen: ' + sache.text + '.');
+  if(!f) return '';                      // Stufe 3 ist stumm — das ist der Punkt
+  return `<div class="wirkung"><span>${esc(f.kopf)}</span>${wie} ${f.text} <b>${esc(f.wirkung)}</b></div>`;
+}
+
+function unterstellteGuete(){
+  const u = (S && S.unterstellte || []).filter(x=>x.lebt);
+  if(!u.length) return null;
+  return Math.round(u.reduce((s,x)=>s+x.koennen,0) / u.length);
+}
+
+/* ── Die eine Stelle, an der der Rang gesetzt wird ──
+   **Jeder Rangwechsel geht hier durch**, damit `hoechsterRang` nicht leckt.
+   Dieselbe Regel wie bei `atemKlemmen()`: Ein Nebenwert, der an fünf Stellen
+   von Hand mitgezogen werden muss, wird an der sechsten vergessen.
+
+   Er sinkt nie. Der Inspecteur nimmt einen Rang, aber niemand vergisst
+   dadurch, wen er kennengelernt hat. */
+function rangSetzen(r){
+  if(!S) return;
+  S.rang = r;
+  if((S.hoechsterRang|0) < r) S.hoechsterRang = r;
+  /* Mit dem Rang kommen die, die unter einem stehen. Ab Rang 9 haben sie
+     Namen; darunter sind es Zahlen, und das bleibt so. */
+  unterstellteSetzen();
+}
+
+/* ── Der Fourrier zieht die Muskete ein ──
+   **Er tat es bisher nur beim gekauften Patent.** Ein regulär beförderter
+   Sous-Lieutenant trug weiter „Charleville Modell 1777" und ein
+   „Ausgabebajonett" in der Seitenleiste, während der Bescheid daneben
+   erzählte, die Muskete sei eingezogen — und `nutzen('bajonett')` greift ab
+   Rang 7 ohnehin nicht mehr. Der Bildschirm sagte das eine, der Zustand das
+   andere.
+
+   Der Degen ist **selbst bezahlt**, und das ist keine Floskel: Ein Offizier
+   stellte sich Uniform, Degen und Pferd auf eigene Rechnung. Deshalb kostet
+   der Aufstieg hier zwei Francs Stempelgebühr wie beim Patent — mehr nicht,
+   denn wer regulär aufsteigt, hat die Ausrüstung über Jahre zusammen.
+
+   **Wer schon einen guten Säbel gekauft hat, behält ihn.** Ein
+   geschliffenes Bajonett wird zum Degen; ein Stück, das besser ist als die
+   Ausgabe, wird nicht gegen die Ausgabe getauscht. */
+function offizierAusruesten(){
+  if(!S || S.rang < 7) return;
+  if(S.ausr.muskete && S.ausr.muskete.verschleiss > 0){
+    S.ausr.muskete = {name:'Keine Muskete mehr', zustand:0, verschleiss:0};
+    S.geld = Math.max(0, S.geld - 2);
+  }
+  const sw = S.ausr.seitenwaffe;
+  if(sw && !/Degen/.test(sw.name)){
+    S.ausr.seitenwaffe = {name:'Degen, selbst bezahlt',
+      zustand: Math.max(85, sw.zustand|0), verschleiss:6};
+  }
+}
+
 function personName(id){
   const d = LEUTE.find(l => l.id === id), p = person(id);
   if(!d) return '';
@@ -438,7 +981,9 @@ function wert(k){
   else S.wunden.forEach(w=>{ v -= Math.round((w.abzug||0)/3); });
   v -= Math.floor(S.belastung/12);
   if(k==='muskete' && S.ausr.muskete.zustand < 35) v -= 15;
-  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) v -= 18;
+  /* Maßstiefel verschieben die Schwelle von 25 auf 15 — sie gehen kaputt wie
+     alles andere, nur merkt man es viel später. */
+  if(k==='konstitution' && S.ausr.schuhe.zustand < (gekauft('stiefel') ? 15 : 25)) v -= 18;
   return Math.max(1, Math.round(v));
 }
 
@@ -455,7 +1000,7 @@ function abzugGrund(k){
   const bel = Math.floor(S.belastung/12);
   if(bel) g.push(`Belastung −${bel}`);
   if(k==='muskete' && S.ausr.muskete.zustand < 35) g.push('verrostete Muskete −15');
-  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) g.push('zerrissene Schuhe −18');
+  if(k==='konstitution' && S.ausr.schuhe.zustand < (gekauft('stiefel') ? 15 : 25)) g.push('zerrissene Schuhe −18');
   return g;
 }
 
@@ -645,6 +1190,11 @@ function nutzen(k, intens, fechtboden){
      die einzige Quelle, und sie kostet einen Abend, den man nicht auf Listen,
      Kasse oder Drill verwendet. Sie umgeht diese Sperre über `fechten:true`. */
   if(k==='bajonett' && S.rang>=7 && !fechtboden) return;
+  /* „Schreibzeug." Der billigste strategische Kauf des Ladens: Bildung ist
+     die Schwelle zum Fourrier (35) und zum Sous-Lieutenant (50), und sie
+     wächst nur im Lager. Eine Intensität mehr verkürzt den Weg dorthin um
+     etwa ein Kapitel — sie kauft keine Bildung, sondern Zeit. */
+  if(k==='bildung' && gekauft('schreibzeug')) intens += 1;
   const zuwachs = (1.7 * intens * (100-ist)/100) * (0.5 + Math.random());
   if(Math.random() < 0.75){
     const neu = Math.min(100, ist + Math.max(1, Math.round(zuwachs)));
@@ -800,7 +1350,12 @@ function frostWirken(n){
      Gewohnte im Januar bei Stufe 4 eine zehrende Wunde schuldig. Es ist die
      Erfahrung, die daneben steht: wo man liegt, wie man sich einwickelt,
      wann man aufsteht und geht, statt liegen zu bleiben. */
-  const stufe = Math.max(0, ((n && n.frost) | 0) - (zaeh('zaeh_schlaf') ? 1 : 0));
+  /* Die Winterausstattung mildert ebenfalls eine Stufe. **Beides zusammen
+     mildert nicht zwei** — sonst wäre Russland mit zwei Käufen abgeschaltet,
+     und Frost 4 an der Beresina ist die eigene Regel von Kapitel 6 und 8.
+     Wer beides hat, hat die Sicherheit, nicht die doppelte Wirkung. */
+  const milder = (zaeh('zaeh_schlaf') || gekauft('winter')) ? 1 : 0;
+  const stufe = Math.max(0, ((n && n.frost) | 0) - milder);
   const hat = S.wunden.some(w => w.name === FROST_WUNDE);
   if(!stufe){
     if(!hat) return '';
@@ -835,7 +1390,50 @@ function wundeGeben(name, abzug, zehrt){
    Muskete instand setzt, und keinen Marketender. **Was kaputt ist, bleibt
    kaputt** — und der Verschleiß greift über `wert()` direkt in die Proben:
    Konstitution verliert 18 Punkte, sobald die Schuhe unter Zustand 25 fallen. */
+/* ══════════════════ DER BURSCHE ══════════════════
+
+   **Ab Lieutenant kümmert sich jemand anders um deine Sachen.** Jeder Offizier
+   hatte einen *domestique* — einen Mann, der die Stiefel putzt, den Rock
+   ausbessert und dafür sorgt, dass am Morgen alles da ist, wo es sein soll.
+   Im Spiel heißt das: **Der Verschleiß hört auf, und der Knopf „Ausrüstung
+   durchsehen und flicken" verschwindet.**
+
+   Es ist dieselbe Idee wie die verschwundene Atemleiste ab Rang 10: **Größe
+   zeigt sich daran, was aufhört, dich zu betreffen.** Ein Zugewinn, der als
+   Wegfall daherkommt — und es steht nirgends, dass es aufgehört hat.
+
+   **Der Mantel gehört dazu.** Ein Offizier hat einen; wer bis dahin keinen
+   gekauft hat, bekommt einen gestellt. Das nimmt dem Frost seinen Zahn — aber
+   nur dort, wo es etwas zu stellen gibt.
+
+   **Und genau dort hört es auf: `ersatz:false`.** In Russland gibt es nichts
+   zu flicken und nichts zu ersetzen, auch nicht für einen General. Der
+   Bursche steht mit denselben leeren Händen da wie alle anderen, der doppelte
+   Verschleiß greift wieder, und ein Mantel, der dort kaputtgeht, bleibt
+   kaputt. **Die eigene Regel des Kapitels schlägt den Rang** — sonst wäre
+   Russland ab Rang 8 abgeschaltet. */
+function ohneErsatz(){
+  const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
+  return !!(k && k.ersatz === false);
+}
+function burscheHaelt(){ return !!S && S.rang >= 8 && !ohneErsatz(); }
+/* Je Station: Was abgenutzt ist, ist am Morgen wieder brauchbar — nicht neu,
+   aber brauchbar. Die 80 ist bewusst kein Höchstwert: Ein gekauftes Stück
+   bleibt besser als ein geflicktes. */
+function burscheSorgt(){
+  if(!burscheHaelt()) return;
+  for(const k in S.ausr){
+    const a = S.ausr[k];
+    if(a.verschleiss > 0) a.zustand = Math.max(a.zustand, 80);
+  }
+  const m = S.ausr.mantel;
+  if(!m || m.zustand < 20) S.ausr.mantel = {name:'Offiziersmantel', zustand:85, verschleiss:6};
+}
+
 function verschleiss(faktor){
+  /* Der Bursche hält, was abgenutzt wird — außer dort, wo es nichts zu halten
+     gibt. */
+  if(burscheHaelt()) return;
   const k = (typeof kampagneVon==='function') ? kampagneVon(KAPITEL[LAUF?LAUF.node:0]) : null;
   if(k && k.verschleiss) faktor *= k.verschleiss;
   for(const k2 in S.ausr){

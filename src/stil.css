@@ -185,6 +185,32 @@
   td.d{color:var(--dim)}
   tr.hi td{background:rgba(120,100,70,.14)}
   /* Grün heißt: hier ist etwas dazugekommen */
+  /* Gesperrtes steht da, aber es steht zurück: keine Farbe, keine Wirkung,
+     nur der Satz, unter welcher Bedingung es käme. Der Laden ist damit die
+     Landkarte dessen, was das Spiel noch hat. */
+  /* ── Der Schreibtisch liegt auf dem Lager ──
+     **Ein Blatt, das auf dem Tisch liegt, verdeckt den Tisch nicht.** Das
+     Lager bleibt sichtbar und leicht zurückgenommen; das Blatt darüber hat
+     einen eigenen Schatten, damit man sieht, dass es obenauf liegt und nicht
+     eingeklebt ist. Der Rücken fängt jeden Klick ab — er ist kein Dekor,
+     sondern die Sperre.
+
+     `overscroll-behavior:contain` verhindert, dass das Scrollen im Fenster
+     die Seite dahinter mitzieht; auf einem kurzen Blatt fällt es nicht auf,
+     auf einem langen sofort. */
+  .ueberlage{position:fixed;inset:0;z-index:60;display:flex;
+    align-items:flex-start;justify-content:center;padding:38px 16px;
+    overflow:auto;overscroll-behavior:contain;
+    background:rgba(24,17,10,.62);backdrop-filter:blur(1.5px)}
+  .ueberlage .fenster{width:min(680px,100%);animation:blattauf .16s ease-out}
+  /* Der Schatten ist warm, nicht schwarz: Papier auf Holz wirft keinen
+     grauen Schatten, sondern einen bräunlichen. */
+  .ueberlage .card{box-shadow:0 18px 44px rgba(20,12,4,.55),0 2px 0 rgba(0,0,0,.2)}
+  @keyframes blattauf{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .ueberlage .fenster{animation:none} }
+
+  tr.gesperrt td{opacity:.42}
+  tr.gesperrt td.k{color:var(--dim);font-style:italic}
   tr.gewaehlt td{background:rgba(62,90,44,.13)}
   tr.gewaehlt td.k{color:var(--green)}
   button.plain.gewaehlt{border-color:var(--green);color:#b6c48d}
@@ -221,6 +247,210 @@
   .herk .hn{color:var(--brass);font-size:14.5px}
   .herk .hd{color:var(--dim);font-size:13px;margin-top:3px;
     font-family:ui-monospace,monospace;letter-spacing:.02em}
+
+  /* ══════════════════ DIE FEUILLE D'ENRÔLEMENT ══════════════════
+
+     **Ein Bogen statt zwei Bildschirme** (Entwurfspaket 12a). Aushebung und
+     Vorrat liegen auf demselben Blatt, weil der zweite Schritt genau der ist,
+     in dem man die Werte des ersten bewertet.
+
+     Kontraste, alle gegen das Kanzleipapier #f2ebda gerechnet:
+
+       Tinte     #1d1814   13,9 : 1
+       Fließtext #3a3128    9,6 : 1
+       blass     #5f5240    5,8 : 1
+       Bronze    #6b4f22    5,4 : 1
+       Gold      #8a6410    4,6 : 1
+       Siegel    #8f2a1e    6,1 : 1
+       Jäger     #3e5a2c    5,5 : 1
+
+     Auf dem Bronzebalken #6b4f22: Elfenbein #f6ecc8 7,0 : 1, Rot #e8a9a0 4,7 : 1. */
+  .enrol{ background:var(--papier); color:var(--tinte); border:1px solid #a89a7e;
+    position:relative; box-shadow:0 8px 26px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.5) inset;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 30%), var(--wolken);
+    background-blend-mode:normal, multiply; }
+  /* Die Doppellinie, wie auf jedem Vordruck des Spiels. */
+  .enrol::before{ content:''; position:absolute; inset:6px; pointer-events:none;
+    border:1px solid rgba(90,76,58,.55);
+    box-shadow:inset 0 0 0 3px var(--papier), inset 0 0 0 4px rgba(90,76,58,.3) }
+  .enrolinner{ position:relative; padding:30px 32px 32px }
+
+  .enrolkopf{ text-align:center; border-bottom:3px double rgba(90,76,58,.55); padding-bottom:13px }
+  .enrolkopf .rf{ font-family:var(--didone); font-variant:small-caps; letter-spacing:.3em;
+    font-size:13.5px; color:#6b4f22 }
+  .enroltitel{ font-family:var(--didone); font-variant:small-caps; letter-spacing:.14em;
+    font-size:34px; color:var(--tinte); line-height:1.06; margin-top:4px }
+  .enrolwo{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+    letter-spacing:.2em; text-transform:uppercase; color:#5f5240; margin-top:7px }
+
+  .enrolgrid{ display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:30px;
+    margin-top:24px; align-items:start }
+
+  .namezeile{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:14px; align-items:center }
+  .namezeile .nlabel{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px;
+    letter-spacing:.14em; text-transform:uppercase; color:#8a6410 }
+  /* **Der Name wird geschrieben, nicht getippt.** Handschrift ist die einzige
+     Stelle auf dem Blatt, an der ein Mensch und keine Kanzlei spricht. */
+  .enrol input[type=text]{ background:none; border:none; border-bottom:1px solid rgba(138,100,16,.5);
+    font-family:'Brush Script MT','Segoe Script','Bradley Hand',cursive; font-size:26px;
+    color:#20304a; padding:0 0 1px; width:100% }
+  .enrol input[type=text]:focus{ outline:none; border-bottom-color:#8a6410 }
+
+  .enrolabschnitt{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    border-bottom:1px solid rgba(90,76,58,.45); padding-bottom:7px; margin:26px 0 6px }
+  .enrolabschnitt span{ font-family:var(--didone); font-variant:small-caps; letter-spacing:.22em;
+    font-size:15px; color:#6b4f22 }
+  .enrolabschnitt i{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10px;
+    letter-spacing:.12em; text-transform:uppercase; color:#5f5240; font-style:normal }
+  .enrolsatz{ font-size:14px; line-height:1.62; color:#3a3128; margin:11px 0 0 }
+  .enrolsatz b{ color:var(--tinte) }
+
+  /* Der Befund: Name, Balken, Rechnung. Kein −/+, keine Punktanzeige. */
+  .befund{ display:grid; grid-template-columns:158px minmax(0,1fr) 108px; gap:12px;
+    align-items:center; padding:6px 0; border-bottom:1px solid rgba(90,76,58,.14) }
+  .bfname{ font-size:14.5px; color:#3a3128 }
+  .bfname .fest{ font-style:normal; font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:9.5px; color:#6d5f4b; letter-spacing:.1em; text-transform:uppercase; margin-left:6px }
+  .bfbalken{ height:6px; background:rgba(90,76,58,.2); border:1px solid #b3a382; display:block }
+  .bfbalken i{ display:block; height:100%; background:#8a6410 }
+  .bfwert{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px;
+    color:var(--tinte); text-align:right; white-space:nowrap }
+  .bfwert .bo{ font-style:normal; color:#6b4f22 }
+  .bfwert .gl{ font-style:normal; color:#6d5f4b }
+
+  .enrol .herkwahl{ display:grid; grid-template-columns:1fr 1fr; gap:8px; flex-direction:unset }
+  .enrol .herk{ background:none; border:1px solid rgba(90,76,58,.3); padding:10px 13px }
+  .enrol .herk:hover{ background:rgba(120,100,70,.09); border-color:rgba(90,76,58,.55) }
+  .enrol .herk.on{ border-color:#6b4f22; background:rgba(120,100,70,.16);
+    box-shadow:inset 0 0 0 1px rgba(138,100,16,.3) }
+  .enrol .herk .hn{ color:var(--tinte); font-size:15.5px; font-weight:600 }
+  .enrol .herk.on .hn{ color:var(--tinte) }
+  .enrol .herk .hd{ color:#6d5f4b; font-size:10.5px; line-height:1.5 }
+  .enrol .herk.on .hd{ color:#6b4f22 }
+
+  /* **Der Vorrat ist der einzige Ort, an dem gewählt wird — also der einzige,
+     der laut sein darf.** */
+  .vorratkasten{ margin-top:34px; border:1px solid rgba(138,100,16,.55);
+    background:rgba(200,144,31,.05); box-shadow:inset 0 1px 0 rgba(255,255,255,.5) }
+  .vorratbalken{ background:linear-gradient(180deg,#7a5a18,#6b4f22 62%,#543d1a);
+    border-bottom:1px solid #c8901f; padding:10px 16px;
+    display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap }
+  .vorratbalken h3{ font-family:var(--didone); font-variant:small-caps; letter-spacing:.26em;
+    font-size:20px; color:#f6ecc8; margin:0; font-weight:normal }
+  .vorratrechts{ display:flex; align-items:baseline; gap:16px }
+  .vorratklein{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10px;
+    letter-spacing:.14em; text-transform:uppercase; color:#d8c79f; text-align:right; line-height:1.7 }
+  .vorratklein i{ font-style:normal }
+  .vorratstrich{ width:1px; height:34px; background:rgba(246,236,200,.3); display:block }
+  .vorratzahl{ text-align:right }
+  .vorratzahl b{ display:block; font-family:var(--didone); font-size:34px; line-height:1;
+    color:#f6ecc8; font-weight:normal; font-variant-numeric:oldstyle-nums }
+  .vorratzahl b.leer{ color:#e8a9a0 }
+  .vorratzahl span{ display:block; font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#d8c79f; margin-top:3px }
+  .vorratbody{ padding:14px 16px 16px }
+  .vorratbody > p{ font-size:14px; line-height:1.62; color:#3a3128; margin:0 0 4px }
+  .vabschnitt{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:9.5px;
+    letter-spacing:.16em; text-transform:uppercase; color:#5f5240; margin:18px 0 2px }
+  .vabschnitt i{ font-style:normal; color:#6d5f4b; letter-spacing:.1em }
+
+  /* Eine Kaufzeile ist ein Knopf, kein Tabellenzeile mit Knopf darin. */
+  .kaufzeile{ display:grid; grid-template-columns:minmax(0,1fr) 64px 74px; gap:10px;
+    align-items:baseline; width:100%; text-align:left; font-family:inherit; cursor:pointer;
+    padding:8px 4px; border:none; border-bottom:1px solid rgba(90,76,58,.14); background:none }
+  .kaufzeile:hover:not(:disabled){ background:rgba(120,100,70,.08) }
+  .kaufzeile.gewaehlt{ background:rgba(120,100,70,.1) }
+  .kaufzeile.teuer, .kaufzeile.gesperrt{ opacity:.45; cursor:not-allowed }
+  .kaufzeile .kl{ display:block; font-size:14.5px; color:#3a3128; font-weight:400 }
+  .kaufzeile.gewaehlt .kl{ color:var(--tinte); font-weight:600 }
+  .kaufzeile .kb{ display:block; font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:10.5px; color:#6d5f4b; margin-top:2px; line-height:1.45 }
+  .kaufzeile .kabzug{ display:block; font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:10.5px; color:#8f2a1e; margin-top:3px }
+  .kaufzeile .kvp{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;
+    color:var(--tinte); text-align:right }
+  .kaufzeile.gewaehlt .kvp{ color:#6b4f22 }
+  .kaufzeile .kwahl{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:9.5px;
+    letter-spacing:.1em; text-transform:uppercase; color:#6d5f4b; text-align:right }
+  .kaufzeile.gewaehlt .kwahl{ color:#3e5a2c }
+  .kaufzeile.teuer .kwahl, .kaufzeile.gesperrt .kwahl{ color:#8f2a1e }
+
+  .patentkasten{ margin-top:20px; border:1px solid rgba(138,100,16,.5);
+    background:rgba(200,144,31,.06); padding:13px 15px }
+  .patentkopf{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    border-bottom:1px solid rgba(138,100,16,.35); padding-bottom:7px }
+  .patentkopf span:first-child{ font-family:var(--didone); font-variant:small-caps;
+    letter-spacing:.2em; font-size:14px; color:#8a6410 }
+  .patentkopf span:last-child{ font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#5f5240 }
+  .patentkasten > p{ font-size:14px; line-height:1.6; color:#3a3128; margin:9px 0 10px }
+
+  /* Die rechte Spalte rechnet mit — sie ist der Grund, warum beide Schritte
+     auf ein Blatt gehören. */
+  /* **Sie bleibt stehen, während man scrollt.** Der ganze Grund, beide
+     Schritte auf ein Blatt zu legen, ist, dass die rechte Spalte mitrechnet —
+     eine Spalte, die beim dritten Kauf aus dem Bild gescrollt ist, rechnet
+     für niemanden mehr mit. */
+  .enrolrechts{ position:sticky; top:14px }
+  .einrueck{ border:1px solid rgba(90,76,58,.45); background:rgba(120,100,70,.07);
+    max-height:calc(100vh - 150px); overflow-y:auto }
+  .ekopf{ padding:8px 13px; border-bottom:1px solid rgba(90,76,58,.35);
+    font-family:var(--didone); font-variant:small-caps; letter-spacing:.2em;
+    font-size:12.5px; color:#6b4f22 }
+  .ebody{ padding:14px 15px 16px }
+  .ename{ font-family:'Brush Script MT','Segoe Script','Bradley Hand',cursive;
+    font-size:24px; color:#20304a; line-height:1.15; min-height:28px }
+  .erang{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10px;
+    letter-spacing:.14em; text-transform:uppercase; color:#6b4f22; margin-top:3px }
+  .eleben{ display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    margin-top:14px; padding-bottom:6px; border-bottom:1px solid rgba(90,76,58,.3);
+    font-size:14px; color:#3a3128 }
+  .eleben b{ font-family:var(--didone); font-size:24px; color:var(--tinte);
+    line-height:1; font-weight:normal }
+  .efein{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10px; line-height:1.6;
+    color:#5f5240; margin:6px 0 0 }
+  .efein.mitte{ text-align:center }
+  .eabschnitt{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:9px;
+    letter-spacing:.16em; text-transform:uppercase; color:#5f5240; margin:16px 0 4px }
+  .ezeile{ display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    padding:3.5px 0; border-bottom:1px solid rgba(90,76,58,.14); font-size:13.5px; color:#3a3128 }
+  .ezeile b{ font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:400; color:var(--tinte) }
+  .ezeile.hervor{ color:var(--tinte); font-weight:600 }
+  .ezeile.hervor b{ font-weight:600 }
+  .ezeile.ja{ color:#3e5a2c; border-bottom:none } .ezeile.ja b{ color:#3e5a2c }
+  .ezeile.nein{ color:#6d5f4b; border-bottom:none } .ezeile.nein b{ color:#6d5f4b }
+  .einruecken{ width:100%; margin-top:14px; background:#e0d4b4; border:1px solid #a89a7e;
+    color:var(--tinte); font-family:var(--didone); font-variant:small-caps;
+    letter-spacing:.2em; font-size:17px; padding:12px 16px }
+  .einruecken:hover:not(:disabled){ background:#e8dcbd; border-color:#6b4f22; color:#120f0c }
+  .einruecken:disabled{ opacity:.4; cursor:not-allowed }
+  .enebentasten{ display:flex; gap:8px; margin-top:10px }
+  .enebentasten button{ flex:1 }
+  .enrol button.plain{ background:none; border:1px solid rgba(90,76,58,.45); color:#4e4335 }
+  .enrol button.plain:hover:not(:disabled){ background:rgba(120,100,70,.12); border-color:#6b4f22;
+    color:var(--tinte) }
+  .enrol .punktzeile{ border-bottom-color:rgba(90,76,58,.14); color:#3a3128 }
+  .enrol .punktzeile.gewaehlt{ background:rgba(120,100,70,.1); box-shadow:inset 2px 0 0 #6b4f22 }
+  .enrol .punktwert{ color:var(--tinte) }
+  .enrol .punktwert b{ color:var(--tinte) } .enrol .punktwert i{ color:#6b4f22 }
+  .enrol .punktvp{ color:#6b4f22 }
+  .enrol .punktvp.aus{ color:#6d5f4b }
+  .enrol .punktvp .naechst{ font-style:normal; font-size:10.5px }
+  .enrol .punktvp .voll{ font-style:normal; font-size:10.5px; color:#8f2a1e }
+  .enrol .pmbtn{ background:none; border:1px solid rgba(90,76,58,.45); color:#4e4335;
+    width:24px; height:24px }
+  .enrol .pmbtn:hover:not(:disabled){ background:rgba(120,100,70,.14); border-color:#6b4f22 }
+
+  /* Unter 900 Pixeln fällt die rechte Spalte nach unten. Sie hört damit auf,
+     mitzurechnen, während man scrollt — das ist der richtige Verlust: Lesbar
+     bleibt sie, und ein Formular in zwei Spalten auf einem Telefon ist keines. */
+  @media (max-width:900px){
+    .enrolgrid{ grid-template-columns:1fr }
+    .enrol .herkwahl{ grid-template-columns:1fr }
+    .enrolinner{ padding:22px 18px 24px }
+    .enroltitel{ font-size:26px }
+    .befund{ grid-template-columns:120px minmax(0,1fr) 92px }
+  }
 
   /* Ausbildung vorwegnehmen — Veteranenpunkte in Werte umsetzen */
   .punktzeile{display:grid;grid-template-columns:1fr 96px 62px 68px;gap:10px;align-items:center;
@@ -340,6 +570,11 @@
     font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}
   .wirkung span{display:block;font-size:10.5px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--brass);margin-bottom:3px}
+  /* Der Erfüllungsstand eines Auftrags — dieselben zwei Bedeutungen wie
+     überall: Grün ist Zugewinn, Rot ist Kosten. Bis hierher gab es `ok` und
+     `warn` nur in der Seitenleiste; ein Auftrag, dessen Stand man nicht
+     ablesen kann, ist eine Lotterie. */
+  .wirkung .ok{color:var(--green)} .wirkung .warn{color:var(--blood)}
 
   .log{max-height:200px;overflow-y:auto;font-size:14px;color:var(--dim)}
   .log div{padding:3px 0;border-bottom:1px solid #221f1a}
@@ -436,6 +671,61 @@
 .papier .namebtn{ color:#6b4f22 }
 .papier .namebtn:hover{ color:#3d2c12 }
 .papier s{ color:#7a6a55 }
+
+/* ══════════════════ DIE URKUNDE ══════════════════
+
+   **Trauerblatt und Congé absolu — die zwei Papiere, mit denen ein Mann
+   aufhört.** Sie liegen als eigener, eingerückter Block auf dem
+   Kanzleipapier: ein Vordruck im Vordruck, so wie ein ausgefülltes Formular
+   auf einem Schreibtisch liegt.
+
+   **Der Ton steckt in der gepunkteten Linie.** Ein Feldname links, eine Linie
+   nach rechts, darauf die Eintragung — und wo nichts eingetragen ist, bleibt
+   die Linie sichtbar leer. Genau das trägt die Aussage des Trauerblatts:
+   Die Zeile „Erben" steht auf jedem Vordruck und wird bei einem Fusilier
+   fast nie ausgefüllt. Deshalb darf `.feld b` nie ausgeblendet werden, wenn
+   es leer ist. */
+.urkunde{ margin:18px 0 4px; padding:16px 18px 14px;
+  border:1px solid rgba(90,76,58,.45); background:rgba(255,253,246,.42);
+  box-shadow:0 1px 6px rgba(90,76,58,.13) inset; }
+.urkopf{ display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  flex-wrap:wrap; border-bottom:1px solid rgba(90,76,58,.35); padding-bottom:9px; margin-bottom:12px; }
+.urkopf span{ font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:#6b4f22 }
+.urkopf b{ font-family:var(--didone); font-size:19px; letter-spacing:.05em;
+  font-weight:normal; font-variant:small-caps; color:#1d1814 }
+
+/* Zwei Spalten, solange Platz ist. Ein Vordruck, der auf einem Telefon zu
+   einer einzigen langen Spalte wird, bleibt lesbar — er hört nur auf,
+   nach Formular auszusehen, und das ist der richtige Verlust. */
+.felder{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:2px 26px }
+.felder.eng{ gap:0 26px }
+.feld{ display:flex; align-items:baseline; gap:7px; padding:3px 0; min-width:0 }
+.feld > span{ flex:none; font-size:11px; letter-spacing:.06em; color:#6a5a44 }
+/* Die Linie: Sie gehört dem Feld, nicht der Eintragung — sonst verschwände
+   sie genau dort, wo sie etwas sagt. */
+.feld > b{ flex:1 1 auto; min-width:0; font-weight:normal; color:var(--tinte);
+  font-size:13px; border-bottom:1px dotted rgba(90,76,58,.5);
+  overflow-wrap:anywhere; padding-bottom:1px }
+
+.urabschnitt{ margin:15px 0 7px; font-size:10.5px; letter-spacing:.18em;
+  text-transform:uppercase; color:#6b4f22; border-bottom:1px solid rgba(90,76,58,.3);
+  padding-bottom:4px }
+.urnote{ margin-top:13px; font-size:12.5px; color:var(--tinte2); line-height:1.55 }
+.urfuss{ margin-top:16px; display:flex; align-items:flex-end; justify-content:space-between;
+  gap:14px; flex-wrap:wrap }
+.urfuss span{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#6a5a44;
+  border-top:1px solid rgba(90,76,58,.4); padding-top:5px; min-width:180px }
+/* Die Unterschrift ist eine Krakelei, keine Schrift: schräg, gedrängt, und
+   man liest sie nicht wirklich. So sah jede Unterschrift auf jedem dieser
+   Blätter aus. */
+.krakel{ font-family:var(--didone); font-size:21px; font-style:italic;
+  color:#3a3128; opacity:.72; transform:rotate(-3deg); letter-spacing:-.02em;
+  margin-right:58px }
+
+@media (max-width:620px){
+  .felder, .felder.eng{ grid-template-columns:1fr }
+  .krakel{ margin-right:0 }
+}
 
 /* Der Kopf eines Vordrucks: Republik/Kaiserreich, Einheit, Datum. */
 .vordruck{ text-align:center; font-family:var(--didone); color:#4a3f31;

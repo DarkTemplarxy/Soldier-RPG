@@ -5,6 +5,215 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Die Protektion eines Marschalls, und Rang 14 ist erreichbar
+
+**Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine Zugehörigkeit.** Grandmaison war Patron für die Ränge 10 bis 13 — ein Mann, vier Stufen, zwei Gunstquellen. **Gemessen: vierzig von vierzig Maximalveteranen blieben Colonel**, Median −2 bei geforderten +5, während Ruf zu 93 % und Bulletins zu 80 % erfüllt waren. Nicht die Schwelle war zu hoch, die Mechanik war zu dünn.
+
+**Sobald man Colonel ist, wählt man auf dem Schreibtisch, wessen Mann man ist.** Einmal je Laufbahn, nicht zurückzunehmen. Von da an beurteilt der Marschall die Ränge 12, 13 und 14.
+
+| | verlangt | verachtet |
+|---|---|---|
+| **Davout** | erfüllte stehende Aufträge · Einheitszustand ≥ 70 | **jeden Eintrag im Verzeichnis, doppelt** |
+| **Ney** | Bulletins, also vor der Linie gestanden | ein Gefecht ohne Nennung |
+| **Masséna** | Geld — Kasse, Vertrag, Requisition | Ehrlichkeit |
+
+**Der Kern der Wahl ist nicht, wie viel Fürsprache man bekommt, sondern wofür.** Ein Lauf, der unter Davout mustergültig ist, steht unter Ney bei null.
+
+**Dazu ihr eigener Stand beim Kaiser**, sichtbar in der Seitenleiste, in seiner Entwicklung nicht angekündigt: Davout bleibt bei 4–5, Ney fällt nach Russland auf 3 und 2, Masséna von 4 auf **0**. Wer sich 1807 für Masséna entscheidet, wählt den, der jetzt am meisten gibt und am Ende nichts mehr wert ist.
+
+### Rang 14 hängt an einem Mann, nicht an einem Szenario
+
+`generalskampagne:true` stand dort und die gibt es nicht — der Rang war gebaut und **per Regel unerreichbar**, und die ganze VP-Ökonomie war gegen eine Decke geeicht, die niemand je gesehen hat. Jetzt: Gunst 5 · 5 Bulletins · `patronMacht:4`.
+
+Gemessen mit sonst perfektem Mann: **Davout trägt bis Waterloo, Ney bis 1813, Masséna nie.** Das ist die letzte Folge der Wahl von 1807 und die einzige Schranke des Spiels, an der man nichts mehr tun kann.
+
+**⚠ `'patron'` in der LEITER ist eine Rolle, kein Name — und das musste an zwölf Stellen aufgelöst werden.** Zuerst tat es nur `beurteiler()`; die Musterung prüfte daraufhin `gunst('patron')`, also immer null, also immer `fehltGunst`. Dieselbe Fehlerfamilie wie fünfmal zuvor.
+
+`LAUF_FASSUNG` 15 → **16** mit Wandler: Die drei kommen in die Personenkartei, `S.patron` bleibt leer, der Schreibtisch legt die Wahl beim nächsten Lager vor.
+
+**Der Bot wählt nach Gemüt:** vorsichtig Davout, mutig Ney. Masséna wählt keiner — seine Währung ist Unterschlagung, und ein Bot, der unterschlägt, misst das Strafsystem statt des Spiels.
+
+**Balance-Wirkung: ungemessen.** Die Decke bei Rang 11 sollte fallen; um wie viel, sagt erst die Neumessung.
+
+---
+
+## 2026-07-30 — Das Lager ist der Abend, der Schreibtisch ist die Arbeit
+
+**Rang 9 hatte zwölf Knöpfe auf drei Abende, drei davon die Kompaniekasse in drei Varianten.** Der Schreibtisch war seit Sitzung 5 gebaut, die Verwaltung lag trotzdem weiter daneben im Lager — und verdrängte damit genau das, wovor der Kommentar über `abendeFuer()` warnt.
+
+| Rang | vorher | jetzt |
+|---|---|---|
+| 5 · Sergent | 11 | **9** |
+| 7 · Sous-Lieutenant | 11 | **7** |
+| 8 · Lieutenant | 12 | **6** |
+| **9 · Capitaine** | **12** | **5** + drei Vorgänge |
+| 11 · Colonel | 8 | **4** + drei Vorgänge |
+
+### Drei Ebenen statt drei Ziehungen
+
+Kasse, Lieferantenvertrag und Adjutantenauftrag sind auf den Schreibtisch gezogen, und die Vorgänge haben eine Struktur bekommen — je einer aus jeder Ebene, in dieser Reihenfolge, **mit der Ebene über dem Blatt:**
+
+| Ebene | Reicht bis | Vorgänge |
+|---|---|---|
+| **Was heute entschieden wird** | sofort | Zustandsfrage · Bestandsmeldung · Arbeitskolonne · Zuteilung |
+| **Was den Feldzug trägt** | Kapitelende, zahlt auf den stehenden Auftrag ein | **Kasse / Vertrag** · Ausbildungsplan · Quartiere |
+| **Was bleibt** | darüber hinaus | Personalvorschlag · **Adjutantenauftrag** · Beurteilung · der Mitgezogene |
+
+Drei neue Vorgänge dafür: **Ausbildungsplan** (die Unteroffiziere selbst unterrichten oder die Mannschaft exerzieren lassen), **Quartierverteilung** (eng legen, nach Vorschrift, oder requirieren) und **Beurteilung für die Personalakte** — der einzige Vorgang, bei dem man über einen anderen schreibt, und der schärfste: Dort wählt man nicht zwischen zweien, sondern schreibt einen Satz, der jemandem folgt.
+
+**Die Kasse ist damit unausweichlich.** Vorher konnte man den Knopf einfach nicht drücken; jetzt liegt sie jedes Quartal auf dem Tisch. Ehrlich ausgeben ist eine Antwort, kein Nichtstun.
+
+**Der Adjutantenauftrag ging bisher hart an `'vernet'`** — dieselbe Fehlerfamilie wie viermal zuvor. Er geht jetzt an `beurteiler()`.
+
+### Der Bursche ab Lieutenant
+
+`instand` und `schuhe` fallen ab Rang 8 weg, der Verschleiß greift nicht mehr, und was abgenutzt ist, ist am Morgen wieder brauchbar (Zustand mindestens 80). Wer keinen Mantel hat, bekommt einen gestellt. Dieselbe Idee wie die verschwundene Atemleiste: **Größe zeigt sich daran, was aufhört, dich zu betreffen.**
+
+**Ausgenommen ist `ersatz:false`** — in Russland gibt es nichts zu flicken, auch nicht für einen General. Das Feld stand seit Kapitel 8 im Kommentar und war nie gesetzt; jetzt ist es das.
+
+### Zwei Knöpfe wurden einer
+
+`listen`+`ausgabe` → **`schreibarbeit`**, `rekruten`+`sektion` → **`zwanzig`**. Beide fallen ab Rang 7 weg: Ein Sous-Lieutenant führt einen Zug, er drillt keine acht Mann und keine zwanzig mehr.
+
+### Drei Fehler beim Bauen
+
+1. Der Schreibtisch stand **vor** dem Zurücksetzen von `S.kasseQuartal` — der `ab:`-Filter prüfte gegen den Wert des *vorigen* Lagers, und die Kasse lag damit nie auf dem Tisch.
+2. Mit dem Versatz `k*3` fiel jede Ziehung auf dieselbe Restklasse: Die Kasse kam **immer** mit dem Adjutanten, der Ausbildungsplan **immer** mit der Vorschlagsliste. `k*7` ist teilerfremd zu allen drei Längen.
+3. **`rangTun` an einer Lagerstation liest niemand.** Sechs Lager trugen die Liste, und sie hat nie etwas getan — dieselbe Familie wie die zwei Lager in Kapitel 4, die siebzehn Prozentpunkte gekostet haben. Entfernt, und beide Handlungsfilter melden Unbekanntes jetzt in die Konsole.
+
+**Balance-Wirkung: ungemessen.** Der Bot ist auf die neuen Beschriftungen umgestellt und nimmt die Kasse weiterhin ehrlich; die drei Leitmessungen müssen wiederholt werden.
+
+---
+
+## 2026-07-30 — Bündel 7: die Feuille d'enrôlement
+
+**Ein Bogen statt zwei Bildschirme** (Entwurfspaket `12a`). Aushebung und Veteranenpunkte waren zwei Ansichten mit einem Knopf dazwischen — und der zweite Schritt ist genau der, in dem man die Werte des ersten bewertet. Man braucht sie nebeneinander.
+
+Links das Formular, rechts eine mitrechnende Spalte *So rückt er ein*, unten der Vorrat in einem eigenen Kasten mit Bronzebalken.
+
+| | |
+|---|---|
+| Der Befund ist ein Befund, kein Formular | Name, Balken, Rechnung `45 +15 = 60`. Kein −/+, kein „übrig" |
+| Wo die Herkunft nichts beiträgt | steht der Wert **einmal** — `30 = 30` ist Rauschen |
+| An jeder Kaufzeile | der Preis des **nächsten Fünfers**, nicht nur das Ausgegebene |
+| Was der Vorrat nicht deckt | wird **gesperrt statt kommentiert** |
+| Ein Kauf | ersetzt das Ausgabestück, statt danebenzustehen |
+| Die rechte Spalte | klebt (`sticky`) — eine Spalte, die beim dritten Kauf aus dem Bild ist, rechnet für niemanden mit |
+
+**Ein Aktualisierer für das ganze Blatt.** `aktualisiereBogen()` löst `aktualisiereErschaffung()` und `aktualisiereLaden()` ab; beide bleiben als Weiterleitung stehen. Auf einem Blatt gibt es nur einen Zustand, und zwei Funktionen, die dieselbe Ansicht pflegen, laufen früher oder später auseinander.
+
+**Zwei veraltete Texte mitkorrigiert**, beide aus dem Handoff: Der Laden nannte in den Kartenköpfen `höchstens 70` und `höchstens 60`, während `punktGrenze()` seit dem 30.07. **100** liefert — jetzt aus der Funktion gelesen statt abgeschrieben. Und `Alle beginnen bei 5` gegen `FERT_SOCKEL = 20`.
+
+**Zwei Fehler beim Bauen:**
+
+1. `AUSRUESTUNG_START` ist eine **Funktion**, kein Objekt. `Object.keys()` darüber lieferte eine leere Liste — der Abschnitt „Ausgabe · Zustand" stand mit Überschrift und ohne Inhalt auf dem Blatt.
+2. Die Leitern des Ladens heißen anders als die Plätze der Ausrüstung (`waffe` gegen `muskete`). Ohne Zuordnung ersetzte kein Kauf sein Ausgabestück.
+
+**Alle sechs Prüfstände klickten „Weiter zu den Veteranenpunkten".** Den Knopf gibt es nicht mehr; sie rücken jetzt direkt nach der Herkunft ein. `#h_<herkunft>` und `#startbtn` bleiben.
+
+---
+
+## 2026-07-30 — Bündel 6: die zwei Endbildschirme
+
+**Ein Mann hört auf zwei Arten auf, und beide Male entsteht dabei ein Papier.** Bisher endeten beide in einem gewöhnlichen Bogen mit einer Punktetabelle — und die Entlassungsurkunde, das amtlichste Blatt des Spiels, stand sogar auf Feldpapier statt auf Kanzleipapier.
+
+| | **Trauerblatt** | **Congé absolu** |
+|---|---|---|
+| Wann | er ist gefallen | er geht lebend — Schranke, Ausmusterung, Epilog |
+| Beschreibt | einen **Nachlass** | einen **Körper** |
+| Leer bleibt | die Zeile für die **Erben** | nichts |
+
+**Der Ton kommt aus der Form, nicht aus Adjektiven.** Ein Vordruck wertet nicht — er hat Felder, und die Felder werden ausgefüllt. Dass eines davon leer bleibt, sagt mehr als jeder Satz daneben: Die Zeile „Erben" steht auf jedem Vordruck und wird bei einem Fusilier fast nie ausgefüllt. Das Spiel sagt dazu nichts.
+
+**Das Signalement** ist der Kern eines echten Congé: neun Zeilen, mit denen der Staat einen Mann so beschreibt, dass man ihn wiedererkennt, **falls er desertiert** — und die einzige Stelle im Spiel, an der jemand aufschreibt, wie dieser Mann aussieht. Sie kommt in dem Augenblick, in dem er aufhört, zu ihnen zu gehören. In „Besondere Kennzeichen" stehen die Wunden.
+
+Die Größe rechnet in pieds und pouces, `59 + Konstitution/16 + 0…2` Zoll. **Vier Fuß elf ist der Boden, und das ist kein Zufall:** das gesetzliche Mindestmaß der Konskription (1,598 m). **Nichts wird gewürfelt** — `zug()` streut deterministisch aus dem Namen, sonst hätte der Mann beim zweiten Blick andere Augen.
+
+**Drei Fehler, die erst das Dokument sichtbar gemacht hat:**
+
+1. `grund.toLowerCase()` machte aus „Gefallen bei Eylau" ein **„gefallen bei eylau"** — es sollte den ersten Buchstaben kleinschreiben und traf den Ortsnamen mit.
+2. Der Nachlass führte Leerstellen als Gegenstände: „Kein Mantel" ist ein Eintrag in der Ausrüstungsliste, und so stand *ein kein mantel* zwischen den Schuhen und dem Tornister.
+3. `schrankeEnde()` stand auf `.card` statt `.card papier`.
+
+Die Knopftexte bleiben unangetastet — „Nächster Mann" und „Noch einmal, besser" sind das, woran drei Prüfstände Tod und Ende unterscheiden.
+
+---
+
+## 2026-07-30 — Die Verwaltung: sieben Sitzungen für die obere Hälfte
+
+**Das Spiel hatte oben eine Hälfte, die nicht gespielt wurde, sondern verwaltet.** Ab Rang 9 gab es eine Kompaniekasse, einen Einheitszustand und einen Auftrag je Gefecht — drei Zahlen, die etwas taten, ohne dass jemand mit ihnen umgehen konnte. Der Leitsatz über allen sieben Sitzungen:
+
+> **Verwaltung ist kein zweiter Kampf mit anderen Zahlen. Sie ist die Frage, wen man dafür bezahlen lässt.**
+
+### 1 · Aufräumen — acht Widersprüche zwischen Code und Entwurf
+
+Keine Balance-Änderung, nur die Stellen, an denen der Code etwas anderes sagte als `KONZEPT.md` oder `RANGLEITER.md`. Die Patente sind dabei von Freischaltrang 6/8 auf **9/11** gegangen — die Abweichung war 2026 nötig, als vier Kapitel gebaut waren; mit elf ist sie es nicht mehr.
+
+### 2 · Die Zahlen geradeziehen
+
+| | Was | Warum |
+|---|---|---|
+| **`francs()`** | eine Stelle für jede Geldanzeige | `12`, `12.0` und `12,00` standen nebeneinander |
+| **`rangSetzen()`** | **die einzige Tür für jede Rangänderung** | sechs Stellen setzten `S.rang` von Hand; sie pflegt `S.hoechsterRang` und ruft `unterstellteSetzen()` |
+| **Abende nach Rang** | dritte Stufe ab Rang 9, vierte ab Rang 12 | dieselbe Begründung wie beim Caporal: sonst verdrängt die rangeigene Handlung die eigene Ausbildung |
+| **Der Abbau** | Ausrüstung, die ein Offizier nicht mehr trägt, verschwindet | sie stand als tote Zeile in der Anzeige |
+
+**Befund, der Sitzung 5 ausgelöst hat:** Verwaltung als weiterer Lagerknopf frisst die Abende. **Deshalb kostet der Schreibtisch keinen Abend.**
+
+### 3 · Der Kaufladen — 28 Posten statt 13
+
+**Güteleitern (`gruppe:`):** Muskete, Schuhe und Mantel in drei Güten, und **der teurere Kauf ersetzt den billigeren** — man besitzt eine Muskete, nicht drei. **Freischaltung durch Leistung (`frei:`, `freiKapitel:`):** zehn Posten stehen erst im Laden, wenn man etwas erreicht hat. **Nie durch Veteranenpunkte** (Invariante 3).
+
+> **Ein Posten, der 400 VP kostet, ist teuer. Ein Posten, den es erst gibt, wenn man einmal Colonel war, ist etwas anderes** — er erzählt, dass man ihn kennt.
+
+### 4 · Die Kette unter dir
+
+Vier Unterstellte ab Rang 7, jeder mit `koennen` und `treue` (−5…+5). `ausfuehrungsProbe()` würfelt gegen sein Können; ein misslungener Befehl wirkt mit **Faktor 0,55** — er wird ausgeführt, nur schlechter.
+
+> **Das ist die zweite Ohnmacht, und sie sitzt tiefer als die erste.** Ab Rang 7 gab es schon die Trennung von Entscheidung und Wirkung. Jetzt hat das Warten einen Namen: Ein gut gewählter Befehl kann daran scheitern, dass Sergent Peyron ihn ausführt.
+
+Dazu das **Pferd**: der erste Ladenposten mit laufenden Kosten (60 F je Feldzug für das Vollblut, fällig am Übergang). Wer nicht zahlen kann, verliert es.
+
+**`unterstellteSetzen()` ist selbstheilend**, und das musste es zweimal werden — `test/raenge.js` und `schreibtischStellen()` setzen den Rang von Hand, `rangSetzen()` läuft dabei nie. **Regel: Was ein Rang mitbringt, wird nicht beim Aufstieg gebaut, sondern beim Betrachten geprüft.**
+
+### 5 · Der Schreibtisch
+
+Ab Rang 9 ein **Fenster über dem Lager** (`.ueberlage`), drei Vorgänge, kein Abend, keine Auswahl — man muss alle drei erledigen. Fünf Vorgangsarten (Personalvorschlag, Zustandsfrage, Bestandsmeldung, Auftrag von oben, Zuteilung), je drei Antworten, kein Kommentar hinterher.
+
+> **Drei Vorgänge, die man erledigen muss, sind Verwaltung. Zwölf, aus denen man wählt, sind ein Einkaufsladen.**
+
+**Der Rücken der Überlage ist die Sperre, nicht das Dekor.** Alle sechs Prüfstände liefen daraufhin in einen Timeout — der Beweis, dass sie greift, und zugleich ein Fehler im Messgerät. Sie suchen ihre Knöpfe jetzt zuerst im Fenster.
+
+### 6 · Das Risiko und die Mitwisser
+
+**Sechs Folgestufen statt einer Strafe** — vom Aktenvermerk bis zu zwei Rängen zurück, und jeder bestehende Vermerk hebt die nächste Folge um eine Stufe. **Gemessen:** Schwere 1–4 ohne Vermerke → Stufe 1, 2, 3, 5; mit zwei Vermerken → 3, 4, 5, 6.
+
+**Entlassen wird man nie.** Die Armee gibt keinen Mann her, den sie noch brauchen kann — sie stellt ihn tiefer. Damit bleiben die vier Enden vier.
+
+**Stufe 3 ist die beste Strafe, die dieses Spiel haben kann:** Man wird nicht bestraft, man wird nicht befördert. Kein Bildschirm, keine Meldung. Höchstens einmal je Laufbahn.
+
+**Fünf Wege der Entdeckung**, keiner nennt den Namen: der Inspecteur · ein Unterstellter redet ((−treue) × 5 %) · **einer in Bedrängnis handelt** (35 %, unabhängig von seiner Treue) · die Aktenprüfung ab Rang 11 · der Rivale an der Musterung.
+
+**Gemessen, 200 Lager je Fall:** Treue −5 bei allen → **48 % entdeckt**; Treue +2 → **16 %**, also nur noch der Inspecteur.
+
+**Verjährung** 2 / 3 / 4 Kapitel, Schwere 4 nie. Der Aktenvermerk verjährt nicht: **Was aufgeschrieben wurde, bleibt aufgeschrieben.**
+
+> **⚠ Und wieder derselbe Fehler im Messgerät, zum vierten Mal.** Die erste Probe meldete „entdeckt in 0 von 200" — sie prüfte den *Rückgabewert*, und Stufe 3 gibt absichtlich einen leeren String zurück. **Eine Quote von exakt null ist fast immer das Messgerät.**
+
+### 7 · Aufträge nach oben
+
+| | |
+|---|---|
+| **Der Stand ist sichtbar** | „steht" / „steht nicht" neben jedem Auftrag, in jeder Runde neu |
+| **Zwei Befehle ab Rang 12** | einer vom Korps, einer aus Paris, echter Widerspruch; abgerechnet wird, ob *einer* steht |
+| **Der stehende Auftrag ab Rang 10** | drei Sorten im Wechsel, geprüft am Übergang, zahlt in Fürsprache und Bulletins — **nicht in Ruf** |
+
+**Am Hebel ausgelesen, nicht am Ergebnis geraten:** Rang 9 liefert in 40 von 40 Gefechten genau einen Auftrag, Rang 12 in allen 40 ein widersprüchliches Paar (`nehmen+schonen` ×17, `halten+nehmen` ×11, `decken+nehmen` ×8, `schonen+nehmen` ×4). Der stehende Auftrag bucht bei doppeltem Aufruf nur einmal.
+
+**`LAUF_FASSUNG` 13 → 14** mit Wandler: `LAUF.kauftrag` fängt unabgerechnet an.
+
+---
+
 ## 2026-07-30 — Der Umbau: Probe, Ökonomie, Leiter
 
 **Zwölf Änderungen, und keine konnte für sich allein stehen.** Sie stehen hier in der Reihenfolge, in der sie voneinander abhängen — wer eine davon zurücknimmt, nimmt die darunter mit.

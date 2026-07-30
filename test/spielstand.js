@@ -1,5 +1,11 @@
 /* Prüft den Spielstand: sichern, unterbrechen, fortsetzen, sterben, wandeln.
    Aufruf:  node test/spielstand.js  */
+/* ── Das Fenster über dem Bildschirm ──
+   **Liegt ein Blatt obenauf (`.ueberlage`), ist nur dieses bedienbar.** Der
+   Rücken fängt jeden Klick ab — ein Prüfstand, der dahinter klickt, läuft
+   entweder in einen Timeout oder, schlimmer, drückt einen Knopf, den ein
+   Spieler gar nicht erreichen kann. Deshalb sucht jeder Prüfstand seine
+   Knöpfe **zuerst im Fenster**. */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const ZIEL = 'file://' + path.resolve(__dirname, '../index.html');
@@ -14,14 +20,14 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
 
   const text = () => p.$eval('#app', e => e.innerText);
   const klick = async re => p.evaluate(s => {
-    const b=[...document.querySelectorAll('.ord:not([disabled]),button.plain')].find(e=>new RegExp(s).test(e.textContent));
+    const b=[...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled]),button.plain')].find(e=>new RegExp(s).test(e.textContent));
     if(b){b.click();return true;} return false;
   }, re);
   const weiterBis = async (re, max=60) => {
     for(let i=0;i<max;i++){
       const t = await text(); if(new RegExp(re).test(t)) return true;
-      const w = await p.$('.ord.weiter'); if(w){ await w.click(); continue; }
-      const ok = await p.evaluate(()=>{ const b=[...document.querySelectorAll('.ord:not([disabled])')]
+      const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if(w){ await w.click(); continue; }
+      const ok = await p.evaluate(()=>{ const b=[...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')]
         .filter(e=>!/Zurückweichen|Mitmachen/.test(e.textContent)); if(b[0]){b[0].click();return true;} return false; });
       if(!ok) return false;
     }
@@ -34,7 +40,7 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
 
   console.log('\n1 — Lauf beginnen, im Lager sichern');
   await klick('Neuen Mann aufstellen'); await klick('Einen anderen Mann');
-  await p.click('#h_schmied'); await klick('Weiter zu den Veteranenpunkten');
+  await p.click('#h_schmied');
   await p.click('#startbtn');
   const name = await p.evaluate(() => LAUF.mann.name);
   /* Auch die erste Station hat einen Marschweg, dort kann also mit 35 % ein
@@ -43,7 +49,7 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
      statt an ihm zu scheitern. */
   if(await p.evaluate(()=> !!LAUF.marsch)){
     await p.evaluate(()=>{ const b=document.querySelector('.ord:not([disabled])'); if(b) b.click(); });
-    const w = await p.$('.ord.weiter'); if(w) await w.click();
+    const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if(w) await w.click();
   }
   /* **Geprüft wird die Frage, nicht der Zähler.** Bis zum Layoutumbau stand
      hier `VERBLEIBENDE ABENDE` — eine Zeichenkette aus der Gestaltung, die

@@ -87,6 +87,17 @@ Gebaut sind **alle elf Kapitel** — Italien 1796/97 bis Waterloo 1815, **einhun
 | **Grand Officier der Ehrenlegion** — Rang 13 ist entriegelt | Commandeur, zweiter fremder Orden |
 | **Feldbeförderung bis Rang 6**, Bescheid im nächsten Lager | |
 | **Zwei Musterungen in jedem der elf Feldzüge** | |
+| **Der Kaufladen**: 28 Posten, drei Güteleitern, Freischaltung durch Leistung | Uhr, zweiter fremder Orden |
+| **Die Kette unter dir** — vier Unterstellte mit Können und Treue | |
+| **Das Pferd** mit Unterhalt je Feldzug und eigener Gefahr | |
+| **Der Schreibtisch** — ein Fenster über dem Lager, fünf Vorgangsarten | |
+| **Das Verzeichnis** — heimliche Sachen mit namentlichen Mitwissern | |
+| **Sechs Folgestufen** statt einer Strafe, fünf Wege der Entdeckung | |
+| **Aufträge mit sichtbarem Stand**, zwei widersprüchliche ab Rang 12 | |
+| **Der stehende Auftrag** je Feldzug ab Rang 10 | |
+| **Trauerblatt und Congé absolu** — die zwei Endbildschirme als Urkunde | |
+| **Feuille d’enrôlement** — Aushebung und Vorrat auf einem Bogen | |
+| **Die Protektion eines Marschalls** — Rang 14 ist erreichbar | Generalskampagnen als Szenarien |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -1015,8 +1026,8 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 
 | Patent | VP | frei ab | Wertungsabzug |
 |---|---|---|---|
-| Sous-Lieutenant (Rang 7) | 110 | einmal Rang 6 getragen | −158 |
-| Lieutenant (Rang 8) | 145 | einmal Rang 8 getragen | −205 |
+| Sous-Lieutenant (Rang 7) | **550** | einmal **Rang 9** getragen | **−790** |
+| Lieutenant (Rang 8) | **725** | einmal **Rang 11** getragen | **−1 025** |
 
 > **Warum es sie überhaupt gibt.** Mit vier Kapiteln erreichte kein einziger von 200 gemessenen Läufen Rang 10 — die halbe Rangleiter war gebaut und für den Spieler unsichtbar. Die Patente lösen das **ohne ein neues Kapitel:** Wer eines kauft, startet 1796 in Savona und spielt die Offiziershälfte vom ersten Tag an.
 
@@ -1308,11 +1319,11 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 | Kauf | Wirkung | greift in | VP |
 |---|---|---|---|
-| **Füße wie Leder** | Schuhverschleiß halbiert · Forcieren kostet 8 Atem weniger | `verschleiss()` · `waehleTempo()` | 30 |
-| **Er weiß, welches Wasser** | Krankheits- und Frostzehrung halbiert | `stationErledigt()` | 35 |
-| **Er bleibt nicht zurück** | Aderlass −3 je Station | `aderlass()` | 45 |
-| **Er schläft im Freien** | Frost eine Stufe milder | `frostWirken()` | 30 |
-| **Alte Narben** | Der Feldscher näht zwei Wunden statt einer | `kampfEnde()` | 40 |
+| **Füße wie Leder** | Schuhverschleiß halbiert · Forcieren kostet 8 Atem weniger | `verschleiss()` · `waehleTempo()` | **150** |
+| **Er weiß, welches Wasser** | Krankheits- und Frostzehrung halbiert | `stationErledigt()` | **175** |
+| **Er bleibt nicht zurück** | Aderlass −3 je Station | `aderlass()` | **225** |
+| **Er schläft im Freien** | Frost eine Stufe milder | `frostWirken()` | **150** |
+| **Alte Narben** | Der Feldscher näht zwei Wunden statt einer | `kampfEnde()` | **200** |
 
 **Und sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am Anfang — Italien übersteht er zu 98–100 %. Er stirbt in **Ägypten** (15 von 40: Hitze, Ruhr) und **Jena** (11 von 40: die Beine). Jede der fünf handelt davon.
 
@@ -1324,7 +1335,11 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 > **Der Prüfpunkt ist nicht, ob die Weite steigt.** Er ist, ob sie steigt, **ohne dass die Rangverteilung mitwandert.** Die eiserne Regel lautet: *Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Aufstieg.* Wandert der Rang mit, ist der Entwurf verfehlt — dann ist irgendeine der fünf doch im Gefecht angekommen.
 
-**Der Testbot kauft jetzt** (`VETERAN_KAEUFE` in `test/balance.js`): Mantel und Schuhe zuerst, dann die fünf. Das erledigt zugleich `OFFEN.md` Punkt 3 — bisher kaufte er **nie** einen Mantel, weshalb jede Frostmessung durchweg den Ausnahmefall maß statt des Normalfalls. **Stücke werden vor den Punkten gekauft:** Punkte sind beliebig teilbar, ein 30-VP-Stück ist es nicht, und wer zuerst Punkte verteilt, hat für ein Stück nie wieder genug übrig.
+**Der Testbot kauft jetzt** (`VETERAN_PLAN` in `test/balance.js`). Das erledigt zugleich `OFFEN.md` Punkt 3 — bisher kaufte er **nie** einen Mantel, weshalb jede Frostmessung durchweg den Ausnahmefall maß statt des Normalfalls.
+
+> **⚠ Die Reihenfolge ist einmal falsch gewesen, und die Korrektur ist die eigentliche Regel.** Die erste Fassung kaufte **alle Stücke vor allen Punkten**, mit der Begründung, Punkte seien teilbar und Stücke nicht. Gemessen war das ein Bot-Artefakt: Ein Veteran mit 160 VP gab 135 davon für Mantel, Schuhe und zwei Gewohnheiten aus und hatte für Konstitution **fünfundzwanzig** übrig — er lief mit den Attributen eines Erstläufers los, und die Rangquote fiel von 30 auf 15 %. **Kein Mensch kauft so.**
+>
+> Jetzt steht alles in **einer** Liste, **abwechselnd Wert und Stück**, in der Reihenfolge, in der ein Mann es täte, der weiß, woran er zuletzt gestorben ist: erst der Lebensvorrat, dann der Mantel, dann das, was durch Ägypten bringt. Seit der exponentiellen Kostenkurve geht die Liste **zweimal** durch — erst auf ein Grundmaß, dann alles auf 70+.
 
 ### Zielwerte
 
@@ -1752,7 +1767,7 @@ Zwei Dinge werden gespeichert, und sie haben nichts miteinander zu tun:
 
 **Stationen schließen sich ab, bevor der „Weiter"-Knopf kommt.** `stationErledigt()` setzt `LAUF.node` schon hoch, während der Ergebnisbildschirm noch steht. Sonst könnte man eine Szenenwahl rückgängig machen, indem man auf dem Ergebnis das Spiel beendet. Wer eine neue Stationsart baut, muss sie aufrufen — vergisst man es, hängt das Spiel in einer Schleife (genau das ist beim Bau der Beförderung passiert und wurde vom Testskript gefunden).
 
-**Fassungen.** `CHRONIK_FASSUNG` (1) und `LAUF_FASSUNG` (2, seit den Lebenspunkten) in `src/spielstand.js`. Wer das Format ändert, **erhöht die Zahl und hängt einen Wandler an** — jeder Wandler hebt genau eine Fassung auf die nächste, nie zwei auf einmal. Ein Spielstand aus einer neueren Fassung wird abgewiesen, nicht geraten. Die alte Chronik ohne Fassungsnummer ist Fassung 0 und wird weiterhin gelesen.
+**Fassungen.** `CHRONIK_FASSUNG` (1) und `LAUF_FASSUNG` (**14**, seit dem stehenden Auftrag) in `src/spielstand.js`. Wer das Format ändert, **erhöht die Zahl und hängt einen Wandler an** — jeder Wandler hebt genau eine Fassung auf die nächste, nie zwei auf einmal. Ein Spielstand aus einer neueren Fassung wird abgewiesen, nicht geraten. Die alte Chronik ohne Fassungsnummer ist Fassung 0 und wird weiterhin gelesen.
 
 **`localStorage` ist nur die bequeme Ablage** (Invariante 6). Die Datei bleibt maßgeblich: `speichern()` schreibt Chronik *und* laufenden Feldzug in eine JSON-Datei, `laden()` liest beides zurück. Wo `localStorage` fehlt — mancher Browser über `file://`, privater Modus —, läuft alles weiter, nur ohne Absturzsicherung; der Titelbildschirm sagt das dann auch.
 
@@ -1799,6 +1814,161 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 **Rangabzeichen** (`rangabzeichen()` in `grundwerte.js`) zeigen den Rang als Bild statt als Wort: Der Fusilier trägt nichts — das ist der Witz an ihm —, die Elitekompanien eine Epaulette (Grenadier rot, Voltigeur grüngelb), die Unteroffiziere Streifen am Unterarm (Caporal zwei aus Wolle in Aurore, Caporal-fourrier zusätzlich einen quer, Sergent einen aus Tresse in Metallfarbe). Sie stehen in der Seitenleiste und dort, wo man sie bekommt: bei der Elitewahl und bei der Beförderung.
 
 ---
+
+## Die Protektion eines Marschalls (`PATRONE` in `grundwerte.js`)
+
+**Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine Zugehörigkeit.** Bis Rang 11 arbeitet man sich eine Kette hoch, in der jeder Nächste einen Schritt über dem Vorigen steht. Darüber gibt es das nicht mehr: Ein Général de brigade wird nicht von seinem Divisionsgeneral befördert, sondern vom Kaiser — und der Kaiser kennt achthundert Generäle nicht. **Er kennt seine Marschälle.**
+
+> **⚠ Gemessen war das der Engpass, und zwar der einzige.** Grandmaison war Patron für die Ränge 10 bis 13 — ein Mann, vier Stufen, zwei Gunstquellen, beide am Gefecht hängend. Vierzig von vierzig Maximalveteranen blieben Colonel, bei einem Median von **−2**, wo **+5** nötig waren, während Ruf zu 93 % und Bulletins zu 80 % erfüllt waren. **Nicht die Schwelle war zu hoch, die Mechanik war zu dünn.**
+
+**Sobald man Colonel ist, wählt man auf dem Schreibtisch, wessen Mann man ist** (`VORGANG_PATRON`, Ebene „Was bleibt", einmal je Laufbahn). Von da an beurteilt der Marschall die Ränge 12, 13 und 14 — Grandmaison bleibt der Patron für 10 und 11 und hört dort auf.
+
+### Drei Vorstellungen davon, was ein guter Untergebener ist
+
+**Und keine davon ist die richtige.** Dieselben Ereignisse zählen bei jedem anders (`PATRON_ZAEHLT`, eine Stelle für alle drei):
+
+| | verlangt | verachtet |
+|---|---|---|
+| **Davout** | erfüllte stehende Aufträge · Einheitszustand ≥ 70 | **jeden Eintrag im Verzeichnis, doppelt** |
+| **Ney** | Bulletins, also vor der Linie gestanden | ein Gefecht, in dem dein Name nicht fällt |
+| **Masséna** | Geld — die Kasse, den Vertrag, die Requisition | Ehrlichkeit, die ihn schlecht aussehen lässt |
+
+**Das ist der Kern der Wahl: nicht wie viel Fürsprache man bekommt, sondern wofür.** Ein Lauf, der unter Davout mustergültig ist, steht unter Ney bei null — und umgekehrt.
+
+### Ihr eigener Stand beim Kaiser (`patronStand()`)
+
+**Ein Patron ist nur so viel wert, wie der Kaiser auf ihn hört**, und das ändert sich. Der Stand steht in der Seitenleiste neben seinem Namen; wie er sich entwickelt, sagt das Spiel nicht.
+
+| | Jena | Eylau | Spanien | Russland | 1813 | 1814 | Waterloo |
+|---|---|---|---|---|---|---|---|
+| **Davout** | 4 | 4 | 4 | 5 | 4 | 4 | 4 |
+| **Ney** | 5 | 5 | 4 | 5 | **3** | **2** | 2 |
+| **Masséna** | 4 | 4 | 3 | **1** | **0** | 0 | 0 |
+
+> **Wer sich 1807 für Masséna entscheidet, wählt den, der jetzt am meisten gibt und am Ende nichts mehr wert ist.** Davout bleibt oben, weil er nie etwas falsch macht und deshalb nie geliebt wird. Ney stürzt in Russland ab, wo er die Nachhut führt und dabei ein Korps verliert. **Das Spiel sagt es nicht — es zeigt nur den Stand.**
+
+### Rang 14 hängt an einem Mann, nicht an einem Szenario
+
+**Hier stand `generalskampagne:true`, und die gibt es nicht** — der Rang war gebaut und per Regel unerreichbar, und die ganze VP-Ökonomie war gegen eine Decke geeicht, die niemand je gesehen hat. An ihre Stelle tritt der Marschall: **Gunst 5 · 5 Bulletins · und `patronMacht:4`, der Stand des Patrons.**
+
+Gemessen mit sonst perfektem Mann (Ruf 700, neun Bulletins, Grand Officier, Gunst 5):
+
+| | Russland | 1813 | 1814 | Waterloo |
+|---|---|---|---|---|
+| **Davout** | erfüllt | erfüllt | erfüllt | erfüllt |
+| **Ney** | erfüllt | erfüllt | **zu spät** | **zu spät** |
+| **Masséna** | **zu spät** | zu spät | zu spät | zu spät |
+
+**Das ist die letzte und härteste Folge der Wahl von 1807**, und die einzige Schranke des Spiels, an der man nichts mehr tun kann. Es steht dabei, es wird nie erklärt.
+
+> **⚠ `'patron'` in der LEITER ist eine Rolle, kein Name — und das musste an zwölf Stellen aufgelöst werden.** Zuerst tat es nur `beurteiler()`; die Musterung prüfte daraufhin `gunst('patron')`, also immer null, also immer `fehltGunst`. Der Marschall war gewählt, hatte Fürsprache +5, und der Tisch sah ihn nicht. **Dieselbe Fehlerfamilie wie fünfmal zuvor**, nur in die andere Richtung. `leiterPatron(z)` löst sie jetzt an einer Stelle auf.
+
+**Der Bot wählt nach Gemüt, nicht nach Nutzen:** der vorsichtige Davout, der mutige Ney. Masséna wählt keiner von beiden — seine Währung ist Unterschlagung, und ein Bot, der unterschlägt, misst das Strafsystem statt des Spiels. **Wer seinen Weg messen will, ändert eine Zeile in `balance.js` und sagt dazu, dass er es getan hat.**
+
+## Das Lager ist der Abend, der Schreibtisch ist die Arbeit (30.07.2026)
+
+**Rang 9 hatte zwölf Knöpfe auf drei Abende, drei davon waren die Kompaniekasse in drei Varianten.** Verwaltung verdrängte damit die eigene Ausbildung — genau das, wovor der Kommentar über `abendeFuer()` seit Sitzung 2 warnt. Der Schreibtisch war gebaut, aber die Verwaltung lag weiterhin daneben im Lager.
+
+| Rang | vorher | jetzt |
+|---|---|---|
+| 5 · Sergent | 11 | **9** |
+| 7 · Sous-Lieutenant | 11 | **7** |
+| 8 · Lieutenant | 12 | **6** |
+| **9 · Capitaine** | **12** | **5** + drei Vorgänge |
+| 11 · Colonel | 8 | **4** + drei Vorgänge |
+
+**Was Papier ist, liegt auf dem Schreibtisch und kostet keinen Abend. Was der eigene Körper, der eigene Kopf oder die eigenen Leute sind, bleibt ein Abend.**
+
+### Die drei Ebenen (`ebene` in `VORGAENGE`, `EBENE_WORT`)
+
+**Bis dahin waren es drei Ziehungen aus fünf Arten** — der Spieler bekam drei Blätter und wusste bei keinem, wie weit seine Entscheidung reicht. Jetzt kommt aus jeder Ebene genau eines, immer in derselben Reihenfolge, und **über jedem Blatt steht, welche es ist:**
+
+| Ebene | Wie weit sie reicht | Vorgänge |
+|---|---|---|
+| **Was heute entschieden wird** | sofort und sichtbar | Zustandsfrage · Bestandsmeldung · Arbeitskolonne · Zuteilung |
+| **Was den Feldzug trägt** | bis zum Kapitelende, zahlt auf den stehenden Auftrag ein | **Kasse und Lieferantenvertrag** · Ausbildungsplan · Quartiere |
+| **Was bleibt** | darüber hinaus | Personalvorschlag · **Adjutantenauftrag** · Beurteilung · der Mitgezogene |
+
+> **Der eigentliche Gewinn ist die Beschriftung.** Man weiß beim Entscheiden, wie weit die Entscheidung reicht — und bei der dritten sagt das Spiel nie, ob es richtig war.
+
+**Die Kasse ist damit unausweichlich geworden**, und das ist Absicht: Vorher konnte man den Knopf einfach nicht drücken. Jetzt liegt sie jedes Quartal auf dem Tisch. Ehrlich ausgeben ist eine der Antworten — aber es ist eine Antwort und kein Nichtstun.
+
+> **⚠ Zwei Reihenfolge-Fallen beim Bauen.** Erstens stand der Schreibtisch **vor** dem Zurücksetzen von `S.kasseQuartal` — der `ab:`-Filter prüfte gegen den Wert des *vorigen* Lagers, und die Kasse lag damit nie auf dem Tisch. Zweitens fiel mit dem Versatz `k*3` jede Ziehung auf dieselbe Restklasse: Die Kasse kam **immer** zusammen mit dem Adjutanten, der Ausbildungsplan **immer** mit der Vorschlagsliste. `k*7` ist teilerfremd zu allen drei Listenlängen.
+
+### Der Bursche (`burscheHaelt()`, `burscheSorgt()` in `mechanik.js`)
+
+**Ab Lieutenant kümmert sich jemand anders um deine Sachen.** Jeder Offizier hatte einen *domestique*. Im Spiel heißt das: Der Verschleiß hört auf, „Ausrüstung durchsehen und flicken" und der Schuster verschwinden, und was abgenutzt ist, ist am Morgen wieder brauchbar (Zustand mindestens 80). Wer keinen Mantel hat, bekommt einen gestellt.
+
+Es ist dieselbe Idee wie die verschwundene Atemleiste ab Rang 10: **Größe zeigt sich daran, was aufhört, dich zu betreffen.**
+
+> **Und genau dort hört es auf: `ersatz:false`.** In Russland gibt es nichts zu flicken und nichts zu ersetzen, auch nicht für einen General — der doppelte Verschleiß greift wieder, und ein Mantel, der dort kaputtgeht, bleibt kaputt. **Die eigene Regel des Kapitels schlägt den Rang**, sonst wäre Russland ab Rang 8 abgeschaltet. Das Feld stand seit Kapitel 8 im Kommentar und war nie gesetzt; jetzt ist es das.
+
+### Zwei Knöpfe wurden einer
+
+`listen` + `ausgabe` → **`schreibarbeit`** (Rang 4–8): eine Probe, beide Folgen. Wer die Liste im Griff hat, kann sie auch gegen das Dienstalter lesen; wer nicht, gibt der Reihe nach aus und drei Mann gehen weiter barfuß.
+
+`rekruten` + `sektion` → **`zwanzig`** (Rang 5–6): die Auswahl entscheidet die Probe, das Exerzieren kommt in jedem Fall. Beide fallen ab Rang 7 weg — ein Sous-Lieutenant führt einen Zug, er drillt keine acht Mann und keine zwanzig mehr.
+
+> **⚠ Und wieder ein stummer Filter.** `rangTun` an einer **Lagerstation** liest niemand — die Rangregeln stehen in `lagerHandlungen()` und nirgends sonst. Sechs Lager trugen die Liste trotzdem, und sie hat nie etwas getan; sie sind entfernt. Dieselbe Familie wie die zwei Lager in Kapitel 4, die siebzehn Prozentpunkte gekostet haben. **`lagerHandlungen()` und `winterHandlungen()` melden Unbekanntes jetzt in die Konsole, statt es wegzulassen.**
+
+## Die Feuille d'enrôlement — ein Bogen statt zwei Bildschirme (`zeigeErschaffung()`)
+
+**Bis zum 30.07.2026 waren Aushebung und Veteranenpunkte zwei Ansichten mit einem Knopf dazwischen.** Der zweite Schritt ist aber genau der, in dem man die Werte des ersten *bewertet* — man braucht sie nebeneinander. Entwurfspaket `12a` legt beide auf ein Blatt: links das Formular, rechts eine mitrechnende Spalte *So rückt er ein*, unten der Vorrat.
+
+| | |
+|---|---|
+| **Der Befund ist ein Befund, kein Formular** | Name, Balken, Rechnung (`45 +15 = 60`). Kein −/+, keine Punktanzeige, kein „übrig". Der einzige Knopf heißt *Einen anderen Mann* |
+| **Wo die Herkunft nichts beiträgt, steht der Wert einmal** | `30 = 30` ist keine Rechnung, sondern Rauschen |
+| **Der Vorrat ist der einzige Ort, an dem gewählt wird** | also der einzige, der laut sein darf: eigener Kasten, Bronzebalken, der Rest als große Mediävalzahl |
+| **An jeder Kaufzeile steht der Preis des nächsten Fünfers** | nicht nur das Ausgegebene — bei einer exponentiellen Kurve ist das die Zahl, nach der man entscheidet |
+| **Was der Vorrat nicht deckt, wird gesperrt statt kommentiert** | „zu teuer" am rechten Rand, die Zeile bleibt sichtbar |
+| **Ein Kauf ersetzt das Ausgabestück** | sonst steht dasselbe Paar Schuhe zweimal auf dem Blatt |
+
+**Die rechte Spalte klebt** (`position:sticky`). Das ist keine Bequemlichkeit, sondern der ganze Grund, beide Schritte auf ein Blatt zu legen: Eine Spalte, die beim dritten Kauf aus dem Bild gescrollt ist, rechnet für niemanden mehr mit.
+
+**Ein Aktualisierer für das ganze Blatt.** `aktualisiereBogen()` ersetzt `aktualisiereErschaffung()` und `aktualisiereLaden()`; beide bleiben als Weiterleitung stehen, weil `waehleHerkunft()`, `stellePunkt()` und `waehle()` sie rufen. **Auf einem Blatt gibt es nur einen Zustand, und zwei Funktionen, die dieselbe Ansicht pflegen, laufen früher oder später auseinander.** `zeigeLaden()` zeigt jetzt denselben Bogen, damit kein alter Knopf ins Leere geht.
+
+> **⚠ `AUSRUESTUNG_START` ist eine Funktion, kein Objekt.** Die erste Fassung ging mit `Object.keys()` darüber und lieferte eine leere Liste — der Abschnitt „Ausgabe · Zustand" stand mit Überschrift und ohne Inhalt auf dem Blatt. Dazu heißen die Leitern des Ladens anders als die Plätze der Ausrüstung (`waffe` gegen `muskete`); die Zuordnung steht in `einrueckSpalte()` und nicht in den Daten, weil sie nur diesen einen Bildschirm betrifft.
+
+> **⚠ Alle sechs Prüfstände klickten „Weiter zu den Veteranenpunkten".** Der Knopf gibt es nicht mehr; sie rücken jetzt direkt nach der Herkunft ein. **Wer den Startbildschirm anfasst, fasst sechs Prüfstände mit an** — `#h_<herkunft>` und `#startbtn` sind die beiden IDs, an denen sie hängen, und die bleiben.
+
+## Die zwei Endbildschirme (`trauerblatt()`, `congeAbsolu()` in `src/abschluss.js`)
+
+**Ein Mann hört auf zwei Arten auf, und beide Male entsteht dabei ein Papier.** Bis zum 30.07.2026 endeten beide in einem gewöhnlichen Bogen mit einer Punktetabelle — die Wertung stand da, wo das Dokument hingehört, und die Entlassungsurkunde, das amtlichste Blatt des Spiels, stand sogar auf **Feldpapier** statt auf Kanzleipapier.
+
+| | **Trauerblatt** (`extrait mortuaire`) | **Congé absolu** |
+|---|---|---|
+| Wann | er ist gefallen | er geht lebend — Schranke, Ausmusterung, Epilog |
+| Wer schreibt | ein Schreiber über ihn | die Armee an ihn |
+| Wen es beschreibt | einen **Nachlass** | einen **Körper** |
+| Was leer bleibt | die Zeile für die Erben | nichts |
+| Unterschrift | Collot, der Fourier | Vernet, der Chef de bataillon |
+
+> **Der Ton kommt aus der Form, nicht aus Adjektiven** (Invariante 7). Ein Vordruck wertet nicht — er hat Felder, und die Felder werden ausgefüllt. **Dass eines davon leer bleibt, sagt mehr als jeder Satz, den man daneben schreiben könnte:** Die Zeile „Erben" steht auf jedem Vordruck, weil sie auf jedem Vordruck steht, und wird bei einem Fusilier fast nie ausgefüllt. Das Spiel sagt dazu nichts.
+>
+> Deshalb darf `.feld b` **nie ausgeblendet werden, wenn es leer ist.** Die gepunktete Linie gehört dem Feld, nicht der Eintragung — sonst verschwände sie genau dort, wo sie etwas sagt.
+
+### Das Signalement — die einzige Stelle, an der jemand aufschreibt, wie dieser Mann aussieht
+
+Der Kern eines echten Congé ist das *signalement*: neun Zeilen, mit denen der Staat einen Mann so beschreibt, dass man ihn wiedererkennt, **falls er desertiert**. Genau deshalb steht es hier — und es kommt in dem Augenblick, in dem er aufhört, zu ihnen zu gehören.
+
+**In die Zeile „Besondere Kennzeichen" kommen die Wunden.** Nicht als Auszeichnung und nicht als Klage, sondern als Merkmal, an dem man ihn erkennt.
+
+| | |
+|---|---|
+| **Die Größe** | `59 + Konstitution/16 + 0…2` Zoll. **Vier Fuß elf Zoll ist der Boden, und er ist kein Zufall:** Das war das gesetzliche Mindestmaß der Konskription (1,598 m). Nach oben rund fünf Fuß sieben — die Spanne, die in den Registern wirklich steht |
+| **Das Maß** | pieds und pouces. Das metrische Maß gab es 1796 auf dem Papier und in keinem Registerbuch |
+| **Die Pension** | im Spiel je Station, auf dem Blatt **je Jahr** (× 9). Ein Dokument sagt nicht „je Station" — das ist eine Spielregel, keine Verwaltungsangabe |
+
+> **Nichts darin wird gewürfelt.** Dieselbe Regel wie im Sichtfeld, und aus demselben Grund: Der Bildschirm wird bei `binde()` neu gezeichnet, und ein Signalement, das beim zweiten Blick andere Augen hat, ist kein Signalement. `zug(saat, n)` streut deterministisch aus dem Namen.
+
+**Drei Fehler, die erst das Dokument sichtbar gemacht hat** — alle drei standen vorher schon da, nur unauffällig:
+
+1. **`grund.toLowerCase()`** machte aus „Gefallen bei Eylau" ein **„gefallen bei eylau"**. Es sollte den ersten Buchstaben kleinschreiben; es traf den Ortsnamen mit. Jetzt `charAt(0).toLowerCase() + slice(1)`.
+2. **Der Nachlass führte Leerstellen als Gegenstände.** Die Ausrüstungsliste hält fehlende Sachen als Eintrag mit dem Namen „Kein Mantel" — im Register stand daraufhin *ein kein mantel* zwischen den Schuhen und dem Tornister.
+3. **`schrankeEnde()` stand auf `.card` statt `.card papier`.** Eine Entlassung ist kein Lagebericht, sondern eine Urkunde mit Siegel.
+
+> **⚠ Der Knopftext bleibt unangetastet.** „Nächster Mann" steht nur auf dem Todesblatt, „Noch einmal, besser" nur unter einem Ende, das der Mann überlebt hat — **drei Prüfstände unterscheiden Tod und Ende daran**, weil `zeigeTod()` den Zustand wegräumt und ein Fließtext kein Zustand ist. Wer an den Endbildschirmen baut, lässt die beiden Zeichenketten stehen.
 
 ## Pergament: die Gestalt seit dem 28.07.2026 (`src/stil.css`)
 
@@ -2014,6 +2184,131 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 
 **Die Abrechnung ist der eigentliche Rangunterschied.** Nach jedem Gefecht wird gezählt: Von zwanzig unter neun Verlusten gibt Fürsprache, ab neun kostet sie. Zum ersten Mal kann man ein Gefecht gewinnen und trotzdem verlieren — „Wer barfuß marschiert, ist dein Versäumnis" (KONZEPT). Im Lager kommen „Rekruten aussuchen" (Menschenkenntnis, hebt `S.sektionGuete` für den Rest des Laufs) und „exerzieren lassen" dazu.
 
+## Die Verwaltung — sieben Sitzungen (30.07.2026)
+
+**Das Spiel hatte oben eine Hälfte, die nicht gespielt wurde, sondern verwaltet.** Ab Rang 9 gab es eine Kompaniekasse, einen Einheitszustand und einen Auftrag je Gefecht — drei Zahlen, die etwas taten, ohne dass jemand mit ihnen umgehen konnte. Sieben Sitzungen haben daraus ein System gemacht. **Der Leitsatz über allen sieben:**
+
+> **Verwaltung ist kein zweiter Kampf mit anderen Zahlen. Sie ist die Frage, wen man dafür bezahlen lässt.**
+
+| Sitzung | Was |
+|---|---|
+| 1 · Aufräumen | acht Widersprüche zwischen Code und Entwurf |
+| 2 · Die Zahlen geradeziehen | `francs()`, `rangSetzen()`, Abende nach Rang, der Abbau |
+| 3 · Der Kaufladen | drei Güteleitern, zehn Extras, Freischaltung durch Leistung |
+| 4 · Die Kette unter dir | vier Unterstellte, die deine Befehle ausführen — oder nicht |
+| 5 · Der Schreibtisch | ein Fenster über dem Lager, drei Vorgänge, kein Abend |
+| 6 · Das Risiko und die Mitwisser | sechs Folgestufen, fünf Wege, wie es herauskommt |
+| 7 · Aufträge nach oben | der Stand sichtbar, zwei Befehle ab 12, der stehende Auftrag |
+
+### Sitzung 2 — die Zahlen geradeziehen
+
+**Vier Einzelheiten, und die dritte ist die einzige, die die Balance berührt.**
+
+| | Was |
+|---|---|
+| **`francs()`** | Eine Stelle für jede Geldanzeige. Vorher standen `12`, `12.0` und `12,00` nebeneinander, je nachdem, welche Datei die Zahl gedruckt hat |
+| **`rangSetzen()`** | **Die einzige Tür für jede Rangänderung.** Sie pflegt `S.hoechsterRang` und ruft `unterstellteSetzen()`. Vorher setzten sechs Stellen `S.rang` von Hand, und der Rückstufung aus Sitzung 6 hätte es die Kette unter dem Mann stehen lassen |
+| **Abende nach Rang, dritte und vierte Stufe** | 3 ab Rang 9, 4 ab Rang 12 — dieselbe Begründung wie beim Caporal: Ohne den zusätzlichen Abend verdrängt die rangeigene Handlung die eigene Ausbildung, und der Rang fühlt sich an wie eine Strafe |
+| **Der Abbau** | Ausrüstung, die ein Offizier nicht mehr trägt, verschwindet aus der Anzeige, statt dort als tote Zeile zu stehen |
+
+> **Der Befund, der Sitzung 5 ausgelöst hat:** Verwaltung als weiterer Lagerknopf frisst die Abende. Ein Capitaine hat drei, und wenn zwei davon in die Kasse und die Listen gehen, ist der Rang keine neue Möglichkeit mehr, sondern eine Pflicht mit Zeitkosten. **Deshalb kostet der Schreibtisch keinen Abend** — er liegt davor.
+
+### Sitzung 3 — der Kaufladen (`LADEN_GRUPPEN`, `ladenFrei()` in `grundwerte.js`)
+
+**Achtundzwanzig Posten statt dreizehn, und zwei neue Regeln.**
+
+**Güteleitern (`gruppe:`).** Muskete, Schuhe und Mantel gibt es in drei Güten. **Der teurere Kauf ersetzt den billigeren**, statt neben ihm zu liegen — man besitzt eine Muskete, nicht drei. Das ist der Unterschied zwischen einem Laden und einem Inventar.
+
+**Freischaltung durch Leistung (`frei:`, `freiKapitel:`).** Zehn Posten stehen erst im Laden, wenn man etwas erreicht hat — ein Fernrohr, wenn man einmal ein Bataillon geführt hat; ein Pferd, wenn man einmal berechtigt war, eines zu haben. **Nie durch Veteranenpunkte** (Invariante 3): VP kaufen den Ausgangspunkt, aber *welche* Posten es überhaupt gibt, entscheidet, was ein früherer Lauf gesehen hat.
+
+> **Warum das kein zweiter VP-Preis ist.** Ein Posten, der 400 VP kostet, ist teuer. Ein Posten, den es erst gibt, wenn man einmal Colonel war, ist **etwas anderes** — er erzählt, dass man ihn kennt. Dieselbe Logik wie bei den Generalskampagnen und den Patenten.
+
+### Sitzung 4 — die Kette unter dir (`S.unterstellte`, `ausfuehrungsProbe()` in `kampf.js`)
+
+**Ab Rang 7 hat man vier Namen unter sich, und sie führen aus, was man befiehlt — oder eben nicht.**
+
+| Feld | Was es tut |
+|---|---|
+| `koennen` | die Probe, die *er* wirft, wenn du einen Befehl gibst |
+| `treue` | −5…+5, und der einzige Wert, der über die Mitwisser aus Sitzung 6 entscheidet |
+
+```js
+function ausfuehrungsProbe(schw){
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  if(!u.length) return {erfolg:true, wer:null, faktor:1};
+  ...
+  return {erfolg, wer:x, faktor: erfolg ? 1 : 0.55};
+}
+```
+
+**Das ist die zweite Ohnmacht, und sie sitzt tiefer als die erste.** Ab Rang 7 gab es schon die Trennung von Entscheidung und Wirkung — du befiehlst und wartest. Jetzt hat das Warten einen Namen: **Ein Befehl, der gut gewählt war, kann daran scheitern, dass Sergent Peyron ihn ausführt.** Der Faktor 0,55 ist absichtlich keine Null — ein schlecht ausgeführter Befehl wird ausgeführt, nur schlechter.
+
+> **`unterstellteSetzen()` ist selbstheilend, und das musste es zweimal werden.** Es kehrt sofort zurück, wenn die Stufe schon stimmt, also darf es überall gerufen werden. **Der Grund ist ein Prüfstand:** `test/raenge.js` setzt `S.rang` von Hand, `rangSetzen()` läuft dabei nie, und der Block fehlte auf allen sechs oberen Rängen. Derselbe Fall ein zweites Mal in `schreibtischStellen()`. **Regel daraus: Was ein Rang mitbringt, wird nicht beim Aufstieg gebaut, sondern beim Betrachten geprüft.**
+
+**Dazu das Pferd** (`pferdFaktor()`, `pferdUnterhalt()`, `pferdGefahr()`): der erste Ladenposten, der laufend Geld kostet — 60 F je Feldzug für das Vollblut, fällig am Übergang. Wer nicht zahlen kann, verliert es; die Armee füttert kein Privatpferd. **Und er kostet auch Sicherheit:** Ein Berittener ist sichtbar.
+
+### Sitzung 5 — der Schreibtisch (`VORGAENGE`, `schreibtischFenster()` in `abschluss.js`)
+
+**Ab Rang 9 liegt vor den Abenden ein Fenster, das keinen Abend kostet.** Drei Vorgänge liegen darauf, und man muss **alle drei** erledigen — nicht auswählen, sondern durcharbeiten.
+
+> **Drei und nicht zwölf, Pflicht und nicht Auswahl.** Drei Vorgänge, die man erledigen *muss*, sind Verwaltung. Zwölf, aus denen man wählt, sind ein Einkaufsladen. Der Unterschied ist der ganze Ton dieses Rangs.
+
+**Fünf Vorgangsarten, je drei Antworten, kein Kommentar hinterher:** der Personalvorschlag (der Fähigere oder der Treuere — Invariante 5 von der anderen Seite: *du* bist jetzt der, der vergibt), die Zustandsfrage (einer säuft: melden oder decken), die Bestandsmeldung (achtzig Paar Schuhe fehlen: Wahrheit, schönen, oder aus eigener Tasche), der Auftrag von oben (dreißig Mann für eine Arbeitskolonne — jede Wahl senkt jemandes Können) und die Zuteilung.
+
+**Es ist ein Fenster, kein Bildschirm** (`.ueberlage`, auf Ansage des Entwicklers). Es liegt **über** dem Lager, nicht an seiner Stelle: Man sieht, was man gleich tun wird, und daneben das Blatt, das erst noch weg muss. Genau so liegt es auf einem Feldtisch.
+
+> **Der Rücken der Überlage ist die Sperre, nicht das Dekor.** Solange ein Vorgang offen ist, ist das Lager sichtbar und nicht bedienbar. **Alle sechs Prüfstände liefen daraufhin in einen Timeout** — der Beweis, dass die Sperre greift, und zugleich ein Fehler im Messgerät: Ein Prüfstand, der hinter ein Fenster klickt, drückt einen Knopf, den ein Spieler nicht erreichen kann. Sie suchen ihre Knöpfe jetzt zuerst in `.ueberlage`.
+
+### Sitzung 6 — das Risiko und die Mitwisser (`heimlich()`, `folgeStufe()` in `mechanik.js`)
+
+**Ein Risiko ohne Mitwisser ist ein Würfel. Ein Risiko mit Mitwissern ist ein Verhältnis.** Bis dahin gab es genau eine riskante Entscheidung — die Kompaniekasse — und sie hing an einer Zahl, die niemand kennt und die keine Geschichte hat.
+
+**Sechs Folgestufen statt einer Strafe.** Vorher: ein Rang zurück, Ruf −20, für alles gleich. Jetzt vom Aktenvermerk bis zu zwei Rängen zurück, und **jeder bestehende Vermerk hebt die nächste Folge um eine Stufe.** Gemessen: Schwere 1–4 ohne Vermerke → Stufe 1, 2, 3, 5; mit zwei Vermerken → 3, 4, 5, 6.
+
+> **Stufe 3 ist die beste Strafe, die dieses Spiel haben kann, weil sie seinem Ton entspricht: Man wird nicht bestraft, man wird nicht befördert.** Kein Bildschirm, keine Meldung, kein Vorwurf — nur eine Musterung, an der nichts passiert. **Höchstens einmal je Laufbahn:** Wer zweimal ohne Erklärung übergangen wird, hält die Leiter für kaputt statt sich selbst für erwischt.
+
+**Entlassen wird man nie.** Die Armee gibt keinen Mann her, den sie noch brauchen kann — sie stellt ihn tiefer. Damit bleiben die vier Enden vier. Und es gibt keinen Boden: Wer als Colonel dreimal auffällt, dient als Sergent-major weiter, und man gibt ihm seine Muskete zurück, die er seit zehn Jahren nicht geladen hat.
+
+**Fünf Wege, wie es herauskommt, und keiner nennt den Namen:** der Inspecteur (findet nur, was auf Papier steht; ein Mitwisser mit Treue ≤ 0 hebt es um acht Punkte, weil er nicht lügt) · ein Unterstellter redet ((−treue) × 5 %, ab Treue +1 nie) · **einer in Bedrängnis handelt** (35 %, unabhängig von seiner Treue) · die Aktenprüfung ab Rang 11 · der Rivale an der Musterung.
+
+> **Der dritte Weg ist der, um den das ganze System gebaut ist.** Der Gefallen *ist* das Leck: Du hast ihn gedeckt, das machte ihn zum Mitwisser, und jetzt gibt er eine Sache her, um seine eigene loszuwerden. **Es gibt keine gute Antwort auf die Zustandsfrage** — melden kostet sein Können, decken kostet dich später.
+
+**Gemessen, 200 Lager je Fall:** Treue −5 bei allen → **48 % entdeckt**; Treue +2 → **16 %**, also nur noch der Inspecteur. Treue ist damit das, was sie sein soll: kein Bonus, sondern der Unterschied zwischen einem Verhältnis und einer Wahrscheinlichkeit.
+
+**Verjährung: Schwere 1 zwei Kapitel, 2 drei, 3 vier, 4 nie.** Der Aktenvermerk verjährt nicht — **was aufgeschrieben wurde, bleibt aufgeschrieben; nur was niemand aufgeschrieben hat, kann vergessen werden.** Dazu die zweite Verjährung, die keine ist: Ein Mitwisser, der stirbt, nimmt seinen Teil mit.
+
+**Der Mitgezogene** — einmal, beim Aufstieg zu Rang 10, auf dem Schreibtisch. Er rückt zwei Stufen unter einem nach, ist der einzige, dessen Treue +5 erreichen kann, und der längste Mitwisser. Daraus ergibt sich die Geometrie, die dieses System trägt: **Der Mann, dem du am meisten vertraust, ist der Mann, der am meisten über dich weiß.** Beides wächst aus derselben Zeit. Das Spiel spricht es nie aus.
+
+**Angezeigt werden Sache und Zahl der Mitwisser, nie die Namen.** Menschen sind lesbar, Vergangenheit ist es nicht — man kann einschätzen, wem man traut, und trotzdem nicht ausrechnen, was auf dem Spiel steht.
+
+> **⚠ Und wieder derselbe Fehler im Messgerät, zum vierten Mal.** Die erste Probe meldete **„entdeckt in 0 von 200"**. Die Mechanik war heil; die Probe war blind — sie prüfte den *Rückgabewert*, und Stufe 3 gibt absichtlich einen leeren String zurück. **Eine Quote von exakt null ist fast immer das Messgerät.** Gemessen wird am Zustand, nie am Rückgabewert.
+
+### Sitzung 7 — Aufträge nach oben (`AUFTRAEGE`, `KAPITELAUFTRAEGE` in `kampf.js`)
+
+**Den Auftrag gab es seit Rang 9, aber er war eine Lotterie.** Er stand vor der ersten Runde auf dem Schirm und danach nie wieder — und ab Rang 10 prüfte er gegen Zahlen, die der Bildschirm gar nicht mehr zeigt. **Wer nicht sehen kann, ob sein Auftrag steht, entscheidet nicht, sondern hofft.**
+
+**Der Stand ist sichtbar** (`auftragStand()`): „steht" oder „steht nicht", grün oder rot, in jeder Runde neu. Dieselbe Überlegung wie bei den Proben, die Wert und Schwierigkeit schon auf dem Knopf zeigen.
+
+**Zwei Befehle ab Rang 12** (`auftragZweiter()`) — einer vom Korps, einer aus Paris, und sie schließen einander aus. Gebaut ist **nur der echte Widerspruch** („nehmen" gegen „halten", „decken", „schonen"): Ein zweiter Auftrag, den man nebenbei miterfüllt, wäre keine Entscheidung. Abgerechnet wird, ob **einer** von beiden steht, nicht welcher; darunter steht der andere mit seinem Ausgang, ohne Kommentar.
+
+> **Das ist die Erfahrung, die dieser Rang verkauft:** nicht die Frage, ob man einen Befehl ausführen kann, sondern welchen von zweien. **Die Antwort darauf kommt nie.** Beide sind berechtigt, beide kommen von jemandem, der mehr weiß als du, und sie widersprechen sich, weil zwei Leute an zwei Orten zwei Dinge für dringend halten.
+
+**Der stehende Auftrag ab Rang 10** (`KAPITELAUFTRAEGE`) — drei Sorten im Wechsel je Feldzug: das Bataillon ist im Frühjahr gefechtsbereit (`S.einheit ≥ 60`), die Unteroffiziere sind ausgebildet (`unterstellteGuete() ≥ 55`), die Bücher sind ohne Beanstandung (kein Verzeichniseintrag, kein Vermerk).
+
+| | |
+|---|---|
+| **Wo geprüft** | am `uebergang` und an der Schranke — dort, wo ein Feldzug wirklich zu Ende ist |
+| **Womit bezahlt** | Fürsprache beim Beurteiler und ein Bulletin — **nicht in Ruf** |
+| **Wo sichtbar** | im Gefecht *und* im Lager |
+
+> **Warum nicht in Ruf.** Ruf bekommt man für das, was man tut; **das hier ist, was man unterlassen hat zu ruinieren.** Und es zahlt genau in die beiden Währungen, an denen die oberen Leitersprossen hängen: Fürsprache und Bulletins.
+>
+> **Warum auch im Lager.** Das Lager ist der einzige Ort, an dem man etwas dafür tun kann. Ein stehender Auftrag, den man nur im Gefecht sieht, sagt einem, was man vor drei Wochen hätte tun sollen.
+
+**`LAUF.kauftrag` merkt die abgerechnete Kapitelnummer**, damit erneutes Zeichnen oder Fortsetzen aus dem Spielstand nicht ein zweites Mal bucht — dieselbe Sicherung wie `LAUF.erholt`. Am Hebel geprüft: doppelter Aufruf lässt die Bulletins bei 1.
+
+**Am Hebel ausgelesen, nicht am Ergebnis geraten:** Rang 9 liefert in 40 von 40 Gefechten genau einen Auftrag, Rang 12 in allen 40 ein widersprüchliches Paar (`nehmen+schonen` ×17, `halten+nehmen` ×11, `decken+nehmen` ×8, `schonen+nehmen` ×4).
+
 ## Was an der Leiter noch offen ist
 
 **Die Stationen im Prototyp:** Caporal in Verona (Italien), Fourrier bei der Musterung in Kairo, **Sergent in Katia** — der neuen Station zwischen dem Rückzug aus Syrien und Abukir. **Abukir ist damit das erste und einzige Sektionsgefecht**, und das ist dramaturgisch der richtige Ort: ein Gefecht im neuen Maßstab als Schlussstein, statt Rang 5 zu verwalten.
@@ -2091,10 +2386,8 @@ Ab Rang 5 wechseln die Kampfknöpfe vollständig — der Maßstabswechsel aus KO
 ## Was als Nächstes ansteht
 
 1. **Die Einstiegshürde höher legen.** Der Erstläufer klettert mit Fertigkeiten-Sockel 20 zu schnell — Caporal 65 %, Sergent 53 %, neunmal ein Patent bei einer Weite von 31. Gefordert ist das Gegenteil: *„relativ nutzlos, bzw. ziemlich sicher sterben"*, **nie über den Colonel hinaus**. Der Hebel ist die Härtekurve (Italien +0), nicht der Sockel.
-2. **Den Marschallstab erreichbar machen.** Rang 14 verlangt eine `generalskampagne`, die es nicht gibt — dieselbe Lage, in der Rang 13 bis zum 30.07.2026 war. Erst danach steht die Decke der VP-Ökonomie endgültig fest.
-3. **Bündel 6 — die zwei Endbildschirme** (Trauerblatt und Congé absolu). Keine Priorität. **⚠ Der Knopftext „Nächster Mann" darf sich dabei nicht ändern** — drei Prüfstände erkennen den Tod daran, und zwar am Knopf, weil `zeigeTod()` den Zustand wegräumt.
-4. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
-5. **Alles, was in `OFFEN.md` steht.**
+2. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
+3. **Alles, was in `OFFEN.md` steht.**
 
 > **Erledigt am 30.07.2026, in einem Zug** — zwölf zusammenhängende Änderungen, weil keine für sich allein stehen konnte:
 >

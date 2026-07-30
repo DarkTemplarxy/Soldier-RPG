@@ -111,38 +111,46 @@ const LAGER_TUN = {
      Der Fourrier hat keine neuen Kampfknöpfe, und das ist der Witz an ihm
      (KONZEPT: „ein Weg nach oben für schlechte Kämpfer"). Seine Arbeit liegt
      im Lager, und sie zahlt in der Währung, die er dafür braucht. */
-  listen:{label:'Die Listen der Kompanie führen',
-    cost:'Verwaltung und Bildung · Fürsprache',
+  /* ── Die Schreibarbeit der Kompanie ──
+     **Zwei Knöpfe wurden einer.** „Die Listen führen" und „Die Ausgabe
+     verteilen" standen nebeneinander und waren dieselbe Sache aus zwei
+     Blickwinkeln: das Papier und das, was daraus am Hof wird. Ein Abend, eine
+     Probe, beide Folgen — der Fourrier hat vier Abende und hatte neun Knöpfe.
+
+     **Die Verteilung hängt am Ausgang der Probe, nicht an einer zweiten
+     Wahl.** Wer die Liste im Griff hat, kann sie auch gegen das Dienstalter
+     lesen; wer nicht, gibt der Reihe nach aus und drei Mann gehen weiter
+     barfuß. */
+  schreibarbeit:{label:'Die Schreibarbeit der Kompanie',
+    cost:'Verwaltung und Bildung · Fürsprache · wer bekommt die Schuhe zuerst',
     tu(){ const p = probe('verwaltung',35);
       nutzen('verwaltung',2); S.attr.bildung = Math.min(100, S.attr.bildung+2);
-      if(p.erfolg){ gunstGeben('collot',1); gunstGeben('berthaud',1);
-        return 'Bestand, Abgang, Zugang, dreimal nachgezählt, weil es beim zweiten Mal nie stimmt. Am Ende geht die Liste durch, ohne dass jemand etwas sagt — und das ist bei Listen das höchste Lob. <span class="fein">Verwaltung und Bildung steigen · Fürsprache Collot und Berthaud +1</span>'; }
-      gunstGeben('berthaud',-1);
-      return 'Zwölf Paar Schuhe fehlen, und du findest nicht heraus, wo sie geblieben sind. Der Lieutenant findet es auch nicht heraus, aber er weiß, auf wessen Blatt es steht. <span class="fein">Verwaltung steigt · Fürsprache Berthaud −1</span>'; }},
-
-  ausgabe:{label:'Die Ausgabe verteilen',
-    cost:'Wer bekommt die Schuhe zuerst?',
-    tu(){ const p = probe('menschenkenntnis',35);
-      if(p.erfolg){ S.kameradschaft=Math.min(100,S.kameradschaft+10); gunstGeben('collot',1);
-        return 'Du gibst die Schuhe denen, die am längsten barfuß gehen, und nicht denen, die am lautesten fragen. Es dauert länger und macht zwei Leute wütend, aber am Abend erzählt es die Kompanie weiter. <span class="fein">Kameradschaft +10 · Fürsprache Collot +1</span>'; }
-      S.kameradschaft=Math.max(0,S.kameradschaft-6); gunstGeben('berthaud',1); S.geld+=3;
-      return 'Du gibst die Schuhe der Reihe nach aus, wie es die Liste vorsieht, und die Liste ist nach Dienstalter geordnet. Es geht schnell, der Lieutenant nickt, und drei Männer im hinteren Glied gehen weiter barfuß. <span class="fein">Kameradschaft −6 · Fürsprache Berthaud +1 · +3 F</span>'; }},
+      if(p.erfolg){
+        S.kameradschaft = Math.min(100, S.kameradschaft+8);
+        gunstGeben('collot',1); gunstGeben('berthaud',1);
+        return 'Bestand, Abgang, Zugang, dreimal nachgezählt, weil es beim zweiten Mal nie stimmt. Am Ende geht die Liste durch, ohne dass jemand etwas sagt — und das ist bei Listen das höchste Lob. Bei der Ausgabe bekommst du deshalb die Schuhe denen, die am längsten barfuß gehen, und nicht denen, die am lautesten fragen. <span class="fein">Verwaltung und Bildung steigen · Kameradschaft +8 · Fürsprache Collot und Berthaud +1</span>'; }
+      S.kameradschaft = Math.max(0, S.kameradschaft-6); gunstGeben('berthaud',-1); S.geld += 3;
+      return 'Zwölf Paar Schuhe fehlen, und du findest nicht heraus, wo sie geblieben sind. Also gibst du der Reihe nach aus, wie es die Liste vorsieht, und die Liste ist nach Dienstalter geordnet. Es geht schnell, und drei Männer im hinteren Glied gehen weiter barfuß. <span class="fein">Verwaltung steigt · Kameradschaft −6 · Fürsprache Berthaud −1 · +3 F</span>'; }},
 
   /* ── Ab Rang 5: zwanzig Mann ── */
-  rekruten:{label:'Die Rekruten für deine Sektion aussuchen',
-    cost:'Menschenkenntnis · wer neben dir steht, entscheidet mit',
+  /* ── Deine zwanzig Mann ──
+     **Auch hier waren es zwei Knöpfe für eine Sache:** wen man nimmt und was
+     man mit ihm macht. Zusammengelegt zu einem Abend, der beides tut — die
+     Auswahl entscheidet die Probe, das Exerzieren kommt in jedem Fall.
+
+     Der Ruf-Punkt bleibt am Exerzieren hängen, nicht an der Auswahl: Gesehen
+     wird, wer seine Leute auf dem Hof hat, nicht wer klug aussucht. */
+  zwanzig:{label:'Deine zwanzig Mann',
+    cost:'Menschenkenntnis, Autorität und Drill · Ruf +1 · deine Sektion',
     tu(){ const p = probe('menschenkenntnis',40);
       guetePlus(p.erfolg ? 12 : -6);
-      nutzen('autoritaet',1);
-      return p.erfolg
-        ? 'Du gehst die Neuen ab und siehst nicht auf die Schultern, sondern auf die Hände und auf die Augen. Zwei nimmst du, die niemand wollte, und einen Großen lässt du stehen. Man wird dich in vier Wochen dafür verstehen. <span class="fein">Deine Sektion wird besser</span>'
-        : 'Du nimmst die Größten und die, die am geradesten stehen. Es sieht gut aus auf dem Hof. Was davon im Rauch übrig bleibt, wirst du sehen. <span class="fein">Deine Sektion wird schlechter</span>'; }},
-
-  sektion:{label:'Deine zwanzig Mann exerzieren lassen',
-    cost:'Autorität und Drill · Ruf +1 · deine Sektion hält besser',
-    tu(){ nutzen('autoritaet',2.5); nutzen('drill',2.5); S.ruf+=1;
       guetePlus(8);
-      return 'Zwanzig Mann in zwei Gliedern, Salve auf Kommando, vierzig Mal. Beim vierzigsten geht es gleichzeitig los, und das Geräusch ist ein einziges. Genau darum geht es: Zwanzig Musketen, die nacheinander knallen, sind Lärm. Zwanzig auf einmal sind eine Wand. <span class="fein">Autorität und Drill steigen · Ruf +1 · Sektion besser</span>'; }},
+      nutzen('autoritaet',2.5); nutzen('drill',2.5); S.ruf += 1;
+      const auswahl = p.erfolg
+        ? 'Du gehst die Neuen ab und siehst nicht auf die Schultern, sondern auf die Hände und auf die Augen. Zwei nimmst du, die niemand wollte, und einen Großen lässt du stehen.'
+        : 'Du nimmst die Größten und die, die am geradesten stehen. Es sieht gut aus auf dem Hof. Was davon im Rauch übrig bleibt, wirst du sehen.';
+      return auswahl + ' Danach zwei Glieder, Salve auf Kommando, vierzig Mal. Beim vierzigsten geht es gleichzeitig los, und das Geräusch ist ein einziges — zwanzig Musketen, die nacheinander knallen, sind Lärm, zwanzig auf einmal sind eine Wand. <span class="fein">Autorität und Drill steigen · Ruf +1 · '
+        + (p.erfolg ? 'deine Sektion wird deutlich besser' : 'deine Sektion wird nur wenig besser') + '</span>'; }},
 
   tornister:{label:'Mit vollem Tornister auf den Hügel und zurück',
     cost:'Konstitution · Atem −10',
@@ -176,71 +184,11 @@ const LAGER_TUN = {
     tu(){ nutzen('kartenkunde',2.5); nutzen('taktik',2);
       return 'Ein Blatt von 1793, auf dem drei Dörfer fehlen und ein Fluss falsch liegt. Der Adjutant sagt, es sei das beste, das sie haben. Du zeichnest den Weg nach, den ihr heute gegangen seid, und danach weißt du, wo ihr wirklich seid. <span class="fein">Kartenkunde und Taktik steigen</span>'; }},
 
-  /* ── Ab Rang 8: der Adjutantenauftrag ──
-     Drei Fertigkeiten, die zehn Ränge lang fast nichts getan haben, bekommen
-     hier ihre Verwendung. Reihum, damit nicht dieselbe Probe dreimal kommt. */
-  adjutant:{label:'Einen Auftrag des Bataillons übernehmen',
-    cost:'Reiten, Kartenkunde oder Verwaltung · Fürsprache Vernet',
-    tu(){ const arten = [
-        ['reiten',40,'Eine Meldung nach Norden reiten, achtzehn Kilometer, zwei davon im Dunkeln.',
-         'Du bist vor der Dämmerung dort und kannst hersagen, was du gesehen hast, ohne aufzusehen.',
-         'Das Pferd bricht in einem Graben ein, und du kommst zwei Stunden zu spät. Die Meldung ist bis dahin überholt.'],
-        ['kartenkunde',40,'Eine Stellung erkunden und aufzeichnen: welcher Hang, welcher Weg, wo man ein Bataillon verstecken kann.',
-         'Deine Skizze geht ohne Rückfrage an den Stab, und drei Tage später steht darauf, wo die Batterien hinkommen.',
-         'Du zeichnest den Bach auf der falschen Seite ein. Es fällt jemandem auf, der es besser weiß.'],
-        ['verwaltung',40,'Einen Nachschubzug führen: elf Wagen, sechs Fuhrleute, die nicht Soldaten sind.',
-         'Elf Wagen kommen an, und keiner davon leer. Das ist seltener, als es klingt.',
-         'Zwei Wagen bleiben in Vaux stehen, weil ein Fuhrmann sich weigert, und du hast nichts, womit du ihn zwingen kannst.']];
-      const a = arten[(S.auftraege||0) % 3];
-      S.auftraege = (S.auftraege||0)+1;
-      const p = probe(a[0], a[1]);
-      if(p.erfolg){ gunstGeben('vernet',1); S.ruf += 1;
-        return a[2]+' '+a[3]+' <span class="fein">Fürsprache Vernet +1 · Ruf +1</span>'; }
-      gunstGeben('vernet',-1);
-      return a[2]+' '+a[4]+' <span class="fein">Fürsprache Vernet −1</span>'; }},
-
-  /* ── Ab Rang 9: die Kompaniekasse ──
-     Historisch die *masses*, verwaltet vom Capitaine. Das Spiel kommentiert
-     die Wahl nie — es zeigt ein halbes Jahr später einen Satz darüber, wie
-     viele auf dem Marsch zurückgeblieben sind. Der Stachel steckt woanders:
-     Du hast Veteranenpunkte für deine eigene Muskete ausgegeben und weißt
-     deshalb genau, was gute Ausrüstung wert ist. */
-  kasse_ganz:{label:'Die Kasse ausgeben, wie sie vorgesehen ist',
-    cost:'0 F · Einheitszustand ++',
-    tu(){ S.kasseQuartal = true;
-      S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+25);
-      return 'Schuhe für einundvierzig Mann, Hemden für neunzehn, ein Fass Branntwein und ein Wagen Stroh. Am Ende liegt der Rest in Kupfer auf dem Tisch, und der Rest ist nichts. <span class="fein">Einheitszustand +25</span>'; }},
-
-  kasse_ueblich:{label:'Das Übliche abzweigen',
-    cost:'+150 F · Einheitszustand + · es kann auffallen',
-    tu(){ S.kasseQuartal = true; S.geld += 150;
-      S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
-      S.kasseRisiko = (S.kasseRisiko||0) + 15;
-      return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger. <span class="fein">+150 F · Einheitszustand +10</span>'; }},
-
-  /* ── Ab Rang 11: die Lieferantenverträge ──
-     Dieselbe Struktur wie die Kompaniekasse, eine Größenordnung darüber, mit
-     demselben Schweigen. Ein Colonel bestellt Tuch, Schuhe und Brot für
-     zweitausend Mann; wer die Lieferung bekommt, entscheidet er. */
-  vertrag_sauber:{label:'Den Vertrag an den vergeben, der liefert',
-    cost:'0 F · Einheitszustand ++',
-    tu(){ S.kasseQuartal = true;
-      S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+30);
-      return 'Der Tuchhändler aus Elbeuf ist der teuerste von dreien und der einzige, dessen Ware nach dem ersten Regen noch Tuch ist. Du nimmst ihn. Der Intendant zieht die Augenbrauen hoch und schreibt es auf. <span class="fein">Einheitszustand +30</span>'; }},
-
-  vertrag_still:{label:'Den Vertrag an den vergeben, der zahlt',
-    cost:'+600 F · Einheitszustand − · es fällt wahrscheinlich auf',
-    tu(){ S.kasseQuartal = true; S.geld += 600;
-      S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
-      S.kasseRisiko = (S.kasseRisiko||0) + 35;
-      return 'Er kommt selbst, im eigenen Wagen, und er redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt. <span class="fein">+600 F · Einheitszustand −15</span>'; }},
-
-  kasse_voll:{label:'Kräftig zulangen',
-    cost:'+400 F · Einheitszustand − · es fällt wahrscheinlich auf',
-    tu(){ S.kasseQuartal = true; S.geld += 400;
-      S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
-      S.kasseRisiko = (S.kasseRisiko||0) + 40;
-      return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat. <span class="fein">+400 F · Einheitszustand −10</span>'; }}
+  /* Der Adjutantenauftrag, die Kompaniekasse und die Lieferantenverträge
+     standen bis zum 30.07.2026 hier als sechs Knöpfe und kosteten Abende.
+     **Sie liegen jetzt auf dem Schreibtisch** — Papier ist kein Abend, und
+     eine Kasse, der man durch Nichtdrücken ausweichen kann, ist keine Frage.
+     Siehe `VORGAENGE`, Ebenen „Was den Feldzug trägt" und „Was bleibt". */
 };
 
 /* Unteroffiziere sind vom Wachdienst und von den Handreichungen befreit, die
@@ -248,28 +196,93 @@ const LAGER_TUN = {
    Hals. Ein Rang gibt also nicht nur einen Knopf mehr, sondern auch den Abend,
    an dem man ihn drücken kann; sonst verdrängt die Dienstpflicht die eigene
    Ausbildung. Ab Sergent noch einen. */
-function abendeFuer(n){ return n.abende + (S.rang>=5 ? 2 : S.rang>=3 ? 1 : 0); }
+/* ── Die dritte und vierte Stufe ──
+   **Der Deckel lag bei Rang 5, und damit hatte ein Marschall genau so viele
+   Abende wie ein Sergent — vier.** Die Knöpfe wuchsen aber weiter: Rang 5 sah
+   11 bis 13, Rang 9 sah 15 bis 17. Jede neue Verwaltungshandlung *verdrängte*
+   damit die eigene Ausbildung, statt eine Ebene daneben zu sein — genau das,
+   wovor der Kommentar darüber warnt.
 
+   **Ein Capitaine hat Zeit, weil er Leute hat, die für ihn arbeiten.** Das ist
+   die Begründung im Spiel und zugleich die im Entwurf: Ohne den Abend
+   verdrängt die Dienstpflicht die Ausbildung, und der Rang fühlt sich an wie
+   eine Strafe. Ab Rang 12 kommt ein vierter dazu — ein General teilt seine
+   Zeit selbst ein. */
+function abendeFuer(n){
+  return n.abende + (S.rang>=12 ? 4 : S.rang>=9 ? 3 : S.rang>=5 ? 2 : S.rang>=3 ? 1 : 0);
+}
+
+/* ── Welche Knöpfe der Abend hat ──
+
+   **Das Lager ist der Abend, der Schreibtisch ist die Arbeit.** Bis zum
+   30.07.2026 stand beides nebeneinander: Rang 9 hatte zwölf Knöpfe auf drei
+   Abende, drei davon waren die Kompaniekasse in drei Varianten. Verwaltung
+   verdrängte damit die eigene Ausbildung — genau das, wovor der Kommentar über
+   `abendeFuer()` warnt.
+
+   Jetzt gilt: **Was Papier ist, liegt auf dem Schreibtisch und kostet keinen
+   Abend. Was der eigene Körper, der eigene Kopf oder die eigenen Leute sind,
+   bleibt ein Abend.**
+
+   | Rang | vorher | jetzt |
+   |---|---|---|
+   | 5 · Sergent | 11 | 9 |
+   | 8 · Lieutenant | 12 | 9 |
+   | **9 · Capitaine** | **12** | **6** |
+   | 11 · Colonel | 8 | 5 | */
 function lagerHandlungen(n){
   const ids = (n.tun||[]).slice();
   if(S.rang>=3) ids.push('korporalschaft');
-  if(S.rang>=4) ids.push('listen','ausgabe');
-  if(S.rang>=5) ids.push('rekruten','sektion');
+  if(S.rang>=4) ids.push('schreibarbeit');
+  if(S.rang>=5) ids.push('zwanzig');
   /* Ab dem Patent fällt weg, was die Muskete betraf, und es kommt hinzu, was
      eine Einheit betrifft. Der Fechtboden steht dabei allein: Er ist die
      einzige Handlung im Spiel, die einen Wert gegen sein eigenes Verkümmern
      verteidigt, statt ihn zu steigern. */
   if(S.rang>=7) ids.push('fechtboden','zugfuehren','karten');
-  if(S.rang>=8) ids.push('adjutant');
-  if(S.rang>=9 && S.rang<11 && !S.kasseQuartal) ids.push('kasse_ganz','kasse_ueblich','kasse_voll');
-  if(S.rang>=11 && !S.kasseQuartal) ids.push('vertrag_sauber','vertrag_still');
   if(S.zweig==='grenadier') ids.push('tornister');
   if(S.zweig==='voltigeur') ids.push('gelaende');
-  /* Ein Offizier exerziert nicht mehr selbst und trägt keine Muskete mehr —
-     die Lagerhandlungen, die daran hängen, verschwinden mit ihr. */
-  if(S.rang>=7) return ids.filter(id=>LAGER_TUN[id]
-    && !['exerzieren','bajonett','scharf','waffe','gelaende','tornister'].includes(id));
-  return ids.filter(id=>LAGER_TUN[id]);
+  /* ── Der Abbau ──
+     **Ohne Abbau gibt es keine Verschiebung, sondern Anhäufung.** Bis zum
+     30.07.2026 fiel ab Rang 7 nur weg, was die Muskete betraf; alles andere
+     blieb kumulativ stehen. Ein **Général de division** hatte weiterhin „Deine
+     acht Mann drillen" — die Sektion, die er vor sechs Rängen abgegeben hat.
+
+     Jeder Zugewinn kostet etwas. Das ist die Regel der ganzen Rangleiter. */
+  const weg = [];
+  /* Ab 7: die Muskete, und die Leute, die er nicht mehr hat. Ein
+     Sous-Lieutenant führt einen Zug — er drillt keine acht Mann und keine
+     zwanzig mehr, das tun die Sergenten unter ihm. */
+  if(S.rang>=7)  weg.push('exerzieren','bajonett','scharf','waffe','gelaende','tornister',
+                          'korporalschaft','zwanzig');
+  /* ── Ab 8: der Bursche ──
+     **„Ausrüstung durchsehen und flicken" verschwindet, weil es jemand für
+     dich tut** (`burscheSorgt()` in `mechanik.js`). Der Schuster geht mit —
+     ein Lieutenant trägt seine Schuhe nicht selbst ins Dorf. */
+  if(S.rang>=8)  weg.push('instand','schuhe');
+  /* Ab 9: Du hast keine acht Mann und keine zwanzig. Du hast Sergenten, die
+     acht Mann haben. Und die Schreibarbeit liegt auf dem Schreibtisch. */
+  if(S.rang>=9)  weg.push('schreibarbeit');
+  /* Ab 10: Ein Bataillonschef geht nicht fouragieren. Das machen die, die er
+     dafür einteilt. */
+  if(S.rang>=10) weg.push('fouragieren');
+  /* Ab 11: Der Zug ist drei Ebenen weg. */
+  if(S.rang>=11) weg.push('zugfuehren');
+  /* Nie weg: `ruhe`, `leute`, `lesen`, `fechtboden`, `karten` — der eigene
+     Körper, der eigene Kopf und der eigene Säbel bleiben immer die eigene
+     Sache. */
+  /* ── Ein stummer Filter ist ein Fehlerverstecker ──
+     **Diese Regel hat das Projekt schon einmal siebzehn Prozentpunkte
+     gekostet**: Zwei Lager in Kapitel 4 forderten Handlungs-IDs, die es nicht
+     gab, und der Filter warf sie wortlos weg — das Lager vor Austerlitz hatte
+     zwei von acht Knöpfen und keinen davon war `ruhe`. Wer eine Auswahl aus
+     Daten füttert, meldet Unbekanntes, statt es wegzulassen.
+
+     Nebenbei gefunden: **`rangTun` an einer Lagerstation liest niemand.** Die
+     Rangregeln stehen hier und nirgends sonst; sechs Lager trugen die Liste
+     trotzdem, und sie hat nie etwas getan. Sie sind entfernt. */
+  ids.forEach(id=>{ if(!LAGER_TUN[id]) console.error('Unbekannte Lagerhandlung: '+id+' (Station '+(n.id||'?')+')'); });
+  return ids.filter(id=>LAGER_TUN[id] && weg.indexOf(id) < 0);
 }
 
 /* ══════════════════ DER INSPECTEUR AUX REVUES ══════════════════
@@ -285,6 +298,12 @@ function lagerHandlungen(n){
    Satz über die Zurückgebliebenen, und es sagt nicht, ob das schlimm war. */
 function inspektion(){
   if(S.rang<9) return '';
+  /* ── Das Verzeichnis kommt vor der Zahl ──
+     **Ein Risiko mit Mitwissern ist ein Verhältnis, kein Würfel.** Fliegt
+     etwas aus dem Verzeichnis auf, ist das die Meldung dieses Lagers; die
+     Kassen-Zahl darunter bleibt als zweiter, gröberer Weg bestehen. */
+  const ausVerzeichnis = heimlichPruefen();
+  if(ausVerzeichnis) return ausVerzeichnis;
   const z = (S.einheit==null ? (S.einheit=70) : S.einheit);
   const risiko = S.kasseRisiko||0;
   let t = '', ertappt = false;
@@ -292,13 +311,22 @@ function inspektion(){
     ertappt = true; S.kasseRisiko = 0;
     /* Bei Entdeckung sind Rang **und** Fürsprecher weg — das ist die schärfste
        Strafe, die das Spiel außerhalb des Todes kennt, und sie ist angesagt. */
-    S.rang = Math.max(6, S.rang-1); S.ruf = Math.max(0, S.ruf-20);
+    rangSetzen(Math.max(6, S.rang-1)); S.ruf = Math.max(0, S.ruf-20);
     gunstGeben('vernet',-4); gunstGeben('grandmaison',-3);
     t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
       Er rechnet die Ausgabelisten gegen die Bestandslisten und braucht dafür einen Vormittag. Am Nachmittag steht er auf und geht zum Chef de bataillon, ohne dich anzusehen. Was danach passiert, passiert schnell und ohne Verhandlung.
       <b>Rang zurück · Ruf −20 · Fürsprache Vernet −4</b></div>`;
   } else {
-    S.kasseRisiko = Math.max(0, risiko-10);
+    /* ── Abkühlung −10 → −4, und ein Deckel ──
+       **Die kleine Kassenwahl war faktisch straffrei:** +15 Risiko gegen −10
+       Abkühlung je Lager sind netto +5 für 150 Francs. Mit −4 bleiben elf
+       stehen, und wer dreimal zulangt, sitzt bei über dreißig.
+
+       Der Deckel bei 85 ist die Gegenrichtung: Ohne ihn wächst das Risiko ins
+       Unbegrenzte, und `kasse_voll` (+40) wäre nach dem dritten Mal eine
+       sichere Entdeckung statt einer Entscheidung. Erwischt werden soll
+       wahrscheinlich sein, nicht gewiss. */
+    S.kasseRisiko = Math.max(0, risiko-4);
     const wem = 'vernet';
     if(z>=75){ gunstGeben(wem,1);
       t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
@@ -353,14 +381,545 @@ function zeigeFeldbescheid(n){
   kopfzeile();
 }
 
+/* ══════════════════ DER SCHREIBTISCH ══════════════════
+
+   **Die Verwaltung braucht eine eigene Ebene, keinen weiteren Knopf im
+   Lager.** Sonst frisst sie die Abende — genau der Befund, der Sitzung 2
+   ausgelöst hat: Rang 5 sah 11 bis 13 Knöpfe, Rang 9 sah 15 bis 17, und jede
+   neue Verwaltungshandlung verdrängte die eigene Ausbildung.
+
+   Ab Rang 9 liegt deshalb **vor** den Abenden ein Bildschirm, der **keinen
+   Abend kostet**. Es liegen drei Vorgänge darauf, und man muss alle drei
+   erledigen — nicht auswählen, sondern durcharbeiten. Danach beginnen die
+   Abende wie gehabt.
+
+   **Warum drei und nicht fünf:** Weil die Verwaltung sich nach Pflicht
+   anfühlen soll, nicht nach Buffet. Drei Vorgänge, die man erledigen *muss*,
+   sind Verwaltung. Zwölf, aus denen man wählt, sind ein Einkaufsladen.
+
+   Ein Vorgang ist immer: ein Blatt Papier, zwei bis vier Antworten, **kein
+   Kommentar hinterher**. Das Spiel sagt nie, ob es richtig war. */
+/* Wie weit eine Entscheidung reicht — steht auf jedem Blatt. */
+const EBENE_WORT = {heute:'Was heute entschieden wird', feldzug:'Was den Feldzug trägt', bleibt:'Was bleibt'};
+const VORGAENGE = [
+
+  /* ── Personalvorschlag ── Die erste Stelle, an der man selbst vergibt, was
+     einem Berthaud einmal gegeben hat. Invariante 5 von der anderen Seite. */
+  {art:'personal', ebene:'bleibt', kopf:'Vorschlagsliste für die nächste Musterung',
+   text:u=>`Der Adjutant legt die Liste hin und wartet. Eine Stelle, zwei Namen: `
+     +`${u[0].posten} ${u[0].name}, der es kann, und ${u[1].posten} ${u[1].name}, der zu dir hält. `
+     +`Beide wissen, dass der andere daraufsteht.`,
+   wahlen:u=>[
+     {label:'Den Fähigeren vorschlagen', kosten:'Können +8 bei ihm · der andere erfährt es',
+      tu(){ koennenPlus(0,8); treuePlus(1,-2,'weiß, dass du den anderen genommen hast');
+        return 'Du schreibst den Namen hin, den du hingeschrieben hättest, wenn niemand zusähe. '
+             + `${S.unterstellte[1].name} sieht dich am Abend nicht an, und am nächsten Morgen wieder.`; }},
+     {label:'Den Treueren vorschlagen', kosten:'Treue +2 bei ihm · Können −4 in der Einheit',
+      tu(){ treuePlus(1,2,'hat bekommen, was er nicht verdient hatte'); koennenPlus(0,-4);
+        heimlich('personal_treu','Die Vorschlagsliste des Quartals',1,[1]);
+        return 'Du schreibst den anderen Namen hin. Der Adjutant liest ihn, sagt nichts und trägt ihn ein. '
+             + 'Es ist die Art von Sache, die niemand meldet und jeder weiß.'; }},
+     {label:'Niemanden vorschlagen', kosten:'die Stelle bleibt leer',
+      tu(){ treuePlus(0,-1,'hat auf die Liste gesehen und seinen Namen nicht gefunden');
+        treuePlus(1,-1,'auch nicht');
+        return 'Du gibst die Liste leer zurück. Der Adjutant sagt, dann bleibe die Stelle eben. '
+             + 'Sie bleibt sechs Wochen, und in diesen sechs Wochen macht die Arbeit, wer gerade danebensteht.'; }}]},
+
+  /* ── Zustandsfrage ── Der Gefallen ist das Leck: Wer deckt, macht den
+     Gedeckten zum Mitwisser. Das Spiel sagt das nie. */
+  {art:'zustand', ebene:'heute', kopf:'Meldung des Feldwebels',
+   text:u=>`${u[0].posten} ${u[0].name} war zweimal nicht auf dem Posten, und beide Male roch es danach, `
+     +`warum. Der Feldwebel hat es aufgeschrieben und legt es dir hin, statt es weiterzugeben. `
+     +`Das ist seine Art zu fragen, was du damit machen willst.`,
+   wahlen:u=>[
+     {label:'Weitermelden, wie es sich gehört', kosten:'Können −10 bei ihm · Ordnung in der Einheit',
+      tu(){ koennenPlus(0,-10); treuePlus(0,-2,'ist gemeldet worden, und er weiß von wem');
+        S.unterstellte[0].zustand = 'unter Verdacht';
+        S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+6);
+        return 'Du schreibst es weiter. Vierzehn Tage Arrest, und danach steht er wieder da, wo er stand, '
+             + 'nur dass jetzt alle wissen, dass er dort steht.'; }},
+     {label:'Ihn decken', kosten:'Treue +2 · und er weiß etwas über dich', risk:true,
+      tu(){ treuePlus(0,2,'weiß, dass du ihn gedeckt hast'); S.unterstellte[0].zustand = 'säuft';
+        heimlich('zustand_gedeckt','Die Meldung, die nicht weitergegangen ist',2,[0]);
+        return 'Du legst das Blatt zur Seite und sagst dem Feldwebel, du habest es gesehen. '
+             + 'Damit ist es nicht mehr seine Sache. Es ist deine.'; }},
+     {label:'Selbst mit ihm reden', kosten:'Menschenkenntnis · offen',
+      tu(){ const p = probe('menschenkenntnis', 40);
+        if(p.erfolg){ koennenPlus(0,5); treuePlus(0,1,'hat aufgehört, wenigstens vorerst');
+          S.unterstellte[0].zustand = 'dienstfähig';
+          return 'Ihr steht zwanzig Minuten hinter dem Magazin. Er sagt wenig, du auch. '
+               + 'Danach ist er sechs Wochen lang der Erste auf dem Platz.'; }
+        koennenPlus(0,-4); treuePlus(0,-1,'hat zugehört und nichts gehört');
+        S.unterstellte[0].zustand = 'säuft';
+        return 'Du redest, und er hört zu wie einer, der weiß, wie lange so etwas dauert. '
+             + 'Am Freitag ist er wieder nicht da.'; }}]},
+
+  /* ── Bestandsmeldung ── Der Ort, an dem `S.einheit` entsteht, und die
+     Gegenseite zur Kompaniekasse: Das Geld, das du abzweigst, ist genau das
+     Geld, mit dem du den Zustand hättest heben können. */
+  {art:'bestand', ebene:'heute', kopf:'Bestandsmeldung an das Bataillon',
+   text:u=>`Achtzig Paar Schuhe fehlen, und der Bogen fragt nach einer Zahl, nicht nach einer Erklärung. `
+     +`Was du hinschreibst, liest im Frühjahr jemand, der dich nicht kennt.`,
+   wahlen:u=>[
+     {label:'Die Wahrheit melden', kosten:'Rüffel jetzt · Einheitszustand +8',
+      tu(){ S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+8);
+        S.ruf = Math.max(0, S.ruf-3);
+        return 'Du schreibst achtzig hin. Es kommt ein Schreiben zurück, in dem das Wort „unzureichend" '
+             + 'zweimal vorkommt, und mit dem nächsten Konvoi kommen vierzig Paar.'; }},
+     {label:'Die Zahl schönen', kosten:'kein Rüffel · der Schreiber weiß es', risk:true,
+      tu(){ S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-4);
+        heimlich('bestand_geschoent','Die Bestandsmeldung des Quartals',1,[0]);
+        return 'Du schreibst dreißig hin. Es kommt kein Schreiben zurück, und es kommen auch keine Schuhe. '
+             + 'Der Schreiber trägt es ein, ohne aufzusehen.'; }},
+     {label:'Auf eigene Kosten beschaffen', kosten:'120 F · Einheitszustand +18',
+      ab:()=>S.geld >= 120,
+      tu(){ S.geld -= 120; S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+18);
+        treuePlus(0,1,'hat gesehen, wer die Schuhe bezahlt hat');
+        return 'Ein Händler in der Vorstadt, bar, ohne Beleg. Die Schuhe sind schlechter als die aus dem '
+             + 'Magazin und sie sind da. <span class="fein">−120 F</span>'; }}]},
+
+  /* ── Auftrag von oben ── Jede Wahl senkt das Können eines Unterstellten.
+     Es gibt keine gute Antwort, nur eine, die man verantwortet. */
+  {art:'auftrag', ebene:'heute', kopf:'Anforderung des Bataillons',
+   text:u=>`Dreißig Mann für eine Arbeitskolonne an der Straße, vierzehn Tage. `
+     +`Die Anforderung nennt die Zahl und nicht, aus welcher Abteilung sie kommen soll. `
+     +`Das ist die Höflichkeit, mit der man jemandem eine Entscheidung überlässt.`,
+   wahlen:u=>[
+     {label:`Aus ${u[0].name}s Abteilung`, kosten:'Können −7 bei ihm',
+      tu(){ koennenPlus(0,-7); treuePlus(0,-1,'hat dreißig Mann abgegeben und weiß, warum er');
+        return `Dreißig Mann von ${S.unterstellte[0].name}, weil seine Abteilung die vollzähligste ist. `
+             + 'Er sagt „zu Befehl" und nichts weiter.'; }},
+     {label:'Aus allen gleichmäßig', kosten:'Können −3 bei allen',
+      tu(){ (S.unterstellte||[]).forEach((x,i)=> koennenPlus(i,-3));
+        return 'Sieben, acht, sieben, acht. Niemand kann sich beschweren, und niemand ist zufrieden. '
+             + 'Vierzehn Tage später kommen sechsundzwanzig zurück.'; }},
+     {label:'Die Schwächsten aus jeder Abteilung', kosten:'Können −2 · Einheitszustand −6', risk:true,
+      tu(){ (S.unterstellte||[]).forEach((x,i)=> koennenPlus(i,-2));
+        S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-6);
+        heimlich('auftrag_schwaechste','Die Zusammenstellung der Arbeitskolonne',1,[0,1]);
+        return 'Du gehst die Listen durch und nimmst die, die ohnehin nichts halten. '
+             + 'An der Straße arbeiten dreißig Männer, die dafür am wenigsten taugen, und zwei davon kommen nicht zurück.'; }}]},
+
+  /* ── Zuteilung ── **Die einzige Handlung im Spiel ohne Probe.** Reine
+     Zuordnung: vier Aufgaben, vier Unterstellte, keine passt perfekt. */
+  {art:'zuteilung', ebene:'heute', kopf:'Einteilung für das Quartal',
+   text:u=>`Vier Dinge müssen laufen, und du hast genau so viele Leute, wie du hast. `
+     +`Es gibt keine Probe darauf und keinen Wurf. Du teilst ein, und danach ist es eingeteilt.`,
+   wahlen:u=>[
+     {label:`${u[0].name} auf den Exerzierplatz`, kosten:'Können +6 bei ihm · Einheitszustand −2',
+      tu(){ koennenPlus(0,6); S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-2);
+        return `${S.unterstellte[0].name} steht sechs Wochen auf dem Platz. Was daneben liegen bleibt, `
+             + 'liegt daneben.'; }},
+     {label:`${u[0].name} auf die Ausrüstung`, kosten:'Einheitszustand +10 · Können −2',
+      tu(){ koennenPlus(0,-2); S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
+        return `${S.unterstellte[0].name} zählt, sortiert und schreibt an. Es ist die Arbeit, die niemand sieht, `
+             + 'und im März sieht man sie.'; }},
+     {label:`${u[1].name} auf den Wachdienst`, kosten:'Treue +1 · Können −3 bei ihm',
+      tu(){ treuePlus(1,1,'hat den bequemen Dienst bekommen'); koennenPlus(1,-3);
+        return `${S.unterstellte[1].name} bekommt den Dienst, bei dem man nachts wach ist und tags nichts tut. `
+             + 'Er weiß, dass das ein Gefallen ist.'; }}]},
+
+  /* ══════════════════ EBENE „DIESER FELDZUG" ══════════════════
+
+     ── Die Kasse und der Vertrag ──
+     **Sie standen bis zum 30.07.2026 als drei beziehungsweise zwei Knöpfe im
+     Lager und kosteten einen Abend.** Das war zweimal falsch: Es ist keine
+     Ausbildung, sondern Papier — und man konnte den Knopf einfach nicht
+     drücken und der Frage ausweichen.
+
+     **Jetzt ist es ein Pflichtvorgang.** Jedes Quartal liegt die Kasse auf dem
+     Tisch, und man muss entscheiden, was mit ihr geschieht. Ehrlich ausgeben
+     ist eine der Antworten — aber es ist eine Antwort und kein Nichtstun.
+
+     Ab Rang 11 dieselbe Struktur eine Größenordnung darüber: Ein Colonel
+     bestellt Tuch, Schuhe und Brot für zweitausend Mann, und wer die Lieferung
+     bekommt, entscheidet er. */
+  {art:'kasse', ebene:'feldzug', kopf:'Die Kasse des Quartals',
+   ab:()=> !S.kasseQuartal,
+   text:u=> S.rang>=11
+     ? `Drei Angebote für Tuch, Schuhe und Brot, zweitausend Mann. Der Intendant legt sie nebeneinander und sagt nichts dazu. `
+       +`Was du unterschreibst, tragen deine Leute ein Jahr lang — oder eben nicht.`
+     : `Die Quartalskasse der Kompanie, hundertzwanzig Mann. Der Betrag steht fest, die Verwendung nicht. `
+       +`${u[0].posten} ${u[0].name} macht die Ausgabe und weiß hinterher, wie viele Paar Schuhe wirklich da waren.`,
+   wahlen:u=> S.rang>=11 ? [
+     {label:'Den Vertrag an den vergeben, der liefert', kosten:'0 F · Einheitszustand +30',
+      tu(){ S.kasseQuartal = true;
+        S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+30);
+        patronMerkt('ehrlich');
+        return 'Der Tuchhändler aus Elbeuf ist der teuerste von dreien und der einzige, dessen Ware nach dem ersten Regen noch Tuch ist. Du nimmst ihn. Der Intendant zieht die Augenbrauen hoch und schreibt es auf.'; }},
+     {label:'Den Vertrag an den vergeben, der zahlt', kosten:'+600 F · Einheitszustand −15 · es fällt wahrscheinlich auf', risk:true,
+      tu(){ S.kasseQuartal = true; S.geld += 600;
+        S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
+        S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 35);
+        heimlich('vertrag_still','Der Lieferantenvertrag',3,[0]);
+        patronMerkt('gierig');
+        return 'Er kommt selbst, im eigenen Wagen, und redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt.'; }}
+   ] : [
+     {label:'Die Kasse ausgeben, wie sie vorgesehen ist', kosten:'0 F · Einheitszustand +25',
+      tu(){ S.kasseQuartal = true;
+        S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+25);
+        patronMerkt('ehrlich');
+        return 'Schuhe für einundvierzig Mann, Hemden für neunzehn, ein Fass Branntwein und ein Wagen Stroh. Am Ende liegt der Rest in Kupfer auf dem Tisch, und der Rest ist nichts.'; }},
+     {label:'Das Übliche abzweigen', kosten:'+150 F · Einheitszustand +10 · es kann auffallen', risk:true,
+      tu(){ S.kasseQuartal = true; S.geld += 150;
+        S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
+        S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 15);
+        heimlich('kasse_ueblich','Die Kompaniekasse des Quartals',3,[0]);
+        patronMerkt('gierig');
+        return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger.'; }},
+     {label:'Kräftig zulangen', kosten:'+400 F · Einheitszustand −10 · es fällt wahrscheinlich auf', risk:true,
+      tu(){ S.kasseQuartal = true; S.geld += 400;
+        S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
+        S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 40);
+        heimlich('kasse_voll','Die Kasse des dritten Quartals',3,[0,1]);
+        patronMerkt('gierig');
+        return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat.'; }}
+   ]},
+
+  /* ── Der Ausbildungsplan ──
+     Die zweite Sorte für diese Ebene, und sie zahlt auf den stehenden
+     Kapitelauftrag „Die Unteroffiziere sind ausgebildet" ein. Drei Wege, und
+     jeder kostet etwas anderes: Zeit, Zustand oder das Können eines Einzelnen. */
+  {art:'ausbildung', ebene:'feldzug', kopf:'Ausbildungsplan für das Quartal',
+   text:u=>`Sechs Wochen bis zum Frühjahr, und der Adjutant fragt, was in dieser Zeit geübt werden soll. `
+     +`Es ist eine kurze Frage mit einer langen Folge: Was jetzt nicht geübt wird, kann im April niemand.`,
+   wahlen:u=>[
+     {label:'Die Unteroffiziere selbst unterrichten', kosten:'Können +5 bei allen · Einheitszustand −5',
+      tu(){ (S.unterstellte||[]).forEach((x,i)=> koennenPlus(i,5));
+        S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-5);
+        return 'Sechs Abende, an denen du selbst vor ihnen stehst, statt sie stehen zu lassen. Die Kompanie merkt in dieser Zeit, dass niemand hinsieht — aber im April können sie es.'; }},
+     {label:'Die Mannschaft exerzieren lassen', kosten:'Einheitszustand +12 · Können −2 bei allen',
+      tu(){ (S.unterstellte||[]).forEach((x,i)=> koennenPlus(i,-2));
+        S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+12);
+        return 'Sechs Wochen Hof, jeden Vormittag. Das Bataillon steht im April besser da, als es aussieht — und die, die es befehlen, haben in dieser Zeit nichts dazugelernt.'; }},
+     {label:'Nichts anordnen, es ist Winter', kosten:'Belastung −6 · nichts wird besser',
+      tu(){ S.belastung = Math.max(0, S.belastung-6);
+        return 'Du schreibst „nach Ermessen der Kompaniechefs" auf den Bogen, und damit ist es entschieden. Es ist die Antwort, die niemand aufschreibt und die jeder versteht.'; }}]},
+
+  /* ── Die Quartiere ──
+     Die dritte Sorte dieser Ebene. Sie ist die unscheinbarste und die einzige,
+     bei der der Einheitszustand direkt daran hängt, wie man mit Leuten
+     umgeht, die keine Soldaten sind. */
+  {art:'quartier', ebene:'feldzug', kopf:'Quartierverteilung',
+   text:u=>`Vierzehn Höfe für hundertzwanzig Mann, und der Ortsvorsteher steht daneben und rechnet mit. `
+     +`Wie eng man legt, entscheidet, wie viele im Frühjahr husten — und wie der Ort darüber redet, `
+     +`wenn die nächste Kolonne durchkommt.`,
+   wahlen:u=>[
+     {label:'Eng legen, dafür alle unter Dach', kosten:'Einheitszustand +14 · Kameradschaft −5',
+      tu(){ S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+14);
+        S.kameradschaft = Math.max(0, S.kameradschaft-5);
+        return 'Zwölf Mann in eine Scheune, in der acht Platz haben. Niemand friert, niemand schläft, und im März sind alle noch da.'; }},
+     {label:'Nach Vorschrift, wer keinen Platz hat, biwakiert', kosten:'Einheitszustand −6 · Belastung −4',
+      tu(){ S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-6);
+        S.belastung = Math.max(0, S.belastung-4);
+        return 'Die Liste sagt vierzehn Höfe, also vierzehn Höfe. Der Rest liegt hinter der Kirche, und der Rest sind neunzehn Mann.'; }},
+     {label:'Requirieren, was der Ort noch hat', kosten:'+90 F · Einheitszustand +8 · man wird es sich merken', risk:true,
+      tu(){ S.geld += 90;
+        S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+8);
+        heimlich('quartier_hart','Die Requisition in dem Ort, dessen Namen du vergessen hast',2,[0,1]);
+        return 'Stroh, Brennholz, zwei Schweine und der Inhalt eines Kellers, den der Ortsvorsteher nicht erwähnt hatte. Es steht in keiner Liste, und der Ort hat kein Gericht in der Nähe.'; }}]},
+
+
+  /* ══════════════════ EBENE „WAS BLEIBT" ══════════════════
+
+     ── Der Auftrag des Bataillons ──
+     **Er war ein Lagerabend und ist jetzt ein Vorgang.** Fürsprache ist die
+     langfristigste Währung des Spiels — sie zahlt auf die nächste Beförderung
+     ein, nicht auf dieses Gefecht —, und sie gehört damit auf die dritte
+     Ebene und nicht in denselben Topf wie Schlafen und Fechten.
+
+     **Und sie geht an den, der über die nächste Stelle entscheidet.** Hier
+     stand hart `'vernet'` — dieselbe Fehlerfamilie, die im Auftrag am
+     Gefechtsende vierzig von vierzig Veteranen beim Capitaine hat stehen
+     lassen: eine Fürsprachequelle, die an einen **Namen** gebunden ist statt
+     an die **Rolle**. */
+  {art:'adjutant', ebene:'bleibt', kopf:'Auftrag des Bataillonsstabs',
+   text:u=>`Der Adjutant bringt einen Bogen und wartet nicht auf eine Antwort — er wartet darauf, dass du `
+     +`aussuchst, welchen der drei Aufträge du selbst übernimmst. Die beiden anderen bekommt jemand anderes, `
+     +`und jemand anderes wird dafür genannt.`,
+   wahlen:u=>[
+     {label:'Die Meldung nach Norden reiten', kosten:'Reiten 40 · Fürsprache',
+      tu(){ return adjutantTun('reiten',40,
+        'Achtzehn Kilometer, zwei davon im Dunkeln.',
+        'Du bist vor der Dämmerung dort und kannst hersagen, was du gesehen hast, ohne aufzusehen.',
+        'Das Pferd bricht in einem Graben ein, und du kommst zwei Stunden zu spät. Die Meldung ist bis dahin überholt.'); }},
+     {label:'Die Stellung erkunden und aufzeichnen', kosten:'Kartenkunde 40 · Fürsprache',
+      tu(){ return adjutantTun('kartenkunde',40,
+        'Welcher Hang, welcher Weg, wo man ein Bataillon verstecken kann.',
+        'Deine Skizze geht ohne Rückfrage an den Stab, und drei Tage später steht darauf, wo die Batterien hinkommen.',
+        'Du zeichnest den Bach auf der falschen Seite ein. Es fällt jemandem auf, der es besser weiß.'); }},
+     {label:'Den Nachschubzug führen', kosten:'Verwaltung 40 · Fürsprache',
+      tu(){ return adjutantTun('verwaltung',40,
+        'Elf Wagen, sechs Fuhrleute, die nicht Soldaten sind.',
+        'Elf Wagen kommen an, und keiner davon leer. Das ist seltener, als es klingt.',
+        'Zwei Wagen bleiben in Vaux stehen, weil ein Fuhrmann sich weigert, und du hast nichts, womit du ihn zwingen kannst.'); }}]},
+
+  /* ── Die Beurteilung ──
+     **Der dritte Vorgang dieser Ebene, und der einzige, bei dem man über
+     einen anderen schreibt.** Was auf diesem Bogen steht, liest jemand in
+     zwei Jahren, wenn eine Stelle frei wird — und der, über den es steht,
+     erfährt ungefähr, was drinstand. Beides bleibt.
+
+     Es ist Invariante 5 von der anderen Seite, eine Stufe schärfer als der
+     Personalvorschlag: Dort wählt man zwischen zweien, hier schreibt man
+     einen Satz, der jemandem folgt. */
+  {art:'bericht', ebene:'bleibt', kopf:'Beurteilung für die Personalakte',
+   text:u=>`Einmal im Jahr will der Stab von jedem Offizier ein Urteil über die, die unter ihm stehen. `
+     +`Der Bogen für ${u[1].posten} ${u[1].name} liegt oben. Zwei Zeilen, und sie werden ihn überdauern.`,
+   wahlen:u=>[
+     {label:'Schreiben, was er kann', kosten:'Treue +1 · Fürsprache +1',
+      tu(){ treuePlus(1,1,'hat gelesen, was über ihn geschrieben wurde');
+        gunstGeben(beurteiler()||'vernet',1);
+        return 'Du schreibst, was er kann, und daneben, was er nicht kann. Es ist der kürzeste der drei Wege '
+             + 'und der einzige, den du in zwei Jahren noch vertreten kannst.'; }},
+     {label:'Ihn besser machen, als er ist', kosten:'Treue +2 · du hast etwas unterschrieben', risk:true,
+      tu(){ treuePlus(1,2,'weiß, was du über ihn geschrieben hast');
+        heimlich('bericht_geschoent','Die Beurteilung, die nicht stimmt',1,[1]);
+        return 'Du schreibst ihn zwei Stufen über das, was du gesehen hast. Er wird es erfahren, und er wird '
+             + 'wissen, dass er es dir schuldet. Der Bogen bleibt in der Akte, auch wenn er es nicht bleibt.'; }},
+     {label:'Ihn schlechter machen, als er ist', kosten:'Können −6 · Treue −3 · Ruf +2',
+      tu(){ koennenPlus(1,-6); treuePlus(1,-3,'ist übergangen worden und weiß, von wem');
+        S.ruf += 2;
+        return 'Zwei Zeilen, die freundlich klingen und ihn festhalten, wo er ist. Der Stab liest daraus, dass '
+             + 'du streng bist, und Strenge steht gut in einer Akte. Er liest es anders.'; }}]},
+
+];
+
+/* Der gemeinsame Rumpf der drei Adjutantenwege. `beurteiler()` liefert die
+   Rolle, nie einen Namen. */
+function adjutantTun(wert, schw, was, gut, schlecht){
+  S.auftraege = (S.auftraege||0)+1;
+  const wer = beurteiler() || 'vernet';
+  const p = probe(wert, schw);
+  if(p.erfolg){ gunstGeben(wer,1); S.ruf += 1;
+    return was+' '+gut+` <span class="fein">Fürsprache ${esc(personKurz(wer))} +1 · Ruf +1</span>`; }
+  gunstGeben(wer,-1);
+  return was+' '+schlecht+` <span class="fein">Fürsprache ${esc(personKurz(wer))} −1</span>`;
+}
+
+/* `'mit'` ist die einmalige Wahl des Mitgezogenen, alles andere ein Index in
+   VORGAENGE. Ein Sonderfall in einer Zeile ist billiger als eine sechste Art,
+   die nur einmal vorkommt. */
+function vorgangVon(k){
+  if(k === 'mit')    return VORGANG_MITGEZOGEN;
+  if(k === 'patron') return VORGANG_PATRON;
+  return VORGAENGE[k];
+}
+
+/* Wie viele Ausfertigungen es je Art gibt, und welche Vorgänge dieses Lager
+   bringt. **Drei Pflichtvorgänge, gezogen aus fünf Arten**, damit zwei Lager
+   hintereinander nicht dieselbe Frage stellen. */
+function schreibtischStellen(n){
+  unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  if(S.rang < 9 || u.length < 2) return [];
+  /* **Die Wahl des Mitgezogenen kommt einmal und geht vor.** Sie steht auf
+     demselben Blatt wie alles andere, aber sie ist die einzige, die man nur
+     ein einziges Mal in einer Laufbahn trifft. */
+  if(S.rang >= 10 && !u.some(x=>x.mit) && !S.mitgewaehlt){
+    S.mitgewaehlt = true;
+    return ['mit'];
+  }
+  /* **Und ab Colonel die zweite einmalige Wahl: wessen Mann man ist.** Sie
+     geht allem anderen vor, weil ohne sie der Beurteiler fehlt — `beurteiler()`
+     fiele sonst auf Grandmaison zurück, und die Fürsprache liefe fünf Kapitel
+     lang an den Falschen. Dieselbe Fehlerfamilie, die diesen Umbau ausgelöst
+     hat. */
+  if(S.rang >= 11 && !S.patron){
+    return ['patron'];
+  }
+  /* ── Drei Vorgänge, drei Ebenen, je einer ──
+
+     **Bis zum 30.07.2026 waren es drei Ziehungen aus fünf Arten** — der
+     Spieler bekam drei Blätter und wusste bei keinem, wie weit seine
+     Entscheidung reicht. Jetzt kommt aus jeder Ebene genau eines, immer in
+     derselben Reihenfolge:
+
+     | Ebene | Wie weit es reicht |
+     |---|---|
+     | **heute** | wirkt sofort und sichtbar — Zustand, Können, Geld |
+     | **feldzug** | wirkt bis zum Kapitelende und zahlt auf den stehenden Auftrag ein |
+     | **bleibt** | wirkt darüber hinaus — Fürsprache, Mitwisser, wer aufsteigt |
+
+     Über jedem Blatt steht, welche Ebene es ist. **Das ist der eigentliche
+     Gewinn:** Man weiß beim Entscheiden, wie weit die Entscheidung reicht —
+     und bei der dritten sagt das Spiel nie, ob es richtig war.
+
+     Deterministisch aus der Stations-ID, damit ein Beenden und Fortsetzen
+     nicht andere Vorgänge liefert — dieselbe Regel wie bei den Ereignissen. */
+  const saat = (n.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const raus = [];
+  ['heute','feldzug','bleibt'].forEach((eb,k)=>{
+    const wahl = VORGAENGE.map((v,i)=>[v,i]).filter(([v])=>
+      v.ebene === eb && (!v.ab || v.ab()));
+    /* **Der Versatz muss die Ebenen entkoppeln.** Mit `k*3` und Listen der
+       Längen 4/3/3 fiel jede Ziehung auf dieselbe Restklasse — die Kasse kam
+       immer zusammen mit dem Adjutanten, der Ausbildungsplan immer mit der
+       Vorschlagsliste. `k*7` ist teilerfremd zu allen drei Längen. */
+    if(wahl.length) raus.push(wahl[(saat + k*7) % wahl.length][1]);
+  });
+  return raus;
+}
+
+/* ── Der Mitgezogene ──
+   **Einer deiner Unterstellten steigt mit dir. Nicht als Belohnung, als
+   Verhältnis.** Die Wahl steht einmal, beim Aufstieg zu Rang 10, und sie steht
+   auf dem Schreibtisch — mit den Zahlen, die du kennst. Was du nicht siehst,
+   ist, wie lange du ihn brauchen wirst.
+
+   Er rückt immer zwei bis drei Stufen unter dir nach, wie Martel es über dir
+   tat. Er ist der **einzige**, dessen Treue +5 erreichen kann — und der
+   **längste Mitwisser**: Er stand bei jeder Sache dabei, seit du Capitaine
+   warst. Wer alle anderen dreimal ausgetauscht hat, hat immer noch ihn.
+
+   **Daraus ergibt sich die Geometrie, die dieses System trägt:** Der Mann, dem
+   du am meisten vertraust, ist der Mann, der am meisten über dich weiß. Beides
+   wächst aus derselben Zeit, und man kann das eine nicht ohne das andere
+   haben. Das Spiel spricht es nie aus. */
+/* ══════════════════ DIE WAHL DES PATRONS ══════════════════
+
+   **Sobald man Colonel ist, muss man sich entscheiden, wessen Mann man ist.**
+   Das ist der zweite und letzte unumkehrbare Entschluss des Spiels — der erste
+   war der Mitgezogene, und der betraf einen Mann unter dir. Dieser betrifft
+   den, der deinen Namen ausspricht, wenn eine Stelle aufgeht.
+
+   **Angezeigt wird, was jeder verlangt, und was er beim Kaiser gilt.** Nicht
+   angezeigt wird, wie sich das ändert. Masséna steht 1807 bei vier und 1812
+   bei null; man kann es wissen, wenn man Geschichte kennt, und das Spiel sagt
+   es nicht. */
+const VORGANG_PATRON = {
+  art:'patron', ebene:'bleibt', kopf:'Wessen Mann bist du',
+  text:u=>`Ein Regiment führt man allein, eine Brigade nicht. Über dir sitzen drei Männer, die dem Kaiser `
+    +`Namen nennen dürfen, und keiner von ihnen nennt einen, den er nicht kennt. `
+    +`Der Adjutant sagt, alle drei hätten gefragt. Das stimmt vermutlich bei einem von ihnen.`,
+  wahlen:u=>PATRONE.map(m=>({
+    label:m.name,
+    kosten:`verlangt ${m.wollen} · beim Kaiser ${patronStand(m.id, kapitelNummer())} von 5`,
+    tu(){
+      S.patron = m.id;
+      /* Er fängt bei +1 an: Er hat gefragt, also weiß er, wer du bist. */
+      const l = S.leute && S.leute[m.id];
+      if(l){ l.gunst = 1; l.lebt = true; }
+      return m.text + ` <span class="fein">Du bist ${esc(personKurz(m.id))}s Mann. Das lässt sich nicht zurücknehmen.</span>`;
+    }
+  }))
+};
+
+const VORGANG_MITGEZOGEN = {
+  art:'mitgezogen', kopf:'Wen nimmst du mit',
+  text:u=>`Ein Bataillon ist kein Zug, und die Sergenten bleiben bei der Kompanie. `
+    +`Einen darfst du mitnehmen — der Adjutant fragt es beiläufig, als sei es eine Formsache. `
+    +`Er wird zwei Stufen unter dir aufsteigen und in zehn Jahren immer noch da sein.`,
+  /* **Angeboten wird, wen man kannte, nicht wen man gerade bekommen hat.**
+     `unterstellteSetzen()` legt die alte Liste in `S.unterstellteVorher` ab,
+     ehe es sie ersetzt — sonst stünden hier die vier Capitaines, die man in
+     derselben Minute kennengelernt hat, und der Satz „die Sergenten bleiben
+     bei der Kompanie" liefe ins Leere. */
+  wahlen:u=>((S.unterstellteVorher && S.unterstellteVorher.length)
+      ? S.unterstellteVorher : u).slice(0,4).map((x,i)=>({
+    label:`${x.posten} ${x.name}`,
+    kosten:`Können ${x.koennen} · Treue ${x.treue>0?'+':''}${x.treue}${x.zustand!=='dienstfähig'?' · '+x.zustand:''}`,
+    tu(){
+      /* Er rückt auf den ersten Posten der neuen Stufe nach und bringt alles
+         mit, was ihn ausmacht — **vor allem seine Kennung.** An ihr hängt,
+         was er über dich weiß; ein neuer Mann mit demselben Namen wüsste es
+         nicht. */
+      const posten = (S.unterstellte[0]||{}).posten || x.posten;
+      const vorhanden = S.unterstellte.find(y=>y.id === x.id);
+      if(vorhanden){ vorhanden.mit = true; vorhanden.satz = 'geht mit dir'; }
+      else S.unterstellte[0] = Object.assign({}, x, {posten, mit:true, satz:'geht mit dir'});
+      S.unterstellteVorher = null;
+      return `${esc(x.name)} trägt seine Sachen selbst hinüber. Er sagt nichts dazu, und du auch nicht — `
+           + 'es ist die Art von Entscheidung, die man nicht bespricht.';
+    }
+  }))
+};
+
+/* ── Ein Blatt, das auf dem Lager liegt ──
+   **Der Schreibtisch ist kein eigener Bildschirm, sondern ein Fenster darüber.**
+   Das Lager bleibt sichtbar — man sieht, was man gleich tun wird, und daneben
+   das Blatt, das erst noch weg muss. Genau so liegt es auf einem Feldtisch:
+   Die Abende warten nicht woanders, sie warten darunter.
+
+   Der Rücken (`.ueberlage`) fängt jeden Klick ab, damit man nicht hinter dem
+   Blatt weiterspielt. Er ist kein Dekor, sondern die Sperre. */
+function schreibtischFenster(n){
+  const T = LAUF.schreibtisch;
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  const v = vorgangVon(T.offen[0]);
+  const alle = v.wahlen(u);
+  const offen = alle.filter(w => !w.ab || w.ab());
+  const opt = offen.map((w,i)=>
+    wahlZeile(roemisch(i+1), w.label, w.kosten, `schreibtischTun(${alle.indexOf(w)})`,
+      {risk:w.risk})).join('');
+  return `<div class="ueberlage"><div class="fenster">
+    <div class="card bogen"><div class="ch"><span>Der Schreibtisch</span><span>${esc((n&&n.ort)||'')}</span></div>
+      <div class="inner">
+        ${vordruck(n)}
+        <div class="prose"><p>${v.text(u)}</p></div>
+        ${T.log.length?`<div class="ergebnis">${T.log.join('<br><br>')}</div>`:''}
+        ${/* **Über jedem Blatt steht, wie weit die Entscheidung reicht.**
+             Das ist der Unterschied zwischen einem Vorgang und einem
+             Formular: Man weiß vorher, ob man über heute abend, über den
+             Feldzug oder über den Rest der Laufbahn entscheidet. */''}
+        <div class="wahlkopf"><span>${v.kopf}</span><span>${esc(EBENE_WORT[v.ebene]||'')} · Vorgang ${T.erledigt+1} von ${T.gesamt}</span></div>
+        ${opt}
+        <div class="bogenfuss"><span>Kostet keinen Abend. Muss trotzdem vor den Abenden vom Tisch.</span>
+          <span class="siegel">${kaiserreich()?'N':'RF'}</span></div>
+      </div></div>
+    </div></div>`;
+}
+
+function schreibtischTun(i){
+  const T = LAUF.schreibtisch;
+  const u = (S.unterstellte||[]).filter(x=>x.lebt);
+  const v = vorgangVon(T.offen[0]);
+  const w = v.wahlen(u)[i];
+  if(!w || (w.ab && !w.ab())) return;
+  /* **Kein Kommentar hinterher.** Der Vorgang sagt, was geschehen ist, und
+     nicht, ob es richtig war — dieselbe Regel wie überall im Spiel. */
+  const text = w.tu();
+  T.log = [`<b>${esc(w.label)}</b><br>${text}`];
+  T.offen.shift(); T.erledigt++;
+  laufSichern();
+  /* Immer dasselbe Ziel: Das Lager zeichnet sich neu und legt das nächste
+     Blatt darauf, wenn noch eines da ist. */
+  /* Zurück auf den Bildschirm, auf dem das Blatt lag — Lager oder Saison. */
+  const nn = KAPITEL[LAUF.node];
+  if(nn && nn.typ === 'winter') zeigeWinter(nn); else zeigeLager(nn);
+}
+
 function zeigeLager(n){
   if(S && S.bescheidOffen){ zeigeFeldbescheid(n); return; }
   const L = LAUF.lager;
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
     L.sold = soldAuszahlen();
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
+    /* Davout sieht sich den Zustand an, wenn er vorbeikommt, und er kommt
+       vorbei. Siebzig ist die Zahl, bei der er nichts sagt. */
+    if((S.einheit==null?70:S.einheit) >= 70) patronMerkt('einheitGut');
+    /* Sechs Wochen unter demselben Offizier: Die Kette unter dir wird von
+       allein ein wenig besser. Hier und nicht je Station, weil das Lager
+       auch der Ort ist, an dem man gezielt nachhilft — beides gehört an
+       dieselbe Stelle, sonst rechnet man gegen sich selbst. */
+    unterstellteReifen();
     L.inspektion = inspektion();
     laufSichern(); }
+  /* ── Der Schreibtisch liegt vor den Abenden ──
+     Ab Rang 9, drei Pflichtvorgänge, kein Abend. Er wird je Lager einmal
+     aufgebaut und über `LAUF.schreibtisch` durchgehalten — wer mitten darin
+     aufhört, steht beim Fortsetzen wieder davor, wie bei den
+     Gefechts-Ereignissen.
+
+     **Er steht nach dem Zurücksetzen von `S.kasseQuartal` und nicht davor.**
+     Die Kasse ist ein Vorgang mit `ab:`, und der wurde in der ersten Fassung
+     gegen den Wert des *vorigen* Lagers geprüft — sie lag damit nie auf dem
+     Tisch. Reihenfolge ist hier Zustand, nicht Geschmack. */
+  if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
+    const offen = schreibtischStellen(n);
+    LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+    laufSichern();
+  }
   const opt = lagerHandlungen(n).map((id,i)=>{
     const t = LAGER_TUN[id];
     return wahlZeile(roemisch(i+1), t.label, t.cost, `lagerTun('${id}')`, {gesperrt:L.abende<=0});
@@ -370,14 +929,23 @@ function zeigeLager(n){
     ${bogen(n,
       `<div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
        ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
-       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
+       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${francs(L.sold, true)} F</b></div>`:''}
        ${L.inspektion||''}
+       ${/* Der stehende Auftrag gehört ins Lager, nicht nur ins Gefecht: Hier
+            ist der einzige Ort, an dem man etwas dafür tun kann. Er sagt,
+            wofür die Abende zu verwenden wären — und ob es noch reicht. */
+         kapitelauftragZeile()}
        ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       ['Womit verbringst du den Abend?',
        `Verbleibend ${L.abende} von ${abendeFuer(n)}${abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'ein Abend':'zwei Abende'} mehr als ${rangName(S.rang)}`:''}`],
       opt,
       'Es ist immer mehr zu tun als Zeit da ist')}
-    </div>${seitenleiste()}</div>`;
+    </div>${seitenleiste()}</div>${
+      /* Das Blatt liegt zuletzt im Baum und damit obenauf. Solange eines da
+         ist, fängt sein Rücken jeden Klick ab — das Lager ist sichtbar, aber
+         nicht bedienbar. */
+      (S.rang>=9 && LAUF.schreibtisch && LAUF.schreibtisch.offen.length)
+        ? schreibtischFenster(n) : ''}`;
   kopfzeile();
 }
 function lagerTun(id){
@@ -578,6 +1146,7 @@ function winterHandlungen(n){
   if(n.rangTun) for(const r in n.rangTun) if(S.rang >= +r) ids.push(...n.rangTun[r]);
   if(S.zweig==='grenadier' && n.zweigTun && n.zweigTun.grenadier) ids.push(...n.zweigTun.grenadier);
   if(S.zweig==='voltigeur' && n.zweigTun && n.zweigTun.voltigeur) ids.push(...n.zweigTun.voltigeur);
+  ids.forEach(id=>{ if(!WINTER_TUN[id]) console.error('Unbekannte Winterhandlung: '+id+' (Station '+(n.id||'?')+')'); });
   return ids.filter((id,i,a)=>WINTER_TUN[id] && a.indexOf(id)===i);
 }
 function wochenFuer(n){ return n.wochen || 3; }
@@ -590,8 +1159,15 @@ function zeigeWinter(n){
        danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
        Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
     W.atemVoll = S.atem < S.leben; S.atem = 100; atemKlemmen();
+    unterstellteReifen();                   // wie im Lager: Zeit unter demselben Offizier
+    S.kasseQuartal = false;                 // auch eine Saison ist ein Quartal
     W.sold = soldAuszahlen();
     laufSichern();
+  }
+  /* Der Schreibtisch, nach dem Zurücksetzen des Quartals — siehe `zeigeLager()`. */
+  if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
+    const offen = schreibtischStellen(n);
+    LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
   }
   const opt = winterHandlungen(n).map((id,i)=>{
     const t = WINTER_TUN[id];
@@ -606,12 +1182,17 @@ function zeigeWinter(n){
       `<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
        ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
        ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
-       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
+       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${francs(W.sold, true)} F</b></div>`:''}
        ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
       opt+schluss,
       'Drei Wochen unter einem Dach')}
-    </div>${seitenleiste()}</div>`;
+    </div>${seitenleiste()}</div>${
+      /* **Auch eine Saison hat einen Schreibtisch** (VERWALTUNG §3: „an jedem
+         Lager und jeder Saison"). Ein Winterquartier ist die Zeit, in der die
+         Papiere sich stapeln, nicht die, in der sie verschwinden. */
+      (S.rang>=9 && LAUF.schreibtisch && LAUF.schreibtisch.offen.length)
+        ? schreibtischFenster(n) : ''}`;
   kopfzeile();
 }
 function winterTun(id){
@@ -810,6 +1391,184 @@ function wertungsTabelleAus(c){
   </table>`;
 }
 
+/* ══════════════════ DIE ZWEI ENDBILDSCHIRME ══════════════════
+
+   **Ein Mann hört auf zwei Arten auf, und beide Male entsteht dabei ein
+   Papier.** Bis hierher endete beides in einem gewöhnlichen Bogen mit einer
+   Punktetabelle — die Wertung stand da, wo das Dokument hingehört.
+
+   Es sind zwei verschiedene Papiere, und der Unterschied ist der ganze Punkt:
+
+   | | **Trauerblatt** | **Congé absolu** |
+   |---|---|---|
+   | Wann | er ist gefallen | er geht lebend |
+   | Wer schreibt | ein Schreiber über ihn | die Armee an ihn |
+   | Wen es beschreibt | einen Nachlass | einen Körper |
+   | Was leer bleibt | die Zeile für die Erben | nichts |
+
+   **Der Ton kommt aus der Form, nicht aus Adjektiven** (Invariante 7). Ein
+   Vordruck wertet nicht — er hat Felder, und die Felder werden ausgefüllt.
+   Dass eines davon leer bleibt, sagt mehr als jeder Satz, den man daneben
+   schreiben könnte.
+
+   **Nichts darin wird gewürfelt.** Dieselbe Regel wie im Sichtfeld: Der
+   Bildschirm wird bei `binde()` neu gezeichnet, und ein Signalement, das beim
+   zweiten Blick andere Augen hat, ist kein Signalement. `zug()` streut
+   deterministisch aus dem Namen. */
+function zug(saat, n){
+  let h = 0;
+  for(let i=0;i<saat.length;i++) h = (h*31 + saat.charCodeAt(i)) & 0x7fffffff;
+  return h % n;
+}
+/* Eine Zeile des Vordrucks: Feldname, gepunktete Linie, eingetragener Wert.
+   Ein leerer Wert bleibt eine leere Linie — das ist eine Aussage und kein
+   Fehler, deshalb wird hier nichts ausgelassen. */
+function feld(was, wert){
+  return `<div class="feld"><span>${esc(was)}</span><b>${wert==null||wert===''?'':esc(String(wert))}</b></div>`;
+}
+function dienstjahre(){
+  const j = jahrVonStation() - 1796;
+  return j <= 0 ? 'weniger als ein Jahr' : j === 1 ? 'ein Jahr' : j + ' Jahre';
+}
+function feldzuege(){
+  const k = kapitelUeberlebt();
+  return k === 0 ? 'keinen vollständig' : k === 1 ? 'einen' : k + ' Feldzüge';
+}
+/* Der Nachlass eines Soldaten ist eine Liste von Gegenständen, und genau so
+   wird er im Register geführt. Das Geld zuerst, weil danach zuerst gefragt
+   wurde. */
+function nachlass(){
+  const teile = [];
+  if(S.geld > 0) teile.push(francs(S.geld) + ' Francs');
+  Object.keys(S.ausr||{}).forEach(k=>{
+    const a = S.ausr[k];
+    /* **Ein leerer Platz ist kein Nachlassstück.** Die Ausrüstungsliste führt
+       fehlende Sachen als Eintrag mit dem Namen „Kein Mantel" — im Register
+       stand daraufhin ein kein mantel zwischen den Schuhen und dem Tornister.
+       Ebenso bleibt die Schreibweise, wie sie ist: Eine Charleville heißt
+       Charleville, auch in einem Formular. */
+    if(!a || !a.name || /^kein/i.test(a.name)) return;
+    teile.push(a.name + (a.verschleiss ? ' (Zustand ' + Math.round(a.zustand) + ')' : ''));
+  });
+  return teile.length ? teile.join(', ') : 'nichts von Wert';
+}
+function ordenZeile(){
+  const o = (S.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean);
+  return o.length ? o.join(', ') : 'keine';
+}
+function wundenZeile(){
+  const w = (S.wunden||[]).map(x=>x.name);
+  return w.length ? w.join(', ') : '';
+}
+
+/* ── Das Trauerblatt ──
+   Der Auszug aus dem Sterberegister, wie ihn ein Fourier ausfüllt: acht
+   Felder, eine Bemerkung, eine Unterschrift, die niemand lesen kann.
+
+   **Die Zeile „Erben" bleibt leer, und sie ist der Grund für das ganze Blatt.**
+   Sie steht auf dem Vordruck, weil sie auf jedem Vordruck steht; ausgefüllt
+   wird sie bei einem Fusilier fast nie. Das Spiel sagt dazu nichts. */
+function trauerblatt(grund){
+  const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  const bemerkungen = [
+    'Kein Brief nach Hause. In der Kompanie kann niemand schreiben, der ihn gekannt hat.',
+    'Die Sachen sind am selben Abend verteilt worden. Der Vordruck verlangt eine Aufstellung, also steht sie hier.',
+    'Der Eintrag ist nachgetragen worden. Das Datum ist das, an dem er zuletzt beim Appell war.'
+  ];
+  return `<div class="urkunde">
+    <div class="urkopf"><span>${kaiserreich() ? 'Empire Français' : 'République Française'}</span>
+      <b>Extrait mortuaire</b><span>32.&thinsp;Demi-brigade de bataille</span></div>
+    <div class="felder">
+      ${feld('Name', S.name)}
+      ${feld('Grad und Kompanie', rangName(S.rang) + ', 1. Kompanie')}
+      ${feld('Herkunft', S.herkunft)}
+      ${feld('Eingetreten', 'April 1796, Savona')}
+      ${feld('Ausgeschieden', letzte.datum || '')}
+      ${feld('Ort', letzte.ort || '')}
+      ${feld('Ursache', grund)}
+      ${feld('Dienstzeit', dienstjahre() + ', ' + feldzuege())}
+      ${feld('Auszeichnungen', ordenZeile())}
+      ${feld('Nachlass', nachlass())}
+      ${feld('Erben', '')}
+    </div>
+    <div class="urnote">${esc(bemerkungen[zug(S.name + grund, bemerkungen.length)])}</div>
+    <div class="urfuss"><span>Der Fourier der Kompanie</span><i class="krakel">Collot</i></div>
+  </div>`;
+}
+
+/* ── Der Congé absolu ──
+   **Die endgültige Entlassung, und das echte Dokument.** Sein Kern ist das
+   *signalement*: neun Zeilen, mit denen der Staat einen Mann so beschreibt,
+   dass man ihn wiedererkennt, falls er desertiert. Genau deshalb steht es
+   hier — es ist die einzige Stelle im ganzen Spiel, an der jemand aufschreibt,
+   wie dieser Mann aussieht, und sie kommt in dem Augenblick, in dem er
+   aufhört, zu ihnen zu gehören.
+
+   **In die Zeile „Besondere Kennzeichen" kommen die Wunden.** Nicht als
+   Auszeichnung und nicht als Klage — als Merkmal, an dem man ihn erkennt. */
+const SIG_HAAR = ['braun','kastanienbraun','schwarz','blond','dunkelblond','grau meliert'];
+const SIG_STIRN = ['hoch','gewöhnlich','niedrig','bedeckt'];
+const SIG_NASE = ['gewöhnlich','lang','breit','gebogen','spitz'];
+const SIG_MUND = ['mittel','groß','klein'];
+const SIG_KINN = ['rund','spitz','gespalten','breit'];
+const SIG_GESICHT = ['oval','voll','länglich','mager','pockennarbig'];
+const SIG_AUGEN = ['grau','blau','braun','graublau','dunkelbraun'];
+function signalement(){
+  const s = S.name || 'x';
+  /* Die Größe wächst mit der Konstitution und streut um zwei Zoll. Gemessen
+     wird in pieds und pouces — das metrische Maß gab es 1796 auf dem Papier
+     und in keinem Registerbuch. */
+  /* **Vier Fuß elf Zoll ist der Boden, und er ist kein Zufall:** Das war das
+     gesetzliche Mindestmaß der Konskription (1,598 m). Nach oben reicht es
+     bis rund fünf Fuß sieben — die Spanne, die in den Registern wirklich
+     steht. Gerechnet wird in pieds und pouces; das metrische Maß gab es 1796
+     auf dem Papier und in keinem Registerbuch. */
+  const zoll = 59 + Math.round((S.attr.konstitution|0) / 16) + zug(s+'g', 3);
+  const fuss = Math.floor(zoll / 12), rest = zoll % 12;
+  return [
+    ['Größe', fuss + ' Fuß ' + rest + ' Zoll'],
+    ['Haare und Brauen', SIG_HAAR[zug(s+'h', SIG_HAAR.length)]],
+    ['Augen', SIG_AUGEN[zug(s+'a', SIG_AUGEN.length)]],
+    ['Stirn', SIG_STIRN[zug(s+'s', SIG_STIRN.length)]],
+    ['Nase', SIG_NASE[zug(s+'n', SIG_NASE.length)]],
+    ['Mund', SIG_MUND[zug(s+'m', SIG_MUND.length)]],
+    ['Kinn', SIG_KINN[zug(s+'k', SIG_KINN.length)]],
+    ['Gesicht', SIG_GESICHT[zug(s+'f', SIG_GESICHT.length)]],
+    ['Besondere Kennzeichen', wundenZeile() || 'keine']
+  ];
+}
+function congeAbsolu(){
+  const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  const grund = S.abgelehnt ? 'Auf eigenen Antrag'
+    : S.ende === 'halbsold' ? 'Auflösung des Verbandes'
+    : 'Ausgemustert nach der neuen Rangordnung';
+  const rente = ordenPension();
+  return `<div class="urkunde">
+    <div class="urkopf"><span>${kaiserreich() ? 'Empire Français' : 'République Française'}</span>
+      <b>Congé absolu</b><span>32.&thinsp;Demi-brigade de bataille</span></div>
+    <div class="felder">
+      ${feld('Name', S.name)}
+      ${feld('Grad bei der Entlassung', rangName(S.rang))}
+      ${feld('Herkunft', S.herkunft)}
+      ${feld('Eingetreten', 'April 1796, Savona')}
+      ${feld('Entlassen', letzte.datum || '')}
+      ${feld('Dienstzeit', dienstjahre() + ', ' + feldzuege())}
+      ${feld('Grund', grund)}
+      ${feld('Auszeichnungen', ordenZeile())}
+      ${/* Die Pension läuft im Spiel je Station. Ein Congé nennt einen
+            Jahresbetrag — einhundertdreiundsechzig Stationen auf neunzehn
+            Jahre sind rund neun je Jahr, und mit dieser Zahl wird gerechnet.
+            Ein Dokument sagt nicht „je Station"; das ist eine Spielregel. */''}
+      ${feld('Pension', rente ? francs(Math.round(rente*9)) + ' Francs jährlich' : 'keine')}
+    </div>
+    <div class="urabschnitt">Signalement</div>
+    <div class="felder eng">${signalement().map(([a,b])=>feld(a,b)).join('')}</div>
+    <div class="urnote">Der Inhaber darf sich in jeder Gemeinde niederlassen und ist zu weiterem Dienst nicht verpflichtet.
+      Das Blatt ist bei jeder Aufforderung vorzuzeigen.</div>
+    <div class="urfuss"><span>Der Chef de bataillon</span><i class="krakel">Vernet</i></div>
+  </div>`;
+}
+
 /* `letzterText` und `kk` reicht `gefallen()` aus dem Gefecht herein: der letzte
    Absatz vor dem Umfallen und die Taten dieses Gefechts. Vorher baute
    `kampfEnde()` beides in einen Bildschirm, den `zeigeTod()` eine Anweisung
@@ -824,9 +1583,14 @@ function zeigeTod(letzterText, kk){
     <div class="cb">
       <div class="prose">
         ${letzterText?`<p>${letzterText}</p>`:''}
-        <p><b>${esc(S.name)}</b>, ${rangName(S.rang)} der 32. Halbbrigade, ${esc(grund.toLowerCase())}.</p>
+        ${/* `toLowerCase()` stand hier, damit „Gefallen" klein anfängt — und
+              machte aus „Gefallen bei Eylau" ein „gefallen bei eylau". Der
+              erste Buchstabe genügt; ein Ortsname bleibt ein Ortsname. */''}
+        <p><b>${esc(S.name)}</b>, ${rangName(S.rang)} der 32. Halbbrigade, ${
+          esc(grund.charAt(0).toLowerCase() + grund.slice(1))}.</p>
         <p>${todesText()}</p>
       </div>
+      ${trauerblatt(grund)}
       ${kk && kk.taten && kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
         ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
       </div>`:''}
@@ -935,6 +1699,8 @@ function schrankeWeiter(){
     S.leben = lebenMax();
     S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
+    // Aus demselben Grund auch der stehende Auftrag: Hier endet ein Feldzug.
+    kapitelauftragAbrechnen();
   }
   stationErledigt();
   naechster();
@@ -999,6 +1765,12 @@ function zeigeEpilog(n){
       <div class="cb">${vordruck(n)}
         <div class="prose">${prosa}</div>
         <div class="ergebnis" style="margin-top:16px">${leben}</div>
+        ${/* Auch hier ein Congé, und historisch der massenhafteste von allen:
+             1815 wurde die Armee aufgelöst, und Hunderttausende bekamen
+             dasselbe Blatt am selben Tag. Der Grund darauf unterscheidet die
+             beiden Wege — „Auflösung des Verbandes" oder „Auf eigenen
+             Antrag" —, sonst nichts. */ ''}
+        ${congeAbsolu()}
         <div class="grid2" style="margin-top:18px">
           <div>${wertungsTabelle(p)}</div>
           <div class="note ${neu?'green':''}">
@@ -1019,9 +1791,13 @@ function zeigeEpilog(n){
 function schrankeEnde(n, prosa, epilog){
   const p = eintragen((S.ende==='halbsold'?'Halbsold · ':'Ruhestand · ')+rangName(S.rang));
   const neu = p.rekord;
-  app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
+  /* **Das amtlichste Blatt des Spiels stand bis hierher auf Feldpapier.** Eine
+     Entlassung ist kein Lagebericht, sondern eine Urkunde mit Siegel — und
+     `.papier` ist genau dafür da. */
+  app.innerHTML = `<div class="card papier"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
     <div class="cb"><div class="prose">${prosa}</div>
       <div class="ergebnis" style="margin-top:14px">${esc(epilog||'')}</div>
+      ${congeAbsolu()}
       <div class="grid2" style="margin-top:18px">
         <div>${wertungsTabelle(p)}</div>
         <div class="note ${neu?'green':''}">

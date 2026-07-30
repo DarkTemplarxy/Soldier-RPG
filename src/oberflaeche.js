@@ -104,7 +104,7 @@ function kopfzeile(){
   }).join('');
   kopf.innerHTML = `<span class="kopfzeile">
     ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
-    <span class="kopfgeld">${Math.round(S.geld*100)/100} F</span>
+    <span class="kopfgeld">${francs(S.geld)} F</span>
     <span class="kopftrenner"></span>
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span>
     <span class="kopftrenner"></span>
@@ -198,16 +198,94 @@ function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
 /* Die Kette über dir. Vier Namen statt einer Zahl — und der Rang davor ändert
    sich mit, wenn die Person selbst aufsteigt. Gefallene bleiben stehen, damit
    man sieht, wer einmal für einen gesprochen hätte. */
+/* ── Wen du überhaupt kennst ──
+   **`ab:` wurde bis zum 30.07.2026 nirgends gelesen**, obwohl es an
+   Grandmaison stand: Ein frischer Fusilier las „Chef de bataillon Grandmaison
+   0" in seiner Seitenleiste — und damit war die Pointe der ganzen Kette
+   verschenkt. Grandmaison soll ab Rang 9 **wieder auftauchen**, zwölf
+   Spieljahre nach dem Sumpf von Arcole, und wer damals bestanden hat, findet
+   ihn bei Gunst +2 vor. Etwas, das die ganze Zeit dastand, kann nicht
+   wiederkommen.
+
+   Gezeigt wird deshalb nur, wen der eigene Rang erreicht — die Kette wächst
+   von unten mit. Wer einmal drin steht, bleibt drin: `hoechsterRang` merkt
+   sich das, sonst verschwände ein Fürsprecher bei einer Degradierung, und
+   seine Gunst liefe unsichtbar weiter. */
+function kenntPerson(l){
+  /* **Sichtbar ist immer nur der Marschall, den man gewählt hat.** Die drei
+     stehen in derselben Liste wie die Kette, damit `gunst()` und
+     `personName()` unverändert für sie gelten — aber man gehört zu einem,
+     nicht zu dreien. */
+  if(l.patron) return S.patron === l.id;
+  if(!l.ab) return true;
+  return Math.max(S.rang|0, S.hoechsterRang|0) >= l.ab;
+}
 function ueberDir(){
   if(!S.leute) return '';
   const zeile = l => {
+    if(!kenntPerson(l)) return '';
     const p = S.leute[l.id]; if(!p) return '';
     const g = p.gunst, farbe = g<0 ? 'warn' : (g>=3 ? 'ok' : '');
+    /* **Beim Patron steht sein eigener Stand daneben.** Er ist die einzige
+       Zahl der Seitenleiste, die nichts mit dem Spieler zu tun hat — und
+       genau das ist ihre Aussage: Ein Marschall, der beim Kaiser bei null
+       steht, nützt dir nichts, egal wie sehr er dich schätzt. */
+    const macht = l.patron
+      ? ` <i class="mini" style="font-style:normal">· Kaiser ${patronStand(l.id, kapitelNummer())}</i>` : '';
     return `<div class="kv"><span class="hilfe" data-hilfe="${String(l.was).replace(/"/g,'&quot;')}">${
-      p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
+      p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}${macht}</span>
       <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
   };
-  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}`;
+  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}${verzeichnis()}`;
+}
+
+/* ── Unter dir ──
+   **Vier Personen mit je zwei Zahlen sind acht Zahlen — und das ist die
+   Grenze dessen, was man im Blick behält, ohne eine Tabelle zu führen.**
+   Deshalb Können und Treue als Zahl, nicht als Umschreibung, und daneben ein
+   halber Satz über das letzte Ereignis: Die Zahl sagt *wie viel*, der Satz
+   sagt *woran es liegt*.
+
+   Der Mitgezogene steht zuerst und trägt ein Zeichen — er ist der einzige,
+   dessen Treue +5 erreichen kann, und der einzige, der beim Aufstieg
+   mitwandert. */
+/* ── Das Verzeichnis ──
+   **Angezeigt wird die Sache und die Zahl der Mitwisser, nie ihre Namen.**
+   Du weißt, was du getan hast und wie viele dabei waren. Nicht, wer davon
+   redet. Das ist die bessere Aufteilung: **Menschen sind lesbar, Vergangenheit
+   ist es nicht** — man kann einschätzen, wem man traut, und trotzdem nicht
+   ausrechnen, was auf dem Spiel steht.
+
+   Der Aktenvermerk steht daneben, weil er nicht verjährt und weil er ab Rang
+   11 die Beförderung halbiert. */
+function verzeichnis(){
+  if(!S || S.rang < 9) return '';
+  const h = (S.heimlich||[]);
+  const v = (S.vermerke|0);
+  if(!h.length && !v) return '';
+  /* **Gezählt werden die Lebenden.** Ein Toter nimmt seinen Teil mit, und
+     genau das soll man an der Zahl sehen — sonst stünde neben einer Sache,
+     von der niemand mehr weiß, weiter eine Zwei. Wer nicht mehr unter einem
+     steht, zählt dagegen mit: Er ist versetzt, nicht verschwunden. */
+  const tot = S.unterTot || [];
+  const lebend = x => (x.mitwisser||[]).filter(m => tot.indexOf(m) < 0).length;
+  const zeile = x => `<div class="kv"><span class="hilfe" data-hilfe="${
+      String('Schwere '+x.schwere+' von 4. Wer dabei war, steht im Verzeichnis — nicht hier.').replace(/"/g,'&quot;')}">${
+      esc(x.text)}</span><b class="${x.schwere>=3?'warn':''}">${lebend(x)}</b></div>`;
+  return `<p class="mini">Was jemand weiß <span class="fein">Mitwisser</span></p>${h.map(zeile).join('')}${
+    v ? `<div class="kv"><span>Aktenvermerke</span><b class="warn">${v}</b></div>` : ''}`;
+}
+
+function unterDir(){
+  unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
+  const u = (S.unterstellte||[]);
+  if(!u.length) return '';
+  const zeile = x => `<div class="kv"><span class="hilfe" data-hilfe="${
+      String(x.posten+' '+x.name+'. '+(x.zustand!=='dienstfähig'?x.zustand[0].toUpperCase()+x.zustand.slice(1)+'.':'Dienstfähig.')).replace(/"/g,'&quot;')}">${
+      x.lebt ? (x.mit?'· ':'')+esc(x.name) : '<s>'+esc(x.name)+'</s>'}${
+      x.lebt && x.zustand!=='dienstfähig' ? ' <span class="warn">!</span>' : ''}</span>
+    <b>${x.lebt ? x.koennen + ' <span class="fein">/</span> ' + (x.treue>0?'+':'') + x.treue : '†'}</b></div>`;
+  return `<p class="mini">Unter dir <span class="fein">Können / Treue</span></p>${u.map(zeile).join('')}`;
 }
 
 /* Eine Zeile der Seitenleiste — und **sie zeigt den Wert, mit dem geprüft
@@ -280,6 +358,19 @@ function seitenleiste(){
       ${S.adler?`<div class="kv"><span>Der Adler</span><b class="${S.adler==='verloren'?'warn':''}">${
         S.adler==='verloren'?'verloren':S.adler==='gerettet'?'gerettet':'getragen'}</b></div>`:''}
       ${(S.rang>=13&&S.dotation)?`<div class="kv"><span>Dotation</span><b>${S.dotation} F je Station</b></div>`:''}
+      ${/* ── Die Ausbildung, endlich sichtbar ──
+           **`sektionGuete` hatte kein einziges Vorkommen in `oberflaeche.js`.**
+           Vier Lagerhandlungen speisten sie, sie entschied über Haltung,
+           Verluste und den Startbestand — und der Spieler sah nie eine Zahl.
+           Ein Wert mit vier Zuflüssen und keiner Anzeige ist ein
+           Konstruktionsfehler, kein Detail.
+
+           Sie steht ab Rang 2 da, weil die Sektion dort anfängt zu zählen,
+           und sie darf negativ sein: Der gekaufte Leutnant startet bei −25,
+           und **genau das soll er sehen.** */''}
+      ${S.rang>=2?`<div class="kv"><span>${mitHilfe('sektionGuete','Ausbildung der Einheit')}</span><b class="${
+        (S.sektionGuete||0)<0?'warn':((S.sektionGuete||0)>=30?'ok':'')}">${
+        (S.sektionGuete||0)>0?'+':''}${S.sektionGuete||0}</b></div>`:''}
       ${S.rang>=9?`<div class="stat"><div class="statlab"><span>Einheitszustand</span><span class="${(S.einheit==null?70:S.einheit)<40?'warn':''}">${Math.round(S.einheit==null?70:S.einheit)}</span></div>${balken((S.einheit==null?70:S.einheit)<40?'b-red':'b-steel',(S.einheit==null?70:S.einheit),100)}
         ${(S.einheit!=null&&S.einheit<40)?`<p class="warnung">Deine Kompanie hat nichts an den Füßen.${S.einheit<20?' Jeder Marsch kostet Männer, die niemand beschossen hat.':' Der Feldscher meldet mehr Kranke, als er sollte.'}</p>`:''}</div>`:''}
       ${K?`<div class="rule"></div>${S.rang>=7?'':`<div class="kv"><span>Muskete</span><b>${geladen}</b></div>`}
@@ -294,8 +385,8 @@ function seitenleiste(){
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
       <div class="rule"></div>
-      <div class="kv"><span>Geld</span><b>${Math.round(S.geld*100)/100} F</b></div>
-      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${(Math.round(S.soldOffen*100)/100).toFixed(2)} F</b></div>` : ''}
+      <div class="kv"><span>Geld</span><b>${francs(S.geld)} F</b></div>
+      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${francs(S.soldOffen, true)} F</b></div>` : ''}
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
       ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
       ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}
@@ -475,15 +566,65 @@ function gesamtKosten(){
        + Object.keys(PUNKTE).reduce((s,k)=>s+punktKosten(k),0);
 }
 
+/* ══════════════════ DIE FEUILLE D'ENRÔLEMENT ══════════════════
+
+   **Ein Bogen statt zwei Bildschirme** (Entwurfspaket `12a`). Bis zum
+   30.07.2026 waren Aushebung und Veteranenpunkte zwei Ansichten mit einem
+   Knopf dazwischen — und der zweite Schritt ist genau der, in dem man die
+   Werte des ersten *bewertet*. Man braucht sie nebeneinander.
+
+   Links das Formular, rechts eine mitrechnende Spalte *So rückt er ein*,
+   unten der Vorrat. Es ist dasselbe Blatt, das der Werber ausfüllt, und der
+   Spieler schreibt in die eine Spalte, die ihm gehört.
+
+   **Drei Dinge tragen die Gestaltung, und alle drei folgen aus dem Inhalt:**
+
+   1. **Der Befund ist ein Befund, kein Formular.** Name, Balken, Rechnung —
+      kein −/+, keine Punktanzeige, kein „übrig". Der einzige Knopf heißt
+      *Einen anderen Mann*. Wo die Herkunft nichts beiträgt, steht der Wert
+      **einmal** und nicht als `30 = 30`.
+   2. **Der Vorrat ist der einzige Ort, an dem gewählt wird — also der
+      einzige, der laut sein darf.** Eigener Kasten, Bronzebalken, der Rest
+      als große Mediävalzahl.
+   3. **An jeder Kaufzeile steht der Preis des nächsten Fünfers**, nicht nur
+      das bereits Ausgegebene. Bei einer exponentiellen Kurve ist das die
+      Zahl, nach der man entscheidet. */
+
+/* Eine Zeile des Werberbefunds: Wurf, Herkunftszuschlag, Ergebnis. Wo die
+   Herkunft nichts beiträgt, steht nur eine Zahl — `30 = 30` ist keine
+   Rechnung, sondern Rauschen. */
+function befundZeile(k, n){
+  const h = HERKUENFTE.find(x=>x.id===(ERSCH&&ERSCH.herkunft)) || {attr:{}};
+  const roh = ERSCH.attr[k], bonus = h.attr[k]||0, ist = istWert(k);
+  const rechnung = bonus
+    ? `${roh}<i class="bo">${bonus>0?' +':' −'}${Math.abs(bonus)}</i><i class="gl"> = </i><b>${ist}</b>`
+    : `<b>${ist}</b>`;
+  return `<div class="befund" id="bf_${k}">
+    <span class="bfname">${mitHilfe(k,n)}${k==='bildung'?'<i class="fest">fest</i>':''}</span>
+    <span class="bfbalken"><i id="bb_${k}" style="width:${Math.max(0,Math.min(100,ist))}%"></i></span>
+    <span class="bfwert" id="bw_${k}">${rechnung}</span>
+  </div>`;
+}
+
+/* Eine Kaufzeile des Vorrats. Gekauft: `ist → neu` und die Summe. Nicht
+   gekauft: der Istwert und **was der nächste Fünfer kostet**. */
 function punktZeile(k,n){
   const p = PUNKTE[k]||0, ist = istWert(k);
   return `<div class="punktzeile ${p?'gewaehlt':''}" id="pz_${k}">
     <span>${mitHilfe(k,n)}</span>
     <span class="punktwert" id="pw_${k}">${ist}${p?` <i>→</i> <b>${ist+p}</b>`:''}</span>
-    <span class="punktvp ${p?'':'aus'}" id="pv_${k}">${p?punktKosten(k)+' VP':''}</span>
+    <span class="punktvp ${p?'':'aus'}" id="pv_${k}">${p?punktKosten(k)+' VP':naechsterFuenfer(k)}</span>
     <span><button class="pmbtn" onclick="stellePunkt('${k}',-PUNKT_SCHRITT)" id="pm_${k}">−</button>
     <button class="pmbtn" onclick="stellePunkt('${k}',PUNKT_SCHRITT)" id="pa_${k}">+</button></span>
   </div>`;
+}
+/* Was der nächste Schritt kostet — die Zahl, nach der man bei einer
+   exponentiellen Kurve entscheidet. Am Deckel steht kein Preis, sondern die
+   Decke. */
+function naechsterFuenfer(k){
+  const ist = istWert(k) + (PUNKTE[k]||0);
+  if(ist + PUNKT_SCHRITT > punktGrenze(k)) return '<i class="voll">am Deckel</i>';
+  return `<i class="naechst">+${PUNKT_SCHRITT} für ${kostenVon(ist, ist+PUNKT_SCHRITT)}</i>`;
 }
 
 /* ══════════════════ DIE PATENTKARTE ══════════════════
@@ -499,70 +640,229 @@ function punktZeile(k,n){
 function patentKarte(){
   const offen = PATENTE.filter(patentFrei);
   if(!offen.length) return '';
-  const zeilen = offen.map(p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td>
-    <td class="d">${p.beschr}<br><span class="fein">Wertung −${p.abzug} · keine Fürsprecher · Kapitel 1 bis 4 werden härter</span></td>
-    <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
-    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`).join('');
-  return `<div class="card"><div class="ch"><span>Offizierspatent</span><span>höchstens eines</span></div>
-   <div class="cb">
-    <p class="hinweis">Ein Patent unterschreibt der Kaiser, und es kommt auf Papier. Wer eines hat, rückt 1796 als Offizier ein — mit allem, was das an Knöpfen gibt, und ohne alles, was ein Mann sich in zehn Jahren an Bekanntschaften erwirbt. Martel, Collot, Berthaud und Vernet kennen dich nicht, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen.</p>
-    <table><tr><th>Kauf</th><th>Was es bedeutet</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
-   </div></div>`;
+  const zeilen = offen.map(p=>`<button class="kaufzeile" id="kz_${p.id}" onclick="waehle('${p.id}')">
+    <span><b class="kl">${p.label}</b><span class="kb">${p.beschr}</span>
+      <span class="kabzug">Wertung −${p.abzug} · keine Fürsprecher · Gefahr +2</span></span>
+    <span class="kvp">${p.vp}</span><span class="kwahl" id="kb_${p.id}">wählen</span></button>`).join('');
+  return `<div class="patentkasten">
+    <div class="patentkopf"><span>Offizierspatent</span><span>höchstens eines</span></div>
+    <p>Ein Patent unterschreibt der Kaiser, und es kommt auf Papier. Wer eines hat, rückt 1796 als Offizier ein — mit allem, was das an Knöpfen gibt, und ohne alles, was ein Mann sich in zehn Jahren an Bekanntschaften erwirbt. <b>Martel, Collot, Berthaud und Vernet kennen dich nicht</b>, und die Abende am Feuer, an denen man sie kennenlernt, stehen einem Offizier nicht offen.</p>
+    ${zeilen}</div>`;
 }
 
-/* Zweiter Schritt der Erschaffung: Was der Vorrat aus dem fertigen Mann macht. */
-function zeigeLaden(){
-  if(!ERSCH || !ERSCH.herkunft){ zeigeErschaffung(); return; }
-  AUSWAHL = []; PUNKTE = {};
-  const kaufZeile = p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
-    <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
-    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`;
-  const zeilen  = LADEN.filter(p=>p.art!=='zaeh').map(kaufZeile).join('');
-  const zeilenZ = LADEN.filter(p=>p.art==='zaeh').map(kaufZeile).join('');
-  const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft);
-  app.innerHTML = `
-  <div class="card"><div class="ch"><span>Zweiter Schritt · Veteranenpunkte</span><span id="vpanz">${META.vp} verfügbar</span></div>
-   <div class="cb">
-    <div class="note"><b>${esc(ERSCH.name)}</b>, ${esc(h.name)}. Die Werte unten sind die, mit denen er einrücken würde.
-    Der Vorrat ist die Punktzahl deines besten Laufs; er wird nicht verbraucht, sondern bei jedem Neustart neu verteilt.
-    ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu — der erste Mann rückt ein, wie er ist.':''}</div>
-   </div></div>
+/* Die rechte Spalte: was aus dem Blatt wird, wenn man jetzt einrückt. Sie
+   rechnet bei jedem Klick mit — das ist der Grund, warum die beiden Schritte
+   auf ein Blatt gehören. */
+function einrueckSpalte(){
+  const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft) || {attr:{},fert:{},name:''};
+  const end = k => istWert(k) + (PUNKTE[k]||0);
+  const kon = end('konstitution');
+  const zeile = (n, v, hervor) => `<div class="ezeile${hervor?' hervor':''}"><span>${n}</span><b>${v}</b></div>`;
+  const schwelle = (n, ja) => `<div class="ezeile ${ja?'ja':'nein'}"><span>${n}</span><b>${ja?'erreicht':'nicht erreicht'}</b></div>`;
+  /* ── Ein Kauf ersetzt das Ausgabestück, statt danebenzustehen ──
+     Sonst steht dasselbe Paar Schuhe zweimal auf dem Blatt. Die Leitern des
+     Ladens heißen anders als die Plätze der Ausrüstung (`waffe` gegen
+     `muskete`), also braucht es eine Zuordnung — und die steht hier und
+     nicht in den Daten, weil sie nur diesen einen Bildschirm betrifft.
 
-  <div class="card"><div class="ch"><span>Attribute ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 70</span></div>
-   <div class="cb">
-    <p class="hinweis">Gerechnet wird vom jetzigen Wert. Der erste Zehner kostet 1 VP je Punkt, der fünfte schon 4 — wer schon hoch steht, zahlt für jeden weiteren Punkt mehr.</p>
-    ${ATTRIBUTE.map(([k,n])=>punktZeile(k,n)).join('')}
-   </div></div>
-
-  <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 60</span></div>
-   <div class="cb">
-    <p class="hinweis">Alle beginnen bei 5, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
-    ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
-   </div></div>
-
-  ${patentKarte()}
-
-  <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
-   <div class="cb">
-    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
-   </div></div>
-
-  <div class="card"><div class="ch"><span>Was ein Mann behält</span><span>nicht Kraft, sondern Gewohnheit</span></div>
-   <div class="cb">
-    <p class="hinweis">Was einer aus zwei Feldzügen mitbringt, ist selten Kraft. Es ist das Wissen, wie man nicht stirbt: welches Wasser man trinkt, wie man seine Füße behält, wo man sich hinlegt, wenn es kein Dach gibt. <b>Nichts davon macht dich im Gefecht besser</b> — es hält dich nur zwischen den Gefechten aufrecht, und dort verliert man die meisten Männer.</p>
-    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilenZ}</table>
-    <div style="margin-top:18px;display:flex;gap:10px">
-      <button class="plain" onclick="zeigeErschaffung()">Zurück zur Erschaffung</button>
-      <button class="plain haupt" id="startbtn" onclick="starte()">Einrücken</button></div>
-   </div></div>`;
-  aktualisiereLaden();
+     ⚠ `AUSRUESTUNG_START` ist eine **Funktion**, kein Objekt. Die erste
+     Fassung ging mit `Object.keys()` darüber und lieferte eine leere Liste —
+     der Abschnitt „Ausgabe · Zustand" stand mit Überschrift und ohne Inhalt
+     auf dem Blatt. */
+  const PLATZ = {waffe:'muskete', schuhe:'schuhe', mantel:'mantel', seitenwaffe:'seitenwaffe'};
+  const start = AUSRUESTUNG_START();
+  const ersetzt = {};
+  AUSWAHL.forEach(id=>{ const q = LADEN.find(x=>x.id===id);
+    if(q && q.art==='ausr' && PLATZ[q.gruppe]) ersetzt[PLATZ[q.gruppe]] = q.label; });
+  const ausrZeilen = Object.keys(start).map(k=>{
+    const a = start[k], neu = ersetzt[k];
+    return `<div class="ezeile${neu?' hervor':''}"><span>${esc(neu||a.name)}</span><b>${neu?'neu':a.zustand}</b></div>`;
+  }).join('');
+  const gekauft = AUSWAHL.map(id=>{
+    const p = LADEN.find(x=>x.id===id) || patentVon(id);
+    return p ? `<div class="ezeile"><span>${p.label}</span><b>${p.vp} VP</b></div>` : '';
+  }).join('');
+  return `<div class="einrueck">
+    <div class="ekopf">So rückt er ein</div>
+    <div class="ebody">
+      <div class="ename" id="e_name">${esc(ERSCH.name||'')}</div>
+      <div class="erang" id="e_rang">Fusilier · ${esc(h.name||'ohne Herkunft')}</div>
+      <div class="eleben"><span>Leben</span><b id="e_leben">${40 + Math.round(kon*0.6)}</b></div>
+      <p class="efein">40 plus drei Fünftel der Konstitution.<br>Der Atem steigt nie darüber.</p>
+      <div class="eabschnitt">Attribute</div>
+      ${ATTRIBUTE.map(([k,n])=>zeile(n, end(k), !!PUNKTE[k])).join('')}
+      <div class="eabschnitt">Fertigkeiten</div>
+      ${FERTIGKEITEN.map(([k,n])=>zeile(n, end(k), !!PUNKTE[k] || !!(h.fert&&h.fert[k]))).join('')}
+      <div class="eabschnitt">Elitekompanie</div>
+      ${schwelle('Grenadiere · Konstitution 55', kon>=55)}
+      ${schwelle('Voltigeure · Geschick 55', end('geschick')>=55)}
+      ${gekauft?`<div class="eabschnitt">Gekauft</div>${gekauft}`:''}
+      <div class="eabschnitt">Ausgabe · Zustand</div>
+      ${ausrZeilen}
+    </div></div>
+  <button class="plain haupt einruecken" id="startbtn" onclick="starte()">Einrücken</button>
+  <p class="efein mitte">Ein Platz, kein zweiter — der alte Feldzug ist damit vorbei.</p>
+  <div class="enebentasten">
+    <button class="plain" onclick="zeigeTitel()">Zur Chronik</button>
+    <button class="plain" onclick="window.open('wiki.html','_blank')">Handbuch</button>
+  </div>`;
 }
+
+/* Der eine Bogen. `neu` würfelt einen frischen Mann aus; ohne das Flag wird
+   nur neu gezeichnet (Herkunftswechsel, Rückkehr vom Titel). */
+function zeigeErschaffung(neu){
+  if(neu || !ERSCH){
+    ERSCH = {name:'', herkunft:null, attr:{}};
+    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
+    wuerfeln(true);   // **Es steht nie ein unverteilter Mann da.** Man sieht sofort einen.
+    AUSWAHL = []; PUNKTE = {};
+  }
+  if(!ERSCH.name) ERSCH.name = zufallsName();
+  /* **Gesperrtes bekommt den Bedingungssatz statt der Wirkung.** Der Laden ist
+     die Landkarte dessen, was noch kommt — wer nicht weiß, wofür er spielt,
+     spielt auf nichts hin. */
+  const kaufZeile = p=>{
+    const frei = ladenFrei(p);
+    return `<button class="kaufzeile${frei?'':' gesperrt'}" id="kz_${p.id}" onclick="waehle('${p.id}')"${frei?'':' disabled'}>
+      <span><b class="kl">${p.label}</b><span class="kb">${frei ? p.beschr : ladenBedingung(p)}</span></span>
+      <span class="kvp">${p.vp}</span><span class="kwahl" id="kb_${p.id}">${frei?'wählen':'gesperrt'}</span></button>`;
+  };
+  const leitern = LADEN_GRUPPEN.map(([g,titel,unter])=>{
+    const teile = LADEN.filter(p=>p.gruppe===g);
+    if(!teile.length) return '';
+    return `<div class="vabschnitt">${titel} <i>${unter}</i></div>${teile.map(kaufZeile).join('')}`;
+  }).join('');
+  const einzeln = LADEN.filter(p=>p.art!=='zaeh' && !p.gruppe).map(kaufZeile).join('');
+  const zaeh    = LADEN.filter(p=>p.art==='zaeh').map(kaufZeile).join('');
+
+  app.innerHTML = `<div class="enrol"><div class="enrolinner">
+    <div class="enrolkopf">
+      <div class="rf">${kaiserreich() ? 'Empire Français' : 'République Française'}</div>
+      <div class="enroltitel">Feuille d’enrôlement</div>
+      <div class="enrolwo">32.&thinsp;Demi-brigade de bataille · Savona, 1. April 1796</div>
+    </div>
+    <div class="enrolgrid">
+      <div>
+        <div class="namezeile">
+          <span class="nlabel">Name</span>
+          <input type="text" id="namefeld" value="${esc(ERSCH.name)}"
+                 oninput="ERSCH.name=this.value;aktualisiereBogen()">
+          <button class="plain" onclick="wuerfeln()">Einen anderen Mann</button>
+        </div>
+
+        <div class="enrolabschnitt"><span>Befund des Werbers</span><i>ausgehoben · nicht verhandelbar</i></div>
+        ${ATTRIBUTE.map(([k,n])=>befundZeile(k,n)).join('')}
+        <p class="enrolsatz"><b>Du suchst dir nicht aus, wer du bist.</b> Der Werber schreibt auf, was er sieht. Wenn dir der Mann nicht passt, kannst du einen anderen nehmen — aber besser machen kannst du ihn nicht.</p>
+        <p class="efein">Sockel ${SOCKEL} · ${POOL} Punkte in Schritten von ${ERSCH_SCHRITT} · höchstens ${MAXE} bei der Aushebung<br>
+        Bildung steht fest auf ${BILDUNG_SOCKEL} — du kannst nicht lesen. Alle neun Fertigkeiten beginnen bei ${FERT_SOCKEL}.</p>
+
+        <div class="enrolabschnitt"><span>Herkunft</span><i>je genau 50 Punkte · deine Wahl</i></div>
+        <div class="herkwahl">${HERKUENFTE.map(h=>`<div class="herk${h.id===ERSCH.herkunft?' on':''}" id="h_${h.id}" onclick="waehleHerkunft('${h.id}')">
+          <div class="hn">${h.name}</div><div class="hd">${h.text}</div></div>`).join('')}</div>
+
+        <div class="vorratkasten">
+          <div class="vorratbalken">
+            <h3>Veteranenpunkte</h3>
+            <span class="vorratrechts">
+              <span class="vorratklein">Vorrat ${META.vp}<br>Ausgegeben <i id="vpaus">0</i></span>
+              <span class="vorratstrich"></span>
+              <span class="vorratzahl"><b id="vpanz">${META.vp}</b><span>übrig</span></span>
+            </span>
+          </div>
+          <div class="vorratbody">
+            <p>Der Vorrat ist die Punktzahl deines besten Laufs; er wird nicht verbraucht, sondern bei jedem Neustart neu verteilt. <b>Hier darfst du wählen</b> — und nur hier. Gerechnet wird vom jetzigen Wert, nicht vom Sockel: Wer als Wilderer mit Muskete 50 anfängt, zahlt für den nächsten Punkt mehr als einer, der bei 20 steht.
+            ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu — der erste Mann rückt ein, wie er ist.':''}</p>
+            <div class="vabschnitt">Attribute ergänzen <i>Obergrenze ${punktGrenze('konstitution')}</i></div>
+            ${ATTRIBUTE.map(([k,n])=>punktZeile(k,n)).join('')}
+            <div class="vabschnitt">Fertigkeiten ergänzen <i>Obergrenze ${punktGrenze('muskete')}</i></div>
+            ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
+            ${leitern}
+            <div class="vabschnitt">Kleinkram und Papiere <i>stapelbar · das Billigste ist oft das Klügste</i></div>
+            ${einzeln}
+            <div class="vabschnitt">Was ein Mann behält <i>nicht Kraft, sondern Gewohnheit</i></div>
+            <p class="efein">Was einer aus zwei Feldzügen mitbringt, ist selten Kraft. Es ist das Wissen, wie man nicht stirbt. <b>Nichts davon macht dich im Gefecht besser</b> — es hält dich nur zwischen den Gefechten aufrecht, und dort verliert man die meisten Männer.</p>
+            ${zaeh}
+            ${patentKarte()}
+            <p class="efein">Der Weg von 90 auf 100 kostet 600 VP — mehr als drei Werte von 20 auf 70 zusammen.<br>Wer eine Hundert will, bezahlt sie mit der Breite.</p>
+          </div>
+        </div>
+      </div>
+      <div class="enrolrechts" id="enrolrechts">${einrueckSpalte()}</div>
+    </div>
+  </div></div>`;
+  aktualisiereBogen();
+}
+
+/* Ein Aktualisierer für das ganze Blatt. Er ersetzt `aktualisiereErschaffung()`
+   und `aktualisiereLaden()`: Auf einem Blatt gibt es nur einen Zustand, und
+   zwei Funktionen, die dieselbe Ansicht pflegen, laufen früher oder später
+   auseinander. */
+function aktualisiereBogen(){
+  const rest = META.vp - gesamtKosten();
+  const anz = document.getElementById('vpanz');
+  if(anz){ anz.textContent = rest; anz.className = rest ? '' : 'leer'; }
+  const aus = document.getElementById('vpaus');
+  if(aus) aus.textContent = gesamtKosten();
+  /* Der Befund hängt an der Herkunft: Ein Wechsel ändert jede Zeile. */
+  ATTRIBUTE.forEach(([k,n])=>{
+    const z = document.getElementById('bf_'+k);
+    if(z) z.outerHTML = befundZeile(k,n);
+  });
+  LADEN.concat(PATENTE.filter(patentFrei)).forEach(p=>{
+    const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
+    if(!b || !z) return;
+    /* Gesperrtes ist im Laden **sichtbar**, nicht versteckt: Er ist die
+       einzige Stelle, an der man sieht, was das Spiel noch hat. */
+    if(!patentVon(p.id) && (p.frei !== undefined || p.freiKapitel) && !ladenFrei(p)){
+      b.textContent = 'gesperrt'; z.disabled = true; z.className = 'kaufzeile gesperrt'; return;
+    }
+    const drin = AUSWAHL.includes(p.id);
+    /* **Was der Vorrat nicht deckt, wird gesperrt statt kommentiert.** */
+    const zuTeuer = !drin && p.vp > rest;
+    b.textContent = drin ? 'gewählt' : zuTeuer ? 'zu teuer' : 'wählen';
+    z.disabled = zuTeuer;
+    z.className = 'kaufzeile' + (drin?' gewaehlt':'') + (zuTeuer?' teuer':'');
+  });
+  ATTRIBUTE.concat(FERTIGKEITEN).forEach(([k])=>{
+    const p = PUNKTE[k]||0, b = istWert(k);
+    const pw = document.getElementById('pw_'+k), pv = document.getElementById('pv_'+k);
+    if(!pw) return;
+    pw.innerHTML = p ? `${b} <i>→</i> <b>${b+p}</b>` : String(b);
+    pv.innerHTML = p ? punktKosten(k)+' VP' : naechsterFuenfer(k);
+    pv.className = 'punktvp'+(p?'':' aus');
+    document.getElementById('pz_'+k).className = 'punktzeile'+(p?' gewaehlt':'');
+    document.getElementById('pm_'+k).disabled = !p;
+    document.getElementById('pa_'+k).disabled =
+      b+p+PUNKT_SCHRITT > punktGrenze(k) || kostenVon(b+p, b+p+PUNKT_SCHRITT) > rest;
+  });
+  const r = document.getElementById('enrolrechts');
+  if(r) r.innerHTML = einrueckSpalte();
+  const s = document.getElementById('startbtn');
+  if(s) s.disabled = !(ERSCH.herkunft && (ERSCH.name||'').trim().length>0);
+}
+/* Die alten Namen bleiben als Weiterleitung stehen: `waehleHerkunft()`,
+   `stellePunkt()` und `waehle()` rufen sie, und die Prüfstände tun es auch. */
+function aktualisiereErschaffung(){ aktualisiereBogen(); }
+function aktualisiereLaden(){ aktualisiereBogen(); }
+/* `zeigeLaden()` gibt es nicht mehr als eigenen Bildschirm — der Aufruf
+   landet auf demselben Bogen, damit ein alter Knopf nirgends ins Leere geht. */
+function zeigeLaden(){ zeigeErschaffung(); }
+
 function waehle(id){
+  const p = LADEN.find(x=>x.id===id);
+  if(p && !ladenFrei(p)) return;                 // gesperrt bleibt gesperrt
   const i = AUSWAHL.indexOf(id);
   if(i>=0) AUSWAHL.splice(i,1);
   else {
     // Höchstens ein Patent: das zweite ersetzt das erste, statt danebenzustehen.
     if(patentVon(id)) AUSWAHL = AUSWAHL.filter(x=>!patentVon(x));
+    /* ── Je Leiter ein Kauf ──
+       **Der teurere ersetzt den billigeren, statt danebenzustehen.** Zwei
+       Musketen trägt niemand, und ein Laden, in dem man Stufe 2 und Stufe 4
+       nebeneinander kauft, ist kein Laden, sondern eine Liste. Wer klickt,
+       wählt damit die Stufe — er muss nichts abwählen. */
+    if(p && p.gruppe) AUSWAHL = AUSWAHL.filter(x=>{
+      const q = LADEN.find(y=>y.id===x); return !q || q.gruppe !== p.gruppe; });
     AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop();
   }
   aktualisiereLaden();
@@ -575,30 +875,6 @@ function stellePunkt(k,d){
   if(!PUNKTE[k]) delete PUNKTE[k];
   aktualisiereLaden();
 }
-function aktualisiereLaden(){
-  const rest = META.vp - gesamtKosten();
-  document.getElementById('vpanz').textContent = `${rest} von ${META.vp} übrig`;
-  LADEN.concat(PATENTE.filter(patentFrei)).forEach(p=>{
-    const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
-    if(!b || !z) return;
-    const drin = AUSWAHL.includes(p.id);
-    b.textContent = drin?'gewählt':'wählen';
-    b.disabled = !drin && p.vp>rest;
-    z.className = drin?'gewaehlt':'';
-    b.className = 'plain'+(drin?' gewaehlt':'');
-  });
-  ATTRIBUTE.concat(FERTIGKEITEN).forEach(([k])=>{
-    const p = PUNKTE[k]||0, b = istWert(k);
-    const pw = document.getElementById('pw_'+k), pv = document.getElementById('pv_'+k);
-    pw.innerHTML = p ? `${b} <i>→</i> <b>${b+p}</b>` : String(b);
-    pv.textContent = p?punktKosten(k)+' VP':''; pv.className = 'punktvp'+(p?'':' aus');
-    document.getElementById('pz_'+k).className = 'punktzeile'+(p?' gewaehlt':'');
-    document.getElementById('pm_'+k).disabled = !p;
-    document.getElementById('pa_'+k).disabled =
-      b+p+PUNKT_SCHRITT > punktGrenze(k) || kostenVon(b+p, b+p+PUNKT_SCHRITT) > rest;
-  });
-}
-
 /* ── Charaktererschaffung ──
 
    **Der Pool ist von 120 auf 60 gesenkt worden (28.07.2026), und das ist die
@@ -643,46 +919,6 @@ const POOL = 60, SOCKEL = 15, MAXE = 70, ERSCH_SCHRITT = 5;
 const BILDUNG_SOCKEL = 20;
 const sockelVon = k => k==='bildung' ? BILDUNG_SOCKEL : SOCKEL;
 let ERSCH = null;
-function zeigeErschaffung(neu){
-  if(neu || !ERSCH){
-    ERSCH = {name:'', herkunft:null, attr:{}};
-    ATTRIBUTE.forEach(([k])=> ERSCH.attr[k]=sockelVon(k));
-    wuerfeln(true);   // **Es steht nie ein unverteilter Mann da.** Man sieht sofort einen.
-  }
-  /* **Keine Plus- und Minusknöpfe mehr.** Der erste Mann wird nicht gebaut,
-     er wird ausgehoben — man sieht, was man bekommen hat, und darf neu
-     würfeln, bis es einem passt. Was man *gestalten* kann, sind die
-     Veteranenpunkte im nächsten Schritt, und die hat der erste Mann nicht. */
-  const zeilen = ATTRIBUTE.map(([k,n])=>`
-    <div class="attrrow">
-      <span class="attrname">${mitHilfe(k,n)}${k==='bildung'?' <span style="color:var(--faint);font-size:11px">(fest)</span>':''}</span>
-      ${balken('b-brass',ERSCH.attr[k],100).replace('class="bar','id="ab_'+k+'" class="bar')}
-      <span class="attrval" id="av_${k}">${ERSCH.attr[k]}</span>
-    </div>`).join('');
-  app.innerHTML = `
-  <div class="stage">${verlauf()}
-    <div>
-      <div class="card"><div class="ch"><span>Erster Schritt · Wer bist du</span></div><div class="cb">
-        <input type="text" id="namefeld" placeholder="Name des Rekruten" value="${esc(ERSCH.name||zufallsName())}" oninput="ERSCH.name=this.value;aktualisiereErschaffung()">
-      </div></div>
-      <div class="card"><div class="ch"><span>Attribute</span><span id="poolanz">ausgehoben</span></div>
-        <div class="cb">${zeilen}
-        <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Sockel ${SOCKEL} · höchstens ${MAXE} bei der Aushebung · Bildung steht fest auf ${BILDUNG_SOCKEL} — du kannst nicht lesen.
-        Alle neun Fertigkeiten beginnen bei ${FERT_SOCKEL}.<br>
-        <b>Du suchst dir nicht aus, wer du bist.</b> Der Werber schreibt auf, was er sieht. Wenn dir der Mann nicht passt, kannst du einen anderen nehmen — aber besser machen kannst du ihn nicht. Das kommt erst mit den Veteranenpunkten deiner früheren Männer.</p>
-        <div style="margin-top:12px"><button class="plain" onclick="wuerfeln()">Einen anderen Mann</button></div>
-      </div></div>
-    </div>
-    <div class="card"><div class="ch"><span>Herkunft</span><span>je genau 50 Punkte</span></div><div class="cb">
-      <div class="herkwahl">${HERKUENFTE.map(h=>`<div class="herk${h.id===ERSCH.herkunft?' on':''}" id="h_${h.id}" onclick="waehleHerkunft('${h.id}')">
-        <div class="hn">${h.name}</div><div class="hd">${h.text}</div></div>`).join('')}</div>
-      <div style="margin-top:16px"><button class="plain" id="weiterbtn" onclick="zeigeLaden()" disabled>Weiter zu den Veteranenpunkten</button>
-      <p class="hinweis" style="margin-top:10px">Danach kannst du auf diese Werte noch Veteranenpunkte legen.</p></div>
-    </div></div>
-  </div>`;
-  ERSCH.name = document.getElementById('namefeld').value;
-  aktualisiereErschaffung();
-}
 function zufallsName(){
   const v=['Étienne','Jean-Baptiste','Pierre','Antoine','Louis','Nicolas','Claude','Michel','François','Gilbert'];
   const n=['Duval','Rey','Vasseur','Marchand','Ferrand','Bonnet','Lemoine','Charpentier','Roussel','Barbier'];
@@ -708,19 +944,6 @@ function waehleHerkunft(id){
   ERSCH.herkunft=id;
   HERKUENFTE.forEach(h=> document.getElementById('h_'+h.id).className = 'herk'+(h.id===id?' on':''));
   aktualisiereErschaffung();
-}
-function aktualisiereErschaffung(){
-  const anz = document.getElementById('poolanz');
-  if(anz) anz.textContent = 'ausgehoben';
-  ATTRIBUTE.forEach(([k])=>{
-    const v = document.getElementById('av_'+k); if(v) v.textContent = ERSCH.attr[k];
-    const b = document.getElementById('ab_'+k); if(b) b.querySelector('i').style.width = ERSCH.attr[k]+'%';
-  });
-  /* **Der Pool wird nicht mehr geprüft**, weil es keinen zu verteilen gibt —
-     `wuerfeln()` legt ihn immer vollständig an. Übrig bleiben die zwei Dinge,
-     die der Spieler wirklich entscheidet: Name und Herkunft. */
-  const w = document.getElementById('weiterbtn');
-  if(w) w.disabled = !(ERSCH.herkunft && ERSCH.name.trim().length>0);
 }
 function starte(){
   laufVerwerfen();       // ein Platz, kein zweiter — der alte Feldzug ist damit vorbei
@@ -1388,6 +1611,20 @@ function zeigeUebergang(n){
     S.leben = lebenMax();
     S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
+    /* ── Der Unterhalt des Pferdes ──
+       Er wird am Übergang fällig, also einmal je Feldzug, und er ist der
+       Grund, warum ein Pferd eine Entscheidung ist: 60 Francs für das Vollblut
+       sind mehr, als ein Fusilier in drei Kapiteln Sold sieht. Wer nicht
+       zahlen kann, verliert es — die Armee füttert kein Privatpferd. */
+    const uh = pferdUnterhalt();
+    if(uh){
+      if(S.geld >= uh){ S.geld -= uh; LAUF.pferdKosten = uh; }
+      else { S.pferdWeg = true; LAUF.pferdKosten = -1; }
+    }
+    /* Der stehende Auftrag des Feldzugs wird hier abgerechnet — die einzige
+       Stelle, an der ein ganzer Feldzug zu Ende ist und noch jemand da ist,
+       der etwas dazu sagt. */
+    kapitelauftragAbrechnen();
     laufSichern();
   }
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -1396,6 +1633,11 @@ function zeigeUebergang(n){
         <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
         <div class="wirkung"><span>Zwischenstand</span>
           ${rangName(S.rang)} · Ruf ${S.ruf} · ${stationen()} Stationen · ${S.nennungen}× im Tagesbefehl</div>
+        ${LAUF.pferdKosten ? `<div class="wirkung"><span>Das Pferd</span>${
+          LAUF.pferdKosten > 0
+            ? 'Hafer, Hufeisen, ein Sattler, der zweimal ausbessert. <b>−'+francs(LAUF.pferdKosten)+' F</b>'
+            : 'Du kannst es nicht mehr füttern. Der Train nimmt es, und man gibt dir einen Schein, den niemand einlöst. <b>Das Pferd ist weg.</b>'}</div>` : ''}
+        ${kapitelauftragAbrechnungZeile()}
         <div class="wirkung"><span>Ein Jahr Garnison</span>
           Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.
           <b>Konstitution +3:</b> Der Körper hat sich an das Marschieren gewöhnt, an das Schlafen im Nassen und daran, mit wenig auszukommen.</div>

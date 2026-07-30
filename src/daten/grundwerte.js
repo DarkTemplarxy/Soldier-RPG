@@ -41,6 +41,10 @@ function wertName(k){
   return NAMEN[k] || k;
 }
 const ERKLAERUNG = ATTRIBUTE.concat(FERTIGKEITEN).reduce((o,[k,,e])=>(o[k]=e||'',o),{});
+/* Werte, die keine Attribute und keine Fertigkeiten sind, aber in der
+   Seitenleiste stehen und deshalb einen Satz brauchen. **Ein Wert ohne
+   Erklärung ist eine Zahl, die der Spieler abschreibt statt versteht.** */
+ERKLAERUNG.sektionGuete = 'Wie gut deine Leute ausgebildet sind. Sie kommt aus dem Lager — exerzieren, den Zug antreten lassen, Rekruten aussuchen — und entscheidet, wie viele antreten, wie lange sie halten und wie schnell sie wegschmelzen. Ein gekauftes Patent fängt hier bei −25 an: Seine Leute wissen nicht, wer er ist.';
 
 /* Ein Wort mit Erklärung beim Überfahren. Reines CSS, keine Abhängigkeit. */
 function mitHilfe(k, beschriftung){
@@ -272,13 +276,17 @@ function rangabzeichen(mann){
    Die Gunst läuft von −5 bis +5 (KONZEPT §8) — negativ heißt, dass jemand
    über dir etwas gegen dich hat, und das blockt. */
 const LEUTE = [
+  /* `ab:` ist der Rang, ab dem einer in der Seitenleiste steht. **Wer über dir
+     steht, den kennst du nicht von Anfang an** — ein Fusilier weiß, wie sein
+     Sergent heißt, und hat den Capitaine höchstens einmal reiten sehen.
+     `ueberDir()` wertet das aus; ohne `ab` steht einer von Station 1 an da. */
   {id:'martel', kurz:'Martel', stufen:['Sergent','Sergent-major'],
    was:'Dein Sergent. Er hat dich im April über die Pässe gebracht und weiß, wer bei Lodi wo gestanden hat.'},
   {id:'collot', kurz:'Collot', stufen:['Fourier','Sergent-fourrier','Adjudant'],
    was:'Der Schreiber der Kompanie. Er führt die Listen, und in den Listen steht, wer Schuhe bekommt.'},
-  {id:'berthaud', kurz:'Berthaud', stufen:['Lieutenant','Capitaine','Chef de bataillon'],
+  {id:'berthaud', kurz:'Berthaud', ab:3, stufen:['Lieutenant','Capitaine','Chef de bataillon'],
    was:'Der Zugführer. Er entscheidet, welche Namen der Capitaine überhaupt zu hören bekommt.'},
-  {id:'vernet', kurz:'Vernet', stufen:['Capitaine','Chef de bataillon','Colonel'],
+  {id:'vernet', kurz:'Vernet', ab:3, stufen:['Capitaine','Chef de bataillon','Colonel'],
    was:'Der Kompaniechef. Er kennt deinen Namen erst, wenn ihn jemand nennt.'},
 
   /* ── Der fünfte Mann, und warum er dich kennt ──
@@ -297,8 +305,98 @@ const LEUTE = [
      sie wird nirgends angekündigt.** Sie wird nur eingelöst. */
   {id:'grandmaison', kurz:'Grandmaison', ab:9,
    stufen:['Chef de bataillon','Colonel','Général de brigade','Général de division'],
-   was:'Der General. Ob er deinen Namen kennt, hat sich vor zwölf Jahren entschieden, an einem Damm im Sumpf.'}
+   was:'Der General. Ob er deinen Namen kennt, hat sich vor zwölf Jahren entschieden, an einem Damm im Sumpf.'},
+
+  /* ── Die drei Marschälle ──
+     Sie stehen in derselben Liste wie die Kette, damit `gunst()`,
+     `gunstGeben()` und `personName()` unverändert für sie gelten. Sichtbar ist
+     immer nur der eine, den man gewählt hat — `kenntPerson()` prüft das. */
+  {id:'davout',  kurz:'Davout',  ab:11, patron:true, stufen:['Maréchal'],
+   was:'Prince d’Eckmühl. Er verlangt Ordnung, und er verlangt sie von jedem gleich, einschließlich von sich.'},
+  {id:'ney',     kurz:'Ney',     ab:11, patron:true, stufen:['Maréchal'],
+   was:'Duc d’Elchingen. Er sieht, wer vorgeht, und er sieht sonst wenig.'},
+  {id:'massena', kurz:'Masséna', ab:11, patron:true, stufen:['Maréchal'],
+   was:'Duc de Rivoli. Er hat in Italien mehr verdient als jeder andere und hört nicht auf damit.'}
 ];
+
+/* ══════════════════ DIE PROTEKTION EINES MARSCHALLS ══════════════════
+
+   **Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine
+   Zugehörigkeit.** Bis Rang 11 arbeitet man sich eine Kette hoch, in der jeder
+   Nächste einen Schritt über dem Vorigen steht. Darüber gibt es das nicht mehr:
+   Ein Général de brigade wird nicht von seinem Divisionsgeneral befördert,
+   sondern vom Kaiser — und der Kaiser kennt achthundert Generäle nicht.
+
+   **Er kennt seine Marschälle.** Wessen Mann du bist, entscheidet, wer deinen
+   Namen ausspricht, wenn eine Stelle aufgeht. Historisch war das der
+   entscheidende Mechanismus der ganzen Epoche: Es gab Davouts Leute, Neys
+   Leute, Massénas Leute, und wer zu keinem gehörte, blieb Colonel.
+
+   **Gemessen war das der Engpass.** Grandmaison war Patron für die Ränge 10 bis
+   13 — ein Mann, vier Stufen, zwei Gunstquellen, und beide am Gefecht hängend.
+   Vierzig von vierzig Maximalveteranen blieben Colonel, bei einem Median von
+   **−2**, wo **+5** nötig waren. Nicht die Schwelle war zu hoch, die Mechanik
+   war zu dünn.
+
+   ── Was die drei voneinander unterscheidet ──
+
+   **Jeder hat eine andere Vorstellung davon, was ein guter Untergebener ist**,
+   und keine davon ist die richtige:
+
+   | | verlangt | verachtet |
+   |---|---|---|
+   | **Davout** | erfüllte stehende Aufträge, ein Bataillon in Ordnung, saubere Bücher | jeden Eintrag im Verzeichnis, doppelt |
+   | **Ney** | vor der Linie stehen, Bulletins, genommene Stellungen | ein Gefecht, in dem dein Name nicht fällt |
+   | **Masséna** | Geld, und dass du weißt, wie man daran kommt | Ehrlichkeit, die ihn schlecht aussehen lässt |
+
+   ── Und der Preis, den keiner ansagt: ihr eigener Stand ──
+
+   **Ein Patron ist nur so viel wert, wie der Kaiser auf ihn hört**, und das
+   ändert sich. Davout bleibt oben, weil er nie etwas falsch macht und deshalb
+   nie geliebt wird. Ney steht hoch und stürzt in Russland ab, wo er die
+   Nachhut führt und dabei ein Korps verliert. Masséna ist 1805 der reichste
+   Mann der Armee und 1811 in Portugal erledigt.
+
+   **Wer sich 1807 für Masséna entscheidet, wählt den, der jetzt am meisten
+   gibt und am Ende nichts mehr wert ist.** Das Spiel sagt es nicht. Es zeigt
+   nur seinen Stand, und der steht neben seinem Namen. */
+const PATRONE = [
+  {id:'davout',  name:'Maréchal Davout, Prince d’Eckmühl',
+   will:'ordnung', wollen:'Ordnung, und zwar überprüfbar',
+   text:'Er fragt dich nach Zahlen. Wie viele Paar Schuhe, wie viele auf dem Marsch zurückgeblieben, '
+      +'wie viele deiner Unteroffiziere lesen können. Er schreibt die Antworten auf und vergleicht sie im Frühjahr '
+      +'mit dem, was du gesagt hast. Man erzählt sich, dass er noch nie jemanden angeschrien hat.',
+   /* Sein Stand ist der stabilste von allen und nie der höchste: Er macht
+      nichts falsch und wird dafür geachtet, nicht geliebt. */
+   stand:{4:3, 5:4, 6:4, 7:4, 8:5, 9:4, 10:4}},
+
+  {id:'ney',     name:'Maréchal Ney, Duc d’Elchingen',
+   will:'tapfer', wollen:'dass man dich vorn gesehen hat',
+   text:'Er redet zwanzig Minuten mit dir und stellt keine einzige Frage, die du beantworten müsstest. '
+      +'Am Ende sagt er, er habe bei Elchingen jemanden gesehen, der auf der Brücke stehen geblieben ist, '
+      +'und ob du das gewesen seist. Du warst es nicht. Er nickt trotzdem.',
+   /* Der Höchststand der Armee — bis Russland. Danach ist er der Mann, der die
+      Nachhut geführt und ein Korps verloren hat, und beides stimmt. */
+   stand:{4:4, 5:5, 6:5, 7:4, 8:5, 9:3, 10:2}},
+
+  {id:'massena', name:'Maréchal Masséna, Duc de Rivoli',
+   will:'geld', wollen:'seinen Anteil, und dass du deinen nimmst',
+   text:'Er empfängt dich in einem Zimmer, das drei Wochen vorher jemand anderem gehört hat, und redet über '
+      +'den Preis von Tuch. Nach einer halben Stunde weißt du, dass es kein Gespräch über Tuch war, '
+      +'und dass du eine Antwort gegeben hast, ohne es zu merken.',
+   /* 1805 der reichste Mann der Armee, nach Portugal 1811 erledigt. Wer ihn
+      früh wählt, bekommt am meisten und steht am Ende allein. */
+   stand:{4:5, 5:4, 6:4, 7:3, 8:1, 9:0, 10:0}}
+];
+function patronVon(id){ return PATRONE.find(p=>p.id===id) || null; }
+/* Sein Stand beim Kaiser im laufenden Feldzug. Vor Rang 11 gibt es keine
+   Wahl, also auch keinen Stand; nach dem letzten Eintrag gilt der letzte. */
+function patronStand(id, kap){
+  const p = patronVon(id); if(!p) return 0;
+  const k = Math.max(0, kap|0);
+  for(let i = k; i >= 0; i--) if(p.stand[i] !== undefined) return p.stand[i];
+  return 3;
+}
 
 /* Nachrücker, wenn einer fällt. Der Nachfolger trägt denselben Posten und
    kennt dich nicht — deshalb Gunst 0 und ein eigener Satz zur Einführung. */
@@ -316,6 +414,49 @@ function leuteStart(){
   LEUTE.forEach(l => { o[l.id] = {gunst:0, stufe:0, lebt:true, kurz:l.kurz}; });
   return o;
 }
+
+/* ══════════════════ DIE KETTE UNTER DIR ══════════════════
+
+   **Der Kern der Verschiebung, und er kostet fast keine neue Maschine.** Das
+   Spiel hat ein bewährtes System für benannte Personen mit eigener Haltung,
+   Aufstieg, Tod und Nachfolge — `S.leute`, `LEUTE`, `NACHFOLGER`. Es zeigt
+   nach oben. **Hier wird dasselbe System nach unten gerichtet.**
+
+   Bis Rang 8 hat man Untergebene als *Zahl*: `K.sektion` ist eine Zahl für 20,
+   60 oder 120 Mann, die Kompanien heißen „1. Kompanie" bis „4. Kompanie", und
+   `MANNSCHAFT` liefert Namen ausschließlich für Verlustlisten. Die Texte
+   behaupteten Untergebene („drei Sergenten machen die Arbeit"), der Zustand
+   kannte sie nicht.
+
+   **Ab Rang 9 haben sie Namen.** Vier Personen, wie „Über dir" — und je Person
+   nur vier Werte, damit vier Personen überschaubar bleiben:
+
+     koennen   0–100   was seine Einheit im Gefecht leistet
+     treue    −5…+5    ob er dich deckt oder anzeigt
+     zustand           ein Problem, das auf deinem Schreibtisch landet
+     lebt              er kann fallen; der Nachfolger beginnt bei 25
+
+   **Die Zahl der Menschen, die du kennst, bleibt gleich — sie rücken nur
+   immer weiter von der Schlacht ab.** Als Fusilier kennst du vier Männer neben
+   dir. Als Général de division kennst du vier Generäle unter dir. */
+const UNTERSTELLTE_STUFEN = [
+  {ab:9,  posten:['Sergent','Sergent','Sergent','Sous-Lieutenant'], was:'deine Unteroffiziere und dein junger Offizier'},
+  {ab:10, posten:['Capitaine','Capitaine','Capitaine','Capitaine'], was:'die vier Kompaniechefs'},
+  {ab:11, posten:['Chef de bataillon','Chef de bataillon','Chef de bataillon'], was:'die Bataillonschefs deines Regiments'},
+  {ab:12, posten:['Colonel','Colonel','Colonel','Général de brigade'], was:'die Regimenter deiner Brigade'},
+  {ab:13, posten:['Général de brigade','Général de brigade','Colonel','Colonel','Colonel'], was:'die Verbände deiner Division'}
+];
+/* Welche Stufe zum Rang gehört — die höchste, die er erreicht. */
+function unterstellteStufe(rang){
+  let s = null;
+  for(const u of UNTERSTELLTE_STUFEN) if(rang >= u.ab) s = u;
+  return s;
+}
+/* Namen für die Unterstellten. Sie kommen aus derselben Liste wie die
+   Verlustmeldungen — es sind dieselben Leute, nur die, die man kennt. */
+const UNTER_NAMEN = ['Toussaint','Lavaux','Perrin','Reynaud','Ducasse','Marbot',
+  'Chevrier','Delaunay','Prevost','Ravel','Bonnet','Gerard','Lefranc','Vidal',
+  'Aubert','Chastel','Marchand','Dorsay','Villiers','Rocher'];
 
 const HERKUENFTE = [
   {id:'bauer',name:'Bauernsohn',
@@ -371,7 +512,7 @@ const KAMPAGNEN = [
   {id:'jena',       nr:5,  name:'Jena–Auerstedt', jahre:'1806',    guete:7, sold:0.8, schwierigkeit:8, kurz:'Tempo, Verfolgung, Marschstrapazen.'},
   {id:'eylau',      nr:6,  name:'Eylau & Friedland', jahre:'1807', guete:8, sold:0.6, schwierigkeit:10, kurz:'Schnee und Massenverluste. Viele Vakanzen.'},
   {id:'spanien',    nr:7,  name:'Spanien',        jahre:'1808–12', guete:8, sold:0.7, aderlass:4, schwierigkeit:12, kurz:'Guerilla. Kein Ruhm, nur Repressalien.'},
-  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, schwierigkeit:16, kurz:'Kein Feldzug, ein Überlebensspiel.'},
+  {id:'russland',   nr:8,  name:'Russland',       jahre:'1812',    guete:10, sold:0.1, aderlass:8, verschleiss:2, ersatz:false, schwierigkeit:16, kurz:'Kein Feldzug, ein Überlebensspiel.'},
   {id:'deutschland',nr:9,  name:'Deutschland',    jahre:'1813',    guete:10, sold:0.4, rekruten:25, schwierigkeit:16, kurz:'Wiederaufbau aus Rekruten. Leipzig.'},
   {id:'frankreich', nr:10, name:'Frankreich',     jahre:'1814',    guete:11, sold:0.2, rekruten:20, schwierigkeit:18, kurz:'Verteidigung der Heimat, Abdankung.'},
   {id:'hunderttage',nr:11, name:'Hundert Tage',   jahre:'1815',    guete:12, sold:1.0, schwierigkeit:20, kurz:'Waterloo. Epilog je nach Rang.'}
@@ -773,11 +914,21 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
    Erzählt wird es als das, was es historisch war: der Sohn eines
    zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
    der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
+/* ── Die Freischaltung steht seit dem 30.07.2026 wieder auf 9 und 11 ──
+   **`frei:6` und `frei:8` waren die befristete Fassung für vier Kapitel.**
+   Damals war Rang 9 gemessen unerreichbar, und eine Freischaltung, die
+   niemand auslöst, hätte Phase E ihren Zweck genommen — die Offiziershälfte
+   sollte überhaupt einmal jemand sehen.
+
+   Der Grund ist weg: Mit elf Kapiteln erreicht der Veteran mit 5800 VP in
+   **40 von 40 Läufen den Colonel**. Wer ein Patent kaufen will, hat den
+   verlangten Rang längst getragen. `RANGLEITER.md` §9 gilt damit wieder
+   wörtlich, und die Abweichung ist keine mehr. */
 const PATENTE = [
-  {id:'patent_sl', rang:7, vp:550, frei:6, abzug:790,
+  {id:'patent_sl', rang:7, vp:550, frei:9, abzug:790,
    label:'Patent als Sous-Lieutenant',
    beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
-  {id:'patent_lt', rang:8, vp:725, frei:8, abzug:1025,
+  {id:'patent_lt', rang:8, vp:725, frei:11, abzug:1025,
    label:'Patent als Lieutenant',
    beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
 ];
@@ -786,15 +937,93 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
    über alle Läufe mit und ist damit dauerhaft — wie die Generalskampagnen. */
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
 
+/* ══════════════════ DER KAUFLADEN ══════════════════
+
+   **Drei Qualitätsleitern, Extras, und die fünf Gewohnheiten.**
+
+   `gruppe:` macht aus Posten eine Leiter: Innerhalb einer Gruppe gibt es
+   **einen** Kauf, und der teurere ersetzt den billigeren, statt danebenzustehen.
+   Was keine Gruppe hat, ist stapelbar — Kleinkram und Gewohnheiten.
+
+   **Jede Stufe kostet mehr und bringt weniger Zuwachs als die davor.** Wer
+   Stufe 4 bezahlt, bezahlt Zuverlässigkeit, keinen Sprung. Stufe 1 ist immer
+   die Ausgabe, die jeder ohnehin bekommt, und steht deshalb nicht im Laden.
+
+   `frei:` schaltet über `META.bestRang` frei — **durch Erreichtes, nie durch
+   Vorrat.** Gesperrtes steht grau mit einem Satz Bedingung da; damit ist der
+   Laden zugleich die Landkarte dessen, was noch kommt. `freiKapitel:` ist
+   dasselbe für eine Kapitelmarke: Die Winterausstattung kann man erst kaufen,
+   wenn man weiß, warum man sie braucht.
+
+   **Der Nebeneffekt ist der Hauptpunkt:** Für 165 VP (Muskete und Schuhe auf
+   Stufe 2) ist ein Erstkäufer spürbar besser ausgerüstet. Vorher begann der
+   Laden praktisch bei 200 — bei einer Erstlauf-Weite von 32 von 163 Stationen
+   war das der falsche Einstiegspreis. */
 const LADEN = [
-  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
-  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  /* ── Die Waffe ── */
+  {id:'muskete_depot',art:'ausr',gruppe:'waffe',stufe:2,label:'Ausgesuchte Muskete aus dem Depot',
+   beschr:'Der Waffenmeister legt drei nebeneinander und nimmt die, deren Lauf gerade ist · +4 Muskete',vp:90},
+  {id:'muskete_gut',art:'ausr',gruppe:'waffe',stufe:3,label:'Sorgfältig eingeschossene Muskete',
+   beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
+  {id:'muskete_manu',art:'ausr',gruppe:'waffe',stufe:4,label:'Manufakturmuskete aus Versailles',
+   beschr:'Sie schießt nicht anders, sie schießt jedes Mal gleich · +12 Muskete, hält einen ganzen Krieg',vp:350},
+  {id:'stutzen',art:'ausr',gruppe:'waffe',frei:2,label:'Gezogener Stutzen',
+   beschr:'Kein Aufstieg, ein anderer Weg: Zielen wird tödlich, schnelles Feuern wertlos · nur für Plänkler',vp:275},
+
+  /* ── Die Schuhe ── */
+  {id:'schuhe_neu',art:'ausr',gruppe:'schuhe',stufe:2,label:'Neue Schuhe, passend',
+   beschr:'Nicht besser gemacht als die Ausgabe, nur nicht von einem anderen getragen',vp:75},
+  {id:'schuhe_gut',art:'ausr',gruppe:'schuhe',stufe:3,label:'Doppelt besohlte Schuhe',
+   beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  {id:'stiefel',art:'ausr',gruppe:'schuhe',stufe:4,label:'Marschstiefel vom Schuster, Maßarbeit',
+   beschr:'Sie gehen kaputt wie alles andere, nur zwei Feldzüge später · und du merkst es viel später',vp:300},
+
+  /* ── Uniform und Mantel ── */
+  {id:'mantel_gut',art:'ausr',gruppe:'mantel',stufe:2,label:'Beutemantel, gewachst',
+   beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
+  {id:'uniform_gut',art:'ausr',gruppe:'mantel',stufe:3,label:'Gute Uniform mit Capote',
+   beschr:'Man sieht einem Mann an, wie ernst er sich nimmt · Mantel und +4 Autorität',vp:250},
+  {id:'winter',art:'ausr',gruppe:'mantel',stufe:4,freiKapitel:'eylau',label:'Winterausstattung: Tuch und Pelz',
+   beschr:'Der Kauf, den man erst versteht, wenn man einmal ohne dagestanden hat · Frost eine Stufe milder',vp:375},
+
+  /* ── Die Seitenwaffe ── */
+  {id:'bajonett_gut',art:'ausr',gruppe:'seitenwaffe',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
+  {id:'sabre',art:'ausr',gruppe:'seitenwaffe',frei:2,label:'Sabre briquet',
+   beschr:'Der kurze Säbel der Elitekompanien · +4, und ab dem Patent zählt er als gepflegter Säbel',vp:125},
+  {id:'degen',art:'ausr',gruppe:'seitenwaffe',frei:7,label:'Offiziersdegen',
+   beschr:'Zum Angesehenwerden und einmal je Gefecht zu etwas anderem · „Den Degen ziehen" +6',vp:175},
+
+  /* ── Tornister ── */
   {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:120},
-  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
-  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
-  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
-  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+
+  /* ── Kleinkram, stapelbar ── */
   {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:60},
+  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
+  {id:'schreibzeug',art:'ausr',label:'Schreibzeug',
+   beschr:'Feder, Tinte, ein Bogen zum Üben · Bildung wächst schneller — der kürzeste Weg zur Offiziersschwelle',vp:75},
+  {id:'uhr',art:'ausr',frei:5,label:'Taschenuhr',
+   beschr:'Wer die Zeit hat, hat die Salve · +4 auf Drill-Proben im Gefecht',vp:90},
+  {id:'besteck',art:'ausr',label:'Chirurgenbesteck',
+   beschr:'+5 Feldchirurgie, und am Verbandsplatz hilft es wirklich',vp:100},
+  {id:'fernrohr',art:'ausr',frei:7,label:'Fernrohr',
+   beschr:'Es zeigt, was sonst nur gemeldet wird — im Sturm, auf der Skizze, auf der Karte · +4 Taktik',vp:150},
+
+  /* ── Geld ── */
+  {id:'geld',art:'geld',gruppe:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+  {id:'geld_gross',art:'geld',gruppe:'geld',frei:9,label:'200 Francs Startgeld',
+   beschr:'Genug, um eine Kompanie zu beschuhen, ohne die Kasse anzurühren',vp:225},
+
+  /* ── Papiere ── */
+  {id:'empfehlung',art:'ausr',frei:4,label:'Empfehlungsschreiben',
+   beschr:'Ein Brief von jemandem, den der Capitaine kennt · er öffnet eine Tür, mehr nicht',vp:150},
+
+  /* ── Das Pferd ── */
+  {id:'pferd_land',art:'ausr',gruppe:'pferd',frei:7,label:'Landpferd',
+   beschr:'Kein schönes Tier, aber du gehst nicht mehr zu Fuß · Marsch kostet 40 % weniger · 15 F je Kapitel',vp:200},
+  {id:'pferd_kav',art:'ausr',gruppe:'pferd',frei:9,label:'Kavalleriepferd',
+   beschr:'Es bleibt stehen, wenn geschossen wird, und das ist der ganze Unterschied · 30 F je Kapitel',vp:375},
+  {id:'pferd_voll',art:'ausr',gruppe:'pferd',frei:11,label:'Vollblut',
+   beschr:'Man sieht dich von weitem. Das ist der Vorteil und der Preis · Ruf +1 je Gefecht, +2 Gefahr · 60 F je Kapitel',vp:600},
 
   /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
 
@@ -834,3 +1063,57 @@ const LADEN = [
 /* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
    gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */
 function zaeh(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }
+/* Dasselbe für jeden anderen Posten. `zaeh()` bleibt als eigener Name stehen,
+   weil an seinen sechs Stellen die Absicht mitgelesen wird. */
+function gekauft(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }
+
+/* ── Freigeschaltet wird durch Erreichtes, nie durch Vorrat ──
+   `frei:` prüft gegen `META.bestRang` (läuft dauerhaft über alle Läufe),
+   `freiKapitel:` gegen die betretenen Kapitel. **Ein Posten, den man sich
+   kaufen kann, weil man reich ist, wäre keine Freischaltung, sondern ein
+   Preisschild.**
+
+   Gesperrtes wird **angezeigt**, nicht versteckt: Der Laden ist die einzige
+   Stelle, an der ein Spieler sieht, was das Spiel noch hat. */
+function ladenFrei(p){
+  const m = (typeof META==='object' && META) ? META : null;
+  if(p.frei && (!m || (m.bestRang|0) < p.frei)) return false;
+  if(p.freiKapitel && !kapitelGesehen(p.freiKapitel, m)) return false;
+  return true;
+}
+/* ── Warum das nicht `bestKapitel[id]` sein darf ──
+   **`META.bestKapitel` ist nach Stations-IDs verschlüsselt, nicht nach
+   Kampagnen-IDs.** Die erste Fassung schlug die Kampagne direkt darin nach und
+   funktionierte nur deshalb, weil in Kapitel 6 zufällig eine *Station* `eylau`
+   heißt. Jeder künftige Wert ohne gleichnamige Station hätte den Posten
+   **stumm für immer gesperrt** — dieselbe Familie wie der stumme Filter im
+   Lager, der siebzehn Prozentpunkte gekostet hat.
+   Jetzt wird gegen die Stationsliste der Kampagne geprüft: gesehen ist sie,
+   wenn irgendeine ihrer Stationen betreten wurde. */
+function kapitelGesehen(id, m){
+  const meta = m || ((typeof META==='object' && META) ? META : null);
+  if(!meta || !meta.bestKapitel) return false;
+  const st = (typeof STATIONEN==='object' && STATIONEN) ? STATIONEN[id] : null;
+  if(!st || !st.length) return !!meta.bestKapitel[id];
+  return st.some(n => n && n.id && meta.bestKapitel[n.id]);
+}
+function ladenBedingung(p){
+  if(p.frei){
+    const r = RANG.find(x=>x.n===p.frei);
+    return 'Erst, wenn du einmal ' + (r ? r.name : 'Rang '+p.frei) + ' warst.';
+  }
+  if(p.freiKapitel){
+    const k = KAMPAGNEN.find(x=>x.id===p.freiKapitel);
+    return 'Erst, wenn du ' + (k ? k.name+' '+k.jahre : p.freiKapitel) + ' gesehen hast.';
+  }
+  return '';
+}
+/* Die Leitern des Ladens, in der Reihenfolge, in der sie angezeigt werden. */
+const LADEN_GRUPPEN = [
+  ['waffe','Die Waffe','je ein Kauf · der teurere ersetzt den billigeren'],
+  ['schuhe','Die Schuhe','der Posten, den jeder zuletzt kauft und zuerst braucht'],
+  ['mantel','Uniform und Mantel','was zwischen dir und der Nacht steht'],
+  ['seitenwaffe','Die Seitenwaffe','einmal je Laufbahn wichtig, und dann sehr'],
+  ['geld','Bares','was in der Tasche ist, wenn der Marketender kommt'],
+  ['pferd','Das Pferd','ab dem Patent — und in Russland wird es gegessen']
+];

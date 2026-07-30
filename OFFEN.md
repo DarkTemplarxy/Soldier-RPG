@@ -40,7 +40,23 @@
 
 ---
 
-## 2 · Der Veteran mit 400 VP war einmal schlechter als der mit 160
+## 2 · ✓ Entschieden: es ist die Bot-Formel, nicht das Spiel
+
+> **Geschlossen am 30.07.2026 mit dem `risk`-Zähler** (`balance.js` druckt jetzt „Riskante Wahlen: n von m"). Der Verdacht stand seit Tagen und war richtig:
+>
+> | Bot | riskante Wahlen |
+> |---|---|
+> | Erstlauf, vorsichtig *(80 Läufe)* | **1 %** (153 von 10 973) |
+> | Erstlauf, mutig *(80)* | 6 % (541 von 8 462) |
+> | **Veteran 5800 VP** | **38 %** (411 von 1 086) |
+>
+> **Der reiche Veteran geht achtunddreißigmal so oft ins Risiko wie der vorsichtige Erstläufer — und zwar nicht, weil es klug wäre.** Der Bot bewertet Szenenwahlen nach dem Abstand `Wert − Schwierigkeit` und zieht für riskante 20 ab. Bei Werten über 70 übersteigt eine riskante Wahl auch nach dem Abschlag noch jede sichere, also nimmt er sie fast immer. Ein Mensch mit Konstitution 85 riskiert eine Wunde nicht deshalb, weil er sie sich leisten kann.
+>
+> **Damit ist die frühere Beobachtung erklärt** („der 400er überlebte seltener als der 160er"): Es war kein Balance-Befund, sondern der Bot. Wer die Heuristik anfasst, misst gegen genau diese drei Zahlen — der Abschlag müsste mit dem Wert wachsen, nicht fest bei 20 stehen.
+>
+> **Nicht geändert, und das ist Absicht.** Ein Bot, der Risiken meidet, misst das Strafsystem und nicht das Spiel (Regel 9). Solange die Zahl *danebensteht*, ist sie kein Fehler mehr, sondern eine bekannte Eigenschaft der Messung.
+
+### Der ursprüngliche Befund
 
 **Gemessen nach Kapitel 5:** 23 % gegen 53 %, je 40 Läufe — über vier Standardabweichungen. **Nach Kapitel 6 ist es umgekehrt** (25 gegen 15 %), also möglicherweise erledigt oder möglicherweise Rauschen bei n=40.
 
@@ -199,9 +215,28 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 > **Der Prüfpunkt ist nicht die Weite, sondern die Form der Verteilung.** Wer die Härtekurve anhebt, misst die Zeile „Überstanden je Kapitel": Sie soll flacher werden — kein Kapitel unter 60 %, keines über 95 %. **Bleibt ein einzelnes Kapitel bei 38 %, während die anderen bei 80 stehen, hat sich nur der Ort des Siebs verschoben.**
 
-## 10 · Der Marschall ist unerreichbar, und die Ökonomie hängt daran
+## 10 · Was „Generalskampagne" heißt — zwei Entwürfe sagen Verschiedenes
 
-**Rang 14 verlangt `generalskampagne`**, und die Szenarien gibt es nicht. Das ist dieselbe Lage, in der Rang 13 bis zum 30.07.2026 war — mit derselben Folge: **Die Decke der VP-Ökonomie steht nicht fest.**
+**Rang 14 verlangt `S.generalskampagne`. Das Feld wird an zwei Stellen gelesen und an keiner einzigen gesetzt** (`schwellenStimmen()` und `fehltWas()` in `kampf.js`). Der Marschall ist damit nicht schwer, sondern per Konstruktion unmöglich — dieselbe Lage, in der Rang 13 bis zum 30.07.2026 war, als ihm der Grand Officier fehlte.
+
+**Und die beiden Quellen meinen nicht dasselbe:**
+
+| Quelle | Was `generalskampagne` heißt |
+|---|---|
+| `KONZEPT.md` §9 | **Eigenständige Szenarien** — Wagram 1809, Leipzig 1813, Waterloo 1815, je 30–60 Minuten, rein auf der Operationsebene, mit eigener Wertung und eigenem Chronikeintrag. Rang 12 schaltet sie dauerhaft frei (`META.generalskampagnen`, gebaut und in Betrieb) |
+| **Ansage des Entwicklers, 30.07.2026** | Eine **Zeitschranke**: *„man wird frühestens drei Kampagnen vor Schluss zum Marschall"* — also nicht vor Kapitel 9 (Deutschland 1813) |
+
+**Nicht aufgelöst, weil beides gebaut werden kann und die Entscheidung nicht am Code hängt.** Zwei Beobachtungen dazu:
+
+1. **Die zwei Flags werden leicht verwechselt.** `META.generalskampagnen` (dauerhaft, über alle Läufe, von Rang 12 gesetzt) und `S.generalskampagne` (je Lauf, von niemandem gesetzt) sehen fast gleich aus und bedeuten Verschiedenes. Wer eines von beiden baut, benennt das andere um.
+2. **Die Zeitschranke ist die Fassung, die der Invariante näher steht.** Sie fordert nichts, was es nicht gibt, und sie hält den Ton: *„Sechsundzwanzig in zwölf Jahren, unter Hunderttausenden."* Ein Szenario, das man abhaken kann, wäre eine Bedingung; drei Feldzüge vor Schluss ist eine Aussage über den Krieg.
+
+| Hebel | Was er tut |
+|---|---|
+| **Zeitschranke** *(näher an der Invariante)* | `generalskampagne` durch eine Kapitelmarke ersetzen — Rang 14 frühestens ab Kapitel 9. Eine Zeile, und der Stab bleibt die Legende, die er im Text ohnehin ist |
+| **Die Szenarien bauen** | Die aufwendige Antwort. `META.generalskampagnen` steht bereit; es fehlt der ganze Szenariomodus |
+
+**Solange die oberste Stufe fehlt, ist jede Eichung der Kostenkurve vorläufig:**
 
 | Erreichbare Decke | Ein perfekter Lauf bringt |
 |---|---|
@@ -210,14 +245,7 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 | Rang 13 · Général de division | 5 370 VP |
 | **Rang 14 · Maréchal** | **ungerechnet** |
 
-Das Ziel *„alles auf 70+"* kostet 4 950 VP. **Solange die oberste Stufe fehlt, ist jede Eichung der Kostenkurve vorläufig.**
-
-| Hebel | Was er tut |
-|---|---|
-| **Die Generalskampagnen bauen** | Die ehrliche Antwort. KONZEPT entwirft sie als Szenarien; `META.generalskampagnen` wird ab Rang 12 längst freigeschaltet |
-| **Die Bedingung ersetzen** | Etwas fordern, das es gibt — ein zweiter fremder Orden, eine Zahl an Bulletins, ein überstandener Feldzug als Général. Billig, und der Stab bleibt die Legende, die er sein soll |
-
-> **Rang 14 feiert nichts, und das gehört zur Entscheidung.** Der Abschlusstext nennt die Namen, die vor deinem stehen, und stellt fest, dass die Liste nicht länger wird. **Eine Bedingung, die man einfach abhakt, würde dem widersprechen** — sechsundzwanzig in zwölf Jahren, unter Hunderttausenden.
+Das Ziel *„alles auf 70+"* kostet 4 950 VP.
 
 ---
 
@@ -248,6 +276,20 @@ Das Ziel *„alles auf 70+"* kostet 4 950 VP. **Solange die oberste Stufe fehlt,
 **b) 98 % ganz durch ist kein Erfolg, sondern eine Warnung.** Ein Mann, der elf Feldzüge und einundvierzig Gefechte übersteht, ohne dass ihn irgendetwas ernsthaft bedroht, hat keine Entscheidungen mehr — und **die eigene Regel sagt, dass eine Quote nahe 100 % zuerst verdächtig ist.** Hier ist sie echt (der Prüfstand ist repariert, der Bericht ist in sich stimmig), aber sie heißt: Der Maximalveteran hat den Trichter verlassen.
 
 Das ist die Kehrseite von Punkt 9. **Beide Enden der Progression sind zu flach** — der Erstläufer klettert zu schnell, der Veteran stirbt gar nicht mehr —, und beide hängen an derselben Stelle: Die Härtekurve endet bei +20, die Werte gehen bis 100. **Wer eines von beiden anfasst, misst das andere mit.**
+
+---
+
+## 12 · Rang 12 ist die nächste Wand — welche der drei Schranken bindet, ist ungemessen
+
+**Gemessen: 40 von 40 Maximalveteranen enden als Colonel (Rang 11).** Der Auftrag-Fix hat die Decke von 9 auf 11 gehoben; die Ansage lautet aber *„dass man als Veteran mit vielen VP General werden kann"*, und Général de brigade ist Rang 12.
+
+| Was Rang 12 verlangt | Stand |
+|---|---|
+| Ruf 480 | erreicht er mühelos — er kommt mit rund 690 an |
+| Grandmaison ≥ 5 | **der Verdächtige.** Er ist Patron für 10 bis 13; dieselbe Fürsprache muss über vier Stufen reichen |
+| 3 Bulletins | ungeprüft — `S.bulletins` füttert nur die oberste Sichtbarkeitsstufe |
+
+> **Der Messweg steht fest und ist billig:** eine Zeile in `balance.js`, die je Lauf `S.ruf`, `gunst('grandmaison')` und `S.bulletins` am Ende ausgibt. Dann steht dort, welche der drei bindet. **Erst auslesen, dann drehen** — an einem Tag war dreimal hintereinander die vermutete Ursache nicht die wirkliche (Güte-Leck, Grandmaisons eigene Rangvoraussetzung, der Auftrag an Vernet).
 
 ---
 

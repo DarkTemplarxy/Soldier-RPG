@@ -114,7 +114,6 @@ const KAPITEL7 = [
 /* 98 */ {typ:'lager',id:'quartier_madrid',datum:'Sommer 1808 · Madrid',ort:'Quartier in einer besetzten Hauptstadt',
   abende:3,
   tun:['exerzieren','bajonett','scharf','instand','schuhe','waffe','lesen','ruhe','leute','fouragieren'],
-  rangTun:{3:['korporalschaft'],4:['listen'],5:['sektion','rekruten'],7:['fechtboden','zugfuehren','karten','adjutant'],9:['kasse_ganz','kasse_ueblich','kasse_voll']},
   text:[
     'Madrid im Juli ist heiß, still und voll. Die Läden sind offen, die Preise haben sich verdreifacht, und man wird bedient, ohne angesehen zu werden.',
     'Am 22. Juli kommt eine Nachricht aus Andalusien, die niemand glaubt: Bei Bailén hat ein französisches Korps kapituliert. Achtzehntausend Mann, mit Waffen, Fahnen und Generalen, vor einer spanischen Armee, über die man seit Monaten Witze macht.',
