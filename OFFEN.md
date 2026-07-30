@@ -213,6 +213,36 @@ Das Ziel *„alles auf 70+"* kostet 4 950 VP. **Solange die oberste Stufe fehlt,
 
 ---
 
+## 11 · Der Veteran steht bei Colonel und hat keinen Widerstand mehr
+
+**Gemessen mit repariertem Prüfstand, `VP=5800`, 40 Läufe, vorsichtig:**
+
+| | |
+|---|---|
+| Weite | **163 von 163** |
+| Rangverteilung | **11 Col 40** — alle vierzig, keiner darüber, keiner darunter |
+| Ganz durch | **39 (98 %)** |
+| Gestorben | **1**, in Russland |
+| Punkte | Median 4 728 · Bereich 3 258–4 808 |
+
+**Zwei Befunde, und sie ziehen in verschiedene Richtungen.**
+
+**a) Die Decke sitzt bei Rang 11.** Der Auftrag-Fix hat sie von 9 auf 11 gehoben — das war sein Zweck und er hat gewirkt. Aber die Ansage lautet *„dass man als Veteran mit vielen VP General werden kann"*, und Général de brigade ist **Rang 12**. Vierzig von vierzig bleiben Colonel.
+
+| Was Rang 12 verlangt | Wo es klemmt |
+|---|---|
+| Ruf 480 | erreicht ein Maximalveteran mühelos (er kommt mit ~690 an) |
+| Grandmaison ≥ 5 | **der Verdächtige.** Er ist Patron für 10–13; die Fürsprache muss über vier Stufen reichen |
+| 3 Bulletins | ungeprüft — `S.bulletins` wird nur von der obersten Sichtbarkeitsstufe gefüttert |
+
+> **Wer das anfasst, liest zuerst den Hebel aus, nicht das Ergebnis.** Gebraucht wird eine Zeile, die je Lauf `S.ruf`, `gunst('grandmaison')` und `S.bulletins` am Ende ausgibt — dann steht dort, welche der drei Schranken bindet. Dieselbe Lektion wie beim stummen Güte-Leck und beim Auftrag, der den falschen Mann fütterte: **Dreimal hintereinander war die vermutete Ursache nicht die wirkliche.**
+
+**b) 98 % ganz durch ist kein Erfolg, sondern eine Warnung.** Ein Mann, der elf Feldzüge und einundvierzig Gefechte übersteht, ohne dass ihn irgendetwas ernsthaft bedroht, hat keine Entscheidungen mehr — und **die eigene Regel sagt, dass eine Quote nahe 100 % zuerst verdächtig ist.** Hier ist sie echt (der Prüfstand ist repariert, der Bericht ist in sich stimmig), aber sie heißt: Der Maximalveteran hat den Trichter verlassen.
+
+Das ist die Kehrseite von Punkt 9. **Beide Enden der Progression sind zu flach** — der Erstläufer klettert zu schnell, der Veteran stirbt gar nicht mehr —, und beide hängen an derselben Stelle: Die Härtekurve endet bei +20, die Werte gehen bis 100. **Wer eines von beiden anfasst, misst das andere mit.**
+
+---
+
 ## Erledigt
 
 | Punkt | Wie geschlossen | Messwert |
