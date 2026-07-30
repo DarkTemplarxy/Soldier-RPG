@@ -556,30 +556,37 @@ function chance(ziel){
 
    ```
    roh    = Wert − Schwierigkeit + PROBE_SOCKEL   (ungeklemmt, Sockel = 60)
-   Ziel   = clamp(roh, 5, 95)
-   Können = max(0, roh − 95)
+   Ziel   = clamp(roh, 5, 95)                     (die Trefferchance)
+   Können = max(0, roh − KOENNEN_AB)              (die Wirkung, ab Abstand +20)
    Wurf   = Mittel aus sechs d100 (eng, siehe wurfZahl)
    ```
 
-   **Sockel und Wurfbreite sind die Eichung, siehe oben.** Sockel 60 plus enger
-   Wurf heißt: „gleich gut wie die Aufgabe" ~80 %, „weit darunter" fast nichts.
-   `Können` greift ab 35 Punkten über der Schwierigkeit (roh − 95 = Abstand −
-   35) — dort ist die Probe ohnehin so gut wie sicher, und der Überschuss zahlt
-   in Wirkung statt in Trefferchance.
-
    **Die Klemme bleibt, und sie ist richtig.** Fünf Prozent Fehlschlag gehören
    dazu: Im Rauch schießt auch der beste Schütze daneben, und eine Probe, die
-   nie misslingt, ist keine. Aber sie hatte eine Nebenwirkung, die erst mit
-   vielen Veteranenpunkten sichtbar wurde — **gegen die üblichen
-   Schwierigkeiten 35 bis 50 sind Wert 85 und Wert 100 dieselbe Zahl.** Und
-   weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit
-   ausschließlich Trefferwahrscheinlichkeit. Damit war das obere Fünftel der
-   Skala **tote Währung**: Wer seine Spitze nachschärfte, bekam dafür nichts.
+   nie misslingt, ist keine. Aber sie hat eine Nebenwirkung — **gegen die
+   üblichen Schwierigkeiten sind irgendwann alle hohen Werte dieselbe Zahl**,
+   und weil der Schaden bei Erfolg ein fester Wurf ist, kaufte eine Fertigkeit
+   dort ausschließlich Trefferwahrscheinlichkeit, die es nicht mehr zu kaufen
+   gab. Das obere Ende der Skala war **tote Währung**.
 
-   `koennen` ist genau das, was die Klemme wegwirft. Es zahlt nicht mehr in
-   die Trefferchance — die bleibt bei 95 % —, sondern in die **Wirkung**.
-   Damit gilt für die ganze Skala wieder: Mehr Wert ist mehr wert; nur ändert
-   sich oben, *worin*. Ein Meister trifft nicht öfter, er trifft härter. */
+   `koennen` ist genau das, was die Klemme wegwirft: Es zahlt nicht in die
+   Trefferchance, sondern in die **Wirkung**. Ein Meister trifft nicht öfter,
+   er trifft härter.
+
+   > **⚠ KOENNEN_AB und die Klemme sind zwei Zahlen, nicht eine — und dass sie
+   > früher beide 95 waren, war Zufall, nicht Absicht.** Mit dem engen Wurf
+   > sättigt die Trefferchance schon bei **Abstand +20** (99 %), aber `roh − 95`
+   > hätte den Schadensbonus erst ab Abstand +35 anspringen lassen. Dazwischen
+   > lag ein Loch: **kein Treffer mehr zu holen, kein Schaden noch zu holen.**
+   > Gemessen an den Kaufkosten war das die Rückkehr der toten Währung — der
+   > Schritt von Wert 60 auf 65 kostete 30 VP und brachte **+0,7 %**, der von
+   > 75 auf 80 kostete 40 VP und brachte **null**.
+   >
+   > `KOENNEN_AB` sitzt deshalb dort, wo die Kurve *sättigt*, und wandert mit
+   > dem Sockel: **Wer den Sockel ändert, prüft diese Zahl mit.** Die Regel
+   > lautet `PROBE_SOCKEL + 20` — bis dorthin kauft man Treffer, darüber
+   > Wirkung, und dazwischen ist kein Loch. */
+const KOENNEN_AB = PROBE_SOCKEL + 20;
 /* Die zuletzt gewürfelte Probe. `kampfAktion()` setzt sie am Anfang auf null
    und liest sie am Ende aus, wo der Schaden verrechnet wird — so steht der
    Meisterschaftsfaktor an **einer** Stelle statt an fünfzehn Schadenszeilen,
@@ -589,9 +596,9 @@ function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
   const roh = w - schwierigkeit + PROBE_SOCKEL;
   const ziel = Math.max(5, Math.min(95, roh));
-  const wurf = wurfZahl();   // Mittel aus zwei Würfen, siehe oben
+  const wurf = wurfZahl();   // Mittel aus sechs Würfen, siehe oben
   if(!ohneUebung) nutzen(k, 1);
-  PROBE_ZULETZT = {wurf, ziel, wertRoh:w, roh, koennen: Math.max(0, roh - 95), erfolg: wurf <= ziel};
+  PROBE_ZULETZT = {wurf, ziel, wertRoh:w, roh, koennen: Math.max(0, roh - KOENNEN_AB), erfolg: wurf <= ziel};
   return PROBE_ZULETZT;
 }
 
@@ -600,9 +607,11 @@ function probe(k, schwierigkeit, ohneUebung){
    von 100 gegen eine leichte Schwierigkeit auf das Doppelte hinaus, und die
    späten Gefechte wären in drei Runden vorbei.
 
-   30 Punkte über der Klemme sind das Maximum, das im Spiel vorkommt (Wert 100
-   gegen Schwierigkeit 35). Wer dort steht, richtet die Hälfte mehr an als
-   einer, der die Probe gerade so sicher besteht. */
+   Der Deckel wird bei **Abstand +50** erreicht (`koennen` 30, also etwa Wert 90
+   gegen Schwierigkeit 40). Dazwischen wächst er stetig: Ab Abstand +20 fängt
+   er bei null an, und jeder weitere Punkt zahlt ein. **Genau das ist die
+   Strecke, auf der ein Veteran seine Überschüsse los wird** — vorher endete
+   sie im Nichts. */
 /* **Wie deutlich es gelungen ist, in einem Wort.** Ab fünfzehn Punkten über
    der Klemme steht der Mann so weit über der Aufgabe, dass die Probe nur noch
    Form ist — und das gehört auf den Schirm, sonst merkt niemand, wofür er
