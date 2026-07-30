@@ -95,6 +95,7 @@ Gebaut sind **alle elf Kapitel** — Italien 1796/97 bis Waterloo 1815, **einhun
 | **Sechs Folgestufen** statt einer Strafe, fünf Wege der Entdeckung | |
 | **Aufträge mit sichtbarem Stand**, zwei widersprüchliche ab Rang 12 | |
 | **Der stehende Auftrag** je Feldzug ab Rang 10 | |
+| **Trauerblatt und Congé absolu** — die zwei Endbildschirme als Urkunde | |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -1812,6 +1813,44 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 
 ---
 
+## Die zwei Endbildschirme (`trauerblatt()`, `congeAbsolu()` in `src/abschluss.js`)
+
+**Ein Mann hört auf zwei Arten auf, und beide Male entsteht dabei ein Papier.** Bis zum 30.07.2026 endeten beide in einem gewöhnlichen Bogen mit einer Punktetabelle — die Wertung stand da, wo das Dokument hingehört, und die Entlassungsurkunde, das amtlichste Blatt des Spiels, stand sogar auf **Feldpapier** statt auf Kanzleipapier.
+
+| | **Trauerblatt** (`extrait mortuaire`) | **Congé absolu** |
+|---|---|---|
+| Wann | er ist gefallen | er geht lebend — Schranke, Ausmusterung, Epilog |
+| Wer schreibt | ein Schreiber über ihn | die Armee an ihn |
+| Wen es beschreibt | einen **Nachlass** | einen **Körper** |
+| Was leer bleibt | die Zeile für die Erben | nichts |
+| Unterschrift | Collot, der Fourier | Vernet, der Chef de bataillon |
+
+> **Der Ton kommt aus der Form, nicht aus Adjektiven** (Invariante 7). Ein Vordruck wertet nicht — er hat Felder, und die Felder werden ausgefüllt. **Dass eines davon leer bleibt, sagt mehr als jeder Satz, den man daneben schreiben könnte:** Die Zeile „Erben" steht auf jedem Vordruck, weil sie auf jedem Vordruck steht, und wird bei einem Fusilier fast nie ausgefüllt. Das Spiel sagt dazu nichts.
+>
+> Deshalb darf `.feld b` **nie ausgeblendet werden, wenn es leer ist.** Die gepunktete Linie gehört dem Feld, nicht der Eintragung — sonst verschwände sie genau dort, wo sie etwas sagt.
+
+### Das Signalement — die einzige Stelle, an der jemand aufschreibt, wie dieser Mann aussieht
+
+Der Kern eines echten Congé ist das *signalement*: neun Zeilen, mit denen der Staat einen Mann so beschreibt, dass man ihn wiedererkennt, **falls er desertiert**. Genau deshalb steht es hier — und es kommt in dem Augenblick, in dem er aufhört, zu ihnen zu gehören.
+
+**In die Zeile „Besondere Kennzeichen" kommen die Wunden.** Nicht als Auszeichnung und nicht als Klage, sondern als Merkmal, an dem man ihn erkennt.
+
+| | |
+|---|---|
+| **Die Größe** | `59 + Konstitution/16 + 0…2` Zoll. **Vier Fuß elf Zoll ist der Boden, und er ist kein Zufall:** Das war das gesetzliche Mindestmaß der Konskription (1,598 m). Nach oben rund fünf Fuß sieben — die Spanne, die in den Registern wirklich steht |
+| **Das Maß** | pieds und pouces. Das metrische Maß gab es 1796 auf dem Papier und in keinem Registerbuch |
+| **Die Pension** | im Spiel je Station, auf dem Blatt **je Jahr** (× 9). Ein Dokument sagt nicht „je Station" — das ist eine Spielregel, keine Verwaltungsangabe |
+
+> **Nichts darin wird gewürfelt.** Dieselbe Regel wie im Sichtfeld, und aus demselben Grund: Der Bildschirm wird bei `binde()` neu gezeichnet, und ein Signalement, das beim zweiten Blick andere Augen hat, ist kein Signalement. `zug(saat, n)` streut deterministisch aus dem Namen.
+
+**Drei Fehler, die erst das Dokument sichtbar gemacht hat** — alle drei standen vorher schon da, nur unauffällig:
+
+1. **`grund.toLowerCase()`** machte aus „Gefallen bei Eylau" ein **„gefallen bei eylau"**. Es sollte den ersten Buchstaben kleinschreiben; es traf den Ortsnamen mit. Jetzt `charAt(0).toLowerCase() + slice(1)`.
+2. **Der Nachlass führte Leerstellen als Gegenstände.** Die Ausrüstungsliste hält fehlende Sachen als Eintrag mit dem Namen „Kein Mantel" — im Register stand daraufhin *ein kein mantel* zwischen den Schuhen und dem Tornister.
+3. **`schrankeEnde()` stand auf `.card` statt `.card papier`.** Eine Entlassung ist kein Lagebericht, sondern eine Urkunde mit Siegel.
+
+> **⚠ Der Knopftext bleibt unangetastet.** „Nächster Mann" steht nur auf dem Todesblatt, „Noch einmal, besser" nur unter einem Ende, das der Mann überlebt hat — **drei Prüfstände unterscheiden Tod und Ende daran**, weil `zeigeTod()` den Zustand wegräumt und ein Fließtext kein Zustand ist. Wer an den Endbildschirmen baut, lässt die beiden Zeichenketten stehen.
+
 ## Pergament: die Gestalt seit dem 28.07.2026 (`src/stil.css`)
 
 **Die Leitmetapher ist der Feldtisch.** Alles, was man sieht, sind Papiere auf dem Tisch eines Capitaine — das Livret, die Meldungen, die Schlachtskizze, das Wertungsblatt. Der Grund dahinter ist dunkles Holz (`--holz`) und nur an den Rändern sichtbar, damit die Bögen als Bögen lesbar sind.
@@ -2229,9 +2268,8 @@ function ausfuehrungsProbe(schw){
 
 1. **Die Einstiegshürde höher legen.** Der Erstläufer klettert mit Fertigkeiten-Sockel 20 zu schnell — Caporal 65 %, Sergent 53 %, neunmal ein Patent bei einer Weite von 31. Gefordert ist das Gegenteil: *„relativ nutzlos, bzw. ziemlich sicher sterben"*, **nie über den Colonel hinaus**. Der Hebel ist die Härtekurve (Italien +0), nicht der Sockel.
 2. **Den Marschallstab erreichbar machen.** Rang 14 verlangt eine `generalskampagne`, die es nicht gibt — dieselbe Lage, in der Rang 13 bis zum 30.07.2026 war. Erst danach steht die Decke der VP-Ökonomie endgültig fest.
-3. **Bündel 6 — die zwei Endbildschirme** (Trauerblatt und Congé absolu). Keine Priorität. **⚠ Der Knopftext „Nächster Mann" darf sich dabei nicht ändern** — drei Prüfstände erkennen den Tod daran, und zwar am Knopf, weil `zeigeTod()` den Zustand wegräumt.
-4. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
-5. **Alles, was in `OFFEN.md` steht.**
+3. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
+4. **Alles, was in `OFFEN.md` steht.**
 
 > **Erledigt am 30.07.2026, in einem Zug** — zwölf zusammenhängende Änderungen, weil keine für sich allein stehen konnte:
 >

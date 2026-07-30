@@ -1151,6 +1151,184 @@ function wertungsTabelleAus(c){
   </table>`;
 }
 
+/* ══════════════════ DIE ZWEI ENDBILDSCHIRME ══════════════════
+
+   **Ein Mann hört auf zwei Arten auf, und beide Male entsteht dabei ein
+   Papier.** Bis hierher endete beides in einem gewöhnlichen Bogen mit einer
+   Punktetabelle — die Wertung stand da, wo das Dokument hingehört.
+
+   Es sind zwei verschiedene Papiere, und der Unterschied ist der ganze Punkt:
+
+   | | **Trauerblatt** | **Congé absolu** |
+   |---|---|---|
+   | Wann | er ist gefallen | er geht lebend |
+   | Wer schreibt | ein Schreiber über ihn | die Armee an ihn |
+   | Wen es beschreibt | einen Nachlass | einen Körper |
+   | Was leer bleibt | die Zeile für die Erben | nichts |
+
+   **Der Ton kommt aus der Form, nicht aus Adjektiven** (Invariante 7). Ein
+   Vordruck wertet nicht — er hat Felder, und die Felder werden ausgefüllt.
+   Dass eines davon leer bleibt, sagt mehr als jeder Satz, den man daneben
+   schreiben könnte.
+
+   **Nichts darin wird gewürfelt.** Dieselbe Regel wie im Sichtfeld: Der
+   Bildschirm wird bei `binde()` neu gezeichnet, und ein Signalement, das beim
+   zweiten Blick andere Augen hat, ist kein Signalement. `zug()` streut
+   deterministisch aus dem Namen. */
+function zug(saat, n){
+  let h = 0;
+  for(let i=0;i<saat.length;i++) h = (h*31 + saat.charCodeAt(i)) & 0x7fffffff;
+  return h % n;
+}
+/* Eine Zeile des Vordrucks: Feldname, gepunktete Linie, eingetragener Wert.
+   Ein leerer Wert bleibt eine leere Linie — das ist eine Aussage und kein
+   Fehler, deshalb wird hier nichts ausgelassen. */
+function feld(was, wert){
+  return `<div class="feld"><span>${esc(was)}</span><b>${wert==null||wert===''?'':esc(String(wert))}</b></div>`;
+}
+function dienstjahre(){
+  const j = jahrVonStation() - 1796;
+  return j <= 0 ? 'weniger als ein Jahr' : j === 1 ? 'ein Jahr' : j + ' Jahre';
+}
+function feldzuege(){
+  const k = kapitelUeberlebt();
+  return k === 0 ? 'keinen vollständig' : k === 1 ? 'einen' : k + ' Feldzüge';
+}
+/* Der Nachlass eines Soldaten ist eine Liste von Gegenständen, und genau so
+   wird er im Register geführt. Das Geld zuerst, weil danach zuerst gefragt
+   wurde. */
+function nachlass(){
+  const teile = [];
+  if(S.geld > 0) teile.push(francs(S.geld) + ' Francs');
+  Object.keys(S.ausr||{}).forEach(k=>{
+    const a = S.ausr[k];
+    /* **Ein leerer Platz ist kein Nachlassstück.** Die Ausrüstungsliste führt
+       fehlende Sachen als Eintrag mit dem Namen „Kein Mantel" — im Register
+       stand daraufhin ein kein mantel zwischen den Schuhen und dem Tornister.
+       Ebenso bleibt die Schreibweise, wie sie ist: Eine Charleville heißt
+       Charleville, auch in einem Formular. */
+    if(!a || !a.name || /^kein/i.test(a.name)) return;
+    teile.push(a.name + (a.verschleiss ? ' (Zustand ' + Math.round(a.zustand) + ')' : ''));
+  });
+  return teile.length ? teile.join(', ') : 'nichts von Wert';
+}
+function ordenZeile(){
+  const o = (S.orden||[]).map(id=>(ordenVon(id)||{}).name).filter(Boolean);
+  return o.length ? o.join(', ') : 'keine';
+}
+function wundenZeile(){
+  const w = (S.wunden||[]).map(x=>x.name);
+  return w.length ? w.join(', ') : '';
+}
+
+/* ── Das Trauerblatt ──
+   Der Auszug aus dem Sterberegister, wie ihn ein Fourier ausfüllt: acht
+   Felder, eine Bemerkung, eine Unterschrift, die niemand lesen kann.
+
+   **Die Zeile „Erben" bleibt leer, und sie ist der Grund für das ganze Blatt.**
+   Sie steht auf dem Vordruck, weil sie auf jedem Vordruck steht; ausgefüllt
+   wird sie bei einem Fusilier fast nie. Das Spiel sagt dazu nichts. */
+function trauerblatt(grund){
+  const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  const bemerkungen = [
+    'Kein Brief nach Hause. In der Kompanie kann niemand schreiben, der ihn gekannt hat.',
+    'Die Sachen sind am selben Abend verteilt worden. Der Vordruck verlangt eine Aufstellung, also steht sie hier.',
+    'Der Eintrag ist nachgetragen worden. Das Datum ist das, an dem er zuletzt beim Appell war.'
+  ];
+  return `<div class="urkunde">
+    <div class="urkopf"><span>${kaiserreich() ? 'Empire Français' : 'République Française'}</span>
+      <b>Extrait mortuaire</b><span>32.&thinsp;Demi-brigade de bataille</span></div>
+    <div class="felder">
+      ${feld('Name', S.name)}
+      ${feld('Grad und Kompanie', rangName(S.rang) + ', 1. Kompanie')}
+      ${feld('Herkunft', S.herkunft)}
+      ${feld('Eingetreten', 'April 1796, Savona')}
+      ${feld('Ausgeschieden', letzte.datum || '')}
+      ${feld('Ort', letzte.ort || '')}
+      ${feld('Ursache', grund)}
+      ${feld('Dienstzeit', dienstjahre() + ', ' + feldzuege())}
+      ${feld('Auszeichnungen', ordenZeile())}
+      ${feld('Nachlass', nachlass())}
+      ${feld('Erben', '')}
+    </div>
+    <div class="urnote">${esc(bemerkungen[zug(S.name + grund, bemerkungen.length)])}</div>
+    <div class="urfuss"><span>Der Fourier der Kompanie</span><i class="krakel">Collot</i></div>
+  </div>`;
+}
+
+/* ── Der Congé absolu ──
+   **Die endgültige Entlassung, und das echte Dokument.** Sein Kern ist das
+   *signalement*: neun Zeilen, mit denen der Staat einen Mann so beschreibt,
+   dass man ihn wiedererkennt, falls er desertiert. Genau deshalb steht es
+   hier — es ist die einzige Stelle im ganzen Spiel, an der jemand aufschreibt,
+   wie dieser Mann aussieht, und sie kommt in dem Augenblick, in dem er
+   aufhört, zu ihnen zu gehören.
+
+   **In die Zeile „Besondere Kennzeichen" kommen die Wunden.** Nicht als
+   Auszeichnung und nicht als Klage — als Merkmal, an dem man ihn erkennt. */
+const SIG_HAAR = ['braun','kastanienbraun','schwarz','blond','dunkelblond','grau meliert'];
+const SIG_STIRN = ['hoch','gewöhnlich','niedrig','bedeckt'];
+const SIG_NASE = ['gewöhnlich','lang','breit','gebogen','spitz'];
+const SIG_MUND = ['mittel','groß','klein'];
+const SIG_KINN = ['rund','spitz','gespalten','breit'];
+const SIG_GESICHT = ['oval','voll','länglich','mager','pockennarbig'];
+const SIG_AUGEN = ['grau','blau','braun','graublau','dunkelbraun'];
+function signalement(){
+  const s = S.name || 'x';
+  /* Die Größe wächst mit der Konstitution und streut um zwei Zoll. Gemessen
+     wird in pieds und pouces — das metrische Maß gab es 1796 auf dem Papier
+     und in keinem Registerbuch. */
+  /* **Vier Fuß elf Zoll ist der Boden, und er ist kein Zufall:** Das war das
+     gesetzliche Mindestmaß der Konskription (1,598 m). Nach oben reicht es
+     bis rund fünf Fuß sieben — die Spanne, die in den Registern wirklich
+     steht. Gerechnet wird in pieds und pouces; das metrische Maß gab es 1796
+     auf dem Papier und in keinem Registerbuch. */
+  const zoll = 59 + Math.round((S.attr.konstitution|0) / 16) + zug(s+'g', 3);
+  const fuss = Math.floor(zoll / 12), rest = zoll % 12;
+  return [
+    ['Größe', fuss + ' Fuß ' + rest + ' Zoll'],
+    ['Haare und Brauen', SIG_HAAR[zug(s+'h', SIG_HAAR.length)]],
+    ['Augen', SIG_AUGEN[zug(s+'a', SIG_AUGEN.length)]],
+    ['Stirn', SIG_STIRN[zug(s+'s', SIG_STIRN.length)]],
+    ['Nase', SIG_NASE[zug(s+'n', SIG_NASE.length)]],
+    ['Mund', SIG_MUND[zug(s+'m', SIG_MUND.length)]],
+    ['Kinn', SIG_KINN[zug(s+'k', SIG_KINN.length)]],
+    ['Gesicht', SIG_GESICHT[zug(s+'f', SIG_GESICHT.length)]],
+    ['Besondere Kennzeichen', wundenZeile() || 'keine']
+  ];
+}
+function congeAbsolu(){
+  const letzte = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)] || {};
+  const grund = S.abgelehnt ? 'Auf eigenen Antrag'
+    : S.ende === 'halbsold' ? 'Auflösung des Verbandes'
+    : 'Ausgemustert nach der neuen Rangordnung';
+  const rente = ordenPension();
+  return `<div class="urkunde">
+    <div class="urkopf"><span>${kaiserreich() ? 'Empire Français' : 'République Française'}</span>
+      <b>Congé absolu</b><span>32.&thinsp;Demi-brigade de bataille</span></div>
+    <div class="felder">
+      ${feld('Name', S.name)}
+      ${feld('Grad bei der Entlassung', rangName(S.rang))}
+      ${feld('Herkunft', S.herkunft)}
+      ${feld('Eingetreten', 'April 1796, Savona')}
+      ${feld('Entlassen', letzte.datum || '')}
+      ${feld('Dienstzeit', dienstjahre() + ', ' + feldzuege())}
+      ${feld('Grund', grund)}
+      ${feld('Auszeichnungen', ordenZeile())}
+      ${/* Die Pension läuft im Spiel je Station. Ein Congé nennt einen
+            Jahresbetrag — einhundertdreiundsechzig Stationen auf neunzehn
+            Jahre sind rund neun je Jahr, und mit dieser Zahl wird gerechnet.
+            Ein Dokument sagt nicht „je Station"; das ist eine Spielregel. */''}
+      ${feld('Pension', rente ? francs(Math.round(rente*9)) + ' Francs jährlich' : 'keine')}
+    </div>
+    <div class="urabschnitt">Signalement</div>
+    <div class="felder eng">${signalement().map(([a,b])=>feld(a,b)).join('')}</div>
+    <div class="urnote">Der Inhaber darf sich in jeder Gemeinde niederlassen und ist zu weiterem Dienst nicht verpflichtet.
+      Das Blatt ist bei jeder Aufforderung vorzuzeigen.</div>
+    <div class="urfuss"><span>Der Chef de bataillon</span><i class="krakel">Vernet</i></div>
+  </div>`;
+}
+
 /* `letzterText` und `kk` reicht `gefallen()` aus dem Gefecht herein: der letzte
    Absatz vor dem Umfallen und die Taten dieses Gefechts. Vorher baute
    `kampfEnde()` beides in einen Bildschirm, den `zeigeTod()` eine Anweisung
@@ -1165,9 +1343,14 @@ function zeigeTod(letzterText, kk){
     <div class="cb">
       <div class="prose">
         ${letzterText?`<p>${letzterText}</p>`:''}
-        <p><b>${esc(S.name)}</b>, ${rangName(S.rang)} der 32. Halbbrigade, ${esc(grund.toLowerCase())}.</p>
+        ${/* `toLowerCase()` stand hier, damit „Gefallen" klein anfängt — und
+              machte aus „Gefallen bei Eylau" ein „gefallen bei eylau". Der
+              erste Buchstabe genügt; ein Ortsname bleibt ein Ortsname. */''}
+        <p><b>${esc(S.name)}</b>, ${rangName(S.rang)} der 32. Halbbrigade, ${
+          esc(grund.charAt(0).toLowerCase() + grund.slice(1))}.</p>
         <p>${todesText()}</p>
       </div>
+      ${trauerblatt(grund)}
       ${kk && kk.taten && kk.taten.length?`<div class="lage"><div class="lagekopf">Was gesehen wurde</div>
         ${kk.taten.map(t=>`<div class="tat"><span>${esc(t.was)}</span><b>Ruf +${t.ruf}</b></div>`).join('')}
       </div>`:''}
@@ -1342,6 +1525,12 @@ function zeigeEpilog(n){
       <div class="cb">${vordruck(n)}
         <div class="prose">${prosa}</div>
         <div class="ergebnis" style="margin-top:16px">${leben}</div>
+        ${/* Auch hier ein Congé, und historisch der massenhafteste von allen:
+             1815 wurde die Armee aufgelöst, und Hunderttausende bekamen
+             dasselbe Blatt am selben Tag. Der Grund darauf unterscheidet die
+             beiden Wege — „Auflösung des Verbandes" oder „Auf eigenen
+             Antrag" —, sonst nichts. */ ''}
+        ${congeAbsolu()}
         <div class="grid2" style="margin-top:18px">
           <div>${wertungsTabelle(p)}</div>
           <div class="note ${neu?'green':''}">
@@ -1362,9 +1551,13 @@ function zeigeEpilog(n){
 function schrankeEnde(n, prosa, epilog){
   const p = eintragen((S.ende==='halbsold'?'Halbsold · ':'Ruhestand · ')+rangName(S.rang));
   const neu = p.rekord;
-  app.innerHTML = `<div class="card"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
+  /* **Das amtlichste Blatt des Spiels stand bis hierher auf Feldpapier.** Eine
+     Entlassung ist kein Lagebericht, sondern eine Urkunde mit Siegel — und
+     `.papier` ist genau dafür da. */
+  app.innerHTML = `<div class="card papier"><div class="ch"><span>${esc(n.datum||'')}</span><span>${esc(n.ort||'')}</span></div>
     <div class="cb"><div class="prose">${prosa}</div>
       <div class="ergebnis" style="margin-top:14px">${esc(epilog||'')}</div>
+      ${congeAbsolu()}
       <div class="grid2" style="margin-top:18px">
         <div>${wertungsTabelle(p)}</div>
         <div class="note ${neu?'green':''}">

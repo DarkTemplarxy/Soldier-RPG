@@ -468,6 +468,61 @@
 .papier .namebtn:hover{ color:#3d2c12 }
 .papier s{ color:#7a6a55 }
 
+/* ══════════════════ DIE URKUNDE ══════════════════
+
+   **Trauerblatt und Congé absolu — die zwei Papiere, mit denen ein Mann
+   aufhört.** Sie liegen als eigener, eingerückter Block auf dem
+   Kanzleipapier: ein Vordruck im Vordruck, so wie ein ausgefülltes Formular
+   auf einem Schreibtisch liegt.
+
+   **Der Ton steckt in der gepunkteten Linie.** Ein Feldname links, eine Linie
+   nach rechts, darauf die Eintragung — und wo nichts eingetragen ist, bleibt
+   die Linie sichtbar leer. Genau das trägt die Aussage des Trauerblatts:
+   Die Zeile „Erben" steht auf jedem Vordruck und wird bei einem Fusilier
+   fast nie ausgefüllt. Deshalb darf `.feld b` nie ausgeblendet werden, wenn
+   es leer ist. */
+.urkunde{ margin:18px 0 4px; padding:16px 18px 14px;
+  border:1px solid rgba(90,76,58,.45); background:rgba(255,253,246,.42);
+  box-shadow:0 1px 6px rgba(90,76,58,.13) inset; }
+.urkopf{ display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  flex-wrap:wrap; border-bottom:1px solid rgba(90,76,58,.35); padding-bottom:9px; margin-bottom:12px; }
+.urkopf span{ font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:#6b4f22 }
+.urkopf b{ font-family:var(--didone); font-size:19px; letter-spacing:.05em;
+  font-weight:normal; font-variant:small-caps; color:#1d1814 }
+
+/* Zwei Spalten, solange Platz ist. Ein Vordruck, der auf einem Telefon zu
+   einer einzigen langen Spalte wird, bleibt lesbar — er hört nur auf,
+   nach Formular auszusehen, und das ist der richtige Verlust. */
+.felder{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:2px 26px }
+.felder.eng{ gap:0 26px }
+.feld{ display:flex; align-items:baseline; gap:7px; padding:3px 0; min-width:0 }
+.feld > span{ flex:none; font-size:11px; letter-spacing:.06em; color:#6a5a44 }
+/* Die Linie: Sie gehört dem Feld, nicht der Eintragung — sonst verschwände
+   sie genau dort, wo sie etwas sagt. */
+.feld > b{ flex:1 1 auto; min-width:0; font-weight:normal; color:var(--tinte);
+  font-size:13px; border-bottom:1px dotted rgba(90,76,58,.5);
+  overflow-wrap:anywhere; padding-bottom:1px }
+
+.urabschnitt{ margin:15px 0 7px; font-size:10.5px; letter-spacing:.18em;
+  text-transform:uppercase; color:#6b4f22; border-bottom:1px solid rgba(90,76,58,.3);
+  padding-bottom:4px }
+.urnote{ margin-top:13px; font-size:12.5px; color:var(--tinte2); line-height:1.55 }
+.urfuss{ margin-top:16px; display:flex; align-items:flex-end; justify-content:space-between;
+  gap:14px; flex-wrap:wrap }
+.urfuss span{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#6a5a44;
+  border-top:1px solid rgba(90,76,58,.4); padding-top:5px; min-width:180px }
+/* Die Unterschrift ist eine Krakelei, keine Schrift: schräg, gedrängt, und
+   man liest sie nicht wirklich. So sah jede Unterschrift auf jedem dieser
+   Blätter aus. */
+.krakel{ font-family:var(--didone); font-size:21px; font-style:italic;
+  color:#3a3128; opacity:.72; transform:rotate(-3deg); letter-spacing:-.02em;
+  margin-right:58px }
+
+@media (max-width:620px){
+  .felder, .felder.eng{ grid-template-columns:1fr }
+  .krakel{ margin-right:0 }
+}
+
 /* Der Kopf eines Vordrucks: Republik/Kaiserreich, Einheit, Datum. */
 .vordruck{ text-align:center; font-family:var(--didone); color:#4a3f31;
   border-bottom:1px solid rgba(90,76,58,.4); padding-bottom:10px; margin-bottom:14px }

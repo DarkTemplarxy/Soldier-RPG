@@ -5,6 +5,32 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Bündel 6: die zwei Endbildschirme
+
+**Ein Mann hört auf zwei Arten auf, und beide Male entsteht dabei ein Papier.** Bisher endeten beide in einem gewöhnlichen Bogen mit einer Punktetabelle — und die Entlassungsurkunde, das amtlichste Blatt des Spiels, stand sogar auf Feldpapier statt auf Kanzleipapier.
+
+| | **Trauerblatt** | **Congé absolu** |
+|---|---|---|
+| Wann | er ist gefallen | er geht lebend — Schranke, Ausmusterung, Epilog |
+| Beschreibt | einen **Nachlass** | einen **Körper** |
+| Leer bleibt | die Zeile für die **Erben** | nichts |
+
+**Der Ton kommt aus der Form, nicht aus Adjektiven.** Ein Vordruck wertet nicht — er hat Felder, und die Felder werden ausgefüllt. Dass eines davon leer bleibt, sagt mehr als jeder Satz daneben: Die Zeile „Erben" steht auf jedem Vordruck und wird bei einem Fusilier fast nie ausgefüllt. Das Spiel sagt dazu nichts.
+
+**Das Signalement** ist der Kern eines echten Congé: neun Zeilen, mit denen der Staat einen Mann so beschreibt, dass man ihn wiedererkennt, **falls er desertiert** — und die einzige Stelle im Spiel, an der jemand aufschreibt, wie dieser Mann aussieht. Sie kommt in dem Augenblick, in dem er aufhört, zu ihnen zu gehören. In „Besondere Kennzeichen" stehen die Wunden.
+
+Die Größe rechnet in pieds und pouces, `59 + Konstitution/16 + 0…2` Zoll. **Vier Fuß elf ist der Boden, und das ist kein Zufall:** das gesetzliche Mindestmaß der Konskription (1,598 m). **Nichts wird gewürfelt** — `zug()` streut deterministisch aus dem Namen, sonst hätte der Mann beim zweiten Blick andere Augen.
+
+**Drei Fehler, die erst das Dokument sichtbar gemacht hat:**
+
+1. `grund.toLowerCase()` machte aus „Gefallen bei Eylau" ein **„gefallen bei eylau"** — es sollte den ersten Buchstaben kleinschreiben und traf den Ortsnamen mit.
+2. Der Nachlass führte Leerstellen als Gegenstände: „Kein Mantel" ist ein Eintrag in der Ausrüstungsliste, und so stand *ein kein mantel* zwischen den Schuhen und dem Tornister.
+3. `schrankeEnde()` stand auf `.card` statt `.card papier`.
+
+Die Knopftexte bleiben unangetastet — „Nächster Mann" und „Noch einmal, besser" sind das, woran drei Prüfstände Tod und Ende unterscheiden.
+
+---
+
 ## 2026-07-30 — Die Verwaltung: sieben Sitzungen für die obere Hälfte
 
 **Das Spiel hatte oben eine Hälfte, die nicht gespielt wurde, sondern verwaltet.** Ab Rang 9 gab es eine Kompaniekasse, einen Einheitszustand und einen Auftrag je Gefecht — drei Zahlen, die etwas taten, ohne dass jemand mit ihnen umgehen konnte. Der Leitsatz über allen sieben Sitzungen:
