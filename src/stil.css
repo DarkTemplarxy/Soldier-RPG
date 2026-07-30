@@ -366,6 +366,11 @@
     font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}
   .wirkung span{display:block;font-size:10.5px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--brass);margin-bottom:3px}
+  /* Der Erfüllungsstand eines Auftrags — dieselben zwei Bedeutungen wie
+     überall: Grün ist Zugewinn, Rot ist Kosten. Bis hierher gab es `ok` und
+     `warn` nur in der Seitenleiste; ein Auftrag, dessen Stand man nicht
+     ablesen kann, ist eine Lotterie. */
+  .wirkung .ok{color:var(--green)} .wirkung .warn{color:var(--blood)}
 
   .log{max-height:200px;overflow-y:auto;font-size:14px;color:var(--dim)}
   .log div{padding:3px 0;border-bottom:1px solid #221f1a}

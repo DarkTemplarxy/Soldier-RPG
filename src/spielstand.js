@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 13;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen
+const LAUF_FASSUNG    = 14;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -222,6 +222,16 @@ const LAUF_WANDLER = {
       if(m.mitgewaehlt === undefined) m.mitgewaehlt = (m.rang >= 10);
     }
     return Object.assign({}, alt, {fassung:13});
+  },
+  /* Fassung 13 kannte den stehenden Auftrag über den Feldzug noch nicht.
+     **Er fängt unabgerechnet an, und das ist die richtige Fassung:** Er wird
+     am Übergang geprüft, also gegen den Zustand, in dem der Mann dort
+     ankommt — nicht gegen eine Vergangenheit, von der der Spielstand nichts
+     weiß. Wer mitten im Feldzug fortsetzt, bekommt ihn beim nächsten
+     Übergang zum ersten Mal abgerechnet, und zwar vollständig. */
+  13: alt => {
+    if(alt.kauftrag === undefined) alt.kauftrag = null;
+    return Object.assign({}, alt, {fassung:14});
   }
 };
 

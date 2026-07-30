@@ -682,6 +682,10 @@ function zeigeLager(n){
        ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
        ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${francs(L.sold, true)} F</b></div>`:''}
        ${L.inspektion||''}
+       ${/* Der stehende Auftrag gehört ins Lager, nicht nur ins Gefecht: Hier
+            ist der einzige Ort, an dem man etwas dafür tun kann. Er sagt,
+            wofür die Abende zu verwenden wären — und ob es noch reicht. */
+         kapitelauftragZeile()}
        ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       ['Womit verbringst du den Abend?',
        `Verbleibend ${L.abende} von ${abendeFuer(n)}${abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'ein Abend':'zwei Abende'} mehr als ${rangName(S.rang)}`:''}`],
@@ -1259,6 +1263,8 @@ function schrankeWeiter(){
     S.leben = lebenMax();
     S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
+    // Aus demselben Grund auch der stehende Auftrag: Hier endet ein Feldzug.
+    kapitelauftragAbrechnen();
   }
   stationErledigt();
   naechster();

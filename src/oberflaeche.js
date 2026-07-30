@@ -1510,6 +1510,10 @@ function zeigeUebergang(n){
       if(S.geld >= uh){ S.geld -= uh; LAUF.pferdKosten = uh; }
       else { S.pferdWeg = true; LAUF.pferdKosten = -1; }
     }
+    /* Der stehende Auftrag des Feldzugs wird hier abgerechnet — die einzige
+       Stelle, an der ein ganzer Feldzug zu Ende ist und noch jemand da ist,
+       der etwas dazu sagt. */
+    kapitelauftragAbrechnen();
     laufSichern();
   }
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -1522,6 +1526,7 @@ function zeigeUebergang(n){
           LAUF.pferdKosten > 0
             ? 'Hafer, Hufeisen, ein Sattler, der zweimal ausbessert. <b>−'+francs(LAUF.pferdKosten)+' F</b>'
             : 'Du kannst es nicht mehr füttern. Der Train nimmt es, und man gibt dir einen Schein, den niemand einlöst. <b>Das Pferd ist weg.</b>'}</div>` : ''}
+        ${kapitelauftragAbrechnungZeile()}
         <div class="wirkung"><span>Ein Jahr Garnison</span>
           Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.
           <b>Konstitution +3:</b> Der Körper hat sich an das Marschieren gewöhnt, an das Schlafen im Nassen und daran, mit wenig auszukommen.</div>

@@ -500,6 +500,108 @@ function auftragFuer(n){
   return AUFTRAEGE[saat % AUFTRAEGE.length];
 }
 
+/* ── Der zweite Auftrag ab Rang 12 ──
+   **Zwei Aufträge, die sich ausschließen — einer vom Korps, einer aus Paris.**
+   Man erfüllt einen. Das Spiel sagt nie, welcher der richtige war.
+
+   Das ist die Erfahrung, die ein General verkauft: Nicht die Frage, ob man
+   einen Befehl ausführen kann, sondern welchen von zweien. Beide sind
+   berechtigt, beide kommen von jemandem, der mehr weiß als du, und sie
+   widersprechen sich, weil zwei Leute an zwei Orten zwei Dinge für dringend
+   halten. */
+function auftragZweiter(n){
+  if(S.rang < 12) return null;
+  const erster = auftragFuer(n);
+  if(!erster) return null;
+  const saat = (n.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const andere = AUFTRAEGE.filter(a => a.id !== erster.id
+    /* Nur echte Widersprüche: „halten" und „nehmen" schließen einander aus,
+       „halten" und „schonen" nicht. Ein zweiter Auftrag, den man nebenbei
+       miterfüllt, wäre keine Entscheidung. */
+    && ((erster.id==='nehmen' && (a.id==='schonen'||a.id==='decken'))
+     || (erster.id==='schonen' && a.id==='nehmen')
+     || (erster.id==='decken' && a.id==='nehmen')
+     || (erster.id==='halten' && a.id==='nehmen')));
+  return andere.length ? andere[saat % andere.length] : null;
+}
+function auftragVon(a){
+  const z = auftragZweiter(KAPITEL[LAUF.node]);
+  if(!z) return 'des Chef de bataillon';
+  return a === z ? 'aus Paris' : 'des Korps';
+}
+
+/* ── Der Erfüllungsstand, sichtbar ──
+   **Ein Auftrag, dessen Erfüllungsstand man nicht sehen kann, ist eine
+   Lotterie.** Bis heute stand der Auftrag vor der ersten Runde auf dem Schirm
+   und danach nie wieder — und ab Rang 10 prüfte er gegen Zahlen, die
+   ausgeblendet sind. Jetzt steht daneben, wie es gerade steht. */
+function auftragStand(a){
+  if(!a || !K) return '';
+  const erfuellt = a.erfuellt(KAPITEL[LAUF.node]);
+  return `<b class="${erfuellt?'ok':'warn'}">${erfuellt?'steht':'steht nicht'}</b>`;
+}
+
+/* ── Der Kapitelauftrag ab Rang 10 ──
+   **Ein stehender Auftrag über den ganzen Feldzug**, abgerechnet am
+   Kapitelende. Er ist die Ebene, auf der ein Bataillonschef wirklich gemessen
+   wird: nicht an einem Gefecht, sondern daran, in welchem Zustand seine Leute
+   im Frühjahr antreten.
+
+   Er zahlt in Fürsprache und Bulletins — den beiden Währungen, an denen die
+   oberen Leitersprossen hängen — und **nicht in Ruf**. Ruf bekommt man für
+   das, was man tut; das hier ist, was man unterlassen hat zu ruinieren. */
+const KAPITELAUFTRAEGE = [
+  {id:'gefechtsbereit', text:'Das Bataillon ist im Frühjahr gefechtsbereit.',
+   pruef:()=> (S.einheit==null?70:S.einheit) >= 60,
+   gut:'Es steht vollzählig genug, um etwas damit anzufangen.',
+   schlecht:'Es steht, und man sieht ihm an, dass es steht.'},
+  {id:'ausgebildet', text:'Die Unteroffiziere sind ausgebildet, wenn der Feldzug beginnt.',
+   pruef:()=> (unterstellteGuete()||0) >= 55,
+   gut:'Die, die deine Befehle ausführen, können es.',
+   schlecht:'Sie führen aus, was sie verstanden haben.'},
+  {id:'sauber', text:'Die Bücher der Einheit sind ohne Beanstandung.',
+   pruef:()=> !(S.heimlich||[]).length && !(S.vermerke|0),
+   gut:'Es gibt nichts, was jemand aufschreiben müsste.',
+   schlecht:'Es gibt eine Zahl, die nicht stimmt, und jemanden, der das weiß.'}
+];
+function kapitelauftragFuer(){
+  if(!S || S.rang < 10) return null;
+  return KAPITELAUFTRAEGE[kapitelNummer() % KAPITELAUFTRAEGE.length];
+}
+function kapitelauftragZeile(){
+  const k = kapitelauftragFuer();
+  if(!k) return '';
+  return `<div class="wirkung"><span>Stehender Auftrag</span>${esc(k.text)}
+    <b class="${k.pruef()?'ok':'warn'}">${k.pruef()?'steht':'steht nicht'}</b></div>`;
+}
+/* ── Abgerechnet wird am Ende des Feldzugs, nicht nach einem Gefecht ──
+   Ein stehender Auftrag über einen ganzen Feldzug hat nur dort seinen Ort:
+   am Übergang, wo ohnehin gezählt wird, was ein Jahr aus einem Mann gemacht
+   hat. `LAUF.kauftrag` merkt die Kapitelnummer, damit ein zweiter Aufruf —
+   erneutes Zeichnen, Fortsetzen aus dem Spielstand — nicht ein zweites Mal
+   bucht. Dieselbe Sicherung wie `LAUF.erholt`. */
+function kapitelauftragAbrechnen(){
+  const k = kapitelauftragFuer();
+  if(!k) return null;
+  const nr = kapitelNummer();
+  if(LAUF.kauftrag && LAUF.kauftrag.kap === nr) return LAUF.kauftrag;
+  const ok = k.pruef();
+  const wer = beurteiler() || 'grandmaison';
+  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; }
+  else gunstGeben(wer,-1);
+  LAUF.kauftrag = {kap:nr, id:k.id, ok:ok, wer:wer};
+  return LAUF.kauftrag;
+}
+function kapitelauftragAbrechnungZeile(){
+  const a = LAUF && LAUF.kauftrag;
+  if(!a) return '';
+  const k = KAPITELAUFTRAEGE.find(x=>x.id===a.id);
+  if(!k) return '';
+  return `<div class="wirkung"><span>Der stehende Auftrag${a.ok?' — erfüllt':' — verfehlt'}</span>
+    ${esc(k.text)} ${esc(a.ok?k.gut:k.schlecht)}
+    <b>Fürsprache ${esc(personKurz(a.wer))} ${a.ok?'+1 · ein Bulletin':'−1'}</b></div>`;
+}
+
 /* ══════════════════ DIE LINIE BRICHT ══════════════════
 
    **Der Bildschirm klappt für zwei bis drei Runden auf die persönliche Ansicht
@@ -1804,8 +1906,14 @@ function zeigeKampf(text){
       `<div class="stichrahmen">${sichtfeld()}</div>
        <div class="stichzeile"><span>${esc((n.lage&&n.lage.stellung)||'Sichtfeld')}</span><span>${esc((n.lage&&n.lage.gelaende)||'')}</span></div>
         ${bruchAnsage()}
-        ${(()=>{ const auf = auftragFuer(n); return auf
-          ? `<div class="wirkung" style="margin-top:14px"><span>Auftrag des Chef de bataillon</span>${esc(auf.text)}</div>` : ''; })()}
+        ${(()=>{ const auf = auftragFuer(n); if(!auf) return '';
+          /* Ab Rang 12 liegen zwei Befehle da, und sie widersprechen einander.
+             Beide stehen untereinander, beide mit ihrem Stand — die Wahl ist
+             die Handlung, und sie braucht dafür beide Seiten sichtbar. */
+          const zwei = auftragZweiter(n);
+          const zeile = a => `<div class="wirkung" style="margin-top:14px"><span>Auftrag ${esc(auftragVon(a))}</span>${esc(a.text)} ${auftragStand(a)}</div>`;
+          return zeile(auf) + (zwei ? zeile(zwei) : ''); })()}
+        ${kapitelauftragZeile()}
         <div class="prose" style="margin-top:15px"><p>${text}</p></div>
         ${/* Ab Rang 12 stehen hier Meldungen statt eines Zustands — mit Alter,
              ohne Gewähr. Sie sind das Einzige, was ein General vom Gefecht hat. */''}
@@ -2919,7 +3027,22 @@ function kampfEnde(sieg, letzterText){
   const auftrag = auftragFuer(n);
   let auftragZeile = '';
   if(auftrag){
-    const ok = auftrag.erfuellt(n);
+    /* ── Zwei Befehle, einer davon genügt ──
+       **Ab Rang 12 liegen zwei Aufträge auf dem Tisch, die einander
+       ausschließen — einer vom Korps, einer aus Paris.** Wer den einen
+       ausführt, verfehlt den anderen; das ist die Bauart des Widerspruchs und
+       kein Versäumnis. Abgerechnet wird deshalb, ob **einer** von beiden
+       steht, nicht welcher.
+
+       **Das Spiel sagt nie, welcher der richtige war.** Unter der Abrechnung
+       steht der andere Befehl mit seinem Ausgang, ohne Kommentar. Das ist die
+       Erfahrung, die dieser Rang verkauft: nicht die Frage, ob man einen
+       Befehl ausführen kann, sondern welchen von zweien — und die Antwort
+       darauf kommt nie. */
+    const zweit = auftragZweiter(n);
+    const okEins = auftrag.erfuellt(n);
+    const okZwei = zweit ? zweit.erfuellt(n) : false;
+    const ok = okEins || okZwei;
     K.auftragErfuellt = ok;
     if(!ok) stufe = Math.min(stufe, 1);
     /* ── Die Fürsprache geht an den, der über die nächste Stelle entscheidet ──
@@ -2938,9 +3061,16 @@ function kampfEnde(sieg, letzterText){
     const wer = beurteiler() || 'vernet';
     if(ok){ gunstGeben(wer,1); S.ruf += 2; }
     else { gunstGeben(wer,-1); S.ruf = Math.max(0,S.ruf-2); }
+    const gefuehrt = okEins ? auftrag : okZwei ? zweit : auftrag;
     auftragZeile = `<div class="wirkung"><span>Der Auftrag${ok?' — erfüllt':' — verfehlt'}</span>
-      ${esc(auftrag.text)} ${esc(ok?auftrag.gut:auftrag.schlecht)}
+      ${esc(gefuehrt.text)} ${esc(ok?gefuehrt.gut:gefuehrt.schlecht)}
       <b>Fürsprache ${esc(personKurz(wer))} ${ok?'+1 · Ruf +2':'−1 · Ruf −2'}</b></div>`;
+    if(zweit){
+      const andere = gefuehrt === auftrag ? zweit : auftrag;
+      const okAndere = andere === auftrag ? okEins : okZwei;
+      auftragZeile += `<div class="wirkung"><span>Der andere Befehl</span>
+        ${esc(andere.text)} <b>${okAndere ? 'Er steht auch.' : 'Er steht nicht.'}</b></div>`;
+    }
   }
 
   /* ── `stumm:true` · Die Bulletins schweigen ──
