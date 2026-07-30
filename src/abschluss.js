@@ -292,7 +292,7 @@ function inspektion(){
     ertappt = true; S.kasseRisiko = 0;
     /* Bei Entdeckung sind Rang **und** Fürsprecher weg — das ist die schärfste
        Strafe, die das Spiel außerhalb des Todes kennt, und sie ist angesagt. */
-    S.rang = Math.max(6, S.rang-1); S.ruf = Math.max(0, S.ruf-20);
+    rangSetzen(Math.max(6, S.rang-1)); S.ruf = Math.max(0, S.ruf-20);
     gunstGeben('vernet',-4); gunstGeben('grandmaison',-3);
     t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
       Er rechnet die Ausgabelisten gegen die Bestandslisten und braucht dafür einen Vormittag. Am Nachmittag steht er auf und geht zum Chef de bataillon, ohne dich anzusehen. Was danach passiert, passiert schnell und ohne Verhandlung.
@@ -370,7 +370,7 @@ function zeigeLager(n){
     ${bogen(n,
       `<div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
        ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
-       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
+       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${francs(L.sold, true)} F</b></div>`:''}
        ${L.inspektion||''}
        ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       ['Womit verbringst du den Abend?',
@@ -606,7 +606,7 @@ function zeigeWinter(n){
       `<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
        ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
        ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
-       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
+       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${francs(W.sold, true)} F</b></div>`:''}
        ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
       opt+schluss,

@@ -2,18 +2,25 @@
 
    **Zwei Zahlen sind die Leitzahlen, alles andere ist Beiwerk:**
 
-     1. `überlebt` — wie viele alle gebauten Kapitel hinter sich gebracht haben.
-     2. `höchster Rang` — wie viele den höchsten gebauten Rang bekommen haben.
-        **Das ist eine Definition, kein fester Rang:** Mit Kapitel 4 ist der
-        höchste Rang der Sergent-major (6), vorher war es der Sergent (5). Die
-        Zahl wandert also mit dem Ausbaustand mit, und genau deshalb veraltet
-        sie nicht — im Gegensatz zum früheren Caporal-Sollwert.
+     1. `Weite` — der **Median der erreichten Stationen**, immer mit Nenner.
+        Sie hat `überlebt` abgelöst: Das war ein *Produkt* über alle
+        Kapitelquoten und geht mit jedem Kapitel gegen null — bei elf liefert es
+        für jeden Spielertyp dasselbe. Ein Median hat kein Verfallsdatum, aber
+        er ist eine absolute Stationszahl und wandert mit dem Ausbaustand.
+        **32 von 163 ist nicht schlechter als 58 von 122, sondern etwas
+        anderes.**
+     2. `höchster Rang` — wie viele `LEITRANG` erreicht haben. **Das ist eine
+        Definition, kein fester Rang:** Er steht heute auf **9 (Capitaine)** und
+        wandert mit dem gebauten Inhalt. Wer ein Kapitel anbaut, prüft ihn mit.
 
    Die erste misst, wie hart das Spiel ist, die zweite, ob die Leiter trägt. Sie
    lösen „Italien überstanden" (Band 45–55 %) und den Caporal-Anteil (Sollwert
    30 %) ab: Italien ist inzwischen das Lehrstück und lässt 90–100 % durch, und
    der Caporal ist der *unterste* erreichbare Aufstieg — beide sagen nichts mehr
    über den Stand des Spiels. Die Sollwerte stehen in CLAUDE.md.
+
+   `überlebt` wird als „Ganz durch" weiter mitgedruckt, trägt aber keinen
+   Sollwert mehr.
 
    Erreicht, nicht überlebt — gezählt wird der höchste Rang, den ein Mann
    je getragen hat, auch wenn er zwei Stationen später fällt. Vorher zählte das
@@ -44,10 +51,14 @@
    misst damit die Offiziershälfte, die ein Lauf mit vier Kapiteln sonst nie
    sieht — mit vier Kapiteln endet jeder Aufstieg spätestens bei Rang 8.
 
-   Aufruf:  node test/balance.js [anzahl]              erster Lauf, ohne Vorrat
-            MUT=1 node test/balance.js [anzahl]        derselbe Mann, aber mutig
-            VP=160 node test/balance.js [anzahl]       dritter Lauf, mit Vorrat
-            PATENT=lt VP=260 node test/balance.js 40   der gekaufte Leutnant  */
+   Aufruf:  node test/balance.js 80                    erster Lauf, ohne Vorrat
+            MUT=1 node test/balance.js 80              derselbe Mann, aber mutig
+            VP=5800 node test/balance.js 80            der Maximalveteran
+            PATENT=lt VP=5800 node test/balance.js 40  der gekaufte Leutnant
+
+   **80 Läufe sind der Normalfall.** Die Regel „bei Zweifeln 80" hat mehrfach
+   eine Fehldeutung verhindert; bei 40 liegt eine Standardabweichung schon bei
+   rund sieben Punkten.  */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const N = parseInt(process.argv[2] || '40', 10);
@@ -181,6 +192,10 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                    ein und werden laut gemeldet: **Ein Prüfstand, der seine
                    eigene Obergrenze verschweigt, misst sich selbst.** */
                 abbruch: 0,
+                /* Wie oft der Bot eine als riskant markierte Wahl genommen hat,
+                   und wie viele Wahlen er insgesamt hatte. Erst das Verhältnis
+                   macht `OFFEN.md` Punkt 2 entscheidbar. */
+                risk: 0, wahlen: 0,
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
                    **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
@@ -522,10 +537,22 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
 
         if (!z) z = btn[0];
         if (z) z.click();
-        return { ok: !!z, rang: S ? S.rang : 0, zweig: S ? S.zweig : null };
+        /* ── Der risk-Zähler ──
+           `OFFEN.md` Punkt 2 fragt seit Tagen, ob der reiche Veteran wirklich
+           gefährlicher lebt oder ob nur die Bot-Formel ihn dorthin rechnet: Bei
+           sehr hohen Werten übersteigt eine riskante Wahl auch nach dem Abschlag
+           von 20 noch jede sichere. **Solange niemand zählt, wie oft er zugreift,
+           misst man das Ergebnis und nicht den Hebel** — derselbe Fehler wie beim
+           stummen Güte-Leck.
+           Gezählt wird der Knopf, den er wirklich gedrückt hat, nicht der, den er
+           hätte drücken können. */
+        return { ok: !!z, rang: S ? S.rang : 0, zweig: S ? S.zweig : null,
+                 risk: !!(z && z.classList && z.classList.contains('risk')) };
       }, MUT);
       if (zug.rang > hoechster) hoechster = zug.rang;
       if (zug.zweig) zweig = zug.zweig;
+      if (zug.risk) res.risk++;
+      res.wahlen++;
       if (!zug.ok) break;
     }
     if (zweig) res.elite++;
@@ -615,6 +642,13 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
   const verteilung = Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
     .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`).join(' · ');
   console.log(`Rangverteilung (höchster je Lauf): ${verteilung}`);
+  /* ── Wie oft der Bot ins Risiko gegangen ist ──
+     `OFFEN.md` Punkt 2 lässt sich nur mit dieser Zeile entscheiden: Wenn der
+     reiche Veteran seltener überlebt als der ärmere, muss man wissen, ob er
+     **öfter zugreift** (Bot-Artefakt — bei hohen Werten übersteigt eine
+     riskante Wahl auch nach dem Abschlag jede sichere) oder ob dieselbe Zahl
+     Wahlen härter bestraft wird (dann ist es das Spiel). */
+  console.log(`Riskante Wahlen: ${res.risk} von ${res.wahlen} (${res.wahlen ? Math.round(res.risk/res.wahlen*100) : 0} %)`);
   /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
   const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])
     .map(k => { const e = res.erreicht[k], t = res.sterbeort[k]||0;

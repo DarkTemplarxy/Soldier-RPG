@@ -1015,8 +1015,8 @@ Bei Entdeckung durch den *Inspecteur aux revues*: **ein Rang zurück, Ruf −20,
 
 | Patent | VP | frei ab | Wertungsabzug |
 |---|---|---|---|
-| Sous-Lieutenant (Rang 7) | 110 | einmal Rang 6 getragen | −158 |
-| Lieutenant (Rang 8) | 145 | einmal Rang 8 getragen | −205 |
+| Sous-Lieutenant (Rang 7) | **550** | einmal **Rang 9** getragen | **−790** |
+| Lieutenant (Rang 8) | **725** | einmal **Rang 11** getragen | **−1 025** |
 
 > **Warum es sie überhaupt gibt.** Mit vier Kapiteln erreichte kein einziger von 200 gemessenen Läufen Rang 10 — die halbe Rangleiter war gebaut und für den Spieler unsichtbar. Die Patente lösen das **ohne ein neues Kapitel:** Wer eines kauft, startet 1796 in Savona und spielt die Offiziershälfte vom ersten Tag an.
 
@@ -1308,11 +1308,11 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 | Kauf | Wirkung | greift in | VP |
 |---|---|---|---|
-| **Füße wie Leder** | Schuhverschleiß halbiert · Forcieren kostet 8 Atem weniger | `verschleiss()` · `waehleTempo()` | 30 |
-| **Er weiß, welches Wasser** | Krankheits- und Frostzehrung halbiert | `stationErledigt()` | 35 |
-| **Er bleibt nicht zurück** | Aderlass −3 je Station | `aderlass()` | 45 |
-| **Er schläft im Freien** | Frost eine Stufe milder | `frostWirken()` | 30 |
-| **Alte Narben** | Der Feldscher näht zwei Wunden statt einer | `kampfEnde()` | 40 |
+| **Füße wie Leder** | Schuhverschleiß halbiert · Forcieren kostet 8 Atem weniger | `verschleiss()` · `waehleTempo()` | **150** |
+| **Er weiß, welches Wasser** | Krankheits- und Frostzehrung halbiert | `stationErledigt()` | **175** |
+| **Er bleibt nicht zurück** | Aderlass −3 je Station | `aderlass()` | **225** |
+| **Er schläft im Freien** | Frost eine Stufe milder | `frostWirken()` | **150** |
+| **Alte Narben** | Der Feldscher näht zwei Wunden statt einer | `kampfEnde()` | **200** |
 
 **Und sie greifen dort, wo der Veteran wirklich stirbt.** Nicht am Anfang — Italien übersteht er zu 98–100 %. Er stirbt in **Ägypten** (15 von 40: Hitze, Ruhr) und **Jena** (11 von 40: die Beine). Jede der fünf handelt davon.
 
@@ -1324,7 +1324,11 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 > **Der Prüfpunkt ist nicht, ob die Weite steigt.** Er ist, ob sie steigt, **ohne dass die Rangverteilung mitwandert.** Die eiserne Regel lautet: *Alles, was die Kampfkraft hebt, hebt über den Ruf auch den Aufstieg.* Wandert der Rang mit, ist der Entwurf verfehlt — dann ist irgendeine der fünf doch im Gefecht angekommen.
 
-**Der Testbot kauft jetzt** (`VETERAN_KAEUFE` in `test/balance.js`): Mantel und Schuhe zuerst, dann die fünf. Das erledigt zugleich `OFFEN.md` Punkt 3 — bisher kaufte er **nie** einen Mantel, weshalb jede Frostmessung durchweg den Ausnahmefall maß statt des Normalfalls. **Stücke werden vor den Punkten gekauft:** Punkte sind beliebig teilbar, ein 30-VP-Stück ist es nicht, und wer zuerst Punkte verteilt, hat für ein Stück nie wieder genug übrig.
+**Der Testbot kauft jetzt** (`VETERAN_PLAN` in `test/balance.js`). Das erledigt zugleich `OFFEN.md` Punkt 3 — bisher kaufte er **nie** einen Mantel, weshalb jede Frostmessung durchweg den Ausnahmefall maß statt des Normalfalls.
+
+> **⚠ Die Reihenfolge ist einmal falsch gewesen, und die Korrektur ist die eigentliche Regel.** Die erste Fassung kaufte **alle Stücke vor allen Punkten**, mit der Begründung, Punkte seien teilbar und Stücke nicht. Gemessen war das ein Bot-Artefakt: Ein Veteran mit 160 VP gab 135 davon für Mantel, Schuhe und zwei Gewohnheiten aus und hatte für Konstitution **fünfundzwanzig** übrig — er lief mit den Attributen eines Erstläufers los, und die Rangquote fiel von 30 auf 15 %. **Kein Mensch kauft so.**
+>
+> Jetzt steht alles in **einer** Liste, **abwechselnd Wert und Stück**, in der Reihenfolge, in der ein Mann es täte, der weiß, woran er zuletzt gestorben ist: erst der Lebensvorrat, dann der Mantel, dann das, was durch Ägypten bringt. Seit der exponentiellen Kostenkurve geht die Liste **zweimal** durch — erst auf ein Grundmaß, dann alles auf 70+.
 
 ### Zielwerte
 

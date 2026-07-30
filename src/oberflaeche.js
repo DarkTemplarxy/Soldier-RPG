@@ -104,7 +104,7 @@ function kopfzeile(){
   }).join('');
   kopf.innerHTML = `<span class="kopfzeile">
     ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
-    <span class="kopfgeld">${Math.round(S.geld*100)/100} F</span>
+    <span class="kopfgeld">${francs(S.geld)} F</span>
     <span class="kopftrenner"></span>
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span>
     <span class="kopftrenner"></span>
@@ -198,9 +198,27 @@ function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
 /* Die Kette über dir. Vier Namen statt einer Zahl — und der Rang davor ändert
    sich mit, wenn die Person selbst aufsteigt. Gefallene bleiben stehen, damit
    man sieht, wer einmal für einen gesprochen hätte. */
+/* ── Wen du überhaupt kennst ──
+   **`ab:` wurde bis zum 30.07.2026 nirgends gelesen**, obwohl es an
+   Grandmaison stand: Ein frischer Fusilier las „Chef de bataillon Grandmaison
+   0" in seiner Seitenleiste — und damit war die Pointe der ganzen Kette
+   verschenkt. Grandmaison soll ab Rang 9 **wieder auftauchen**, zwölf
+   Spieljahre nach dem Sumpf von Arcole, und wer damals bestanden hat, findet
+   ihn bei Gunst +2 vor. Etwas, das die ganze Zeit dastand, kann nicht
+   wiederkommen.
+
+   Gezeigt wird deshalb nur, wen der eigene Rang erreicht — die Kette wächst
+   von unten mit. Wer einmal drin steht, bleibt drin: `hoechsterRang` merkt
+   sich das, sonst verschwände ein Fürsprecher bei einer Degradierung, und
+   seine Gunst liefe unsichtbar weiter. */
+function kenntPerson(l){
+  if(!l.ab) return true;
+  return Math.max(S.rang|0, S.hoechsterRang|0) >= l.ab;
+}
 function ueberDir(){
   if(!S.leute) return '';
   const zeile = l => {
+    if(!kenntPerson(l)) return '';
     const p = S.leute[l.id]; if(!p) return '';
     const g = p.gunst, farbe = g<0 ? 'warn' : (g>=3 ? 'ok' : '');
     return `<div class="kv"><span class="hilfe" data-hilfe="${String(l.was).replace(/"/g,'&quot;')}">${
@@ -294,8 +312,8 @@ function seitenleiste(){
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
       <div class="rule"></div>
-      <div class="kv"><span>Geld</span><b>${Math.round(S.geld*100)/100} F</b></div>
-      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${(Math.round(S.soldOffen*100)/100).toFixed(2)} F</b></div>` : ''}
+      <div class="kv"><span>Geld</span><b>${francs(S.geld)} F</b></div>
+      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${francs(S.soldOffen, true)} F</b></div>` : ''}
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
       ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
       ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}
@@ -528,15 +546,15 @@ function zeigeLaden(){
     ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu — der erste Mann rückt ein, wie er ist.':''}</div>
    </div></div>
 
-  <div class="card"><div class="ch"><span>Attribute ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 70</span></div>
+  <div class="card"><div class="ch"><span>Attribute ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens ${punktGrenze("konstitution")}</span></div>
    <div class="cb">
     <p class="hinweis">Gerechnet wird vom jetzigen Wert. Der erste Zehner kostet 1 VP je Punkt, der fünfte schon 4 — wer schon hoch steht, zahlt für jeden weiteren Punkt mehr.</p>
     ${ATTRIBUTE.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
-  <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 60</span></div>
+  <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens ${punktGrenze("muskete")}</span></div>
    <div class="cb">
-    <p class="hinweis">Alle beginnen bei 5, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
+    <p class="hinweis">Alle beginnen bei ${FERT_SOCKEL}, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen — und jeder Punkt darüber kostet mehr als der davor.</p>
     ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 

@@ -335,7 +335,12 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   });
   const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
-    rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
+    /* `hoechsterRang` ist der höchste je getragene Rang. Er entscheidet, wen
+       die Seitenleiste unter „Über dir" zeigt (`kenntPerson()`) — und er
+       sinkt nie, auch wenn der Inspecteur einen Rang nimmt: Eine Bekanntschaft
+       verliert man nicht durch eine Rückstufung. Gepflegt wird er an einer
+       einzigen Stelle, `rangSetzen()`. */
+    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     /* Der Offizier: `einheit` bleibt null, bis es eine Kompanie gibt (Rang 9).
@@ -419,6 +424,63 @@ function gunstGeben(id, n){
 /* Anrede mit Rang: „Sergent Martel", nach seinem Aufstieg „Sergent-major
    Martel". Dieselbe Person, andere Anrede — KONZEPT §3 („Kostet nichts, wirkt
    enorm"), nur in die andere Richtung. */
+/* ── Francs, überall gleich geschrieben ──
+   **Vier Stellen, drei Schreibweisen.** `Math.round(g*100)/100` liefert
+   „4" und „12.5", `toFixed(2)` liefert „4.00" — mit Dezimal*punkt*, in einem
+   Spiel, dessen Texte durchgehend deutsch gesetzt sind. Ein Betrag, der
+   einmal „12.5 F" und zwei Zeilen tiefer „12,50 F" heißt, sieht nach zwei
+   verschiedenen Zahlen aus.
+
+   Ganze Beträge stehen ohne Nachkommastellen da — „4 F", nicht „4,00 F".
+   Der Sold ist der einzige Ort, an dem Zentimes zählen, und dort hat er sie. */
+function francs(betrag, immerZwei){
+  const b = Math.round((betrag || 0) * 100) / 100;
+  const s = (immerZwei || b % 1 !== 0) ? b.toFixed(2) : String(b);
+  return s.replace('.', ',');
+}
+
+/* ── Die eine Stelle, an der der Rang gesetzt wird ──
+   **Jeder Rangwechsel geht hier durch**, damit `hoechsterRang` nicht leckt.
+   Dieselbe Regel wie bei `atemKlemmen()`: Ein Nebenwert, der an fünf Stellen
+   von Hand mitgezogen werden muss, wird an der sechsten vergessen.
+
+   Er sinkt nie. Der Inspecteur nimmt einen Rang, aber niemand vergisst
+   dadurch, wen er kennengelernt hat. */
+function rangSetzen(r){
+  if(!S) return;
+  S.rang = r;
+  if((S.hoechsterRang|0) < r) S.hoechsterRang = r;
+}
+
+/* ── Der Fourrier zieht die Muskete ein ──
+   **Er tat es bisher nur beim gekauften Patent.** Ein regulär beförderter
+   Sous-Lieutenant trug weiter „Charleville Modell 1777" und ein
+   „Ausgabebajonett" in der Seitenleiste, während der Bescheid daneben
+   erzählte, die Muskete sei eingezogen — und `nutzen('bajonett')` greift ab
+   Rang 7 ohnehin nicht mehr. Der Bildschirm sagte das eine, der Zustand das
+   andere.
+
+   Der Degen ist **selbst bezahlt**, und das ist keine Floskel: Ein Offizier
+   stellte sich Uniform, Degen und Pferd auf eigene Rechnung. Deshalb kostet
+   der Aufstieg hier zwei Francs Stempelgebühr wie beim Patent — mehr nicht,
+   denn wer regulär aufsteigt, hat die Ausrüstung über Jahre zusammen.
+
+   **Wer schon einen guten Säbel gekauft hat, behält ihn.** Ein
+   geschliffenes Bajonett wird zum Degen; ein Stück, das besser ist als die
+   Ausgabe, wird nicht gegen die Ausgabe getauscht. */
+function offizierAusruesten(){
+  if(!S || S.rang < 7) return;
+  if(S.ausr.muskete && S.ausr.muskete.verschleiss > 0){
+    S.ausr.muskete = {name:'Keine Muskete mehr', zustand:0, verschleiss:0};
+    S.geld = Math.max(0, S.geld - 2);
+  }
+  const sw = S.ausr.seitenwaffe;
+  if(sw && !/Degen/.test(sw.name)){
+    S.ausr.seitenwaffe = {name:'Degen, selbst bezahlt',
+      zustand: Math.max(85, sw.zustand|0), verschleiss:6};
+  }
+}
+
 function personName(id){
   const d = LEUTE.find(l => l.id === id), p = person(id);
   if(!d) return '';

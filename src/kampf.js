@@ -106,7 +106,17 @@ function aktionen(){
      führen. Der Zug ist bewusst **schlank** gehalten — zwei Knöpfe, nicht vier:
      Der Sergent-major greift seltener selbst ein, er lässt eingreifen. Genau
      das ist der Unterschied, und mehr Knöpfe würden ihn verwischen. */
-  if(S.rang>=6){
+  /* **Die Obergrenze fehlte bis zum 30.07.2026**, und damit trugen die Ränge
+     7 bis 9 diese zwei Knöpfe zusätzlich zu ihren eigenen vier Befehlen.
+     (Ab Rang 10 nicht — dort kehrt die Funktion oben früher zurück.)
+
+     Das widerspricht dem zweiten sichtbaren Bruch an seiner empfindlichsten
+     Stelle: Ab Rang 7 verschwinden Laden und Feuern **vollständig**, „nicht
+     abgefedert, nicht als Notknopf behalten" — ein Bruch, den man umgehen
+     kann, ist eine Option. „Feuer nach Sektionen" ist die Handlung eines
+     Sergent-majors, der bei seinem Zug steht; ein Sous-Lieutenant lässt sie
+     ausführen, statt sie selbst zu geben. */
+  if(S.rang===6){
     a.push({id:'zugfeuer',label:'Feuer nach Sektionen',
       cost:'Drill · rollendes Feuer · der Zug schießt auch, während du nachlädst'});
     a.push({id:'einteilen',label:'Die Sergenten einteilen',
@@ -2788,7 +2798,7 @@ function kampfEnde(sieg, letzterText){
     const weg = S.adlerGefahr && (!sieg || gesamt < 40) && Math.random() < 0.5;
     if(weg){
       S.adler = 'verloren';
-      S.rang = Math.max(10, S.rang-1); S.ruf = Math.max(0, S.ruf-25);
+      rangSetzen(Math.max(10, S.rang-1)); S.ruf = Math.max(0, S.ruf-25);
       gunstGeben('grandmaison',-3);
       abrechnung += `<div class="wirkung"><span>Der Adler</span>
         Er ist nicht zurückgekommen. Man wird nie herausfinden, wer ihn zuletzt gehabt hat, und es spielt auch keine Rolle: Ein Regiment, das seinen Adler verliert, hat keinen Colonel mehr. Der Befehl kommt nach elf Tagen, und er ist zwei Zeilen lang.
@@ -3233,7 +3243,8 @@ function feldBefoerderung(){
   if(fehltWas(ziel)) return '';
   if(ziel.vakanz && !vakanzStand(ziel.vakanz).tot) return '';
 
-  S.rang = Math.max(S.rang, ziel.rang);
+  rangSetzen(Math.max(S.rang, ziel.rang));
+  offizierAusruesten();
   S.ruf += 5;
   if(ziel.patron) gunstGeben(ziel.patron, 1);
   S.log.push('Befördert zum ' + ziel.name + '.');
@@ -3512,7 +3523,8 @@ function zeigeBefoerderung(n){
 
   let text, klasse = 'schlecht';
   if(bekommt){
-    S.rang = Math.max(S.rang, ziel.rang);
+    rangSetzen(Math.max(S.rang, ziel.rang));
+    offizierAusruesten();
     S.ruf += 5;
     if(ziel.patron) gunstGeben(ziel.patron, 1);
     text = ziel.text(ziel.patron ? personName(ziel.patron) : '');

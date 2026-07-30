@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Der Marschallstab — Italien 1796/97 · Ägypten 1798/99</title>
+<title>Der Marschallstab — Grande Armée 1796–1815</title>
 <style>
 :root{
     /* ══════════════════ PERGAMENT ══════════════════
@@ -699,7 +699,7 @@ a.plain:hover{ color:var(--brass) }
 <header class="top">
   <div>
     <h1>Der Marschallstab</h1>
-    <p class="sub" id="untertitel">Erstes Kapitel · Italien 1796/97</p>
+    <p class="sub" id="untertitel">Grande Armée 1796–1815</p>
   </div>
   <div class="hdrright" id="kopfrechts"></div>
 </header>
@@ -987,13 +987,17 @@ function rangabzeichen(mann){
    Die Gunst läuft von −5 bis +5 (KONZEPT §8) — negativ heißt, dass jemand
    über dir etwas gegen dich hat, und das blockt. */
 const LEUTE = [
+  /* `ab:` ist der Rang, ab dem einer in der Seitenleiste steht. **Wer über dir
+     steht, den kennst du nicht von Anfang an** — ein Fusilier weiß, wie sein
+     Sergent heißt, und hat den Capitaine höchstens einmal reiten sehen.
+     `ueberDir()` wertet das aus; ohne `ab` steht einer von Station 1 an da. */
   {id:'martel', kurz:'Martel', stufen:['Sergent','Sergent-major'],
    was:'Dein Sergent. Er hat dich im April über die Pässe gebracht und weiß, wer bei Lodi wo gestanden hat.'},
   {id:'collot', kurz:'Collot', stufen:['Fourier','Sergent-fourrier','Adjudant'],
    was:'Der Schreiber der Kompanie. Er führt die Listen, und in den Listen steht, wer Schuhe bekommt.'},
-  {id:'berthaud', kurz:'Berthaud', stufen:['Lieutenant','Capitaine','Chef de bataillon'],
+  {id:'berthaud', kurz:'Berthaud', ab:3, stufen:['Lieutenant','Capitaine','Chef de bataillon'],
    was:'Der Zugführer. Er entscheidet, welche Namen der Capitaine überhaupt zu hören bekommt.'},
-  {id:'vernet', kurz:'Vernet', stufen:['Capitaine','Chef de bataillon','Colonel'],
+  {id:'vernet', kurz:'Vernet', ab:3, stufen:['Capitaine','Chef de bataillon','Colonel'],
    was:'Der Kompaniechef. Er kennt deinen Namen erst, wenn ihn jemand nennt.'},
 
   /* ── Der fünfte Mann, und warum er dich kennt ──
@@ -1488,11 +1492,21 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
    Erzählt wird es als das, was es historisch war: der Sohn eines
    zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
    der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
+/* ── Die Freischaltung steht seit dem 30.07.2026 wieder auf 9 und 11 ──
+   **`frei:6` und `frei:8` waren die befristete Fassung für vier Kapitel.**
+   Damals war Rang 9 gemessen unerreichbar, und eine Freischaltung, die
+   niemand auslöst, hätte Phase E ihren Zweck genommen — die Offiziershälfte
+   sollte überhaupt einmal jemand sehen.
+
+   Der Grund ist weg: Mit elf Kapiteln erreicht der Veteran mit 5800 VP in
+   **40 von 40 Läufen den Colonel**. Wer ein Patent kaufen will, hat den
+   verlangten Rang längst getragen. `RANGLEITER.md` §9 gilt damit wieder
+   wörtlich, und die Abweichung ist keine mehr. */
 const PATENTE = [
-  {id:'patent_sl', rang:7, vp:550, frei:6, abzug:790,
+  {id:'patent_sl', rang:7, vp:550, frei:9, abzug:790,
    label:'Patent als Sous-Lieutenant',
    beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
-  {id:'patent_lt', rang:8, vp:725, frei:8, abzug:1025,
+  {id:'patent_lt', rang:8, vp:725, frei:11, abzug:1025,
    label:'Patent als Lieutenant',
    beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
 ];
@@ -5170,7 +5184,7 @@ STATIONEN.hunderttage = KAPITEL11.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 9;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente
+const LAUF_FASSUNG    = 10;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -5320,6 +5334,21 @@ const LAUF_WANDLER = {
   8: alt => {
     if(alt.mann && alt.mann.patent === undefined) alt.mann.patent = null;
     return Object.assign({}, alt, {fassung:9});
+  },
+  /* Fassung 9 merkte sich nicht, wie hoch einer schon einmal stand.
+     Gebraucht wird das, seit die Seitenleiste `ab:` auswertet: Wer über dir
+     steht, erscheint erst, wenn dein Rang ihn erreicht — und **ein
+     zurückgestufter Offizier darf seinen Fürsprecher nicht verlieren.** Der
+     Inspecteur nimmt einen Rang, nicht eine Bekanntschaft; Gunst liefe sonst
+     unsichtbar weiter.
+
+     Für einen angefangenen Feldzug ist der heutige Rang die einzige ehrliche
+     Auskunft — höher stand er vielleicht, aber raten wäre schlechter als
+     untertreiben. */
+  9: alt => {
+    const m = alt.mann;
+    if(m && m.hoechsterRang === undefined) m.hoechsterRang = m.rang|0;
+    return Object.assign({}, alt, {fassung:10});
   }
 };
 
@@ -5793,7 +5822,12 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   });
   const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
-    rang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
+    /* `hoechsterRang` ist der höchste je getragene Rang. Er entscheidet, wen
+       die Seitenleiste unter „Über dir" zeigt (`kenntPerson()`) — und er
+       sinkt nie, auch wenn der Inspecteur einen Rang nimmt: Eine Bekanntschaft
+       verliert man nicht durch eine Rückstufung. Gepflegt wird er an einer
+       einzigen Stelle, `rangSetzen()`. */
+    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(), kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
     /* Der Offizier: `einheit` bleibt null, bis es eine Kompanie gibt (Rang 9).
@@ -5877,6 +5911,63 @@ function gunstGeben(id, n){
 /* Anrede mit Rang: „Sergent Martel", nach seinem Aufstieg „Sergent-major
    Martel". Dieselbe Person, andere Anrede — KONZEPT §3 („Kostet nichts, wirkt
    enorm"), nur in die andere Richtung. */
+/* ── Francs, überall gleich geschrieben ──
+   **Vier Stellen, drei Schreibweisen.** `Math.round(g*100)/100` liefert
+   „4" und „12.5", `toFixed(2)` liefert „4.00" — mit Dezimal*punkt*, in einem
+   Spiel, dessen Texte durchgehend deutsch gesetzt sind. Ein Betrag, der
+   einmal „12.5 F" und zwei Zeilen tiefer „12,50 F" heißt, sieht nach zwei
+   verschiedenen Zahlen aus.
+
+   Ganze Beträge stehen ohne Nachkommastellen da — „4 F", nicht „4,00 F".
+   Der Sold ist der einzige Ort, an dem Zentimes zählen, und dort hat er sie. */
+function francs(betrag, immerZwei){
+  const b = Math.round((betrag || 0) * 100) / 100;
+  const s = (immerZwei || b % 1 !== 0) ? b.toFixed(2) : String(b);
+  return s.replace('.', ',');
+}
+
+/* ── Die eine Stelle, an der der Rang gesetzt wird ──
+   **Jeder Rangwechsel geht hier durch**, damit `hoechsterRang` nicht leckt.
+   Dieselbe Regel wie bei `atemKlemmen()`: Ein Nebenwert, der an fünf Stellen
+   von Hand mitgezogen werden muss, wird an der sechsten vergessen.
+
+   Er sinkt nie. Der Inspecteur nimmt einen Rang, aber niemand vergisst
+   dadurch, wen er kennengelernt hat. */
+function rangSetzen(r){
+  if(!S) return;
+  S.rang = r;
+  if((S.hoechsterRang|0) < r) S.hoechsterRang = r;
+}
+
+/* ── Der Fourrier zieht die Muskete ein ──
+   **Er tat es bisher nur beim gekauften Patent.** Ein regulär beförderter
+   Sous-Lieutenant trug weiter „Charleville Modell 1777" und ein
+   „Ausgabebajonett" in der Seitenleiste, während der Bescheid daneben
+   erzählte, die Muskete sei eingezogen — und `nutzen('bajonett')` greift ab
+   Rang 7 ohnehin nicht mehr. Der Bildschirm sagte das eine, der Zustand das
+   andere.
+
+   Der Degen ist **selbst bezahlt**, und das ist keine Floskel: Ein Offizier
+   stellte sich Uniform, Degen und Pferd auf eigene Rechnung. Deshalb kostet
+   der Aufstieg hier zwei Francs Stempelgebühr wie beim Patent — mehr nicht,
+   denn wer regulär aufsteigt, hat die Ausrüstung über Jahre zusammen.
+
+   **Wer schon einen guten Säbel gekauft hat, behält ihn.** Ein
+   geschliffenes Bajonett wird zum Degen; ein Stück, das besser ist als die
+   Ausgabe, wird nicht gegen die Ausgabe getauscht. */
+function offizierAusruesten(){
+  if(!S || S.rang < 7) return;
+  if(S.ausr.muskete && S.ausr.muskete.verschleiss > 0){
+    S.ausr.muskete = {name:'Keine Muskete mehr', zustand:0, verschleiss:0};
+    S.geld = Math.max(0, S.geld - 2);
+  }
+  const sw = S.ausr.seitenwaffe;
+  if(sw && !/Degen/.test(sw.name)){
+    S.ausr.seitenwaffe = {name:'Degen, selbst bezahlt',
+      zustand: Math.max(85, sw.zustand|0), verschleiss:6};
+  }
+}
+
 function personName(id){
   const d = LEUTE.find(l => l.id === id), p = person(id);
   if(!d) return '';
@@ -6421,7 +6512,7 @@ function kopfzeile(){
   }).join('');
   kopf.innerHTML = `<span class="kopfzeile">
     ${orden ? `<span class="kopfgruppe">${orden}</span>` : ''}
-    <span class="kopfgeld">${Math.round(S.geld*100)/100} F</span>
+    <span class="kopfgeld">${francs(S.geld)} F</span>
     <span class="kopftrenner"></span>
     ${emblem()}<span>${esc(S.name.toUpperCase())} · ${rangName(S.rang).toUpperCase()} · RUF ${S.ruf}</span>
     <span class="kopftrenner"></span>
@@ -6515,9 +6606,27 @@ function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
 /* Die Kette über dir. Vier Namen statt einer Zahl — und der Rang davor ändert
    sich mit, wenn die Person selbst aufsteigt. Gefallene bleiben stehen, damit
    man sieht, wer einmal für einen gesprochen hätte. */
+/* ── Wen du überhaupt kennst ──
+   **`ab:` wurde bis zum 30.07.2026 nirgends gelesen**, obwohl es an
+   Grandmaison stand: Ein frischer Fusilier las „Chef de bataillon Grandmaison
+   0" in seiner Seitenleiste — und damit war die Pointe der ganzen Kette
+   verschenkt. Grandmaison soll ab Rang 9 **wieder auftauchen**, zwölf
+   Spieljahre nach dem Sumpf von Arcole, und wer damals bestanden hat, findet
+   ihn bei Gunst +2 vor. Etwas, das die ganze Zeit dastand, kann nicht
+   wiederkommen.
+
+   Gezeigt wird deshalb nur, wen der eigene Rang erreicht — die Kette wächst
+   von unten mit. Wer einmal drin steht, bleibt drin: `hoechsterRang` merkt
+   sich das, sonst verschwände ein Fürsprecher bei einer Degradierung, und
+   seine Gunst liefe unsichtbar weiter. */
+function kenntPerson(l){
+  if(!l.ab) return true;
+  return Math.max(S.rang|0, S.hoechsterRang|0) >= l.ab;
+}
 function ueberDir(){
   if(!S.leute) return '';
   const zeile = l => {
+    if(!kenntPerson(l)) return '';
     const p = S.leute[l.id]; if(!p) return '';
     const g = p.gunst, farbe = g<0 ? 'warn' : (g>=3 ? 'ok' : '');
     return `<div class="kv"><span class="hilfe" data-hilfe="${String(l.was).replace(/"/g,'&quot;')}">${
@@ -6611,8 +6720,8 @@ function seitenleiste(){
       <p class="mini">Ausrüstung · Zustand</p>
       ${Object.keys(S.ausr).filter(k=>S.ausr[k].verschleiss>0).map(zust).join('')}
       <div class="rule"></div>
-      <div class="kv"><span>Geld</span><b>${Math.round(S.geld*100)/100} F</b></div>
-      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${(Math.round(S.soldOffen*100)/100).toFixed(2)} F</b></div>` : ''}
+      <div class="kv"><span>Geld</span><b>${francs(S.geld)} F</b></div>
+      ${(S.soldOffen||0) >= 0.5 ? `<div class="kv"><span>Sold ausstehend</span><b class="fein">${francs(S.soldOffen, true)} F</b></div>` : ''}
       <div class="kv"><span>Im Tagesbefehl</span><b>${S.nennungen}×</b></div>
       ${S.bulletins?`<div class="kv"><span>${kaiserreich()?'Im Bulletin':'Dem Oberbefehl gemeldet'}</span><b>${S.bulletins}×</b></div>`:''}
       ${S.belobigungen?`<div class="kv"><span>Vor der Front gelobt</span><b>${S.belobigungen}×</b></div>`:''}
@@ -6845,15 +6954,15 @@ function zeigeLaden(){
     ${META.vp===0?'<br><br><b>Beim ersten Mal hast du nichts.</b> Das gehört dazu — der erste Mann rückt ein, wie er ist.':''}</div>
    </div></div>
 
-  <div class="card"><div class="ch"><span>Attribute ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 70</span></div>
+  <div class="card"><div class="ch"><span>Attribute ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens ${punktGrenze("konstitution")}</span></div>
    <div class="cb">
     <p class="hinweis">Gerechnet wird vom jetzigen Wert. Der erste Zehner kostet 1 VP je Punkt, der fünfte schon 4 — wer schon hoch steht, zahlt für jeden weiteren Punkt mehr.</p>
     ${ATTRIBUTE.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
-  <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens 60</span></div>
+  <div class="card"><div class="ch"><span>Fertigkeiten ergänzen</span><span>je ${PUNKT_SCHRITT} Punkte · höchstens ${punktGrenze("muskete")}</span></div>
    <div class="cb">
-    <p class="hinweis">Alle beginnen bei 5, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen.</p>
+    <p class="hinweis">Alle beginnen bei ${FERT_SOCKEL}, sofern die Herkunft nichts anderes mitgebracht hat. Was darüber hinausgeht, musst du dir im Feld verdienen — und jeder Punkt darüber kostet mehr als der davor.</p>
     ${FERTIGKEITEN.map(([k,n])=>punktZeile(k,n)).join('')}
    </div></div>
 
@@ -8174,7 +8283,17 @@ function aktionen(){
      führen. Der Zug ist bewusst **schlank** gehalten — zwei Knöpfe, nicht vier:
      Der Sergent-major greift seltener selbst ein, er lässt eingreifen. Genau
      das ist der Unterschied, und mehr Knöpfe würden ihn verwischen. */
-  if(S.rang>=6){
+  /* **Die Obergrenze fehlte bis zum 30.07.2026**, und damit trugen die Ränge
+     7 bis 9 diese zwei Knöpfe zusätzlich zu ihren eigenen vier Befehlen.
+     (Ab Rang 10 nicht — dort kehrt die Funktion oben früher zurück.)
+
+     Das widerspricht dem zweiten sichtbaren Bruch an seiner empfindlichsten
+     Stelle: Ab Rang 7 verschwinden Laden und Feuern **vollständig**, „nicht
+     abgefedert, nicht als Notknopf behalten" — ein Bruch, den man umgehen
+     kann, ist eine Option. „Feuer nach Sektionen" ist die Handlung eines
+     Sergent-majors, der bei seinem Zug steht; ein Sous-Lieutenant lässt sie
+     ausführen, statt sie selbst zu geben. */
+  if(S.rang===6){
     a.push({id:'zugfeuer',label:'Feuer nach Sektionen',
       cost:'Drill · rollendes Feuer · der Zug schießt auch, während du nachlädst'});
     a.push({id:'einteilen',label:'Die Sergenten einteilen',
@@ -10856,7 +10975,7 @@ function kampfEnde(sieg, letzterText){
     const weg = S.adlerGefahr && (!sieg || gesamt < 40) && Math.random() < 0.5;
     if(weg){
       S.adler = 'verloren';
-      S.rang = Math.max(10, S.rang-1); S.ruf = Math.max(0, S.ruf-25);
+      rangSetzen(Math.max(10, S.rang-1)); S.ruf = Math.max(0, S.ruf-25);
       gunstGeben('grandmaison',-3);
       abrechnung += `<div class="wirkung"><span>Der Adler</span>
         Er ist nicht zurückgekommen. Man wird nie herausfinden, wer ihn zuletzt gehabt hat, und es spielt auch keine Rolle: Ein Regiment, das seinen Adler verliert, hat keinen Colonel mehr. Der Befehl kommt nach elf Tagen, und er ist zwei Zeilen lang.
@@ -11301,7 +11420,8 @@ function feldBefoerderung(){
   if(fehltWas(ziel)) return '';
   if(ziel.vakanz && !vakanzStand(ziel.vakanz).tot) return '';
 
-  S.rang = Math.max(S.rang, ziel.rang);
+  rangSetzen(Math.max(S.rang, ziel.rang));
+  offizierAusruesten();
   S.ruf += 5;
   if(ziel.patron) gunstGeben(ziel.patron, 1);
   S.log.push('Befördert zum ' + ziel.name + '.');
@@ -11580,7 +11700,8 @@ function zeigeBefoerderung(n){
 
   let text, klasse = 'schlecht';
   if(bekommt){
-    S.rang = Math.max(S.rang, ziel.rang);
+    rangSetzen(Math.max(S.rang, ziel.rang));
+    offizierAusruesten();
     S.ruf += 5;
     if(ziel.patron) gunstGeben(ziel.patron, 1);
     text = ziel.text(ziel.patron ? personName(ziel.patron) : '');
@@ -11938,7 +12059,7 @@ function inspektion(){
     ertappt = true; S.kasseRisiko = 0;
     /* Bei Entdeckung sind Rang **und** Fürsprecher weg — das ist die schärfste
        Strafe, die das Spiel außerhalb des Todes kennt, und sie ist angesagt. */
-    S.rang = Math.max(6, S.rang-1); S.ruf = Math.max(0, S.ruf-20);
+    rangSetzen(Math.max(6, S.rang-1)); S.ruf = Math.max(0, S.ruf-20);
     gunstGeben('vernet',-4); gunstGeben('grandmaison',-3);
     t = `<div class="wirkung"><span>Der Inspecteur aux revues</span>
       Er rechnet die Ausgabelisten gegen die Bestandslisten und braucht dafür einen Vormittag. Am Nachmittag steht er auf und geht zum Chef de bataillon, ohne dich anzusehen. Was danach passiert, passiert schnell und ohne Verhandlung.
@@ -12016,7 +12137,7 @@ function zeigeLager(n){
     ${bogen(n,
       `<div class="prose">${n.text.map(t=>`<p>${t}</p>`).join('')}</div>
        ${L.log.length?`<div class="ergebnis">${L.log.join('<br><br>')}</div>`:''}
-       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${L.sold.toFixed(2)} F</b></div>`:''}
+       ${L.sold?`<div class="wirkung"><span>Sold</span>${soldText(L.sold)} <b>+${francs(L.sold, true)} F</b></div>`:''}
        ${L.inspektion||''}
        ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       ['Womit verbringst du den Abend?',
@@ -12252,7 +12373,7 @@ function zeigeWinter(n){
       `<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
        ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
        ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
-       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${W.sold.toFixed(2)} F</b></div>`:''}
+       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${francs(W.sold, true)} F</b></div>`:''}
        ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
       opt+schluss,

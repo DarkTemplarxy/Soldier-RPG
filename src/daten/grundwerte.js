@@ -272,13 +272,17 @@ function rangabzeichen(mann){
    Die Gunst läuft von −5 bis +5 (KONZEPT §8) — negativ heißt, dass jemand
    über dir etwas gegen dich hat, und das blockt. */
 const LEUTE = [
+  /* `ab:` ist der Rang, ab dem einer in der Seitenleiste steht. **Wer über dir
+     steht, den kennst du nicht von Anfang an** — ein Fusilier weiß, wie sein
+     Sergent heißt, und hat den Capitaine höchstens einmal reiten sehen.
+     `ueberDir()` wertet das aus; ohne `ab` steht einer von Station 1 an da. */
   {id:'martel', kurz:'Martel', stufen:['Sergent','Sergent-major'],
    was:'Dein Sergent. Er hat dich im April über die Pässe gebracht und weiß, wer bei Lodi wo gestanden hat.'},
   {id:'collot', kurz:'Collot', stufen:['Fourier','Sergent-fourrier','Adjudant'],
    was:'Der Schreiber der Kompanie. Er führt die Listen, und in den Listen steht, wer Schuhe bekommt.'},
-  {id:'berthaud', kurz:'Berthaud', stufen:['Lieutenant','Capitaine','Chef de bataillon'],
+  {id:'berthaud', kurz:'Berthaud', ab:3, stufen:['Lieutenant','Capitaine','Chef de bataillon'],
    was:'Der Zugführer. Er entscheidet, welche Namen der Capitaine überhaupt zu hören bekommt.'},
-  {id:'vernet', kurz:'Vernet', stufen:['Capitaine','Chef de bataillon','Colonel'],
+  {id:'vernet', kurz:'Vernet', ab:3, stufen:['Capitaine','Chef de bataillon','Colonel'],
    was:'Der Kompaniechef. Er kennt deinen Namen erst, wenn ihn jemand nennt.'},
 
   /* ── Der fünfte Mann, und warum er dich kennt ──
@@ -773,11 +777,21 @@ function kostenVon(a,b){ let t=0; for(let x=a;x<b;x++) t+=PRO_PUNKT[Math.min(9,M
    Erzählt wird es als das, was es historisch war: der Sohn eines
    zurückgekehrten Emigranten oder ein Freiwilliger von 1792 mit Schulbildung,
    der sein Patent auf dem Papier hat und im Feld noch gar nichts. */
+/* ── Die Freischaltung steht seit dem 30.07.2026 wieder auf 9 und 11 ──
+   **`frei:6` und `frei:8` waren die befristete Fassung für vier Kapitel.**
+   Damals war Rang 9 gemessen unerreichbar, und eine Freischaltung, die
+   niemand auslöst, hätte Phase E ihren Zweck genommen — die Offiziershälfte
+   sollte überhaupt einmal jemand sehen.
+
+   Der Grund ist weg: Mit elf Kapiteln erreicht der Veteran mit 5800 VP in
+   **40 von 40 Läufen den Colonel**. Wer ein Patent kaufen will, hat den
+   verlangten Rang längst getragen. `RANGLEITER.md` §9 gilt damit wieder
+   wörtlich, und die Abweichung ist keine mehr. */
 const PATENTE = [
-  {id:'patent_sl', rang:7, vp:550, frei:6, abzug:790,
+  {id:'patent_sl', rang:7, vp:550, frei:9, abzug:790,
    label:'Patent als Sous-Lieutenant',
    beschr:'Du rückst 1796 mit Epauletten ein und hast nie eine Muskete abgefeuert. Niemand in der Kompanie kennt dich.'},
-  {id:'patent_lt', rang:8, vp:725, frei:8, abzug:1025,
+  {id:'patent_lt', rang:8, vp:725, frei:11, abzug:1025,
    label:'Patent als Lieutenant',
    beschr:'Dasselbe, eine Stufe höher — und mit demselben Nichts an Bekanntschaft.'}
 ];

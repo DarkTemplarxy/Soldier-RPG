@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 9;   // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente
+const LAUF_FASSUNG    = 10;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -167,6 +167,21 @@ const LAUF_WANDLER = {
   8: alt => {
     if(alt.mann && alt.mann.patent === undefined) alt.mann.patent = null;
     return Object.assign({}, alt, {fassung:9});
+  },
+  /* Fassung 9 merkte sich nicht, wie hoch einer schon einmal stand.
+     Gebraucht wird das, seit die Seitenleiste `ab:` auswertet: Wer über dir
+     steht, erscheint erst, wenn dein Rang ihn erreicht — und **ein
+     zurückgestufter Offizier darf seinen Fürsprecher nicht verlieren.** Der
+     Inspecteur nimmt einen Rang, nicht eine Bekanntschaft; Gunst liefe sonst
+     unsichtbar weiter.
+
+     Für einen angefangenen Feldzug ist der heutige Rang die einzige ehrliche
+     Auskunft — höher stand er vielleicht, aber raten wäre schlechter als
+     untertreiben. */
+  9: alt => {
+    const m = alt.mann;
+    if(m && m.hoechsterRang === undefined) m.hoechsterRang = m.rang|0;
+    return Object.assign({}, alt, {fassung:10});
   }
 };
 
