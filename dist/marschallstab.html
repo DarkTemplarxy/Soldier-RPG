@@ -14541,7 +14541,17 @@ function zeigeLager(n){
          kapitelauftragZeile()}
        ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
       ['Womit verbringst du den Abend?',
-       `Verbleibend ${L.abende} von ${abendeFuer(n)}${abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'ein Abend':'zwei Abende'} mehr als ${rangName(S.rang)}`:''}`],
+       /* ── Zwei Fehler in einer Zeile ──
+          **`rangName(S.rang)` schrieb den eigenen Rang hin** — bei einem
+          Capitaine also „drei Abende mehr als Capitaine". Gemeint ist der
+          Rang, ab dem es die Zulage *nicht* gibt: der Fusilier.
+
+          Und die Zahlwörter endeten bei zwei, während `abendeFuer()` seit der
+          dritten und vierten Stufe bis **vier** gibt. Ein Général de division
+          las „zwei Abende mehr", wo vier gemeint waren. */
+       `Verbleibend ${L.abende} von ${abendeFuer(n)}${abendeFuer(n)>n.abende
+          ? ` · ${['','ein Abend','zwei Abende','drei Abende','vier Abende'][abendeFuer(n)-n.abende] || (abendeFuer(n)-n.abende)+' Abende'} mehr als ein Fusilier`
+          : ''}`],
       opt,
       'Es ist immer mehr zu tun als Zeit da ist')}
     </div>${seitenleiste()}</div>${
