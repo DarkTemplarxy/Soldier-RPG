@@ -188,6 +188,27 @@
   /* Gesperrtes steht da, aber es steht zurück: keine Farbe, keine Wirkung,
      nur der Satz, unter welcher Bedingung es käme. Der Laden ist damit die
      Landkarte dessen, was das Spiel noch hat. */
+  /* ── Der Schreibtisch liegt auf dem Lager ──
+     **Ein Blatt, das auf dem Tisch liegt, verdeckt den Tisch nicht.** Das
+     Lager bleibt sichtbar und leicht zurückgenommen; das Blatt darüber hat
+     einen eigenen Schatten, damit man sieht, dass es obenauf liegt und nicht
+     eingeklebt ist. Der Rücken fängt jeden Klick ab — er ist kein Dekor,
+     sondern die Sperre.
+
+     `overscroll-behavior:contain` verhindert, dass das Scrollen im Fenster
+     die Seite dahinter mitzieht; auf einem kurzen Blatt fällt es nicht auf,
+     auf einem langen sofort. */
+  .ueberlage{position:fixed;inset:0;z-index:60;display:flex;
+    align-items:flex-start;justify-content:center;padding:38px 16px;
+    overflow:auto;overscroll-behavior:contain;
+    background:rgba(24,17,10,.62);backdrop-filter:blur(1.5px)}
+  .ueberlage .fenster{width:min(680px,100%);animation:blattauf .16s ease-out}
+  /* Der Schatten ist warm, nicht schwarz: Papier auf Holz wirft keinen
+     grauen Schatten, sondern einen bräunlichen. */
+  .ueberlage .card{box-shadow:0 18px 44px rgba(20,12,4,.55),0 2px 0 rgba(0,0,0,.2)}
+  @keyframes blattauf{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .ueberlage .fenster{animation:none} }
+
   tr.gesperrt td{opacity:.42}
   tr.gesperrt td.k{color:var(--dim);font-style:italic}
   tr.gewaehlt td{background:rgba(62,90,44,.13)}

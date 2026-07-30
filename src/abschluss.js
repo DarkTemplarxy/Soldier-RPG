@@ -535,6 +535,7 @@ const VORGAENGE = [
    bringt. **Drei Pflichtvorgänge, gezogen aus fünf Arten**, damit zwei Lager
    hintereinander nicht dieselbe Frage stellen. */
 function schreibtischStellen(n){
+  unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
   if(S.rang < 9 || u.length < 2) return [];
   /* Deterministisch aus der Stations-ID, damit ein Beenden und Fortsetzen
@@ -546,9 +547,15 @@ function schreibtischStellen(n){
   return raus.filter((v,i)=>raus.indexOf(v)===i).slice(0,3);
 }
 
-/* Der Bildschirm selbst. Er sieht aus wie ein Lager, ist aber keins: kein
-   Abend, keine Auswahl, drei Blätter nacheinander. */
-function zeigeSchreibtisch(n){
+/* ── Ein Blatt, das auf dem Lager liegt ──
+   **Der Schreibtisch ist kein eigener Bildschirm, sondern ein Fenster darüber.**
+   Das Lager bleibt sichtbar — man sieht, was man gleich tun wird, und daneben
+   das Blatt, das erst noch weg muss. Genau so liegt es auf einem Feldtisch:
+   Die Abende warten nicht woanders, sie warten darunter.
+
+   Der Rücken (`.ueberlage`) fängt jeden Klick ab, damit man nicht hinter dem
+   Blatt weiterspielt. Er ist kein Dekor, sondern die Sperre. */
+function schreibtischFenster(n){
   const T = LAUF.schreibtisch;
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
   const v = VORGAENGE[T.offen[0]];
@@ -557,15 +564,18 @@ function zeigeSchreibtisch(n){
   const opt = offen.map((w,i)=>
     wahlZeile(roemisch(i+1), w.label, w.kosten, `schreibtischTun(${alle.indexOf(w)})`,
       {risk:w.risk})).join('');
-  app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}
-    ${bogen(n,
-      `<div class="prose"><p>${v.text(u)}</p></div>
-       ${T.log.length?`<div class="ergebnis">${T.log.join('<br><br>')}</div>`:''}`,
-      [v.kopf, `Vorgang ${T.erledigt+1} von ${T.gesamt}`],
-      opt,
-      'Der Schreibtisch kostet keinen Abend. Er ist trotzdem vor den Abenden zu erledigen.')}
-    </div>${seitenleiste()}</div>`;
-  kopfzeile();
+  return `<div class="ueberlage"><div class="fenster">
+    <div class="card bogen"><div class="ch"><span>Der Schreibtisch</span><span>${esc((n&&n.ort)||'')}</span></div>
+      <div class="inner">
+        ${vordruck(n)}
+        <div class="prose"><p>${v.text(u)}</p></div>
+        ${T.log.length?`<div class="ergebnis">${T.log.join('<br><br>')}</div>`:''}
+        <div class="wahlkopf"><span>${v.kopf}</span><span>Vorgang ${T.erledigt+1} von ${T.gesamt}</span></div>
+        ${opt}
+        <div class="bogenfuss"><span>Kostet keinen Abend. Muss trotzdem vor den Abenden vom Tisch.</span>
+          <span class="siegel">${kaiserreich()?'N':'RF'}</span></div>
+      </div></div>
+    </div></div>`;
 }
 
 function schreibtischTun(i){
@@ -580,8 +590,11 @@ function schreibtischTun(i){
   T.log = [`<b>${esc(w.label)}</b><br>${text}`];
   T.offen.shift(); T.erledigt++;
   laufSichern();
+  /* Immer dasselbe Ziel: Das Lager zeichnet sich neu und legt das nächste
+     Blatt darauf, wenn noch eines da ist. */
+  /* Zurück auf den Bildschirm, auf dem das Blatt lag — Lager oder Saison. */
   const nn = KAPITEL[LAUF.node];
-  if(T.offen.length) zeigeSchreibtisch(nn); else zeigeLager(nn);
+  if(nn && nn.typ === 'winter') zeigeWinter(nn); else zeigeLager(nn);
 }
 
 function zeigeLager(n){
@@ -591,13 +604,10 @@ function zeigeLager(n){
      aufgebaut und über `LAUF.schreibtisch` durchgehalten — wer mitten darin
      aufhört, steht beim Fortsetzen wieder davor, wie bei den
      Gefechts-Ereignissen. */
-  if(S && S.rang >= 9){
-    if(!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id){
-      const offen = schreibtischStellen(n);
-      LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
-      laufSichern();
-    }
-    if(LAUF.schreibtisch.offen.length){ zeigeSchreibtisch(n); return; }
+  if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
+    const offen = schreibtischStellen(n);
+    LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+    laufSichern();
   }
   const L = LAUF.lager;
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
@@ -621,7 +631,12 @@ function zeigeLager(n){
        `Verbleibend ${L.abende} von ${abendeFuer(n)}${abendeFuer(n)>n.abende?` · ${(abendeFuer(n)-n.abende)===1?'ein Abend':'zwei Abende'} mehr als ${rangName(S.rang)}`:''}`],
       opt,
       'Es ist immer mehr zu tun als Zeit da ist')}
-    </div>${seitenleiste()}</div>`;
+    </div>${seitenleiste()}</div>${
+      /* Das Blatt liegt zuletzt im Baum und damit obenauf. Solange eines da
+         ist, fängt sein Rücken jeden Klick ab — das Lager ist sichtbar, aber
+         nicht bedienbar. */
+      (S.rang>=9 && LAUF.schreibtisch && LAUF.schreibtisch.offen.length)
+        ? schreibtischFenster(n) : ''}`;
   kopfzeile();
 }
 function lagerTun(id){
@@ -828,6 +843,10 @@ function wochenFuer(n){ return n.wochen || 3; }
 
 function zeigeWinter(n){
   const W = LAUF.winter;
+  if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
+    const offen = schreibtischStellen(n);
+    LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+  }
   if(W.ort !== n.id){                       // neue Saison: Wochen frisch setzen
     W.ort = n.id; W.wochen = wochenFuer(n); W.log = []; W.gesichert = Ablage.dauerhaft;
     /* Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem ist
@@ -855,7 +874,12 @@ function zeigeWinter(n){
       [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
       opt+schluss,
       'Drei Wochen unter einem Dach')}
-    </div>${seitenleiste()}</div>`;
+    </div>${seitenleiste()}</div>${
+      /* **Auch eine Saison hat einen Schreibtisch** (VERWALTUNG §3: „an jedem
+         Lager und jeder Saison"). Ein Winterquartier ist die Zeit, in der die
+         Papiere sich stapeln, nicht die, in der sie verschwinden. */
+      (S.rang>=9 && LAUF.schreibtisch && LAUF.schreibtisch.offen.length)
+        ? schreibtischFenster(n) : ''}`;
   kopfzeile();
 }
 function winterTun(id){

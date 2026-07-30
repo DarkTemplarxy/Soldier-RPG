@@ -59,6 +59,12 @@
    **80 Läufe sind der Normalfall.** Die Regel „bei Zweifeln 80" hat mehrfach
    eine Fehldeutung verhindert; bei 40 liegt eine Standardabweichung schon bei
    rund sieben Punkten.  */
+/* ── Das Fenster über dem Bildschirm ──
+   **Liegt ein Blatt obenauf (`.ueberlage`), ist nur dieses bedienbar.** Der
+   Rücken fängt jeden Klick ab — ein Prüfstand, der dahinter klickt, läuft
+   entweder in einen Timeout oder, schlimmer, drückt einen Knopf, den ein
+   Spieler gar nicht erreichen kann. Deshalb sucht jeder Prüfstand seine
+   Knöpfe **zuerst im Fenster**. */
 const { chromium } = require('playwright'); // CHROMIUM=/pfad/zu/chrome setzen, falls Playwright den Browser nicht findet
 const path = require('path');
 const N = parseInt(process.argv[2] || '40', 10);
@@ -322,9 +328,9 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       if (!italienGeschafft && /vorfrieden/i.test(t)) { italienGeschafft = true; res.italien++; }
       if (t.includes('Nächster Mann')) { res.tot++; break; }
       if (t.includes('Noch einmal, besser')) { res.ende++; break; }
-      const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+      const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
       const zug = await p.evaluate((MUT) => {
-        const btn = [...document.querySelectorAll('.ord:not([disabled])')];
+        const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')];
         const f = re => btn.find(e => re.test(e.textContent));
         const anteil = S.leben / lebenMax();
         let z = null;

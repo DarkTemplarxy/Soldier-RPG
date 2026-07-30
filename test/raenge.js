@@ -13,6 +13,12 @@
    würde alle drei durchgehen lassen.
 
    Aufruf:  node test/raenge.js          */
+/* ── Das Fenster über dem Bildschirm ──
+   **Liegt ein Blatt obenauf (`.ueberlage`), ist nur dieses bedienbar.** Der
+   Rücken fängt jeden Klick ab — ein Prüfstand, der dahinter klickt, läuft
+   entweder in einen Timeout oder, schlimmer, drückt einen Knopf, den ein
+   Spieler gar nicht erreichen kann. Deshalb sucht jeder Prüfstand seine
+   Knöpfe **zuerst im Fenster**. */
 const { chromium } = require('playwright');
 const path = require('path');
 const ziel = path.resolve(__dirname, '../index.html');
@@ -76,9 +82,9 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
         gesehen.nummern = gesehen.knoepfe.some(k => /^Die \d\. Kompanie vorgehen/.test(k));
         break;
       }
-      const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+      const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
       const ok = await p.evaluate(() => {
-        const btn = [...document.querySelectorAll('.ord:not([disabled])')];
+        const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')];
         const z = btn.find(e => !/Zurückweichen|Mitmachen/.test(e.textContent)) || btn[0];
         if (z) { z.click(); return true; } return false;
       });
@@ -90,7 +96,7 @@ const RAENGE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
       const t = await p.$eval('#app', e => e.innerText);
       if (!/(RUNDE|PHASE|STUNDE|TAG) \d+ VON \d+/.test(t)) break;
       const ok = await p.evaluate(i => {
-        const btn = [...document.querySelectorAll('.ord:not([disabled])')]
+        const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')]
           .filter(e => !/Zurückweichen/.test(e.textContent));
         if (!btn.length) return false;
         btn[i % btn.length].click(); return true;

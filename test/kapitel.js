@@ -39,6 +39,12 @@
    Aufruf:  node test/kapitel.js jena
             node test/kapitel.js jena 7        (nur ein Rang)
             HAERTE=40 node test/kapitel.js russland 9   (vierzig Läufe, ungeheilt) */
+/* ── Das Fenster über dem Bildschirm ──
+   **Liegt ein Blatt obenauf (`.ueberlage`), ist nur dieses bedienbar.** Der
+   Rücken fängt jeden Klick ab — ein Prüfstand, der dahinter klickt, läuft
+   entweder in einen Timeout oder, schlimmer, drückt einen Knopf, den ein
+   Spieler gar nicht erreichen kann. Deshalb sucht jeder Prüfstand seine
+   Knöpfe **zuerst im Fenster**. */
 const { chromium } = require('playwright');
 const path = require('path');
 const ziel = path.resolve(__dirname, '../index.html');
@@ -112,9 +118,9 @@ async function haerteLauf(b, rang) {
       return LAUF.node > i;
     }, start.letzte);
     if (fertig) { ende = 'durch'; break; }
-    const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+    const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
     const ok = await p.evaluate(i => {
-      const btn = [...document.querySelectorAll('.ord:not([disabled])')]
+      const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')]
         .filter(e => !/Zurückweichen|Zurückgehen|Ablehnen|Den Abschied nehmen/.test(e.textContent));
       if (!btn.length) return false;
       btn[i % btn.length].click(); return true;
@@ -264,7 +270,7 @@ async function haerteLauf(b, rang) {
       }, start.letzte);
       if (fertig) { ende = 'durchgelaufen'; break; }
 
-      const w = await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
+      const w = (await p.$('.ueberlage')) ? null : await p.$('.ord.weiter'); if (w) { await w.click(); continue; }
       /* **Ein Vollständigkeitsläufer nimmt keinen freiwilligen Ausstieg.**
          „Ablehnen" (der Rückruf 1815) und „Den Abschied nehmen" (die beiden
          Rangschranken) sind vollwertige Enden — und genau deshalb verstecken
@@ -273,7 +279,7 @@ async function haerteLauf(b, rang) {
          alle vier Ränge meldeten 2 von 9 Stationen. Das war kein Fehler im
          Kapitel, sondern eine richtige Entscheidung zur falschen Zeit. */
       const ok = await p.evaluate(i => {
-        const btn = [...document.querySelectorAll('.ord:not([disabled])')]
+        const btn = [...document.querySelectorAll((document.querySelector('.ueberlage')?'.ueberlage ':'')+'.ord:not([disabled])')]
           .filter(e => !/Zurückweichen|Zurückgehen|Ablehnen|Den Abschied nehmen/.test(e.textContent));
         if (!btn.length) return false;
         btn[i % btn.length].click(); return true;   // reihum, damit alle Optionen drankommen
