@@ -128,6 +128,18 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 **Warum es den Erstläufer so viel härter trifft als den Veteranen:** Er hat Attribute 15–60 und Fertigkeiten 5. Gegen die üblichen Schwierigkeiten 35–50 liegt sein Zielwert bei 25–35, und genau dort ist der Verlust am größten (Zielwert 35: 35 → 24 %, Zielwert 20: 20 → 8 %). Der Gewinn am oberen Ende (80 → 92 %) fällt ihm nie zu — **ein Erstläufer wohnt ausschließlich in der unteren Hälfte der Skala.** Über zwanzig Proben je Kapitel multipliziert sich das.
 
+**Und dieselbe Messung beweist die Asymmetrie vom anderen Ende.** Derselbe Commit-Vergleich mit einem Veteranen (400 VP, je 40 Läufe) läuft **umgekehrt**:
+
+| Veteran 400 VP · je 40 Läufe | ein Wurf (`52211b0^`) | **zwei Würfe** (`52211b0`) |
+|---|---|---|
+| Weite | 61 | **70** |
+| Ägypten überstanden | 50 % | **70 %** |
+| Austerlitz überstanden | 90 % | **100 %** |
+
+**Dieselbe Zeile Code hilft dem Veteranen und halbiert den Erstläufer** — Weite 61 → 70 hier, 70 → 31 dort. Das ist der Beweis, dass es keine gleichmäßige Verschärfung ist, sondern eine Verlagerung entlang der Skala: Wer oben wohnt, gewinnt an Verlässlichkeit; wer unten wohnt, verliert an Trefferchance. (Die Capitaine-Quote des Veteranen — 38 → 28 % — bewegt sich bei n = 40 im Rauschen und trägt hier nicht.)
+
+**Und die Quelle der 58 reproduziert sich auf den Punkt.** `0aae610` (der Commit, der die 58 einst lieferte, 8 Kapitel, Ein Wurf) mit dem heutigen Prüfstand gemessen: **Weite 58 von 122**, Ägypten 57 %, Caporal 43 %. Der Prüfstand ist also nicht der Verdächtige — die 58 war echt, und sie stammt aus der Ein-Wurf-Zeit.
+
 > **Der dokumentierte Satz war falsch, und das ist der eigentliche Lehrsatz.** In CLAUDE.md steht: *„keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden — es sind die Ränder, die sich bewegen."* Die Ränder sind aber nicht symmetrisch bewohnt: **Der Veteran lebt am oberen Rand, der Erstläufer am unteren, und nur einer von beiden hat etwas gewonnen.** Eine Verteilungsänderung, die „die Mitte unberührt lässt", ist keine neutrale Änderung, solange die Spieler nicht in der Mitte stehen.
 
 **Entschieden ist nichts, und das ist Absicht** — die Klage, die den Wurf ausgelöst hat, war berechtigt („manchmal schafft man eine Probe mit dem doppelten Wert nicht"), und die zwei Würfe lösen sie. Drei Wege, alle ungemessen:
