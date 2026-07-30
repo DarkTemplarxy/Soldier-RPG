@@ -226,7 +226,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                    oft" ist das die erste Zahl, die man braucht — und sie ist
                    billig, weil das Chronikblatt Ort und Station ohnehin
                    mitschreibt. */
-                sterbeort: {}, sterbestation: [], weite: [],
+                sterbeort: {}, sterbeplatz: {}, sterbestation: [], weite: [],
                 /* ── Die Sterblichkeit je Kapitel ──
                    **`überlebt` läuft aus, und zwar rechnerisch.** Die Zahl ist
                    ein Produkt: Sieben Kapitel zu je rund fünfzig Prozent
@@ -242,7 +242,16 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                 erreicht: {} };
   /* Reihenfolge der Kapitel, für die Quote je Kapitel. Muss zur Zuordnung
      unten passen (dort wird aus der Jahreszahl der Kapitelname gewonnen). */
-  const KAPITEL_FOLGE = ['Italien','Ägypten','Garnison','Austerlitz','Jena','Eylau','Spanien','Russland'];
+  /* ── Die Kapitelliste kommt aus dem Spiel, nicht aus dem Skript ──
+     ⚠ **Sie stand hier als fester Satz von ACHT Namen, während elf gebaut
+     sind.** Und die Zuordnung lief über die Jahreszahl im Stationsdatum, mit
+     `<= '1811' ? 'Spanien' : 'Russland'` als letztem Zweig — **jeder Tote von
+     1813, 1814 und 1815 wurde damit als Russland gezählt.** Leipzig, Laon und
+     Waterloo gab es in dieser Statistik nicht.
+     Dieselbe Fehlerfamilie wie dreimal zuvor: aus einem gerenderten Text
+     (hier: einer Jahreszahl) auf einen Zustand schließen, statt den Zustand zu
+     lesen. Die Stationsnummer ist eindeutig, das Datum ist es nicht. */
+  let KAPITEL_FOLGE = [], KAPITEL_GRENZE = [], ORTE = [];
   /* Die Gesamtzahl der Stationen kommt aus dem Spiel, nicht aus dem Skript —
      sie stand hier als „von 64" fest und war mit dem fünften Kapitel falsch. */
   let STATIONSZAHL = 0;
@@ -302,7 +311,20 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       }
     }, VETERAN_PLAN);
     await p.click('#startbtn');
-    if (!STATIONSZAHL) STATIONSZAHL = await p.evaluate(() => KAPITEL.length);
+    if (!STATIONSZAHL) {
+      const k = await p.evaluate(() => {
+        const namen = [], grenzen = []; let summe = 0;
+        for (const kam of KAMPAGNEN) {
+          const st = STATIONEN[kam.id];
+          if (!st || !st.length) continue;      // ungebaute Kapitel zählen nicht
+          summe += st.length; namen.push(kam.name); grenzen.push(summe);
+        }
+        return {gesamt: KAPITEL.length, namen, grenzen,
+                orte: KAPITEL.map(n => (n.typ==='kampf' ? '⚔ ' : '') + (n.ort || n.id || '?'))};
+      });
+      STATIONSZAHL = k.gesamt; KAPITEL_FOLGE = k.namen; KAPITEL_GRENZE = k.grenzen;
+      ORTE = k.orte;
+    }
     /* Wie lang die Chronik VOR diesem Lauf war — daran erkennt man unten, ob
        der Eintrag am Ende von diesem Lauf stammt oder vom vorigen. */
     const chronikVorher = await p.evaluate(() => META.chronik.length);
@@ -677,18 +699,21 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     }, chronikVorher);
     if (!d) { res.abbruch++; continue; }
     if (d.gefallen) {
-      /* Das Kapitel steht nicht im Blatt, wohl aber das Datum der letzten
-         Station — und die Jahreszahl ist eindeutig. */
-      const j = (d.ort.match(/1[78]\d\d/) || ['?'])[0];
-      const kap = j <= '1797' ? 'Italien' : j <= '1799' ? 'Ägypten'
-                : j <= '1804' ? 'Garnison' : j <= '1805' ? 'Austerlitz' : j <= '1806' ? 'Jena' : j <= '1807' ? 'Eylau' : j <= '1811' ? 'Spanien' : 'Russland';
+      /* Aus der Stationsnummer, nicht aus dem Datum: Sie ist der Zustand. */
+      let bisIdx = KAPITEL_GRENZE.findIndex(g => d.stationen <= g);
+      if (bisIdx < 0) bisIdx = KAPITEL_FOLGE.length - 1;
+      const kap = KAPITEL_FOLGE[bisIdx] || '?';
       res.sterbeort[kap] = (res.sterbeort[kap]||0) + 1;
+      /* **Und woran genau.** Das Kapitel sagt, in welchem Krieg er geblieben
+         ist; die Station sagt, an welchem Tag. Für jede Frage der Art „woran
+         stirbt dieser Mann" ist das die Zahl, die man wirklich braucht. */
+      const ort = ORTE[d.stationen-1] || ('Station ' + d.stationen);
+      res.sterbeplatz[ort] = (res.sterbeplatz[ort]||0) + 1;
       res.sterbestation.push(d.stationen);
       res.weite.push(d.stationen);
       /* Erreicht hat er jedes Kapitel bis einschließlich dem, in dem er
          gestorben ist. */
-      const bis = KAPITEL_FOLGE.indexOf(kap);
-      KAPITEL_FOLGE.slice(0, bis+1).forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
+      KAPITEL_FOLGE.slice(0, bisIdx+1).forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
     } else {
       res.weite.push(STATIONSZAHL);
       KAPITEL_FOLGE.forEach(k => res.erreicht[k] = (res.erreicht[k]||0)+1);
@@ -766,6 +791,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
   if (jeKapitel.length) console.log(`Überstanden je Kapitel (von denen, die es erreichen): ${jeKapitel.join(' · ')}`);
   if (res.sterbestation.length) {
     const mittel = Math.round(res.sterbestation.reduce((a, x) => a + x, 0) / res.sterbestation.length * 10) / 10;
+    const plaetze = Object.keys(res.sterbeplatz).sort((a,b)=>res.sterbeplatz[b]-res.sterbeplatz[a]).slice(0,6);
+    console.log(`Gestorben wo genau: ${plaetze.map(k=>`${k} ${res.sterbeplatz[k]}`).join(' · ')}`);
     console.log(`Gestorben in: ${Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`).join(' · ')}`
       + ` · im Schnitt bei Station ${mittel} von ${STATIONSZAHL}`);
   }
