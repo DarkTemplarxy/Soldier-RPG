@@ -988,8 +988,24 @@ function gekauft(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe
 function ladenFrei(p){
   const m = (typeof META==='object' && META) ? META : null;
   if(p.frei && (!m || (m.bestRang|0) < p.frei)) return false;
-  if(p.freiKapitel && !(m && m.bestKapitel && m.bestKapitel[p.freiKapitel])) return false;
+  if(p.freiKapitel && !kapitelGesehen(p.freiKapitel, m)) return false;
   return true;
+}
+/* ── Warum das nicht `bestKapitel[id]` sein darf ──
+   **`META.bestKapitel` ist nach Stations-IDs verschlüsselt, nicht nach
+   Kampagnen-IDs.** Die erste Fassung schlug die Kampagne direkt darin nach und
+   funktionierte nur deshalb, weil in Kapitel 6 zufällig eine *Station* `eylau`
+   heißt. Jeder künftige Wert ohne gleichnamige Station hätte den Posten
+   **stumm für immer gesperrt** — dieselbe Familie wie der stumme Filter im
+   Lager, der siebzehn Prozentpunkte gekostet hat.
+   Jetzt wird gegen die Stationsliste der Kampagne geprüft: gesehen ist sie,
+   wenn irgendeine ihrer Stationen betreten wurde. */
+function kapitelGesehen(id, m){
+  const meta = m || ((typeof META==='object' && META) ? META : null);
+  if(!meta || !meta.bestKapitel) return false;
+  const st = (typeof STATIONEN==='object' && STATIONEN) ? STATIONEN[id] : null;
+  if(!st || !st.length) return !!meta.bestKapitel[id];
+  return st.some(n => n && n.id && meta.bestKapitel[n.id]);
 }
 function ladenBedingung(p){
   if(p.frei){

@@ -591,12 +591,25 @@ const VORGANG_MITGEZOGEN = {
   text:u=>`Ein Bataillon ist kein Zug, und die Sergenten bleiben bei der Kompanie. `
     +`Einen darfst du mitnehmen — der Adjutant fragt es beiläufig, als sei es eine Formsache. `
     +`Er wird zwei Stufen unter dir aufsteigen und in zehn Jahren immer noch da sein.`,
-  wahlen:u=>u.slice(0,4).map((x,i)=>({
+  /* **Angeboten wird, wen man kannte, nicht wen man gerade bekommen hat.**
+     `unterstellteSetzen()` legt die alte Liste in `S.unterstellteVorher` ab,
+     ehe es sie ersetzt — sonst stünden hier die vier Capitaines, die man in
+     derselben Minute kennengelernt hat, und der Satz „die Sergenten bleiben
+     bei der Kompanie" liefe ins Leere. */
+  wahlen:u=>((S.unterstellteVorher && S.unterstellteVorher.length)
+      ? S.unterstellteVorher : u).slice(0,4).map((x,i)=>({
     label:`${x.posten} ${x.name}`,
     kosten:`Können ${x.koennen} · Treue ${x.treue>0?'+':''}${x.treue}${x.zustand!=='dienstfähig'?' · '+x.zustand:''}`,
     tu(){
-      const w = S.unterstellte.find(y=>y.name===x.name);
-      if(w){ w.mit = true; w.satz = 'geht mit dir'; }
+      /* Er rückt auf den ersten Posten der neuen Stufe nach und bringt alles
+         mit, was ihn ausmacht — **vor allem seine Kennung.** An ihr hängt,
+         was er über dich weiß; ein neuer Mann mit demselben Namen wüsste es
+         nicht. */
+      const posten = (S.unterstellte[0]||{}).posten || x.posten;
+      const vorhanden = S.unterstellte.find(y=>y.id === x.id);
+      if(vorhanden){ vorhanden.mit = true; vorhanden.satz = 'geht mit dir'; }
+      else S.unterstellte[0] = Object.assign({}, x, {posten, mit:true, satz:'geht mit dir'});
+      S.unterstellteVorher = null;
       return `${esc(x.name)} trägt seine Sachen selbst hinüber. Er sagt nichts dazu, und du auch nicht — `
            + 'es ist die Art von Entscheidung, die man nicht bespricht.';
     }

@@ -252,9 +252,15 @@ function verzeichnis(){
   const h = (S.heimlich||[]);
   const v = (S.vermerke|0);
   if(!h.length && !v) return '';
+  /* **Gezählt werden die Lebenden.** Ein Toter nimmt seinen Teil mit, und
+     genau das soll man an der Zahl sehen — sonst stünde neben einer Sache,
+     von der niemand mehr weiß, weiter eine Zwei. Wer nicht mehr unter einem
+     steht, zählt dagegen mit: Er ist versetzt, nicht verschwunden. */
+  const tot = S.unterTot || [];
+  const lebend = x => (x.mitwisser||[]).filter(m => tot.indexOf(m) < 0).length;
   const zeile = x => `<div class="kv"><span class="hilfe" data-hilfe="${
       String('Schwere '+x.schwere+' von 4. Wer dabei war, steht im Verzeichnis — nicht hier.').replace(/"/g,'&quot;')}">${
-      esc(x.text)}</span><b class="${x.schwere>=3?'warn':''}">${x.mitwisser.length}</b></div>`;
+      esc(x.text)}</span><b class="${x.schwere>=3?'warn':''}">${lebend(x)}</b></div>`;
   return `<p class="mini">Was jemand weiß <span class="fein">Mitwisser</span></p>${h.map(zeile).join('')}${
     v ? `<div class="kv"><span>Aktenvermerke</span><b class="warn">${v}</b></div>` : ''}`;
 }

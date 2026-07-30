@@ -1349,7 +1349,15 @@ function ausfuehrungsZeile(a){
    Offizier auf einem auffallenden Pferd wird gesehen — von den eigenen Leuten,
    die daraufhin stehen bleiben, und von denen, die zielen. Es ist der einzige
    Kauf im Laden, der Ruf bringt und dafür Gefahr kostet. */
-function pferdGefahr(){ return gekauft('pferd_voll') ? 2 : 0; }
+/* `S.pferdWeg` zählt hier mit, und `S.rang` auch: Wer sein Pferd nicht mehr
+   füttern konnte, wird nicht weiter von weitem gesehen, und ein Fusilier sitzt
+   nicht darauf, auch wenn er eines besitzt. Dieselbe Bedingung wie in
+   `pferdFaktor()` — ein Vorteil, der an zwei Stellen geprüft wird, gehört an
+   beiden gleich geprüft. */
+function pferdGefahr(){
+  if(!S || S.rang < 7 || S.pferdWeg) return 0;
+  return gekauft('pferd_voll') ? 2 : 0;
+}
 /* Wie viel vom Marsch übrig bleibt. Ein Pferd nutzt erst ab Rang 7 etwas —
    davor reitet kein Fusilier, auch wenn er ein Pferd besitzt. */
 function pferdFaktor(){

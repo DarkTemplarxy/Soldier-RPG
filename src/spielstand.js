@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 14;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag
+const LAUF_FASSUNG    = 15;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -232,6 +232,37 @@ const LAUF_WANDLER = {
   13: alt => {
     if(alt.kauftrag === undefined) alt.kauftrag = null;
     return Object.assign({}, alt, {fassung:14});
+  },
+  /* Fassung 14 führte die Mitwisser über ihren **Namen**, und daran hingen
+     zwei stille Fehler: Jede Beförderung baute die Unterstellten neu auf und
+     löschte damit das ganze Verzeichnis, und Namen wiederholten sich zwischen
+     den Stufen, sodass ein Fremder eine Sache erben konnte, von der er nichts
+     weiß. Ab hier trägt jeder eine Kennung.
+
+     **Namen, die kein heutiger Unterstellter trägt, fallen aus der Mitwisser-
+     liste.** Das ist keine Nachsicht, sondern genau das Verhalten der alten
+     Fassung: Dort galt eine Sache ohne aktuellen Träger ohnehin als
+     geschlossen. Sie rückwirkend wieder zu öffnen hieße, einen Spielstand
+     strenger zu machen, als er gespielt wurde. */
+  14: alt => {
+    const m = alt.mann;
+    if(m){
+      let z = 0;
+      const nachName = {};
+      (m.unterstellte||[]).forEach(u=>{
+        if(u.id === undefined) u.id = ++z;
+        else z = Math.max(z, u.id);
+        nachName[u.name] = u.id;
+      });
+      if(m.unterId === undefined) m.unterId = z;
+      if(m.unterTot === undefined) m.unterTot = [];
+      if(m.unterNamen === undefined) m.unterNamen = (m.unterstellte||[]).map(u=>u.name);
+      (m.heimlich||[]).forEach(h=>{
+        h.mitwisser = (h.mitwisser||[]).map(w =>
+          typeof w === 'number' ? w : nachName[w]).filter(x => x != null);
+      });
+    }
+    return Object.assign({}, alt, {fassung:15});
   }
 };
 

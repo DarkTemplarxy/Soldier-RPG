@@ -378,7 +378,8 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(),
     /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
        und eine leere Liste ist ehrlicher als vier Platzhalter. */
-    unterstellte:[], unterstellteStufe:0, heimlich:[], vermerke:0, uebergangen:false, mitgewaehlt:false,
+    unterstellte:[], unterstellteStufe:0, unterId:0, unterTot:[], unterNamen:[], unterstellteVorher:null,
+    heimlich:[], vermerke:0, uebergangen:false, mitgewaehlt:false,
     kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
@@ -498,30 +499,50 @@ function francs(betrag, immerZwei){
 function unterstellteSetzen(){
   if(!S) return;
   const stufe = unterstellteStufe(S.rang);
-  if(!stufe){ S.unterstellte = []; return; }
+  /* **Die Stufe muss mit zurückgesetzt werden, nicht nur die Liste.** Sonst
+     sperrt eine Rückstufung die Unterstellten dauerhaft aus: Rang 9 → 8 leert
+     die Liste, lässt aber `unterstellteStufe = 9` stehen — und der Weg zurück
+     auf 9 springt oben früh heraus, weil die Stufe „schon aufgebaut" meldet.
+     Gemessen: 4 Unterstellte → 0 → **0**. Der Mann führt danach ein Bataillon
+     ohne einen einzigen Untergebenen, und `ausfuehrungsProbe()` gibt ihm
+     stillschweigend immer recht. */
+  if(!stufe){ S.unterstellte = []; S.unterstellteStufe = 0; return; }
   if(S.unterstellteStufe === stufe.ab) return;      // schon aufgebaut
   const alt = S.unterstellte || [];
   const mit = alt.find(u=>u.mit && u.lebt) || null;
-  /* Namen, die schon vergeben sind, kommen nicht zweimal vor. */
-  const belegt = alt.map(u=>u.name);
-  const frei = UNTER_NAMEN.filter(n=>belegt.indexOf(n)<0);
+  /* ── Die Wahl des Mitgezogenen bekommt die Alten vorgelegt, nicht die Neuen ──
+     **Der Text sagt „die Sergenten bleiben bei der Kompanie, einen darfst du
+     mitnehmen" — und angeboten wurden die vier Capitaines**, weil dieser
+     Umbau beim Aufstieg längst gelaufen war, ehe der Schreibtisch fragte. Man
+     nahm einen Fremden mit, den man in derselben Minute kennengelernt hatte.
+     Deshalb bleibt die alte Liste liegen, bis die Wahl getroffen ist. */
+  if(!mit && !S.mitgewaehlt && stufe.ab >= 10 && alt.length)
+    S.unterstellteVorher = alt.filter(u=>u.lebt);
   const neu = [];
   stufe.posten.forEach((posten,i)=>{
-    /* Der Mitgezogene behält Können und Treue und bekommt den neuen Posten —
-       er ist zwei bis drei Stufen unter dir aufgestiegen, nicht ersetzt worden. */
+    /* Der Mitgezogene behält Kennung, Können und Treue und bekommt den neuen
+       Posten — er ist mit aufgestiegen, nicht ersetzt worden. */
     if(mit && i===0){ neu.push(Object.assign({}, mit, {posten})); return; }
-    neu.push({
-      name: frei[i] || UNTER_NAMEN[(i*7) % UNTER_NAMEN.length],
-      posten,
-      /* Start 35–55, gestreut: Wer neu unter dir steht, ist weder ein
-         Versager noch ein Geschenk. Ein Fremder von außen startet bei 25,
-         siehe `unterstellterFaellt()`. */
-      koennen: 35 + Math.floor(Math.random()*21),
-      treue: 0, zustand:'dienstfähig', lebt:true, mit:false, satz:''
-    });
+    neu.push(neuerUnterstellter(posten, 35 + Math.floor(Math.random()*21)));
   });
   S.unterstellte = neu;
   S.unterstellteStufe = stufe.ab;
+}
+
+/* ── Kennung und Name ──
+   **Ein Mitwisser wird über seine Kennung geführt, nie über seinen Namen.**
+   Namen wiederholen sich: Ausgeschlossen wurde nur die *vorige* Liste, also
+   konnte ein Sergent von 1805 als Colonel von 1813 wiederkommen — und mit ihm
+   eine Sache, von der der neue Mann nichts weiß. `S.unterNamen` merkt sich
+   jeden vergebenen Namen für den ganzen Lauf. */
+function neuerUnterstellter(posten, koennen){
+  if(!S.unterNamen) S.unterNamen = [];
+  const frei = UNTER_NAMEN.filter(n => S.unterNamen.indexOf(n) < 0);
+  const name = frei.length ? frei[0] : UNTER_NAMEN[S.unterNamen.length % UNTER_NAMEN.length];
+  S.unterNamen.push(name);
+  S.unterId = (S.unterId|0) + 1;
+  return {id:S.unterId, name, posten, koennen, treue:0,
+          zustand:'dienstfähig', lebt:true, mit:false, satz:''};
 }
 
 /* Der Nachrücker kennt dich nicht — Können 25, Treue 0. Das ist derselbe
@@ -530,12 +551,14 @@ function unterstellterFaellt(i){
   const u = S.unterstellte && S.unterstellte[i];
   if(!u || !u.lebt) return '';
   u.lebt = false;
+  /* **Nur der Tote nimmt seinen Teil mit.** Hier und nirgends sonst wird eine
+     Kennung als erloschen vermerkt — eine Versetzung, eine Beförderung und
+     eine Rückstufung tun das ausdrücklich nicht. */
+  if(!S.unterTot) S.unterTot = [];
+  if(u.id) S.unterTot.push(u.id);
   const gefallen = u.posten + ' ' + u.name;
-  const belegt = S.unterstellte.map(x=>x.name);
-  const name = UNTER_NAMEN.filter(n=>belegt.indexOf(n)<0)[0] || 'Ferrand';
-  S.unterstellte[i] = {name, posten:u.posten, koennen:25, treue:0,
-                       zustand:'dienstfähig', lebt:true, mit:false,
-                       satz:'ist seit vier Tagen da'};
+  S.unterstellte[i] = Object.assign(neuerUnterstellter(u.posten, 25),
+                                    {satz:'ist seit vier Tagen da'});
   return gefallen;
 }
 
@@ -593,19 +616,39 @@ function unterstellteZehren(){
 function heimlich(id, text, schwere, indizes){
   if(!S) return;
   if(!S.heimlich) S.heimlich = [];
+  /* Gespeichert wird die **Kennung**, nicht der Name — siehe
+     `neuerUnterstellter()`. Der Name steht daneben, damit ein Blick in den
+     Spielstand lesbar bleibt; gerechnet wird nie mit ihm. */
   const wer = (indizes||[]).map(i=>{
     const u = S.unterstellte && S.unterstellte[i];
-    return u && u.lebt ? u.name : null;
-  }).filter(Boolean);
+    return u && u.lebt ? u.id : null;
+  }).filter(x => x != null);
   S.heimlich.push({id, text, schwere, mitwisser:wer,
                    seit:(LAUF?LAUF.node:0), kapitel:kapitelNummer()});
 }
 /* Wie viele Sachen noch jemand weiß. Eine Sache ohne lebende Mitwisser ist
-   sicher — **Papier verjährt nach Jahren, Menschen sofort.** */
+   sicher — **Papier verjährt nach Jahren, Menschen sofort.**
+
+   ⚠ **Die erste Fassung suchte die Mitwisser in der *aktuellen* Liste, und das
+   war die stillste Lücke des ganzen Systems.** `UNTERSTELLTE_STUFEN` baut die
+   Liste bei **jedem** Rang von 9 bis 13 neu — also löschte jede Beförderung
+   das Verzeichnis. Gemessen: offen 1 → **0** beim Aufstieg 9 → 10. Wer
+   riskierte und danach befördert wurde, war die Sache los; **die Beförderung
+   wusch, und genau für sie hatte man riskiert.**
+
+   Jetzt zählt allein, ob die Kennung erloschen ist. Ein Mann, der nicht mehr
+   unter dir steht, lebt weiter, ist irgendwo und weiß es weiter. Nur der Tote
+   nimmt seinen Teil mit. */
 function heimlichOffen(){
   if(!S || !S.heimlich) return [];
-  const lebende = (S.unterstellte||[]).filter(x=>x.lebt).map(x=>x.name);
-  return S.heimlich.filter(h => h.mitwisser.some(m => lebende.indexOf(m) >= 0));
+  const tot = S.unterTot || [];
+  return S.heimlich.filter(h => (h.mitwisser||[]).some(m => tot.indexOf(m) < 0));
+}
+/* Wer von den Mitwissern einer Sache heute noch unter einem steht — nur die
+   können reden, weil nur sie in `heimlichPruefen()` vorkommen. Die anderen
+   wissen es trotzdem und zählen für `heimlichOffen()` mit. */
+function mitwisserHier(h){
+  return (S.unterstellte||[]).filter(u => u.lebt && (h.mitwisser||[]).indexOf(u.id) >= 0);
 }
 
 /* ── Verjährung ──
@@ -733,7 +776,7 @@ function heimlichPruefen(){
   const papier = offen.filter(h => h.schwere <= 3);
   if(papier.length){
     const summe = papier.reduce((a,h)=>a+h.schwere, 0);
-    const kalt = lebende.some(u => u.treue <= 0 && papier.some(h => h.mitwisser.indexOf(u.name)>=0));
+    const kalt = lebende.some(u => u.treue <= 0 && papier.some(h => (h.mitwisser||[]).indexOf(u.id)>=0));
     const p = summe*6 - wert('verwaltung')/20 + (kalt ? 8 : 0);
     if(Math.random()*100 < p) return heimlichAufgeflogen(papier[0],
       'Der Inspecteur aux revues rechnet die Listen gegeneinander und braucht dafür einen Vormittag.');
@@ -742,7 +785,7 @@ function heimlichPruefen(){
          sagt er nie etwas; bei 0 lügt er auch nicht für dich. */
   for(const u of lebende){
     if(u.treue >= 1) continue;
-    const seine = offen.filter(h => h.mitwisser.indexOf(u.name) >= 0);
+    const seine = offen.filter(h => (h.mitwisser||[]).indexOf(u.id) >= 0);
     if(!seine.length) continue;
     if(Math.random()*100 < (-u.treue)*5) return heimlichAufgeflogen(seine[0],
       'Irgendwer hat geredet. Es steht in keinem Bericht, wer.');
@@ -751,9 +794,17 @@ function heimlichPruefen(){
          **Der Gefallen ist das Leck:** Du hast ihn gedeckt, das machte ihn zum
          Mitwisser, und jetzt gibt er eine Sache her, um seine eigene
          loszuwerden. Das Spiel sagt das nie. */
+  /* **Der in Bedrängnis ist der Gedeckte, nicht der Gemeldete.** Die erste
+     Fassung prüfte `'unter Verdacht'` — und das bekommt, wen man
+     *weitergemeldet* hat. Der hat seine vierzehn Tage Arrest hinter sich,
+     ist mit nichts mehr erpressbar und ist Mitwisser von gar nichts, weil
+     Melden keinen Eintrag anlegt. **Der Weg konnte damit nie auslösen** —
+     ausgerechnet der, um den der ganze Entwurf gebaut ist.
+     Bedrängt ist der, dessen eigene Sache noch offen liegt: `'säuft'`, nach
+     dem Gefallen, den du ihm getan hast. Genau er steht im Verzeichnis. */
   for(const u of lebende){
-    if(u.zustand !== 'unter Verdacht') continue;
-    const seine = offen.filter(h => h.mitwisser.indexOf(u.name) >= 0);
+    if(u.zustand !== 'säuft' && u.zustand !== 'unter Verdacht') continue;
+    const seine = offen.filter(h => (h.mitwisser||[]).indexOf(u.id) >= 0);
     if(!seine.length) continue;
     if(Math.random() < 0.35) return heimlichAufgeflogen(seine[0],
       'Jemand, der selbst in Bedrängnis war, hatte etwas anzubieten.');
