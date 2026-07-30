@@ -5373,7 +5373,7 @@ STATIONEN.hunderttage = KAPITEL11.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 12;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis
+const LAUF_FASSUNG    = 13;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -5561,6 +5561,23 @@ const LAUF_WANDLER = {
     if(alt.mann && alt.mann.heimlich === undefined) alt.mann.heimlich = [];
     if(alt.schreibtisch === undefined) alt.schreibtisch = null;
     return Object.assign({}, alt, {fassung:12});
+  },
+  /* Fassung 12 hatte das Verzeichnis, aber noch keine Folgen. Beide Zähler
+     fangen bei null an — **rückwirkend einen Aktenvermerk einzutragen wäre
+     eine Bestrafung für nichts**, und „übergangen" ist ohnehin ein Zustand,
+     der genau einmal eintritt. */
+  12: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.vermerke === undefined) m.vermerke = 0;
+      if(m.uebergangen === undefined) m.uebergangen = false;
+      /* Wer schon über Rang 10 steht, hat die Wahl in dieser Fassung nie
+         bekommen — sie wird ihm nicht nachgereicht, sondern gilt als
+         getroffen. Einen Mitgezogenen rückwirkend zu bestimmen hieße, eine
+         Beziehung zu erfinden, die nie stattgefunden hat. */
+      if(m.mitgewaehlt === undefined) m.mitgewaehlt = (m.rang >= 10);
+    }
+    return Object.assign({}, alt, {fassung:13});
   }
 };
 
@@ -6077,7 +6094,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
     rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(),
     /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
        und eine leere Liste ist ehrlicher als vier Platzhalter. */
-    unterstellte:[], unterstellteStufe:0, heimlich:[],
+    unterstellte:[], unterstellteStufe:0, heimlich:[], vermerke:0, uebergangen:false, mitgewaehlt:false,
     kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
@@ -6296,7 +6313,8 @@ function heimlich(id, text, schwere, indizes){
     const u = S.unterstellte && S.unterstellte[i];
     return u && u.lebt ? u.name : null;
   }).filter(Boolean);
-  S.heimlich.push({id, text, schwere, mitwisser:wer, seit:(LAUF?LAUF.node:0)});
+  S.heimlich.push({id, text, schwere, mitwisser:wer,
+                   seit:(LAUF?LAUF.node:0), kapitel:kapitelNummer()});
 }
 /* Wie viele Sachen noch jemand weiß. Eine Sache ohne lebende Mitwisser ist
    sicher — **Papier verjährt nach Jahren, Menschen sofort.** */
@@ -6304,6 +6322,168 @@ function heimlichOffen(){
   if(!S || !S.heimlich) return [];
   const lebende = (S.unterstellte||[]).filter(x=>x.lebt).map(x=>x.name);
   return S.heimlich.filter(h => h.mitwisser.some(m => lebende.indexOf(m) >= 0));
+}
+
+/* ── Verjährung ──
+   **Ohne sie wächst das Verzeichnis über elf Kapitel ins Unspielbare**, und
+   die späten Kapitel wären für jeden verloren, der früh etwas riskiert hat.
+
+     Schwere 1  dieses Kapitel und das nächste
+     Schwere 2  drei Kapitel
+     Schwere 3  vier Kapitel
+     Schwere 4  nie — ein Dienstvergehen mit Blut bleibt bis zum Ende
+
+   Der **Aktenvermerk** verjährt nicht. Was aufgeschrieben wurde, bleibt
+   aufgeschrieben; nur was niemand aufgeschrieben hat, kann vergessen werden. */
+const VERJAEHRUNG = {1:2, 2:3, 3:4, 4:99};
+function heimlichVerjaehren(){
+  if(!S || !S.heimlich || !S.heimlich.length) return;
+  const jetzt = kapitelNummer();
+  S.heimlich = S.heimlich.filter(h => {
+    const von = h.kapitel != null ? h.kapitel : jetzt;
+    return (jetzt - von) < (VERJAEHRUNG[h.schwere] || 2);
+  });
+}
+/* Die laufende Kapitelnummer — die Verjährung rechnet in Feldzügen, nicht in
+   Stationen. Ein Kapitel ist die Zeiteinheit, in der Akten durchgesehen
+   werden. */
+function kapitelNummer(){
+  const n = KAPITEL[LAUF ? Math.min(LAUF.node, KAPITEL.length-1) : 0];
+  for(let i=0;i<KAMPAGNEN.length;i++){
+    const st = STATIONEN[KAMPAGNEN[i].id];
+    if(st && st.indexOf(n) >= 0) return i;
+  }
+  return 0;
+}
+
+/* ══════════════════ DIE FOLGEN, GESTAFFELT ══════════════════
+
+   **Bisher gab es genau eine: ein Rang zurück, Ruf −20.** Das ist zu grob, um
+   daraus Entscheidungen zu machen — wer einmal zulangt, riskiert dasselbe wie
+   einer, der es dreimal getan hat.
+
+     1  Aktenvermerk   jetzt nichts. Die nächste Folge ist eine Stufe härter
+     2  Rüffel         Fürsprecher schlechter, Ruf −8
+     3  Übergangen     die nächste verdiente Beförderung geht an einen anderen
+     4  Versetzung     neue Einheit, alle Unterstellten weg, Zustand 40
+     5  Ein Rang zurück
+     6  Zwei Ränge zurück, dazu alle Unterstellten weg
+
+   **Entlassen wird man nie.** Die Armee gibt keinen Mann her, den sie noch
+   brauchen kann — sie stellt ihn tiefer. Das hält auch die vier Enden intakt.
+
+   **Und es gibt keinen Boden.** Wer als Colonel dreimal auffällt, dient als
+   Sergent-major weiter, und wer alles falsch macht, steht wieder in der Linie
+   — mit einem Musketenwert von vor zehn Jahren.
+
+   **Stufe 3 ist die beste Strafe, die dieses Spiel haben kann**, weil sie dem
+   Ton entspricht: Man wird nicht bestraft, man wird nicht befördert. Kein
+   Bildschirm, keine Meldung, kein Vorwurf. Nur eine Musterung, an der nichts
+   passiert. */
+function folgeStufe(schwere){
+  const vermerke = (S.vermerke|0);
+  /* Schwere 1 gibt einen Vermerk, 2 einen Rüffel, 3 „übergangen" oder
+     Versetzung, 4 einen Rang zurück — und jeder bestehende Aktenvermerk hebt
+     das um eine Stufe. */
+  let stufe = schwere === 1 ? 1 : schwere === 2 ? 2 : schwere === 3 ? 3 : 5;
+  stufe += vermerke;
+  /* Stufe 3 höchstens einmal je Laufbahn: Sie ist absichtlich stumm, und wer
+     zweimal ohne Erklärung übergangen wird, hält die Leiter für kaputt statt
+     sich selbst für erwischt. */
+  if(stufe === 3 && S.uebergangen) stufe = 4;
+  return Math.min(6, stufe);
+}
+
+function folgeAnwenden(stufe, sache){
+  const was = sache ? sache.text : 'eine Sache aus dem Verzeichnis';
+  if(stufe <= 1){
+    S.vermerke = (S.vermerke|0) + 1;
+    return {kopf:'Ein Aktenvermerk', text:`Es steht jetzt in einer Akte, und in der Akte steht auch, wer es hineingeschrieben hat. `
+      + `Sonst passiert nichts. <span class="fein">${esc(was)}</span>`, wirkung:'Aktenvermerk'};
+  }
+  if(stufe === 2){
+    S.ruf = Math.max(0, S.ruf - 8);
+    gunstGeben(beurteiler() || 'vernet', -2);
+    return {kopf:'Ein Rüffel', text:'Du stehst zwölf Minuten vor einem Schreibtisch und hörst zu. Danach ist es erledigt, '
+      + 'und es ist nicht erledigt.', wirkung:'Ruf −8 · Fürsprache −2'};
+  }
+  if(stufe === 3){
+    S.uebergangen = true;
+    /* **Kein Bildschirm.** Das ist der ganze Punkt: Der Spieler erfährt es
+       nicht, er merkt es an einer Musterung, an der nichts passiert. */
+    return null;
+  }
+  if(stufe === 4){
+    S.unterstellte = []; S.unterstellteStufe = 0; unterstellteSetzen();
+    S.einheit = 40;
+    return {kopf:'Versetzung', text:'Ein anderes Bataillon, dieselbe Armee. Niemand hier kennt dich, und niemand hier '
+      + 'weiß, warum du gekommen bist. Deine Mitwisser bleiben, wo sie sind — die Sachen von damals sind weiter dort bekannt.',
+      wirkung:'Neue Einheit · Einheitszustand 40'};
+  }
+  if(stufe === 5){
+    rangSetzen(Math.max(1, S.rang-1)); S.ruf = Math.max(0, S.ruf-20);
+    gunstGeben(beurteiler() || 'vernet', -4);
+    return {kopf:'Ein Rang zurück', text:'Was danach passiert, passiert schnell und ohne Verhandlung.',
+      wirkung:'Rang zurück · Ruf −20 · Fürsprache −4'};
+  }
+  rangSetzen(Math.max(1, S.rang-2)); S.ruf = Math.max(0, S.ruf-30);
+  S.unterstellte = []; S.unterstellteStufe = 0; unterstellteSetzen();
+  gunstGeben(beurteiler() || 'vernet', -5);
+  return {kopf:'Zwei Ränge zurück', text:'Man gibt dir deine Muskete zurück. Sie ist nicht die, die du hattest, '
+    + 'und du hast seit zehn Jahren nicht mehr geladen.', wirkung:'Zwei Ränge zurück · Ruf −30 · alle Unterstellten weg'};
+}
+
+/* ── Fünf Wege, wie es herauskommt ──
+   **Kein einziger nennt den Namen des Verräters.** Du erfährst, dass etwas
+   bekannt ist — nie von wem. Das ist die Tonregel dieses ganzen Systems. */
+function heimlichPruefen(){
+  if(!S || S.rang < 9) return '';
+  heimlichVerjaehren();
+  const offen = heimlichOffen();
+  if(!offen.length) return '';
+  const lebende = (S.unterstellte||[]).filter(x=>x.lebt);
+
+  /* 1 · Der Inspecteur findet nur, was auf Papier steht (Schwere 1–3).
+         Summe der Schweren × 6 %, minus Verwaltung/20. Ein Mitwisser mit
+         Treue ≤ 0 hebt es um 8 Punkte, weil er nicht für dich lügt. */
+  const papier = offen.filter(h => h.schwere <= 3);
+  if(papier.length){
+    const summe = papier.reduce((a,h)=>a+h.schwere, 0);
+    const kalt = lebende.some(u => u.treue <= 0 && papier.some(h => h.mitwisser.indexOf(u.name)>=0));
+    const p = summe*6 - wert('verwaltung')/20 + (kalt ? 8 : 0);
+    if(Math.random()*100 < p) return heimlichAufgeflogen(papier[0],
+      'Der Inspecteur aux revues rechnet die Listen gegeneinander und braucht dafür einen Vormittag.');
+  }
+  /* 2 · Ein Unterstellter redet: (−treue) × 5 % je Mitwisser. Ab Treue +1
+         sagt er nie etwas; bei 0 lügt er auch nicht für dich. */
+  for(const u of lebende){
+    if(u.treue >= 1) continue;
+    const seine = offen.filter(h => h.mitwisser.indexOf(u.name) >= 0);
+    if(!seine.length) continue;
+    if(Math.random()*100 < (-u.treue)*5) return heimlichAufgeflogen(seine[0],
+      'Irgendwer hat geredet. Es steht in keinem Bericht, wer.');
+  }
+  /* 3 · Einer in Bedrängnis handelt — 35 %, unabhängig von seiner Treue.
+         **Der Gefallen ist das Leck:** Du hast ihn gedeckt, das machte ihn zum
+         Mitwisser, und jetzt gibt er eine Sache her, um seine eigene
+         loszuwerden. Das Spiel sagt das nie. */
+  for(const u of lebende){
+    if(u.zustand !== 'unter Verdacht') continue;
+    const seine = offen.filter(h => h.mitwisser.indexOf(u.name) >= 0);
+    if(!seine.length) continue;
+    if(Math.random() < 0.35) return heimlichAufgeflogen(seine[0],
+      'Jemand, der selbst in Bedrängnis war, hatte etwas anzubieten.');
+  }
+  return '';
+}
+
+function heimlichAufgeflogen(sache, wie){
+  S.heimlich = S.heimlich.filter(h => h !== sache);
+  const stufe = folgeStufe(sache.schwere);
+  const f = folgeAnwenden(stufe, sache);
+  S.log.push('Aufgeflogen: ' + sache.text + '.');
+  if(!f) return '';                      // Stufe 3 ist stumm — das ist der Punkt
+  return `<div class="wirkung"><span>${esc(f.kopf)}</span>${wie} ${f.text} <b>${esc(f.wirkung)}</b></div>`;
 }
 
 function unterstellteGuete(){
@@ -7034,7 +7214,7 @@ function ueberDir(){
       p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
       <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
   };
-  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}`;
+  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}${verzeichnis()}`;
 }
 
 /* ── Unter dir ──
@@ -7047,6 +7227,27 @@ function ueberDir(){
    Der Mitgezogene steht zuerst und trägt ein Zeichen — er ist der einzige,
    dessen Treue +5 erreichen kann, und der einzige, der beim Aufstieg
    mitwandert. */
+/* ── Das Verzeichnis ──
+   **Angezeigt wird die Sache und die Zahl der Mitwisser, nie ihre Namen.**
+   Du weißt, was du getan hast und wie viele dabei waren. Nicht, wer davon
+   redet. Das ist die bessere Aufteilung: **Menschen sind lesbar, Vergangenheit
+   ist es nicht** — man kann einschätzen, wem man traut, und trotzdem nicht
+   ausrechnen, was auf dem Spiel steht.
+
+   Der Aktenvermerk steht daneben, weil er nicht verjährt und weil er ab Rang
+   11 die Beförderung halbiert. */
+function verzeichnis(){
+  if(!S || S.rang < 9) return '';
+  const h = (S.heimlich||[]);
+  const v = (S.vermerke|0);
+  if(!h.length && !v) return '';
+  const zeile = x => `<div class="kv"><span class="hilfe" data-hilfe="${
+      String('Schwere '+x.schwere+' von 4. Wer dabei war, steht im Verzeichnis — nicht hier.').replace(/"/g,'&quot;')}">${
+      esc(x.text)}</span><b class="${x.schwere>=3?'warn':''}">${x.mitwisser.length}</b></div>`;
+  return `<p class="mini">Was jemand weiß <span class="fein">Mitwisser</span></p>${h.map(zeile).join('')}${
+    v ? `<div class="kv"><span>Aktenvermerke</span><b class="warn">${v}</b></div>` : ''}`;
+}
+
 function unterDir(){
   unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
   const u = (S.unterstellte||[]);
@@ -12390,7 +12591,7 @@ function zeigeBefoerderung(n){
 
   const vakanz  = !ziel.vakanz || vakanzStand(ziel.vakanz).tot;
   const fehlt   = fehltWas(ziel);
-  const bekommt = !fehlt && vakanz;
+  let bekommt = !fehlt && vakanz;
 
   /* Der Nachsatz, der die fehlende Zahl beim Namen nennt. Er stand früher
      viermal ausgeschrieben; mit vierzehn Rängen und sieben Schrankenarten wäre
@@ -12404,6 +12605,20 @@ function zeigeBefoerderung(n){
     fehltBulletins:() => `Für den ${esc(ziel.name)} braucht es ${ziel.bulletins} Nennungen im Bulletin — du hast ${S.bulletins|0}.`,
     fehltAdler:   () => `Ein Regiment ohne Adler bekommt keinen Colonel.`
   };
+
+  /* ── Vierter Weg: die Aktenprüfung ──
+     **Jeder Aktenvermerk halbiert die Chance auf den Rang, ab Rang 11.**
+     Oben wird nicht mehr nur gefragt, was einer geleistet hat, sondern auch,
+     was über ihn geschrieben wurde — und Vermerke verjähren nicht.
+
+     Und der dritte Folgegrad wird hier eingelöst: Wer „übergangen" ist, wird
+     genau einmal nicht befördert, **ohne dass es jemand ausspricht.** Es gibt
+     keinen Bildschirm dafür. Es gibt nur eine Musterung, an der nichts
+     passiert. */
+  if(bekommt && ziel.rang >= 11 && (S.vermerke|0) > 0){
+    if(Math.random() < 1 - Math.pow(0.5, S.vermerke)) bekommt = false;
+  }
+  if(bekommt && S.uebergangen){ bekommt = false; S.uebergangen = false; }
 
   let text, klasse = 'schlecht';
   if(bekommt){
@@ -12690,6 +12905,10 @@ const LAGER_TUN = {
     tu(){ S.kasseQuartal = true; S.geld += 150;
       S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
       S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 15);
+      /* **Der Sergent, der die Ausgabe macht, weiß, wie viele Paar Schuhe
+         wirklich da waren.** Die Zahl allein war ein Würfel; mit ihm ist es
+         ein Verhältnis. */
+      heimlich('kasse_ueblich','Die Kompaniekasse des Quartals',3,[0]);
       return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger. <span class="fein">+150 F · Einheitszustand +10</span>'; }},
 
   /* ── Ab Rang 11: die Lieferantenverträge ──
@@ -12707,6 +12926,7 @@ const LAGER_TUN = {
     tu(){ S.kasseQuartal = true; S.geld += 600;
       S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
       S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 35);
+      heimlich('vertrag_still','Der Lieferantenvertrag',3,[0]);
       return 'Er kommt selbst, im eigenen Wagen, und er redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt. <span class="fein">+600 F · Einheitszustand −15</span>'; }},
 
   kasse_voll:{label:'Kräftig zulangen',
@@ -12714,6 +12934,7 @@ const LAGER_TUN = {
     tu(){ S.kasseQuartal = true; S.geld += 400;
       S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
       S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 40);
+      heimlich('kasse_voll','Die Kasse des dritten Quartals',3,[0,1]);
       return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat. <span class="fein">+400 F · Einheitszustand −10</span>'; }}
 };
 
@@ -12791,6 +13012,12 @@ function lagerHandlungen(n){
    Satz über die Zurückgebliebenen, und es sagt nicht, ob das schlimm war. */
 function inspektion(){
   if(S.rang<9) return '';
+  /* ── Das Verzeichnis kommt vor der Zahl ──
+     **Ein Risiko mit Mitwissern ist ein Verhältnis, kein Würfel.** Fliegt
+     etwas aus dem Verzeichnis auf, ist das die Meldung dieses Lagers; die
+     Kassen-Zahl darunter bleibt als zweiter, gröberer Weg bestehen. */
+  const ausVerzeichnis = heimlichPruefen();
+  if(ausVerzeichnis) return ausVerzeichnis;
   const z = (S.einheit==null ? (S.einheit=70) : S.einheit);
   const risiko = S.kasseRisiko||0;
   let t = '', ertappt = false;
@@ -13005,6 +13232,11 @@ const VORGAENGE = [
              + 'Er weiß, dass das ein Gefallen ist.'; }}]}
 ];
 
+/* `'mit'` ist die einmalige Wahl des Mitgezogenen, alles andere ein Index in
+   VORGAENGE. Ein Sonderfall in einer Zeile ist billiger als eine sechste Art,
+   die nur einmal vorkommt. */
+function vorgangVon(k){ return k === 'mit' ? VORGANG_MITGEZOGEN : VORGAENGE[k]; }
+
 /* Wie viele Ausfertigungen es je Art gibt, und welche Vorgänge dieses Lager
    bringt. **Drei Pflichtvorgänge, gezogen aus fünf Arten**, damit zwei Lager
    hintereinander nicht dieselbe Frage stellen. */
@@ -13012,6 +13244,13 @@ function schreibtischStellen(n){
   unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
   if(S.rang < 9 || u.length < 2) return [];
+  /* **Die Wahl des Mitgezogenen kommt einmal und geht vor.** Sie steht auf
+     demselben Blatt wie alles andere, aber sie ist die einzige, die man nur
+     ein einziges Mal in einer Laufbahn trifft. */
+  if(S.rang >= 10 && !u.some(x=>x.mit) && !S.mitgewaehlt){
+    S.mitgewaehlt = true;
+    return ['mit'];
+  }
   /* Deterministisch aus der Stations-ID, damit ein Beenden und Fortsetzen
      nicht andere Vorgänge liefert — dieselbe Regel wie bei den Ereignissen. */
   const saat = (n.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
@@ -13020,6 +13259,38 @@ function schreibtischStellen(n){
   for(let k=0;k<3;k++) raus.push(arten[(saat + k*2) % arten.length]);
   return raus.filter((v,i)=>raus.indexOf(v)===i).slice(0,3);
 }
+
+/* ── Der Mitgezogene ──
+   **Einer deiner Unterstellten steigt mit dir. Nicht als Belohnung, als
+   Verhältnis.** Die Wahl steht einmal, beim Aufstieg zu Rang 10, und sie steht
+   auf dem Schreibtisch — mit den Zahlen, die du kennst. Was du nicht siehst,
+   ist, wie lange du ihn brauchen wirst.
+
+   Er rückt immer zwei bis drei Stufen unter dir nach, wie Martel es über dir
+   tat. Er ist der **einzige**, dessen Treue +5 erreichen kann — und der
+   **längste Mitwisser**: Er stand bei jeder Sache dabei, seit du Capitaine
+   warst. Wer alle anderen dreimal ausgetauscht hat, hat immer noch ihn.
+
+   **Daraus ergibt sich die Geometrie, die dieses System trägt:** Der Mann, dem
+   du am meisten vertraust, ist der Mann, der am meisten über dich weiß. Beides
+   wächst aus derselben Zeit, und man kann das eine nicht ohne das andere
+   haben. Das Spiel spricht es nie aus. */
+const VORGANG_MITGEZOGEN = {
+  art:'mitgezogen', kopf:'Wen nimmst du mit',
+  text:u=>`Ein Bataillon ist kein Zug, und die Sergenten bleiben bei der Kompanie. `
+    +`Einen darfst du mitnehmen — der Adjutant fragt es beiläufig, als sei es eine Formsache. `
+    +`Er wird zwei Stufen unter dir aufsteigen und in zehn Jahren immer noch da sein.`,
+  wahlen:u=>u.slice(0,4).map((x,i)=>({
+    label:`${x.posten} ${x.name}`,
+    kosten:`Können ${x.koennen} · Treue ${x.treue>0?'+':''}${x.treue}${x.zustand!=='dienstfähig'?' · '+x.zustand:''}`,
+    tu(){
+      const w = S.unterstellte.find(y=>y.name===x.name);
+      if(w){ w.mit = true; w.satz = 'geht mit dir'; }
+      return `${esc(x.name)} trägt seine Sachen selbst hinüber. Er sagt nichts dazu, und du auch nicht — `
+           + 'es ist die Art von Entscheidung, die man nicht bespricht.';
+    }
+  }))
+};
 
 /* ── Ein Blatt, das auf dem Lager liegt ──
    **Der Schreibtisch ist kein eigener Bildschirm, sondern ein Fenster darüber.**
@@ -13032,7 +13303,7 @@ function schreibtischStellen(n){
 function schreibtischFenster(n){
   const T = LAUF.schreibtisch;
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
-  const v = VORGAENGE[T.offen[0]];
+  const v = vorgangVon(T.offen[0]);
   const alle = v.wahlen(u);
   const offen = alle.filter(w => !w.ab || w.ab());
   const opt = offen.map((w,i)=>
@@ -13055,7 +13326,7 @@ function schreibtischFenster(n){
 function schreibtischTun(i){
   const T = LAUF.schreibtisch;
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
-  const v = VORGAENGE[T.offen[0]];
+  const v = vorgangVon(T.offen[0]);
   const w = v.wahlen(u)[i];
   if(!w || (w.ab && !w.ab())) return;
   /* **Kein Kommentar hinterher.** Der Vorgang sagt, was geschehen ist, und

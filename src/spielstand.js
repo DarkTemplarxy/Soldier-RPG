@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 12;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis
+const LAUF_FASSUNG    = 13;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -205,6 +205,23 @@ const LAUF_WANDLER = {
     if(alt.mann && alt.mann.heimlich === undefined) alt.mann.heimlich = [];
     if(alt.schreibtisch === undefined) alt.schreibtisch = null;
     return Object.assign({}, alt, {fassung:12});
+  },
+  /* Fassung 12 hatte das Verzeichnis, aber noch keine Folgen. Beide Zähler
+     fangen bei null an — **rückwirkend einen Aktenvermerk einzutragen wäre
+     eine Bestrafung für nichts**, und „übergangen" ist ohnehin ein Zustand,
+     der genau einmal eintritt. */
+  12: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.vermerke === undefined) m.vermerke = 0;
+      if(m.uebergangen === undefined) m.uebergangen = false;
+      /* Wer schon über Rang 10 steht, hat die Wahl in dieser Fassung nie
+         bekommen — sie wird ihm nicht nachgereicht, sondern gilt als
+         getroffen. Einen Mitgezogenen rückwirkend zu bestimmen hieße, eine
+         Beziehung zu erfinden, die nie stattgefunden hat. */
+      if(m.mitgewaehlt === undefined) m.mitgewaehlt = (m.rang >= 10);
+    }
+    return Object.assign({}, alt, {fassung:13});
   }
 };
 

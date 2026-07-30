@@ -216,6 +216,10 @@ const LAGER_TUN = {
     tu(){ S.kasseQuartal = true; S.geld += 150;
       S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
       S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 15);
+      /* **Der Sergent, der die Ausgabe macht, weiß, wie viele Paar Schuhe
+         wirklich da waren.** Die Zahl allein war ein Würfel; mit ihm ist es
+         ein Verhältnis. */
+      heimlich('kasse_ueblich','Die Kompaniekasse des Quartals',3,[0]);
       return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger. <span class="fein">+150 F · Einheitszustand +10</span>'; }},
 
   /* ── Ab Rang 11: die Lieferantenverträge ──
@@ -233,6 +237,7 @@ const LAGER_TUN = {
     tu(){ S.kasseQuartal = true; S.geld += 600;
       S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
       S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 35);
+      heimlich('vertrag_still','Der Lieferantenvertrag',3,[0]);
       return 'Er kommt selbst, im eigenen Wagen, und er redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt. <span class="fein">+600 F · Einheitszustand −15</span>'; }},
 
   kasse_voll:{label:'Kräftig zulangen',
@@ -240,6 +245,7 @@ const LAGER_TUN = {
     tu(){ S.kasseQuartal = true; S.geld += 400;
       S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
       S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 40);
+      heimlich('kasse_voll','Die Kasse des dritten Quartals',3,[0,1]);
       return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat. <span class="fein">+400 F · Einheitszustand −10</span>'; }}
 };
 
@@ -317,6 +323,12 @@ function lagerHandlungen(n){
    Satz über die Zurückgebliebenen, und es sagt nicht, ob das schlimm war. */
 function inspektion(){
   if(S.rang<9) return '';
+  /* ── Das Verzeichnis kommt vor der Zahl ──
+     **Ein Risiko mit Mitwissern ist ein Verhältnis, kein Würfel.** Fliegt
+     etwas aus dem Verzeichnis auf, ist das die Meldung dieses Lagers; die
+     Kassen-Zahl darunter bleibt als zweiter, gröberer Weg bestehen. */
+  const ausVerzeichnis = heimlichPruefen();
+  if(ausVerzeichnis) return ausVerzeichnis;
   const z = (S.einheit==null ? (S.einheit=70) : S.einheit);
   const risiko = S.kasseRisiko||0;
   let t = '', ertappt = false;
@@ -531,6 +543,11 @@ const VORGAENGE = [
              + 'Er weiß, dass das ein Gefallen ist.'; }}]}
 ];
 
+/* `'mit'` ist die einmalige Wahl des Mitgezogenen, alles andere ein Index in
+   VORGAENGE. Ein Sonderfall in einer Zeile ist billiger als eine sechste Art,
+   die nur einmal vorkommt. */
+function vorgangVon(k){ return k === 'mit' ? VORGANG_MITGEZOGEN : VORGAENGE[k]; }
+
 /* Wie viele Ausfertigungen es je Art gibt, und welche Vorgänge dieses Lager
    bringt. **Drei Pflichtvorgänge, gezogen aus fünf Arten**, damit zwei Lager
    hintereinander nicht dieselbe Frage stellen. */
@@ -538,6 +555,13 @@ function schreibtischStellen(n){
   unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
   if(S.rang < 9 || u.length < 2) return [];
+  /* **Die Wahl des Mitgezogenen kommt einmal und geht vor.** Sie steht auf
+     demselben Blatt wie alles andere, aber sie ist die einzige, die man nur
+     ein einziges Mal in einer Laufbahn trifft. */
+  if(S.rang >= 10 && !u.some(x=>x.mit) && !S.mitgewaehlt){
+    S.mitgewaehlt = true;
+    return ['mit'];
+  }
   /* Deterministisch aus der Stations-ID, damit ein Beenden und Fortsetzen
      nicht andere Vorgänge liefert — dieselbe Regel wie bei den Ereignissen. */
   const saat = (n.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
@@ -546,6 +570,38 @@ function schreibtischStellen(n){
   for(let k=0;k<3;k++) raus.push(arten[(saat + k*2) % arten.length]);
   return raus.filter((v,i)=>raus.indexOf(v)===i).slice(0,3);
 }
+
+/* ── Der Mitgezogene ──
+   **Einer deiner Unterstellten steigt mit dir. Nicht als Belohnung, als
+   Verhältnis.** Die Wahl steht einmal, beim Aufstieg zu Rang 10, und sie steht
+   auf dem Schreibtisch — mit den Zahlen, die du kennst. Was du nicht siehst,
+   ist, wie lange du ihn brauchen wirst.
+
+   Er rückt immer zwei bis drei Stufen unter dir nach, wie Martel es über dir
+   tat. Er ist der **einzige**, dessen Treue +5 erreichen kann — und der
+   **längste Mitwisser**: Er stand bei jeder Sache dabei, seit du Capitaine
+   warst. Wer alle anderen dreimal ausgetauscht hat, hat immer noch ihn.
+
+   **Daraus ergibt sich die Geometrie, die dieses System trägt:** Der Mann, dem
+   du am meisten vertraust, ist der Mann, der am meisten über dich weiß. Beides
+   wächst aus derselben Zeit, und man kann das eine nicht ohne das andere
+   haben. Das Spiel spricht es nie aus. */
+const VORGANG_MITGEZOGEN = {
+  art:'mitgezogen', kopf:'Wen nimmst du mit',
+  text:u=>`Ein Bataillon ist kein Zug, und die Sergenten bleiben bei der Kompanie. `
+    +`Einen darfst du mitnehmen — der Adjutant fragt es beiläufig, als sei es eine Formsache. `
+    +`Er wird zwei Stufen unter dir aufsteigen und in zehn Jahren immer noch da sein.`,
+  wahlen:u=>u.slice(0,4).map((x,i)=>({
+    label:`${x.posten} ${x.name}`,
+    kosten:`Können ${x.koennen} · Treue ${x.treue>0?'+':''}${x.treue}${x.zustand!=='dienstfähig'?' · '+x.zustand:''}`,
+    tu(){
+      const w = S.unterstellte.find(y=>y.name===x.name);
+      if(w){ w.mit = true; w.satz = 'geht mit dir'; }
+      return `${esc(x.name)} trägt seine Sachen selbst hinüber. Er sagt nichts dazu, und du auch nicht — `
+           + 'es ist die Art von Entscheidung, die man nicht bespricht.';
+    }
+  }))
+};
 
 /* ── Ein Blatt, das auf dem Lager liegt ──
    **Der Schreibtisch ist kein eigener Bildschirm, sondern ein Fenster darüber.**
@@ -558,7 +614,7 @@ function schreibtischStellen(n){
 function schreibtischFenster(n){
   const T = LAUF.schreibtisch;
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
-  const v = VORGAENGE[T.offen[0]];
+  const v = vorgangVon(T.offen[0]);
   const alle = v.wahlen(u);
   const offen = alle.filter(w => !w.ab || w.ab());
   const opt = offen.map((w,i)=>
@@ -581,7 +637,7 @@ function schreibtischFenster(n){
 function schreibtischTun(i){
   const T = LAUF.schreibtisch;
   const u = (S.unterstellte||[]).filter(x=>x.lebt);
-  const v = VORGAENGE[T.offen[0]];
+  const v = vorgangVon(T.offen[0]);
   const w = v.wahlen(u)[i];
   if(!w || (w.ab && !w.ab())) return;
   /* **Kein Kommentar hinterher.** Der Vorgang sagt, was geschehen ist, und

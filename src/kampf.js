@@ -3725,7 +3725,7 @@ function zeigeBefoerderung(n){
 
   const vakanz  = !ziel.vakanz || vakanzStand(ziel.vakanz).tot;
   const fehlt   = fehltWas(ziel);
-  const bekommt = !fehlt && vakanz;
+  let bekommt = !fehlt && vakanz;
 
   /* Der Nachsatz, der die fehlende Zahl beim Namen nennt. Er stand früher
      viermal ausgeschrieben; mit vierzehn Rängen und sieben Schrankenarten wäre
@@ -3739,6 +3739,20 @@ function zeigeBefoerderung(n){
     fehltBulletins:() => `Für den ${esc(ziel.name)} braucht es ${ziel.bulletins} Nennungen im Bulletin — du hast ${S.bulletins|0}.`,
     fehltAdler:   () => `Ein Regiment ohne Adler bekommt keinen Colonel.`
   };
+
+  /* ── Vierter Weg: die Aktenprüfung ──
+     **Jeder Aktenvermerk halbiert die Chance auf den Rang, ab Rang 11.**
+     Oben wird nicht mehr nur gefragt, was einer geleistet hat, sondern auch,
+     was über ihn geschrieben wurde — und Vermerke verjähren nicht.
+
+     Und der dritte Folgegrad wird hier eingelöst: Wer „übergangen" ist, wird
+     genau einmal nicht befördert, **ohne dass es jemand ausspricht.** Es gibt
+     keinen Bildschirm dafür. Es gibt nur eine Musterung, an der nichts
+     passiert. */
+  if(bekommt && ziel.rang >= 11 && (S.vermerke|0) > 0){
+    if(Math.random() < 1 - Math.pow(0.5, S.vermerke)) bekommt = false;
+  }
+  if(bekommt && S.uebergangen){ bekommt = false; S.uebergangen = false; }
 
   let text, klasse = 'schlecht';
   if(bekommt){

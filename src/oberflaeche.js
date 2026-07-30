@@ -225,7 +225,7 @@ function ueberDir(){
       p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
       <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
   };
-  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}`;
+  return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}${verzeichnis()}`;
 }
 
 /* ── Unter dir ──
@@ -238,6 +238,27 @@ function ueberDir(){
    Der Mitgezogene steht zuerst und trägt ein Zeichen — er ist der einzige,
    dessen Treue +5 erreichen kann, und der einzige, der beim Aufstieg
    mitwandert. */
+/* ── Das Verzeichnis ──
+   **Angezeigt wird die Sache und die Zahl der Mitwisser, nie ihre Namen.**
+   Du weißt, was du getan hast und wie viele dabei waren. Nicht, wer davon
+   redet. Das ist die bessere Aufteilung: **Menschen sind lesbar, Vergangenheit
+   ist es nicht** — man kann einschätzen, wem man traut, und trotzdem nicht
+   ausrechnen, was auf dem Spiel steht.
+
+   Der Aktenvermerk steht daneben, weil er nicht verjährt und weil er ab Rang
+   11 die Beförderung halbiert. */
+function verzeichnis(){
+  if(!S || S.rang < 9) return '';
+  const h = (S.heimlich||[]);
+  const v = (S.vermerke|0);
+  if(!h.length && !v) return '';
+  const zeile = x => `<div class="kv"><span class="hilfe" data-hilfe="${
+      String('Schwere '+x.schwere+' von 4. Wer dabei war, steht im Verzeichnis — nicht hier.').replace(/"/g,'&quot;')}">${
+      esc(x.text)}</span><b class="${x.schwere>=3?'warn':''}">${x.mitwisser.length}</b></div>`;
+  return `<p class="mini">Was jemand weiß <span class="fein">Mitwisser</span></p>${h.map(zeile).join('')}${
+    v ? `<div class="kv"><span>Aktenvermerke</span><b class="warn">${v}</b></div>` : ''}`;
+}
+
 function unterDir(){
   unterstellteSetzen();                 // heilt einen von Hand gesetzten Rang
   const u = (S.unterstellte||[]);
