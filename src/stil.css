@@ -185,6 +185,11 @@
   td.d{color:var(--dim)}
   tr.hi td{background:rgba(120,100,70,.14)}
   /* Grün heißt: hier ist etwas dazugekommen */
+  /* Gesperrtes steht da, aber es steht zurück: keine Farbe, keine Wirkung,
+     nur der Satz, unter welcher Bedingung es käme. Der Laden ist damit die
+     Landkarte dessen, was das Spiel noch hat. */
+  tr.gesperrt td{opacity:.42}
+  tr.gesperrt td.k{color:var(--dim);font-style:italic}
   tr.gewaehlt td{background:rgba(62,90,44,.13)}
   tr.gewaehlt td.k{color:var(--green)}
   button.plain.gewaehlt{border-color:var(--green);color:#b6c48d}

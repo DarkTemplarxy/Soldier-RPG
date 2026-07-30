@@ -40,7 +40,23 @@
 
 ---
 
-## 2 · Der Veteran mit 400 VP war einmal schlechter als der mit 160
+## 2 · ✓ Entschieden: es ist die Bot-Formel, nicht das Spiel
+
+> **Geschlossen am 30.07.2026 mit dem `risk`-Zähler** (`balance.js` druckt jetzt „Riskante Wahlen: n von m"). Der Verdacht stand seit Tagen und war richtig:
+>
+> | Bot | riskante Wahlen |
+> |---|---|
+> | Erstlauf, vorsichtig *(80 Läufe)* | **1 %** (153 von 10 973) |
+> | Erstlauf, mutig *(80)* | 6 % (541 von 8 462) |
+> | **Veteran 5800 VP** | **38 %** (411 von 1 086) |
+>
+> **Der reiche Veteran geht achtunddreißigmal so oft ins Risiko wie der vorsichtige Erstläufer — und zwar nicht, weil es klug wäre.** Der Bot bewertet Szenenwahlen nach dem Abstand `Wert − Schwierigkeit` und zieht für riskante 20 ab. Bei Werten über 70 übersteigt eine riskante Wahl auch nach dem Abschlag noch jede sichere, also nimmt er sie fast immer. Ein Mensch mit Konstitution 85 riskiert eine Wunde nicht deshalb, weil er sie sich leisten kann.
+>
+> **Damit ist die frühere Beobachtung erklärt** („der 400er überlebte seltener als der 160er"): Es war kein Balance-Befund, sondern der Bot. Wer die Heuristik anfasst, misst gegen genau diese drei Zahlen — der Abschlag müsste mit dem Wert wachsen, nicht fest bei 20 stehen.
+>
+> **Nicht geändert, und das ist Absicht.** Ein Bot, der Risiken meidet, misst das Strafsystem und nicht das Spiel (Regel 9). Solange die Zahl *danebensteht*, ist sie kein Fehler mehr, sondern eine bekannte Eigenschaft der Messung.
+
+### Der ursprüngliche Befund
 
 **Gemessen nach Kapitel 5:** 23 % gegen 53 %, je 40 Läufe — über vier Standardabweichungen. **Nach Kapitel 6 ist es umgekehrt** (25 gegen 15 %), also möglicherweise erledigt oder möglicherweise Rauschen bei n=40.
 

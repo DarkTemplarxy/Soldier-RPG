@@ -192,6 +192,11 @@
   td.d{color:var(--dim)}
   tr.hi td{background:rgba(120,100,70,.14)}
   /* Grün heißt: hier ist etwas dazugekommen */
+  /* Gesperrtes steht da, aber es steht zurück: keine Farbe, keine Wirkung,
+     nur der Satz, unter welcher Bedingung es käme. Der Laden ist damit die
+     Landkarte dessen, was das Spiel noch hat. */
+  tr.gesperrt td{opacity:.42}
+  tr.gesperrt td.k{color:var(--dim);font-style:italic}
   tr.gewaehlt td{background:rgba(62,90,44,.13)}
   tr.gewaehlt td.k{color:var(--green)}
   button.plain.gewaehlt{border-color:var(--green);color:#b6c48d}
@@ -1519,15 +1524,93 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
    über alle Läufe mit und ist damit dauerhaft — wie die Generalskampagnen. */
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
 
+/* ══════════════════ DER KAUFLADEN ══════════════════
+
+   **Drei Qualitätsleitern, Extras, und die fünf Gewohnheiten.**
+
+   `gruppe:` macht aus Posten eine Leiter: Innerhalb einer Gruppe gibt es
+   **einen** Kauf, und der teurere ersetzt den billigeren, statt danebenzustehen.
+   Was keine Gruppe hat, ist stapelbar — Kleinkram und Gewohnheiten.
+
+   **Jede Stufe kostet mehr und bringt weniger Zuwachs als die davor.** Wer
+   Stufe 4 bezahlt, bezahlt Zuverlässigkeit, keinen Sprung. Stufe 1 ist immer
+   die Ausgabe, die jeder ohnehin bekommt, und steht deshalb nicht im Laden.
+
+   `frei:` schaltet über `META.bestRang` frei — **durch Erreichtes, nie durch
+   Vorrat.** Gesperrtes steht grau mit einem Satz Bedingung da; damit ist der
+   Laden zugleich die Landkarte dessen, was noch kommt. `freiKapitel:` ist
+   dasselbe für eine Kapitelmarke: Die Winterausstattung kann man erst kaufen,
+   wenn man weiß, warum man sie braucht.
+
+   **Der Nebeneffekt ist der Hauptpunkt:** Für 165 VP (Muskete und Schuhe auf
+   Stufe 2) ist ein Erstkäufer spürbar besser ausgerüstet. Vorher begann der
+   Laden praktisch bei 200 — bei einer Erstlauf-Weite von 32 von 163 Stationen
+   war das der falsche Einstiegspreis. */
 const LADEN = [
-  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
-  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  /* ── Die Waffe ── */
+  {id:'muskete_depot',art:'ausr',gruppe:'waffe',stufe:2,label:'Ausgesuchte Muskete aus dem Depot',
+   beschr:'Der Waffenmeister legt drei nebeneinander und nimmt die, deren Lauf gerade ist · +4 Muskete',vp:90},
+  {id:'muskete_gut',art:'ausr',gruppe:'waffe',stufe:3,label:'Sorgfältig eingeschossene Muskete',
+   beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
+  {id:'muskete_manu',art:'ausr',gruppe:'waffe',stufe:4,label:'Manufakturmuskete aus Versailles',
+   beschr:'Sie schießt nicht anders, sie schießt jedes Mal gleich · +12 Muskete, hält einen ganzen Krieg',vp:350},
+  {id:'stutzen',art:'ausr',gruppe:'waffe',frei:2,label:'Gezogener Stutzen',
+   beschr:'Kein Aufstieg, ein anderer Weg: Zielen wird tödlich, schnelles Feuern wertlos · nur für Plänkler',vp:275},
+
+  /* ── Die Schuhe ── */
+  {id:'schuhe_neu',art:'ausr',gruppe:'schuhe',stufe:2,label:'Neue Schuhe, passend',
+   beschr:'Nicht besser gemacht als die Ausgabe, nur nicht von einem anderen getragen',vp:75},
+  {id:'schuhe_gut',art:'ausr',gruppe:'schuhe',stufe:3,label:'Doppelt besohlte Schuhe',
+   beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  {id:'stiefel',art:'ausr',gruppe:'schuhe',stufe:4,label:'Marschstiefel vom Schuster, Maßarbeit',
+   beschr:'Sie gehen kaputt wie alles andere, nur zwei Feldzüge später · und du merkst es viel später',vp:300},
+
+  /* ── Uniform und Mantel ── */
+  {id:'mantel_gut',art:'ausr',gruppe:'mantel',stufe:2,label:'Beutemantel, gewachst',
+   beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
+  {id:'uniform_gut',art:'ausr',gruppe:'mantel',stufe:3,label:'Gute Uniform mit Capote',
+   beschr:'Man sieht einem Mann an, wie ernst er sich nimmt · Mantel und +4 Autorität',vp:250},
+  {id:'winter',art:'ausr',gruppe:'mantel',stufe:4,freiKapitel:'eylau',label:'Winterausstattung: Tuch und Pelz',
+   beschr:'Der Kauf, den man erst versteht, wenn man einmal ohne dagestanden hat · Frost eine Stufe milder',vp:375},
+
+  /* ── Die Seitenwaffe ── */
+  {id:'bajonett_gut',art:'ausr',gruppe:'seitenwaffe',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
+  {id:'sabre',art:'ausr',gruppe:'seitenwaffe',frei:2,label:'Sabre briquet',
+   beschr:'Der kurze Säbel der Elitekompanien · +4, und ab dem Patent zählt er als gepflegter Säbel',vp:125},
+  {id:'degen',art:'ausr',gruppe:'seitenwaffe',frei:7,label:'Offiziersdegen',
+   beschr:'Zum Angesehenwerden und einmal je Gefecht zu etwas anderem · „Den Degen ziehen" +6',vp:175},
+
+  /* ── Tornister ── */
   {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:120},
-  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
-  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
-  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
-  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+
+  /* ── Kleinkram, stapelbar ── */
   {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:60},
+  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
+  {id:'schreibzeug',art:'ausr',label:'Schreibzeug',
+   beschr:'Feder, Tinte, ein Bogen zum Üben · Bildung wächst schneller — der kürzeste Weg zur Offiziersschwelle',vp:75},
+  {id:'uhr',art:'ausr',frei:5,label:'Taschenuhr',
+   beschr:'Wer die Zeit hat, hat die Salve · +4 auf Drill-Proben im Gefecht',vp:90},
+  {id:'besteck',art:'ausr',label:'Chirurgenbesteck',
+   beschr:'+5 Feldchirurgie, und am Verbandsplatz hilft es wirklich',vp:100},
+  {id:'fernrohr',art:'ausr',frei:7,label:'Fernrohr',
+   beschr:'Es zeigt, was sonst nur gemeldet wird — im Sturm, auf der Skizze, auf der Karte · +4 Taktik',vp:150},
+
+  /* ── Geld ── */
+  {id:'geld',art:'geld',gruppe:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+  {id:'geld_gross',art:'geld',gruppe:'geld',frei:9,label:'200 Francs Startgeld',
+   beschr:'Genug, um eine Kompanie zu beschuhen, ohne die Kasse anzurühren',vp:225},
+
+  /* ── Papiere ── */
+  {id:'empfehlung',art:'ausr',frei:4,label:'Empfehlungsschreiben',
+   beschr:'Ein Brief von jemandem, den der Capitaine kennt · er öffnet eine Tür, mehr nicht',vp:150},
+
+  /* ── Das Pferd ── */
+  {id:'pferd_land',art:'ausr',gruppe:'pferd',frei:7,label:'Landpferd',
+   beschr:'Kein schönes Tier, aber du gehst nicht mehr zu Fuß · Marsch kostet 40 % weniger · 15 F je Kapitel',vp:200},
+  {id:'pferd_kav',art:'ausr',gruppe:'pferd',frei:9,label:'Kavalleriepferd',
+   beschr:'Es bleibt stehen, wenn geschossen wird, und das ist der ganze Unterschied · 30 F je Kapitel',vp:375},
+  {id:'pferd_voll',art:'ausr',gruppe:'pferd',frei:11,label:'Vollblut',
+   beschr:'Man sieht dich von weitem. Das ist der Vorteil und der Preis · Ruf +1 je Gefecht, +2 Gefahr · 60 F je Kapitel',vp:600},
 
   /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
 
@@ -1567,6 +1650,44 @@ const LADEN = [
 /* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
    gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */
 function zaeh(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }
+/* Dasselbe für jeden anderen Posten. `zaeh()` bleibt als eigener Name stehen,
+   weil an seinen sechs Stellen die Absicht mitgelesen wird. */
+function gekauft(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }
+
+/* ── Freigeschaltet wird durch Erreichtes, nie durch Vorrat ──
+   `frei:` prüft gegen `META.bestRang` (läuft dauerhaft über alle Läufe),
+   `freiKapitel:` gegen die betretenen Kapitel. **Ein Posten, den man sich
+   kaufen kann, weil man reich ist, wäre keine Freischaltung, sondern ein
+   Preisschild.**
+
+   Gesperrtes wird **angezeigt**, nicht versteckt: Der Laden ist die einzige
+   Stelle, an der ein Spieler sieht, was das Spiel noch hat. */
+function ladenFrei(p){
+  const m = (typeof META==='object' && META) ? META : null;
+  if(p.frei && (!m || (m.bestRang|0) < p.frei)) return false;
+  if(p.freiKapitel && !(m && m.bestKapitel && m.bestKapitel[p.freiKapitel])) return false;
+  return true;
+}
+function ladenBedingung(p){
+  if(p.frei){
+    const r = RANG.find(x=>x.n===p.frei);
+    return 'Erst, wenn du einmal ' + (r ? r.name : 'Rang '+p.frei) + ' warst.';
+  }
+  if(p.freiKapitel){
+    const k = KAMPAGNEN.find(x=>x.id===p.freiKapitel);
+    return 'Erst, wenn du ' + (k ? k.name+' '+k.jahre : p.freiKapitel) + ' gesehen hast.';
+  }
+  return '';
+}
+/* Die Leitern des Ladens, in der Reihenfolge, in der sie angezeigt werden. */
+const LADEN_GRUPPEN = [
+  ['waffe','Die Waffe','je ein Kauf · der teurere ersetzt den billigeren'],
+  ['schuhe','Die Schuhe','der Posten, den jeder zuletzt kauft und zuerst braucht'],
+  ['mantel','Uniform und Mantel','was zwischen dir und der Nacht steht'],
+  ['seitenwaffe','Die Seitenwaffe','einmal je Laufbahn wichtig, und dann sehr'],
+  ['geld','Bares','was in der Tasche ist, wenn der Marketender kommt'],
+  ['pferd','Das Pferd','ab dem Patent — und in Russland wird es gegessen']
+];
 
 
 'use strict';
@@ -5816,13 +5937,43 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const ausr = AUSRUESTUNG_START();
   const hoch = (k,n)=>{ fert[k] = Math.min(100, fert[k] + n); };
   let geld = 4;
+  const hochAttr = (k,n)=>{ attr[k] = Math.min(100, (attr[k]||0) + n); };
   (kaeufe||[]).forEach(id=>{
+    /* ── Die Waffe ── Jede Stufe kostet mehr und bringt weniger Zuwachs. */
+    if(id==='muskete_depot'){ ausr.muskete={name:'Ausgesuchte Muskete',zustand:85,verschleiss:14}; hoch('muskete',4); }
     if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+    if(id==='muskete_manu'){ ausr.muskete={name:'Manufakturmuskete, Versailles',zustand:100,verschleiss:10}; hoch('muskete',12); }
+    /* Der Stutzen ist kein Aufstieg, sondern ein anderer Weg: Er lädt
+       langsamer und trifft weiter. Der Abschlag auf das schnelle Feuern steht
+       in `kampfAktion()`, nicht hier. */
+    if(id==='stutzen'){ ausr.muskete={name:'Gezogener Stutzen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+
+    /* ── Die Seitenwaffe ── */
     if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; hoch('bajonett',5); }
+    if(id==='sabre'){ ausr.seitenwaffe={name:'Sabre briquet',zustand:95,verschleiss:7}; hoch('bajonett',4); }
+    if(id==='degen'){ ausr.seitenwaffe={name:'Offiziersdegen',zustand:95,verschleiss:6}; hoch('bajonett',4); }
+
+    /* ── Die Schuhe ── Stufe 4 verschiebt zusätzlich die Schwelle, ab der
+       kaputte Schuhe die Konstitution kosten (siehe `wert()`). */
+    if(id==='schuhe_neu'){ ausr.schuhe={name:'Neue Schuhe, passend',zustand:80,verschleiss:20}; }
     if(id==='schuhe_gut'){ ausr.schuhe={name:'Doppelt besohlte Schuhe',zustand:100,verschleiss:12}; }
+    if(id==='stiefel'){ ausr.schuhe={name:'Marschstiefel, Maßarbeit',zustand:100,verschleiss:8}; }
+
     if(id==='tornister_gut'){ ausr.tornister={name:'Verstärkter Tornister',zustand:100,verschleiss:8}; }
+
+    /* ── Uniform und Mantel ── */
     if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
+    if(id==='uniform_gut'){ ausr.mantel={name:'Capote zur guten Uniform',zustand:95,verschleiss:6}; hochAttr('autoritaet',4); }
+    if(id==='winter'){ ausr.mantel={name:'Pelzgefütterter Mantel',zustand:95,verschleiss:6}; hochAttr('autoritaet',4); }
+
+    /* ── Kleinkram ── */
+    if(id==='amulett'){ hochAttr('kaltbluetigkeit',5); }
+    if(id==='besteck'){ hoch('feldchirurgie',5); }
+    if(id==='fernrohr'){ hoch('taktik',4); }
+
+    /* ── Bares ── */
     if(id==='geld'){ geld += 50; }
+    if(id==='geld_gross'){ geld += 200; }
   });
   const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
@@ -5991,7 +6142,9 @@ function wert(k){
   else S.wunden.forEach(w=>{ v -= Math.round((w.abzug||0)/3); });
   v -= Math.floor(S.belastung/12);
   if(k==='muskete' && S.ausr.muskete.zustand < 35) v -= 15;
-  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) v -= 18;
+  /* Maßstiefel verschieben die Schwelle von 25 auf 15 — sie gehen kaputt wie
+     alles andere, nur merkt man es viel später. */
+  if(k==='konstitution' && S.ausr.schuhe.zustand < (gekauft('stiefel') ? 15 : 25)) v -= 18;
   return Math.max(1, Math.round(v));
 }
 
@@ -6008,7 +6161,7 @@ function abzugGrund(k){
   const bel = Math.floor(S.belastung/12);
   if(bel) g.push(`Belastung −${bel}`);
   if(k==='muskete' && S.ausr.muskete.zustand < 35) g.push('verrostete Muskete −15');
-  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) g.push('zerrissene Schuhe −18');
+  if(k==='konstitution' && S.ausr.schuhe.zustand < (gekauft('stiefel') ? 15 : 25)) g.push('zerrissene Schuhe −18');
   return g;
 }
 
@@ -6198,6 +6351,11 @@ function nutzen(k, intens, fechtboden){
      die einzige Quelle, und sie kostet einen Abend, den man nicht auf Listen,
      Kasse oder Drill verwendet. Sie umgeht diese Sperre über `fechten:true`. */
   if(k==='bajonett' && S.rang>=7 && !fechtboden) return;
+  /* „Schreibzeug." Der billigste strategische Kauf des Ladens: Bildung ist
+     die Schwelle zum Fourrier (35) und zum Sous-Lieutenant (50), und sie
+     wächst nur im Lager. Eine Intensität mehr verkürzt den Weg dorthin um
+     etwa ein Kapitel — sie kauft keine Bildung, sondern Zeit. */
+  if(k==='bildung' && gekauft('schreibzeug')) intens += 1;
   const zuwachs = (1.7 * intens * (100-ist)/100) * (0.5 + Math.random());
   if(Math.random() < 0.75){
     const neu = Math.min(100, ist + Math.max(1, Math.round(zuwachs)));
@@ -6353,7 +6511,12 @@ function frostWirken(n){
      Gewohnte im Januar bei Stufe 4 eine zehrende Wunde schuldig. Es ist die
      Erfahrung, die daneben steht: wo man liegt, wie man sich einwickelt,
      wann man aufsteht und geht, statt liegen zu bleiben. */
-  const stufe = Math.max(0, ((n && n.frost) | 0) - (zaeh('zaeh_schlaf') ? 1 : 0));
+  /* Die Winterausstattung mildert ebenfalls eine Stufe. **Beides zusammen
+     mildert nicht zwei** — sonst wäre Russland mit zwei Käufen abgeschaltet,
+     und Frost 4 an der Beresina ist die eigene Regel von Kapitel 6 und 8.
+     Wer beides hat, hat die Sicherheit, nicht die doppelte Wirkung. */
+  const milder = (zaeh('zaeh_schlaf') || gekauft('winter')) ? 1 : 0;
+  const stufe = Math.max(0, ((n && n.frost) | 0) - milder);
   const hat = S.wunden.some(w => w.name === FROST_WUNDE);
   if(!stufe){
     if(!hat) return '';
@@ -6957,10 +7120,27 @@ function patentKarte(){
 function zeigeLaden(){
   if(!ERSCH || !ERSCH.herkunft){ zeigeErschaffung(); return; }
   AUSWAHL = []; PUNKTE = {};
-  const kaufZeile = p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
-    <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
-    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`;
-  const zeilen  = LADEN.filter(p=>p.art!=='zaeh').map(kaufZeile).join('');
+  /* **Gesperrtes bekommt den Bedingungssatz statt der Wirkung.** Der Laden ist
+     die Landkarte dessen, was noch kommt — wer nicht weiß, wofür er spielt,
+     spielt auf nichts hin. */
+  const kaufZeile = p=>{
+    const frei = ladenFrei(p);
+    return `<tr id="kz_${p.id}"${frei?'':' class="gesperrt"'}><td class="k">${p.label}</td>
+      <td class="d">${frei ? p.beschr : '<span class="fein">'+ladenBedingung(p)+'</span>'}</td>
+      <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
+      onclick="waehle('${p.id}')" id="kb_${p.id}"${frei?'':' disabled'}>${frei?'wählen':'gesperrt'}</button></td></tr>`;
+  };
+  const kopf = `<tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>`;
+  /* Die drei Leitern und die drei Einzelgruppen, jede als eigene Tabelle mit
+     einem Satz darüber. Eine einzige Liste aus achtundzwanzig Posten wäre
+     wieder das, was der Laden vor dieser Sitzung war. */
+  const leitern = LADEN_GRUPPEN.map(([g,titel,unter])=>{
+    const teile = LADEN.filter(p=>p.gruppe===g);
+    if(!teile.length) return '';
+    return `<div class="card"><div class="ch"><span>${titel}</span><span>${unter}</span></div>
+      <div class="cb"><table>${kopf}${teile.map(kaufZeile).join('')}</table></div></div>`;
+  }).join('');
+  const zeilen  = LADEN.filter(p=>p.art!=='zaeh' && !p.gruppe).map(kaufZeile).join('');
   const zeilenZ = LADEN.filter(p=>p.art==='zaeh').map(kaufZeile).join('');
   const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft);
   app.innerHTML = `
@@ -6985,9 +7165,11 @@ function zeigeLaden(){
 
   ${patentKarte()}
 
-  <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
+  ${leitern}
+
+  <div class="card"><div class="ch"><span>Kleinkram und Papiere</span><span>stapelbar · das Billigste ist oft das Klügste</span></div>
    <div class="cb">
-    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+    <table>${kopf}${zeilen}</table>
    </div></div>
 
   <div class="card"><div class="ch"><span>Was ein Mann behält</span><span>nicht Kraft, sondern Gewohnheit</span></div>
@@ -7001,11 +7183,20 @@ function zeigeLaden(){
   aktualisiereLaden();
 }
 function waehle(id){
+  const p = LADEN.find(x=>x.id===id);
+  if(p && !ladenFrei(p)) return;                 // gesperrt bleibt gesperrt
   const i = AUSWAHL.indexOf(id);
   if(i>=0) AUSWAHL.splice(i,1);
   else {
     // Höchstens ein Patent: das zweite ersetzt das erste, statt danebenzustehen.
     if(patentVon(id)) AUSWAHL = AUSWAHL.filter(x=>!patentVon(x));
+    /* ── Je Leiter ein Kauf ──
+       **Der teurere ersetzt den billigeren, statt danebenzustehen.** Zwei
+       Musketen trägt niemand, und ein Laden, in dem man Stufe 2 und Stufe 4
+       nebeneinander kauft, ist kein Laden, sondern eine Liste. Wer klickt,
+       wählt damit die Stufe — er muss nichts abwählen. */
+    if(p && p.gruppe) AUSWAHL = AUSWAHL.filter(x=>{
+      const q = LADEN.find(y=>y.id===x); return !q || q.gruppe !== p.gruppe; });
     AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop();
   }
   aktualisiereLaden();
@@ -7024,6 +7215,16 @@ function aktualisiereLaden(){
   LADEN.concat(PATENTE.filter(patentFrei)).forEach(p=>{
     const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
     if(!b || !z) return;
+    /* Gesperrtes ist im Laden **sichtbar**, nicht versteckt: Er ist die
+       einzige Stelle, an der man sieht, was das Spiel noch hat. */
+    if(p.frei !== undefined && !patentVon(p.id) && !ladenFrei(p)){
+      b.textContent = 'gesperrt'; b.disabled = true;
+      z.className = 'gesperrt'; b.className = 'plain'; return;
+    }
+    if(p.freiKapitel && !ladenFrei(p)){
+      b.textContent = 'gesperrt'; b.disabled = true;
+      z.className = 'gesperrt'; b.className = 'plain'; return;
+    }
     const drin = AUSWAHL.includes(p.id);
     b.textContent = drin?'gewählt':'wählen';
     b.disabled = !drin && p.vp>rest;
@@ -7831,6 +8032,16 @@ function zeigeUebergang(n){
     S.leben = lebenMax();
     S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
+    /* ── Der Unterhalt des Pferdes ──
+       Er wird am Übergang fällig, also einmal je Feldzug, und er ist der
+       Grund, warum ein Pferd eine Entscheidung ist: 60 Francs für das Vollblut
+       sind mehr, als ein Fusilier in drei Kapiteln Sold sieht. Wer nicht
+       zahlen kann, verliert es — die Armee füttert kein Privatpferd. */
+    const uh = pferdUnterhalt();
+    if(uh){
+      if(S.geld >= uh){ S.geld -= uh; LAUF.pferdKosten = uh; }
+      else { S.pferdWeg = true; LAUF.pferdKosten = -1; }
+    }
     laufSichern();
   }
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -7839,6 +8050,10 @@ function zeigeUebergang(n){
         <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
         <div class="wirkung"><span>Zwischenstand</span>
           ${rangName(S.rang)} · Ruf ${S.ruf} · ${stationen()} Stationen · ${S.nennungen}× im Tagesbefehl</div>
+        ${LAUF.pferdKosten ? `<div class="wirkung"><span>Das Pferd</span>${
+          LAUF.pferdKosten > 0
+            ? 'Hafer, Hufeisen, ein Sattler, der zweimal ausbessert. <b>−'+francs(LAUF.pferdKosten)+' F</b>'
+            : 'Du kannst es nicht mehr füttern. Der Train nimmt es, und man gibt dir einen Schein, den niemand einlöst. <b>Das Pferd ist weg.</b>'}</div>` : ''}
         <div class="wirkung"><span>Ein Jahr Garnison</span>
           Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.
           <b>Konstitution +3:</b> Der Körper hat sich an das Marschieren gewöhnt, an das Schlafen im Nassen und daran, mit wenig auszukommen.</div>
@@ -8466,7 +8681,15 @@ function starteKampf(n){
        Laden ohne jede Wirkung — 24 Veteranenpunkte für eine Zahl, die niemand
        abfragte. Wer bei Akkon 8 Atem verliert statt 4, merkt den Unterschied. */
     const tornister = S.kaeufe.includes('tornister_gut') ? 0.5 : 1;
-    S.atem = Math.max(0, S.atem - Math.round(ak.atem*tornister));
+    /* ── Das Pferd ──
+       **Marschermüdung −40 % beim Landpferd, −60 % darüber.** Es ist der
+       teuerste Kauf des Ladens und der einzige, der laufend Geld kostet
+       (Unterhalt je Kapitel, siehe `pferdUnterhalt()`) — ein Offizier stellte
+       sich sein Pferd selbst, und ein Pferd frisst jeden Tag.
+
+       In Russland wird es gegessen, auch das gekaufte. Das steht nicht hier,
+       sondern in `kapitel08_russland.js`, wo es hingehört. */
+    S.atem = Math.max(0, S.atem - Math.round(ak.atem*tornister*pferdFaktor()));
     S.belastung = Math.min(100, S.belastung+ak.belastung);
     atemKlemmen();
     laufSichern();
@@ -9350,9 +9573,52 @@ function schaetzung(ist, max){
        : a > 0.08 ? 'KAUM NOCH ETWAS'
                   : 'NICHTS MEHR, SOWEIT MAN SIEHT';
 }
+/* ── Das Fernrohr ──
+   **Der Informationskauf, und der einzige, der gegen die Meldungsunsicherheit
+   der oberen Ränge hilft.** Es macht aus einer Schätzung eine Zahl: im Sturm
+   von Eylau, auf der Karte des Generals. Es nimmt dem vierten Bruch nicht
+   seine Aussage — der Feind bleibt weit weg und die Meldung bleibt alt —,
+   aber es zeigt, was der Mann mit dem Glas wirklich sieht. */
+/* ── Die Taschenuhr ──
+   **Wer die Zeit hat, hat die Salve.** Eine Salve ist eine Frage von Sekunden:
+   Der Unterschied zwischen hundert Musketen und hundert einzelnen Schüssen ist
+   das gemeinsame Kommando. Deshalb hebt die Uhr genau die Proben, die im
+   Gefecht auf Drill gehen — und nur die, und nur im Gefecht.
+
+   Sie steht als eigene Funktion da, weil sechs Stellen `probe('drill', n)`
+   rufen und eine siebte dazukommen wird. Ein Bonus, den man an sechs Stellen
+   von Hand mitziehen muss, wird an der siebten vergessen. */
+function drillProbe(schw){ return probe('drill', schw - (gekauft('uhr') ? 4 : 0)); }
+
+/* ── Das Vollblut ──
+   **Man sieht dich von weitem. Das ist der Vorteil und der Preis.** Ein
+   Offizier auf einem auffallenden Pferd wird gesehen — von den eigenen Leuten,
+   die daraufhin stehen bleiben, und von denen, die zielen. Es ist der einzige
+   Kauf im Laden, der Ruf bringt und dafür Gefahr kostet. */
+function pferdGefahr(){ return gekauft('pferd_voll') ? 2 : 0; }
+/* Wie viel vom Marsch übrig bleibt. Ein Pferd nutzt erst ab Rang 7 etwas —
+   davor reitet kein Fusilier, auch wenn er ein Pferd besitzt. */
+function pferdFaktor(){
+  if(!S || S.rang < 7 || S.pferdWeg) return 1;
+  if(gekauft('pferd_kav') || gekauft('pferd_voll')) return 0.4;
+  if(gekauft('pferd_land')) return 0.6;
+  return 1;
+}
+/* Der Unterhalt, fällig am Kapitelende. Er ist der Grund, warum ein Pferd
+   eine Entscheidung ist und kein Geschenk. */
+function pferdUnterhalt(){
+  if(!S || S.pferdWeg) return 0;
+  return gekauft('pferd_voll') ? 60 : gekauft('pferd_kav') ? 30 : gekauft('pferd_land') ? 15 : 0;
+}
+
 function feindAnzeige(n){
-  if(S.rang >= 12) return '· DER FEIND: SIEHE MELDUNG';
-  if(n && n.sturm) return '· DER FEIND: ' + schaetzung(K.feindMoral, n.feindMoral);
+  const glas = gekauft('fernrohr');
+  if(S.rang >= 12) return glas
+    ? '· GEZÄHLT IM GLAS: ' + Math.max(0, Math.round(K.feindMoral))
+    : '· DER FEIND: SIEHE MELDUNG';
+  if(n && n.sturm) return glas
+    ? '· IM GLAS: ' + Math.max(0, Math.round(K.feindMoral))
+    : '· DER FEIND: ' + schaetzung(K.feindMoral, n.feindMoral);
   return '· WIDERSTAND DES FEINDES ' + Math.max(0, Math.round(K.feindMoral));
 }
 
@@ -9928,10 +10194,17 @@ function kampfAktion(id){
   }
   else if(id==='feuern' || id==='zielen'){
     const sorgfalt = (id==='zielen');
-    const p = probe('muskete', sorgfalt? 20 : 35);
+    /* ── Der gezogene Stutzen ──
+       **Ein Spielstil, kein Aufstieg.** Die Züge im Lauf machen den gezielten
+       Schuss auf zweihundert Schritt möglich und das Laden doppelt so
+       umständlich: Wer schnell feuert, feuert damit schlechter als mit der
+       Ausgabemuskete. Er lohnt sich für den Plänkler, der ohnehin zielt, und
+       bestraft jeden, der in der Linie steht und mitschießt. */
+    const stutzen = gekauft('stutzen');
+    const p = probe('muskete', sorgfalt? 20 : (stutzen ? 43 : 35));
     K.geladen = false;
     S.atem = Math.max(0, S.atem - (sorgfalt?10:5));
-    if(p.erfolg){ schaden = sorgfalt? 22+Math.random()*10 : 12+Math.random()*8;
+    if(p.erfolg){ schaden = sorgfalt? (stutzen?28:22)+Math.random()*10 : 12+Math.random()*8;
       text = (sorgfalt? 'Du liegst still, atmest aus und drückst ab. Drüben fällt einer, und du weißt, dass er dir gehört.'
                       : 'Du feuerst in den Rauch. Irgendetwas drüben gerät in Unordnung.')
            + anerkennung(sorgfalt?2:1, sorgfalt?'Ein gezielter Schuss, der saß':'Getroffen'); }
@@ -10001,7 +10274,7 @@ function kampfAktion(id){
     /* Der Unterschied zum Hinknien: Das dort schützt dich, das hier deine
        Leute. Die geschlossene Linie hält drei Runden lang die halben Verluste
        aus, und das erste Mal je Gefecht sieht es jemand, der Listen führt. */
-    const p = probe('drill', 35);
+    const p = drillProbe(35);
     if(p.erfolg){
       gefahrMod = -8; K.geschlossen = 3;
       S.kameradschaft = Math.min(100, S.kameradschaft+4);
@@ -10027,7 +10300,7 @@ function kampfAktion(id){
       text = 'Dein Kommando kommt eine Sekunde zu spät, und die Sektion feuert einzeln. Zwanzig Schüsse nacheinander sind zwanzig Gelegenheiten für die andere Seite.'; }
   }
   else if(id==='glieder'){
-    const p = probe('drill', 40);
+    const p = drillProbe(40);
     if(p.erfolg){ K.geschlossen = 3; schaden = 8;
       text = 'Erstes Glied kniet, zweites tritt durch. Es dauert acht Sekunden, in denen niemand schießt, und danach steht vorn, wer noch Pulver hat.'; }
     else { text = 'Der Wechsel gerät durcheinander, und für einen Moment stehen alle zwanzig ohne Ordnung im Freien.'; K.sektion = Math.max(0,(K.sektion||100)-8); }
@@ -10046,7 +10319,7 @@ function kampfAktion(id){
      leistet — er schießt *durchgehend*, während ein einzelner Mann die Hälfte
      der Zeit lädt. Deshalb wirkt er auch in der Runde, in der man nichts tut. */
   else if(id==='zugfeuer'){
-    const p = probe('drill', 45);
+    const p = drillProbe(45);
     const anteil = Math.max(0.35, (K.sektion||100)/100);
     if(p.erfolg){ schaden = (30 + Math.random()*12) * anteil; K.rollend = 3; nutzen('autoritaet',1);
       text = 'Erste Sektion Feuer, zweite Sektion Feuer, dritte Sektion Feuer, erste wieder geladen. Es hört nicht auf, und das ist der ganze Unterschied: Ein Mann schießt jede zweite Minute, ein Zug schießt immer.'
@@ -10063,7 +10336,7 @@ function kampfAktion(id){
       K.sektion = Math.max(0,(K.sektion||100)-6); }
   }
   else if(id==='halten_sektion'){
-    const p = probe('drill', 40);
+    const p = drillProbe(40);
     if(p.erfolg){ gefahrMod = -6; K.geschlossen = 3;
       K.sektion = Math.min(100,(K.sektion||100)+4);
       let lob = '';
@@ -10103,7 +10376,7 @@ function kampfAktion(id){
     else { text = 'Was von hier aus wie eine Senke aussah, ist eine Mulde von vierzig Schritt, die an beiden Enden offen liegt. Der Zug steht darin wie in einer Schüssel.'; gefahrMod = +6; }
   }
   else if(id==='frontverkuerzen'){
-    const p = probe('drill', 45);
+    const p = drillProbe(45);
     if(p.erfolg){ K.geschlossen = 3; K.sektion = Math.min(100,(K.sektion||100)+5);
       text = 'Von drei Sektionen auf zwei, das rechte Ende zieht nach innen. Die Front ist kürzer, die Wand ist dichter, und die Lücken, durch die es vorhin hereinkam, sind zu.'; }
     else { text = 'Der Befehl geht durch, und dann steht das rechte Ende an zwei Stellen doppelt und an einer gar nicht. Es dauert eine Minute, das aufzulösen, und in der Minute wird geschossen.';
@@ -10114,7 +10387,10 @@ function kampfAktion(id){
        Offizier mit gezogenem Degen ist auf dreihundert Schritt zu erkennen —
        von den eigenen Leuten und von denen, die zielen. */
     K.degenGezogen = true; K.deckung = false;
-    const p = probe('kaltbluetigkeit', 50);
+    /* Der gekaufte Offiziersdegen zahlt genau hier — an der einzigen Stelle,
+       an der ein Offizier seine Klinge überhaupt zeigt. Ein Stück, das man
+       selbst bezahlt hat, hält man anders. */
+    const p = probe('kaltbluetigkeit', 50 - (gekauft('degen') ? 6 : 0));
     gefahrMod = +20;
     if(p.erfolg){ K.zugHaelt = true; schaden = 14;
       text = 'Du ziehst den Degen und hältst ihn hoch, und danach geht niemand mehr zurück. Es ist kein Befehl. Es ist nur etwas, das jeder sehen kann, und in einem Gefecht ist das mehr wert als ein Befehl.'
@@ -10512,6 +10788,7 @@ function kampfAktion(id){
      auch inhaltlich das Richtige: **Der Feind wird nicht besser, weil du ein
      Patent gekauft hast. Du bist schlechter.** */
   if(S.patent) gefahr += 2;
+  gefahr += pferdGefahr();
   /* Wer im Gelände liegt, wird schlechter getroffen — drei Runden lang. */
   if(K.gelaendeVorteil > 0) gefahr -= 12;
   /* Ein Höhepunkt ist nicht nur teurer, sondern auch dichter: +3 Trefferchance

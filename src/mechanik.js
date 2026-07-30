@@ -325,13 +325,43 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
   const ausr = AUSRUESTUNG_START();
   const hoch = (k,n)=>{ fert[k] = Math.min(100, fert[k] + n); };
   let geld = 4;
+  const hochAttr = (k,n)=>{ attr[k] = Math.min(100, (attr[k]||0) + n); };
   (kaeufe||[]).forEach(id=>{
+    /* ── Die Waffe ── Jede Stufe kostet mehr und bringt weniger Zuwachs. */
+    if(id==='muskete_depot'){ ausr.muskete={name:'Ausgesuchte Muskete',zustand:85,verschleiss:14}; hoch('muskete',4); }
     if(id==='muskete_gut'){ ausr.muskete={name:'Modell 1777 An IX, eingeschossen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+    if(id==='muskete_manu'){ ausr.muskete={name:'Manufakturmuskete, Versailles',zustand:100,verschleiss:10}; hoch('muskete',12); }
+    /* Der Stutzen ist kein Aufstieg, sondern ein anderer Weg: Er lädt
+       langsamer und trifft weiter. Der Abschlag auf das schnelle Feuern steht
+       in `kampfAktion()`, nicht hier. */
+    if(id==='stutzen'){ ausr.muskete={name:'Gezogener Stutzen',zustand:95,verschleiss:12}; hoch('muskete',8); }
+
+    /* ── Die Seitenwaffe ── */
     if(id==='bajonett_gut'){ ausr.seitenwaffe={name:'Geschliffenes Bajonett',zustand:95,verschleiss:8}; hoch('bajonett',5); }
+    if(id==='sabre'){ ausr.seitenwaffe={name:'Sabre briquet',zustand:95,verschleiss:7}; hoch('bajonett',4); }
+    if(id==='degen'){ ausr.seitenwaffe={name:'Offiziersdegen',zustand:95,verschleiss:6}; hoch('bajonett',4); }
+
+    /* ── Die Schuhe ── Stufe 4 verschiebt zusätzlich die Schwelle, ab der
+       kaputte Schuhe die Konstitution kosten (siehe `wert()`). */
+    if(id==='schuhe_neu'){ ausr.schuhe={name:'Neue Schuhe, passend',zustand:80,verschleiss:20}; }
     if(id==='schuhe_gut'){ ausr.schuhe={name:'Doppelt besohlte Schuhe',zustand:100,verschleiss:12}; }
+    if(id==='stiefel'){ ausr.schuhe={name:'Marschstiefel, Maßarbeit',zustand:100,verschleiss:8}; }
+
     if(id==='tornister_gut'){ ausr.tornister={name:'Verstärkter Tornister',zustand:100,verschleiss:8}; }
+
+    /* ── Uniform und Mantel ── */
     if(id==='mantel_gut'){ ausr.mantel={name:'Beutemantel, gewachst',zustand:90,verschleiss:8}; }
+    if(id==='uniform_gut'){ ausr.mantel={name:'Capote zur guten Uniform',zustand:95,verschleiss:6}; hochAttr('autoritaet',4); }
+    if(id==='winter'){ ausr.mantel={name:'Pelzgefütterter Mantel',zustand:95,verschleiss:6}; hochAttr('autoritaet',4); }
+
+    /* ── Kleinkram ── */
+    if(id==='amulett'){ hochAttr('kaltbluetigkeit',5); }
+    if(id==='besteck'){ hoch('feldchirurgie',5); }
+    if(id==='fernrohr'){ hoch('taktik',4); }
+
+    /* ── Bares ── */
     if(id==='geld'){ geld += 50; }
+    if(id==='geld_gross'){ geld += 200; }
   });
   const mann = {
     name, herkunft:h.name, herkunftId, attr, fert, ausr, geld,
@@ -500,7 +530,9 @@ function wert(k){
   else S.wunden.forEach(w=>{ v -= Math.round((w.abzug||0)/3); });
   v -= Math.floor(S.belastung/12);
   if(k==='muskete' && S.ausr.muskete.zustand < 35) v -= 15;
-  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) v -= 18;
+  /* Maßstiefel verschieben die Schwelle von 25 auf 15 — sie gehen kaputt wie
+     alles andere, nur merkt man es viel später. */
+  if(k==='konstitution' && S.ausr.schuhe.zustand < (gekauft('stiefel') ? 15 : 25)) v -= 18;
   return Math.max(1, Math.round(v));
 }
 
@@ -517,7 +549,7 @@ function abzugGrund(k){
   const bel = Math.floor(S.belastung/12);
   if(bel) g.push(`Belastung −${bel}`);
   if(k==='muskete' && S.ausr.muskete.zustand < 35) g.push('verrostete Muskete −15');
-  if(k==='konstitution' && S.ausr.schuhe.zustand < 25) g.push('zerrissene Schuhe −18');
+  if(k==='konstitution' && S.ausr.schuhe.zustand < (gekauft('stiefel') ? 15 : 25)) g.push('zerrissene Schuhe −18');
   return g;
 }
 
@@ -707,6 +739,11 @@ function nutzen(k, intens, fechtboden){
      die einzige Quelle, und sie kostet einen Abend, den man nicht auf Listen,
      Kasse oder Drill verwendet. Sie umgeht diese Sperre über `fechten:true`. */
   if(k==='bajonett' && S.rang>=7 && !fechtboden) return;
+  /* „Schreibzeug." Der billigste strategische Kauf des Ladens: Bildung ist
+     die Schwelle zum Fourrier (35) und zum Sous-Lieutenant (50), und sie
+     wächst nur im Lager. Eine Intensität mehr verkürzt den Weg dorthin um
+     etwa ein Kapitel — sie kauft keine Bildung, sondern Zeit. */
+  if(k==='bildung' && gekauft('schreibzeug')) intens += 1;
   const zuwachs = (1.7 * intens * (100-ist)/100) * (0.5 + Math.random());
   if(Math.random() < 0.75){
     const neu = Math.min(100, ist + Math.max(1, Math.round(zuwachs)));
@@ -862,7 +899,12 @@ function frostWirken(n){
      Gewohnte im Januar bei Stufe 4 eine zehrende Wunde schuldig. Es ist die
      Erfahrung, die daneben steht: wo man liegt, wie man sich einwickelt,
      wann man aufsteht und geht, statt liegen zu bleiben. */
-  const stufe = Math.max(0, ((n && n.frost) | 0) - (zaeh('zaeh_schlaf') ? 1 : 0));
+  /* Die Winterausstattung mildert ebenfalls eine Stufe. **Beides zusammen
+     mildert nicht zwei** — sonst wäre Russland mit zwei Käufen abgeschaltet,
+     und Frost 4 an der Beresina ist die eigene Regel von Kapitel 6 und 8.
+     Wer beides hat, hat die Sicherheit, nicht die doppelte Wirkung. */
+  const milder = (zaeh('zaeh_schlaf') || gekauft('winter')) ? 1 : 0;
+  const stufe = Math.max(0, ((n && n.frost) | 0) - milder);
   const hat = S.wunden.some(w => w.name === FROST_WUNDE);
   if(!stufe){
     if(!hat) return '';

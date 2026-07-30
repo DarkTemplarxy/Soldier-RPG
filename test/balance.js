@@ -91,11 +91,19 @@ const PATENT = ({sl:'patent_sl', lt:'patent_lt'})[process.env.PATENT] || null;
    dann das, was ihn durch Ägypten bringt, und der Rest, wenn noch etwas da
    ist. `['k', id]` ist ein Stück, `['w', name, bis]` ein Wert. */
 const VETERAN_PLAN = [
+  /* ── Die billigen Leiterstufen zuerst ──
+     **Seit dem Umbau des Ladens beginnt er nicht mehr bei 200.** Muskete und
+     Schuhe auf Stufe 2 kosten zusammen 165 VP; für einen Veteranen ist das
+     Kleingeld, und für die Messung ist es der Posten, der zuerst greift.
+     Das Schreibzeug steht früh, weil Bildung die Schwelle zum Fourrier (35)
+     und zum Sous-Lieutenant (50) ist und im Feld einen Lagerabend kostet. */
+  ['k','muskete_depot'], ['k','schuhe_neu'], ['k','schreibzeug'],
   ['w','konstitution',70],      // der Lebensvorrat zuerst — er ist die Schwelle des Todes
-  ['k','mantel_gut'],           // Eylau und Russland, und er kostet nur 30
+  ['k','mantel_gut'],           // Eylau und Russland
   ['w','geschick',70],          // Voltigeur, und die zweite Elitegrenze
   ['k','zaeh_wasser'],          // Ägypten tötet mehr Veteranen als jedes andere Kapitel
   ['w','muskete',60],           // kürzere Gefechte heißen weniger Runden mit Treffern
+  ['k','muskete_gut'],          // Stufe 3 ersetzt Stufe 2 — der Laden räumt selbst auf
   ['k','schuhe_gut'], ['k','zaeh_fuesse'],
   /* Bildung 40 steht bewusst hier: Sie ist die Schwelle zum Caporal-fourrier
      (35) und der einzige Weg, den ein Veteran *kaufen* kann — im Feld kostet
@@ -111,6 +119,11 @@ const VETERAN_PLAN = [
      den, den das Spiel tatsächlich hervorbringt. */
   ['w','autoritaet',50], ['w','bajonett',40], ['w','drill',55],
   ['w','taktik',50], ['w','verwaltung',50], ['w','menschenkenntnis',60],
+  /* Die oberen Leiterstufen und die Freischaltungen. Was gesperrt ist, fällt
+     in `waehle()` von allein weg — der Bot muss nichts davon wissen. */
+  ['k','uniform_gut'], ['k','besteck'], ['k','amulett'], ['k','tornister_gut'],
+  ['k','uhr'], ['k','fernrohr'], ['k','degen'], ['k','geld_gross'],
+  ['k','muskete_manu'], ['k','stiefel'], ['k','winter'], ['k','pferd_kav'],
   /* ── Die zweite Runde: alles auf 70 ──
      **Das ist das erklärte Ziel der neuen Ökonomie** — ein perfekter Lauf bis
      Waterloo soll reichen, um jeden Wert auf 70 zu heben (4 950 VP für alle

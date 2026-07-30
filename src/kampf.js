@@ -272,7 +272,15 @@ function starteKampf(n){
        Laden ohne jede Wirkung — 24 Veteranenpunkte für eine Zahl, die niemand
        abfragte. Wer bei Akkon 8 Atem verliert statt 4, merkt den Unterschied. */
     const tornister = S.kaeufe.includes('tornister_gut') ? 0.5 : 1;
-    S.atem = Math.max(0, S.atem - Math.round(ak.atem*tornister));
+    /* ── Das Pferd ──
+       **Marschermüdung −40 % beim Landpferd, −60 % darüber.** Es ist der
+       teuerste Kauf des Ladens und der einzige, der laufend Geld kostet
+       (Unterhalt je Kapitel, siehe `pferdUnterhalt()`) — ein Offizier stellte
+       sich sein Pferd selbst, und ein Pferd frisst jeden Tag.
+
+       In Russland wird es gegessen, auch das gekaufte. Das steht nicht hier,
+       sondern in `kapitel08_russland.js`, wo es hingehört. */
+    S.atem = Math.max(0, S.atem - Math.round(ak.atem*tornister*pferdFaktor()));
     S.belastung = Math.min(100, S.belastung+ak.belastung);
     atemKlemmen();
     laufSichern();
@@ -1156,9 +1164,52 @@ function schaetzung(ist, max){
        : a > 0.08 ? 'KAUM NOCH ETWAS'
                   : 'NICHTS MEHR, SOWEIT MAN SIEHT';
 }
+/* ── Das Fernrohr ──
+   **Der Informationskauf, und der einzige, der gegen die Meldungsunsicherheit
+   der oberen Ränge hilft.** Es macht aus einer Schätzung eine Zahl: im Sturm
+   von Eylau, auf der Karte des Generals. Es nimmt dem vierten Bruch nicht
+   seine Aussage — der Feind bleibt weit weg und die Meldung bleibt alt —,
+   aber es zeigt, was der Mann mit dem Glas wirklich sieht. */
+/* ── Die Taschenuhr ──
+   **Wer die Zeit hat, hat die Salve.** Eine Salve ist eine Frage von Sekunden:
+   Der Unterschied zwischen hundert Musketen und hundert einzelnen Schüssen ist
+   das gemeinsame Kommando. Deshalb hebt die Uhr genau die Proben, die im
+   Gefecht auf Drill gehen — und nur die, und nur im Gefecht.
+
+   Sie steht als eigene Funktion da, weil sechs Stellen `probe('drill', n)`
+   rufen und eine siebte dazukommen wird. Ein Bonus, den man an sechs Stellen
+   von Hand mitziehen muss, wird an der siebten vergessen. */
+function drillProbe(schw){ return probe('drill', schw - (gekauft('uhr') ? 4 : 0)); }
+
+/* ── Das Vollblut ──
+   **Man sieht dich von weitem. Das ist der Vorteil und der Preis.** Ein
+   Offizier auf einem auffallenden Pferd wird gesehen — von den eigenen Leuten,
+   die daraufhin stehen bleiben, und von denen, die zielen. Es ist der einzige
+   Kauf im Laden, der Ruf bringt und dafür Gefahr kostet. */
+function pferdGefahr(){ return gekauft('pferd_voll') ? 2 : 0; }
+/* Wie viel vom Marsch übrig bleibt. Ein Pferd nutzt erst ab Rang 7 etwas —
+   davor reitet kein Fusilier, auch wenn er ein Pferd besitzt. */
+function pferdFaktor(){
+  if(!S || S.rang < 7 || S.pferdWeg) return 1;
+  if(gekauft('pferd_kav') || gekauft('pferd_voll')) return 0.4;
+  if(gekauft('pferd_land')) return 0.6;
+  return 1;
+}
+/* Der Unterhalt, fällig am Kapitelende. Er ist der Grund, warum ein Pferd
+   eine Entscheidung ist und kein Geschenk. */
+function pferdUnterhalt(){
+  if(!S || S.pferdWeg) return 0;
+  return gekauft('pferd_voll') ? 60 : gekauft('pferd_kav') ? 30 : gekauft('pferd_land') ? 15 : 0;
+}
+
 function feindAnzeige(n){
-  if(S.rang >= 12) return '· DER FEIND: SIEHE MELDUNG';
-  if(n && n.sturm) return '· DER FEIND: ' + schaetzung(K.feindMoral, n.feindMoral);
+  const glas = gekauft('fernrohr');
+  if(S.rang >= 12) return glas
+    ? '· GEZÄHLT IM GLAS: ' + Math.max(0, Math.round(K.feindMoral))
+    : '· DER FEIND: SIEHE MELDUNG';
+  if(n && n.sturm) return glas
+    ? '· IM GLAS: ' + Math.max(0, Math.round(K.feindMoral))
+    : '· DER FEIND: ' + schaetzung(K.feindMoral, n.feindMoral);
   return '· WIDERSTAND DES FEINDES ' + Math.max(0, Math.round(K.feindMoral));
 }
 
@@ -1734,10 +1785,17 @@ function kampfAktion(id){
   }
   else if(id==='feuern' || id==='zielen'){
     const sorgfalt = (id==='zielen');
-    const p = probe('muskete', sorgfalt? 20 : 35);
+    /* ── Der gezogene Stutzen ──
+       **Ein Spielstil, kein Aufstieg.** Die Züge im Lauf machen den gezielten
+       Schuss auf zweihundert Schritt möglich und das Laden doppelt so
+       umständlich: Wer schnell feuert, feuert damit schlechter als mit der
+       Ausgabemuskete. Er lohnt sich für den Plänkler, der ohnehin zielt, und
+       bestraft jeden, der in der Linie steht und mitschießt. */
+    const stutzen = gekauft('stutzen');
+    const p = probe('muskete', sorgfalt? 20 : (stutzen ? 43 : 35));
     K.geladen = false;
     S.atem = Math.max(0, S.atem - (sorgfalt?10:5));
-    if(p.erfolg){ schaden = sorgfalt? 22+Math.random()*10 : 12+Math.random()*8;
+    if(p.erfolg){ schaden = sorgfalt? (stutzen?28:22)+Math.random()*10 : 12+Math.random()*8;
       text = (sorgfalt? 'Du liegst still, atmest aus und drückst ab. Drüben fällt einer, und du weißt, dass er dir gehört.'
                       : 'Du feuerst in den Rauch. Irgendetwas drüben gerät in Unordnung.')
            + anerkennung(sorgfalt?2:1, sorgfalt?'Ein gezielter Schuss, der saß':'Getroffen'); }
@@ -1807,7 +1865,7 @@ function kampfAktion(id){
     /* Der Unterschied zum Hinknien: Das dort schützt dich, das hier deine
        Leute. Die geschlossene Linie hält drei Runden lang die halben Verluste
        aus, und das erste Mal je Gefecht sieht es jemand, der Listen führt. */
-    const p = probe('drill', 35);
+    const p = drillProbe(35);
     if(p.erfolg){
       gefahrMod = -8; K.geschlossen = 3;
       S.kameradschaft = Math.min(100, S.kameradschaft+4);
@@ -1833,7 +1891,7 @@ function kampfAktion(id){
       text = 'Dein Kommando kommt eine Sekunde zu spät, und die Sektion feuert einzeln. Zwanzig Schüsse nacheinander sind zwanzig Gelegenheiten für die andere Seite.'; }
   }
   else if(id==='glieder'){
-    const p = probe('drill', 40);
+    const p = drillProbe(40);
     if(p.erfolg){ K.geschlossen = 3; schaden = 8;
       text = 'Erstes Glied kniet, zweites tritt durch. Es dauert acht Sekunden, in denen niemand schießt, und danach steht vorn, wer noch Pulver hat.'; }
     else { text = 'Der Wechsel gerät durcheinander, und für einen Moment stehen alle zwanzig ohne Ordnung im Freien.'; K.sektion = Math.max(0,(K.sektion||100)-8); }
@@ -1852,7 +1910,7 @@ function kampfAktion(id){
      leistet — er schießt *durchgehend*, während ein einzelner Mann die Hälfte
      der Zeit lädt. Deshalb wirkt er auch in der Runde, in der man nichts tut. */
   else if(id==='zugfeuer'){
-    const p = probe('drill', 45);
+    const p = drillProbe(45);
     const anteil = Math.max(0.35, (K.sektion||100)/100);
     if(p.erfolg){ schaden = (30 + Math.random()*12) * anteil; K.rollend = 3; nutzen('autoritaet',1);
       text = 'Erste Sektion Feuer, zweite Sektion Feuer, dritte Sektion Feuer, erste wieder geladen. Es hört nicht auf, und das ist der ganze Unterschied: Ein Mann schießt jede zweite Minute, ein Zug schießt immer.'
@@ -1869,7 +1927,7 @@ function kampfAktion(id){
       K.sektion = Math.max(0,(K.sektion||100)-6); }
   }
   else if(id==='halten_sektion'){
-    const p = probe('drill', 40);
+    const p = drillProbe(40);
     if(p.erfolg){ gefahrMod = -6; K.geschlossen = 3;
       K.sektion = Math.min(100,(K.sektion||100)+4);
       let lob = '';
@@ -1909,7 +1967,7 @@ function kampfAktion(id){
     else { text = 'Was von hier aus wie eine Senke aussah, ist eine Mulde von vierzig Schritt, die an beiden Enden offen liegt. Der Zug steht darin wie in einer Schüssel.'; gefahrMod = +6; }
   }
   else if(id==='frontverkuerzen'){
-    const p = probe('drill', 45);
+    const p = drillProbe(45);
     if(p.erfolg){ K.geschlossen = 3; K.sektion = Math.min(100,(K.sektion||100)+5);
       text = 'Von drei Sektionen auf zwei, das rechte Ende zieht nach innen. Die Front ist kürzer, die Wand ist dichter, und die Lücken, durch die es vorhin hereinkam, sind zu.'; }
     else { text = 'Der Befehl geht durch, und dann steht das rechte Ende an zwei Stellen doppelt und an einer gar nicht. Es dauert eine Minute, das aufzulösen, und in der Minute wird geschossen.';
@@ -1920,7 +1978,10 @@ function kampfAktion(id){
        Offizier mit gezogenem Degen ist auf dreihundert Schritt zu erkennen —
        von den eigenen Leuten und von denen, die zielen. */
     K.degenGezogen = true; K.deckung = false;
-    const p = probe('kaltbluetigkeit', 50);
+    /* Der gekaufte Offiziersdegen zahlt genau hier — an der einzigen Stelle,
+       an der ein Offizier seine Klinge überhaupt zeigt. Ein Stück, das man
+       selbst bezahlt hat, hält man anders. */
+    const p = probe('kaltbluetigkeit', 50 - (gekauft('degen') ? 6 : 0));
     gefahrMod = +20;
     if(p.erfolg){ K.zugHaelt = true; schaden = 14;
       text = 'Du ziehst den Degen und hältst ihn hoch, und danach geht niemand mehr zurück. Es ist kein Befehl. Es ist nur etwas, das jeder sehen kann, und in einem Gefecht ist das mehr wert als ein Befehl.'
@@ -2318,6 +2379,7 @@ function kampfAktion(id){
      auch inhaltlich das Richtige: **Der Feind wird nicht besser, weil du ein
      Patent gekauft hast. Du bist schlechter.** */
   if(S.patent) gefahr += 2;
+  gefahr += pferdGefahr();
   /* Wer im Gelände liegt, wird schlechter getroffen — drei Runden lang. */
   if(K.gelaendeVorteil > 0) gefahr -= 12;
   /* Ein Höhepunkt ist nicht nur teurer, sondern auch dichter: +3 Trefferchance

@@ -804,15 +804,93 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
    über alle Läufe mit und ist damit dauerhaft — wie die Generalskampagnen. */
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
 
+/* ══════════════════ DER KAUFLADEN ══════════════════
+
+   **Drei Qualitätsleitern, Extras, und die fünf Gewohnheiten.**
+
+   `gruppe:` macht aus Posten eine Leiter: Innerhalb einer Gruppe gibt es
+   **einen** Kauf, und der teurere ersetzt den billigeren, statt danebenzustehen.
+   Was keine Gruppe hat, ist stapelbar — Kleinkram und Gewohnheiten.
+
+   **Jede Stufe kostet mehr und bringt weniger Zuwachs als die davor.** Wer
+   Stufe 4 bezahlt, bezahlt Zuverlässigkeit, keinen Sprung. Stufe 1 ist immer
+   die Ausgabe, die jeder ohnehin bekommt, und steht deshalb nicht im Laden.
+
+   `frei:` schaltet über `META.bestRang` frei — **durch Erreichtes, nie durch
+   Vorrat.** Gesperrtes steht grau mit einem Satz Bedingung da; damit ist der
+   Laden zugleich die Landkarte dessen, was noch kommt. `freiKapitel:` ist
+   dasselbe für eine Kapitelmarke: Die Winterausstattung kann man erst kaufen,
+   wenn man weiß, warum man sie braucht.
+
+   **Der Nebeneffekt ist der Hauptpunkt:** Für 165 VP (Muskete und Schuhe auf
+   Stufe 2) ist ein Erstkäufer spürbar besser ausgerüstet. Vorher begann der
+   Laden praktisch bei 200 — bei einer Erstlauf-Weite von 32 von 163 Stationen
+   war das der falsche Einstiegspreis. */
 const LADEN = [
-  {id:'muskete_gut',art:'ausr',label:'Sorgfältig eingeschossene Muskete',beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
-  {id:'schuhe_gut',art:'ausr',label:'Doppelt besohlte Schuhe',beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  /* ── Die Waffe ── */
+  {id:'muskete_depot',art:'ausr',gruppe:'waffe',stufe:2,label:'Ausgesuchte Muskete aus dem Depot',
+   beschr:'Der Waffenmeister legt drei nebeneinander und nimmt die, deren Lauf gerade ist · +4 Muskete',vp:90},
+  {id:'muskete_gut',art:'ausr',gruppe:'waffe',stufe:3,label:'Sorgfältig eingeschossene Muskete',
+   beschr:'Modell 1777 An IX · +8 Muskete, verrostet langsamer',vp:200},
+  {id:'muskete_manu',art:'ausr',gruppe:'waffe',stufe:4,label:'Manufakturmuskete aus Versailles',
+   beschr:'Sie schießt nicht anders, sie schießt jedes Mal gleich · +12 Muskete, hält einen ganzen Krieg',vp:350},
+  {id:'stutzen',art:'ausr',gruppe:'waffe',frei:2,label:'Gezogener Stutzen',
+   beschr:'Kein Aufstieg, ein anderer Weg: Zielen wird tödlich, schnelles Feuern wertlos · nur für Plänkler',vp:275},
+
+  /* ── Die Schuhe ── */
+  {id:'schuhe_neu',art:'ausr',gruppe:'schuhe',stufe:2,label:'Neue Schuhe, passend',
+   beschr:'Nicht besser gemacht als die Ausgabe, nur nicht von einem anderen getragen',vp:75},
+  {id:'schuhe_gut',art:'ausr',gruppe:'schuhe',stufe:3,label:'Doppelt besohlte Schuhe',
+   beschr:'Halber Marschverschleiß — der unterschätzte Kauf',vp:200},
+  {id:'stiefel',art:'ausr',gruppe:'schuhe',stufe:4,label:'Marschstiefel vom Schuster, Maßarbeit',
+   beschr:'Sie gehen kaputt wie alles andere, nur zwei Feldzüge später · und du merkst es viel später',vp:300},
+
+  /* ── Uniform und Mantel ── */
+  {id:'mantel_gut',art:'ausr',gruppe:'mantel',stufe:2,label:'Beutemantel, gewachst',
+   beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
+  {id:'uniform_gut',art:'ausr',gruppe:'mantel',stufe:3,label:'Gute Uniform mit Capote',
+   beschr:'Man sieht einem Mann an, wie ernst er sich nimmt · Mantel und +4 Autorität',vp:250},
+  {id:'winter',art:'ausr',gruppe:'mantel',stufe:4,freiKapitel:'eylau',label:'Winterausstattung: Tuch und Pelz',
+   beschr:'Der Kauf, den man erst versteht, wenn man einmal ohne dagestanden hat · Frost eine Stufe milder',vp:375},
+
+  /* ── Die Seitenwaffe ── */
+  {id:'bajonett_gut',art:'ausr',gruppe:'seitenwaffe',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
+  {id:'sabre',art:'ausr',gruppe:'seitenwaffe',frei:2,label:'Sabre briquet',
+   beschr:'Der kurze Säbel der Elitekompanien · +4, und ab dem Patent zählt er als gepflegter Säbel',vp:125},
+  {id:'degen',art:'ausr',gruppe:'seitenwaffe',frei:7,label:'Offiziersdegen',
+   beschr:'Zum Angesehenwerden und einmal je Gefecht zu etwas anderem · „Den Degen ziehen" +6',vp:175},
+
+  /* ── Tornister ── */
   {id:'tornister_gut',art:'ausr',label:'Verstärkter Tornister',beschr:'Mehr Patronen und zwei Tage Proviant — der Anmarsch kostet halb so viel Atem',vp:120},
-  {id:'bajonett_gut',art:'ausr',label:'Geschliffenes Bajonett',beschr:'+5 Bajonett',vp:100},
-  {id:'mantel_gut',art:'ausr',label:'Beutemantel, gewachst',beschr:'Ein Mantel überhaupt — kalte Nächte, Wüste, später Russland',vp:150},
-  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
-  {id:'geld',art:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+
+  /* ── Kleinkram, stapelbar ── */
   {id:'amulett',art:'ausr',label:'Amulett',beschr:'+5 Kaltblütigkeit. Wirkt, weil du glaubst, dass es wirkt.',vp:60},
+  {id:'flasche',art:'ausr',label:'Feldflasche mit Schnapsvorrat',beschr:'Belastung sinkt im Winterquartier',vp:75},
+  {id:'schreibzeug',art:'ausr',label:'Schreibzeug',
+   beschr:'Feder, Tinte, ein Bogen zum Üben · Bildung wächst schneller — der kürzeste Weg zur Offiziersschwelle',vp:75},
+  {id:'uhr',art:'ausr',frei:5,label:'Taschenuhr',
+   beschr:'Wer die Zeit hat, hat die Salve · +4 auf Drill-Proben im Gefecht',vp:90},
+  {id:'besteck',art:'ausr',label:'Chirurgenbesteck',
+   beschr:'+5 Feldchirurgie, und am Verbandsplatz hilft es wirklich',vp:100},
+  {id:'fernrohr',art:'ausr',frei:7,label:'Fernrohr',
+   beschr:'Es zeigt, was sonst nur gemeldet wird — im Sturm, auf der Skizze, auf der Karte · +4 Taktik',vp:150},
+
+  /* ── Geld ── */
+  {id:'geld',art:'geld',gruppe:'geld',label:'50 Francs Startgeld',beschr:'Bares in der Tasche',vp:75},
+  {id:'geld_gross',art:'geld',gruppe:'geld',frei:9,label:'200 Francs Startgeld',
+   beschr:'Genug, um eine Kompanie zu beschuhen, ohne die Kasse anzurühren',vp:225},
+
+  /* ── Papiere ── */
+  {id:'empfehlung',art:'ausr',frei:4,label:'Empfehlungsschreiben',
+   beschr:'Ein Brief von jemandem, den der Capitaine kennt · er öffnet eine Tür, mehr nicht',vp:150},
+
+  /* ── Das Pferd ── */
+  {id:'pferd_land',art:'ausr',gruppe:'pferd',frei:7,label:'Landpferd',
+   beschr:'Kein schönes Tier, aber du gehst nicht mehr zu Fuß · Marsch kostet 40 % weniger · 15 F je Kapitel',vp:200},
+  {id:'pferd_kav',art:'ausr',gruppe:'pferd',frei:9,label:'Kavalleriepferd',
+   beschr:'Es bleibt stehen, wenn geschossen wird, und das ist der ganze Unterschied · 30 F je Kapitel',vp:375},
+  {id:'pferd_voll',art:'ausr',gruppe:'pferd',frei:11,label:'Vollblut',
+   beschr:'Man sieht dich von weitem. Das ist der Vorteil und der Preis · Ruf +1 je Gefecht, +2 Gefahr · 60 F je Kapitel',vp:600},
 
   /* ══════════════════ WAS EIN MANN BEHÄLT ══════════════════
 
@@ -852,3 +930,41 @@ const LADEN = [
 /* Ob eine Gewohnheit gekauft wurde. Eine Zeile, weil sie an sechs Stellen
    gefragt wird — und alle sechs liegen in der Zermürbung, nicht im Gefecht. */
 function zaeh(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }
+/* Dasselbe für jeden anderen Posten. `zaeh()` bleibt als eigener Name stehen,
+   weil an seinen sechs Stellen die Absicht mitgelesen wird. */
+function gekauft(id){ return !!(typeof S==='object' && S && S.kaeufe && S.kaeufe.includes(id)); }
+
+/* ── Freigeschaltet wird durch Erreichtes, nie durch Vorrat ──
+   `frei:` prüft gegen `META.bestRang` (läuft dauerhaft über alle Läufe),
+   `freiKapitel:` gegen die betretenen Kapitel. **Ein Posten, den man sich
+   kaufen kann, weil man reich ist, wäre keine Freischaltung, sondern ein
+   Preisschild.**
+
+   Gesperrtes wird **angezeigt**, nicht versteckt: Der Laden ist die einzige
+   Stelle, an der ein Spieler sieht, was das Spiel noch hat. */
+function ladenFrei(p){
+  const m = (typeof META==='object' && META) ? META : null;
+  if(p.frei && (!m || (m.bestRang|0) < p.frei)) return false;
+  if(p.freiKapitel && !(m && m.bestKapitel && m.bestKapitel[p.freiKapitel])) return false;
+  return true;
+}
+function ladenBedingung(p){
+  if(p.frei){
+    const r = RANG.find(x=>x.n===p.frei);
+    return 'Erst, wenn du einmal ' + (r ? r.name : 'Rang '+p.frei) + ' warst.';
+  }
+  if(p.freiKapitel){
+    const k = KAMPAGNEN.find(x=>x.id===p.freiKapitel);
+    return 'Erst, wenn du ' + (k ? k.name+' '+k.jahre : p.freiKapitel) + ' gesehen hast.';
+  }
+  return '';
+}
+/* Die Leitern des Ladens, in der Reihenfolge, in der sie angezeigt werden. */
+const LADEN_GRUPPEN = [
+  ['waffe','Die Waffe','je ein Kauf · der teurere ersetzt den billigeren'],
+  ['schuhe','Die Schuhe','der Posten, den jeder zuletzt kauft und zuerst braucht'],
+  ['mantel','Uniform und Mantel','was zwischen dir und der Nacht steht'],
+  ['seitenwaffe','Die Seitenwaffe','einmal je Laufbahn wichtig, und dann sehr'],
+  ['geld','Bares','was in der Tasche ist, wenn der Marketender kommt'],
+  ['pferd','Das Pferd','ab dem Patent — und in Russland wird es gegessen']
+];

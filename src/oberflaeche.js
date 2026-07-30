@@ -545,10 +545,27 @@ function patentKarte(){
 function zeigeLaden(){
   if(!ERSCH || !ERSCH.herkunft){ zeigeErschaffung(); return; }
   AUSWAHL = []; PUNKTE = {};
-  const kaufZeile = p=>`<tr id="kz_${p.id}"><td class="k">${p.label}</td><td class="d">${p.beschr}</td>
-    <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
-    onclick="waehle('${p.id}')" id="kb_${p.id}">wählen</button></td></tr>`;
-  const zeilen  = LADEN.filter(p=>p.art!=='zaeh').map(kaufZeile).join('');
+  /* **Gesperrtes bekommt den Bedingungssatz statt der Wirkung.** Der Laden ist
+     die Landkarte dessen, was noch kommt — wer nicht weiß, wofür er spielt,
+     spielt auf nichts hin. */
+  const kaufZeile = p=>{
+    const frei = ladenFrei(p);
+    return `<tr id="kz_${p.id}"${frei?'':' class="gesperrt"'}><td class="k">${p.label}</td>
+      <td class="d">${frei ? p.beschr : '<span class="fein">'+ladenBedingung(p)+'</span>'}</td>
+      <td class="n">${p.vp}</td><td class="n"><button class="plain" style="padding:4px 12px;font-size:13px"
+      onclick="waehle('${p.id}')" id="kb_${p.id}"${frei?'':' disabled'}>${frei?'wählen':'gesperrt'}</button></td></tr>`;
+  };
+  const kopf = `<tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>`;
+  /* Die drei Leitern und die drei Einzelgruppen, jede als eigene Tabelle mit
+     einem Satz darüber. Eine einzige Liste aus achtundzwanzig Posten wäre
+     wieder das, was der Laden vor dieser Sitzung war. */
+  const leitern = LADEN_GRUPPEN.map(([g,titel,unter])=>{
+    const teile = LADEN.filter(p=>p.gruppe===g);
+    if(!teile.length) return '';
+    return `<div class="card"><div class="ch"><span>${titel}</span><span>${unter}</span></div>
+      <div class="cb"><table>${kopf}${teile.map(kaufZeile).join('')}</table></div></div>`;
+  }).join('');
+  const zeilen  = LADEN.filter(p=>p.art!=='zaeh' && !p.gruppe).map(kaufZeile).join('');
   const zeilenZ = LADEN.filter(p=>p.art==='zaeh').map(kaufZeile).join('');
   const h = HERKUENFTE.find(x=>x.id===ERSCH.herkunft);
   app.innerHTML = `
@@ -573,9 +590,11 @@ function zeigeLaden(){
 
   ${patentKarte()}
 
-  <div class="card"><div class="ch"><span>Ausrüstung</span><span>fertige Stücke statt einzelner Punkte</span></div>
+  ${leitern}
+
+  <div class="card"><div class="ch"><span>Kleinkram und Papiere</span><span>stapelbar · das Billigste ist oft das Klügste</span></div>
    <div class="cb">
-    <table><tr><th>Kauf</th><th>Wirkung</th><th class="n">VP</th><th class="n"></th></tr>${zeilen}</table>
+    <table>${kopf}${zeilen}</table>
    </div></div>
 
   <div class="card"><div class="ch"><span>Was ein Mann behält</span><span>nicht Kraft, sondern Gewohnheit</span></div>
@@ -589,11 +608,20 @@ function zeigeLaden(){
   aktualisiereLaden();
 }
 function waehle(id){
+  const p = LADEN.find(x=>x.id===id);
+  if(p && !ladenFrei(p)) return;                 // gesperrt bleibt gesperrt
   const i = AUSWAHL.indexOf(id);
   if(i>=0) AUSWAHL.splice(i,1);
   else {
     // Höchstens ein Patent: das zweite ersetzt das erste, statt danebenzustehen.
     if(patentVon(id)) AUSWAHL = AUSWAHL.filter(x=>!patentVon(x));
+    /* ── Je Leiter ein Kauf ──
+       **Der teurere ersetzt den billigeren, statt danebenzustehen.** Zwei
+       Musketen trägt niemand, und ein Laden, in dem man Stufe 2 und Stufe 4
+       nebeneinander kauft, ist kein Laden, sondern eine Liste. Wer klickt,
+       wählt damit die Stufe — er muss nichts abwählen. */
+    if(p && p.gruppe) AUSWAHL = AUSWAHL.filter(x=>{
+      const q = LADEN.find(y=>y.id===x); return !q || q.gruppe !== p.gruppe; });
     AUSWAHL.push(id); if(gesamtKosten() > META.vp) AUSWAHL.pop();
   }
   aktualisiereLaden();
@@ -612,6 +640,16 @@ function aktualisiereLaden(){
   LADEN.concat(PATENTE.filter(patentFrei)).forEach(p=>{
     const b = document.getElementById('kb_'+p.id), z = document.getElementById('kz_'+p.id);
     if(!b || !z) return;
+    /* Gesperrtes ist im Laden **sichtbar**, nicht versteckt: Er ist die
+       einzige Stelle, an der man sieht, was das Spiel noch hat. */
+    if(p.frei !== undefined && !patentVon(p.id) && !ladenFrei(p)){
+      b.textContent = 'gesperrt'; b.disabled = true;
+      z.className = 'gesperrt'; b.className = 'plain'; return;
+    }
+    if(p.freiKapitel && !ladenFrei(p)){
+      b.textContent = 'gesperrt'; b.disabled = true;
+      z.className = 'gesperrt'; b.className = 'plain'; return;
+    }
     const drin = AUSWAHL.includes(p.id);
     b.textContent = drin?'gewählt':'wählen';
     b.disabled = !drin && p.vp>rest;
@@ -1419,6 +1457,16 @@ function zeigeUebergang(n){
     S.leben = lebenMax();
     S.atem = 100; atemKlemmen();
     S.belastung = Math.max(0, Math.floor(S.belastung/2));
+    /* ── Der Unterhalt des Pferdes ──
+       Er wird am Übergang fällig, also einmal je Feldzug, und er ist der
+       Grund, warum ein Pferd eine Entscheidung ist: 60 Francs für das Vollblut
+       sind mehr, als ein Fusilier in drei Kapiteln Sold sieht. Wer nicht
+       zahlen kann, verliert es — die Armee füttert kein Privatpferd. */
+    const uh = pferdUnterhalt();
+    if(uh){
+      if(S.geld >= uh){ S.geld -= uh; LAUF.pferdKosten = uh; }
+      else { S.pferdWeg = true; LAUF.pferdKosten = -1; }
+    }
     laufSichern();
   }
   app.innerHTML = `<div class="stage">${verlauf()}
@@ -1427,6 +1475,10 @@ function zeigeUebergang(n){
         <div class="cb"><div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
         <div class="wirkung"><span>Zwischenstand</span>
           ${rangName(S.rang)} · Ruf ${S.ruf} · ${stationen()} Stationen · ${S.nennungen}× im Tagesbefehl</div>
+        ${LAUF.pferdKosten ? `<div class="wirkung"><span>Das Pferd</span>${
+          LAUF.pferdKosten > 0
+            ? 'Hafer, Hufeisen, ein Sattler, der zweimal ausbessert. <b>−'+francs(LAUF.pferdKosten)+' F</b>'
+            : 'Du kannst es nicht mehr füttern. Der Train nimmt es, und man gibt dir einen Schein, den niemand einlöst. <b>Das Pferd ist weg.</b>'}</div>` : ''}
         <div class="wirkung"><span>Ein Jahr Garnison</span>
           Die Wunden schließen sich, der Atem kommt zurück. Was bleibt, ist, was du gelernt hast — und die Hälfte der Last.
           <b>Konstitution +3:</b> Der Körper hat sich an das Marschieren gewöhnt, an das Schlafen im Nassen und daran, mit wenig auszukommen.</div>
