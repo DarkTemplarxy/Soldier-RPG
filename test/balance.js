@@ -176,6 +176,11 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
      Rang 6, oder sieht überhaupt jemand ein Patent? */
   const res = { tot: 0, ende: 0, italien: 0, elite: 0, caporal: 0, fourrier: 0, sergent: 0, major: 0, leit: 0,
                 punkte: [], raenge: {},
+                /* Läufe, die weder gestorben noch angekommen sind — Klickbudget
+                   erschöpft oder kein Knopf mehr da. Sie gehen in keine Quote
+                   ein und werden laut gemeldet: **Ein Prüfstand, der seine
+                   eigene Obergrenze verschweigt, misst sich selbst.** */
+                abbruch: 0,
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
                    **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
@@ -259,6 +264,9 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     }, VETERAN_PLAN);
     await p.click('#startbtn');
     if (!STATIONSZAHL) STATIONSZAHL = await p.evaluate(() => KAPITEL.length);
+    /* Wie lang die Chronik VOR diesem Lauf war — daran erkennt man unten, ob
+       der Eintrag am Ende von diesem Lauf stammt oder vom vorigen. */
+    const chronikVorher = await p.evaluate(() => META.chronik.length);
 
     let s = 0, italienGeschafft = false, hoechster = 1, zweig = null;
     /* ── Das Klickbudget ist ein Prüfstand-Wert und darf nie die Messung sein ──
@@ -529,10 +537,32 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     res.raenge[hoechster] = (res.raenge[hoechster] || 0) + 1;
     const t = await p.$eval('#app', e => e.innerText);
     const m = t.match(/Summe\s+(\d+)/); if (m) res.punkte.push(+m[1]);
-    const d = await p.evaluate(() => {
+    /* ── Die Chronik überlebt den Lauf, der Lauf überlebt die Chronik nicht ──
+       **Der Prüfstand benutzt EINE Seite für alle Läufe** (`newPage()` einmal,
+       `goto()` je Lauf), also bleibt `localStorage` stehen und die Chronik
+       wächst über die Läufe hinweg. Ein Lauf, der weder stirbt noch endet —
+       weil er am Klickbudget hängenbleibt oder keinen Knopf mehr findet —
+       schreibt **keinen** Eintrag. `META.chronik[length-1]` lieferte dann den
+       Eintrag des *vorigen* Laufs.
+
+       **Und das erfand gute Nachrichten.** Stand dort zufällig ein Überlebender
+       (`gefallen:false`), zählte der Zweig unten den abgebrochenen Lauf als
+       „alle 163 Stationen erreicht, jedes Kapitel überstanden". Gemessen kam so
+       eine Weite von 163 bei einer einzigen tatsächlich beendeten Wertung
+       heraus — und eine Zeile „gestorben 1" direkt neben „Gestorben in:
+       Eylau 13", weil die eine Zahl vom Bildschirm kam und die andere aus der
+       fremden Chronik.
+
+       Gezählt wird jetzt nur ein Eintrag, den **dieser** Lauf geschrieben hat;
+       alles andere ist `abbruch` und geht in keine Quote ein. **Ein Lauf, der
+       nicht zu Ende gespielt wurde, ist kein Messwert — weder ein guter noch
+       ein schlechter.** */
+    const d = await p.evaluate(vorher => {
+      if (META.chronik.length <= vorher) return null;   // dieser Lauf hat nichts geschrieben
       const c = META.chronik[META.chronik.length-1] || {};
       return {gefallen: !!c.gefallen, ort: c.ort||'', stationen: c.stationen|0};
-    });
+    }, chronikVorher);
+    if (!d) { res.abbruch++; continue; }
     if (d.gefallen) {
       /* Das Kapitel steht nicht im Blatt, wohl aber das Datum der letzten
          Station — und die Jahreszahl ist eindeutig. */
@@ -573,6 +603,11 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
   const weite = we.length ? we[Math.floor(we.length / 2)] : 0;
   console.log(`\n  WEITE ${weite} von ${STATIONSZAHL} (${Math.round(weite/STATIONSZAHL*100)} %)`
     + `   ·   HÖCHSTER RANG (${rangKurz(LEITRANG)}) ${q(res.leit)}\n`);
+  /* **Laut, nicht am Rand.** Ein abgebrochener Lauf ist kein Messwert, und ein
+     Prüfstand, der seine eigene Obergrenze verschweigt, misst irgendwann sich
+     selbst statt des Spiels. Genau das ist am 30.07.2026 passiert. */
+  if (res.abbruch) console.log(`  ⚠ ABGEBROCHEN: ${q(res.abbruch)} — weder gestorben noch angekommen.`
+    + `\n    Klickbudget erschöpft oder kein Knopf mehr. Diese Läufe gehen in KEINE Quote unten ein.\n`);
   console.log(`Ganz durch: ${q(res.ende)} (Produktzahl, mit elf Kapiteln stumpf)`);
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
   console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);

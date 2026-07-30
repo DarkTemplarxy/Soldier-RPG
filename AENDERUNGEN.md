@@ -109,28 +109,31 @@ Sechs Stationen dazu, **157 → 163**. Kapitel 10 und 11 hatten zusammen **eine*
 
 Rang 13 forderte `orden:'legion_grand'`, und den gab es nicht. **Damit waren Rang 13 und 14 verschlossen und die ganze VP-Ökonomie gegen eine Decke geeicht, die niemand erreicht.** Bedingungen sind Zahlen, die es schon gab: der dritte Grad, ein Regiment, fünf Bulletins. Vierte Ordensform (`ordenStern()`): achtstrahliger Bruststern, **ohne Band** — man legt ihn nicht ab.
 
-### 13 · Das Klickbudget des Prüfstands (`test/balance.js`)
+### 13 · Zwei Fehler im Prüfstand (`test/balance.js`)
 
-**600 → 2500.** Keine Balance-Zahl, aber sie hat eine Messreihe wertlos gemacht, und der Zusammenhang ist keiner, den man vorher sieht:
+Keine Balance-Zahlen, aber sie haben Messreihen wertlos gemacht — und der zweite hat dabei **gute Nachrichten erfunden**, statt bloß zu schweigen.
 
-```
-Auftrag-Fix → Rangdecke 9 → 11 → ab Rang 10 hängt der Schaden an den vier
-Kompanien statt an den eigenen Werten → Gefechte dauern länger → mehr Klicks
-```
+**Das Klickbudget: 600 → 2500.** Ein voller Lauf über 163 Stationen braucht rund 600 Klicks (ausgezählt: Station 122 nach 443 Klicks). Das Budget lag also genau auf der Grenze. Solange der Veteran unterwegs starb, fiel das nicht auf — **erst als die Rangdecke fiel und er anfing anzukommen, wurde die Grenze bindend.** Der Prüfstand ging in dem Augenblick kaputt, in dem die Leiter zum ersten Mal trug. Gemessen mit acht Läufen bei 2500: kein einziger Abbruch, Punkte 4 706–4 768.
 
-**Ein Maximalveteran, der als Capitaine ein Gefecht in drei Runden entschied, braucht als Colonel zehn.** Das Budget wurde also genau in dem Augenblick zur bindenden Schranke, in dem die Leiter zum ersten Mal trug.
+**Die fremde Chronik.** `balance.js` benutzt *eine* Seite für alle Läufe, also bleibt `localStorage` stehen und die Chronik wächst über die Läufe hinweg. Weite, Sterbeort und „Kapitel überstanden" kamen aus `META.chronik[length-1]` — und ein Lauf, der weder stirbt noch ankommt, schreibt keinen Eintrag. Gelesen wurde dann der des **vorigen** Laufs:
 
-| Gemessen, dieselbe Fassung, 40 Läufe | Budget 600 |
+| Stand dort zufällig… | …zählte der abgebrochene Lauf als |
 |---|---|
-| Läufe ohne Todesblatt und ohne Wertung | **39 von 40** |
-| Weite | 32 von 163 |
-| Punktebereich | **952–952** |
+| ein Überlebender | **„alle 163 Stationen erreicht, jedes Kapitel überstanden"** |
+| ein Gefallener | ein Toter in dessen Kapitel, an dessen Station |
 
-> **Die Punktespanne von null war das Signal.** Vierzig Läufe können nicht denselben Punktwert liefern — sie sagt, dass **ein einziger** Lauf bis zu einer Wertung kam. Die Rangverteilung daneben (`11 Col 39`) war dabei echt: Sie liest `S.rang` bei jedem Klick. **Eine Zahl war richtig, die andere ein Artefakt, und beide standen nebeneinander.**
->
-> **Regel: Ein Prüfstand mit einer Obergrenze meldet nicht, wenn er sie erreicht.** Dasselbe Muster wie die 100 % des Härtemodus und die 0 % Caporal des blinden Bots — vierter Fall in diesem Protokoll. 2500 steht bewusst weit über den rund 700, die ein voller Lauf braucht: **Ein Budget, das gerade so reicht, misst beim nächsten Kapitel wieder sich selbst.**
+> **Das Signal stand die ganze Zeit im Bericht, in zwei Zeilen übereinander:** „gestorben **1**" neben „Gestorben in: Eylau **13**". Die eine Zahl kam vom Bildschirm, die andere aus einer fremden Chronik. **Zwei Zähler derselben Sache, die einander widersprechen, sind kein Rätsel, sondern ein Befund.**
 
-### Gemessen — 163 Stationen, Veteran mit `VP=5800`
+**Behoben:** `chronikVorher` merkt die Länge vor dem Lauf; gezählt wird nur, was *dieser* Lauf geschrieben hat. Alles andere ist `res.abbruch`, geht in keine Quote ein und wird laut gemeldet.
+
+**Vier Regeln daraus:**
+
+1. **Ein Lauf, der nicht zu Ende gespielt wurde, ist kein Messwert** — weder ein guter noch ein schlechter.
+2. **Ein Prüfstand mit einer Obergrenze muss melden, wenn er sie erreicht.**
+3. **Zustand, der den Messgegenstand überlebt, gehört nicht in die Messung.** Die Chronik ist absichtlich langlebig — genau deshalb darf ein Laufergebnis nicht aus ihr kommen. Schwesterregel zu „ein Fließtext ist kein Zustand": *Nicht jeder Zustand gehört diesem Lauf.*
+4. **Zwei Messungen dürfen nie in dieselbe Ausgabedatei schreiben.** Genau das ist hier passiert; der ineinandergeschriebene Bericht hat die Diagnose um eine Stunde verzögert und beinahe eine falsche Ursache ins Protokoll gebracht.
+
+### Gemessen — 163 Stationen, Veteran mit `VP=5800`### Gemessen — 163 Stationen, Veteran mit `VP=5800`
 
 | | **Weite** (von 163) | **höchster Rang (Cpt)** | Caporal | Punkte-Median |
 |---|---|---|---|---|

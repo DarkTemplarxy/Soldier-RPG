@@ -1620,29 +1620,41 @@ Der Streubereich bei 40 Läufen ist etwa ±8 Punkte — ein einzelner Durchgang 
 
 `node test/balance.js 40` misst das. **Weicht der Wert nach einer Änderung um mehr als zehn Punkte ab, ist die Änderung zu prüfen.**
 
-### ⚠ Das Klickbudget des Prüfstands ist selbst ein Messwert (`while (s++ < 2500)`)
+### ⚠ Zwei Fehler im Prüfstand, und der zweite erfand gute Nachrichten
 
-**Es stand auf 600 und wurde am 30.07.2026 zur bindenden Schranke** — an dem Tag, an dem die Rangdecke endlich fiel. Der Zusammenhang ist keiner, den man vorher sieht:
+**Gefunden am 30.07.2026 beim Versuch, die Dokumentation zu belegen.** Sie hängen zusammen und waren einzeln nicht zu sehen.
 
-```
-Auftrag-Fix → Rangdecke 9 → 11 → ab Rang 10 hängt der Schaden an den vier
-Kompanien statt an den eigenen Werten → Gefechte dauern länger → mehr Klicks
-```
+#### 1 · Das Klickbudget war die bindende Schranke (`while (s++ < 2500)`, vorher 600)
 
-**Ein Maximalveteran, der als Capitaine ein Gefecht in drei Runden entschied, braucht als Colonel zehn.** Die Klicks je Gefecht vervielfachen sich also genau dann, wenn die Leiter zum ersten Mal trägt.
+**Ein voller Lauf über 163 Stationen braucht rund 600 Klicks** — ausgezählt an Einzelläufen: Station 122 nach 443 Klicks, hochgerechnet knapp 590 für die ganze Strecke. Das Budget stand auf **600** und lag damit genau auf der Grenze.
 
-| Gemessen, dieselbe Fassung, 40 Läufe | Budget 600 |
+**Solange der Veteran unterwegs starb, fiel das nicht auf.** Erst als die Rangdecke fiel und er anfing anzukommen, wurde die Grenze bindend — der Prüfstand ging genau in dem Augenblick kaputt, in dem die Leiter zum ersten Mal trug.
+
+Gemessen mit acht Läufen bei Budget 2500: **kein einziger Abbruch**, alle acht bis zum Ende, Punkte 4 706–4 768. Bei 600 kam fast keiner an.
+
+#### 2 · Die Chronik überlebt den Lauf, und der Prüfstand las sie trotzdem
+
+**Das ist der schwerere der beiden, weil er nicht schweigt, sondern lügt.**
+
+`balance.js` benutzt **eine** Seite für alle Läufe (`newPage()` einmal, `goto()` je Lauf). Damit bleibt `localStorage` stehen und die Chronik wächst über die Läufe hinweg. Weite, Sterbeort und „Kapitel überstanden" wurden aus `META.chronik[length-1]` gelesen — und ein Lauf, der weder stirbt noch ankommt, **schreibt keinen Eintrag.** Gelesen wurde dann der Eintrag des *vorigen* Laufs.
+
+| Stand dort zufällig… | …zählte der abgebrochene Lauf als |
 |---|---|
-| Läufe ohne Todesblatt und ohne Wertung | **39 von 40** |
-| Weite | 32 von 163 |
-| Punktebereich | **952–952** |
-| Rangverteilung | 11 Col 39 |
+| ein Überlebender (`gefallen:false`) | **„alle 163 Stationen erreicht, jedes Kapitel überstanden"** |
+| ein Gefallener | ein Toter in dessen Kapitel, an dessen Station |
 
-> **Die Punktespanne von null ist das Signal, und sie gehört in dieselbe Familie wie die 100 % des Härtemodus und die 0 % Caporal des blinden Bots.** Vierzig Läufe können nicht denselben Punktwert liefern; die Spanne sagt, dass **ein einziger** Lauf überhaupt bis zu einer Wertung kam. Die Rangverteilung war dabei echt — sie las `S.rang` bei jedem Klick —, und genau das machte den Befund verwirrend: **Eine Zahl war richtig, die andere ein Artefakt, und beide standen nebeneinander.**
+> **Das Signal stand die ganze Zeit im Bericht, in zwei Zeilen übereinander:** „gestorben **1**" direkt neben „Gestorben in: Eylau **13**". Die eine Zahl kam vom Bildschirm, die andere aus einer fremden Chronik. **Zwei Zähler derselben Sache, die einander widersprechen, sind kein Rätsel, sondern ein Befund** — und zwar der erste, den man verfolgt.
+
+**Behoben:** `chronikVorher` merkt die Länge vor dem Lauf; gezählt wird nur ein Eintrag, den *dieser* Lauf geschrieben hat. Alles andere ist `res.abbruch`, geht in **keine** Quote ein und wird **laut gemeldet**.
+
+> ### Was daran zu lernen ist, und es ist nicht „das Budget war zu klein"
 >
-> **Regel daraus: Ein Prüfstand mit einer Obergrenze meldet nicht, wenn er sie erreicht.** Das Budget steht jetzt auf 2500 gegen rund 700, die ein voller Lauf braucht — **ein Budget, das gerade so reicht, misst beim nächsten Kapitel wieder sich selbst.**
+> 1. **Ein Lauf, der nicht zu Ende gespielt wurde, ist kein Messwert** — weder ein guter noch ein schlechter. Er gehört gezählt und ausgewiesen, nicht in eine Quote gerechnet.
+> 2. **Ein Prüfstand mit einer Obergrenze muss melden, wenn er sie erreicht.** Sonst misst er irgendwann sich selbst statt des Spiels, und man sieht es nicht.
+> 3. **Zustand, der den Messgegenstand überlebt, gehört nicht in die Messung.** Die Chronik ist absichtlich langlebig — genau deshalb darf ein Laufergebnis nicht aus ihr kommen. Das ist die Schwesterregel zu „ein Fließtext ist kein Zustand": *Nicht jeder Zustand gehört diesem Lauf.*
+> 4. **Und eine Regel für mich selbst:** Zwei Messungen dürfen nie in dieselbe Datei schreiben. Genau das ist hier passiert — ein alter und ein neuer Lauf teilten sich eine Ausgabedatei, und der ineinandergeschriebene Bericht hat die erste Diagnose um eine Stunde verzögert.
 
-**Zwei weitere Fallen beim Messen, beide teuer bezahlt:**
+**Zwei weitere Fallen beim Messen, beide teuer bezahlt:****Zwei weitere Fallen beim Messen, beide teuer bezahlt:**
 
 1. **Der Punkte-Median ist bei ~50 % Überlebensquote unbrauchbar.** Ein überstandener Lauf bekommt +25 und +10 pauschal; der Median springt deshalb um rund dreißig Punkte, sobald die Quote die 50 % kreuzt. Gemessen: 91 bei 43 % Überleben, 59 bei 36 % — dieselbe Mechanik, nur die andere Seite der Schwelle. **Der Median misst hier nicht die Härte, sondern nur, ob der mittlere Lauf zufällig überlebt hat.** Wer eine Änderung beurteilen will, nimmt die Quote.
 2. **Das Rauschen ist größer, als es sich anfühlt.** Derselbe unveränderte Stand lieferte an einem Nachmittag 49 % und 43 %. Bei 80 Läufen ist eine Standardabweichung rund 5,6 Punkte, zwei also elf. **Wer einen Unterschied von unter zehn Punkten deutet, deutet Rauschen** — dagegen hilft nur, den alten Stand noch einmal zu messen (`git stash`) statt gegen eine Zahl von gestern zu vergleichen.
