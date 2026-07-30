@@ -545,29 +545,34 @@ const VORGAENGE = [
      {label:'Den Vertrag an den vergeben, der liefert', kosten:'0 F · Einheitszustand +30',
       tu(){ S.kasseQuartal = true;
         S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+30);
+        patronMerkt('ehrlich');
         return 'Der Tuchhändler aus Elbeuf ist der teuerste von dreien und der einzige, dessen Ware nach dem ersten Regen noch Tuch ist. Du nimmst ihn. Der Intendant zieht die Augenbrauen hoch und schreibt es auf.'; }},
      {label:'Den Vertrag an den vergeben, der zahlt', kosten:'+600 F · Einheitszustand −15 · es fällt wahrscheinlich auf', risk:true,
       tu(){ S.kasseQuartal = true; S.geld += 600;
         S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
         S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 35);
         heimlich('vertrag_still','Der Lieferantenvertrag',3,[0]);
+        patronMerkt('gierig');
         return 'Er kommt selbst, im eigenen Wagen, und redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt.'; }}
    ] : [
      {label:'Die Kasse ausgeben, wie sie vorgesehen ist', kosten:'0 F · Einheitszustand +25',
       tu(){ S.kasseQuartal = true;
         S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+25);
+        patronMerkt('ehrlich');
         return 'Schuhe für einundvierzig Mann, Hemden für neunzehn, ein Fass Branntwein und ein Wagen Stroh. Am Ende liegt der Rest in Kupfer auf dem Tisch, und der Rest ist nichts.'; }},
      {label:'Das Übliche abzweigen', kosten:'+150 F · Einheitszustand +10 · es kann auffallen', risk:true,
       tu(){ S.kasseQuartal = true; S.geld += 150;
         S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
         S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 15);
         heimlich('kasse_ueblich','Die Kompaniekasse des Quartals',3,[0]);
+        patronMerkt('gierig');
         return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger.'; }},
      {label:'Kräftig zulangen', kosten:'+400 F · Einheitszustand −10 · es fällt wahrscheinlich auf', risk:true,
       tu(){ S.kasseQuartal = true; S.geld += 400;
         S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
         S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 40);
         heimlich('kasse_voll','Die Kasse des dritten Quartals',3,[0,1]);
+        patronMerkt('gierig');
         return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat.'; }}
    ]},
 
@@ -695,7 +700,11 @@ function adjutantTun(wert, schw, was, gut, schlecht){
 /* `'mit'` ist die einmalige Wahl des Mitgezogenen, alles andere ein Index in
    VORGAENGE. Ein Sonderfall in einer Zeile ist billiger als eine sechste Art,
    die nur einmal vorkommt. */
-function vorgangVon(k){ return k === 'mit' ? VORGANG_MITGEZOGEN : VORGAENGE[k]; }
+function vorgangVon(k){
+  if(k === 'mit')    return VORGANG_MITGEZOGEN;
+  if(k === 'patron') return VORGANG_PATRON;
+  return VORGAENGE[k];
+}
 
 /* Wie viele Ausfertigungen es je Art gibt, und welche Vorgänge dieses Lager
    bringt. **Drei Pflichtvorgänge, gezogen aus fünf Arten**, damit zwei Lager
@@ -710,6 +719,14 @@ function schreibtischStellen(n){
   if(S.rang >= 10 && !u.some(x=>x.mit) && !S.mitgewaehlt){
     S.mitgewaehlt = true;
     return ['mit'];
+  }
+  /* **Und ab Colonel die zweite einmalige Wahl: wessen Mann man ist.** Sie
+     geht allem anderen vor, weil ohne sie der Beurteiler fehlt — `beurteiler()`
+     fiele sonst auf Grandmaison zurück, und die Fürsprache liefe fünf Kapitel
+     lang an den Falschen. Dieselbe Fehlerfamilie, die diesen Umbau ausgelöst
+     hat. */
+  if(S.rang >= 11 && !S.patron){
+    return ['patron'];
   }
   /* ── Drei Vorgänge, drei Ebenen, je einer ──
 
@@ -759,6 +776,35 @@ function schreibtischStellen(n){
    du am meisten vertraust, ist der Mann, der am meisten über dich weiß. Beides
    wächst aus derselben Zeit, und man kann das eine nicht ohne das andere
    haben. Das Spiel spricht es nie aus. */
+/* ══════════════════ DIE WAHL DES PATRONS ══════════════════
+
+   **Sobald man Colonel ist, muss man sich entscheiden, wessen Mann man ist.**
+   Das ist der zweite und letzte unumkehrbare Entschluss des Spiels — der erste
+   war der Mitgezogene, und der betraf einen Mann unter dir. Dieser betrifft
+   den, der deinen Namen ausspricht, wenn eine Stelle aufgeht.
+
+   **Angezeigt wird, was jeder verlangt, und was er beim Kaiser gilt.** Nicht
+   angezeigt wird, wie sich das ändert. Masséna steht 1807 bei vier und 1812
+   bei null; man kann es wissen, wenn man Geschichte kennt, und das Spiel sagt
+   es nicht. */
+const VORGANG_PATRON = {
+  art:'patron', ebene:'bleibt', kopf:'Wessen Mann bist du',
+  text:u=>`Ein Regiment führt man allein, eine Brigade nicht. Über dir sitzen drei Männer, die dem Kaiser `
+    +`Namen nennen dürfen, und keiner von ihnen nennt einen, den er nicht kennt. `
+    +`Der Adjutant sagt, alle drei hätten gefragt. Das stimmt vermutlich bei einem von ihnen.`,
+  wahlen:u=>PATRONE.map(m=>({
+    label:m.name,
+    kosten:`verlangt ${m.wollen} · beim Kaiser ${patronStand(m.id, kapitelNummer())} von 5`,
+    tu(){
+      S.patron = m.id;
+      /* Er fängt bei +1 an: Er hat gefragt, also weiß er, wer du bist. */
+      const l = S.leute && S.leute[m.id];
+      if(l){ l.gunst = 1; l.lebt = true; }
+      return m.text + ` <span class="fein">Du bist ${esc(personKurz(m.id))}s Mann. Das lässt sich nicht zurücknehmen.</span>`;
+    }
+  }))
+};
+
 const VORGANG_MITGEZOGEN = {
   art:'mitgezogen', kopf:'Wen nimmst du mit',
   text:u=>`Ein Bataillon ist kein Zug, und die Sergenten bleiben bei der Kompanie. `
@@ -849,6 +895,9 @@ function zeigeLager(n){
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
     L.sold = soldAuszahlen();
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
+    /* Davout sieht sich den Zustand an, wenn er vorbeikommt, und er kommt
+       vorbei. Siebzig ist die Zahl, bei der er nichts sagt. */
+    if((S.einheit==null?70:S.einheit) >= 70) patronMerkt('einheitGut');
     /* Sechs Wochen unter demselben Offizier: Die Kette unter dir wird von
        allein ein wenig besser. Hier und nicht je Station, weil das Lager
        auch der Ort ist, an dem man gezielt nachhilft — beides gehört an

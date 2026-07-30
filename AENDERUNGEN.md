@@ -5,6 +5,38 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-30 — Die Protektion eines Marschalls, und Rang 14 ist erreichbar
+
+**Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine Zugehörigkeit.** Grandmaison war Patron für die Ränge 10 bis 13 — ein Mann, vier Stufen, zwei Gunstquellen. **Gemessen: vierzig von vierzig Maximalveteranen blieben Colonel**, Median −2 bei geforderten +5, während Ruf zu 93 % und Bulletins zu 80 % erfüllt waren. Nicht die Schwelle war zu hoch, die Mechanik war zu dünn.
+
+**Sobald man Colonel ist, wählt man auf dem Schreibtisch, wessen Mann man ist.** Einmal je Laufbahn, nicht zurückzunehmen. Von da an beurteilt der Marschall die Ränge 12, 13 und 14.
+
+| | verlangt | verachtet |
+|---|---|---|
+| **Davout** | erfüllte stehende Aufträge · Einheitszustand ≥ 70 | **jeden Eintrag im Verzeichnis, doppelt** |
+| **Ney** | Bulletins, also vor der Linie gestanden | ein Gefecht ohne Nennung |
+| **Masséna** | Geld — Kasse, Vertrag, Requisition | Ehrlichkeit |
+
+**Der Kern der Wahl ist nicht, wie viel Fürsprache man bekommt, sondern wofür.** Ein Lauf, der unter Davout mustergültig ist, steht unter Ney bei null.
+
+**Dazu ihr eigener Stand beim Kaiser**, sichtbar in der Seitenleiste, in seiner Entwicklung nicht angekündigt: Davout bleibt bei 4–5, Ney fällt nach Russland auf 3 und 2, Masséna von 4 auf **0**. Wer sich 1807 für Masséna entscheidet, wählt den, der jetzt am meisten gibt und am Ende nichts mehr wert ist.
+
+### Rang 14 hängt an einem Mann, nicht an einem Szenario
+
+`generalskampagne:true` stand dort und die gibt es nicht — der Rang war gebaut und **per Regel unerreichbar**, und die ganze VP-Ökonomie war gegen eine Decke geeicht, die niemand je gesehen hat. Jetzt: Gunst 5 · 5 Bulletins · `patronMacht:4`.
+
+Gemessen mit sonst perfektem Mann: **Davout trägt bis Waterloo, Ney bis 1813, Masséna nie.** Das ist die letzte Folge der Wahl von 1807 und die einzige Schranke des Spiels, an der man nichts mehr tun kann.
+
+**⚠ `'patron'` in der LEITER ist eine Rolle, kein Name — und das musste an zwölf Stellen aufgelöst werden.** Zuerst tat es nur `beurteiler()`; die Musterung prüfte daraufhin `gunst('patron')`, also immer null, also immer `fehltGunst`. Dieselbe Fehlerfamilie wie fünfmal zuvor.
+
+`LAUF_FASSUNG` 15 → **16** mit Wandler: Die drei kommen in die Personenkartei, `S.patron` bleibt leer, der Schreibtisch legt die Wahl beim nächsten Lager vor.
+
+**Der Bot wählt nach Gemüt:** vorsichtig Davout, mutig Ney. Masséna wählt keiner — seine Währung ist Unterschlagung, und ein Bot, der unterschlägt, misst das Strafsystem statt des Spiels.
+
+**Balance-Wirkung: ungemessen.** Die Decke bei Rang 11 sollte fallen; um wie viel, sagt erst die Neumessung.
+
+---
+
 ## 2026-07-30 — Das Lager ist der Abend, der Schreibtisch ist die Arbeit
 
 **Rang 9 hatte zwölf Knöpfe auf drei Abende, drei davon die Kompaniekasse in drei Varianten.** Der Schreibtisch war seit Sitzung 5 gebaut, die Verwaltung lag trotzdem weiter daneben im Lager — und verdrängte damit genau das, wovor der Kommentar über `abendeFuer()` warnt.

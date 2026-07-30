@@ -305,8 +305,98 @@ const LEUTE = [
      sie wird nirgends angekündigt.** Sie wird nur eingelöst. */
   {id:'grandmaison', kurz:'Grandmaison', ab:9,
    stufen:['Chef de bataillon','Colonel','Général de brigade','Général de division'],
-   was:'Der General. Ob er deinen Namen kennt, hat sich vor zwölf Jahren entschieden, an einem Damm im Sumpf.'}
+   was:'Der General. Ob er deinen Namen kennt, hat sich vor zwölf Jahren entschieden, an einem Damm im Sumpf.'},
+
+  /* ── Die drei Marschälle ──
+     Sie stehen in derselben Liste wie die Kette, damit `gunst()`,
+     `gunstGeben()` und `personName()` unverändert für sie gelten. Sichtbar ist
+     immer nur der eine, den man gewählt hat — `kenntPerson()` prüft das. */
+  {id:'davout',  kurz:'Davout',  ab:11, patron:true, stufen:['Maréchal'],
+   was:'Prince d’Eckmühl. Er verlangt Ordnung, und er verlangt sie von jedem gleich, einschließlich von sich.'},
+  {id:'ney',     kurz:'Ney',     ab:11, patron:true, stufen:['Maréchal'],
+   was:'Duc d’Elchingen. Er sieht, wer vorgeht, und er sieht sonst wenig.'},
+  {id:'massena', kurz:'Masséna', ab:11, patron:true, stufen:['Maréchal'],
+   was:'Duc de Rivoli. Er hat in Italien mehr verdient als jeder andere und hört nicht auf damit.'}
 ];
+
+/* ══════════════════ DIE PROTEKTION EINES MARSCHALLS ══════════════════
+
+   **Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine
+   Zugehörigkeit.** Bis Rang 11 arbeitet man sich eine Kette hoch, in der jeder
+   Nächste einen Schritt über dem Vorigen steht. Darüber gibt es das nicht mehr:
+   Ein Général de brigade wird nicht von seinem Divisionsgeneral befördert,
+   sondern vom Kaiser — und der Kaiser kennt achthundert Generäle nicht.
+
+   **Er kennt seine Marschälle.** Wessen Mann du bist, entscheidet, wer deinen
+   Namen ausspricht, wenn eine Stelle aufgeht. Historisch war das der
+   entscheidende Mechanismus der ganzen Epoche: Es gab Davouts Leute, Neys
+   Leute, Massénas Leute, und wer zu keinem gehörte, blieb Colonel.
+
+   **Gemessen war das der Engpass.** Grandmaison war Patron für die Ränge 10 bis
+   13 — ein Mann, vier Stufen, zwei Gunstquellen, und beide am Gefecht hängend.
+   Vierzig von vierzig Maximalveteranen blieben Colonel, bei einem Median von
+   **−2**, wo **+5** nötig waren. Nicht die Schwelle war zu hoch, die Mechanik
+   war zu dünn.
+
+   ── Was die drei voneinander unterscheidet ──
+
+   **Jeder hat eine andere Vorstellung davon, was ein guter Untergebener ist**,
+   und keine davon ist die richtige:
+
+   | | verlangt | verachtet |
+   |---|---|---|
+   | **Davout** | erfüllte stehende Aufträge, ein Bataillon in Ordnung, saubere Bücher | jeden Eintrag im Verzeichnis, doppelt |
+   | **Ney** | vor der Linie stehen, Bulletins, genommene Stellungen | ein Gefecht, in dem dein Name nicht fällt |
+   | **Masséna** | Geld, und dass du weißt, wie man daran kommt | Ehrlichkeit, die ihn schlecht aussehen lässt |
+
+   ── Und der Preis, den keiner ansagt: ihr eigener Stand ──
+
+   **Ein Patron ist nur so viel wert, wie der Kaiser auf ihn hört**, und das
+   ändert sich. Davout bleibt oben, weil er nie etwas falsch macht und deshalb
+   nie geliebt wird. Ney steht hoch und stürzt in Russland ab, wo er die
+   Nachhut führt und dabei ein Korps verliert. Masséna ist 1805 der reichste
+   Mann der Armee und 1811 in Portugal erledigt.
+
+   **Wer sich 1807 für Masséna entscheidet, wählt den, der jetzt am meisten
+   gibt und am Ende nichts mehr wert ist.** Das Spiel sagt es nicht. Es zeigt
+   nur seinen Stand, und der steht neben seinem Namen. */
+const PATRONE = [
+  {id:'davout',  name:'Maréchal Davout, Prince d’Eckmühl',
+   will:'ordnung', wollen:'Ordnung, und zwar überprüfbar',
+   text:'Er fragt dich nach Zahlen. Wie viele Paar Schuhe, wie viele auf dem Marsch zurückgeblieben, '
+      +'wie viele deiner Unteroffiziere lesen können. Er schreibt die Antworten auf und vergleicht sie im Frühjahr '
+      +'mit dem, was du gesagt hast. Man erzählt sich, dass er noch nie jemanden angeschrien hat.',
+   /* Sein Stand ist der stabilste von allen und nie der höchste: Er macht
+      nichts falsch und wird dafür geachtet, nicht geliebt. */
+   stand:{4:3, 5:4, 6:4, 7:4, 8:5, 9:4, 10:4}},
+
+  {id:'ney',     name:'Maréchal Ney, Duc d’Elchingen',
+   will:'tapfer', wollen:'dass man dich vorn gesehen hat',
+   text:'Er redet zwanzig Minuten mit dir und stellt keine einzige Frage, die du beantworten müsstest. '
+      +'Am Ende sagt er, er habe bei Elchingen jemanden gesehen, der auf der Brücke stehen geblieben ist, '
+      +'und ob du das gewesen seist. Du warst es nicht. Er nickt trotzdem.',
+   /* Der Höchststand der Armee — bis Russland. Danach ist er der Mann, der die
+      Nachhut geführt und ein Korps verloren hat, und beides stimmt. */
+   stand:{4:4, 5:5, 6:5, 7:4, 8:5, 9:3, 10:2}},
+
+  {id:'massena', name:'Maréchal Masséna, Duc de Rivoli',
+   will:'geld', wollen:'seinen Anteil, und dass du deinen nimmst',
+   text:'Er empfängt dich in einem Zimmer, das drei Wochen vorher jemand anderem gehört hat, und redet über '
+      +'den Preis von Tuch. Nach einer halben Stunde weißt du, dass es kein Gespräch über Tuch war, '
+      +'und dass du eine Antwort gegeben hast, ohne es zu merken.',
+   /* 1805 der reichste Mann der Armee, nach Portugal 1811 erledigt. Wer ihn
+      früh wählt, bekommt am meisten und steht am Ende allein. */
+   stand:{4:5, 5:4, 6:4, 7:3, 8:1, 9:0, 10:0}}
+];
+function patronVon(id){ return PATRONE.find(p=>p.id===id) || null; }
+/* Sein Stand beim Kaiser im laufenden Feldzug. Vor Rang 11 gibt es keine
+   Wahl, also auch keinen Stand; nach dem letzten Eintrag gilt der letzte. */
+function patronStand(id, kap){
+  const p = patronVon(id); if(!p) return 0;
+  const k = Math.max(0, kap|0);
+  for(let i = k; i >= 0; i--) if(p.stand[i] !== undefined) return p.stand[i];
+  return 3;
+}
 
 /* Nachrücker, wenn einer fällt. Der Nachfolger trägt denselben Posten und
    kennt dich nicht — deshalb Gunst 0 und ein eigener Satz zur Einführung. */

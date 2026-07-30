@@ -212,6 +212,11 @@ function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
    sich das, sonst verschwände ein Fürsprecher bei einer Degradierung, und
    seine Gunst liefe unsichtbar weiter. */
 function kenntPerson(l){
+  /* **Sichtbar ist immer nur der Marschall, den man gewählt hat.** Die drei
+     stehen in derselben Liste wie die Kette, damit `gunst()` und
+     `personName()` unverändert für sie gelten — aber man gehört zu einem,
+     nicht zu dreien. */
+  if(l.patron) return S.patron === l.id;
   if(!l.ab) return true;
   return Math.max(S.rang|0, S.hoechsterRang|0) >= l.ab;
 }
@@ -221,8 +226,14 @@ function ueberDir(){
     if(!kenntPerson(l)) return '';
     const p = S.leute[l.id]; if(!p) return '';
     const g = p.gunst, farbe = g<0 ? 'warn' : (g>=3 ? 'ok' : '');
+    /* **Beim Patron steht sein eigener Stand daneben.** Er ist die einzige
+       Zahl der Seitenleiste, die nichts mit dem Spieler zu tun hat — und
+       genau das ist ihre Aussage: Ein Marschall, der beim Kaiser bei null
+       steht, nützt dir nichts, egal wie sehr er dich schätzt. */
+    const macht = l.patron
+      ? ` <i class="mini" style="font-style:normal">· Kaiser ${patronStand(l.id, kapitelNummer())}</i>` : '';
     return `<div class="kv"><span class="hilfe" data-hilfe="${String(l.was).replace(/"/g,'&quot;')}">${
-      p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
+      p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}${macht}</span>
       <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
   };
   return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}${verzeichnis()}`;

@@ -587,8 +587,8 @@ function kapitelauftragAbrechnen(){
   if(LAUF.kauftrag && LAUF.kauftrag.kap === nr) return LAUF.kauftrag;
   const ok = k.pruef();
   const wer = beurteiler() || 'grandmaison';
-  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; }
-  else gunstGeben(wer,-1);
+  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; patronMerkt('auftragJa'); }
+  else { gunstGeben(wer,-1); patronMerkt('auftragNein'); }
   LAUF.kauftrag = {kap:nr, id:k.id, ok:ok, wer:wer};
   return LAUF.kauftrag;
 }
@@ -3103,7 +3103,11 @@ function kampfEnde(sieg, letzterText){
   K.stumm = stumm;
   if(stufe === 1) { S.belobigungen++; S.kameradschaft = Math.min(100, S.kameradschaft+4); }
   if(stufe === 2) { S.nennungen++; }
-  if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; }
+  if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; patronMerkt('bulletin'); }
+  /* **Ney sieht nur, wer vorn war.** Ein Gefecht, in dem der Name nicht fällt,
+     ist für ihn kein Gefecht — und das ist die Kehrseite seiner Großzügigkeit:
+     Er gibt schnell und vergisst ebenso schnell. */
+  if(stufe === 0) patronMerkt('unsichtbar');
   K.stufeName = ['','Lob vor der Front','Nennung im Tagesbefehl',
                  bulletinZeit?'Im Bulletin der Großen Armee':'Dem Oberbefehl gemeldet'][stufe];
   /* ── Die Abrechnung ──
@@ -3462,7 +3466,7 @@ const LEITER = [
    text:p=>esc(p)+` übergibt dir das Regiment und den Adler dazu.
     <br><br>Der Adler ist kein Gegenstand, sondern eine Bedingung. Wer ihn verliert, verliert alles, was daran hängt — unabhängig davon, wie das Gefecht ausgegangen ist.`},
 
-  {rang:12, name:'Général de brigade', ruf:480, patron:'grandmaison', gunst:5, bulletins:3, von:[10,11],
+  {rang:12, name:'Général de brigade', ruf:480, patron:'patron', gunst:5, bulletins:3, von:[10,11],
    vakanz:'brigade', vorschlag:'für eine Brigade, wenn der Kaiser zustimmt',
    stellenText:'Die Division habe ihre Brigadegenerale.',
    faelltWer:'Général Séverin', rueckt:'grandmaison',
@@ -3473,7 +3477,7 @@ const LEITER = [
    text:p=>esc(p)+` schlägt dich vor, und in Paris wird unterschrieben. Vier Regimenter, ein Stab, eine Karte.
     <br><br>Ab jetzt vergeht die Zeit in Stunden, und was du über den Feind weißt, hat jemand vor einer Stunde gesehen.`},
 
-  {rang:13, name:'Général de division', ruf:570, patron:'grandmaison', gunst:5, orden:'legion_grand', von:[11,12],
+  {rang:13, name:'Général de division', ruf:570, patron:'patron', gunst:5, orden:'legion_grand', von:[11,12],
    vakanz:'division', vorschlag:'für eine Division',
    stellenText:'Das Korps habe seine Divisionsgenerale.',
    faelltWer:'Général de division Marchand', rueckt:'grandmaison',
@@ -3488,10 +3492,28 @@ const LEITER = [
      Kein Patron: Marschälle wurden von einem Mann allein ernannt. Die
      Bedingung `generalskampagne` gibt es noch nicht — der Rang ist gebaut und
      unerreichbar, und das ist der Entwurf, nicht ein Versäumnis. */
-  {rang:14, name:'Maréchal d\'Empire', ruf:680, patron:null, gunst:0,
-   generalskampagne:true, von:[13],
+  /* ── Rang 14 hängt an einem Mann, nicht an einem Szenario ──
+     **Hier stand `generalskampagne:true`, und die gibt es nicht** — der Rang
+     war damit gebaut und per Regel unerreichbar, und die ganze VP-Ökonomie war
+     gegen eine Decke geeicht, die niemand je gesehen hat.
+
+     An ihre Stelle tritt der Marschall, den man sich bei Rang 11 gewählt hat.
+     Er schlägt vor, der Kaiser entscheidet — und ob der Kaiser zuhört, hängt
+     nicht an dir, sondern am **Stand deines Patrons** (`patronMacht:4`).
+
+     **Das ist die letzte und härteste Folge der Wahl von 1807.** Masséna steht
+     1812 bei null; wer ihn genommen hat, kann alles richtig gemacht haben und
+     wird trotzdem nicht vorgeschlagen. Es steht dabei, es wird nie erklärt,
+     und es ist nicht mehr zu ändern. */
+  {rang:14, name:'Maréchal d\'Empire', ruf:680, patron:'patron', gunst:5,
+   patronMacht:4, bulletins:5, von:[13],
+   vorschlag:'für den Stab des Kaisers',
+   stellenText:'Es sei kein Marschallstab zu vergeben.',
    fehltRuf:'Es gibt keine Liste, auf die man sich setzen lässt. Es gibt einen Mann, der einen Namen sagt.',
-   text:()=>`Es wird nicht verlesen. Es steht im Moniteur, und jemand liest es dir vor.
+   fehltGunst:'Der Mann, der deinen Namen sagen müsste, sagt ihn nicht.',
+   fehltBulletins:'Der Kaiser ernennt niemanden, von dem er nur gehört hat.',
+   fehltPatronMacht:'Dein Marschall schlägt dich vor. Man hört ihn an, wie man einen anhört, den man nicht mehr braucht.',
+   text:p=>esc(p)+` sagt deinen Namen, und diesmal hört jemand hin. Es wird nicht verlesen — es steht im Moniteur, und jemand liest es dir vor.
     <br><br>Vierundzwanzig Namen stehen vor deinem, und die meisten davon standen 1796 dort, wo du gestanden hast.`}
 ];
 
@@ -3515,10 +3537,31 @@ const LEITER = [
    Fällt nichts aus (Rang 14, oder eine Lücke in der Leiter), gibt es niemanden
    zu beeindrucken — dann liefert die Funktion null, und `gunstGeben()` läuft
    ins Leere, was es ohnehin gefahrlos tut. */
+/* ── `'patron'` in der LEITER ist eine Rolle, kein Name ──
+   **Die LEITER ist ein Datensatz und kann nicht wissen, wen dieser Lauf
+   gewählt hat.** Ab Rang 12 steht dort deshalb der Platzhalter, und jede
+   Stelle, die den Patron *liest*, muss ihn auflösen — es sind zwölf.
+
+   ⚠ Zuerst tat es nur `beurteiler()`, und damit prüfte die Musterung
+   `gunst('patron')`: immer null, immer `fehltGunst`. Der Marschall war
+   gewählt, hatte Fürsprache +5, und der Tisch sah ihn nicht. **Dieselbe
+   Fehlerfamilie wie fünfmal zuvor** — eine Regel an einen Namen gebunden
+   statt an die Rolle, nur diesmal in die andere Richtung. */
+function leiterPatron(z){
+  if(!z || !z.patron) return null;
+  return z.patron === 'patron' ? (S && S.patron || 'grandmaison') : z.patron;
+}
+
 function beurteiler(){
   const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0 && e.patron);
   if(!passend.length) return null;
-  return passend.reduce((a, b) => (b.rang < a.rang ? b : a)).patron;
+  const p = passend.reduce((a, b) => (b.rang < a.rang ? b : a)).patron;
+  /* ── `'patron'` ist keine Person, sondern eine Rolle ──
+     **Ab Rang 12 beurteilt der Marschall, den man sich gewählt hat.** Die
+     LEITER trägt dort den Platzhalter, weil sie ein Datensatz ist und nicht
+     wissen kann, wen dieser Lauf gewählt hat. Wer noch keinen hat, fällt auf
+     Grandmaison zurück — dann greift die Wahl beim nächsten Lager. */
+  return p === 'patron' ? (S.patron || 'grandmaison') : p;
 }
 
 /* `nurOffizier` blendet die Unteroffiziersränge aus — die vergibt seit dem
@@ -3603,7 +3646,7 @@ function feldBefoerderung(){
   rangSetzen(Math.max(S.rang, ziel.rang));
   offizierAusruesten();
   S.ruf += 5;
-  if(ziel.patron) gunstGeben(ziel.patron, 1);
+  if(leiterPatron(ziel)) gunstGeben(leiterPatron(ziel), 1);
   S.log.push('Befördert zum ' + ziel.name + '.');
   /* ── Das Papier kommt später ──
      **Im Feld wird ernannt, ausgestellt wird im Lager.** Der Bescheid ist der
@@ -3613,7 +3656,7 @@ function feldBefoerderung(){
      nicht: Man ist es sofort, und man hat es eine Woche später schriftlich. */
   if(ziel.rang >= 5) S.bescheidOffen = ziel.rang;
   return `<div class="wirkung"><span>Im Feld befördert</span>
-    ${esc(personName(ziel.patron) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
+    ${esc(personName(leiterPatron(ziel)) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
     Eingetragen wird es später, von jemand anderem. <b>${esc(ziel.name)}</b></div>`;
 }
 
@@ -3640,7 +3683,7 @@ function vakanzPruefen(){
     if(v.tot || v.faellt) continue;
     if(!schwellenStimmen(z)) continue;
     v.faellt = true;
-    if(LAUF) LAUF.vorschlag = {patron:z.patron, rang:z.rang};
+    if(LAUF) LAUF.vorschlag = {patron:leiterPatron(z), rang:z.rang};
     return;                                // höchstens ein Vorschlag je Gefecht
   }
 }
@@ -3648,15 +3691,19 @@ function vakanzPruefen(){
 /* Ob ein Eintrag der Leiter erfüllt ist — **ohne** die Vakanz. Sie wird
    getrennt geprüft, weil sie erst durch den Vorschlag entsteht. */
 function schwellenStimmen(z, stand){
-  const g = stand || {ruf:S.ruf, gunst:gunst(z.patron), bildung:S.attr.bildung};
+  const g = stand || {ruf:S.ruf, gunst:gunst(leiterPatron(z)), bildung:S.attr.bildung};
   if(g.ruf < z.ruf) return false;
-  if(z.patron && g.gunst < z.gunst) return false;
+  if(leiterPatron(z) && g.gunst < z.gunst) return false;
   if(z.bildung && g.bildung < z.bildung) return false;
   if(z.reiten && wert('reiten') < z.reiten) return false;
   if(z.orden && !hatOrden(z.orden)) return false;
   if(z.bulletins && (S.bulletins|0) < z.bulletins) return false;
   if(z.adler && S.adlerVerloren) return false;
   if(z.generalskampagne && !S.generalskampagne) return false;
+  /* Der Stand des Patrons beim Kaiser — die einzige Schranke des Spiels, die
+     nicht am Spieler hängt, sondern an einer Entscheidung von vor fünf
+     Kapiteln. */
+  if(z.patronMacht && patronStand(S.patron, kapitelNummer()) < z.patronMacht) return false;
   return true;
 }
 
@@ -3665,13 +3712,14 @@ function schwellenStimmen(z, stand){
    aus dem LEITER-Eintrag (`fehltBildung`, `fehltOrden`, …). */
 function fehltWas(z){
   if(S.ruf < z.ruf) return 'fehltRuf';
-  if(z.patron && gunst(z.patron) < z.gunst) return 'fehltGunst';
+  if(leiterPatron(z) && gunst(leiterPatron(z)) < z.gunst) return 'fehltGunst';
   if(z.bildung && S.attr.bildung < z.bildung) return 'fehltBildung';
   if(z.reiten && wert('reiten') < z.reiten) return 'fehltReiten';
   if(z.orden && !hatOrden(z.orden)) return 'fehltOrden';
   if(z.bulletins && (S.bulletins|0) < z.bulletins) return 'fehltBulletins';
   if(z.adler && S.adlerVerloren) return 'fehltAdler';
   if(z.generalskampagne && !S.generalskampagne) return 'fehltRuf';
+  if(z.patronMacht && patronStand(S.patron, kapitelNummer()) < z.patronMacht) return 'fehltPatronMacht';
   return null;
 }
 
@@ -3781,9 +3829,9 @@ function bescheidBogen(ziel, text, klasse, statuszeile){
   const namen = [];
   if(m.kaiser){
     namen.push({n:'Napoléon', a:'Empereur des Français', gross:true});
-    if(ziel.patron) namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
-  } else if(ziel.patron){
-    namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+    if(leiterPatron(ziel)) namen.push({n:personName(leiterPatron(ziel)), a:'vorgeschlagen'});
+  } else if(leiterPatron(ziel)){
+    namen.push({n:personName(leiterPatron(ziel)), a:'vorgeschlagen'});
   }
   const weitere = [
     {n:'Delzons', a:'Colonel · 32ᵉ de ligne'},
@@ -3858,7 +3906,7 @@ function zeigeBefoerderung(n){
   }
 
   if(!S.befPruefungen[n.id])
-    S.befPruefungen[n.id] = {ruf:S.ruf, gunst:gunst(ziel.patron), bildung:S.attr.bildung};
+    S.befPruefungen[n.id] = {ruf:S.ruf, gunst:gunst(leiterPatron(ziel)), bildung:S.attr.bildung};
   const g = S.befPruefungen[n.id];
 
   const vakanz  = !ziel.vakanz || vakanzStand(ziel.vakanz).tot;
@@ -3870,12 +3918,17 @@ function zeigeBefoerderung(n){
      daraus eine Kette von Sonderfällen geworden. */
   const nachsatz = {
     fehltRuf:     () => `Für den ${esc(ziel.name)} braucht es Ruf ${ziel.ruf} — du hast ${S.ruf}.`,
-    fehltGunst:   () => `Für den ${esc(ziel.name)} braucht es die Fürsprache von ${esc(personName(ziel.patron))} — ${ziel.gunst}, du hast ${gunst(ziel.patron)}. Fürsprache sammelt sich in Abenden und Gefälligkeiten, nicht in einer einzigen Tat.`,
+    fehltGunst:   () => `Für den ${esc(ziel.name)} braucht es die Fürsprache von ${esc(personName(leiterPatron(ziel)))} — ${ziel.gunst}, du hast ${gunst(leiterPatron(ziel))}. Fürsprache sammelt sich in Abenden und Gefälligkeiten, nicht in einer einzigen Tat.`,
     fehltBildung: () => `Für den ${esc(ziel.name)} braucht es Bildung ${ziel.bildung} — du hast ${S.attr.bildung}. Buchstaben lernt man im Lager und in der Regimentsschule, gegen Geld und gegen Zeit.`,
     fehltReiten:  () => `Für den ${esc(ziel.name)} braucht es Reiten ${ziel.reiten} — du hast ${wert('reiten')}.`,
     fehltOrden:   () => `Für den ${esc(ziel.name)} braucht es ${esc((ordenVon(ziel.orden)||{name:'einen Orden, den es noch nicht gibt'}).name)}.`,
     fehltBulletins:() => `Für den ${esc(ziel.name)} braucht es ${ziel.bulletins} Nennungen im Bulletin — du hast ${S.bulletins|0}.`,
-    fehltAdler:   () => `Ein Regiment ohne Adler bekommt keinen Colonel.`
+    fehltAdler:   () => `Ein Regiment ohne Adler bekommt keinen Colonel.`,
+    /* Die einzige Schranke, an der man nichts tun kann — sie hängt an einer
+       Entscheidung von vor fünf Kapiteln. Der Satz sagt das nicht; er sagt
+       nur, wie es steht. */
+    fehltPatronMacht:() => `${esc(personName(S.patron||'grandmaison'))} steht beim Kaiser bei ${
+      patronStand(S.patron, kapitelNummer())} von 5. Für einen Marschallstab reicht das nicht.`
   };
 
   /* ── Vierter Weg: die Aktenprüfung ──
@@ -3897,8 +3950,8 @@ function zeigeBefoerderung(n){
     rangSetzen(Math.max(S.rang, ziel.rang));
     offizierAusruesten();
     S.ruf += 5;
-    if(ziel.patron) gunstGeben(ziel.patron, 1);
-    text = ziel.text(ziel.patron ? personName(ziel.patron) : '');
+    if(leiterPatron(ziel)) gunstGeben(leiterPatron(ziel), 1);
+    text = ziel.text(leiterPatron(ziel) ? personName(leiterPatron(ziel)) : '');
     klasse = 'gut';
     /* ── Rang 12 schaltet die Generalskampagnen frei ──
        Einmal erreicht, bleiben sie dauerhaft offen (`META.generalskampagnen`) —
@@ -3933,7 +3986,7 @@ function zeigeBefoerderung(n){
          + `<br><br><em>${(nachsatz[fehlt] || nachsatz.fehltRuf)()}</em>`;
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
-  const statuszeile = `${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}`;
+  const statuszeile = `${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(leiterPatron(ziel)).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}`;
 
   /* **Ein Bescheid wird nur ausgestellt, wenn es etwas zu bescheiden gibt** —
      und erst ab Rang 5. Wer übergangen wird oder zwei Wollstreifen bekommt,

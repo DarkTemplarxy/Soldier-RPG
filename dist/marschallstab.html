@@ -1310,8 +1310,98 @@ const LEUTE = [
      sie wird nirgends angekündigt.** Sie wird nur eingelöst. */
   {id:'grandmaison', kurz:'Grandmaison', ab:9,
    stufen:['Chef de bataillon','Colonel','Général de brigade','Général de division'],
-   was:'Der General. Ob er deinen Namen kennt, hat sich vor zwölf Jahren entschieden, an einem Damm im Sumpf.'}
+   was:'Der General. Ob er deinen Namen kennt, hat sich vor zwölf Jahren entschieden, an einem Damm im Sumpf.'},
+
+  /* ── Die drei Marschälle ──
+     Sie stehen in derselben Liste wie die Kette, damit `gunst()`,
+     `gunstGeben()` und `personName()` unverändert für sie gelten. Sichtbar ist
+     immer nur der eine, den man gewählt hat — `kenntPerson()` prüft das. */
+  {id:'davout',  kurz:'Davout',  ab:11, patron:true, stufen:['Maréchal'],
+   was:'Prince d’Eckmühl. Er verlangt Ordnung, und er verlangt sie von jedem gleich, einschließlich von sich.'},
+  {id:'ney',     kurz:'Ney',     ab:11, patron:true, stufen:['Maréchal'],
+   was:'Duc d’Elchingen. Er sieht, wer vorgeht, und er sieht sonst wenig.'},
+  {id:'massena', kurz:'Masséna', ab:11, patron:true, stufen:['Maréchal'],
+   was:'Duc de Rivoli. Er hat in Italien mehr verdient als jeder andere und hört nicht auf damit.'}
 ];
+
+/* ══════════════════ DIE PROTEKTION EINES MARSCHALLS ══════════════════
+
+   **Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine
+   Zugehörigkeit.** Bis Rang 11 arbeitet man sich eine Kette hoch, in der jeder
+   Nächste einen Schritt über dem Vorigen steht. Darüber gibt es das nicht mehr:
+   Ein Général de brigade wird nicht von seinem Divisionsgeneral befördert,
+   sondern vom Kaiser — und der Kaiser kennt achthundert Generäle nicht.
+
+   **Er kennt seine Marschälle.** Wessen Mann du bist, entscheidet, wer deinen
+   Namen ausspricht, wenn eine Stelle aufgeht. Historisch war das der
+   entscheidende Mechanismus der ganzen Epoche: Es gab Davouts Leute, Neys
+   Leute, Massénas Leute, und wer zu keinem gehörte, blieb Colonel.
+
+   **Gemessen war das der Engpass.** Grandmaison war Patron für die Ränge 10 bis
+   13 — ein Mann, vier Stufen, zwei Gunstquellen, und beide am Gefecht hängend.
+   Vierzig von vierzig Maximalveteranen blieben Colonel, bei einem Median von
+   **−2**, wo **+5** nötig waren. Nicht die Schwelle war zu hoch, die Mechanik
+   war zu dünn.
+
+   ── Was die drei voneinander unterscheidet ──
+
+   **Jeder hat eine andere Vorstellung davon, was ein guter Untergebener ist**,
+   und keine davon ist die richtige:
+
+   | | verlangt | verachtet |
+   |---|---|---|
+   | **Davout** | erfüllte stehende Aufträge, ein Bataillon in Ordnung, saubere Bücher | jeden Eintrag im Verzeichnis, doppelt |
+   | **Ney** | vor der Linie stehen, Bulletins, genommene Stellungen | ein Gefecht, in dem dein Name nicht fällt |
+   | **Masséna** | Geld, und dass du weißt, wie man daran kommt | Ehrlichkeit, die ihn schlecht aussehen lässt |
+
+   ── Und der Preis, den keiner ansagt: ihr eigener Stand ──
+
+   **Ein Patron ist nur so viel wert, wie der Kaiser auf ihn hört**, und das
+   ändert sich. Davout bleibt oben, weil er nie etwas falsch macht und deshalb
+   nie geliebt wird. Ney steht hoch und stürzt in Russland ab, wo er die
+   Nachhut führt und dabei ein Korps verliert. Masséna ist 1805 der reichste
+   Mann der Armee und 1811 in Portugal erledigt.
+
+   **Wer sich 1807 für Masséna entscheidet, wählt den, der jetzt am meisten
+   gibt und am Ende nichts mehr wert ist.** Das Spiel sagt es nicht. Es zeigt
+   nur seinen Stand, und der steht neben seinem Namen. */
+const PATRONE = [
+  {id:'davout',  name:'Maréchal Davout, Prince d’Eckmühl',
+   will:'ordnung', wollen:'Ordnung, und zwar überprüfbar',
+   text:'Er fragt dich nach Zahlen. Wie viele Paar Schuhe, wie viele auf dem Marsch zurückgeblieben, '
+      +'wie viele deiner Unteroffiziere lesen können. Er schreibt die Antworten auf und vergleicht sie im Frühjahr '
+      +'mit dem, was du gesagt hast. Man erzählt sich, dass er noch nie jemanden angeschrien hat.',
+   /* Sein Stand ist der stabilste von allen und nie der höchste: Er macht
+      nichts falsch und wird dafür geachtet, nicht geliebt. */
+   stand:{4:3, 5:4, 6:4, 7:4, 8:5, 9:4, 10:4}},
+
+  {id:'ney',     name:'Maréchal Ney, Duc d’Elchingen',
+   will:'tapfer', wollen:'dass man dich vorn gesehen hat',
+   text:'Er redet zwanzig Minuten mit dir und stellt keine einzige Frage, die du beantworten müsstest. '
+      +'Am Ende sagt er, er habe bei Elchingen jemanden gesehen, der auf der Brücke stehen geblieben ist, '
+      +'und ob du das gewesen seist. Du warst es nicht. Er nickt trotzdem.',
+   /* Der Höchststand der Armee — bis Russland. Danach ist er der Mann, der die
+      Nachhut geführt und ein Korps verloren hat, und beides stimmt. */
+   stand:{4:4, 5:5, 6:5, 7:4, 8:5, 9:3, 10:2}},
+
+  {id:'massena', name:'Maréchal Masséna, Duc de Rivoli',
+   will:'geld', wollen:'seinen Anteil, und dass du deinen nimmst',
+   text:'Er empfängt dich in einem Zimmer, das drei Wochen vorher jemand anderem gehört hat, und redet über '
+      +'den Preis von Tuch. Nach einer halben Stunde weißt du, dass es kein Gespräch über Tuch war, '
+      +'und dass du eine Antwort gegeben hast, ohne es zu merken.',
+   /* 1805 der reichste Mann der Armee, nach Portugal 1811 erledigt. Wer ihn
+      früh wählt, bekommt am meisten und steht am Ende allein. */
+   stand:{4:5, 5:4, 6:4, 7:3, 8:1, 9:0, 10:0}}
+];
+function patronVon(id){ return PATRONE.find(p=>p.id===id) || null; }
+/* Sein Stand beim Kaiser im laufenden Feldzug. Vor Rang 11 gibt es keine
+   Wahl, also auch keinen Stand; nach dem letzten Eintrag gilt der letzte. */
+function patronStand(id, kap){
+  const p = patronVon(id); if(!p) return 0;
+  const k = Math.max(0, kap|0);
+  for(let i = k; i >= 0; i--) if(p.stand[i] !== undefined) return p.stand[i];
+  return 3;
+}
 
 /* Nachrücker, wenn einer fällt. Der Nachfolger trägt denselben Posten und
    kennt dich nicht — deshalb Gunst 0 und ein eigener Satz zur Einführung. */
@@ -5647,7 +5737,7 @@ STATIONEN.hunderttage = KAPITEL11.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 15;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen
+const LAUF_FASSUNG    = 16;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -5893,6 +5983,25 @@ const LAUF_WANDLER = {
       });
     }
     return Object.assign({}, alt, {fassung:15});
+  },
+  /* Fassung 15 kannte die drei Marschälle noch nicht. **Sie kommen in die
+     Personenkartei, aber ohne Wahl** — `S.patron` bleibt leer, und der
+     Schreibtisch legt sie beim nächsten Lager vor. Einen Patron rückwirkend
+     zuzuweisen hieße, eine Zugehörigkeit zu erfinden, die es nie gegeben hat;
+     bis zur Wahl fällt `beurteiler()` auf Grandmaison zurück, so wie es
+     vorher immer war. */
+  15: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.patron === undefined) m.patron = null;
+      if(m.leute) PATRONE.forEach(x=>{
+        if(!m.leute[x.id]){
+          const d = LEUTE.find(l=>l.id===x.id) || {};
+          m.leute[x.id] = {gunst:0, stufe:0, lebt:true, kurz:d.kurz};
+        }
+      });
+    }
+    return Object.assign({}, alt, {fassung:16});
   }
 };
 
@@ -6407,7 +6516,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        sinkt nie, auch wenn der Inspecteur einen Rang nimmt: Eine Bekanntschaft
        verliert man nicht durch eine Rückstufung. Gepflegt wird er an einer
        einzigen Stelle, `rangSetzen()`. */
-    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(),
+    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(), patron:null,
     /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
        und eine leere Liste ist ehrlicher als vier Platzhalter. */
     unterstellte:[], unterstellteStufe:0, unterId:0, unterTot:[], unterNamen:[], unterstellteVorher:null,
@@ -6491,6 +6600,31 @@ function gunstGeben(id, n){
      die zehn Jahre Vorlauf, die ein aufgestiegener Mann mitbringt. */
   if(S.patent && (id==='martel' || id==='collot')) return;
   p.gunst = Math.max(-5, Math.min(5, p.gunst + n));
+}
+
+/* ── Was der Patron sieht ──
+   **Drei Marschälle, drei Vorstellungen davon, was ein guter Untergebener
+   ist — und keine davon ist die richtige.** Dieselben Ereignisse zählen bei
+   jedem anders; wer Davouts Mann ist, sammelt mit sauberen Büchern, wer Neys
+   Mann ist, mit Bulletins, wer Massénas Mann ist, mit Geld.
+
+   **Das ist der Kern der Wahl:** Nicht wie viel Fürsprache man bekommt, sondern
+   wofür. Ein Lauf, der unter Davout mustergültig ist, steht unter Ney bei null
+   — und umgekehrt.
+
+   Es ist eine Stelle für alle drei, weil ein Zuschlag, den man an sechs
+   Stellen von Hand mitziehen muss, an der siebten vergessen wird. */
+const PATRON_ZAEHLT = {
+  ordnung: {auftragJa:1, auftragNein:-1, einheitGut:1, verzeichnis:-2},
+  tapfer:  {bulletin:1, unsichtbar:-1, vorn:1},
+  geld:    {gierig:1, ehrlich:-1, bar:1}
+};
+function patronMerkt(was, mal){
+  if(!S || !S.patron) return;
+  const p = (typeof patronVon==='function') ? patronVon(S.patron) : null;
+  if(!p) return;
+  const d = (PATRON_ZAEHLT[p.will] || {})[was];
+  if(d) gunstGeben(S.patron, d * (mal || 1));
 }
 
 /* Anrede mit Rang: „Sergent Martel", nach seinem Aufstieg „Sergent-major
@@ -6715,6 +6849,10 @@ function heimlich(id, text, schwere, indizes){
     const u = S.unterstellte && S.unterstellte[i];
     return u && u.lebt ? u.id : null;
   }).filter(x => x != null);
+  /* **Davout sieht jeden Eintrag, und er sieht ihn doppelt.** Nicht erst bei
+     der Entdeckung — schon beim Anlegen: Es gibt ihn, also stimmt etwas nicht,
+     und das genügt ihm. */
+  patronMerkt('verzeichnis');
   S.heimlich.push({id, text, schwere, mitwisser:wer,
                    seit:(LAUF?LAUF.node:0), kapitel:kapitelNummer()});
 }
@@ -7671,6 +7809,11 @@ function lebenGrund(){ return lebenMax({attr:S.attr, wunden:[]}); }
    sich das, sonst verschwände ein Fürsprecher bei einer Degradierung, und
    seine Gunst liefe unsichtbar weiter. */
 function kenntPerson(l){
+  /* **Sichtbar ist immer nur der Marschall, den man gewählt hat.** Die drei
+     stehen in derselben Liste wie die Kette, damit `gunst()` und
+     `personName()` unverändert für sie gelten — aber man gehört zu einem,
+     nicht zu dreien. */
+  if(l.patron) return S.patron === l.id;
   if(!l.ab) return true;
   return Math.max(S.rang|0, S.hoechsterRang|0) >= l.ab;
 }
@@ -7680,8 +7823,14 @@ function ueberDir(){
     if(!kenntPerson(l)) return '';
     const p = S.leute[l.id]; if(!p) return '';
     const g = p.gunst, farbe = g<0 ? 'warn' : (g>=3 ? 'ok' : '');
+    /* **Beim Patron steht sein eigener Stand daneben.** Er ist die einzige
+       Zahl der Seitenleiste, die nichts mit dem Spieler zu tun hat — und
+       genau das ist ihre Aussage: Ein Marschall, der beim Kaiser bei null
+       steht, nützt dir nichts, egal wie sehr er dich schätzt. */
+    const macht = l.patron
+      ? ` <i class="mini" style="font-style:normal">· Kaiser ${patronStand(l.id, kapitelNummer())}</i>` : '';
     return `<div class="kv"><span class="hilfe" data-hilfe="${String(l.was).replace(/"/g,'&quot;')}">${
-      p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}</span>
+      p.lebt ? esc(personName(l.id)) : '<s>'+esc(personName(l.id))+'</s>'}${macht}</span>
       <b class="${farbe}">${p.lebt ? (g>0?'+':'')+g : '†'}</b></div>`;
   };
   return `<p class="mini">Über dir</p>${LEUTE.map(zeile).join('')}${unterDir()}${verzeichnis()}`;
@@ -10028,8 +10177,8 @@ function kapitelauftragAbrechnen(){
   if(LAUF.kauftrag && LAUF.kauftrag.kap === nr) return LAUF.kauftrag;
   const ok = k.pruef();
   const wer = beurteiler() || 'grandmaison';
-  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; }
-  else gunstGeben(wer,-1);
+  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; patronMerkt('auftragJa'); }
+  else { gunstGeben(wer,-1); patronMerkt('auftragNein'); }
   LAUF.kauftrag = {kap:nr, id:k.id, ok:ok, wer:wer};
   return LAUF.kauftrag;
 }
@@ -12544,7 +12693,11 @@ function kampfEnde(sieg, letzterText){
   K.stumm = stumm;
   if(stufe === 1) { S.belobigungen++; S.kameradschaft = Math.min(100, S.kameradschaft+4); }
   if(stufe === 2) { S.nennungen++; }
-  if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; }
+  if(stufe === 3) { S.nennungen += 2; S.bulletins++; S.ruf += 4; patronMerkt('bulletin'); }
+  /* **Ney sieht nur, wer vorn war.** Ein Gefecht, in dem der Name nicht fällt,
+     ist für ihn kein Gefecht — und das ist die Kehrseite seiner Großzügigkeit:
+     Er gibt schnell und vergisst ebenso schnell. */
+  if(stufe === 0) patronMerkt('unsichtbar');
   K.stufeName = ['','Lob vor der Front','Nennung im Tagesbefehl',
                  bulletinZeit?'Im Bulletin der Großen Armee':'Dem Oberbefehl gemeldet'][stufe];
   /* ── Die Abrechnung ──
@@ -12903,7 +13056,7 @@ const LEITER = [
    text:p=>esc(p)+` übergibt dir das Regiment und den Adler dazu.
     <br><br>Der Adler ist kein Gegenstand, sondern eine Bedingung. Wer ihn verliert, verliert alles, was daran hängt — unabhängig davon, wie das Gefecht ausgegangen ist.`},
 
-  {rang:12, name:'Général de brigade', ruf:480, patron:'grandmaison', gunst:5, bulletins:3, von:[10,11],
+  {rang:12, name:'Général de brigade', ruf:480, patron:'patron', gunst:5, bulletins:3, von:[10,11],
    vakanz:'brigade', vorschlag:'für eine Brigade, wenn der Kaiser zustimmt',
    stellenText:'Die Division habe ihre Brigadegenerale.',
    faelltWer:'Général Séverin', rueckt:'grandmaison',
@@ -12914,7 +13067,7 @@ const LEITER = [
    text:p=>esc(p)+` schlägt dich vor, und in Paris wird unterschrieben. Vier Regimenter, ein Stab, eine Karte.
     <br><br>Ab jetzt vergeht die Zeit in Stunden, und was du über den Feind weißt, hat jemand vor einer Stunde gesehen.`},
 
-  {rang:13, name:'Général de division', ruf:570, patron:'grandmaison', gunst:5, orden:'legion_grand', von:[11,12],
+  {rang:13, name:'Général de division', ruf:570, patron:'patron', gunst:5, orden:'legion_grand', von:[11,12],
    vakanz:'division', vorschlag:'für eine Division',
    stellenText:'Das Korps habe seine Divisionsgenerale.',
    faelltWer:'Général de division Marchand', rueckt:'grandmaison',
@@ -12929,10 +13082,28 @@ const LEITER = [
      Kein Patron: Marschälle wurden von einem Mann allein ernannt. Die
      Bedingung `generalskampagne` gibt es noch nicht — der Rang ist gebaut und
      unerreichbar, und das ist der Entwurf, nicht ein Versäumnis. */
-  {rang:14, name:'Maréchal d\'Empire', ruf:680, patron:null, gunst:0,
-   generalskampagne:true, von:[13],
+  /* ── Rang 14 hängt an einem Mann, nicht an einem Szenario ──
+     **Hier stand `generalskampagne:true`, und die gibt es nicht** — der Rang
+     war damit gebaut und per Regel unerreichbar, und die ganze VP-Ökonomie war
+     gegen eine Decke geeicht, die niemand je gesehen hat.
+
+     An ihre Stelle tritt der Marschall, den man sich bei Rang 11 gewählt hat.
+     Er schlägt vor, der Kaiser entscheidet — und ob der Kaiser zuhört, hängt
+     nicht an dir, sondern am **Stand deines Patrons** (`patronMacht:4`).
+
+     **Das ist die letzte und härteste Folge der Wahl von 1807.** Masséna steht
+     1812 bei null; wer ihn genommen hat, kann alles richtig gemacht haben und
+     wird trotzdem nicht vorgeschlagen. Es steht dabei, es wird nie erklärt,
+     und es ist nicht mehr zu ändern. */
+  {rang:14, name:'Maréchal d\'Empire', ruf:680, patron:'patron', gunst:5,
+   patronMacht:4, bulletins:5, von:[13],
+   vorschlag:'für den Stab des Kaisers',
+   stellenText:'Es sei kein Marschallstab zu vergeben.',
    fehltRuf:'Es gibt keine Liste, auf die man sich setzen lässt. Es gibt einen Mann, der einen Namen sagt.',
-   text:()=>`Es wird nicht verlesen. Es steht im Moniteur, und jemand liest es dir vor.
+   fehltGunst:'Der Mann, der deinen Namen sagen müsste, sagt ihn nicht.',
+   fehltBulletins:'Der Kaiser ernennt niemanden, von dem er nur gehört hat.',
+   fehltPatronMacht:'Dein Marschall schlägt dich vor. Man hört ihn an, wie man einen anhört, den man nicht mehr braucht.',
+   text:p=>esc(p)+` sagt deinen Namen, und diesmal hört jemand hin. Es wird nicht verlesen — es steht im Moniteur, und jemand liest es dir vor.
     <br><br>Vierundzwanzig Namen stehen vor deinem, und die meisten davon standen 1796 dort, wo du gestanden hast.`}
 ];
 
@@ -12956,10 +13127,31 @@ const LEITER = [
    Fällt nichts aus (Rang 14, oder eine Lücke in der Leiter), gibt es niemanden
    zu beeindrucken — dann liefert die Funktion null, und `gunstGeben()` läuft
    ins Leere, was es ohnehin gefahrlos tut. */
+/* ── `'patron'` in der LEITER ist eine Rolle, kein Name ──
+   **Die LEITER ist ein Datensatz und kann nicht wissen, wen dieser Lauf
+   gewählt hat.** Ab Rang 12 steht dort deshalb der Platzhalter, und jede
+   Stelle, die den Patron *liest*, muss ihn auflösen — es sind zwölf.
+
+   ⚠ Zuerst tat es nur `beurteiler()`, und damit prüfte die Musterung
+   `gunst('patron')`: immer null, immer `fehltGunst`. Der Marschall war
+   gewählt, hatte Fürsprache +5, und der Tisch sah ihn nicht. **Dieselbe
+   Fehlerfamilie wie fünfmal zuvor** — eine Regel an einen Namen gebunden
+   statt an die Rolle, nur diesmal in die andere Richtung. */
+function leiterPatron(z){
+  if(!z || !z.patron) return null;
+  return z.patron === 'patron' ? (S && S.patron || 'grandmaison') : z.patron;
+}
+
 function beurteiler(){
   const passend = LEITER.filter(e => e.von.indexOf(S.rang) >= 0 && e.patron);
   if(!passend.length) return null;
-  return passend.reduce((a, b) => (b.rang < a.rang ? b : a)).patron;
+  const p = passend.reduce((a, b) => (b.rang < a.rang ? b : a)).patron;
+  /* ── `'patron'` ist keine Person, sondern eine Rolle ──
+     **Ab Rang 12 beurteilt der Marschall, den man sich gewählt hat.** Die
+     LEITER trägt dort den Platzhalter, weil sie ein Datensatz ist und nicht
+     wissen kann, wen dieser Lauf gewählt hat. Wer noch keinen hat, fällt auf
+     Grandmaison zurück — dann greift die Wahl beim nächsten Lager. */
+  return p === 'patron' ? (S.patron || 'grandmaison') : p;
 }
 
 /* `nurOffizier` blendet die Unteroffiziersränge aus — die vergibt seit dem
@@ -13044,7 +13236,7 @@ function feldBefoerderung(){
   rangSetzen(Math.max(S.rang, ziel.rang));
   offizierAusruesten();
   S.ruf += 5;
-  if(ziel.patron) gunstGeben(ziel.patron, 1);
+  if(leiterPatron(ziel)) gunstGeben(leiterPatron(ziel), 1);
   S.log.push('Befördert zum ' + ziel.name + '.');
   /* ── Das Papier kommt später ──
      **Im Feld wird ernannt, ausgestellt wird im Lager.** Der Bescheid ist der
@@ -13054,7 +13246,7 @@ function feldBefoerderung(){
      nicht: Man ist es sofort, und man hat es eine Woche später schriftlich. */
   if(ziel.rang >= 5) S.bescheidOffen = ziel.rang;
   return `<div class="wirkung"><span>Im Feld befördert</span>
-    ${esc(personName(ziel.patron) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
+    ${esc(personName(leiterPatron(ziel)) || 'Der Capitaine')} sagt es dir zwischen zwei Befehlen, ohne stehen zu bleiben.
     Eingetragen wird es später, von jemand anderem. <b>${esc(ziel.name)}</b></div>`;
 }
 
@@ -13081,7 +13273,7 @@ function vakanzPruefen(){
     if(v.tot || v.faellt) continue;
     if(!schwellenStimmen(z)) continue;
     v.faellt = true;
-    if(LAUF) LAUF.vorschlag = {patron:z.patron, rang:z.rang};
+    if(LAUF) LAUF.vorschlag = {patron:leiterPatron(z), rang:z.rang};
     return;                                // höchstens ein Vorschlag je Gefecht
   }
 }
@@ -13089,15 +13281,19 @@ function vakanzPruefen(){
 /* Ob ein Eintrag der Leiter erfüllt ist — **ohne** die Vakanz. Sie wird
    getrennt geprüft, weil sie erst durch den Vorschlag entsteht. */
 function schwellenStimmen(z, stand){
-  const g = stand || {ruf:S.ruf, gunst:gunst(z.patron), bildung:S.attr.bildung};
+  const g = stand || {ruf:S.ruf, gunst:gunst(leiterPatron(z)), bildung:S.attr.bildung};
   if(g.ruf < z.ruf) return false;
-  if(z.patron && g.gunst < z.gunst) return false;
+  if(leiterPatron(z) && g.gunst < z.gunst) return false;
   if(z.bildung && g.bildung < z.bildung) return false;
   if(z.reiten && wert('reiten') < z.reiten) return false;
   if(z.orden && !hatOrden(z.orden)) return false;
   if(z.bulletins && (S.bulletins|0) < z.bulletins) return false;
   if(z.adler && S.adlerVerloren) return false;
   if(z.generalskampagne && !S.generalskampagne) return false;
+  /* Der Stand des Patrons beim Kaiser — die einzige Schranke des Spiels, die
+     nicht am Spieler hängt, sondern an einer Entscheidung von vor fünf
+     Kapiteln. */
+  if(z.patronMacht && patronStand(S.patron, kapitelNummer()) < z.patronMacht) return false;
   return true;
 }
 
@@ -13106,13 +13302,14 @@ function schwellenStimmen(z, stand){
    aus dem LEITER-Eintrag (`fehltBildung`, `fehltOrden`, …). */
 function fehltWas(z){
   if(S.ruf < z.ruf) return 'fehltRuf';
-  if(z.patron && gunst(z.patron) < z.gunst) return 'fehltGunst';
+  if(leiterPatron(z) && gunst(leiterPatron(z)) < z.gunst) return 'fehltGunst';
   if(z.bildung && S.attr.bildung < z.bildung) return 'fehltBildung';
   if(z.reiten && wert('reiten') < z.reiten) return 'fehltReiten';
   if(z.orden && !hatOrden(z.orden)) return 'fehltOrden';
   if(z.bulletins && (S.bulletins|0) < z.bulletins) return 'fehltBulletins';
   if(z.adler && S.adlerVerloren) return 'fehltAdler';
   if(z.generalskampagne && !S.generalskampagne) return 'fehltRuf';
+  if(z.patronMacht && patronStand(S.patron, kapitelNummer()) < z.patronMacht) return 'fehltPatronMacht';
   return null;
 }
 
@@ -13222,9 +13419,9 @@ function bescheidBogen(ziel, text, klasse, statuszeile){
   const namen = [];
   if(m.kaiser){
     namen.push({n:'Napoléon', a:'Empereur des Français', gross:true});
-    if(ziel.patron) namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
-  } else if(ziel.patron){
-    namen.push({n:personName(ziel.patron), a:'vorgeschlagen'});
+    if(leiterPatron(ziel)) namen.push({n:personName(leiterPatron(ziel)), a:'vorgeschlagen'});
+  } else if(leiterPatron(ziel)){
+    namen.push({n:personName(leiterPatron(ziel)), a:'vorgeschlagen'});
   }
   const weitere = [
     {n:'Delzons', a:'Colonel · 32ᵉ de ligne'},
@@ -13299,7 +13496,7 @@ function zeigeBefoerderung(n){
   }
 
   if(!S.befPruefungen[n.id])
-    S.befPruefungen[n.id] = {ruf:S.ruf, gunst:gunst(ziel.patron), bildung:S.attr.bildung};
+    S.befPruefungen[n.id] = {ruf:S.ruf, gunst:gunst(leiterPatron(ziel)), bildung:S.attr.bildung};
   const g = S.befPruefungen[n.id];
 
   const vakanz  = !ziel.vakanz || vakanzStand(ziel.vakanz).tot;
@@ -13311,12 +13508,17 @@ function zeigeBefoerderung(n){
      daraus eine Kette von Sonderfällen geworden. */
   const nachsatz = {
     fehltRuf:     () => `Für den ${esc(ziel.name)} braucht es Ruf ${ziel.ruf} — du hast ${S.ruf}.`,
-    fehltGunst:   () => `Für den ${esc(ziel.name)} braucht es die Fürsprache von ${esc(personName(ziel.patron))} — ${ziel.gunst}, du hast ${gunst(ziel.patron)}. Fürsprache sammelt sich in Abenden und Gefälligkeiten, nicht in einer einzigen Tat.`,
+    fehltGunst:   () => `Für den ${esc(ziel.name)} braucht es die Fürsprache von ${esc(personName(leiterPatron(ziel)))} — ${ziel.gunst}, du hast ${gunst(leiterPatron(ziel))}. Fürsprache sammelt sich in Abenden und Gefälligkeiten, nicht in einer einzigen Tat.`,
     fehltBildung: () => `Für den ${esc(ziel.name)} braucht es Bildung ${ziel.bildung} — du hast ${S.attr.bildung}. Buchstaben lernt man im Lager und in der Regimentsschule, gegen Geld und gegen Zeit.`,
     fehltReiten:  () => `Für den ${esc(ziel.name)} braucht es Reiten ${ziel.reiten} — du hast ${wert('reiten')}.`,
     fehltOrden:   () => `Für den ${esc(ziel.name)} braucht es ${esc((ordenVon(ziel.orden)||{name:'einen Orden, den es noch nicht gibt'}).name)}.`,
     fehltBulletins:() => `Für den ${esc(ziel.name)} braucht es ${ziel.bulletins} Nennungen im Bulletin — du hast ${S.bulletins|0}.`,
-    fehltAdler:   () => `Ein Regiment ohne Adler bekommt keinen Colonel.`
+    fehltAdler:   () => `Ein Regiment ohne Adler bekommt keinen Colonel.`,
+    /* Die einzige Schranke, an der man nichts tun kann — sie hängt an einer
+       Entscheidung von vor fünf Kapiteln. Der Satz sagt das nicht; er sagt
+       nur, wie es steht. */
+    fehltPatronMacht:() => `${esc(personName(S.patron||'grandmaison'))} steht beim Kaiser bei ${
+      patronStand(S.patron, kapitelNummer())} von 5. Für einen Marschallstab reicht das nicht.`
   };
 
   /* ── Vierter Weg: die Aktenprüfung ──
@@ -13338,8 +13540,8 @@ function zeigeBefoerderung(n){
     rangSetzen(Math.max(S.rang, ziel.rang));
     offizierAusruesten();
     S.ruf += 5;
-    if(ziel.patron) gunstGeben(ziel.patron, 1);
-    text = ziel.text(ziel.patron ? personName(ziel.patron) : '');
+    if(leiterPatron(ziel)) gunstGeben(leiterPatron(ziel), 1);
+    text = ziel.text(leiterPatron(ziel) ? personName(leiterPatron(ziel)) : '');
     klasse = 'gut';
     /* ── Rang 12 schaltet die Generalskampagnen frei ──
        Einmal erreicht, bleiben sie dauerhaft offen (`META.generalskampagnen`) —
@@ -13374,7 +13576,7 @@ function zeigeBefoerderung(n){
          + `<br><br><em>${(nachsatz[fehlt] || nachsatz.fehltRuf)()}</em>`;
   }
   stationErledigt();     // die Entscheidung ist gefallen, bevor der Knopf kommt
-  const statuszeile = `${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(ziel.patron).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}`;
+  const statuszeile = `${vakanz?'VAKANZ VORHANDEN':'KEINE VAKANZ'} · RUF ${g.ruf}/${ziel.ruf} · ${esc(personKurz(leiterPatron(ziel)).toUpperCase())} ${g.gunst}/${ziel.gunst}${ziel.bildung?' · BILDUNG '+g.bildung+'/'+ziel.bildung:''} · ${bekommt?'BEFÖRDERT':'ÜBERGANGEN'}`;
 
   /* **Ein Bescheid wird nur ausgestellt, wenn es etwas zu bescheiden gibt** —
      und erst ab Rang 5. Wer übergangen wird oder zwei Wollstreifen bekommt,
@@ -13947,29 +14149,34 @@ const VORGAENGE = [
      {label:'Den Vertrag an den vergeben, der liefert', kosten:'0 F · Einheitszustand +30',
       tu(){ S.kasseQuartal = true;
         S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+30);
+        patronMerkt('ehrlich');
         return 'Der Tuchhändler aus Elbeuf ist der teuerste von dreien und der einzige, dessen Ware nach dem ersten Regen noch Tuch ist. Du nimmst ihn. Der Intendant zieht die Augenbrauen hoch und schreibt es auf.'; }},
      {label:'Den Vertrag an den vergeben, der zahlt', kosten:'+600 F · Einheitszustand −15 · es fällt wahrscheinlich auf', risk:true,
       tu(){ S.kasseQuartal = true; S.geld += 600;
         S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-15);
         S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 35);
         heimlich('vertrag_still','Der Lieferantenvertrag',3,[0]);
+        patronMerkt('gierig');
         return 'Er kommt selbst, im eigenen Wagen, und redet zwanzig Minuten über etwas anderes, ehe er zur Sache kommt. Die Sache ist ein Betrag, und der Betrag ist das Doppelte dessen, was ein Colonel im Jahr bekommt.'; }}
    ] : [
      {label:'Die Kasse ausgeben, wie sie vorgesehen ist', kosten:'0 F · Einheitszustand +25',
       tu(){ S.kasseQuartal = true;
         S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+25);
+        patronMerkt('ehrlich');
         return 'Schuhe für einundvierzig Mann, Hemden für neunzehn, ein Fass Branntwein und ein Wagen Stroh. Am Ende liegt der Rest in Kupfer auf dem Tisch, und der Rest ist nichts.'; }},
      {label:'Das Übliche abzweigen', kosten:'+150 F · Einheitszustand +10 · es kann auffallen', risk:true,
       tu(){ S.kasseQuartal = true; S.geld += 150;
         S.einheit = Math.min(100,(S.einheit==null?70:S.einheit)+10);
         S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 15);
         heimlich('kasse_ueblich','Die Kompaniekasse des Quartals',3,[0]);
+        patronMerkt('gierig');
         return 'Was jeder Capitaine nimmt, und was jeder Inspecteur weiß, dass jeder Capitaine nimmt. Die Schuhe kommen trotzdem, nur zwölf Paar weniger.'; }},
      {label:'Kräftig zulangen', kosten:'+400 F · Einheitszustand −10 · es fällt wahrscheinlich auf', risk:true,
       tu(){ S.kasseQuartal = true; S.geld += 400;
         S.einheit = Math.max(0,(S.einheit==null?70:S.einheit)-10);
         S.kasseRisiko = Math.min(85, (S.kasseRisiko||0) + 40);
         heimlich('kasse_voll','Die Kasse des dritten Quartals',3,[0,1]);
+        patronMerkt('gierig');
         return 'Du schreibst die Zahlen so, dass sie stimmen, und sie stimmen. Vierhundert Francs sind ein Pferd und eine Uniform, die nicht aussieht wie die eines Sergenten, der Glück gehabt hat.'; }}
    ]},
 
@@ -14097,7 +14304,11 @@ function adjutantTun(wert, schw, was, gut, schlecht){
 /* `'mit'` ist die einmalige Wahl des Mitgezogenen, alles andere ein Index in
    VORGAENGE. Ein Sonderfall in einer Zeile ist billiger als eine sechste Art,
    die nur einmal vorkommt. */
-function vorgangVon(k){ return k === 'mit' ? VORGANG_MITGEZOGEN : VORGAENGE[k]; }
+function vorgangVon(k){
+  if(k === 'mit')    return VORGANG_MITGEZOGEN;
+  if(k === 'patron') return VORGANG_PATRON;
+  return VORGAENGE[k];
+}
 
 /* Wie viele Ausfertigungen es je Art gibt, und welche Vorgänge dieses Lager
    bringt. **Drei Pflichtvorgänge, gezogen aus fünf Arten**, damit zwei Lager
@@ -14112,6 +14323,14 @@ function schreibtischStellen(n){
   if(S.rang >= 10 && !u.some(x=>x.mit) && !S.mitgewaehlt){
     S.mitgewaehlt = true;
     return ['mit'];
+  }
+  /* **Und ab Colonel die zweite einmalige Wahl: wessen Mann man ist.** Sie
+     geht allem anderen vor, weil ohne sie der Beurteiler fehlt — `beurteiler()`
+     fiele sonst auf Grandmaison zurück, und die Fürsprache liefe fünf Kapitel
+     lang an den Falschen. Dieselbe Fehlerfamilie, die diesen Umbau ausgelöst
+     hat. */
+  if(S.rang >= 11 && !S.patron){
+    return ['patron'];
   }
   /* ── Drei Vorgänge, drei Ebenen, je einer ──
 
@@ -14161,6 +14380,35 @@ function schreibtischStellen(n){
    du am meisten vertraust, ist der Mann, der am meisten über dich weiß. Beides
    wächst aus derselben Zeit, und man kann das eine nicht ohne das andere
    haben. Das Spiel spricht es nie aus. */
+/* ══════════════════ DIE WAHL DES PATRONS ══════════════════
+
+   **Sobald man Colonel ist, muss man sich entscheiden, wessen Mann man ist.**
+   Das ist der zweite und letzte unumkehrbare Entschluss des Spiels — der erste
+   war der Mitgezogene, und der betraf einen Mann unter dir. Dieser betrifft
+   den, der deinen Namen ausspricht, wenn eine Stelle aufgeht.
+
+   **Angezeigt wird, was jeder verlangt, und was er beim Kaiser gilt.** Nicht
+   angezeigt wird, wie sich das ändert. Masséna steht 1807 bei vier und 1812
+   bei null; man kann es wissen, wenn man Geschichte kennt, und das Spiel sagt
+   es nicht. */
+const VORGANG_PATRON = {
+  art:'patron', ebene:'bleibt', kopf:'Wessen Mann bist du',
+  text:u=>`Ein Regiment führt man allein, eine Brigade nicht. Über dir sitzen drei Männer, die dem Kaiser `
+    +`Namen nennen dürfen, und keiner von ihnen nennt einen, den er nicht kennt. `
+    +`Der Adjutant sagt, alle drei hätten gefragt. Das stimmt vermutlich bei einem von ihnen.`,
+  wahlen:u=>PATRONE.map(m=>({
+    label:m.name,
+    kosten:`verlangt ${m.wollen} · beim Kaiser ${patronStand(m.id, kapitelNummer())} von 5`,
+    tu(){
+      S.patron = m.id;
+      /* Er fängt bei +1 an: Er hat gefragt, also weiß er, wer du bist. */
+      const l = S.leute && S.leute[m.id];
+      if(l){ l.gunst = 1; l.lebt = true; }
+      return m.text + ` <span class="fein">Du bist ${esc(personKurz(m.id))}s Mann. Das lässt sich nicht zurücknehmen.</span>`;
+    }
+  }))
+};
+
 const VORGANG_MITGEZOGEN = {
   art:'mitgezogen', kopf:'Wen nimmst du mit',
   text:u=>`Ein Bataillon ist kein Zug, und die Sergenten bleiben bei der Kompanie. `
@@ -14251,6 +14499,9 @@ function zeigeLager(n){
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
     L.sold = soldAuszahlen();
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
+    /* Davout sieht sich den Zustand an, wenn er vorbeikommt, und er kommt
+       vorbei. Siebzig ist die Zahl, bei der er nichts sagt. */
+    if((S.einheit==null?70:S.einheit) >= 70) patronMerkt('einheitGut');
     /* Sechs Wochen unter demselben Offizier: Die Kette unter dir wird von
        allein ein wenig besser. Hier und nicht je Station, weil das Lager
        auch der Ort ist, an dem man gezielt nachhilft — beides gehört an

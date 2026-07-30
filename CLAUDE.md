@@ -97,6 +97,7 @@ Gebaut sind **alle elf Kapitel** — Italien 1796/97 bis Waterloo 1815, **einhun
 | **Der stehende Auftrag** je Feldzug ab Rang 10 | |
 | **Trauerblatt und Congé absolu** — die zwei Endbildschirme als Urkunde | |
 | **Feuille d’enrôlement** — Aushebung und Vorrat auf einem Bogen | |
+| **Die Protektion eines Marschalls** — Rang 14 ist erreichbar | Generalskampagnen als Szenarien |
 
 Das vollständige Design steht in **`KONZEPT.md`** — auch alles, was noch nicht gebaut ist. Wer ein neues System baut, liest dort zuerst nach, ob es schon entworfen wurde.
 
@@ -1814,6 +1815,56 @@ Das Bild über der Rundenzeile ist eine Aufstellung aus Augenhöhe: unten die ei
 
 ---
 
+## Die Protektion eines Marschalls (`PATRONE` in `grundwerte.js`)
+
+**Über dem Colonel hört Fürsprache auf, eine Zahl zu sein, und wird eine Zugehörigkeit.** Bis Rang 11 arbeitet man sich eine Kette hoch, in der jeder Nächste einen Schritt über dem Vorigen steht. Darüber gibt es das nicht mehr: Ein Général de brigade wird nicht von seinem Divisionsgeneral befördert, sondern vom Kaiser — und der Kaiser kennt achthundert Generäle nicht. **Er kennt seine Marschälle.**
+
+> **⚠ Gemessen war das der Engpass, und zwar der einzige.** Grandmaison war Patron für die Ränge 10 bis 13 — ein Mann, vier Stufen, zwei Gunstquellen, beide am Gefecht hängend. Vierzig von vierzig Maximalveteranen blieben Colonel, bei einem Median von **−2**, wo **+5** nötig waren, während Ruf zu 93 % und Bulletins zu 80 % erfüllt waren. **Nicht die Schwelle war zu hoch, die Mechanik war zu dünn.**
+
+**Sobald man Colonel ist, wählt man auf dem Schreibtisch, wessen Mann man ist** (`VORGANG_PATRON`, Ebene „Was bleibt", einmal je Laufbahn). Von da an beurteilt der Marschall die Ränge 12, 13 und 14 — Grandmaison bleibt der Patron für 10 und 11 und hört dort auf.
+
+### Drei Vorstellungen davon, was ein guter Untergebener ist
+
+**Und keine davon ist die richtige.** Dieselben Ereignisse zählen bei jedem anders (`PATRON_ZAEHLT`, eine Stelle für alle drei):
+
+| | verlangt | verachtet |
+|---|---|---|
+| **Davout** | erfüllte stehende Aufträge · Einheitszustand ≥ 70 | **jeden Eintrag im Verzeichnis, doppelt** |
+| **Ney** | Bulletins, also vor der Linie gestanden | ein Gefecht, in dem dein Name nicht fällt |
+| **Masséna** | Geld — die Kasse, den Vertrag, die Requisition | Ehrlichkeit, die ihn schlecht aussehen lässt |
+
+**Das ist der Kern der Wahl: nicht wie viel Fürsprache man bekommt, sondern wofür.** Ein Lauf, der unter Davout mustergültig ist, steht unter Ney bei null — und umgekehrt.
+
+### Ihr eigener Stand beim Kaiser (`patronStand()`)
+
+**Ein Patron ist nur so viel wert, wie der Kaiser auf ihn hört**, und das ändert sich. Der Stand steht in der Seitenleiste neben seinem Namen; wie er sich entwickelt, sagt das Spiel nicht.
+
+| | Jena | Eylau | Spanien | Russland | 1813 | 1814 | Waterloo |
+|---|---|---|---|---|---|---|---|
+| **Davout** | 4 | 4 | 4 | 5 | 4 | 4 | 4 |
+| **Ney** | 5 | 5 | 4 | 5 | **3** | **2** | 2 |
+| **Masséna** | 4 | 4 | 3 | **1** | **0** | 0 | 0 |
+
+> **Wer sich 1807 für Masséna entscheidet, wählt den, der jetzt am meisten gibt und am Ende nichts mehr wert ist.** Davout bleibt oben, weil er nie etwas falsch macht und deshalb nie geliebt wird. Ney stürzt in Russland ab, wo er die Nachhut führt und dabei ein Korps verliert. **Das Spiel sagt es nicht — es zeigt nur den Stand.**
+
+### Rang 14 hängt an einem Mann, nicht an einem Szenario
+
+**Hier stand `generalskampagne:true`, und die gibt es nicht** — der Rang war gebaut und per Regel unerreichbar, und die ganze VP-Ökonomie war gegen eine Decke geeicht, die niemand je gesehen hat. An ihre Stelle tritt der Marschall: **Gunst 5 · 5 Bulletins · und `patronMacht:4`, der Stand des Patrons.**
+
+Gemessen mit sonst perfektem Mann (Ruf 700, neun Bulletins, Grand Officier, Gunst 5):
+
+| | Russland | 1813 | 1814 | Waterloo |
+|---|---|---|---|---|
+| **Davout** | erfüllt | erfüllt | erfüllt | erfüllt |
+| **Ney** | erfüllt | erfüllt | **zu spät** | **zu spät** |
+| **Masséna** | **zu spät** | zu spät | zu spät | zu spät |
+
+**Das ist die letzte und härteste Folge der Wahl von 1807**, und die einzige Schranke des Spiels, an der man nichts mehr tun kann. Es steht dabei, es wird nie erklärt.
+
+> **⚠ `'patron'` in der LEITER ist eine Rolle, kein Name — und das musste an zwölf Stellen aufgelöst werden.** Zuerst tat es nur `beurteiler()`; die Musterung prüfte daraufhin `gunst('patron')`, also immer null, also immer `fehltGunst`. Der Marschall war gewählt, hatte Fürsprache +5, und der Tisch sah ihn nicht. **Dieselbe Fehlerfamilie wie fünfmal zuvor**, nur in die andere Richtung. `leiterPatron(z)` löst sie jetzt an einer Stelle auf.
+
+**Der Bot wählt nach Gemüt, nicht nach Nutzen:** der vorsichtige Davout, der mutige Ney. Masséna wählt keiner von beiden — seine Währung ist Unterschlagung, und ein Bot, der unterschlägt, misst das Strafsystem statt des Spiels. **Wer seinen Weg messen will, ändert eine Zeile in `balance.js` und sagt dazu, dass er es getan hat.**
+
 ## Das Lager ist der Abend, der Schreibtisch ist die Arbeit (30.07.2026)
 
 **Rang 9 hatte zwölf Knöpfe auf drei Abende, drei davon waren die Kompaniekasse in drei Varianten.** Verwaltung verdrängte damit die eigene Ausbildung — genau das, wovor der Kommentar über `abendeFuer()` seit Sitzung 2 warnt. Der Schreibtisch war gebaut, aber die Verwaltung lag weiterhin daneben im Lager.
@@ -2335,9 +2386,8 @@ function ausfuehrungsProbe(schw){
 ## Was als Nächstes ansteht
 
 1. **Die Einstiegshürde höher legen.** Der Erstläufer klettert mit Fertigkeiten-Sockel 20 zu schnell — Caporal 65 %, Sergent 53 %, neunmal ein Patent bei einer Weite von 31. Gefordert ist das Gegenteil: *„relativ nutzlos, bzw. ziemlich sicher sterben"*, **nie über den Colonel hinaus**. Der Hebel ist die Härtekurve (Italien +0), nicht der Sockel.
-2. **Den Marschallstab erreichbar machen.** Rang 14 verlangt eine `generalskampagne`, die es nicht gibt — dieselbe Lage, in der Rang 13 bis zum 30.07.2026 war. Erst danach steht die Decke der VP-Ökonomie endgültig fest.
-3. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
-4. **Alles, was in `OFFEN.md` steht.**
+2. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
+3. **Alles, was in `OFFEN.md` steht.**
 
 > **Erledigt am 30.07.2026, in einem Zug** — zwölf zusammenhängende Änderungen, weil keine für sich allein stehen konnte:
 >

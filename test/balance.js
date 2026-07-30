@@ -620,12 +620,22 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
             && LAUF.schreibtisch.offen && LAUF.schreibtisch.offen.length){
           const riskant = btn.filter(e => e.classList.contains('risk'));
           const brav    = btn.filter(e => !e.classList.contains('risk'));
-          z = (MUT && riskant.length) ? riskant[0]
+          /* ── Die Wahl des Patrons ist eine Charakterfrage, keine Optimierung ──
+             **Die beiden Gemüter wählen verschieden, und das ist der Sinn.**
+             Der vorsichtige Bot nimmt die Kasse ehrlich, erfüllt Aufträge und
+             hält seine Bücher sauber — das ist Davouts Währung. Der mutige
+             tritt vor die Linie und sammelt Bulletins — das ist Neys.
+             Masséna wählt keiner von beiden: Seine Währung ist Unterschlagung,
+             und ein Bot, der unterschlägt, misst das Strafsystem statt des
+             Spiels. **Wer Massénas Weg messen will, ändert diese Zeile und
+             sagt dazu, dass er es getan hat.** */
+          z = f(MUT ? /Maréchal Ney/ : /Maréchal Davout/)
+            || ((MUT && riskant.length) ? riskant[0]
             : (f(/Kasse ausgeben, wie sie vorgesehen/) || f(/an den vergeben, der liefert/)
                || f(/auf eigene Kosten/) || f(/Wahrheit melden/) || f(/Fähigeren/)
                || f(/Selbst mit ihm reden/) || f(/gleichmäßig/) || f(/Unteroffiziere selbst unterrichten/)
                || f(/Eng legen/) || f(/Schreiben, was er kann/) || f(/Stellung erkunden/)
-               || brav[0] || btn[0]);
+               || brav[0] || btn[0]));
         }
         if (!z) z = btn[0];
         if (z) z.click();

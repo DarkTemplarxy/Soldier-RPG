@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 15;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen
+const LAUF_FASSUNG    = 16;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -263,6 +263,25 @@ const LAUF_WANDLER = {
       });
     }
     return Object.assign({}, alt, {fassung:15});
+  },
+  /* Fassung 15 kannte die drei Marschälle noch nicht. **Sie kommen in die
+     Personenkartei, aber ohne Wahl** — `S.patron` bleibt leer, und der
+     Schreibtisch legt sie beim nächsten Lager vor. Einen Patron rückwirkend
+     zuzuweisen hieße, eine Zugehörigkeit zu erfinden, die es nie gegeben hat;
+     bis zur Wahl fällt `beurteiler()` auf Grandmaison zurück, so wie es
+     vorher immer war. */
+  15: alt => {
+    const m = alt.mann;
+    if(m){
+      if(m.patron === undefined) m.patron = null;
+      if(m.leute) PATRONE.forEach(x=>{
+        if(!m.leute[x.id]){
+          const d = LEUTE.find(l=>l.id===x.id) || {};
+          m.leute[x.id] = {gunst:0, stufe:0, lebt:true, kurz:d.kurz};
+        }
+      });
+    }
+    return Object.assign({}, alt, {fassung:16});
   }
 };
 

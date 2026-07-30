@@ -376,7 +376,7 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        sinkt nie, auch wenn der Inspecteur einen Rang nimmt: Eine Bekanntschaft
        verliert man nicht durch eine Rückstufung. Gepflegt wird er an einer
        einzigen Stelle, `rangSetzen()`. */
-    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(),
+    rang:1, hoechsterRang:1, zweig:null, ruf:0, leute:leuteStart(), patron:null,
     /* Die Kette unter dir. Leer bis Rang 9 — ein Fusilier befehligt niemanden,
        und eine leere Liste ist ehrlicher als vier Platzhalter. */
     unterstellte:[], unterstellteStufe:0, unterId:0, unterTot:[], unterNamen:[], unterstellteVorher:null,
@@ -460,6 +460,31 @@ function gunstGeben(id, n){
      die zehn Jahre Vorlauf, die ein aufgestiegener Mann mitbringt. */
   if(S.patent && (id==='martel' || id==='collot')) return;
   p.gunst = Math.max(-5, Math.min(5, p.gunst + n));
+}
+
+/* ── Was der Patron sieht ──
+   **Drei Marschälle, drei Vorstellungen davon, was ein guter Untergebener
+   ist — und keine davon ist die richtige.** Dieselben Ereignisse zählen bei
+   jedem anders; wer Davouts Mann ist, sammelt mit sauberen Büchern, wer Neys
+   Mann ist, mit Bulletins, wer Massénas Mann ist, mit Geld.
+
+   **Das ist der Kern der Wahl:** Nicht wie viel Fürsprache man bekommt, sondern
+   wofür. Ein Lauf, der unter Davout mustergültig ist, steht unter Ney bei null
+   — und umgekehrt.
+
+   Es ist eine Stelle für alle drei, weil ein Zuschlag, den man an sechs
+   Stellen von Hand mitziehen muss, an der siebten vergessen wird. */
+const PATRON_ZAEHLT = {
+  ordnung: {auftragJa:1, auftragNein:-1, einheitGut:1, verzeichnis:-2},
+  tapfer:  {bulletin:1, unsichtbar:-1, vorn:1},
+  geld:    {gierig:1, ehrlich:-1, bar:1}
+};
+function patronMerkt(was, mal){
+  if(!S || !S.patron) return;
+  const p = (typeof patronVon==='function') ? patronVon(S.patron) : null;
+  if(!p) return;
+  const d = (PATRON_ZAEHLT[p.will] || {})[was];
+  if(d) gunstGeben(S.patron, d * (mal || 1));
 }
 
 /* Anrede mit Rang: „Sergent Martel", nach seinem Aufstieg „Sergent-major
@@ -684,6 +709,10 @@ function heimlich(id, text, schwere, indizes){
     const u = S.unterstellte && S.unterstellte[i];
     return u && u.lebt ? u.id : null;
   }).filter(x => x != null);
+  /* **Davout sieht jeden Eintrag, und er sieht ihn doppelt.** Nicht erst bei
+     der Entdeckung — schon beim Anlegen: Es gibt ihn, also stimmt etwas nicht,
+     und das genügt ihm. */
+  patronMerkt('verzeichnis');
   S.heimlich.push({id, text, schwere, mitwisser:wer,
                    seit:(LAUF?LAUF.node:0), kapitel:kapitelNummer()});
 }
