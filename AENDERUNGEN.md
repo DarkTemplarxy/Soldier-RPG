@@ -5,6 +5,32 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-29 — Überführt: die Zwei-Würfe-Probe hat den Erstläufer halbiert
+
+**Nichts geändert, nur gemessen** — aber es ist der größte Einzelbefund, den dieses Protokoll enthält.
+
+`52211b0` („Zwei Würfe statt einem") ist mit seiner Wahrscheinlichkeitstabelle dokumentiert worden, **nicht mit seiner Wirkung auf die beiden Leitzahlen.** Nachgeholt mit zwei Worktrees auf `52211b0` und `52211b0^`: benachbarte Commits, also **dieselben 148 Stationen**, in beide derselbe heutige Prüfstand, je 80 Läufe. Eine Variable.
+
+| Erstlauf ohne Vorrat · je 80 Läufe | ein Wurf | **zwei Würfe** |
+|---|---|---|
+| **Weite** | **70** von 148 | **31** von 148 |
+| **Capitaine** | **9 %** | **1 %** |
+| Caporal | 44 % | 35 % |
+| Sergent | 39 % | 24 % |
+| Ägypten überstanden | **58 %** | **42 %** |
+| Punkte-Median | **83** | **37** |
+| Ø Todesstation | 66,9 | 52,4 |
+
+**Neununddreißig Stationen Weite, acht Punkte Capitaine-Quote, Punkte-Median auf weniger als die Hälfte.** Bei n = 80 ist 9 → 1 % etwa 2,5 σ; die Weite liegt weit jenseits jeder Rauschgrenze.
+
+**Damit ist die ganze Kette erklärt.** Weite 31 steht seit `52211b0` unverändert — `52211b0` 31/148, `4c749d7` 31/157, HEAD 31/157. Drei Commits, drei Kapitel und alle Gestaltungsbündel später dieselbe Zahl. Die 58 der Zielwert-Tabelle war nie falsch: Sie ist die Zahl aus der Ein-Wurf-Zeit, und sie war zwei Messungen lang als Regression der Gestaltungsarbeit verdächtigt.
+
+> **Der Satz, der falsch war, und der Denkfehler dahinter.** In CLAUDE.md stand: *„keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden — es sind die Ränder, die sich bewegen."* **Die Ränder sind aber nicht symmetrisch bewohnt.** Der Veteran lebt am oberen Rand, der Erstläufer am unteren, und nur einer von beiden hat gewonnen: Ein Erstläufer hat Attribute 15–60 und Fertigkeiten 5, sein Zielwert liegt gegen die üblichen Schwierigkeiten bei 25–35, und dort ist der Verlust am größten (35 → 24 %, 20 → 8 %). Der Gewinn bei Zielwert 80 fällt ihm nie zu.
+>
+> **Regel daraus: Eine Verteilungsänderung, die „die Mitte unberührt lässt", ist keine neutrale Änderung, solange die Spieler nicht in der Mitte stehen.** Und: Eine Wahrscheinlichkeitstabelle ist keine Messung.
+
+**Entschieden ist nichts.** Die Klage, die den Wurf ausgelöst hat, war berechtigt, und die zwei Würfe lösen sie. Drei Wege — Schwierigkeiten nachziehen, den Wurf gewichten, den Sockel heben — stehen mit ihren Kosten in `OFFEN.md` Punkt 8, samt dem Messweg.
+
 ## 2026-07-29 — Der Bot fand das Lager nicht mehr: eine still verfälschte Messung
 
 **Keine Balance-Änderung, sondern die Reparatur des Messgeräts** — und der teuerste Fund dieser Art bisher.
@@ -102,6 +128,8 @@ Gemessen: Colonel **678**, Marschall **928 Punkte**. Damit ist die volle Skala a
 *(Formel gegen 200 000 Würfe geprüft: 7,8 · 24,3 · 49,6 · 75,2 · 91,8 · 99,4 %.)*
 
 **Der Münzwurf in der Mitte bleibt ein Münzwurf.** Die Eichung „Wert 40 gegen Schwierigkeit 40 ist fifty-fifty" gilt unverändert, und **keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden** — es sind die Ränder, die sich bewegen.
+
+> **⚠ NACHTRAG 29.07.2026: Der vorige Absatz ist widerlegt.** Nachgemessen an diesem Commit gegen seinen eigenen Vorgänger (je 80 Läufe, dieselben 148 Stationen): Der Erstläufer verliert **39 Stationen Weite** (70 → 31) und acht Punkte Capitaine-Quote (9 → 1 %). Die Ränder sind nicht symmetrisch bewohnt — der Erstläufer wohnt ausschließlich im unteren, und nur der obere hat gewonnen. **Die Schwierigkeiten hätten nachziehen müssen.** Voller Befund oben unter „Überführt" und in `OFFEN.md` Punkt 8.
 
 **Die Oberfläche musste mit.** Der Zielwert *war* bis dahin die Prozentzahl auf dem Knopf; mit zwei Würfen ist er es nicht mehr. `chance()` rechnet ihn geschlossen um — und deckelt bei 99 statt 100, weil es keine sichere Probe gibt und „100 %" auf einem Knopf eine Lüge wäre.
 

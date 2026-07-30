@@ -106,31 +106,39 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
-## 8 · Die halbe Capitaine-Quote des Veteranen ist verschwunden, und zwar vor den Gestaltungsbündeln
+## 8 · ✓ Überführt: die Zwei-Würfe-Probe hat den Erstläufer halbiert
 
-**Gemessen, gleicher Prüfstand, gleiche 157 Stationen:**
+**Der Wurf ist der Mittelwert aus zwei Würfen** (`wurfZahl()` in `mechanik.js`, eingeführt in `52211b0`). Gemessen wurde damals die Wahrscheinlichkeitstabelle — **nicht die Wirkung auf die beiden Leitzahlen.** Das ist jetzt nachgeholt, und der Befund ist eindeutig.
 
-| Veteran 400 VP · je 40 Läufe | Weite | Capitaine | Punkte-Median |
-|---|---|---|---|
-| Zielwert-Tabelle *(122 Stationen!)* | 75 | **45 %** | 369 |
-| `4c749d7` — alle elf Kapitel, **keine** Bündel | 70 | **25 %** | 307 |
-| HEAD — mit den Bündeln | 61 | 18 % | 233 |
+**Der Prüfweg, und er ist der Grund, warum die Zahl trägt:** ein Worktree auf `52211b0` und einer auf `52211b0^`, in **beide** derselbe heutige (reparierte) Prüfstand, je 80 Läufe. Zwei benachbarte Commits, also **dieselben 148 Stationen** — die Weite ist damit ohne Umrechnung vergleichbar, und es gibt genau eine Variable.
 
-| Erstlauf ohne Vorrat · je 80 Läufe | Weite | Ägypten überstanden | Punkte-Median |
-|---|---|---|---|
-| Zielwert-Tabelle *(122 Stationen!)* | **58** | — | 44 |
-| `4c749d7` — **keine** Bündel | **31** | 43 % | 39 |
-| HEAD — mit den Bündeln | **31** | 34 % | 34 |
+| Erstlauf ohne Vorrat · je 80 Läufe | ein Wurf (`52211b0^`) | **zwei Würfe** (`52211b0`) |
+|---|---|---|
+| **Weite** | **70** von 148 | **31** von 148 |
+| **Capitaine** | **9 %** | **1 %** |
+| Caporal | 44 % | 35 % |
+| Sergent | 39 % | 24 % |
+| Ägypten überstanden | **58 %** | **42 %** |
+| Punkte-Median | **83** | **37** |
+| Ø Todesstation | 66,9 | 52,4 |
 
-**Die Bündel erklären den Sprung nicht, und beim Erstläufer erklären sie gar nichts:** Dessen beide Leitzahlen sind über die Bündel hinweg **identisch** (31 und 0 %). Beim Veteranen liegt zwischen den letzten zwei Zeilen etwa ein Sigma (n = 40 → σ ≈ 6,8 Punkte auf 25 %).
+**Neununddreißig Stationen Weite und acht Punkte Capitaine-Quote.** Bei n = 80 ist σ auf eine 9-%-Quote rund 3,2 Punkte, 9 → 1 % also etwa 2,5 σ; die Weite liegt weit jenseits jeder Rauschgrenze, und der Punkte-Median fällt auf **weniger als die Hälfte**. Das ist die größte Einzelwirkung, die in diesem Projekt je an einer Zeile gemessen wurde.
 
-**Der Bruch liegt in beiden Tabellen an derselben Stelle: zwischen Zeile 1 und Zeile 2.** Zwei unabhängig gemessene Männer, dieselbe Richtung, dasselbe Zeitfenster — das ist kein Rauschen. Und die Weite sagt konkret, was passiert ist: **Der mittlere Erstläufer kam bei der 122-Stationen-Messung durch Ägypten und stirbt heute darin** (Median 58 → 31, und Ägypten liegt bei den Stationen 17–32).
+**Damit ist die ganze Kette erklärt.** Weite 31 steht seit `52211b0` unverändert (`52211b0` 31/148 · `4c749d7` 31/157 · HEAD 31/157) — drei Commits, drei Kapitel und alle Gestaltungsbündel später dieselbe Zahl. Die 58 der Zielwert-Tabelle war nie falsch; sie ist die Zahl aus der Ein-Wurf-Zeit.
 
-**Der Verdächtige ist `52211b0` „Zwei Würfe statt einem".** Er liegt genau im Fenster, und seine Wirkung passt: Der Wurf ist jetzt der Mittelwert aus zwei Würfen, also ballen sich die Ergebnisse um die Mitte — **wer unter der Aufgabe steht, scheitert deutlich öfter als vorher** (Zielwert 35: 35 % → 24 %, Zielwert 20: 20 % → 8 %). Das trifft jeden, dessen Werte nicht schon hoch sind, und es trifft ihn an *jeder* Probe eines Laufs. Die Änderung ist mit ihrer Wahrscheinlichkeitstabelle dokumentiert, aber offenbar nie gegen die beiden Leitzahlen nachgemessen worden.
+**Warum es den Erstläufer so viel härter trifft als den Veteranen:** Er hat Attribute 15–60 und Fertigkeiten 5. Gegen die üblichen Schwierigkeiten 35–50 liegt sein Zielwert bei 25–35, und genau dort ist der Verlust am größten (Zielwert 35: 35 → 24 %, Zielwert 20: 20 → 8 %). Der Gewinn am oberen Ende (80 → 92 %) fällt ihm nie zu — **ein Erstläufer wohnt ausschließlich in der unteren Hälfte der Skala.** Über zwanzig Proben je Kapitel multipliziert sich das.
 
-**Zwei Kandidaten kommen noch in Frage** und sind billiger zu prüfen als zu diskutieren: die Kapitel 10 und 11 selbst (sie hängen nur Stationen an, können eine Rangquote also eigentlich nicht senken — aber sie haben auch die zweite Rangschranke eingehängt) und `697e396` „Das Können über der Klemme", das in die andere Richtung wirken sollte.
+> **Der dokumentierte Satz war falsch, und das ist der eigentliche Lehrsatz.** In CLAUDE.md steht: *„keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden — es sind die Ränder, die sich bewegen."* Die Ränder sind aber nicht symmetrisch bewohnt: **Der Veteran lebt am oberen Rand, der Erstläufer am unteren, und nur einer von beiden hat etwas gewonnen.** Eine Verteilungsänderung, die „die Mitte unberührt lässt", ist keine neutrale Änderung, solange die Spieler nicht in der Mitte stehen.
 
-**Der Hebel ist die Messung, nicht die Formel.** Wer das anfasst, setzt einen Worktree auf `52211b0^`, kopiert den heutigen Prüfstand hinein und misst Veteran 400 und Erstlauf. **Erst wenn die Zahl dort bei 45 % liegt, ist der Zwei-Würfe-Wurf überführt** — und dann ist die Frage nicht, ob er zurückgenommen wird (die Klage, die ihn ausgelöst hat, war berechtigt), sondern ob die Schwierigkeiten in den Kapiteldaten nachziehen müssen. Der Satz „keine einzige Schwierigkeit musste angefasst werden" ist genau die Annahme, die hier auf dem Prüfstand steht.
+**Entschieden ist nichts, und das ist Absicht** — die Klage, die den Wurf ausgelöst hat, war berechtigt („manchmal schafft man eine Probe mit dem doppelten Wert nicht"), und die zwei Würfe lösen sie. Drei Wege, alle ungemessen:
+
+| Weg | Was er tut | Was er kostet |
+|---|---|---|
+| **Schwierigkeiten senken** | Die Kapiteldaten um 5–10 nachziehen, damit der Zielwert des Erstläufers wieder dort liegt, wo er gedacht war | Viel Fläche: 11 Kapitel, 157 Stationen. Und die Eichung „Wert 40 gegen Schwierigkeit 40 ist ein Münzwurf" wandert |
+| **Den Wurf abmildern** | Statt des Mittels aus zwei Würfen ein gewichtetes Mittel (z. B. 0,7 × ein Wurf + 0,3 × Mittel) — die Streuung schrumpft weniger stark | Eine Zeile, eine Messung. Nimmt aber auch vom Gewinn des Veteranen zurück |
+| **Den Sockel heben** | Sockel 15 → 20 zurück, damit der Erstläufer nicht am untersten Rand der Skala startet | Widerspricht „früher sterben, länger leben" (`0aae610`), das der Entwickler ausdrücklich so wollte |
+
+**Wer daran dreht, misst gegen die Tabelle oben** — dieselben zwei Worktrees liegen als Messweg beschrieben da und sind in zehn Minuten wieder aufgesetzt.
 
 ---
 

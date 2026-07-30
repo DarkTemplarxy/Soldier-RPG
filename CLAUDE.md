@@ -449,7 +449,24 @@ Wert 40 gegen Schwierigkeit 40 ist also ein Münzwurf. Das ist die Eichung — S
 | 80 | 80 % | **92 %** | 91,8 |
 | 95 | 95 % | **99 %** | 99,4 |
 
-**Der Münzwurf in der Mitte bleibt ein Münzwurf**, und **keine einzige Schwierigkeit in den Kapiteldaten musste angefasst werden** — es sind die Ränder, die sich bewegen. Können *und* Unvermögen wiegen beide schwerer.
+**Der Münzwurf in der Mitte bleibt ein Münzwurf**, und es sind die Ränder, die sich bewegen. Können *und* Unvermögen wiegen beide schwerer.
+
+> ### ⚠ „Keine einzige Schwierigkeit musste angefasst werden" — das war falsch, und es hat den Erstläufer halbiert
+>
+> Genau dieser Satz stand hier, und er ist der teuerste Irrtum des Projekts. **Gemessen wurde damals die Wahrscheinlichkeitstabelle, nicht die Wirkung auf die Leitzahlen.** Nachgeholt am 29.07.2026 mit zwei Worktrees auf `52211b0` und `52211b0^` — benachbarte Commits, dieselben 148 Stationen, derselbe Prüfstand, je 80 Läufe, **eine** Variable:
+>
+> | Erstlauf ohne Vorrat | ein Wurf | **zwei Würfe** |
+> |---|---|---|
+> | **Weite** | **70** von 148 | **31** von 148 |
+> | **Capitaine** | **9 %** | **1 %** |
+> | Ägypten überstanden | 58 % | 42 % |
+> | Punkte-Median | 83 | 37 |
+>
+> **Neununddreißig Stationen.** Die größte Einzelwirkung, die in diesem Projekt je an einer Zeile gemessen wurde — und sie stand zwei Wochen unbemerkt im Code, weil die Zahl, an der man sie gesehen hätte, nie erhoben wurde.
+>
+> **Der Denkfehler ist verallgemeinerbar und deshalb wichtiger als die Zahl: Die Ränder sind nicht symmetrisch bewohnt.** Der Veteran lebt am oberen Rand der Skala, der Erstläufer am unteren — und nur einer von beiden hat gewonnen. Ein Erstläufer hat Attribute 15–60 und Fertigkeiten 5, sein Zielwert liegt gegen die üblichen Schwierigkeiten 35–50 bei 25–35, und dort ist der Verlust am größten. Der Gewinn bei Zielwert 80 fällt ihm nie zu. **Eine Verteilungsänderung, die „die Mitte unberührt lässt", ist keine neutrale Änderung, solange die Spieler nicht in der Mitte stehen.**
+>
+> **Entschieden ist nichts** — die Klage, die den Wurf ausgelöst hat, war berechtigt, und die zwei Würfe lösen sie. Drei Wege mit ihren Kosten stehen in `OFFEN.md` Punkt 8, samt dem Messweg, der sie entscheidet.
 
 > **Die Oberfläche musste mit, sonst löge sie.** Der Zielwert *war* bis dahin die Prozentzahl auf dem Knopf; mit zwei Würfen ist er es nicht mehr. `chance()` rechnet ihn geschlossen um und deckelt bei **99 statt 100** — es gibt keine sichere Probe, und eine Zahl, die eine verspricht, gehört nicht auf einen Knopf. Wer eine neue Anzeige baut, nimmt `aussicht()` und nicht den Zielwert.
 
