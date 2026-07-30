@@ -457,74 +457,115 @@ function abzugGrund(k){
    ausgerechnet der Kranke bei jedem Ruhe-Abend seine Konstitution und damit
    seinen Lebensvorrat, während der Gesunde beim selben Knopf nichts bekam:
    Krankheit wäre auf Dauer ein Vorteil gewesen. */
+/* ══════════════════ DER PROBEN-SOCKEL — WO DIE KURVE STEHT ══════════════════
+
+   Die Probe hat seit dem 30.07.2026 **zwei** Regler, und sie tun Verschiedenes:
+
+     • `PROBE_SOCKEL` verschiebt die Kurve waagerecht — *wo* „gleich gut wie die
+       Aufgabe" landet.
+     • Die Wurfbreite (`wurfZahl()`) macht die Kurve steil oder flach — *wie
+       sehr* der Abstand zwischen Wert und Aufgabe den Ausschlag gibt.
+
+   **Der Sockel bestimmt den Nullpunkt.** `Ziel = Wert − Schwierigkeit + SOCKEL`;
+   bei Wert == Schwierigkeit ist das Ziel genau der Sockel. Er steht auf **60**,
+   und der enge Wurf macht daraus **rund 80 %**: Wer der Aufgabe gewachsen ist,
+   besteht sie in vier von fünf Fällen, nicht im Münzwurf.
+
+   Bis dahin stand er auf 50 und der Wurf war weit (Mittel aus *zwei* Würfen).
+   Das hatte zwei Fehler in einem:
+     1. „Gleich gut" war ein Münzwurf — reinspieltechnisch unsinnig.
+     2. Der weite Wurf gab **jedem** eine Restchance, auch bei großem Abstand:
+        *Bajonett 8 gegen Schwierigkeit 40* bestand zu 29 %. Ein Mann, der die
+        Sache nicht kann, sollte sie nicht in fast jedem dritten Versuch schaffen.
+
+   **Beide Regler zusammen ergeben eine Leiter statt eines Rauschens:** Früh, mit
+   kleinen Werten, besteht man die 30er-Proben und scheitert an den 50ern; später,
+   mit gewachsenen Werten, öffnen sich die 50er. Die Schwierigkeiten in den
+   Kapiteln müssen dafür *nicht* mit dem Verlauf steigen (sie tun es nicht — alle
+   Kapitel spannen 30–55) — die steile Kurve macht den eigenen Wert zur Schranke.
+
+   Wer den Sockel ändert, misst gegen die vier Leitzahlen und trägt die neue
+   Eichung in `CLAUDE.md` nach — „Wert 40 gegen Schwierigkeit 40" ist kein
+   Münzwurf mehr, sondern vier von fünf. */
+const PROBE_SOCKEL = 60;
+
 /* Die Aussicht einer Probe in Prozent — **dieselbe Rechnung wie `probe()`**,
    nur ohne Wurf. Sie steht auf jedem Knopf, weil zwei nackte Zahlen
-   („Konstitution 40 gegen 40") nicht verraten, was sie bedeuten: Genau das ist
-   ein Münzwurf, und wer „40 gegen 40" liest, denkt eher „reicht genau".
+   („Konstitution 40 gegen 40") nicht verraten, was sie bedeuten.
 
    Das ist dieselbe Überlegung, aus der Wert und Schwierigkeit überhaupt auf dem
    Knopf stehen — sie sollen beim Entscheiden helfen. Eine Zahl, die man erst
    umrechnen muss, tut das nicht. */
 function aussicht(k, schwierigkeit){
-  return chance(Math.max(5, Math.min(95, wert(k) - schwierigkeit + 50)));
+  return chance(Math.max(5, Math.min(95, wert(k) - schwierigkeit + PROBE_SOCKEL)));
 }
 
-/* ══════════════════ ZWEI WÜRFE STATT EINEM ══════════════════
+/* ══════════════════ DER ENGE WURF — KÖNNEN STATT GLÜCK ══════════════════
 
-   **Der Wurf ist der Mittelwert aus zwei Würfen über 1–100, nicht ein
-   einzelner.** Das ist die wichtigste Änderung am Probensystem seit seiner
-   Einführung, und sie behebt eine Klage, die man beim Spielen sofort hat:
-   *Manchmal schafft man eine Probe mit dem doppelten Wert nicht.*
+   **Der Wurf ist der Mittelwert aus sechs Würfen über 1–100.** Sechs, nicht
+   einer und nicht zwei, und die Zahl ist der ganze Punkt: Je mehr Würfe man
+   mittelt, desto enger ballt sich das Ergebnis um die Mitte (Streuung ~12 statt
+   ~29 bei einem Wurf). **Der Wurf entscheidet dadurch immer weniger; der
+   Abstand zwischen Wert und Aufgabe immer mehr.**
 
-   Der Grund lag nicht in der Formel, sondern in der **Streuung**. Ein flacher
-   Wurf über hundert ist überall gleich wahrscheinlich; ein Zielwert von 80
-   ging deshalb in einem von fünf Fällen daneben, und über zwanzig Proben je
-   Kapitel fühlt sich das an, als zähle Können nicht. **Der Mittelwert aus
-   zwei Würfen ballt sich um die Mitte** — wer deutlich über der Aufgabe
-   steht, besteht fast immer; wer deutlich darunter steht, fast nie.
+   Das ist die Antwort auf „reinspieltechnisch unsinnig": Ein weiter Wurf gibt
+   auch dem, der weit unter der Aufgabe steht, eine dicke Restchance. Ein enger
+   nimmt sie ihm. Gemessen an der Trefferchance (Sockel 60):
 
-   | Zielwert | vorher | jetzt |
+   | Abstand Wert−Aufgabe | Ziel | Chance |
    |---|---|---|
-   | 20 | 20 % | **8 %** |
-   | 35 | 35 % | **25 %** |
-   | 50 | 50 % | 50 % |
-   | 65 | 65 % | **75 %** |
-   | 80 | 80 % | **92 %** |
-   | 95 | 95 % | **99 %** |
+   | −32 (Bajonett 8 gegen 40) | 28 | **~3 %** |
+   | −20 | 40 | ~19 % |
+   | −10 | 50 | ~48 % |
+   | **0 (gleich gut)** | **60** | **~80 %** |
+   | +10 | 70 | ~95 % |
+   | +20 | 80 | ~99 % |
 
-   **Der Münzwurf in der Mitte bleibt ein Münzwurf** — die Eichung „Wert 40
-   gegen Schwierigkeit 40 ist fifty-fifty" gilt unverändert, und keine einzige
-   Schwierigkeit in den Kapiteldaten musste angefasst werden. Was sich ändert,
-   sind die Ränder: **Können und Unvermögen wiegen beide schwerer.**
+   **Die Kurve ist jetzt eine Leiter:** Innerhalb von etwa ±12 um „gleich gut"
+   entscheidet noch das Glück; darüber und darunter der Wert. Wer der Aufgabe
+   gewachsen ist, besteht; wer es nicht ist, besteht nicht — und dazwischen ist
+   ein schmaler Streifen, in dem es spannend bleibt.
 
-   Dass der Erstläufer damit härter dasteht, ist gewollt und Teil derselben
-   Richtung wie der tiefere Sockel — und es ist die Stelle, an der Italien
-   endlich beißen darf (Sollwert: nicht mehr als 20 % Tote im Erstlauf). */
+   > **Woher die sechs kommen:** Der frühere Wurf (Mittel aus *zwei*) war zu
+   > weit und hat, kombiniert mit dem Sockel 50, den Erstläufer halbiert — der
+   > teuerste gemessene Verlust des Projekts (`OFFEN.md` Punkt 8). Er wohnt am
+   > unteren Rand, und ein weiter Wurf trifft ihn dort am härtesten. Der enge
+   > Wurf plus der höhere Sockel richten beides zugleich: „gleich gut" steigt
+   > auf 80 %, „weit darunter" fällt auf fast nichts. */
 function wurfZahl(){
-  return Math.round((1 + Math.floor(Math.random()*100) + 1 + Math.floor(Math.random()*100)) / 2);
+  let s = 0;
+  for(let i = 0; i < 6; i++) s += 1 + Math.floor(Math.random() * 100);
+  return Math.round(s / 6);
 }
 
-/* Die Wahrscheinlichkeit, einen Zielwert zu erreichen — geschlossen gerechnet,
-   damit auf dem Knopf steht, was wirklich passiert. **Ohne diese Umrechnung
-   löge die Oberfläche:** Der Zielwert *war* bis dahin die Prozentzahl, und mit
-   zwei Würfen ist er es nicht mehr. */
+/* Die Wahrscheinlichkeit, einen Zielwert zu erreichen — damit auf dem Knopf
+   steht, was wirklich passiert. **Ohne diese Umrechnung löge die Oberfläche:**
+   Der Zielwert ist bei sechs Würfen nicht die Prozentzahl. Das Mittel aus sechs
+   Gleichverteilungen ist nach dem zentralen Grenzwertsatz nahezu normal
+   (Mittel 50,5, Streuung ≈ 11,8); die logistische Näherung der Normalverteilung
+   ist auf einem Knopf mehr als genau genug. */
 function chance(ziel){
-  const t = Math.max(0, Math.min(100, ziel)) / 100;
-  const p = t <= 0.5 ? 2*t*t : 1 - 2*(1-t)*(1-t);
-  /* **Nie 100, nie 0.** Beim geklemmten Zielwert 95 sind es rechnerisch 99,4 %,
-     und „100 %" auf einem Knopf wäre eine Lüge — es gibt keine sichere Probe.
-     Am unteren Ende dasselbe: Wer bei 5 steht, hat 0,5 %, und das ist nicht
-     nichts. Gerundet würde beides zu einer Zahl, die etwas verspricht. */
-  return Math.min(99, Math.max(1, Math.round(p*100)));
+  const x = (Math.max(0, Math.min(100, ziel)) - 50.5) / 11.79;
+  const p = 1 / (1 + Math.exp(-1.702 * x));
+  /* **Nie 100, nie 0.** Es gibt keine sichere Probe und keine unmögliche —
+     „100 %" oder „0 %" auf einem Knopf wären eine Lüge. */
+  return Math.min(99, Math.max(1, Math.round(p * 100)));
 }
 
 /* ══════════════════ DIE PROBE — UND WAS ÜBER IHR LIEGT ══════════════════
 
    ```
-   roh    = Wert − Schwierigkeit + 50        (ungeklemmt)
+   roh    = Wert − Schwierigkeit + PROBE_SOCKEL   (ungeklemmt, Sockel = 60)
    Ziel   = clamp(roh, 5, 95)
    Können = max(0, roh − 95)
+   Wurf   = Mittel aus sechs d100 (eng, siehe wurfZahl)
    ```
+
+   **Sockel und Wurfbreite sind die Eichung, siehe oben.** Sockel 60 plus enger
+   Wurf heißt: „gleich gut wie die Aufgabe" ~80 %, „weit darunter" fast nichts.
+   `Können` greift ab 35 Punkten über der Schwierigkeit (roh − 95 = Abstand −
+   35) — dort ist die Probe ohnehin so gut wie sicher, und der Überschuss zahlt
+   in Wirkung statt in Trefferchance.
 
    **Die Klemme bleibt, und sie ist richtig.** Fünf Prozent Fehlschlag gehören
    dazu: Im Rauch schießt auch der beste Schütze daneben, und eine Probe, die
@@ -546,7 +587,7 @@ function chance(ziel){
 let PROBE_ZULETZT = null;
 function probe(k, schwierigkeit, ohneUebung){
   const w = wert(k);
-  const roh = w - schwierigkeit + 50;
+  const roh = w - schwierigkeit + PROBE_SOCKEL;
   const ziel = Math.max(5, Math.min(95, roh));
   const wurf = wurfZahl();   // Mittel aus zwei Würfen, siehe oben
   if(!ohneUebung) nutzen(k, 1);
