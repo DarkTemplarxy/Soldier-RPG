@@ -734,13 +734,6 @@ function heimlichOffen(){
   const tot = S.unterTot || [];
   return S.heimlich.filter(h => (h.mitwisser||[]).some(m => tot.indexOf(m) < 0));
 }
-/* Wer von den Mitwissern einer Sache heute noch unter einem steht — nur die
-   können reden, weil nur sie in `heimlichPruefen()` vorkommen. Die anderen
-   wissen es trotzdem und zählen für `heimlichOffen()` mit. */
-function mitwisserHier(h){
-  return (S.unterstellte||[]).filter(u => u.lebt && (h.mitwisser||[]).indexOf(u.id) >= 0);
-}
-
 /* ── Verjährung ──
    **Ohne sie wächst das Verzeichnis über elf Kapitel ins Unspielbare**, und
    die späten Kapitel wären für jeden verloren, der früh etwas riskiert hat.

@@ -5,6 +5,26 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Durchsicht des Quelltexts: eine vernichtete Sektion stand als volle da
+
+**Gesucht wurde nach Fehlern und nach dem, was sich beim Bauen einschleicht.** Ohne Befund: keine Zugangsdaten, kein Schlüssel, kein Token im Repo; kein `fetch`, kein `XMLHttpRequest`, kein `import()`, keine URL — das Spiel greift nirgends nach außen, wie es Invariante 6 verlangt. Kein `eval`, kein `new Function`, kein `document.write`. Keine privaten Pfade, keine Mailadressen. Keine doppelt definierte Funktion. In keiner Zeichenfunktion wird gewürfelt. Und der Spielername, das einzige Stück fremder Text im Spiel, geht an **allen** dreizehn Stellen durch `esc()` — auch im Trauerblatt, im Congé absolu und im Beförderungsbescheid, die ihn als Handschrift setzen.
+
+**Ein echter Fehler, und es ist die Familie, die dieses Projekt am teuersten bezahlt hat.** `K.sektion` ist eine Zahl von 0 bis 100, und siebzehn Stellen schrieben `(K.sektion||100)`. Eine Sektion, von der niemand mehr steht, wurde damit als vollzählige gelesen:
+
+| | war | soll |
+|---|---|---|
+| nach einem Sektionsbefehl | 85 bis 91 | 0 |
+| Schadensanteil | 1,0 | 0,35 |
+| „Die Linie bricht" unter 40 | löst nicht aus | löst aus |
+
+Der Rücksprung ist der schwerste: `Math.max(0,(0||100)-6)` ist 94 — der Befehl, der die letzten Leute hätte kosten sollen, gab sie zurück. Dieselbe Datei rechnete an vier Stellen längst richtig; zwei Schreibweisen für denselben Wert, und die kürzere war die falsche. Alle Leser gehen jetzt durch `sektionWert()`, alle Schreiber durch `sektionSetzen()` — eine Tür je Richtung.
+
+**Balance: im geprüften Bereich keine Wirkung.** 20 Läufe mit Rang 5 von Hand, 25 Gefechte mit Sektion, tiefster Stand **89** — die Null wird in den frühen Kapiteln nicht erreicht, der Fehler war latent. In den späten ist er erreichbar: Güte 12 über zehn Runden zehrt rund zehn Punkte je Runde, dazu −6 bis −10 je misslungenem Befehl.
+
+**Zwei tote Funktionen entfernt:** `verteilt()` (Rest der abgeschafften Handverteilung) und `mitwisserHier()` (Rest aus der Verzeichnis-Sitzung). Beide ohne einen einzigen Aufrufer.
+
+---
+
 ## 2026-07-31 — Der Hebel fragte den Falschen
 
 **`test/balance.js` las `gunst('grandmaison')`** — ein Name statt einer Rolle, sechster Fall dieser Familie und der erste im Messgerät statt im Spiel. Grandmaison beurteilt bis Rang 11; seit der Protektion entscheidet ab 12 der gewählte Marschall. Gemeldet wurde `Grandmaison 3 · 20 % erfüllt`, während 33 von 40 Läufen Rang 12 überschritten hatten.

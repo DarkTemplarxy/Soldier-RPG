@@ -924,7 +924,6 @@ function zufallsName(){
   const n=['Duval','Rey','Vasseur','Marchand','Ferrand','Bonnet','Lemoine','Charpentier','Roussel','Barbier'];
   return v[Math.floor(Math.random()*v.length)]+' '+n[Math.floor(Math.random()*n.length)];
 }
-function verteilt(){ return ATTRIBUTE.reduce((s,[k])=>s+(ERSCH.attr[k]-sockelVon(k)),0); }
 /* `stille` unterdrückt das Neuzeichnen — beim ersten Aufbau ist der Bildschirm
    noch gar nicht da, und `aktualisiereErschaffung()` liefe ins Leere. */
 function wuerfeln(stille){

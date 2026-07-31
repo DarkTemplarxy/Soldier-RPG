@@ -472,6 +472,28 @@ function verbaendeStart(){
    `eigeneKraft()` liefert deshalb je nach Maßstab die Zahl, die auf dem
    Bildschirm steht: die Sektion bis Rang 9, den mittleren Kompaniebestand ab
    Rang 10, die gemeldete Stärke der Verbände ab Rang 12. */
+/* ⚠ **`K.sektion` ist eine Zahl von 0 bis 100, und `||` frisst die Null.**
+   Siebzehn Stellen schrieben die kurze Fassung mit `||` und lasen damit eine
+   **vernichtete** Sektion als eine **volle**. Gemessen an einer von Hand auf 0
+   gesetzten Sektion:
+
+   | | war | soll |
+   |---|---|---|
+   | nach einem Sektionsbefehl | **85 bis 91** | 0 — sie kommt nicht wieder |
+   | Schadensanteil | 1,0 (voller Schaden) | 0,35 (der Boden) |
+   | „Die Linie bricht" bei < 40 | löst **nicht** aus | löst aus |
+
+   Der Rücksprung ist der schlimmste der drei: `Math.max(0,(0||100)-6)` ist 94.
+   Wer seine zwanzig Mann verloren hat, hatte sie eine Runde später wieder.
+
+   **Dieselbe Datei rechnete an vier Stellen längst richtig** (`K.sektion==null
+   ? 100 : K.sektion`) — zwei Schreibweisen für denselben Wert, und die kürzere
+   war die falsche. Es ist die Familie von `if(!K.vorhut)`: *Eine Null, die
+   etwas bedeutet, wird mit „nichts" verwechselt.* Alle Leser gehen jetzt durch
+   `sektionWert()`, alle Schreiber durch `sektionSetzen()`. */
+function sektionWert(){ return K.sektion == null ? 100 : K.sektion; }
+function sektionSetzen(n){ if(K.sektion != null) K.sektion = Math.max(0, Math.min(100, n)); }
+
 function eigeneKraft(){
   if(K.kompanien && K.kompanien.length)
     return Math.round(K.kompanien.reduce((s,k)=>s+k.bestand,0) / K.kompanien.length);
@@ -645,7 +667,7 @@ function nahkampfPruefen(n){
   const kap = (typeof kapitelVon==='function') ? kapitelVon(n) : 'x';
   if((S.nahkampfKapitel||[]).includes(kap)) return '';
   let grund = '';
-  if((K.sektion||100) < 40) grund = 'bestand';
+  if(sektionWert() < 40) grund = 'bestand';
   else if(n.formation==='karree' && K.runde>=4 && Math.random()<0.5) grund = 'reiter';
   else if(n.gelaende==='mauer' && K.runde>=5 && Math.random()<0.4) grund = 'bresche';
   else if(K.feindMoral > n.feindMoral*0.8 && K.runde>=6 && Math.random()<0.25) grund = 'nachhut';
@@ -2075,26 +2097,26 @@ function kampfAktion(id){
      trotzdem verlieren — „Wer barfuß marschiert, ist dein Versäumnis". */
   else if(id==='sektionsalve'){
     const p = probe('autoritaet', 45);
-    const anteil = Math.max(0.35, (K.sektion||100)/100);
+    const anteil = Math.max(0.35, sektionWert()/100);
     if(p.erfolg){ schaden = (34 + Math.random()*14) * anteil; nutzen('drill',1);
       text = 'Du lässt anlegen, wartest zwei Atemzüge länger, als sich richtig anfühlt, und dann fällt das Kommando. Zwanzig Musketen auf einen Schlag sind kein Lärm, sondern eine Wand.'
            + anerkennung(1,'Eine Salve, die saß'); }
-    else { schaden = 10 * anteil; K.sektion = Math.max(0,(K.sektion||100)-6);
+    else { schaden = 10 * anteil; sektionSetzen(sektionWert()-6);
       text = 'Dein Kommando kommt eine Sekunde zu spät, und die Sektion feuert einzeln. Zwanzig Schüsse nacheinander sind zwanzig Gelegenheiten für die andere Seite.'; }
   }
   else if(id==='glieder'){
     const p = drillProbe(40);
     if(p.erfolg){ K.geschlossen = 3; schaden = 8;
       text = 'Erstes Glied kniet, zweites tritt durch. Es dauert acht Sekunden, in denen niemand schießt, und danach steht vorn, wer noch Pulver hat.'; }
-    else { text = 'Der Wechsel gerät durcheinander, und für einen Moment stehen alle zwanzig ohne Ordnung im Freien.'; K.sektion = Math.max(0,(K.sektion||100)-8); }
+    else { text = 'Der Wechsel gerät durcheinander, und für einen Moment stehen alle zwanzig ohne Ordnung im Freien.'; sektionSetzen(sektionWert()-8); }
   }
   else if(id==='herausnehmen'){
     const p = probe('menschenkenntnis', 40);
     gefahrMod = +10;                       // du gehst dabei aus dem Glied
-    if(p.erfolg){ K.sektion = Math.min(100,(K.sektion||100)+6); S.kameradschaft=Math.min(100,S.kameradschaft+4);
+    if(p.erfolg){ sektionSetzen(sektionWert()+6); S.kameradschaft=Math.min(100,S.kameradschaft+4);
       text = 'Du siehst es an den Schultern, bevor er selbst es weiß: Der Junge im zweiten Glied läuft gleich. Du hast ihn am Riemen, bevor er den ersten Schritt macht, und stellst ihn zwischen zwei Ältere. Er bleibt.'
            + anerkennung(1,'Einen aus dem Glied geholt, bevor er lief'); }
-    else { text = 'Du greifst nach ihm und bekommst nur den Tornistergurt. Er läuft trotzdem, und zwei sehen ihm nach.'; K.sektion = Math.max(0,(K.sektion||100)-10); }
+    else { text = 'Du greifst nach ihm und bekommst nur den Tornistergurt. Er läuft trotzdem, und zwei sehen ihm nach.'; sektionSetzen(sektionWert()-10); }
   }
   /* ── Der Zug ──
      **Rollendes Feuer** ist der Kern: Drei Sektionen feuern nacheinander, also
@@ -2103,29 +2125,29 @@ function kampfAktion(id){
      der Zeit lädt. Deshalb wirkt er auch in der Runde, in der man nichts tut. */
   else if(id==='zugfeuer'){
     const p = drillProbe(45);
-    const anteil = Math.max(0.35, (K.sektion||100)/100);
+    const anteil = Math.max(0.35, sektionWert()/100);
     if(p.erfolg){ schaden = (30 + Math.random()*12) * anteil; K.rollend = 3; nutzen('autoritaet',1);
       text = 'Erste Sektion Feuer, zweite Sektion Feuer, dritte Sektion Feuer, erste wieder geladen. Es hört nicht auf, und das ist der ganze Unterschied: Ein Mann schießt jede zweite Minute, ein Zug schießt immer.'
            + anerkennung(1,'Rollendes Feuer, das nicht abriss'); }
-    else { schaden = 12 * anteil; K.sektion = Math.max(0,(K.sektion||100)-5);
+    else { schaden = 12 * anteil; sektionSetzen(sektionWert()-5);
       text = 'Die zweite Sektion feuert zu früh, die dritte gar nicht, und für vier Sekunden steht der ganze Zug mit leeren Läufen da.'; }
   }
   else if(id==='einteilen'){
     const p = probe('autoritaet', 50);
     if(p.erfolg){ K.geschlossen = 3; schaden = 6;
-      K.sektion = Math.min(100,(K.sektion||100)+3);
+      sektionSetzen(sektionWert()+3);
       text = 'Du gehst hinter der Front durch und sagst drei Sergenten je einen Satz. Mehr ist es nicht — und danach steht der Zug anders da. Man führt sechzig Mann nicht, indem man sechzig Mann etwas zuruft.'; }
     else { text = 'Zwei von deinen Sergenten hören dich, der dritte nicht, und sein rechtes Ende steht zehn Schritt zu weit vorn. Das sieht jeder, der drüben zielt.';
-      K.sektion = Math.max(0,(K.sektion||100)-6); }
+      sektionSetzen(sektionWert()-6); }
   }
   else if(id==='halten_sektion'){
     const p = drillProbe(40);
     if(p.erfolg){ gefahrMod = -6; K.geschlossen = 3;
-      K.sektion = Math.min(100,(K.sektion||100)+4);
+      sektionSetzen(sektionWert()+4);
       let lob = '';
       if(!K.sektionGelobt){ K.sektionGelobt = true; lob = anerkennung(1,'Die Sektion geschlossen gehalten'); }
       text = 'Schließen, aufschließen, Abstand halten. Zwanzig Mann sind keine acht: Man sieht die Enden nicht mehr, man muss sie sich denken. Deine Sektion steht, wo sie stehen soll.' + lob; }
-    else { text = 'Du rufst gegen den Lärm an, und der Lärm gewinnt. Das rechte Ende der Sektion hört dich nicht.'; K.sektion = Math.max(0,(K.sektion||100)-6); }
+    else { text = 'Du rufst gegen den Lärm an, und der Lärm gewinnt. Das rechte Ende der Sektion hört dich nicht.'; sektionSetzen(sektionWert()-6); }
   }
   /* ══════════════════ DER OFFIZIER ══════════════════
 
@@ -2153,12 +2175,12 @@ function kampfAktion(id){
        **fast immer** scheitert, nicht nur häufig. Das ist die richtige Härte
        für ein System, in dem man den Mann vorher hätte ausbilden können. */
     ausfuehrung = ausfuehrungsProbe(45);
-    const anteil = Math.max(0.35, (K.sektion||100)/100);
+    const anteil = Math.max(0.35, sektionWert()/100);
     K.deckung = false; gefahrMod = +8;    // du gehst voran, sonst geht niemand
     if(p.erfolg){ schaden = (36 + Math.random()*16) * anteil * ausfuehrung.faktor;
       text = 'Du gehst die drei Schritte vor die Front, drehst dich nicht um und weißt trotzdem, dass sie mitkommen. Genau dafür stehst du dort: damit sechzig Männer etwas sehen, dem sie folgen können.'
            + anerkennung(2,'Den Zug selbst vorgeführt'); }
-    else { schaden = 8 * anteil; K.sektion = Math.max(0,(K.sektion||100)-7);
+    else { schaden = 8 * anteil; sektionSetzen(sektionWert()-7);
       text = 'Du gehst vor, und die vordere Sektion kommt mit. Die beiden hinteren nicht, weil sie den Befehl im Lärm nicht gehört haben, und für zehn Sekunden steht ein Drittel deines Zuges allein im Freien.'; }
   }
   else if(id==='gelaendenutzen'){
@@ -2173,10 +2195,10 @@ function kampfAktion(id){
   }
   else if(id==='frontverkuerzen'){
     const p = drillProbe(45);
-    if(p.erfolg){ K.geschlossen = 3; K.sektion = Math.min(100,(K.sektion||100)+5);
+    if(p.erfolg){ K.geschlossen = 3; sektionSetzen(sektionWert()+5);
       text = 'Von drei Sektionen auf zwei, das rechte Ende zieht nach innen. Die Front ist kürzer, die Wand ist dichter, und die Lücken, durch die es vorhin hereinkam, sind zu.'; }
     else { text = 'Der Befehl geht durch, und dann steht das rechte Ende an zwei Stellen doppelt und an einer gar nicht. Es dauert eine Minute, das aufzulösen, und in der Minute wird geschossen.';
-      K.sektion = Math.max(0,(K.sektion||100)-6); }
+      sektionSetzen(sektionWert()-6); }
   }
   else if(id==='degen'){
     /* Einmal je Gefecht, und es ist keine Handlung, sondern ein Zeichen: Ein
@@ -2414,7 +2436,7 @@ function kampfAktion(id){
      wird, was aus dem Stand geschieht, und das hier tut der Zug, nicht du. */
   let rollend = 0;
   if(K.rollend > 0){
-    rollend = (7 + Math.random()*5) * Math.max(0.35, (K.sektion||100)/100);
+    rollend = (7 + Math.random()*5) * Math.max(0.35, sektionWert()/100);
     K.rollend--;
   }
   /* Die zweite Hälfte des Sturms: Wer nicht sieht, trifft nicht — auch du

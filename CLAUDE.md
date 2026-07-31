@@ -772,6 +772,22 @@ Bei Eylau schneite es waagerecht, und beide Armeen verloren einander. Der Schalt
 
 > **Das widersprach dem Entwurf der Stabsränge an der empfindlichsten Stelle.** Ab Rang 10 ist der Gefahrzuschlag null („du stehst nicht mehr im Feuer", RANGLEITER §8), und an seiner Stelle steht das Stabsereignis mit 8 % — selten, ohne Vorwarnung, **und man kann sich nicht hinwerfen.** Das ist die Ersatzgefahr des Stabes, und daneben gehört keine zweite. Jetzt: `rang >= 7 && rang < 10`.
 
+### Eine vernichtete Sektion stand als volle da (`sektionWert()`, `sektionSetzen()`)
+
+**`K.sektion` ist eine Zahl von 0 bis 100, und `||` frisst die Null.** Siebzehn Stellen schrieben `(K.sektion||100)` — und lasen damit eine Sektion, von der niemand mehr steht, als eine vollzählige. Gemessen an einer von Hand auf 0 gesetzten Sektion:
+
+| | war | soll |
+|---|---|---|
+| nach einem Sektionsbefehl | **85 bis 91** | 0 — sie kommt nicht wieder |
+| Schadensanteil | 1,0 · voller Schaden | 0,35 · der Boden |
+| „Die Linie bricht" bei unter 40 | löst **nicht** aus | löst aus |
+
+**Der Rücksprung ist der schlimmste der drei:** `Math.max(0,(0||100)-6)` ist 94. Wer seine zwanzig Mann verloren hatte, hatte sie eine Runde später wieder — und der Befehl, der sie hätte kosten sollen, gab sie ihm zurück.
+
+> **Dieselbe Datei rechnete an vier Stellen längst richtig** (`K.sektion==null ? 100 : K.sektion`). Zwei Schreibweisen für denselben Wert, und die kürzere war die falsche. Es ist die Familie von `if(!K.vorhut)`: *Eine Null, die etwas bedeutet, wird mit „nichts" verwechselt.* Jetzt gehen alle Leser durch `sektionWert()` und alle Schreiber durch `sektionSetzen()` — **eine Tür je Richtung**, damit die kurze Fassung gar nicht mehr entstehen kann.
+
+**Gemessen, ob es die Balance bewegt: im geprüften Bereich nicht.** 20 Läufe mit von Hand gesetztem Rang 5, 25 Gefechte mit Sektion, **tiefster Stand 89** — die Null wird in den frühen Kapiteln nicht erreicht. Der Fehler war latent. Erreichbar ist er in den späten: Bei Güte 12 und zehn Runden zehrt eine ungedrillte Sektion rund zehn Punkte je Runde, dazu −6 bis −10 je misslungenem Befehl. **Wer die Reparatur für folgenlos hält, hat nur die Kapitel gemessen, in denen der Bot stirbt.**
+
 ### Die erste Kompanie zählte nicht als gewählt (`stabAktionen()`)
 
 **Wer bei Rang 10 oder 11 die erste seiner Kompanien nach vorn schickte, bekam die fünf Befehle des Bataillonschefs nie zu sehen** — nur, Runde um Runde, dieselbe Frage noch einmal. `K.vorhut` ist ein **Index**, und `if(!K.vorhut)` hält die Null für „keine gewählt".
