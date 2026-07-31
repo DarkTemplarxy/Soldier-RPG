@@ -225,8 +225,31 @@ function ordenFaellig(){
      (KONZEPT §5); der zweite Platz bleibt für später offen. */
   if(!hatOrden('eisenkrone') && jahr >= 1805 && (S.bulletins|0) >= 1)
     return ordenVon('eisenkrone');
+  /* ── Der zweite Weg in die Ehrenlegion: für den, der bleibt ──
+     **Alle übrigen Auszeichnungen hängen an derselben Achse — gesehen worden
+     zu sein, im Gefecht, im Stehen.** Wer elf Feldzüge übersteht, ohne je
+     vorzutreten, ging bis zum 31.07.2026 mit leerem Rock nach Hause.
+
+     Historisch ist die Lücke ein Fehler: Die Ehrenlegion wurde 1802 gestiftet,
+     um den Wildwuchs der alten Orden zu ersetzen, sie stand ausdrücklich dem
+     Gemeinen offen, und **lange Dienstzeit war ein anerkannter Grund** — nicht
+     nur die einzelne Tat.
+
+     Deshalb kein neuer Orden, sondern ein zweiter Weg in denselben: **dasselbe
+     Kreuz, ein anderer Grund.** Die Rangschranke nach oben ist der Punkt — es
+     ist der Weg des Mannes, der nie ein Patent bekommt. Wer Offizier wird, hat
+     die anderen Wege ohnehin.
+
+     Vier Feldzüge, weil das der Punkt ist, an dem ein Mann aufhört, ein
+     Rekrut zu sein; Kameradschaft, weil Aushalten in dieser Armee heißt, dass
+     die Kompanie einen kennt; und keine heimliche Sache, weil der Bogen zum
+     Präfekten geht. Alle drei Zahlen gibt es längst — **eine Schranke soll
+     bestätigen, nicht Maut kassieren.** */
+  const bleibt = S.rang <= 6 && S.kameradschaft >= 60 && !(S.heimlich||[]).length
+    && (typeof kapitelUeberlebt === 'function' ? kapitelUeberlebt() : 0) >= 4;
   if(!hatOrden('legion') && jahr >= 1804 &&
-     (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel') || (S.nennungen >= 5 && S.ruf >= 45)))
+     (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel')
+      || (S.nennungen >= 5 && S.ruf >= 45) || bleibt))
     return ordenVon('legion');
   /* ── Der zweite Grad, ab 1807 ──
      **Ein Grad ist keine zweite Auszeichnung, sondern dieselbe eine Stufe
@@ -239,6 +262,16 @@ function ordenFaellig(){
   if(!hatOrden('legion_offizier') && jahr >= 1807 && hatOrden('legion') &&
      S.rang >= 7 && S.nennungen >= 8)
     return ordenVon('legion_offizier');
+  /* ── Der Orden der Wiedervereinigung, ab 1811 ──
+     Er steht **hinter** den Graden der Ehrenlegion und **vor** den
+     Tapferkeitsmedaillen: historisch war er ausdrücklich der geringere Orden,
+     im Spiel ist er trotzdem mehr wert als eine Scheibe. Alle drei Bedingungen
+     sind Zahlen, die es schon gibt — der stehende Auftrag, der Einheitszustand,
+     die Akte. */
+  if(!hatOrden('reunion') && jahr >= 1811 && S.rang >= 9 &&
+     (S.kauftraegeJa|0) >= 2 && (S.einheit==null?70:S.einheit) >= 70 && !(S.vermerke|0))
+    return ordenVon('reunion');
+
   /* ── Der vierte Grad, Schranke von Rang 13 ──
      Er steht **vor** den Tapferkeitsmedaillen, weil `ordenFaellig()` den ersten
      Treffer zurückgibt: Wer den Stern verdient hat, soll ihn bekommen und nicht
@@ -394,7 +427,10 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        nicht bloß in `kaeufe`, weil vier verschiedene Stellen es fragen: die
        Wertung, die Feindgüte, die Gunst und die Erschaffung selbst. */
     patent:null,
-    kapitel:0, lebt:true, ende:null, log:[]
+    /* `kapitel` wurde nie erhöht und stand im Epilog immer auf null — „Neunzehn
+       Jahre, 0 Feldzüge". Gezählt wird jetzt mit `kapitelUeberlebt()`, das
+       ohnehin die Wertung rechnet; das tote Feld ist weg. */
+    lebt:true, ende:null, log:[]
   };
   /* ── Der gekaufte Offizier ──
      **Er rückt 1796 in Savona ein wie jeder andere** — nur trägt er Epauletten,

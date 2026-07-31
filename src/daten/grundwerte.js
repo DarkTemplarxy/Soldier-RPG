@@ -631,6 +631,31 @@ const ORDEN = [
      der dritte Grad, ein Regiment (Rang 11) und fünf Bulletins. Wer so weit
      kommt, hat den Stern verdient, bevor er ihn braucht — und genau so soll
      eine Schranke sitzen: als Bestätigung, nicht als Mautstelle. */
+  /* ── Der Orden für den, der nicht schießt, sondern sorgt ──
+     **Alle übrigen Auszeichnungen verlangen, gesehen worden zu sein.** Der
+     Capitaine, dessen Bataillon als einziges Schuhe hat, bekam dafür bis zum
+     31.07.2026 nichts — Verwaltung zahlte in Fürsprache und sonst nirgendwohin.
+
+     **Den Orden gab es wirklich**, und genau dafür: gestiftet am 18. Oktober
+     1811, hellblaues Band, ausdrücklich *unterhalb* der Ehrenlegion angesiedelt
+     und ausdrücklich auch für **Verwaltungsverdienst** — für Präfekten,
+     Intendanten und Offiziere, deren Leistung in Listen stand statt in
+     Bulletins.
+
+     Seine drei Bedingungen sind Zahlen, die es schon gibt: der stehende
+     Feldzugsauftrag zweimal erfüllt, ein Bataillon in brauchbarem Zustand und
+     eine Akte ohne Vermerk. **Er ist damit der einzige Orden des Spiels, den
+     ein Feigling bekommen kann** — und der einzige, für den man nie vor der
+     Linie gestanden haben muss.
+
+     Dass er zugleich genau Davouts Währung ist und genau das, was Ney für
+     nichts hält, braucht keine eigene Mechanik: Die Bedingungen *sind* seine
+     Zählung. */
+  {id:'reunion', name:'Orden der Wiedervereinigung', voll:'Ordre de la Réunion',
+   ab:'1811', vp:30, ruf:6, pension:0.5,
+   was:'Ein weißes Kreuz an hellblauem Band, gestiftet für die, deren Verdienst in Listen steht und nicht in Bulletins. In der Armee heißt er „der Orden für Tinte", und wer ihn trägt, weiß das und trägt ihn trotzdem.',
+   bedingung:'Zweimal den Feldzugsauftrag erfüllt, das Bataillon beisammen, die Akte ohne Vermerk'},
+
   {id:'legion_grand', name:'Grand Officier der Ehrenlegion', voll:'Grand Officier de la Légion d\'honneur',
    ab:'1808', vp:48, ruf:14, pension:3.0,
    was:'Ein achtstrahliger Stern, auf den Rock genäht, kein Band. Man hängt ihn nicht um und legt ihn nicht ab; er ist Teil des Mantels, in dem man vor Leute tritt. Dazu ein Betrag im Jahr, von dem eine Familie lebt, und eine Liste in Paris, die kurz genug ist, dass einer sie auswendig kann.',
@@ -819,6 +844,17 @@ function ordensbild(id){
      ${ordenBand(gid)}`);
 
   if(id==='legion_grand') return bild('Grand Officier der Ehrenlegion', ordenStern(gid, 88));
+
+  /* Hellblaues Band und ein **weißes** Kreuz ohne Mittelbild — so unterscheidet
+     er sich auf Daumengröße von der Ehrenlegion, die dasselbe Kreuz an rotem
+     Band mit goldenem Mittelstück trägt. Das ist der ganze Unterschied, den
+     man bei 44 Pixeln Höhe noch zeigen kann, und er genügt: Man sieht die
+     Farbe, bevor man den Namen liest. */
+  if(id==='reunion') return bild('Orden der Wiedervereinigung',
+    `<rect x="40" y="0" width="40" height="56" fill="#7fa8c9"/>
+     ${ordenKreuz(98, 5, 32, 1.1)}
+     <circle cx="60" cy="98" r="9" fill="#f2ede1" stroke="#8a8272" stroke-width="1.2"/>
+     ${ordenBand(gid)}`);
 
   if(id==='legion' || id==='legion_offizier'){
     /* Der zweite Grad trägt dasselbe Kreuz an einem Band mit **Rosette** —

@@ -621,7 +621,11 @@ function kapitelauftragAbrechnen(){
   if(LAUF.kauftrag && LAUF.kauftrag.kap === nr) return LAUF.kauftrag;
   const ok = k.pruef();
   const wer = beurteiler() || 'grandmaison';
-  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; patronMerkt('auftragJa'); }
+  /* `S.kauftraegeJa` ist der einzige neue Zähler, den der Orden der
+     Wiedervereinigung braucht — er zählt, was `LAUF.kauftrag` nur für das
+     laufende Kapitel weiß. */
+  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; patronMerkt('auftragJa');
+          S.kauftraegeJa = (S.kauftraegeJa|0) + 1; }
   else { gunstGeben(wer,-1); patronMerkt('auftragNein'); }
   LAUF.kauftrag = {kap:nr, id:k.id, ok:ok, wer:wer};
   return LAUF.kauftrag;

@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 16;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls
+const LAUF_FASSUNG    = 17;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls · 17: der Orden der Wiedervereinigung
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -282,6 +282,17 @@ const LAUF_WANDLER = {
       });
     }
     return Object.assign({}, alt, {fassung:16});
+  },
+  /* ── 17: der Orden der Wiedervereinigung ──
+     Ein einziger neuer Zähler. Wer aus einer älteren Fassung fortsetzt, hat
+     seine bisher erfüllten Feldzugsaufträge nicht gezählt und fängt bei null
+     an — der Orden ist damit für ihn zwei Feldzüge entfernt statt keinen.
+     **Das ist die ehrliche Fassung**: Rückwirkend zu raten, wie oft er ihn
+     erfüllt hat, wäre eine Zahl, die niemand gemessen hat. */
+  16: alt => {
+    const m = alt.mann;
+    if(m && m.kauftraegeJa === undefined) m.kauftraegeJa = 0;
+    return Object.assign({}, alt, {fassung:17});
   }
 };
 

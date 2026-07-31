@@ -5,6 +5,22 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Zwei Wege zu einer Auszeichnung, die nicht durch das Gefecht führen
+
+**Alle zehn bisherigen Orden hingen an derselben Achse: gesehen worden zu sein, im Gefecht, im Stehen.** Wer aushält, bekam nichts; wer gut verwaltet, auch nicht.
+
+**A · Die Ehrenlegion auf einem zweiten Weg** — kein neuer Orden, ein zweiter Grund für denselben. Bedingung: ab 1804, **Rang ≤ 6**, vier Feldzüge überstanden, Kameradschaft ≥ 60, keine heimliche Sache. Historisch war lange Dienstzeit ein anerkannter Grund; die Rangschranke nach oben ist der Punkt — es ist der Weg des Mannes, der nie ein Patent bekommt. Kein neuer Zähler.
+
+**B · Der Orden der Wiedervereinigung** (*Ordre de la Réunion*, real, gestiftet 18.10.1811, hellblaues Band, ausdrücklich auch für Verwaltungsverdienst). Bedingung: ab 1811, Rang ≥ 9, **zweimal den stehenden Feldzugsauftrag erfüllt**, Einheitszustand ≥ 70, Akte ohne Vermerk. 30 VP, Ruf +6, Pension 0,5 F. Der einzige Orden, den ein Feigling bekommen kann.
+
+Ein neuer Zähler: `S.kauftraegeJa`. **Fassung 17** mit Wandler — wer aus einer älteren fortsetzt, fängt bei null an.
+
+**Nebenfund:** `S.kapitel` wurde nie erhöht und hatte genau einen Leser — den Epilog, der jedem Marschall „Neunzehn Jahre, **0 Feldzüge**" sagte. Jetzt `kapitelUeberlebt()`; das tote Feld ist weg.
+
+**Gegengeprüft am Zustand**, zehn Fälle: beide Orden fallen unter ihren Bedingungen und unter keiner davon, wenn eine einzelne fehlt (Offizier statt Mannschaft, Kameradschaft 59, eine heimliche Sache, zwei Feldzüge statt vier; ein Auftrag statt zwei, Einheit 69, ein Vermerk, Rang 6). Keine Balance-Zahl berührt — die Wertung wächst um höchstens 30 VP.
+
+---
+
 ## 2026-07-31 — Die Beförderungsurkunde kam nach zwei Dritteln aller Gefechte nicht
 
 **Ausgestellt hat sie eine einzige Zeile, die in `zeigeLager()`.** Über alle elf Kapitel gezählt: **28 von 42 Gefechten haben kein Lager danach im selben Kapitel.** Wer nach einem davon im Feld befördert wurde, bekam sein Papier frühestens im ersten Lager des nächsten Kapitels — nach Waterloo, nach dem letzten Sieg der Hundert Tage und an der Beresina gar nicht mehr. Das Winterquartier hat einen Fourrier und einen Tisch wie jedes Lager und gab trotzdem nichts aus, weil `zeigeWinter()` nicht danach fragte.

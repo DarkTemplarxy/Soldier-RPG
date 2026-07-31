@@ -77,7 +77,7 @@ Gebaut sind **alle elf Kapitel** — Italien 1796/97 bis Waterloo 1815, **einhun
 | **Die Rekruten** (`rekruten:n`) — der Exerzierplatz wird das Spiel | |
 | **Was ein Mann behält** — fünf Gewohnheiten, die Strecke kaufen | Pferd, Fernrohr |
 | **Konstitution wächst im Lauf** und darf über 100 | |
-| **Neun Orden in drei Formen** — Kreuz am Band, geprägte Scheibe, graviertes Täfelchen | Commandeur, Grand Officier, zweiter fremder Orden |
+| **Elf Orden in vier Formen** — Kreuz am Band, geprägte Scheibe, graviertes Täfelchen, Bruststern | Commandeur, zweiter fremder Orden |
 | **Drei Tapferkeitsmedaillen**: jede Sichtbarkeitsstufe zahlt etwas aus | Schnallen mit Ort und Jahr |
 | **Proben auf 80 % bei gleichem Wert** — Sockel 60, sechs Würfel | |
 | **Steigende Schwierigkeiten je Feldzug** (`kampagnenHaerte()` +0 … +20) | |
@@ -1184,8 +1184,28 @@ Gemessen je Kapitel: Italien **3,4 F** (Fusilier) bis **9,6 F** (Sergent-major) 
 | **Offizier der Ehrenlegion** | die Ehrenlegion, ein Patent und 8 Nennungen, ab 1807 | 36 | +10 | 2 F je Station |
 | **Grand Officier der Ehrenlegion** | der dritte Grad, **ein Regiment** (Rang 11) und 5 Bulletins, ab 1808 | **48** | **+14** | 3 F je Station |
 | **Tapferkeitsmedaille** Bronze · Silber · Gold | 1 Nennung · 1 Bulletin · Lob + Bulletin + eine Kette ohne Fehlschlag | 12 · 24 · **36** | +2 · +4 · **+6** | — · — · 0,5 F |
+| **Orden der Wiedervereinigung** | zweimal den Feldzugsauftrag erfüllt, Rang 9, Einheit ≥ 70, Akte ohne Vermerk, ab 1811 | 30 | +6 | 0,5 F je Station |
 
-> **Die VP-Werte sind am 30.07.2026 verdreifacht worden**, während alles andere in der Wertung den Faktor 5 bekam. Das ist kein Versehen: *„Auszeichnungen sind dabei nicht sooo wichtig"* (Ansage des Entwicklers). Orden sollen mit der Ökonomie mitwachsen, aber die Rangleiter nicht überholen — zehn Orden zusammen bringen 360 VP, ein einziger Rangschritt oben bringt 390.
+### Zwei Wege, die nicht durch das Gefecht führen (31.07.2026)
+
+**Alle bis dahin gebauten Auszeichnungen hingen an derselben Achse: gesehen worden zu sein, im Gefecht, im Stehen.** Das ist die Sichtbarkeitsregel und richtig — nur hieß es: **Wer aushält, bekommt nichts. Wer gut verwaltet, bekommt nichts.** Der Mann, der elf Feldzüge übersteht, ohne je vorzutreten, ging mit leerem Rock nach Hause; der Capitaine, dessen Bataillon als einziges Schuhe hat, auch.
+
+**Kein Medaillenwald als Antwort.** Napoleon hatte absichtlich *einen* Orden — die Ehrenlegion ersetzte 1802 den Wildwuchs der alten Auszeichnungen und stand ausdrücklich dem Gemeinen offen. Erfundenes Blech daneben wäre historisch falsch. Zwei reale Dinge passen stattdessen:
+
+| | Für wen | Bedingung |
+|---|---|---|
+| **Die Ehrenlegion, zweiter Weg** | den Fußsoldaten | Rang ≤ 6 · vier Feldzüge überstanden · Kameradschaft ≥ 60 · keine heimliche Sache |
+| **Der Orden der Wiedervereinigung** | den Offizier | Rang ≥ 9 · zweimal den stehenden Auftrag erfüllt · Einheit ≥ 70 · Akte ohne Vermerk |
+
+**Der zweite Weg ist kein neuer Orden, sondern ein zweiter Grund für denselben** — dasselbe Kreuz, eine andere Zeile daneben. Historisch war lange Dienstzeit ein anerkannter Grund; im Spiel ist die **Rangschranke nach oben** der Punkt: Es ist der Weg des Mannes, der nie ein Patent bekommt. Wer Offizier wird, hat die anderen Wege ohnehin.
+
+**Der Orden der Wiedervereinigung gab es wirklich** (*Ordre de la Réunion*, 18. Oktober 1811, hellblaues Band), und zwar ausdrücklich unterhalb der Ehrenlegion und ausdrücklich auch für **Verwaltungsverdienst**. Er ist **der einzige Orden des Spiels, den ein Feigling bekommen kann** — und der einzige, für den man nie vor der Linie gestanden haben muss. Dass er zugleich Davouts Währung ist und das, was Ney für nichts hält, braucht keine eigene Mechanik: Die Bedingungen *sind* seine Zählung.
+
+> **Ein neuer Zähler, mehr nicht:** `S.kauftraegeJa` in `kapitelauftragAbrechnen()` — `LAUF.kauftrag` weiß nur vom laufenden Kapitel. Fassung **17** mit Wandler; wer aus einer älteren fortsetzt, fängt bei null an, weil rückwirkend zu raten eine Zahl wäre, die niemand gemessen hat.
+
+> **⚠ Nebenfund: `S.kapitel` wurde nie erhöht.** Das Feld stand seit `neuerCharakter()` auf 0 und hatte genau einen Leser — den Epilog, der damit jedem Marschall „Neunzehn Jahre, **0 Feldzüge**" sagte. Gezählt wird jetzt mit `kapitelUeberlebt()`, das die Wertung ohnehin rechnet; das tote Feld ist weg.
+
+> **Die VP-Werte sind am 30.07.2026 verdreifacht worden**, während alles andere in der Wertung den Faktor 5 bekam. Das ist kein Versehen: *„Auszeichnungen sind dabei nicht sooo wichtig"* (Ansage des Entwicklers). Orden sollen mit der Ökonomie mitwachsen, aber die Rangleiter nicht überholen — elf Orden zusammen bringen 390 VP, ein einziger Rangschritt oben bringt 390.
 
 ### Der Grand Officier — die Schranke, die Rang 13 verschlossen hielt
 

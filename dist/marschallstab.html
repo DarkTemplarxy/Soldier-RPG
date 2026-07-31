@@ -1653,6 +1653,31 @@ const ORDEN = [
      der dritte Grad, ein Regiment (Rang 11) und fünf Bulletins. Wer so weit
      kommt, hat den Stern verdient, bevor er ihn braucht — und genau so soll
      eine Schranke sitzen: als Bestätigung, nicht als Mautstelle. */
+  /* ── Der Orden für den, der nicht schießt, sondern sorgt ──
+     **Alle übrigen Auszeichnungen verlangen, gesehen worden zu sein.** Der
+     Capitaine, dessen Bataillon als einziges Schuhe hat, bekam dafür bis zum
+     31.07.2026 nichts — Verwaltung zahlte in Fürsprache und sonst nirgendwohin.
+
+     **Den Orden gab es wirklich**, und genau dafür: gestiftet am 18. Oktober
+     1811, hellblaues Band, ausdrücklich *unterhalb* der Ehrenlegion angesiedelt
+     und ausdrücklich auch für **Verwaltungsverdienst** — für Präfekten,
+     Intendanten und Offiziere, deren Leistung in Listen stand statt in
+     Bulletins.
+
+     Seine drei Bedingungen sind Zahlen, die es schon gibt: der stehende
+     Feldzugsauftrag zweimal erfüllt, ein Bataillon in brauchbarem Zustand und
+     eine Akte ohne Vermerk. **Er ist damit der einzige Orden des Spiels, den
+     ein Feigling bekommen kann** — und der einzige, für den man nie vor der
+     Linie gestanden haben muss.
+
+     Dass er zugleich genau Davouts Währung ist und genau das, was Ney für
+     nichts hält, braucht keine eigene Mechanik: Die Bedingungen *sind* seine
+     Zählung. */
+  {id:'reunion', name:'Orden der Wiedervereinigung', voll:'Ordre de la Réunion',
+   ab:'1811', vp:30, ruf:6, pension:0.5,
+   was:'Ein weißes Kreuz an hellblauem Band, gestiftet für die, deren Verdienst in Listen steht und nicht in Bulletins. In der Armee heißt er „der Orden für Tinte", und wer ihn trägt, weiß das und trägt ihn trotzdem.',
+   bedingung:'Zweimal den Feldzugsauftrag erfüllt, das Bataillon beisammen, die Akte ohne Vermerk'},
+
   {id:'legion_grand', name:'Grand Officier der Ehrenlegion', voll:'Grand Officier de la Légion d\'honneur',
    ab:'1808', vp:48, ruf:14, pension:3.0,
    was:'Ein achtstrahliger Stern, auf den Rock genäht, kein Band. Man hängt ihn nicht um und legt ihn nicht ab; er ist Teil des Mantels, in dem man vor Leute tritt. Dazu ein Betrag im Jahr, von dem eine Familie lebt, und eine Liste in Paris, die kurz genug ist, dass einer sie auswendig kann.',
@@ -1841,6 +1866,17 @@ function ordensbild(id){
      ${ordenBand(gid)}`);
 
   if(id==='legion_grand') return bild('Grand Officier der Ehrenlegion', ordenStern(gid, 88));
+
+  /* Hellblaues Band und ein **weißes** Kreuz ohne Mittelbild — so unterscheidet
+     er sich auf Daumengröße von der Ehrenlegion, die dasselbe Kreuz an rotem
+     Band mit goldenem Mittelstück trägt. Das ist der ganze Unterschied, den
+     man bei 44 Pixeln Höhe noch zeigen kann, und er genügt: Man sieht die
+     Farbe, bevor man den Namen liest. */
+  if(id==='reunion') return bild('Orden der Wiedervereinigung',
+    `<rect x="40" y="0" width="40" height="56" fill="#7fa8c9"/>
+     ${ordenKreuz(98, 5, 32, 1.1)}
+     <circle cx="60" cy="98" r="9" fill="#f2ede1" stroke="#8a8272" stroke-width="1.2"/>
+     ${ordenBand(gid)}`);
 
   if(id==='legion' || id==='legion_offizier'){
     /* Der zweite Grad trägt dasselbe Kreuz an einem Band mit **Rosette** —
@@ -5765,7 +5801,7 @@ STATIONEN.hunderttage = KAPITEL11.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 16;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls
+const LAUF_FASSUNG    = 17;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls · 17: der Orden der Wiedervereinigung
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -6030,6 +6066,17 @@ const LAUF_WANDLER = {
       });
     }
     return Object.assign({}, alt, {fassung:16});
+  },
+  /* ── 17: der Orden der Wiedervereinigung ──
+     Ein einziger neuer Zähler. Wer aus einer älteren Fassung fortsetzt, hat
+     seine bisher erfüllten Feldzugsaufträge nicht gezählt und fängt bei null
+     an — der Orden ist damit für ihn zwei Feldzüge entfernt statt keinen.
+     **Das ist die ehrliche Fassung**: Rückwirkend zu raten, wie oft er ihn
+     erfüllt hat, wäre eine Zahl, die niemand gemessen hat. */
+  16: alt => {
+    const m = alt.mann;
+    if(m && m.kauftraegeJa === undefined) m.kauftraegeJa = 0;
+    return Object.assign({}, alt, {fassung:17});
   }
 };
 
@@ -6393,8 +6440,31 @@ function ordenFaellig(){
      (KONZEPT §5); der zweite Platz bleibt für später offen. */
   if(!hatOrden('eisenkrone') && jahr >= 1805 && (S.bulletins|0) >= 1)
     return ordenVon('eisenkrone');
+  /* ── Der zweite Weg in die Ehrenlegion: für den, der bleibt ──
+     **Alle übrigen Auszeichnungen hängen an derselben Achse — gesehen worden
+     zu sein, im Gefecht, im Stehen.** Wer elf Feldzüge übersteht, ohne je
+     vorzutreten, ging bis zum 31.07.2026 mit leerem Rock nach Hause.
+
+     Historisch ist die Lücke ein Fehler: Die Ehrenlegion wurde 1802 gestiftet,
+     um den Wildwuchs der alten Orden zu ersetzen, sie stand ausdrücklich dem
+     Gemeinen offen, und **lange Dienstzeit war ein anerkannter Grund** — nicht
+     nur die einzelne Tat.
+
+     Deshalb kein neuer Orden, sondern ein zweiter Weg in denselben: **dasselbe
+     Kreuz, ein anderer Grund.** Die Rangschranke nach oben ist der Punkt — es
+     ist der Weg des Mannes, der nie ein Patent bekommt. Wer Offizier wird, hat
+     die anderen Wege ohnehin.
+
+     Vier Feldzüge, weil das der Punkt ist, an dem ein Mann aufhört, ein
+     Rekrut zu sein; Kameradschaft, weil Aushalten in dieser Armee heißt, dass
+     die Kompanie einen kennt; und keine heimliche Sache, weil der Bogen zum
+     Präfekten geht. Alle drei Zahlen gibt es längst — **eine Schranke soll
+     bestätigen, nicht Maut kassieren.** */
+  const bleibt = S.rang <= 6 && S.kameradschaft >= 60 && !(S.heimlich||[]).length
+    && (typeof kapitelUeberlebt === 'function' ? kapitelUeberlebt() : 0) >= 4;
   if(!hatOrden('legion') && jahr >= 1804 &&
-     (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel') || (S.nennungen >= 5 && S.ruf >= 45)))
+     (hatOrden('ehrenwaffe') || hatOrden('ehrensaebel')
+      || (S.nennungen >= 5 && S.ruf >= 45) || bleibt))
     return ordenVon('legion');
   /* ── Der zweite Grad, ab 1807 ──
      **Ein Grad ist keine zweite Auszeichnung, sondern dieselbe eine Stufe
@@ -6407,6 +6477,16 @@ function ordenFaellig(){
   if(!hatOrden('legion_offizier') && jahr >= 1807 && hatOrden('legion') &&
      S.rang >= 7 && S.nennungen >= 8)
     return ordenVon('legion_offizier');
+  /* ── Der Orden der Wiedervereinigung, ab 1811 ──
+     Er steht **hinter** den Graden der Ehrenlegion und **vor** den
+     Tapferkeitsmedaillen: historisch war er ausdrücklich der geringere Orden,
+     im Spiel ist er trotzdem mehr wert als eine Scheibe. Alle drei Bedingungen
+     sind Zahlen, die es schon gibt — der stehende Auftrag, der Einheitszustand,
+     die Akte. */
+  if(!hatOrden('reunion') && jahr >= 1811 && S.rang >= 9 &&
+     (S.kauftraegeJa|0) >= 2 && (S.einheit==null?70:S.einheit) >= 70 && !(S.vermerke|0))
+    return ordenVon('reunion');
+
   /* ── Der vierte Grad, Schranke von Rang 13 ──
      Er steht **vor** den Tapferkeitsmedaillen, weil `ordenFaellig()` den ersten
      Treffer zurückgibt: Wer den Stern verdient hat, soll ihn bekommen und nicht
@@ -6562,7 +6642,10 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        nicht bloß in `kaeufe`, weil vier verschiedene Stellen es fragen: die
        Wertung, die Feindgüte, die Gunst und die Erschaffung selbst. */
     patent:null,
-    kapitel:0, lebt:true, ende:null, log:[]
+    /* `kapitel` wurde nie erhöht und stand im Epilog immer auf null — „Neunzehn
+       Jahre, 0 Feldzüge". Gezählt wird jetzt mit `kapitelUeberlebt()`, das
+       ohnehin die Wertung rechnet; das tote Feld ist weg. */
+    lebt:true, ende:null, log:[]
   };
   /* ── Der gekaufte Offizier ──
      **Er rückt 1796 in Savona ein wie jeder andere** — nur trägt er Epauletten,
@@ -10252,7 +10335,11 @@ function kapitelauftragAbrechnen(){
   if(LAUF.kauftrag && LAUF.kauftrag.kap === nr) return LAUF.kauftrag;
   const ok = k.pruef();
   const wer = beurteiler() || 'grandmaison';
-  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; patronMerkt('auftragJa'); }
+  /* `S.kauftraegeJa` ist der einzige neue Zähler, den der Orden der
+     Wiedervereinigung braucht — er zählt, was `LAUF.kauftrag` nur für das
+     laufende Kapitel weiß. */
+  if(ok){ gunstGeben(wer,1); S.bulletins = (S.bulletins|0) + 1; patronMerkt('auftragJa');
+          S.kauftraegeJa = (S.kauftraegeJa|0) + 1; }
   else { gunstGeben(wer,-1); patronMerkt('auftragNein'); }
   LAUF.kauftrag = {kap:nr, id:k.id, ok:ok, wer:wer};
   return LAUF.kauftrag;
@@ -15489,7 +15576,7 @@ function zeigeEpilog(n){
           <div>${wertungsTabelle(p)}</div>
           <div class="note ${neu?'green':''}">
             ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
-            <p style="margin-top:10px">Neunzehn Jahre, ${S.kapitel|0} Feldzüge, ${stationen()} Stationen. Von hundert, die 1796 in Savona angetreten sind, steht am Ende keiner mehr in der Liste — und du bist noch da.</p>
+            <p style="margin-top:10px">Neunzehn Jahre, ${kapitelUeberlebt()} Feldzüge, ${stationen()} Stationen. Von hundert, die 1796 in Savona angetreten sind, steht am Ende keiner mehr in der Liste — und du bist noch da.</p>
           </div>
         </div>
         <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">

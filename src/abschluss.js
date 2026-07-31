@@ -1797,7 +1797,7 @@ function zeigeEpilog(n){
           <div>${wertungsTabelle(p)}</div>
           <div class="note ${neu?'green':''}">
             ${neu?`<b>Neuer Rekord: ${META.vp} Veteranenpunkte.</b>`:`Dein bester Lauf bleibt bei <b>${META.vp} Punkten</b>.`}
-            <p style="margin-top:10px">Neunzehn Jahre, ${S.kapitel|0} Feldzüge, ${stationen()} Stationen. Von hundert, die 1796 in Savona angetreten sind, steht am Ende keiner mehr in der Liste — und du bist noch da.</p>
+            <p style="margin-top:10px">Neunzehn Jahre, ${kapitelUeberlebt()} Feldzüge, ${stationen()} Stationen. Von hundert, die 1796 in Savona angetreten sind, steht am Ende keiner mehr in der Liste — und du bist noch da.</p>
           </div>
         </div>
         <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
