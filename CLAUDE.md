@@ -1421,19 +1421,23 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 **Das ist der gültige Vergleichsmaßstab.** Der Veteran wird mit **`VP=5800`** gemessen, weil ein perfekter Lauf rund 6 000 bringt. Neu dazu: ein **mittlerer Bot mit 1 500 VP** — er ist die einzige der drei Zahlen, die nicht an einem Ende klebt.
 
-| | **Weite** (von 163) | **höchster Rang (Cpt)** | Italien | Caporal | Ägypten | Punkte-Median |
-|---|---|---|---|---|---|---|
-| **Erstlauf ohne Vorrat** *(80 Läufe)* | **32** *(Mittel 54)* | **3 %** | 96 % | 68 % | 49 % | 502 |
-| **Veteran 1500 VP** *(40)* | **93** | **55 %** | 100 % | 100 % | 90 % | 1 849 |
-| **Veteran 5800 VP** *(40)* | **163** | **100 %** | 100 % | 100 % | 100 % | 6 046 |
+| | **Weite: Mittel** *(Median)* | **höchster Rang (Cpt)** | Italien | Ägypten | Punkte-Median |
+|---|---|---|---|---|---|
+| **Erstlauf ohne Vorrat** *(80 Läufe)* | **51** *(32)* | **4 %** | 96 % | 40 % | 452 |
+| **Veteran 1500 VP** *(40)* | **77** *(72)* | **40 %** | 98 % | 100 % | 1 378 |
+| **Veteran 5800 VP** *(40)* | **145** *(163)* | **98 %** | 100 % | 98 % | 5 158 |
+
+> **Gelesen wird der Mittelwert, nicht der Median.** Bei zwei der drei Bots meldet der Prüfstand `⚠ MEDIAN INSTABIL` — beim Erstläufer wegen Ägypten (40 %) und Eylau (43 %), beim mittleren wegen Austerlitz (51 %) und Jena (55 %). Nur der Maximalveteran hat eine eingipflige Verteilung; bei ihm sagen beide Zahlen dasselbe.
+
+> **⚠ Beide Veteranen liegen unter den Zahlen vom Vormittag desselben Tages** — der mittlere bei Austerlitz 51 statt 72 %, der Maximalveteran bei 57 statt 78 % ganz durch, Punkte-Median 5 158 statt 6 046. Dazwischen liegen zwei mechanische Änderungen (die erste Kompanie, die nicht als gewählt zählte; die vernichtete Sektion) und vierzig Läufe Rauschen je Bot. **Welches von beidem es war, ist ungemessen.** Dass der **Erstläufer sich über drei Messungen nicht bewegt hat**, spräche für die Sektion — er lebt und stirbt unterhalb der Ränge, auf denen sie zählt. Die Zahlen oben sind davon unberührt: mit dem reparierten Prüfstand am heutigen Stand gemessen, und sie sind die Grundlinie für alles Weitere.
 
 **Alle drei Berichte melden null Abbrüche** — das ist seit dem 30.07.2026 die erste Zeile, die man liest (siehe „Zwei Fehler im Prüfstand").
 
 | Bot | Rangverteilung |
 |---|---|
-| Erstlauf | 1 Fus 26 · 3 Cap 13 · 5 Serg 13 · **7 S-Lt 22** · 8 Lt 4 · 9 Cpt 2 |
-| **Mitte** | 5 Serg 4 · 7 S-Lt 10 · 8 Lt 4 · **9 Cpt 19** · 11 Col 3 |
-| Maximum | 11 Col 7 · 12 GdB 8 · 13 GdD 4 · **14 Mar 21** |
+| Erstlauf | 1 Fus 28 · 3 Cap 12 · 5 Serg 15 · **7 S-Lt 19** · 8 Lt 3 · 9 Cpt 3 |
+| **Mitte** | 5 Serg 1 · 6 S-maj 1 · **7 S-Lt 17** · 8 Lt 5 · **9 Cpt 14** · 11 Col 2 |
+| Maximum | 7 S-Lt 1 · 9 Cpt 1 · 11 Col 2 · **12 GdB 13** · 13 GdD 5 · **14 Mar 18** |
 
 > **Der Marschallstab ist zum ersten Mal erreicht** — 21 von 40 beim Maximalveteranen, nachdem vorher 40 von 40 beim Colonel standen. Damit schließt sich auch die Ökonomie: „Alles auf 70+" kostet 4 950 VP, ein Spitzenlauf liefert 6 046. Die Kostenkurve war gegen eine Decke geeicht, die bis dahin niemand gesehen hat.
 
