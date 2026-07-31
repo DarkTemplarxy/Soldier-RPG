@@ -280,7 +280,7 @@ Das Ziel *„alles auf 70+"* kostet 4 950 VP.
 
 **b) „Kein Widerstand mehr"** ist mit 78 % statt 98 % erledigt. Er stirbt jetzt — Russland lässt ihn zu 85 % durch, Frankreich zu 94 % —, und 27 % seiner Wahlen sind riskante.
 
-> **Was daran offen bleibt, ist eine Entwurfsfrage und keine Messung:** Ob **53 % Marschall** für den Maximalveteranen richtig sitzt. Historisch waren es sechsundzwanzig in zwölf Jahren; im Spiel ist es der Vorrat eines vollkommenen Laufs. Der Hebel wäre `patronMacht` oder die Bulletin-Schwelle von Rang 14 — **nicht die Ruf-Schwelle**, die ist zu 100 % erfüllt und trennt nichts.
+> **✓ Entschieden am 31.07.2026: 53 % Marschall bleiben so.** *(„Punkt 47 passt so, das ist in Ordnung.")* Die Zahl gilt für den **Maximalveteranen** — den Vorrat eines vollkommenen Laufs —, und für den soll der Marschallstab erreichbar sein, ohne sicher zu sein. Der historische Vergleich (sechsundzwanzig in zwölf Jahren) trägt hier nicht: Er zählt Menschen, die Quote zählt Läufe eines Spielers, der schon alles hinter sich hat. **Nicht mehr anfassen, außer die Ökonomie darüber ändert sich** — dann ist `patronMacht` der Hebel, nicht die Ruf-Schwelle.
 
 ---
 
