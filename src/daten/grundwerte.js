@@ -984,6 +984,72 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
    über alle Läufe mit und ist damit dauerhaft — wie die Generalskampagnen. */
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
 
+/* ══════════════════ DAS ERSTE MAL ══════════════════
+
+   **Invariante 4 sagt: Ein höherer Rang gibt neue Knöpfe, nicht größere
+   Zahlen. Bis hierher hat das Spiel es niemandem gesagt.** Man stand
+   plötzlich vor vier Rechtecken statt vor einer Linie, vor einem Schreibtisch
+   statt vor drei Abenden, in einem Zelt statt in einem Glied — und musste
+   selbst darauf kommen, dass das der Aufstieg war, für den man gearbeitet hat.
+
+   Ein Fenster je Sache, einmal je Laufbahn, ausgelöst **dort, wo die Sache
+   zum ersten Mal wirklich geschieht** und nicht bei der Beförderung. Das ist
+   der Unterschied, auf den es ankommt: Die Nachricht kommt nicht, wenn man den
+   Rang bekommt, sondern wenn er einen zum ersten Mal etwas tun lässt.
+
+   **Zwei Regeln für den Ton, beide aus Invariante 7:**
+
+   1. **Kein Glückwunsch.** Der Aufstieg wird protokolliert, nicht gefeiert.
+      Jedes dieser Blätter sagt, was jetzt anders ist, und was es kostet.
+   2. **Nichts, was das Spiel selbst zeigen könnte, wird hier erklärt.** Vor
+      allem sagt `bataillon` **nicht**, dass die Atemleiste verschwunden ist —
+      der Bruch besteht darin, dass man es bemerkt, und ein Hinweis darauf
+      zerstört ihn vollständig (RANGLEITER §2). */
+const ERSTMAL = {
+  sektion:{
+    kopf:'Zum ersten Mal', titel:'Zwanzig Mann', ort:'Was ein Sergent tut',
+    text:['Bis gestern hast du geladen und gefeuert, und das war alles, was man von dir wollte. Heute stehst du hinter dem Glied, wo der serre-file steht, und vor dir stehen zwanzig, die auf dich hören sollen.',
+          'Du schießt weiter. Es zählt nur nichts mehr.'],
+    fuss:'Neue Befehle im Gefecht · nach jedem Gefecht wird gezählt, wie viele von den zwanzig noch stehen',
+    knopf:'Antreten lassen'},
+  zug:{
+    kopf:'Zum ersten Mal', titel:'Ohne Muskete', ort:'Was ein Offizier nicht mehr tut',
+    text:['Der Fourrier hat deine Muskete abgenommen und nichts dazu gesagt. An ihrer Stelle hängt ein Degen, mit dem du in zehn Jahren dreimal etwas anfangen wirst.',
+          'Von jetzt an entscheidest du nicht mehr, was du tust, sondern was hundertzwanzig andere tun. Zwischen deinem Befehl und dem, was daraus wird, liegen Leute, die du nicht ausgesucht hast.'],
+    fuss:'Kein Laden, kein Feuern · was du befiehlst, führt jemand anders aus — oder auch nicht',
+    knopf:'Den Degen umschnallen'},
+  schreibtisch:{
+    kopf:'Zum ersten Mal', titel:'Der Tisch', ort:'Was vor den Abenden liegt',
+    text:['Vor deinem Quartier steht ein Tisch, und auf dem Tisch liegen drei Vorgänge, die keiner sonst unterschreiben kann. Sie kosten dich keinen Abend. Sie kosten dich nur, dass du sie entscheidest.',
+          'Über jedem steht, wie weit die Entscheidung reicht. Bei der dritten Sorte steht es dabei, weil sie über den Feldzug hinausgeht, und dann sagt niemand mehr etwas dazu.'],
+    fuss:'Drei Vorgänge je Lager · kein Kommentar hinterher, in keine Richtung',
+    knopf:'Die Feder nehmen'},
+  briefing:{
+    kopf:'Zum ersten Mal', titel:'Befehlsausgabe', ort:'Am Vorabend',
+    text:['Du wirst geholt. Nicht ausgerichtet, nicht über den Fourrier — geholt, in ein Quartier mit einer Karte auf dem Tisch, zu einer Stunde, zu der sonst niemand mehr geweckt wird.',
+          'Was dort gesagt wird, hast du zehn Jahre lang am nächsten Morgen erfahren, in einer Fassung, die durch vier Münder gegangen war. Jetzt hörst du es aus dem ersten.'],
+    fuss:'Vor jedem Höhepunktgefecht · du bekommst den Befehl, und was du darauf sagst, steht auf dem Spiel',
+    knopf:'Eintreten'},
+  antreten:{
+    kopf:'Zum ersten Mal', titel:'Sie stehen und warten', ort:'Am Morgen',
+    text:['Es ist noch nicht hell, und sie sind zusammengerufen worden. Man ruft niemanden zusammen, um ihm zu sagen, dass nichts ist — sie wissen also schon, was für ein Tag das wird, bevor du ein Wort gesagt hast.',
+          'Zehn Jahre hast du in dieser Reihe gestanden und zugehört. Von der Seite, auf der du jetzt stehst, sieht es anders aus, als du gedacht hast.'],
+    fuss:'Was du sagst, wirkt das ganze Gefecht · und was du weglässt, finden sie selbst heraus',
+    knopf:'Vortreten'},
+  bataillon:{
+    kopf:'Zum ersten Mal', titel:'Vier Rechtecke', ort:'Was ein Bataillonschef sieht',
+    text:['Es gibt keine Männer mehr auf deinem Bild. Es gibt vier Kästen mit einem Buchstaben, einer Zahl und einer Haltung, und einer von ihnen geht zuerst hinein.',
+          'Welcher, entscheidest du. Es gibt keine Probe darauf, keine Fertigkeit, die es dir abnimmt, und das Spiel wird dir nie sagen, ob es die richtige war. Nach dem Gefecht steht in der Meldung eine Zahl, und die Zahl hat einen Buchstaben.'],
+    fuss:'Bis hierher hast du entschieden, was du tust · ab jetzt, wer stirbt',
+    knopf:'Die Meldungen durchsehen'},
+  karte:{
+    kopf:'Zum ersten Mal', titel:'Die Karte', ort:'Was ein General weiß',
+    text:['Vor dir liegt mehr Gelände, als ein Mann an einem Tag abreiten kann, und darauf stehen deine Verbände als Rechtecke mit einer Uhrzeit daneben. Die Uhrzeit ist das Wichtigste an ihnen.',
+          'Wo der Feind steht, ist eine Vermutung. Was du befiehlst, wird ausgeführt, wenn ein Reiter angekommen ist, und dann gilt eine Lage, die du nicht gesehen hast. Aufklärung macht die Meldungen frischer. Wahr macht sie nichts.'],
+    fuss:'Kein Befehl wirkt sofort · und du bekommst nie zu wissen, wie es wirklich stand',
+    knopf:'Den Zirkel ansetzen'}
+};
+
 /* ══════════════════ DER KAUFLADEN ══════════════════
 
    **Drei Qualitätsleitern, Extras, und die fünf Gewohnheiten.**

@@ -932,6 +932,7 @@ function zeigeLager(n){
   if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
     const offen = schreibtischStellen(n);
     LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+    if(offen.length) erstmal('schreibtisch');
     laufSichern();
   }
   const opt = lagerHandlungen(n).map((id,i)=>{
@@ -1191,6 +1192,7 @@ function zeigeWinter(n){
   if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
     const offen = schreibtischStellen(n);
     LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+    if(offen.length) erstmal('schreibtisch');
   }
   const opt = winterHandlungen(n).map((id,i)=>{
     const t = WINTER_TUN[id];

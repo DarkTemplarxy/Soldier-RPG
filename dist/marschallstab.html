@@ -883,6 +883,17 @@ a.plain:hover{ color:var(--brass) }
 .falte{ position:absolute; pointer-events:none;
   background:linear-gradient(90deg, rgba(80,60,30,.16), rgba(255,255,255,.34)) }
 
+/* ── Das Fenster ──
+   Ein Blatt, das obenauf liegt. **Der Schatten sitzt auf der Hülle, nicht auf
+   dem Blatt** — `clip-path` schneidet einen `box-shadow` mit ab, und die
+   allgemeine Regel für Blätter in der Überlage würde ihn genau dort setzen.
+   Deshalb muss sie hier ausdrücklich zurückgenommen werden. */
+.ueberlage .pergament{ box-shadow:none }
+.ueberlage .fenster.pergamenthuelle{ width:min(560px,100%) }
+.fensterprose{ font-size:17px; line-height:1.7; color:#241f1a }
+.fensterprose p{ margin:0 0 13px }
+.fensterprose p:last-child{ margin-bottom:0 }
+
 /* ── Das Patent, Rang 7 aufwärts ──
    Die Goldbordüre ist eine Hülle, kein `border-image` — sie muss auf jeder
    Breite gleich aussehen und darf nicht kacheln. */
@@ -2005,6 +2016,72 @@ function patentVon(id){ return PATENTE.find(p=>p.id===id) || null; }
 /* Freigeschaltet ist, wer den Rang einmal getragen hat. `META.bestRang` läuft
    über alle Läufe mit und ist damit dauerhaft — wie die Generalskampagnen. */
 function patentFrei(p){ return (typeof META==='object' && META ? (META.bestRang|0) : 0) >= p.frei; }
+
+/* ══════════════════ DAS ERSTE MAL ══════════════════
+
+   **Invariante 4 sagt: Ein höherer Rang gibt neue Knöpfe, nicht größere
+   Zahlen. Bis hierher hat das Spiel es niemandem gesagt.** Man stand
+   plötzlich vor vier Rechtecken statt vor einer Linie, vor einem Schreibtisch
+   statt vor drei Abenden, in einem Zelt statt in einem Glied — und musste
+   selbst darauf kommen, dass das der Aufstieg war, für den man gearbeitet hat.
+
+   Ein Fenster je Sache, einmal je Laufbahn, ausgelöst **dort, wo die Sache
+   zum ersten Mal wirklich geschieht** und nicht bei der Beförderung. Das ist
+   der Unterschied, auf den es ankommt: Die Nachricht kommt nicht, wenn man den
+   Rang bekommt, sondern wenn er einen zum ersten Mal etwas tun lässt.
+
+   **Zwei Regeln für den Ton, beide aus Invariante 7:**
+
+   1. **Kein Glückwunsch.** Der Aufstieg wird protokolliert, nicht gefeiert.
+      Jedes dieser Blätter sagt, was jetzt anders ist, und was es kostet.
+   2. **Nichts, was das Spiel selbst zeigen könnte, wird hier erklärt.** Vor
+      allem sagt `bataillon` **nicht**, dass die Atemleiste verschwunden ist —
+      der Bruch besteht darin, dass man es bemerkt, und ein Hinweis darauf
+      zerstört ihn vollständig (RANGLEITER §2). */
+const ERSTMAL = {
+  sektion:{
+    kopf:'Zum ersten Mal', titel:'Zwanzig Mann', ort:'Was ein Sergent tut',
+    text:['Bis gestern hast du geladen und gefeuert, und das war alles, was man von dir wollte. Heute stehst du hinter dem Glied, wo der serre-file steht, und vor dir stehen zwanzig, die auf dich hören sollen.',
+          'Du schießt weiter. Es zählt nur nichts mehr.'],
+    fuss:'Neue Befehle im Gefecht · nach jedem Gefecht wird gezählt, wie viele von den zwanzig noch stehen',
+    knopf:'Antreten lassen'},
+  zug:{
+    kopf:'Zum ersten Mal', titel:'Ohne Muskete', ort:'Was ein Offizier nicht mehr tut',
+    text:['Der Fourrier hat deine Muskete abgenommen und nichts dazu gesagt. An ihrer Stelle hängt ein Degen, mit dem du in zehn Jahren dreimal etwas anfangen wirst.',
+          'Von jetzt an entscheidest du nicht mehr, was du tust, sondern was hundertzwanzig andere tun. Zwischen deinem Befehl und dem, was daraus wird, liegen Leute, die du nicht ausgesucht hast.'],
+    fuss:'Kein Laden, kein Feuern · was du befiehlst, führt jemand anders aus — oder auch nicht',
+    knopf:'Den Degen umschnallen'},
+  schreibtisch:{
+    kopf:'Zum ersten Mal', titel:'Der Tisch', ort:'Was vor den Abenden liegt',
+    text:['Vor deinem Quartier steht ein Tisch, und auf dem Tisch liegen drei Vorgänge, die keiner sonst unterschreiben kann. Sie kosten dich keinen Abend. Sie kosten dich nur, dass du sie entscheidest.',
+          'Über jedem steht, wie weit die Entscheidung reicht. Bei der dritten Sorte steht es dabei, weil sie über den Feldzug hinausgeht, und dann sagt niemand mehr etwas dazu.'],
+    fuss:'Drei Vorgänge je Lager · kein Kommentar hinterher, in keine Richtung',
+    knopf:'Die Feder nehmen'},
+  briefing:{
+    kopf:'Zum ersten Mal', titel:'Befehlsausgabe', ort:'Am Vorabend',
+    text:['Du wirst geholt. Nicht ausgerichtet, nicht über den Fourrier — geholt, in ein Quartier mit einer Karte auf dem Tisch, zu einer Stunde, zu der sonst niemand mehr geweckt wird.',
+          'Was dort gesagt wird, hast du zehn Jahre lang am nächsten Morgen erfahren, in einer Fassung, die durch vier Münder gegangen war. Jetzt hörst du es aus dem ersten.'],
+    fuss:'Vor jedem Höhepunktgefecht · du bekommst den Befehl, und was du darauf sagst, steht auf dem Spiel',
+    knopf:'Eintreten'},
+  antreten:{
+    kopf:'Zum ersten Mal', titel:'Sie stehen und warten', ort:'Am Morgen',
+    text:['Es ist noch nicht hell, und sie sind zusammengerufen worden. Man ruft niemanden zusammen, um ihm zu sagen, dass nichts ist — sie wissen also schon, was für ein Tag das wird, bevor du ein Wort gesagt hast.',
+          'Zehn Jahre hast du in dieser Reihe gestanden und zugehört. Von der Seite, auf der du jetzt stehst, sieht es anders aus, als du gedacht hast.'],
+    fuss:'Was du sagst, wirkt das ganze Gefecht · und was du weglässt, finden sie selbst heraus',
+    knopf:'Vortreten'},
+  bataillon:{
+    kopf:'Zum ersten Mal', titel:'Vier Rechtecke', ort:'Was ein Bataillonschef sieht',
+    text:['Es gibt keine Männer mehr auf deinem Bild. Es gibt vier Kästen mit einem Buchstaben, einer Zahl und einer Haltung, und einer von ihnen geht zuerst hinein.',
+          'Welcher, entscheidest du. Es gibt keine Probe darauf, keine Fertigkeit, die es dir abnimmt, und das Spiel wird dir nie sagen, ob es die richtige war. Nach dem Gefecht steht in der Meldung eine Zahl, und die Zahl hat einen Buchstaben.'],
+    fuss:'Bis hierher hast du entschieden, was du tust · ab jetzt, wer stirbt',
+    knopf:'Die Meldungen durchsehen'},
+  karte:{
+    kopf:'Zum ersten Mal', titel:'Die Karte', ort:'Was ein General weiß',
+    text:['Vor dir liegt mehr Gelände, als ein Mann an einem Tag abreiten kann, und darauf stehen deine Verbände als Rechtecke mit einer Uhrzeit daneben. Die Uhrzeit ist das Wichtigste an ihnen.',
+          'Wo der Feind steht, ist eine Vermutung. Was du befiehlst, wird ausgeführt, wenn ein Reiter angekommen ist, und dann gilt eine Lage, die du nicht gesehen hast. Aufklärung macht die Meldungen frischer. Wahr macht sie nichts.'],
+    fuss:'Kein Befehl wirkt sofort · und du bekommst nie zu wissen, wie es wirklich stand',
+    knopf:'Den Zirkel ansetzen'}
+};
 
 /* ══════════════════ DER KAUFLADEN ══════════════════
 
@@ -5801,7 +5878,7 @@ STATIONEN.hunderttage = KAPITEL11.slice();
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 17;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls · 17: der Orden der Wiedervereinigung
+const LAUF_FASSUNG    = 18;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls · 17: der Orden der Wiedervereinigung · 18: das Fenster
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -6077,6 +6154,20 @@ const LAUF_WANDLER = {
     const m = alt.mann;
     if(m && m.kauftraegeJa === undefined) m.kauftraegeJa = 0;
     return Object.assign({}, alt, {fassung:17});
+  },
+  /* ── 18: das Fenster ──
+     Zwei Listen, beide leer. `S.gesehen` merkt sich, welche Nachricht schon
+     dastand, `LAUF.fenster` ist die Warteschlange derer, die noch kommen.
+
+     **Ein fortgesetzter Feldzug fängt bei „noch nichts gesehen" an**, und das
+     ist die richtige Seite des Irrtums: Er bekommt eine Nachricht ein zweites
+     Mal, statt sie nie zu bekommen. Rückwirkend zu raten, welche Maßstäbe er
+     schon betreten hat, hieße aus dem Rang zu schließen — und wer über ein
+     Patent eingestiegen ist, hat die unteren nie gehabt. */
+  17: alt => {
+    const m = alt.mann;
+    if(m && !m.gesehen) m.gesehen = [];
+    return Object.assign({}, alt, {fassung:18, fenster:alt.fenster || []});
   }
 };
 
@@ -6237,6 +6328,9 @@ function neuerLauf(mann){
              Spielabbruch durch: Wer mitten in einem Vorgang aufhört, steht
              beim Fortsetzen wieder davor. */
           schreibtisch:null,
+          /* Die Warteschlange der Fenster. Sie liegt in `LAUF` und nicht in
+             einer Modulvariablen, damit eine Nachricht ein Beenden übersteht. */
+          fenster:[],
           begonnen:new Date().toISOString(), zuletzt:null};
   binde();
 }
@@ -6629,6 +6723,9 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        und eine leere Liste ist ehrlicher als vier Platzhalter. */
     unterstellte:[], unterstellteStufe:0, unterId:0, unterTot:[], unterNamen:[], unterstellteVorher:null,
     heimlich:[], vermerke:0, uebergangen:false, mitgewaehlt:false,
+    /* Welche Nachricht schon dastand. Sie gehört dem Mann und nicht dem
+       Feldzug: Das erste Mal ist einmal in einer Laufbahn. */
+    gesehen:[],
     kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},
@@ -7812,6 +7909,12 @@ function kopfzeile(){
     <button class="zurueck" onclick="zumTitel()" title="Zur Übersicht — der Feldzug bleibt gesichert">Übersicht</button></span>`;
   const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
+  /* **Hier steht der Haken für das Fenster**, und er steht hier, weil jeder
+     Bildschirm mit `kopfzeile()` endet — nach `app.innerHTML` und damit nach
+     dem Augenblick, in dem alles Obenaufliegende gelöscht wird. Ein Blatt,
+     das noch in der Schlange steht, legt sich so von selbst wieder darauf,
+     gleich welcher Bildschirm dazwischen neu gezeichnet wurde. */
+  fensterPlanen();
 }
 
 /* ── Kampagnenverlauf links ──
@@ -9145,6 +9248,10 @@ function zeigeOrden(o, n){
 function ordenWeiter(){ LAUF.orden = null; laufSichern(); naechster(); }
 
 function naechster(){
+  /* Ein Fenster, das beim Beenden offen war, liegt beim Fortsetzen wieder da.
+     `naechster()` ist die eine Stelle, durch die jeder Wiedereinstieg geht —
+     angemeldet wird hier nichts, nur gemalt, was noch in der Schlange steht. */
+  fensterPlanen();
   if(!S.lebt){ zeigeTod(); return; }
   if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
   const n = KAPITEL[LAUF.node];
@@ -9589,6 +9696,119 @@ function bogen(n, inhalt, wahlkopf, wahlen, fuss){
   </div></div>`;
 }
 
+/* ══════════════════ DAS FENSTER ══════════════════
+
+   **Ein Blatt, das sich über den laufenden Bildschirm legt, ohne ihn zu
+   ersetzen.** Der Schreibtisch macht das seit Sitzung 5 für die Verwaltung;
+   hier wird dieselbe Bauart allgemein: für Nachrichten, für das erste Mal
+   nach einer Beförderung, später für den Kapitelwechsel.
+
+   **Warum kein eigener Bildschirm.** Ein Bildschirm braucht eine Stelle im
+   Ablauf, an der er steht, und eine Anweisung, wohin er danach führt — für
+   jede Nachricht eine neue Verzweigung in `naechster()`. Ein Fenster braucht
+   beides nicht: Was darunter liegt, ist bereits gezeichnet und richtig. Man
+   nimmt das Blatt weg, und der Bildschirm steht da, wo er ohnehin stand.
+
+   **Drei Regeln, alle drei bezahlt:**
+
+   1. **Die Warteschlange liegt in `LAUF.fenster`**, nicht in einer
+      Modulvariablen. Wer mitten in einer Nachricht aufhört, steht beim
+      Fortsetzen wieder davor — dieselbe Regel wie beim Gefechts-Ereignis
+      und beim Briefing. Ohne laufenden Feldzug gibt es kein Fenster.
+   2. **Gezeigt wird nach dem Zeichnen, nicht währenddessen.** Fast alle
+      Bildschirme setzen `app.innerHTML` und löschen damit alles, was schon
+      obenauf lag. Angemeldet wird deshalb *vorher*, gemalt wird im nächsten
+      Durchlauf (`setTimeout 0`) — dann steht der Bildschirm, und das Blatt
+      legt sich darauf. Das erspart fünfunddreißig Zeichenstellen einen Haken.
+   3. **`S.gesehen` merkt sich, was schon dastand.** Es gehört zum Mann und
+      nicht zum Feldzug: Das erste Mal ist einmal in einer Laufbahn. */
+
+let FENSTER_GEPLANT = false;
+
+/* Anmelden. Ein Fenster ist ein Blatt: Überschrift, Absätze, ein Fuß, ein
+   Knopf. Mehr kann es nicht, und mehr soll es nicht können — sobald ein
+   Fenster eine Wahl trägt, ist es ein Vorgang und gehört auf den Tisch. */
+function fensterZeigen(f){
+  if(!LAUF) return;
+  if(!LAUF.fenster) LAUF.fenster = [];
+  LAUF.fenster.push(f);
+  fensterPlanen();
+}
+
+/* Einmal je Laufbahn. Der Bezeichner steht in `S.gesehen` und überlebt
+   damit jeden Bildschirmwechsel und jedes Fortsetzen. */
+function fensterEinmal(id, f){
+  if(!S) return;
+  if(!S.gesehen) S.gesehen = [];
+  if(S.gesehen.indexOf(id) >= 0) return;
+  S.gesehen.push(id);
+  fensterZeigen(f);
+}
+
+function fensterPlanen(){
+  if(FENSTER_GEPLANT) return;
+  if(!LAUF || !LAUF.fenster || !LAUF.fenster.length) return;
+  FENSTER_GEPLANT = true;
+  setTimeout(fensterMalen, 0);
+}
+
+function fensterMalen(){
+  FENSTER_GEPLANT = false;
+  if(!LAUF || !LAUF.fenster || !LAUF.fenster.length) return;
+  if(document.getElementById('fenster')) return;      // eines liegt schon oben
+  const f = LAUF.fenster[0];
+  const d = document.createElement('div');
+  d.className = 'ueberlage'; d.id = 'fenster';
+  /* **Über allem, auch über dem Schreibtisch** — der liegt selbst schon in
+     einer Überlage, und zwei Blätter auf gleicher Höhe entscheiden nach
+     Reihenfolge im Text, nicht nach Absicht. */
+  d.style.zIndex = 70;
+  const abs = (f.text||[]).map(t=>`<p>${t}</p>`).join('');
+  /* Dieselbe Bauart wie der Beförderungsbescheid: ein Stück Feldpergament mit
+     Bruchkante und drei Falten. Es ist kein Bogen aus der Kanzlei — es ist
+     ein Blatt, das jemand gefaltet in der Tasche hatte. */
+  d.innerHTML = `<div class="fenster pergamenthuelle">
+    <div class="card pergament" style="position:relative;margin:0">
+      <div class="falte" style="left:33%;top:0;bottom:0;width:2px"></div>
+      <div class="falte" style="left:67%;top:0;bottom:0;width:2px"></div>
+      <div class="falte" style="top:48%;left:0;right:0;height:2px"></div>
+      <div class="cb" style="padding:26px 30px 22px">
+        <div class="bescheidkopf">${esc(f.kopf||'Zum ersten Mal')}</div>
+        <div class="bescheidrang">${esc(f.titel||'')}</div>
+        <div class="bescheidzusatz">${esc(f.ort||'')}</div>
+        <div class="prose fensterprose">${abs}</div>
+        ${f.fuss?`<div class="ergebnis" style="background:none;border-left:2px solid var(--gold-linie);padding-left:14px;margin-top:16px">${f.fuss}</div>`:''}
+        <button class="ord weiter" style="margin-top:18px" onclick="fensterWeg()">${esc(f.knopf||'Weiter')}</button>
+      </div></div></div>`;
+  /* **Nach vorn eingehängt, nicht angehängt.** Fünf Prüfstände suchen ihren
+     Knopf mit `.ueberlage .ord` und nehmen den ersten im Text — läge das
+     Fenster hinten, drückten sie durch das oberste Blatt hindurch auf den
+     Schreibtisch darunter. Ein Messgerät, das etwas kann, was ein Spieler
+     nicht kann, misst nicht das Spiel. */
+  app.insertBefore(d, app.firstChild);
+}
+
+function fensterWeg(){
+  if(LAUF && LAUF.fenster) LAUF.fenster.shift();
+  const d = document.getElementById('fenster'); if(d) d.remove();
+  laufSichern();
+  fensterPlanen();                                    // das nächste, falls eins wartet
+}
+
+/* ── Das erste Mal ──
+   **Ein Rang gibt neue Knöpfe (Invariante 4) — und bis hierher hat es das
+   niemandem gesagt.** Man stand plötzlich vor vier Rechtecken statt vor einer
+   Linie und musste selbst darauf kommen, dass das der Aufstieg war.
+
+   Die Texte stehen als `ERSTMAL` in `grundwerte.js`, die Auslöser dort, wo
+   die Sache zum ersten Mal wirklich geschieht — nicht bei der Beförderung.
+   **Das ist der Unterschied:** Man bekommt die Nachricht nicht, wenn man den
+   Rang bekommt, sondern wenn er einen zum ersten Mal etwas tun lässt. */
+function erstmal(id){
+  const e = ERSTMAL[id];
+  if(e) fensterEinmal(id, e);
+}
+
 function zeigeSzene(n){
   const alle = szeneOptionen(n);
   const gesperrtText = alle.filter(o=>szeneVerwehrt(o) && o.ab.sonst)
@@ -10021,8 +10241,8 @@ function starteKampf(n){
   if(S.rang >= 9 && n.haerte > 1){
     if(!LAUF.briefing || LAUF.briefing.id !== n.id)
       LAUF.briefing = {id:n.id, teil:1, wirkung:{haltung:0}, log:[]};
-    if(LAUF.briefing.teil === 1){ laufSichern(); zeigeBriefing(n); return; }
-    if(LAUF.briefing.teil === 2){ laufSichern(); zeigeAntreten(n); return; }
+    if(LAUF.briefing.teil === 1){ laufSichern(); erstmal('briefing'); zeigeBriefing(n); return; }
+    if(LAUF.briefing.teil === 2){ laufSichern(); erstmal('antreten'); zeigeAntreten(n); return; }
   }
   S.anmarschGesehen = null;
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
@@ -10057,6 +10277,16 @@ function starteKampf(n){
   /* Was am Vorabend gesagt wurde, steht am Morgen in der Haltung. Einmal
      angewandt und dann vergessen — das Briefing gilt für dieses Gefecht. */
   briefingWirken();
+  /* ── Das erste Mal auf einem neuen Maßstab ──
+     Ausgelöst wird beim **ersten Gefecht** im neuen Maßstab, nicht bei der
+     Beförderung: Ein Rang gibt neue Knöpfe, und die sieht man dort, wo sie
+     stehen. Wer über ein Patent einsteigt, überspringt die unteren Blätter
+     ganz — er hat die Stufen nie gehabt und bekommt auch nicht erzählt,
+     wie sie gewesen wären. */
+  if(S.rang >= 12)      erstmal('karte');
+  else if(S.rang >= 10) erstmal('bataillon');
+  else if(S.rang >= 7)  erstmal('zug');
+  else if(S.rang >= 5)  erstmal('sektion');
   laufSichern();
   zeigeKampf(n.intro);
 }
@@ -11924,6 +12154,11 @@ function zeigeKampf(text){
       opt,
       'Im Gefecht wird nicht gesichert')}
     </div>${seitenleiste()}</div>`;
+  /* **Der eine Bildschirm, dem `kopfzeile()` fehlte.** Aufgefallen ist es
+     erst am Fenster, dessen Haken dort sitzt — aber es war schon vorher
+     falsch: Geld, Orden und Rang standen im Kopf und wurden während eines
+     ganzen Gefechts nie nachgeführt. */
+  kopfzeile();
 }
 
 function kampfAktion(id){
@@ -14949,6 +15184,7 @@ function zeigeLager(n){
   if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
     const offen = schreibtischStellen(n);
     LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+    if(offen.length) erstmal('schreibtisch');
     laufSichern();
   }
   const opt = lagerHandlungen(n).map((id,i)=>{
@@ -15208,6 +15444,7 @@ function zeigeWinter(n){
   if(S && S.rang >= 9 && (!LAUF.schreibtisch || LAUF.schreibtisch.id !== n.id)){
     const offen = schreibtischStellen(n);
     LAUF.schreibtisch = {id:n.id, offen, gesamt:offen.length, erledigt:0, log:[]};
+    if(offen.length) erstmal('schreibtisch');
   }
   const opt = winterHandlungen(n).map((id,i)=>{
     const t = WINTER_TUN[id];

@@ -111,6 +111,12 @@ function kopfzeile(){
     <button class="zurueck" onclick="zumTitel()" title="Zur Übersicht — der Feldzug bleibt gesichert">Übersicht</button></span>`;
   const n = KAPITEL[Math.min(LAUF?LAUF.node:0, KAPITEL.length-1)];
   untertitel.textContent = n && n.datum ? n.datum : 'Italien 1796/97';
+  /* **Hier steht der Haken für das Fenster**, und er steht hier, weil jeder
+     Bildschirm mit `kopfzeile()` endet — nach `app.innerHTML` und damit nach
+     dem Augenblick, in dem alles Obenaufliegende gelöscht wird. Ein Blatt,
+     das noch in der Schlange steht, legt sich so von selbst wieder darauf,
+     gleich welcher Bildschirm dazwischen neu gezeichnet wurde. */
+  fensterPlanen();
 }
 
 /* ── Kampagnenverlauf links ──
@@ -1444,6 +1450,10 @@ function zeigeOrden(o, n){
 function ordenWeiter(){ LAUF.orden = null; laufSichern(); naechster(); }
 
 function naechster(){
+  /* Ein Fenster, das beim Beenden offen war, liegt beim Fortsetzen wieder da.
+     `naechster()` ist die eine Stelle, durch die jeder Wiedereinstieg geht —
+     angemeldet wird hier nichts, nur gemalt, was noch in der Schlange steht. */
+  fensterPlanen();
   if(!S.lebt){ zeigeTod(); return; }
   if(LAUF.node >= KAPITEL.length){ zeigeKapitelende(); return; }
   const n = KAPITEL[LAUF.node];
@@ -1886,6 +1896,119 @@ function bogen(n, inhalt, wahlkopf, wahlen, fuss){
     <div class="bogenfuss"><span>${fuss}</span>
       <span class="siegel">${kaiserreich()?'N':'RF'}</span></div>
   </div></div>`;
+}
+
+/* ══════════════════ DAS FENSTER ══════════════════
+
+   **Ein Blatt, das sich über den laufenden Bildschirm legt, ohne ihn zu
+   ersetzen.** Der Schreibtisch macht das seit Sitzung 5 für die Verwaltung;
+   hier wird dieselbe Bauart allgemein: für Nachrichten, für das erste Mal
+   nach einer Beförderung, später für den Kapitelwechsel.
+
+   **Warum kein eigener Bildschirm.** Ein Bildschirm braucht eine Stelle im
+   Ablauf, an der er steht, und eine Anweisung, wohin er danach führt — für
+   jede Nachricht eine neue Verzweigung in `naechster()`. Ein Fenster braucht
+   beides nicht: Was darunter liegt, ist bereits gezeichnet und richtig. Man
+   nimmt das Blatt weg, und der Bildschirm steht da, wo er ohnehin stand.
+
+   **Drei Regeln, alle drei bezahlt:**
+
+   1. **Die Warteschlange liegt in `LAUF.fenster`**, nicht in einer
+      Modulvariablen. Wer mitten in einer Nachricht aufhört, steht beim
+      Fortsetzen wieder davor — dieselbe Regel wie beim Gefechts-Ereignis
+      und beim Briefing. Ohne laufenden Feldzug gibt es kein Fenster.
+   2. **Gezeigt wird nach dem Zeichnen, nicht währenddessen.** Fast alle
+      Bildschirme setzen `app.innerHTML` und löschen damit alles, was schon
+      obenauf lag. Angemeldet wird deshalb *vorher*, gemalt wird im nächsten
+      Durchlauf (`setTimeout 0`) — dann steht der Bildschirm, und das Blatt
+      legt sich darauf. Das erspart fünfunddreißig Zeichenstellen einen Haken.
+   3. **`S.gesehen` merkt sich, was schon dastand.** Es gehört zum Mann und
+      nicht zum Feldzug: Das erste Mal ist einmal in einer Laufbahn. */
+
+let FENSTER_GEPLANT = false;
+
+/* Anmelden. Ein Fenster ist ein Blatt: Überschrift, Absätze, ein Fuß, ein
+   Knopf. Mehr kann es nicht, und mehr soll es nicht können — sobald ein
+   Fenster eine Wahl trägt, ist es ein Vorgang und gehört auf den Tisch. */
+function fensterZeigen(f){
+  if(!LAUF) return;
+  if(!LAUF.fenster) LAUF.fenster = [];
+  LAUF.fenster.push(f);
+  fensterPlanen();
+}
+
+/* Einmal je Laufbahn. Der Bezeichner steht in `S.gesehen` und überlebt
+   damit jeden Bildschirmwechsel und jedes Fortsetzen. */
+function fensterEinmal(id, f){
+  if(!S) return;
+  if(!S.gesehen) S.gesehen = [];
+  if(S.gesehen.indexOf(id) >= 0) return;
+  S.gesehen.push(id);
+  fensterZeigen(f);
+}
+
+function fensterPlanen(){
+  if(FENSTER_GEPLANT) return;
+  if(!LAUF || !LAUF.fenster || !LAUF.fenster.length) return;
+  FENSTER_GEPLANT = true;
+  setTimeout(fensterMalen, 0);
+}
+
+function fensterMalen(){
+  FENSTER_GEPLANT = false;
+  if(!LAUF || !LAUF.fenster || !LAUF.fenster.length) return;
+  if(document.getElementById('fenster')) return;      // eines liegt schon oben
+  const f = LAUF.fenster[0];
+  const d = document.createElement('div');
+  d.className = 'ueberlage'; d.id = 'fenster';
+  /* **Über allem, auch über dem Schreibtisch** — der liegt selbst schon in
+     einer Überlage, und zwei Blätter auf gleicher Höhe entscheiden nach
+     Reihenfolge im Text, nicht nach Absicht. */
+  d.style.zIndex = 70;
+  const abs = (f.text||[]).map(t=>`<p>${t}</p>`).join('');
+  /* Dieselbe Bauart wie der Beförderungsbescheid: ein Stück Feldpergament mit
+     Bruchkante und drei Falten. Es ist kein Bogen aus der Kanzlei — es ist
+     ein Blatt, das jemand gefaltet in der Tasche hatte. */
+  d.innerHTML = `<div class="fenster pergamenthuelle">
+    <div class="card pergament" style="position:relative;margin:0">
+      <div class="falte" style="left:33%;top:0;bottom:0;width:2px"></div>
+      <div class="falte" style="left:67%;top:0;bottom:0;width:2px"></div>
+      <div class="falte" style="top:48%;left:0;right:0;height:2px"></div>
+      <div class="cb" style="padding:26px 30px 22px">
+        <div class="bescheidkopf">${esc(f.kopf||'Zum ersten Mal')}</div>
+        <div class="bescheidrang">${esc(f.titel||'')}</div>
+        <div class="bescheidzusatz">${esc(f.ort||'')}</div>
+        <div class="prose fensterprose">${abs}</div>
+        ${f.fuss?`<div class="ergebnis" style="background:none;border-left:2px solid var(--gold-linie);padding-left:14px;margin-top:16px">${f.fuss}</div>`:''}
+        <button class="ord weiter" style="margin-top:18px" onclick="fensterWeg()">${esc(f.knopf||'Weiter')}</button>
+      </div></div></div>`;
+  /* **Nach vorn eingehängt, nicht angehängt.** Fünf Prüfstände suchen ihren
+     Knopf mit `.ueberlage .ord` und nehmen den ersten im Text — läge das
+     Fenster hinten, drückten sie durch das oberste Blatt hindurch auf den
+     Schreibtisch darunter. Ein Messgerät, das etwas kann, was ein Spieler
+     nicht kann, misst nicht das Spiel. */
+  app.insertBefore(d, app.firstChild);
+}
+
+function fensterWeg(){
+  if(LAUF && LAUF.fenster) LAUF.fenster.shift();
+  const d = document.getElementById('fenster'); if(d) d.remove();
+  laufSichern();
+  fensterPlanen();                                    // das nächste, falls eins wartet
+}
+
+/* ── Das erste Mal ──
+   **Ein Rang gibt neue Knöpfe (Invariante 4) — und bis hierher hat es das
+   niemandem gesagt.** Man stand plötzlich vor vier Rechtecken statt vor einer
+   Linie und musste selbst darauf kommen, dass das der Aufstieg war.
+
+   Die Texte stehen als `ERSTMAL` in `grundwerte.js`, die Auslöser dort, wo
+   die Sache zum ersten Mal wirklich geschieht — nicht bei der Beförderung.
+   **Das ist der Unterschied:** Man bekommt die Nachricht nicht, wenn man den
+   Rang bekommt, sondern wenn er einen zum ersten Mal etwas tun lässt. */
+function erstmal(id){
+  const e = ERSTMAL[id];
+  if(e) fensterEinmal(id, e);
 }
 
 function zeigeSzene(n){

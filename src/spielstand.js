@@ -17,7 +17,7 @@
    sie nicht gibt, funktioniert alles weiter, nur eben ohne Absturzsicherung. */
 
 const CHRONIK_FASSUNG = 1;
-const LAUF_FASSUNG    = 17;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls · 17: der Orden der Wiedervereinigung
+const LAUF_FASSUNG    = 18;  // 2: Lebenspunkte · 3: die Kette · 4: Orden · 5: Tatenzählung · 6: Sold · 7: der Offizier · 8: der Stab · 9: die Patente · 10: der höchste getragene Rang · 11: die Kette unter dir · 12: Schreibtisch und Verzeichnis · 13: die Folgen · 14: der stehende Auftrag · 15: Mitwisser über Kennungen · 16: die Protektion eines Marschalls · 17: der Orden der Wiedervereinigung · 18: das Fenster
 const CHRONIK_GRENZE  = 200;   // so viele Läufe im Einzelnen, der beste immer
 
 const ORT_CHRONIK   = 'marschallstab.chronik';
@@ -293,6 +293,20 @@ const LAUF_WANDLER = {
     const m = alt.mann;
     if(m && m.kauftraegeJa === undefined) m.kauftraegeJa = 0;
     return Object.assign({}, alt, {fassung:17});
+  },
+  /* ── 18: das Fenster ──
+     Zwei Listen, beide leer. `S.gesehen` merkt sich, welche Nachricht schon
+     dastand, `LAUF.fenster` ist die Warteschlange derer, die noch kommen.
+
+     **Ein fortgesetzter Feldzug fängt bei „noch nichts gesehen" an**, und das
+     ist die richtige Seite des Irrtums: Er bekommt eine Nachricht ein zweites
+     Mal, statt sie nie zu bekommen. Rückwirkend zu raten, welche Maßstäbe er
+     schon betreten hat, hieße aus dem Rang zu schließen — und wer über ein
+     Patent eingestiegen ist, hat die unteren nie gehabt. */
+  17: alt => {
+    const m = alt.mann;
+    if(m && !m.gesehen) m.gesehen = [];
+    return Object.assign({}, alt, {fassung:18, fenster:alt.fenster || []});
   }
 };
 

@@ -876,6 +876,17 @@ a.plain:hover{ color:var(--brass) }
 .falte{ position:absolute; pointer-events:none;
   background:linear-gradient(90deg, rgba(80,60,30,.16), rgba(255,255,255,.34)) }
 
+/* ── Das Fenster ──
+   Ein Blatt, das obenauf liegt. **Der Schatten sitzt auf der Hülle, nicht auf
+   dem Blatt** — `clip-path` schneidet einen `box-shadow` mit ab, und die
+   allgemeine Regel für Blätter in der Überlage würde ihn genau dort setzen.
+   Deshalb muss sie hier ausdrücklich zurückgenommen werden. */
+.ueberlage .pergament{ box-shadow:none }
+.ueberlage .fenster.pergamenthuelle{ width:min(560px,100%) }
+.fensterprose{ font-size:17px; line-height:1.7; color:#241f1a }
+.fensterprose p{ margin:0 0 13px }
+.fensterprose p:last-child{ margin-bottom:0 }
+
 /* ── Das Patent, Rang 7 aufwärts ──
    Die Goldbordüre ist eine Hülle, kein `border-image` — sie muss auf jeder
    Breite gleich aussehen und darf nicht kacheln. */

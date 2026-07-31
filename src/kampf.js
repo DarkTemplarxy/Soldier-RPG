@@ -307,8 +307,8 @@ function starteKampf(n){
   if(S.rang >= 9 && n.haerte > 1){
     if(!LAUF.briefing || LAUF.briefing.id !== n.id)
       LAUF.briefing = {id:n.id, teil:1, wirkung:{haltung:0}, log:[]};
-    if(LAUF.briefing.teil === 1){ laufSichern(); zeigeBriefing(n); return; }
-    if(LAUF.briefing.teil === 2){ laufSichern(); zeigeAntreten(n); return; }
+    if(LAUF.briefing.teil === 1){ laufSichern(); erstmal('briefing'); zeigeBriefing(n); return; }
+    if(LAUF.briefing.teil === 2){ laufSichern(); erstmal('antreten'); zeigeAntreten(n); return; }
   }
   S.anmarschGesehen = null;
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
@@ -343,6 +343,16 @@ function starteKampf(n){
   /* Was am Vorabend gesagt wurde, steht am Morgen in der Haltung. Einmal
      angewandt und dann vergessen — das Briefing gilt für dieses Gefecht. */
   briefingWirken();
+  /* ── Das erste Mal auf einem neuen Maßstab ──
+     Ausgelöst wird beim **ersten Gefecht** im neuen Maßstab, nicht bei der
+     Beförderung: Ein Rang gibt neue Knöpfe, und die sieht man dort, wo sie
+     stehen. Wer über ein Patent einsteigt, überspringt die unteren Blätter
+     ganz — er hat die Stufen nie gehabt und bekommt auch nicht erzählt,
+     wie sie gewesen wären. */
+  if(S.rang >= 12)      erstmal('karte');
+  else if(S.rang >= 10) erstmal('bataillon');
+  else if(S.rang >= 7)  erstmal('zug');
+  else if(S.rang >= 5)  erstmal('sektion');
   laufSichern();
   zeigeKampf(n.intro);
 }
@@ -2210,6 +2220,11 @@ function zeigeKampf(text){
       opt,
       'Im Gefecht wird nicht gesichert')}
     </div>${seitenleiste()}</div>`;
+  /* **Der eine Bildschirm, dem `kopfzeile()` fehlte.** Aufgefallen ist es
+     erst am Fenster, dessen Haken dort sitzt — aber es war schon vorher
+     falsch: Geld, Orden und Rang standen im Kopf und wurden während eines
+     ganzen Gefechts nie nachgeführt. */
+  kopfzeile();
 }
 
 function kampfAktion(id){

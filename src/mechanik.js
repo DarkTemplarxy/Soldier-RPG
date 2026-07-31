@@ -22,6 +22,9 @@ function neuerLauf(mann){
              Spielabbruch durch: Wer mitten in einem Vorgang aufhört, steht
              beim Fortsetzen wieder davor. */
           schreibtisch:null,
+          /* Die Warteschlange der Fenster. Sie liegt in `LAUF` und nicht in
+             einer Modulvariablen, damit eine Nachricht ein Beenden übersteht. */
+          fenster:[],
           begonnen:new Date().toISOString(), zuletzt:null};
   binde();
 }
@@ -414,6 +417,9 @@ function neuerCharakter(name, herkunftId, attrVerteilung, kaeufe, punkte){
        und eine leere Liste ist ehrlicher als vier Platzhalter. */
     unterstellte:[], unterstellteStufe:0, unterId:0, unterTot:[], unterNamen:[], unterstellteVorher:null,
     heimlich:[], vermerke:0, uebergangen:false, mitgewaehlt:false,
+    /* Welche Nachricht schon dastand. Sie gehört dem Mann und nicht dem
+       Feldzug: Das erste Mal ist einmal in einer Laufbahn. */
+    gesehen:[],
     kameradschaft:20, belastung:0,
     atem:100, leben:0,
     wunden:[], nennungen:0, belobigungen:0, bulletins:0, sondermissionen:0, orden:[], soldOffen:0, kaeufe:kaeufe||[], gekauft:punkte||{},

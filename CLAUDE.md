@@ -115,12 +115,13 @@ node test/raenge.js               # alle 14 Ränge von Hand gesetzt: Knöpfe, Bi
 node test/kapitel.js jena         # ein Kapitel mit vier künstlichen Rängen durchlaufen (Grundsatz 3)
 HAERTE=40 node test/kapitel.js russland 9   # 40 Läufe nur durch dieses Kapitel: wie tödlich ist es?
 node test/spielstand.js           # sichern, fortsetzen, sterben, alte Fassungen
+node test/fenster.js              # die Nachrichten beim ersten Mal: kommt jede, und Rang 1 keine?
 node test/durchspielen.js dist    # dasselbe mit der gebauten Einzeldatei
 node test/balance.js 80           # 80 Läufe, misst die beiden Leitzahlen (Weite · höchster Rang)
 node werkzeug/bauen.js            # baut dist/marschallstab.html zum Weitergeben
 ```
 
-**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 80`, nach jeder Änderung am Zustand `node test/spielstand.js`, nach jeder Änderung an einem Rang `node test/raenge.js`, **nach jedem neuen Kapitel `node test/kapitel.js <id>`**.
+**Nach jeder Änderung am Code `node test/durchspielen.js` laufen lassen.** Nach jeder Änderung an Balance-Zahlen zusätzlich `node test/balance.js 80`, nach jeder Änderung am Zustand `node test/spielstand.js`, nach jeder Änderung an einem Rang `node test/raenge.js`, **nach jedem neuen Kapitel `node test/kapitel.js <id>`**, nach jeder Änderung am Fenster `node test/fenster.js`.
 
 > **`test/kapitel.js` ist der Prüfstand für Grundsatz 3** aus KAMPAGNEN §0: *„Jede Station trägt jeden Rang."* Er springt an den Anfang eines Kapitels, setzt den Rang von Hand auf 1, 5, 8 und 12 und klickt durch — wird jede Station erreicht, läuft jedes Gefecht auf dem Maßstab des Rangs (Sichtfeld · Skizze · Rechtecke · Karte), fällt etwas in die Konsole? Der Mann wird vor jedem Schritt geheilt: **gemessen wird Vollständigkeit, nicht Härte.** Die Härte misst `balance.js`, und ein Toter sieht die zweite Hälfte eines Kapitels nie.
 >
@@ -1873,7 +1874,7 @@ Zwei Dinge werden gespeichert, und sie haben nichts miteinander zu tun:
 
 **Stationen schließen sich ab, bevor der „Weiter"-Knopf kommt.** `stationErledigt()` setzt `LAUF.node` schon hoch, während der Ergebnisbildschirm noch steht. Sonst könnte man eine Szenenwahl rückgängig machen, indem man auf dem Ergebnis das Spiel beendet. Wer eine neue Stationsart baut, muss sie aufrufen — vergisst man es, hängt das Spiel in einer Schleife (genau das ist beim Bau der Beförderung passiert und wurde vom Testskript gefunden).
 
-**Fassungen.** `CHRONIK_FASSUNG` (1) und `LAUF_FASSUNG` (**14**, seit dem stehenden Auftrag) in `src/spielstand.js`. Wer das Format ändert, **erhöht die Zahl und hängt einen Wandler an** — jeder Wandler hebt genau eine Fassung auf die nächste, nie zwei auf einmal. Ein Spielstand aus einer neueren Fassung wird abgewiesen, nicht geraten. Die alte Chronik ohne Fassungsnummer ist Fassung 0 und wird weiterhin gelesen.
+**Fassungen.** `CHRONIK_FASSUNG` (1) und `LAUF_FASSUNG` (**18**, seit dem Fenster) in `src/spielstand.js`. Wer das Format ändert, **erhöht die Zahl und hängt einen Wandler an** — jeder Wandler hebt genau eine Fassung auf die nächste, nie zwei auf einmal. Ein Spielstand aus einer neueren Fassung wird abgewiesen, nicht geraten. Die alte Chronik ohne Fassungsnummer ist Fassung 0 und wird weiterhin gelesen.
 
 **`localStorage` ist nur die bequeme Ablage** (Invariante 6). Die Datei bleibt maßgeblich: `speichern()` schreibt Chronik *und* laufenden Feldzug in eine JSON-Datei, `laden()` liest beides zurück. Wo `localStorage` fehlt — mancher Browser über `file://`, privater Modus —, läuft alles weiter, nur ohne Absturzsicherung; der Titelbildschirm sagt das dann auch.
 
@@ -2191,6 +2192,50 @@ Dazu **Mündungsblitze** nach einer Salve und ein Schleier, der ab Runde 5 das h
 **Wer den Teil weglässt, geht eine Wette ein.** Vierzehn Punkte Haltung sind der stärkste Einzeleffekt der Szene — und er ist geborgt: Bei **verlorenem** Gefecht kostet es Kameradschaft −12 und einen Satz, den niemand laut sagt. Geht es gut, merkt es keiner. Das ist die eigentliche Bosheit daran: keine Strafe, sondern eine Wette.
 
 > **⚠ Ungemessen.** Der Effekt trifft die Ränge 9 aufwärts, also beide Veteranen. **Der Bot nimmt dabei den sicheren Weg** — er klickt den ersten Knopf, also *Verstanden* und *vorlesen*, und landet bei Faktor 0,93. Die Messung wird die Szene deshalb kaum sehen; wer sie wirklich prüfen will, bringt dem Bot zuerst die drei Zweige bei.
+
+### Das Fenster (`fensterZeigen`, `ERSTMAL`, 31.07.2026)
+
+**Ein Blatt, das sich über den laufenden Bildschirm legt, ohne ihn zu ersetzen.** Der Schreibtisch macht das seit Sitzung 5 für die Verwaltung; jetzt ist dieselbe Bauart allgemein — für Nachrichten, für das erste Mal nach einer Beförderung, später für den Kapitelwechsel.
+
+| | |
+|---|---|
+| `fensterZeigen(f)` | meldet ein Blatt an: Kopf, Überschrift, Absätze, Fuß, ein Knopf |
+| `fensterEinmal(id,f)` | dasselbe, aber nur einmal je Laufbahn (`S.gesehen`) |
+| `erstmal(id)` | schlägt den Text in `ERSTMAL` nach und meldet ihn an |
+
+**Warum kein eigener Bildschirm.** Ein Bildschirm braucht eine Stelle im Ablauf und eine Anweisung, wohin er danach führt — für jede Nachricht eine neue Verzweigung in `naechster()`. Ein Fenster braucht beides nicht: **Was darunter liegt, ist bereits gezeichnet und richtig.** Man nimmt das Blatt weg, und der Bildschirm steht da, wo er ohnehin stand.
+
+**Drei Regeln, und die zweite ist die, an der es hing:**
+
+1. **Die Warteschlange liegt in `LAUF.fenster`**, nicht in einer Modulvariablen — wer mitten in einer Nachricht aufhört, steht beim Fortsetzen wieder davor. `S.gesehen` gehört dagegen dem **Mann**: Das erste Mal ist einmal in einer Laufbahn.
+2. **Angemeldet wird vor dem Zeichnen, gemalt wird danach** (`setTimeout 0`). Fast alle Bildschirme setzen `app.innerHTML` und löschen damit alles Obenaufliegende; ein Blatt, das sich währenddessen hinlegt, ist sofort wieder weg. Der Haken sitzt in **`kopfzeile()`**, weil jeder Bildschirm damit *endet* — ein noch wartendes Blatt legt sich so von selbst wieder darauf, gleich was dazwischen neu gezeichnet wurde.
+3. **Nach vorn eingehängt, nicht angehängt** (`insertBefore`), dazu `z-index:70`. Fünf Prüfstände suchen mit `.ueberlage .ord` und nehmen den ersten im Text — läge das Fenster hinten, drückten sie durch das oberste Blatt hindurch auf den Schreibtisch darunter. **Ein Messgerät, das etwas kann, was ein Spieler nicht kann, misst nicht das Spiel.**
+
+**Die Gestalt ist das Feldpergament des Beförderungsbescheids** — Bruchkante, drei Falten, kein Kanzleikopf. Es ist kein Bogen aus einer Schreibstube, sondern ein Blatt, das jemand gefaltet in der Tasche hatte.
+
+#### Das erste Mal (`ERSTMAL` in `grundwerte.js`)
+
+**Invariante 4 sagt: Ein höherer Rang gibt neue Knöpfe. Bis hierher hat das Spiel es niemandem gesagt** — man stand plötzlich vor vier Rechtecken statt vor einer Linie und musste selbst darauf kommen, dass das der Aufstieg war, für den man gearbeitet hat.
+
+| Blatt | Wann | Ausgelöst in |
+|---|---|---|
+| **Zwanzig Mann** | erstes Gefecht ab Rang 5 | `starteKampf()` |
+| **Ohne Muskete** | erstes Gefecht ab Rang 7 | `starteKampf()` |
+| **Der Tisch** | erster Schreibtisch (Rang 9) | `zeigeLager()` · `zeigeWinter()` |
+| **Befehlsausgabe** | erste Befehlsausgabe am Vorabend | `starteKampf()` |
+| **Sie stehen und warten** | erstes Antreten am Morgen | `starteKampf()` |
+| **Vier Rechtecke** | erstes Gefecht ab Rang 10 | `starteKampf()` |
+| **Die Karte** | erstes Gefecht ab Rang 12 | `starteKampf()` |
+
+**Ausgelöst wird dort, wo die Sache zum ersten Mal wirklich geschieht — nicht bei der Beförderung.** Das ist der Unterschied, auf den es ankommt: Die Nachricht kommt nicht, wenn man den Rang bekommt, sondern wenn er einen zum ersten Mal etwas tun lässt. Wer über ein Patent einsteigt, überspringt die unteren Blätter ganz; er hat die Stufen nie gehabt und bekommt auch nicht erzählt, wie sie gewesen wären.
+
+> **Zwei Regeln für den Ton, beide aus Invariante 7.** Erstens **kein Glückwunsch** — jedes Blatt sagt, was jetzt anders ist, und was es kostet. Zweitens **nichts, was das Spiel selbst zeigen könnte.** Vor allem sagt „Vier Rechtecke" **nicht**, dass die Atemleiste verschwunden ist: Der Bruch besteht darin, dass man es bemerkt, und ein Hinweis darauf zerstört ihn vollständig.
+
+> **⚠ Der Prüfstand hat zweimal ein Blatt vermisst, das dastand.** `test/fenster.js` schickte zwei Auswertungen so dicht hintereinander, dass die `setTimeout`-Schlange dazwischen nicht durchlief — er meldete ein fehlendes Fenster, das jeder Spieler gesehen hätte. **Ein Browser zeichnet nie, ohne die Schlange vorher zu leeren; ein Prüfstand schon.** Er hängt seine Heilung jetzt selbst in ein `setTimeout` und wartet damit auf dieselbe Runde.
+>
+> Dazu **hält er den Rang fest** (`window.rangSetzen = () => {}`). Ein geheilter Mann überlebt und steigt auf — und dann sieht ein Lauf, der bei Rang 1 beginnt, irgendwann jede Nachricht, und die Pflichtliste prüft nichts mehr. Rang 1 mit **leerer** Pflichtliste ist die Gegenprobe: Wer nichts erreicht hat, bekommt auch nichts erzählt.
+
+> **⚠ Nebenfund: `zeigeKampf()` rief als einziger Bildschirm kein `kopfzeile()`.** Aufgefallen ist es am Haken für das Fenster — falsch war es schon vorher: Geld, Orden und Rang standen im Kopf und wurden während eines ganzen Gefechts nie nachgeführt.
 
 ### Die Beförderungsurkunde kam nach zwei Dritteln aller Gefechte nicht (31.07.2026)
 

@@ -5,6 +5,26 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Das Fenster und das erste Mal
+
+**Eine allgemeine Bauart für Blätter, die sich über den laufenden Bildschirm legen** — `fensterZeigen()` meldet an, `fensterEinmal(id,…)` einmal je Laufbahn, `erstmal(id)` schlägt den Text in `ERSTMAL` nach. Warteschlange in `LAUF.fenster` (übersteht ein Beenden), Gesehenes in `S.gesehen` (gehört dem Mann). Gestalt: das Feldpergament des Beförderungsbescheids, mit Bruchkante und drei Falten.
+
+**Gemalt wird nach dem Zeichnen** (`setTimeout 0`), weil `app.innerHTML` alles Obenaufliegende löscht. Der Haken sitzt in `kopfzeile()` — jeder Bildschirm endet damit, also legt sich ein wartendes Blatt von selbst wieder darauf. Eingehängt wird **nach vorn** (`insertBefore`, `z-index:70`), damit die Prüfstände nicht durch das oberste Blatt hindurch auf den Schreibtisch darunter drücken.
+
+**Sieben Nachrichten beim ersten Mal**, ausgelöst dort, wo die Sache geschieht, nicht bei der Beförderung: Zwanzig Mann (Rang 5) · Ohne Muskete (7) · Der Tisch (9) · Befehlsausgabe · Sie stehen und warten · Vier Rechtecke (10) · Die Karte (12). Kein Glückwunsch, und **kein Wort darüber, dass die Atemleiste ab Rang 10 weg ist** — der Bruch besteht darin, dass man es bemerkt.
+
+`LAUF_FASSUNG` **17 → 18** mit Wandler (beide Listen leer; ein fortgesetzter Feldzug bekommt eine Nachricht lieber zweimal als nie).
+
+**Neuer Prüfstand `test/fenster.js`** mit Pflichtliste je Rang. Er hält den Rang fest (`rangSetzen` zugehalten) und heilt vor jedem Schritt — sonst steigt der geheilte Mann auf und sieht irgendwann alles. **Rang 1 mit leerer Pflichtliste ist die Gegenprobe.** Zweimal in Folge grün.
+
+**Zwei Fehler im Messgerät, beide derselbe Familie:** Der Prüfstand meldete anfangs fehlende Blätter, die dastanden — er guckte zwischen zwei Auswertungen, ehe die `setTimeout`-Schlange durchgelaufen war; jetzt hängt er seine Heilung selbst in ein `setTimeout`.
+
+**Nebenfund:** `zeigeKampf()` rief als einziger Bildschirm kein `kopfzeile()` — Geld, Orden und Rang wurden während eines ganzen Gefechts nie nachgeführt. Behoben.
+
+Alle sechs Prüfstände grün, `dist` neu gebaut.
+
+---
+
 ## 2026-07-31 — Das Briefing am Vorabend
 
 **Der Auftrag war ein Zettel ohne Gesicht.** Ab Rang 9 wird daraus eine Szene mit zwei Hälften, nur vor Höhepunkten (`haerte > 1`): Am Abend wirst du befohlen (Verstanden · Nachfragen, Taktik 40 · Widersprechen, Taktik 55), am Morgen stehen die Männer und du gibst es weiter (vorlesen · in eigenen Worten, Autorität 45 · den Teil weglassen).
