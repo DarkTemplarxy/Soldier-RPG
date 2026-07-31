@@ -2104,7 +2104,24 @@ Dazu **Mündungsblitze** nach einer Salve und ein Schleier, der ab Runde 5 das h
 
 Damit trägt die Zeile jeden Ausbaustand: Für den Erstläufer meldet sie **Rang 3 · Ruf 10 (30) · Martel 4 (4)**, für den Maximalveteranen **Rang 14 · Ruf 859 (680) · Davout 5 (5) · Bulletins 6 (5)**. Schwellen von 0 werden weggelassen, statt als „100 % erfüllt (0)" nach einer genommenen Hürde auszusehen.
 
-**Und der `HEBEL=1`-Zähler hatte denselben Fehler.** Er zählte nur Fürsprache an Grandmaison, also gerade nicht die, die über die letzten drei Sprossen entscheidet. Er zählt jetzt **jede**, mit Empfänger und Quelle (`davout/kampfEnde +13`, `berthaud/anerkennung +36`) — mehr Ausgabe, dafür keine Annahme darüber, wer gerade wichtig ist.
+**Und der `HEBEL=1`-Zähler hatte denselben Fehler.** Er zählte nur Fürsprache an Grandmaison, also gerade nicht die, die über die letzten drei Sprossen entscheidet. Er zählt jetzt **jede**, mit Empfänger und Quelle — mehr Ausgabe, dafür keine Annahme darüber, wer gerade wichtig ist:
+
+```
+Hebel · Fürsprache, wohin und woher:
+   berthaud      +34   −0   anerkennung +27 · kampfEnde +3 · Object +2
+   vernet        +20   −5   kampfEnde +11 · anwenden +3 · inspektion −3
+   davout        +11   −5   kampfEnde +4 · zeigeBefoerderung +2
+```
+
+### Der Bericht muss in ein Fenster passen (`zeileUmbrechen`)
+
+**Eine Zeile, die das Fenster umbricht, ist keine Zeile mehr, sondern ein Absatz ohne Ausrichtung.** Mit elf Kapiteln stand „Überstanden je Kapitel" bei über 280 Zeichen und der Fürsprache-Hebel bei 340 — beides genau die Zeilen, für die man den Bericht liest.
+
+`zeileUmbrechen(kopf, teile)` setzt die Teile untereinander und rückt ein, **sobald** sie nicht mehr nebeneinander passen; passt alles, bleibt es einzeilig. Deckel ist `BREITE = 104`. Beim Hebel werden so viele Quellen gedruckt, wie hineingehen — nicht vier feste, weil ein langer Funktionsname (`kapitelauftragAbrechnen`) sonst genau die Zeile sprengt, in der er steht.
+
+> **Zwei Kleinigkeiten, die beim Ausrichten auffielen:** `+${String(n).padStart(3)}` schiebt Leerzeichen *zwischen* Vorzeichen und Zahl („+  9") — ausgerichtet wird `('+'+n).padStart(4)`, weil beides ein Wort ist. Und eine Quelle mit Bilanz null steht als „−0" da und sagt nichts; sie fällt weg, die Summe zählt sie weiter.
+>
+> **⚠ Und die Prüfung selbst war zuerst falsch:** `awk '{if (length > 104)}'` zählt **Bytes**. `ä` braucht zwei, `·` zwei, `⚔` drei — eine Zeile aus fünf Sterbeorten wurde dadurch als zwölf Zeichen zu lang gemeldet, obwohl sie passte. Gezählt wird mit `[...zeile].length`.
 
 ### Der Kasten „Feldzug gesichert" ist weg (31.07.2026)
 

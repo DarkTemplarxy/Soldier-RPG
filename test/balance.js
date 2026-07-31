@@ -793,6 +793,26 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
      mit dem Nenner.** Wer sie vergleicht, vergleicht sie nur gegen eine
      Messung mit derselben Stationszahl; deshalb steht sie hier immer mit
      „von ${STATIONSZAHL}" daneben. */
+  /* ── Der Bericht muss in ein Fenster passen ──
+     **Eine Zeile, die der Terminal umbricht, ist keine Zeile mehr, sondern
+     ein Absatz ohne Ausrichtung.** Die Kapitelquoten standen mit elf
+     Kapiteln bei über zweihundertachtzig Zeichen, der Fürsprache-Hebel bei
+     dreihundertvierzig — beides genau die Zeilen, für die man den Bericht
+     liest. `zeileUmbrechen` setzt die Teile untereinander, sobald sie nicht
+     mehr nebeneinander passen, und rückt die Folgezeilen ein. */
+  const BREITE = 104;
+  const zeileUmbrechen = (kopf, teile, trenner = ' · ') => {
+    if (!teile.length) return;
+    const eins = kopf + ' ' + teile.join(trenner);
+    if (eins.length <= BREITE) { console.log(eins); return; }
+    console.log(kopf);
+    let zeile = '';
+    teile.forEach(t => {
+      if (zeile && ('   ' + zeile + trenner + t).length > BREITE) { console.log('   ' + zeile); zeile = ''; }
+      zeile = zeile ? zeile + trenner + t : t;
+    });
+    if (zeile) console.log('   ' + zeile);
+  };
   const we = res.weite.slice().sort((a, b) => a - b);
   const weite = we.length ? we[Math.floor(we.length / 2)] : 0;
   console.log(`\n  WEITE ${weite} von ${STATIONSZAHL} (${Math.round(weite/STATIONSZAHL*100)} %)`
@@ -804,11 +824,12 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     + `\n    Klickbudget erschöpft oder kein Knopf mehr. Diese Läufe gehen in KEINE Quote unten ein.\n`);
   console.log(`Ganz durch: ${q(res.ende)} (Produktzahl, mit elf Kapiteln stumpf)`);
   console.log(`Italien überstanden ${q(res.italien)} (Lehrstück, kein Sollwert) · gestorben ${res.tot}`);
-  console.log(`Weitere Ränge erreicht: Elitekompanie ${q(res.elite)} · Caporal ${q(res.caporal)} · Fourrier ${q(res.fourrier)} · Sergent ${q(res.sergent)}`);
+  zeileUmbrechen('Weitere Ränge erreicht:', [`Elitekompanie ${q(res.elite)}`,
+    `Caporal ${q(res.caporal)}`, `Fourrier ${q(res.fourrier)}`, `Sergent ${q(res.sergent)}`]);
   console.log(`Punkte: Median ${pu[Math.floor(pu.length / 2)]} · Bereich ${pu[0]}–${pu[pu.length - 1]}`);
-  const verteilung = Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
-    .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`).join(' · ');
-  console.log(`Rangverteilung (höchster je Lauf): ${verteilung}`);
+  zeileUmbrechen('Rangverteilung (höchster je Lauf):',
+    Object.keys(res.raenge).map(Number).sort((a, b) => a - b)
+      .map(r => `${r} ${rangKurz(r)} ${res.raenge[r]}`));
   /* ── Wie oft der Bot ins Risiko gegangen ist ──
      `OFFEN.md` Punkt 2 lässt sich nur mit dieser Zeile entscheiden: Wenn der
      reiche Veteran seltener überlebt als der ärmere, muss man wissen, ob er
@@ -836,32 +857,72 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     /* Eine Schwelle von 0 ist keine — sie wird gar nicht erst gedruckt,
        statt als „100 % erfüllt (0)" nach einer erledigten Hürde auszusehen. */
     const teil = (name, werte, schwelle) => schwelle
-      ? `${name} ${med(werte)} ${anteil(werte,schwelle)} % (${schwelle})` : '';
-    console.log(`Rang ${ziel.rang} — die Schranken davor `
-      + `(Median · erfüllt · nötig, ${res.schranke.ruf.length} Läufe): `
-      + [teil('Ruf', res.schranke.ruf, ziel.ruf),
-         teil(wer, res.schranke.gm, ziel.gunst),
-         teil('Bulletins', res.schranke.bul, ziel.bul)].filter(Boolean).join(' · '));
+      ? `${name} ${med(werte)}/${schwelle} ${anteil(werte,schwelle)} %` : '';
+    zeileUmbrechen(`Rang ${ziel.rang} · Schranken davor `
+      + `(${res.schranke.ruf.length} Läufe, Median/nötig · erfüllt):`,
+      [teil('Ruf', res.schranke.ruf, ziel.ruf),
+       teil(wer, res.schranke.gm, ziel.gunst),
+       teil('Bulletins', res.schranke.bul, ziel.bul)].filter(Boolean));
   }
   if (HEBEL && res.hebel) {
     const z = res.hebel;
     console.log(`Hebel · Folgen aus dem Verzeichnis: ${z.folge} (Stufen ${
       Object.keys(z.stufen||{}).sort().map(k=>k+': '+z.stufen[k]).join(' · ') || '—'})`);
-    console.log(`Hebel · Wer welche Fürsprache bewegt (Empfänger/Quelle, die zwölf stärksten): ${
-      Object.keys(z.gm||{}).sort((a,b)=>z.gm[b]-z.gm[a]).slice(0,12)
-        .map(k=>k+' '+z.gm[k]).join(' · ') || '—'}`);
+    /* ── Eine Zeile je Empfänger, nicht eine Zeile für alles ──
+       Die erste Fassung schrieb zwölf Einträge `id/quelle ± n` hintereinander
+       in **eine** Zeile — über dreihundert Zeichen, im Fenster umgebrochen und
+       damit unlesbar. Und `grandmaison/kampfEnde − 5` neben
+       `grandmaison/kampfEnde + 5` sah wie eine Dopplung aus, obwohl es Ab-
+       und Zugang desselben Mannes waren.
+
+       Jetzt: je Empfänger eine Zeile mit Bilanz, dahinter die Quellen. Die
+       Frage, für die der Zähler gebaut wurde — *wer füttert wen* —, steht
+       damit senkrecht statt waagerecht. */
+    const proMann = {};
+    Object.keys(z.gm||{}).forEach(k=>{
+      const m = k.match(/^(.+?)\/(.+?) ([+−])$/); if(!m) return;
+      const [, wem, woher, vz] = m;
+      const e = proMann[wem] || (proMann[wem] = {auf:0, ab:0, quellen:{}});
+      if(vz === '+') e.auf += z.gm[k]; else e.ab += z.gm[k];
+      e.quellen[woher] = (e.quellen[woher]||0) + (vz === '+' ? z.gm[k] : -z.gm[k]);
+    });
+    const namen = Object.keys(proMann).sort((a,b)=>
+      (proMann[b].auf+proMann[b].ab) - (proMann[a].auf+proMann[a].ab));
+    console.log('Hebel · Fürsprache, wohin und woher:');
+    if(!namen.length) console.log('   —');
+    namen.forEach(wem=>{
+      const e = proMann[wem];
+      /* Vorzeichen und Zahl sind **ein** Wort und werden zusammen ausgerichtet.
+         `+${padStart(3)}` schob sonst Leerzeichen dazwischen („+  9"). */
+      const kopf = `   ${wem.padEnd(12)} ${('+'+e.auf).padStart(4)} ${('−'+e.ab).padStart(4)}   `;
+      /* **So viele Quellen, wie in die Zeile passen** — nicht vier feste. Eine
+         Funktion mit langem Namen (`kapitelauftragAbrechnen`) sprengte sonst
+         genau die Zeile, in der sie steht. */
+      const q = []; let breit = kopf.length;
+      Object.keys(e.quellen).sort((a,b)=>Math.abs(e.quellen[b])-Math.abs(e.quellen[a]))
+        .forEach(k=>{
+          /* Eine Quelle, die gleich viel gibt wie nimmt, steht mit „−0" da und
+             sagt nichts — sie fällt weg. Die Bilanz oben zählt sie weiter. */
+          if(!e.quellen[k]) return;
+          const t = `${k} ${e.quellen[k]>0?'+':'−'}${Math.abs(e.quellen[k])}`;
+          if(breit + t.length + 3 > BREITE) return;
+          q.push(t); breit += t.length + 3;
+        });
+      console.log(kopf + q.join(' · '));
+    });
   }
   /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
   const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])
     .map(k => { const e = res.erreicht[k], t = res.sterbeort[k]||0;
                 return `${k} ${Math.round((1-t/e)*100)} %${e<15?' (nur '+e+')':''}`; });
-  if (jeKapitel.length) console.log(`Überstanden je Kapitel (von denen, die es erreichen): ${jeKapitel.join(' · ')}`);
+  zeileUmbrechen('Überstanden je Kapitel (von denen, die es erreichen):', jeKapitel);
   if (res.sterbestation.length) {
     const mittel = Math.round(res.sterbestation.reduce((a, x) => a + x, 0) / res.sterbestation.length * 10) / 10;
     const plaetze = Object.keys(res.sterbeplatz).sort((a,b)=>res.sterbeplatz[b]-res.sterbeplatz[a]).slice(0,6);
-    console.log(`Gestorben wo genau: ${plaetze.map(k=>`${k} ${res.sterbeplatz[k]}`).join(' · ')}`);
-    console.log(`Gestorben in: ${Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`).join(' · ')}`
-      + ` · im Schnitt bei Station ${mittel} von ${STATIONSZAHL}`);
+    zeileUmbrechen('Gestorben wo genau:', plaetze.map(k=>`${k} ${res.sterbeplatz[k]}`));
+    zeileUmbrechen('Gestorben in:',
+      Object.keys(res.sterbeort).map(k => `${k} ${res.sterbeort[k]}`)
+        .concat(`im Schnitt bei Station ${mittel} von ${STATIONSZAHL}`));
   }
   await b.close();
 })();
