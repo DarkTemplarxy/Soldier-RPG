@@ -488,7 +488,11 @@ Wurf     = Mittel aus SECHS Würfen über 1–100 · Erfolg wenn Wurf ≤ Zielwe
 
 | Italien | Ägypten | Garnison | Austerlitz | Jena | Eylau | Spanien | Russland | 1813 | 1814 | Waterloo |
 |---|---|---|---|---|---|---|---|---|---|---|
-| +0 | +4 | +0 | +6 | +8 | +10 | +12 | +16 | +16 | +18 | **+20** |
+| **+1** | +4 | +0 | +6 | +8 | +10 | +12 | +16 | +16 | +18 | **+20** |
+
+> **Italien stand bis zum 31.07.2026 auf +0** und ist auf **+1** gesetzt (Ansage des Entwicklers; Ägypten bleibt bei +4). Grund ist der gemessene Sprung zwischen dem ersten und dem zweiten Kapitel: **Italien 96 %, Ägypten 40 %** — die Kurve griff genau dort am schwächsten, wo der Erstläufer lebt und stirbt.
+>
+> **Ein Punkt ist ein Tastversuch, keine Eichung.** Er verschiebt eine Probe um rund einen Prozentpunkt und liegt damit unter dem Rauschen von achtzig Läufen (±11 Punkte bei 2σ). Gemessen wird trotzdem — auch damit die Grundlinie bestätigt ist und nichts anderes mitgewandert ist.
 
 **Die Garnison steht bewusst auf 0** — es ist Frieden, und eine Regimentsschule wird nicht schwerer, weil draußen Krieg ist.
 

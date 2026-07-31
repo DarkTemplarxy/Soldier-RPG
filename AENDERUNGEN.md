@@ -5,6 +5,16 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Italien von +0 auf +1
+
+**Die Härtekurve griff dort am schwächsten, wo der Erstläufer lebt und stirbt.** Gemessen über 80 Läufe: Italien 96 % überstanden, Ägypten 40 % — ein Sprung von sechsundfünfzig Punkten zwischen dem ersten und dem zweiten Kapitel. Von achtzig Läufen sterben 46 in Ägypten und 3 in Italien; das Spiel sortiert an einer Stelle, und wer sie übersteht, hat den Lauf im Wesentlichen gewonnen.
+
+`schwierigkeit` der Kampagne Italien **0 → 1**. Ägypten bleibt bei 4 (Ansage des Entwicklers).
+
+**Ein Punkt ist ein Tastversuch, keine Eichung** — er verschiebt eine Probe um rund einen Prozentpunkt und liegt unter dem Rauschen von achtzig Läufen. Gemessen wird trotzdem, mit dem Erstlauf-Bot; die Grundlinie dafür steht in CLAUDE.md („Gemessen bei 163 Stationen").
+
+---
+
 ## 2026-07-31 — Die Weite kippt: der Befund war das Messgerät
 
 **Der Verdacht lautete „der Erstläufer kommt zu weit" — Weite 60 statt 32.** Gemessen wurde, wie die eigene Regel es verlangt: Worktree auf `289fa9f`, **derselbe** Prüfstand hineinkopiert, beide Stände über je 80 Läufe.

@@ -505,7 +505,18 @@ const HERKUENFTE = [
    sind eine entworfene Kurve für Kapitel, die es noch nicht gibt; wer eines
    davon baut, misst seine Güte neu, statt der Zahl zu glauben. */
 const KAMPAGNEN = [
-  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, schwierigkeit:0, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
+  /* **Italien stand bis zum 31.07.2026 auf 0** — die Härtekurve griff damit
+     genau dort am schwächsten, wo der Erstläufer lebt und stirbt: Gemessen
+     überstehen 96 % das Lehrstück und 40 % Ägypten, ein Sprung von
+     sechsundfünfzig Punkten zwischen dem ersten und dem zweiten Kapitel. Das
+     Spiel sortiert an einer Stelle, und wer sie übersteht, hat den Lauf im
+     Wesentlichen gewonnen.
+
+     **+1 ist ein Tastversuch, keine Eichung** (Ansage des Entwicklers, dazu
+     Ägypten unverändert bei 4). Ein Punkt verschiebt eine Probe um rund einen
+     Prozentpunkt und liegt damit unter dem Rauschen von achtzig Läufen —
+     gemessen wird trotzdem, denn eine Zahl, die man nicht misst, ist geraten. */
+  {id:'italien',    nr:1,  name:'Italien',        jahre:'1796–97', guete:0, sold:0.3, schwierigkeit:1, kurz:'Barfuß, hungrig, siegreich.',                 gebaut:true},
   {id:'aegypten',   nr:2,  name:'Ägypten',        jahre:'1798–99', guete:5, sold:0.5, schwierigkeit:4, kurz:'Hitze, Krankheit, Karrees gegen Mamluken.'},
   {id:'garnison',   nr:3,  name:'Garnison',       jahre:'1801–04', guete:0, sold:1.0, schwierigkeit:0, kurz:'Ruhe. Bildung nachholen, Beziehungen knüpfen.'},
   {id:'austerlitz', nr:4,  name:'Austerlitz',     jahre:'1805',    guete:6, sold:0.9, schwierigkeit:6, kurz:'Die perfekte Schlacht.'},
