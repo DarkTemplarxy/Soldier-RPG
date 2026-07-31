@@ -298,7 +298,7 @@ Einheitszustand, die Rangschranken, der Kaufladen mit seinen achtundzwanzig Post
 Feindgüte, die jetzt für alle elf Kampagnen <b>am Hebel ausgelesen</b> statt am Ergebnis
 geraten ist. <b>Drei sind neu hinzugekommen</b> — der Erstläufer, der zu weit kommt; der
 mittlere Bot, der in die Regelmessung gehört; und die Frage, ob der Marschallstab bei 53 %
-richtig sitzt. Einer davon ist noch am selben Tag entschieden worden (der Marschallstab bei 53 % bleibt, wie er ist). Es bleiben <b>vierzehn</b>.</p>
+richtig sitzt. Einer davon ist noch am selben Tag entschieden worden (der Marschallstab bei 53 % bleibt, wie er ist). Es bleiben <b>fünfzehn</b> — einer ist beim Messen dazugekommen (die Weite, die kippt).</p>
 <p class="lead">Abhaken verändert nur diese Seite — sichere den Stand als Datei, wenn er
 erhalten bleiben soll.</p>
 
@@ -1748,9 +1748,9 @@ const AUFGABEN = [
 {n:1,d:'später',k:'Mechanik',t:'Datei-Export ist ein Rücksetzpunkt',
  x:'Im Lager sichern, sterben, Datei laden — das hebelt den Permadeath aus. Bewusst nicht repariert, weil es mit einer maßgeblichen Datei prinzipiell nicht verhinderbar ist. Wenn es je stören soll, braucht es eine Entscheidung: Export erst beim Tod, oder eine Einmal-Marke im Lauf-Teil.',
  q:'AENDERUNGEN.md Z. 30'},
-{n:9,d:'wichtig',k:'Balance',t:'Der Erstläufer kommt zu weit — Weite 60 statt 32',
- x:'Gemessen am 31.07.2026 über 80 Läufe: Weite 60 von 163 (vorher 32), Ägypten überstanden 54 % (vorher 38), 40 % erreichen ein Offizierspatent, jeder Zweite wird Sergent. Das widerspricht der Ansage „relativ nutzlos, bzw. ziemlich sicher sterben“. Der Trichter hat inzwischen die gewünschte Form — die Toten verteilen sich über sechs Kapitel statt nur über Ägypten —, er liegt nur zu tief. Woran es liegt, ist ungemessen: Zwischen beiden Messungen liegen sieben Verwaltungssitzungen, der Schreibtisch, die Feuille d’enrôlement, die reifenden Unterstellten und die Verschlankung des Lagers. Erster Verdacht ist die Verschlankung. Vor jeder Änderung denselben Stand neu messen (Worktree auf 289fa9f, derselbe Prüfstand hinein) — gegen eine Zahl von vorgestern zu vergleichen ist wertlos, solange Inhalt und Regeln sich gleichzeitig ändern.',
- q:'OFFEN.md Punkt 9 · CLAUDE.md „Gemessen bei 163 Stationen“'},
+{n:9,d:'wichtig',k:'Balance',t:'Ägypten ist ein Sieb — das Spiel sortiert an einer Stelle',
+ x:'Knapp die Hälfte der Erstläufe stirbt in Ägypten, und wer durchkommt, kommt weit. Das Spiel entscheidet damit an einer einzigen Stelle, und danach entscheidet kaum noch etwas. Empfohlener Hebel ist die Härtekurve (Italien +0, Ägypten +4), die genau dort am schwächsten greift, wo der Erstläufer lebt und stirbt — nicht der Fertigkeiten-Sockel, der ist gesetzt und gehört zur Skala. Der Prüfpunkt ist nicht die Weite, sondern die Form der Verteilung: kein Kapitel unter 60 %, keines über 95 %. Verglichen wird über den Mittelwert, nicht über den Median — siehe den Vermerk zur Weite.',
+ q:'OFFEN.md Punkt 9'},
 {n:20,d:'später',k:'Inhalt',t:'Generalskampagnen als eigene Szenarien',
  x:'Wagram 1809, Leipzig 1813, Waterloo 1815 — je 30 bis 60 Minuten, reine Operationsebene mit Meldungen und Befehlslaufzeiten, eigene Wertung und eigener Chronikeintrag. Die Freischaltung ab einmal Rang 12 ist gebaut und in Betrieb (META.generalskampagnen); es fehlen die Szenarien selbst. Rang 14 hängt seit dem 30.07.2026 nicht mehr daran — an seiner Stelle steht die Protektion eines Marschalls.',
  q:'KONZEPT.md §9'},
@@ -1775,6 +1775,9 @@ const AUFGABEN = [
 {n:46,d:'wichtig',k:'Technik',t:'Der mittlere Bot gehört in die Regelmessung',
  x:'Bis zum 31.07.2026 wurden zwei Bots gemessen, und beide kleben an einem Ende: Der Erstläufer kommt fast nie weit, der Maximalveteran fast immer durch. Ein dritter mit 1500 VP füllt die Lücke — Weite 93 von 163, Capitaine 55 %, Rangverteilung über fünf Stufen, Punkte von 482 bis 2908. Er ist die einzige der drei Zahlen, an der eine Änderung überhaupt sichtbar wird. Kostet 40 Läufe zusätzlich.',
  q:'OFFEN.md Punkt 13'},
+{n:49,d:'wichtig',k:'Technik',t:'Die Weite kippt, weil die Verteilung zwei Gipfel hat — behoben, aber im Auge behalten',
+ x:'Am 31.07.2026 meldete dieselbe Fassung vormittags Weite 60 und nachmittags Weite 32, ohne eine geänderte Zeile. Ursache: Die Läufe verteilen sich auf zwei Gipfel, getrennt vom Sieb in Ägypten — wer dort fällt, kommt bis rund 32, wer durchkommt bis rund 120 —, und der Median greift genau das Tal dazwischen heraus. Kreuzt die Ägypten-Quote die 50 %, kippt er: 45 % → 32, 49 % → 32, 54 % → 60. Derselbe Fehler, der für den Punkte-Median seit Langem dokumentiert ist; die Weite wurde als dessen Nachfolgerin eingeführt und nie darauf geprüft. balance.js druckt jetzt Mittelwert und Viertel daneben und warnt selbst („MEDIAN INSTABIL“). Offen bleibt, dass die Weite der beiden Veteranen unter demselben Vorbehalt steht: Beim mittleren Bot liegt Spanien bei 47 %.',
+ q:'CLAUDE.md „Die Weite ist ein Median über eine zweigipflige Verteilung“'},
 {n:48,d:'später',k:'Inhalt',t:'Die höheren Ordensgrade und der zweite fremde Orden',
  x:'Der Commandeur ab 1809 steht zwischen Offizier und Grand Officier und ist entworfen, nicht gebaut. Ebenso der zweite fremde Orden — KONZEPT §5 rechnet mit zweien, gebaut ist einer (die Eiserne Krone). Beide liegen als Zeichnung vor; es fehlt der Code, nicht der Entwurf.',
  q:'KONZEPT.md §6 · grundwerte.js ORDEN'}

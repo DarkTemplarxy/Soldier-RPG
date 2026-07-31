@@ -5,6 +5,30 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Die Weite kippt: der Befund war das Messgerät
+
+**Der Verdacht lautete „der Erstläufer kommt zu weit" — Weite 60 statt 32.** Gemessen wurde, wie die eigene Regel es verlangt: Worktree auf `289fa9f`, **derselbe** Prüfstand hineinkopiert, beide Stände über je 80 Läufe.
+
+| | alt (`289fa9f`) | neu | Vormittag |
+|---|---|---|---|
+| **Weite (Median)** | **32** | **32** | **60** |
+| Ägypten überstanden | 45 % | 49 % | 54 % |
+| **Mittel der Sterbestation** | **55,3** | **54,2** | — |
+| Caporal | 68 % | 68 % | 57 % |
+| Punkte-Median | 492 | 502 | 502 |
+
+**Der heutige Stand ist nicht leichter.** Keine der sieben Verwaltungssitzungen, nicht der Schreibtisch, nicht die Verschlankung des Lagers hat den Einstieg verändert.
+
+**Warum die Zahl sprang:** Die Weite ist ein Median über eine **zweigipflige** Verteilung. Wer in Ägypten fällt, kommt bis rund 32; wer durchkommt, bis rund 120. Der Median greift den Lauf in der Mitte heraus — und die Mitte liegt im Tal dazwischen. Kreuzt die Ägypten-Quote die 50 %, kippt er: 45 % → 32, 49 % → 32, 54 % → 60. Fünf Punkte Ägypten sind bei achtzig Läufen Rauschen; achtundzwanzig Stationen Weite sehen nach einem Befund aus.
+
+**Es ist derselbe Fehler, der für den Punkte-Median seit Langem dokumentiert ist** („bei ~50 % Überlebensquote unbrauchbar") — und die Weite ist genau als dessen Nachfolgerin eingeführt worden, ohne auf dieselbe Schwäche geprüft zu werden.
+
+**Behoben im Prüfstand, nicht nur auf dem Papier:** `balance.js` druckt jetzt **Mittelwert und Viertel** neben dem Median und meldet selbst `⚠ MEDIAN INSTABIL`, sobald eine Kapitelquote nahe genug an 50 % liegt, um zu kippen. Dazu gepaart, was vorher getrennt gezählt wurde: Sprosse und Beurteiler der Schrankenzeile — sie nannte beim Erstlauf „Rang 3 · Vernet", und Vernet beurteilt Rang 3 nicht.
+
+**Offen bleibt:** Die Weite der beiden Veteranen steht unter demselben Vorbehalt. Beim mittleren Bot liegt Spanien bei 47 %.
+
+---
+
 ## 2026-07-31 — Durchsicht des Quelltexts: eine vernichtete Sektion stand als volle da
 
 **Gesucht wurde nach Fehlern und nach dem, was sich beim Bauen einschleicht.** Ohne Befund: keine Zugangsdaten, kein Schlüssel, kein Token im Repo; kein `fetch`, kein `XMLHttpRequest`, kein `import()`, keine URL — das Spiel greift nirgends nach außen, wie es Invariante 6 verlangt. Kein `eval`, kein `new Function`, kein `document.write`. Keine privaten Pfade, keine Mailadressen. Keine doppelt definierte Funktion. In keiner Zeichenfunktion wird gewürfelt. Und der Spielername, das einzige Stück fremder Text im Spiel, geht an **allen** dreizehn Stellen durch `esc()` — auch im Trauerblatt, im Congé absolu und im Beförderungsbescheid, die ihn als Handschrift setzen.

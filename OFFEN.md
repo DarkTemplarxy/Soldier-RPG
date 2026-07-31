@@ -176,21 +176,26 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
-## 9 · Das Sieb ist schwächer geworden, und der Erstläufer kommt zu weit *(neu gemessen 31.07.2026)*
+## 9 · ✓ Erledigt: Es war das Messgerät, nicht das Spiel
 
-> **⚠ Die Zahlen dieses Punktes haben sich bewegt, und zwar in die falsche Richtung.** Gemessen mit demselben Prüfstand, 80 Läufe, null Abbrüche:
+> **Der Befund lautete „der Erstläufer kommt zu weit" — Weite 60 statt 32 — und er hat sich in Luft aufgelöst.** Gemessen wurde, wie die eigene Regel es verlangt: Worktree auf `289fa9f`, **derselbe** Prüfstand hineinkopiert, beide Stände über je 80 Läufe.
 >
-> | | 30.07. | **31.07.** |
-> |---|---|---|
-> | **Weite** | 32 von 163 | **60 von 163** |
-> | Ägypten überstanden | 38 % | **54 %** |
-> | sterben in Ägypten | 47 von 80 | **35 von 80** |
-> | Patent erreicht (Rang 7+) | 26 % | **40 %** |
-> | Punkte-Median | 462 | 502 |
+> | | alt (`289fa9f`) | neu | Vormittag |
+> |---|---|---|---|
+> | **Weite (Median)** | **32** | **32** | **60** |
+> | Ägypten überstanden | 45 % | 49 % | 54 % |
+> | **Mittel der Sterbestation** | **55,3** | **54,2** | — |
+> | Caporal | 68 % | 68 % | 57 % |
+> | Sergent | 53 % | 51 % | 50 % |
+> | Punkte-Median | 492 | 502 | 502 |
 >
-> **Das Sieb ist breiter geworden — Ägypten 35, Spanien 9, Eylau 9, Russland 8, Jena 8, Austerlitz 7 —, aber es siebt insgesamt zu wenig.** Der Trichter hat jetzt die Form, die Punkt 9 verlangt hat, und liegt dabei zu tief: Jeder Zweite wird Sergent, zwei von fünf bekommen ein Patent. Das widerspricht der Ansage *„relativ nutzlos, bzw. ziemlich sicher sterben"*.
+> **Der heutige Stand ist nicht leichter als der vom 30.07.2026.** Keine der sieben Verwaltungssitzungen, nicht der Schreibtisch, nicht die Verschlankung des Lagers hat den Einstieg verändert.
 >
-> **Woran es liegt, ist ungemessen und darf nicht geraten werden.** Zwischen beiden Messungen liegen die sieben Verwaltungssitzungen, der Schreibtisch, die Feuille d'enrôlement, die reifenden Unterstellten und die Verschlankung des Lagers. Erster Verdacht ist die Verschlankung — weniger Lagerknöpfe heißt für einen Bot, der nach Abstand rechnet, seltener eine schlechte Wahl. **Der Messweg steht in der eigenen Regel:** Worktree auf `289fa9f`, **denselben** Prüfstand hinein, 80 Läufe, dann vergleichen. Gegen eine Zahl von vorgestern zu vergleichen ist bei einem Projekt, das gleichzeitig Inhalt und Regeln ändert, wertlos.
+> **Warum die Zahl trotzdem sprang:** Die Weite ist ein **Median über eine zweigipflige Verteilung.** Wer in Ägypten fällt, kommt bis rund 32; wer durchkommt, bis rund 120. Der Median greift den Lauf in der Mitte heraus, und die Mitte liegt im **Tal** zwischen den Gipfeln. Kreuzt die Ägypten-Quote die 50 %, kippt er hinüber: 45 % → 32, 49 % → 32, **54 % → 60**. Fünf Punkte Ägypten sind bei achtzig Läufen Rauschen; achtundzwanzig Stationen Weite sehen nach einem Befund aus.
+>
+> **Es ist derselbe Fehler, der für den Punkte-Median seit Langem dokumentiert ist — und die Weite ist als dessen Nachfolgerin eingeführt worden, ohne auf dieselbe Schwäche geprüft zu werden.** Behoben im Prüfstand, nicht nur auf dem Papier: `balance.js` druckt jetzt **Mittelwert und Viertel** neben dem Median und meldet `⚠ MEDIAN INSTABIL`, sobald eine Kapitelquote nahe genug an 50 % liegt, um zu kippen.
+
+**Was von Punkt 9 stehen bleibt, ist der ältere und härtere Befund: Ägypten ist ein Sieb.** Knapp die Hälfte stirbt dort, und wer durchkommt, kommt weit — das Spiel sortiert an einer Stelle und danach kaum noch. Der empfohlene Hebel ist unverändert die **Härtekurve** (Italien +0, Ägypten +4), nicht der Fertigkeiten-Sockel. **Der Prüfpunkt ist nicht die Weite, sondern die Form der Verteilung:** Sie soll flacher werden — kein Kapitel unter 60 %, keines über 95 %. Verglichen wird ab jetzt über den **Mittelwert**, weil der Median genau an dieser Stelle unbrauchbar ist.
 
 **Der ursprüngliche Befund vom 30.07.2026, für die Einordnung:**
 

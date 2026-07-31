@@ -219,7 +219,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                 risk: 0, wahlen: 0,
                 /* Die drei Schranken von Rang 12, je Lauf am Ende ausgelesen —
                    Ruf, Grandmaisons Fürsprache, Bulletins. OFFEN.md Punkt 12. */
-                schranke: {ruf: [], gm: [], bul: [], ziel: [], wer: []},
+                schranke: {ruf: [], gm: [], bul: [], ziel: []},
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
                    **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
@@ -713,8 +713,11 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       res.schranke.ruf.push(schluss.ruf);
       res.schranke.gm.push(schluss.gm);
       res.schranke.bul.push(schluss.bul);
-      res.schranke.ziel.push(schluss.ziel);
-      res.schranke.wer.push(schluss.wer || '—');
+      /* **Sprosse und Beurteiler werden als Paar abgelegt.** Getrennt gezählt
+         nannte der Bericht die häufigste Sprosse des einen und den häufigsten
+         Beurteiler eines anderen Laufs — beim Erstlauf stand dort „Rang 3 ·
+         Vernet", und Vernet beurteilt Rang 3 nicht. */
+      res.schranke.ziel.push(Object.assign({wer: schluss.wer || '—'}, schluss.ziel));
     }
     if (zweig) res.elite++;
     if (hoechster >= 3) res.caporal++;
@@ -815,8 +818,43 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
   };
   const we = res.weite.slice().sort((a, b) => a - b);
   const weite = we.length ? we[Math.floor(we.length / 2)] : 0;
+  const mittel = we.length ? Math.round(we.reduce((a,x)=>a+x,0) / we.length) : 0;
   console.log(`\n  WEITE ${weite} von ${STATIONSZAHL} (${Math.round(weite/STATIONSZAHL*100)} %)`
     + `   ·   HÖCHSTER RANG (${rangKurz(LEITRANG)}) ${q(res.leit)}\n`);
+
+  /* ── ⚠ Der Median springt, wenn die Verteilung zwei Gipfel hat ──
+     **Am 31.07.2026 teuer gelernt.** Zwei Messungen desselben Codes lieferten
+     Weite 32 und Weite 60 — ein Unterschied von achtundzwanzig Stationen ohne
+     eine einzige geänderte Zeile. Die Ursache ist die Bauart der Zahl: Die
+     Läufe verteilen sich auf **zwei Gipfel**, getrennt vom Sieb in Ägypten —
+     wer dort stirbt, kommt bis rund 32, wer durchkommt, bis rund 120.
+
+     Der Median greift den Lauf in der Mitte heraus, und die Mitte liegt genau
+     im Tal dazwischen. Sobald die Ägypten-Quote die 50 % kreuzt, kippt er von
+     einem Gipfel auf den anderen:
+
+         Ägypten 45 % → Weite 32
+         Ägypten 49 % → Weite 32
+         Ägypten 54 % → Weite 60
+
+     Fünf Punkte Ägypten sind bei achtzig Läufen Rauschen. Achtundzwanzig
+     Stationen Weite sehen nach einem Befund aus. **Es ist derselbe Fehler,
+     der für den Punkte-Median seit Langem dokumentiert ist** — und die Weite
+     ist genau als dessen Nachfolgerin eingeführt worden, ohne dass jemand sie
+     auf dieselbe Schwäche geprüft hätte.
+
+     Deshalb steht jetzt der **Mittelwert daneben** (er kippt nicht: 55,3 gegen
+     54,2 bei denselben zwei Messungen), und der Prüfstand warnt selbst, wenn
+     eine Kapitelquote nahe genug an 50 % liegt, um den Median zu kippen. */
+  const naheHalb = KAPITEL_FOLGE.filter(k => (res.erreicht[k]||0) >= 15)
+    .map(k => ({k, q: 1 - (res.sterbeort[k]||0)/res.erreicht[k]}))
+    .filter(x => Math.abs(x.q - 0.5) < 0.12);
+  console.log(`  Weite im Mittel ${mittel} · Viertel bei ${we[Math.floor(we.length*0.25)]||0}`
+    + ` und ${we[Math.floor(we.length*0.75)]||0}`);
+  if (naheHalb.length) console.log(`  ⚠ MEDIAN INSTABIL: ${naheHalb.map(x=>x.k+' '+Math.round(x.q*100)+' %').join(' · ')}`
+    + ` liegt/liegen nahe 50 % — die Verteilung hat zwei Gipfel, und der Median kippt`
+    + `\n    zwischen ihnen. Vergleiche über den Mittelwert, nicht über die Weite.`);
+  console.log('');
   /* **Laut, nicht am Rand.** Ein abgebrochener Lauf ist kein Messwert, und ein
      Prüfstand, der seine eigene Obergrenze verschweigt, misst irgendwann sich
      selbst statt des Spiels. Genau das ist am 30.07.2026 passiert. */
@@ -852,8 +890,8 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
     const anteil = (a,s) => s ? Math.round(a.filter(x=>x>=s).length / a.length * 100) : 100;
     const haeufigst = a => { const z = {}; a.forEach(x=>{ const k = JSON.stringify(x); z[k]=(z[k]||0)+1; });
       const k = Object.keys(z).sort((x,y)=>z[y]-z[x])[0]; return k ? JSON.parse(k) : null; };
-    const ziel = haeufigst(res.schranke.ziel) || {rang:'?', ruf:0, gunst:0, bul:0};
-    const wer  = haeufigst(res.schranke.wer) || 'der Beurteiler';
+    const ziel = haeufigst(res.schranke.ziel) || {rang:'?', ruf:0, gunst:0, bul:0, wer:'der Beurteiler'};
+    const wer  = ziel.wer || 'der Beurteiler';
     /* Eine Schwelle von 0 ist keine — sie wird gar nicht erst gedruckt,
        statt als „100 % erfüllt (0)" nach einer erledigten Hürde auszusehen. */
     const teil = (name, werte, schwelle) => schwelle

@@ -1423,7 +1423,7 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 | | **Weite** (von 163) | **höchster Rang (Cpt)** | Italien | Caporal | Ägypten | Punkte-Median |
 |---|---|---|---|---|---|---|
-| **Erstlauf ohne Vorrat** *(80 Läufe)* | **60** | **6 %** | 95 % | 57 % | 54 % | 502 |
+| **Erstlauf ohne Vorrat** *(80 Läufe)* | **32** *(Mittel 54)* | **3 %** | 96 % | 68 % | 49 % | 502 |
 | **Veteran 1500 VP** *(40)* | **93** | **55 %** | 100 % | 100 % | 90 % | 1 849 |
 | **Veteran 5800 VP** *(40)* | **163** | **100 %** | 100 % | 100 % | 100 % | 6 046 |
 
@@ -1431,7 +1431,7 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 | Bot | Rangverteilung |
 |---|---|
-| Erstlauf | 1 Fus 33 · 2 Elite 1 · 3 Cap 6 · 5 Serg 8 · **7 S-Lt 19** · 8 Lt 8 · 9 Cpt 5 |
+| Erstlauf | 1 Fus 26 · 3 Cap 13 · 5 Serg 13 · **7 S-Lt 22** · 8 Lt 4 · 9 Cpt 2 |
 | **Mitte** | 5 Serg 4 · 7 S-Lt 10 · 8 Lt 4 · **9 Cpt 19** · 11 Col 3 |
 | Maximum | 11 Col 7 · 12 GdB 8 · 13 GdD 4 · **14 Mar 21** |
 
@@ -1441,9 +1441,31 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 
 **Die drei Stufen trennen sauber, ohne Überholen und ohne Umkehrung** — 60 / 93 / 163 Stationen, 9 Cpt / 11 Col / 14 Mar. Das ist die Progression, auf der das Spiel beruht, und sie stand zuletzt nicht so da.
 
-> **⚠ Der Erstläufer ist zu weit gekommen: Weite 60 statt 32, Ägypten 54 statt 38 %, 40 % mit Patent.** Das läuft Punkt 1 der Liste „Was als Nächstes ansteht" zuwider. **Die 32 sind aber eine Zahl von vorgestern, kein gleichzeitig gemessener Vergleich** — dazwischen liegen sieben Verwaltungssitzungen, der Schreibtisch, die Feuille d'enrôlement, die reifenden Unterstellten und die Verschlankung des Lagers. Wer daran dreht, misst zuerst denselben Stand neu (Worktree auf `289fa9f`, **derselbe** Prüfstand hinein). Steht als Punkt 9 in `OFFEN.md`.
+> ### ⚠ Die Weite ist ein Median über eine zweigipflige Verteilung — und der Median kippt
+>
+> **Am Vormittag des 31.07.2026 meldete dieselbe Fassung Weite 60, am Nachmittag Weite 32.** Keine geänderte Zeile dazwischen. Der Verdacht lautete „der Erstläufer kommt zu weit"; gemessen wurde stattdessen der Prüfstand.
+>
+> **Gegenprobe, wie die eigene Regel sie verlangt:** Worktree auf `289fa9f`, **denselben** Prüfstand hineinkopiert, beide Stände über je 80 Läufe.
+>
+> | | alt (`289fa9f`) | neu | Vormittag |
+> |---|---|---|---|
+> | **Weite (Median)** | **32** | **32** | **60** |
+> | Ägypten überstanden | 45 % | 49 % | 54 % |
+> | **Mittel der Sterbestation** | **55,3** | **54,2** | — |
+> | Caporal | 68 % | 68 % | 57 % |
+> | Punkte-Median | 492 | 502 | 502 |
+>
+> **Der Mechanismus:** Die Läufe verteilen sich auf **zwei Gipfel**, getrennt vom Sieb in Ägypten — wer dort fällt, kommt bis rund 32, wer durchkommt, bis rund 120. Der Median greift den Lauf in der Mitte heraus, und die Mitte liegt im **Tal** dazwischen. Kreuzt die Ägypten-Quote die 50 %, kippt er von einem Gipfel auf den anderen: 45 % → 32, 49 % → 32, **54 % → 60**. Fünf Punkte Ägypten sind bei achtzig Läufen Rauschen; achtundzwanzig Stationen Weite sehen nach einem Befund aus.
+>
+> **Es ist derselbe Fehler, der für den Punkte-Median seit Langem hier steht** („bei ~50 % Überlebensquote unbrauchbar; der Median springt um rund dreißig Punkte, sobald die Quote die 50 % kreuzt") — **und die Weite ist genau als dessen Nachfolgerin eingeführt worden, ohne auf dieselbe Schwäche geprüft zu werden.**
+>
+> **Was daraus folgt, steht jetzt im Prüfstand und nicht nur hier:** Er druckt **Mittelwert und Viertel** neben dem Median und **warnt selbst**, sobald eine Kapitelquote nahe genug an 50 % liegt, um zu kippen (`⚠ MEDIAN INSTABIL`). Verglichen wird über den Mittelwert — er steht bei 55,3 gegen 54,2 und sagt, was der Median verschweigt: **Die beiden Stände sind gleich.**
+>
+> **Der Befund „der Erstläufer kommt zu weit" ist damit erledigt, ohne dass eine Zahl im Spiel geändert wurde.** Gegen `289fa9f` gemessen ist der heutige Stand nicht leichter: Weite 32 gegen 32, Caporal 68 gegen 68 %, Punkte 502 gegen 492, Sterbestation 54,2 gegen 55,3. Was sich bewegt hatte, war die Messung.
 
-*(Der Stand vom 30.07.2026, zur Einordnung: Erstlauf 32 / 3 % / Median 462, Veteran 5800 163 / 100 % / Median 4 728 bei Rangverteilung 11 Col 40.)*
+> **⚠ Die Weite der beiden Veteranen steht unter demselben Vorbehalt.** Beim mittleren Bot liegt Spanien bei 47 % — dieselbe Lage, dieselbe Kippgefahr. Seine 93 sind erst belastbar, wenn sie gegen den Mittelwert gehalten sind.
+
+*(Der Stand vom 30.07.2026, zur Einordnung: Erstlauf 32 / 3 % / Median 462, Veteran 5800 163 / 100 % / Median 4 728 bei Rangverteilung 11 Col 40. **Die Erstlauf-Weite ist seit drei Messungen unverändert 32** — die 60 vom Vormittag des 31.07. war der gekippte Median, siehe unten.)*
 
 > ### ⚠ Der eigentliche Befund: Das Spiel hat keine Mitte mehr
 >
