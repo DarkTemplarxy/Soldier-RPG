@@ -299,6 +299,17 @@ function starteKampf(n){
     zeigeAnmarsch(n);
     return;
   }
+  /* ── Das Briefing steht zwischen Anmarsch und Gefecht ──
+     Der Zustand liegt in `LAUF`, nicht in `S`: Wer mitten darin aufhört,
+     steht wieder davor — dieselbe Regel wie beim Gefechts-Ereignis, und aus
+     demselben Grund. Ein Befehl, den man durch Beenden und Fortsetzen
+     abschütteln kann, ist kein Befehl. */
+  if(S.rang >= 9 && n.haerte > 1){
+    if(!LAUF.briefing || LAUF.briefing.id !== n.id)
+      LAUF.briefing = {id:n.id, teil:1, wirkung:{haltung:0}, log:[]};
+    if(LAUF.briefing.teil === 1){ laufSichern(); zeigeBriefing(n); return; }
+    if(LAUF.briefing.teil === 2){ laufSichern(); zeigeAntreten(n); return; }
+  }
   S.anmarschGesehen = null;
   setzeKampf({runde:1, geladen:true, deckung:false, feindMoral:n.feindMoral,
               eigen:100, vorn:false, geschlossen:0, lueckeGelobt:false,
@@ -329,8 +340,221 @@ function starteKampf(n){
               verbaende: S.rang>=12 ? verbaendeStart() : null,
               befehle:[], meldungen:[], uhr:0,
               protokoll:['Das Gefecht beginnt.'], zielt:false, verluste:0});
+  /* Was am Vorabend gesagt wurde, steht am Morgen in der Haltung. Einmal
+     angewandt und dann vergessen — das Briefing gilt für dieses Gefecht. */
+  briefingWirken();
   laufSichern();
   zeigeKampf(n.intro);
+}
+
+/* ══════════════════ DAS BRIEFING AM VORABEND ══════════════════
+
+   **Der Auftrag war ein Zettel.** Er stand über dem Gefecht, kam aus dem
+   Nichts und hatte kein Gesicht — dabei ist er das Einzige im Spiel, das
+   jemand einem *sagt*. Ab dem Capitaine wird daraus eine Szene mit zwei
+   Hälften, und die Kette läuft durch beide:
+
+     Am Abend   du wirst befohlen  — annehmen · nachfragen · widersprechen
+     Am Morgen  du befiehlst       — die Männer stehen, und du gibst es weiter
+
+   **Das ist die erste Stelle im Spiel, an der man auf beiden Seiten desselben
+   Tisches sitzt.** Man bekommt einen Befehl und gibt ihn weiter, in derselben
+   Szene, und merkt dabei, wie wenig davon übrig bleibt.
+
+   **Nur vor Höhepunkten** (`haerte > 1`), also ein- bis zweimal je Kapitel.
+   Vor jedem Gefecht wäre es fünfmal dieselbe Frage, und eine Frage, die sich
+   abnutzt, ist keine mehr — dieselbe Überlegung wie die Obergrenze von zwei
+   Ereignissen je Gefecht. Dass die Männer eigens zusammengerufen werden, ist
+   der Grund: Es geschieht, weil dieser Tag zählt. Historisch wurde der
+   Tagesbefehl vor den großen Schlachten den angetretenen Regimentern
+   vorgelesen; vor einem gewöhnlichen Gefecht las niemand irgendetwas vor. */
+
+/* Wer über dir sitzt — dieselbe Kette wie bei der Fürsprache, nur dienstlich.
+   Ab Rang 12 gibt es kein Gesicht mehr: Das Korps ist eine Unterschrift. */
+function briefingVon(){
+  if(S.rang >= 12) return null;
+  if(S.rang >= 10) return 'grandmaison';
+  return 'vernet';
+}
+
+/* ── Erste Hälfte: du wirst befohlen ──
+   Der Auftrag steht hier zum ersten Mal als gesprochener Satz, nicht als
+   Zeile über der Karte. Drei Antworten, und keine davon ist folgenlos. */
+function zeigeBriefing(n){
+  const wer = briefingVon();
+  const auf = auftragFuer(n), zwei = auftragZweiter(n);
+  const name = wer ? personName(wer) : 'Der Adjutant des Korps';
+  const ort = S.rang>=12 ? 'Im Zelt des Korpskommandeurs, nach elf.'
+            : S.rang>=10 ? 'In einem Bauernhaus, an einem Tisch mit einer Karte darauf.'
+            : 'Im Quartier des Bataillonschefs. Es riecht nach nassem Tuch und Talg.';
+  const zeile = a => a ? `<div class="wirkung"><span>Auftrag ${esc(auftragVon(a))}</span>${esc(a.text)}</div>` : '';
+  const opt = [
+    wahlZeile('I','Verstanden','Kein Rückfragen · man wiederholt einen Befehl nicht',
+      `briefingTun('ja')`,{}),
+    wahlZeile('II','Nachfragen, was gemeint ist',
+      `Taktik ${wert('taktik')} gegen 40 · ${aussicht('taktik',40)} % · er hat wenig Zeit`,
+      `briefingTun('frage')`,{}),
+    wahlZeile('III','Sagen, dass es so nicht geht',
+      `Taktik ${wert('taktik')} gegen 55 · ${aussicht('taktik',55)} % · Fürsprache steht auf dem Spiel`,
+      `briefingTun('nein')`,{risk:true})
+  ].join('');
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}
+      ${bogen({ort:'Befehlsausgabe · '+((n.ort)||''), datum:n.datum},
+        `<div class="prose">
+           <p>${esc(ort)} ${esc(name)} hat die Karte schon gedreht, als du hereinkommst, und redet weiter, während du dich setzt.</p>
+           <p>${S.rang>=12
+             ? 'Was er sagt, ist zwei Tage alt und stammt von jemandem, der weiter weg ist als er. Er weiß das. Er sagt es trotzdem, weil es unterschrieben ist.'
+             : 'Er sagt es zweimal, mit denselben Worten, und sieht dabei nicht auf. Beim zweiten Mal begreifst du, dass er es selbst so bekommen hat.'}</p>
+         </div>
+         ${zeile(auf)}${zeile(zwei)}
+         ${zwei?`<div class="ergebnis schlecht">Zwei Befehle, und sie schließen einander aus. Beide sind unterschrieben, beide kommen von jemandem, der mehr weiß als du.</div>`:''}`,
+        ['Was sagst du?','Am Vorabend · morgen stehen die Männer'],
+        opt, 'Ein Befehl wird nicht verhandelt, nur entgegengenommen')}
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+function briefingTun(id){
+  const n = KAPITEL[LAUF.node], b = LAUF.briefing, wer = briefingVon();
+  let text, fein = '';
+  if(id === 'ja'){
+    text = 'Du sagst, was man sagt, und stehst auf. Draußen ist es kalt, und irgendwo singt jemand, der morgen nicht mehr singen wird.';
+    fein = 'Nichts gewonnen, nichts verloren';
+  }
+  else if(id === 'frage'){
+    const p = probe('taktik', 40);
+    if(p.erfolg){
+      b.wirkung.haltung += 6;
+      text = 'Du fragst nach dem einen Punkt, an dem der Befehl unklar ist, und er hält an. Dann nimmt er den Zirkel und zeigt es dir. Es ist eine Kleinigkeit, und sie wird morgen den Unterschied machen, weil du weißt, wo du stehen sollst.';
+      fein = 'Deine Leute stehen morgen fester · Haltung +6';
+    } else {
+      text = 'Du fragst, und er sieht dich an, als hättest du nach dem Wetter gefragt. „Das steht da." Es steht da. Es steht nur nicht so da, dass man es versteht.';
+      fein = 'Nichts gewonnen · er merkt es sich';
+      if(wer) gunstGeben(wer, -1);
+    }
+  }
+  else {
+    const p = probe('taktik', 55);
+    if(p.erfolg){
+      b.wirkung.haltung += 4; S.ruf += 4;
+      text = 'Du sagst, dass die Stellung nicht zu halten ist, und sagst auch, warum. Er hört zu, was länger dauert, als dir lieb ist. Dann ändert er einen Satz. Der Befehl bleibt derselbe, aber die Uhrzeit ist eine andere, und die Uhrzeit ist alles.';
+      fein = 'Ruf +4 · Haltung +4';
+      if(wer) gunstGeben(wer, 1);
+    } else {
+      text = 'Du sagst es, und er lässt dich ausreden. Danach sagt er den Befehl noch einmal, Wort für Wort, ohne eine Silbe zu ändern, und wartet, bis du bestätigst. Zwei andere im Raum sehen weg.';
+      fein = 'Fürsprache −2';
+      if(wer) gunstGeben(wer, -2);
+    }
+  }
+  b.teil = 2; b.log.push(text + (fein?` <span class="fein">${fein}</span>`:''));
+  laufSichern();
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}
+      ${bogen({ort:'Befehlsausgabe · '+((n.ort)||''), datum:n.datum},
+        `<div class="prose"><p>${text}</p></div>
+         ${fein?`<div class="wirkung"><span>Was daraus wurde</span>${fein}</div>`:''}`,
+        ['','' ],
+        wahlZeile('·','Zurück zur Kompanie','Morgen früh stehen sie','starteKampf(KAPITEL[LAUF.node])',{klasse:'weiter'}),
+        'Am Vorabend')}
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+/* ── Zweite Hälfte: du befiehlst ──
+   **Die Männer werden zusammengerufen, und das geschieht nicht jeden Tag.**
+   Genau darin liegt das Gewicht: Ein Appell vor einem gewöhnlichen Gefecht
+   gibt es nicht; wer antreten lässt, sagt damit schon, was für ein Tag das
+   wird — bevor er ein Wort gesagt hat. */
+function zeigeAntreten(n){
+  const kopf = S.rang>=12 ? 'Die Regimenter stehen im Viereck, so weit man sehen kann.'
+             : S.rang>=10 ? 'Vier Kompanien im Karree, und in der Mitte ist Platz für einen.'
+             : 'Hundertzwanzig Mann in drei Gliedern. Der Fourrier hat die Liste unter dem Arm.';
+  const opt = [
+    wahlZeile('I','Den Befehl vorlesen, wie er lautet',
+      'Wort für Wort · sie hören, was du gehört hast',`antretenTun('wort')`,{}),
+    wahlZeile('II','Es in eigenen Worten sagen',
+      `Autorität ${wert('autoritaet')} gegen 45 · ${aussicht('autoritaet',45)} %`,
+      `antretenTun('eigen')`,{}),
+    wahlZeile('III','Den Teil weglassen, der ihnen die Nacht nimmt',
+      'Sie stehen morgen besser · und irgendwann merken sie es',`antretenTun('weg')`,{risk:true})
+  ].join('');
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}
+      ${bogen({ort:'Antreten · '+((n.ort)||''), datum:n.datum},
+        `<div class="prose">
+           <p>${esc(kopf)} Es ist noch nicht hell. Sie sind zusammengerufen worden, und sie wissen, was das heißt — man ruft niemanden zusammen, um ihm zu sagen, dass nichts ist.</p>
+           <p>Was du jetzt sagst, ist das Letzte, was die meisten von dir hören, bevor es losgeht.</p>
+         </div>`,
+        ['Was sagst du ihnen?','Sie stehen und warten · es dauert, solange du willst'],
+        opt, 'Man ruft niemanden zusammen, um ihm zu sagen, dass nichts ist')}
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+function antretenTun(id){
+  const n = KAPITEL[LAUF.node], b = LAUF.briefing;
+  let text, fein = '';
+  if(id === 'wort'){
+    b.wirkung.haltung += 2;
+    text = 'Du liest, was auf dem Blatt steht, und das Blatt ist in einer Sprache geschrieben, die niemand so redet. Sie hören zu. Als du fertig bist, steht einer im zweiten Glied und sagt halblaut, was es heißt, und der neben ihm nickt.';
+    fein = 'Haltung +2 · sie wissen, woran sie sind';
+  }
+  else if(id === 'eigen'){
+    const p = probe('autoritaet', 45);
+    if(p.erfolg){
+      b.wirkung.haltung += 10; S.kameradschaft = Math.min(100, S.kameradschaft + 4);
+      text = 'Du sagst es in drei Sätzen, und im dritten kommt das Wort vor, auf das sie gewartet haben, ohne es zu wissen. Es wird nicht gejubelt. Es wird nur stiller, und die Reihen richten sich von allein.';
+      fein = 'Haltung +10 · Kameradschaft +4';
+    } else {
+      text = 'Du fängst zweimal an. Beim zweiten Mal hörst du dich selbst reden und merkst, dass du zu lange brauchst. Am Ende sagst du doch, was auf dem Blatt steht, nur schlechter.';
+      fein = 'Nichts gewonnen';
+    }
+  }
+  else {
+    b.wirkung.haltung += 14; b.gelogenTat = true;
+    text = 'Du lässt weg, dass die Stellung gehalten werden soll, bis Entsatz kommt, und dass niemand gesagt hat, wann. Sie hören einen Auftrag, der zu schaffen ist. Sie treten weg wie Männer, die etwas vorhaben.';
+    fein = 'Haltung +14 · und sie werden es morgen selbst herausfinden';
+  }
+  b.teil = 3; b.log.push(text + (fein?` <span class="fein">${fein}</span>`:''));
+  laufSichern();
+  app.innerHTML = `<div class="stage">${verlauf()}
+    <div>${wegband(n)}
+      ${bogen({ort:'Antreten · '+((n.ort)||''), datum:n.datum},
+        `<div class="prose"><p>${text}</p></div>
+         <div class="wirkung"><span>Was daraus wurde</span>${fein}</div>`,
+        ['',''],
+        wahlZeile('·','Antreten','Danach gibt es keinen Weg zurück, der nicht Ruf kostet',
+          'starteKampf(KAPITEL[LAUF.node])',{klasse:'weiter'}),
+        'Es ist noch nicht hell')}
+    </div>${seitenleiste()}</div>`;
+  kopfzeile();
+}
+
+function briefingWirken(){
+  const b = LAUF.briefing;
+  if(!b || !b.wirkung) return;
+  const h = b.wirkung.haltung || 0;
+  if(h){
+    /* **Zwei Wirkungen, und die zweite ist die wichtigere.** Der sichtbare
+       Zuschlag auf die Haltung zeigt, dass etwas geschehen ist — er verpufft
+       aber bei einem Capitaine, dessen Kompanie ohnehin mit 100 antritt, und
+       genau für den ist die Szene gebaut. Der Prüfstand hat das sofort
+       gemeldet: dreimal Sektion 100, egal was gesagt wurde.
+
+       Deshalb zusätzlich ein **Faktor auf die Zehrung** des ganzen Gefechts.
+       „Sie stehen fester" heißt nicht, dass mehr von ihnen dastehen, sondern
+       dass weniger von ihnen weggehen — und das ist auch bei voller Stärke
+       sichtbar. Boden bei 0,72: Ein Briefing ersetzt keine Deckung. */
+    if(K.kompanien) K.kompanien.forEach(k=>{ k.haltung = Math.min(100, k.haltung + h); });
+    else if(K.sektion != null) sektionSetzen(sektionWert() + h);
+    /* `h/60` statt `h/50`, damit die Wahlen sich unterscheiden: Mit dem
+       engeren Nenner liefen beide mutigen Wege in den Boden und waren
+       dadurch gleich viel wert — eine Wahl, deren Zweige dasselbe ergeben,
+       ist keine. Jetzt 0,97 · 0,73 · 0,70 statt zweimal 0,72. */
+    K.briefingFest = Math.max(0.70, 1 - h/60);
+  }
+  b.wirkung = null;                       // einmal, dann vergessen
 }
 
 /* ══════════════════ DER DRITTE SICHTBARE BRUCH: DAS BATAILLON ══════════════════
@@ -2490,7 +2714,7 @@ function kampfAktion(id){
        kein gut ausgebildeter Zug, sondern ein unsichtbarer. */
     const guete2 = Math.max(0.45, 1 - (S.sektionGuete||0)/180);
     K.sektion = Math.max(0, K.sektion - (2 + Math.random()*3) * (1 + guete*0.15) * guete2
-      * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1));
+      * Math.max(0, K.feindMoral/n.feindMoral) * (geschlossen?0.5:1) * (K.briefingFest||1));
     /* Der gezogene Degen hält den Zug zusammen — nicht heil, aber beisammen.
        Der Boden bei 30 ist die Zusage des Knopfes und zugleich seine Grenze:
        Er verhindert den Zusammenbruch, nicht die Verluste. */
@@ -2506,8 +2730,8 @@ function kampfAktion(id){
     const druck = Math.max(0, K.feindMoral/n.feindMoral) * (1 + feindGuete(n)*0.15);
     K.kompanien.forEach((k,i)=>{
       const vorn = (i === K.vorhut);
-      k.bestand = Math.max(0, k.bestand - (vorn ? 5+Math.random()*5 : 1+Math.random()*2) * druck);
-      k.haltung = Math.max(0, k.haltung - (vorn ? 6+Math.random()*5 : 2+Math.random()*2) * druck);
+      k.bestand = Math.max(0, k.bestand - (vorn ? 5+Math.random()*5 : 1+Math.random()*2) * druck * (K.briefingFest||1));
+      k.haltung = Math.max(0, k.haltung - (vorn ? 6+Math.random()*5 : 2+Math.random()*2) * druck * (K.briefingFest||1));
       /* Eine Kompanie, deren Haltung fällt, geht von allein zurück — dann
          steht der Abschnitt offen, und das kostet den Rest. */
       if(k.haltung <= 0 && vorn){ K.vorhut = null; k.vorn = false;
@@ -2955,6 +3179,20 @@ function kampfEnde(sieg, letzterText){
      Browserfenster mit. Das wäre die Sorte Fehler, die man erst nach dreißig
      Messläufen bemerkt. */
   const erg = Object.assign({}, sieg ? n.sieg : n.niederlage);
+
+  /* ── Was du am Morgen weggelassen hast ──
+     **Sie finden es heraus, und zwar am selben Tag.** Der Vorteil war echt —
+     vierzehn Punkte Haltung sind der stärkste Einzeleffekt, den das Briefing
+     hergibt —, und er ist geborgt: Wer ihnen den Teil verschwiegen hat, auf
+     den es ankam, hat ihn ihnen nicht erspart, sondern nur verschoben.
+
+     **Nur bei verlorenem Gefecht.** Geht es gut, merkt es niemand, und das ist
+     die eigentliche Bosheit daran: Es ist keine Strafe, sondern eine Wette. */
+  const gelogen = LAUF.briefing && LAUF.briefing.id === n.id && LAUF.briefing.gelogenTat;
+  if(gelogen && !sieg){
+    S.kameradschaft = Math.max(0, S.kameradschaft - 12);
+    erg.text = (erg.text||'') + ' <br><br>Am Abend steht einer vor dir, den du seit Boulogne kennst, und fragt, seit wann bekannt war, dass kein Entsatz kommt. Er fragt es ruhig. Das ist das Schlimmere.';
+  }
 
   /* Der Rückzug kostet Blut — je mehr vom Feind noch steht, desto mehr.
      Ohne diese Zeilen war Verlieren gratis: Wer unter 40 % Leben fiel, kniete

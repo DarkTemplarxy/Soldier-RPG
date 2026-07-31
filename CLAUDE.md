@@ -2169,6 +2169,29 @@ Dazu **Mündungsblitze** nach einer Salve und ein Schleier, der ab Runde 5 das h
 
 > **Regel: Wer die Grundfarbe umdreht, dreht die Schriftglättung mit um.** Beim Umbau auf Pergament sind vierundvierzig Zeichenfarben in `STICH` zusammengezogen worden — die zwei Zeilen, die *wie* Text gerendert wird, sind dabei stehen geblieben, weil sie in keiner Farbtabelle stehen.
 
+### Das Briefing am Vorabend (`zeigeBriefing`, `zeigeAntreten` in `src/kampf.js`)
+
+**Der Auftrag war ein Zettel.** Er stand über dem Gefecht, kam aus dem Nichts und hatte kein Gesicht — dabei ist er das Einzige im Spiel, das jemand einem *sagt*. Ab dem **Capitaine** wird daraus eine Szene mit zwei Hälften:
+
+| | |
+|---|---|
+| **Am Abend** | Du wirst befohlen — *Verstanden* · *Nachfragen* (Taktik 40) · *Sagen, dass es so nicht geht* (Taktik 55) |
+| **Am Morgen** | Du befiehlst — *vorlesen, wie er lautet* · *in eigenen Worten* (Autorität 45) · *den Teil weglassen, der ihnen die Nacht nimmt* |
+
+**Das ist die erste Stelle im Spiel, an der man auf beiden Seiten desselben Tisches sitzt.** Man bekommt einen Befehl und gibt ihn weiter, in derselben Szene, und merkt dabei, wie wenig davon übrig bleibt. Wer über dir sitzt, hängt am Rang — Rang 9 der Chef de bataillon, 10 und 11 Grandmaison, **ab 12 niemand mehr mit Gesicht:** Das Korps ist eine Unterschrift, und was sie anordnet, ist zwei Tage alt.
+
+**Nur vor Höhepunkten** (`haerte > 1`), also ein- bis zweimal je Kapitel. Vor jedem Gefecht wäre es fünfmal dieselbe Frage — dieselbe Überlegung wie die Obergrenze von zwei Ereignissen je Gefecht. **Dass die Männer eigens zusammengerufen werden, ist der Grund:** Es geschieht, weil dieser Tag zählt, und ein Appell vor einem gewöhnlichen Gefecht gibt es nicht. Historisch wurde der Tagesbefehl vor den großen Schlachten den angetretenen Regimentern vorgelesen.
+
+**Der Zustand liegt in `LAUF.briefing`, nicht in `S`** — wer mitten darin aufhört, steht wieder davor. Dieselbe Regel wie beim Gefechts-Ereignis: Ein Befehl, den man durch Beenden und Fortsetzen abschütteln kann, ist keiner.
+
+> **⚠ Der Zuschlag auf die Haltung allein war wirkungslos, und der Prüfstand hat es sofort gemeldet: dreimal Sektion 100, egal was gesagt wurde.** Eine Kompanie tritt mit 100 an, also verpufft jeder Zuschlag genau bei dem Rang, für den die Szene gebaut ist. Deshalb wirkt das Briefing zweifach: der sichtbare Zuschlag **und** ein Faktor auf die Zehrung des ganzen Gefechts (`K.briefingFest`, `1 − h/60`, Boden 0,70). *„Sie stehen fester"* heißt nicht, dass mehr von ihnen dastehen, sondern dass weniger von ihnen weggehen — und das ist auch bei voller Stärke sichtbar.
+>
+> **Der Nenner ist 60 und nicht 50, damit die Wahlen sich unterscheiden.** Mit 50 liefen beide mutigen Wege in den Boden und waren dadurch gleich viel wert; jetzt stehen 0,97 · 0,73 · 0,70. **Eine Wahl, deren Zweige dasselbe ergeben, ist keine.**
+
+**Wer den Teil weglässt, geht eine Wette ein.** Vierzehn Punkte Haltung sind der stärkste Einzeleffekt der Szene — und er ist geborgt: Bei **verlorenem** Gefecht kostet es Kameradschaft −12 und einen Satz, den niemand laut sagt. Geht es gut, merkt es keiner. Das ist die eigentliche Bosheit daran: keine Strafe, sondern eine Wette.
+
+> **⚠ Ungemessen.** Der Effekt trifft die Ränge 9 aufwärts, also beide Veteranen. **Der Bot nimmt dabei den sicheren Weg** — er klickt den ersten Knopf, also *Verstanden* und *vorlesen*, und landet bei Faktor 0,93. Die Messung wird die Szene deshalb kaum sehen; wer sie wirklich prüfen will, bringt dem Bot zuerst die drei Zweige bei.
+
 ### Die Beförderungsurkunde kam nach zwei Dritteln aller Gefechte nicht (31.07.2026)
 
 **`feldBefoerderung()` merkt den Bescheid in `S.bescheidOffen`, und ausgestellt hat ihn eine einzige Zeile — die in `zeigeLager()`.** Ausgezählt über alle elf Kapitel:

@@ -5,6 +5,22 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Das Briefing am Vorabend
+
+**Der Auftrag war ein Zettel ohne Gesicht.** Ab Rang 9 wird daraus eine Szene mit zwei Hälften, nur vor Höhepunkten (`haerte > 1`): Am Abend wirst du befohlen (Verstanden · Nachfragen, Taktik 40 · Widersprechen, Taktik 55), am Morgen stehen die Männer und du gibst es weiter (vorlesen · in eigenen Worten, Autorität 45 · den Teil weglassen).
+
+Wer über dir sitzt, hängt am Rang: 9 der Chef de bataillon, 10–11 Grandmaison, **ab 12 niemand mit Gesicht** — das Korps ist eine Unterschrift.
+
+**Wirkung, zweifach und je Gefecht:** Haltung +2/+10/+14 **und** ein Faktor auf die Zehrung (`K.briefingFest = 1 − h/60`, Boden 0,70). **Der Zuschlag allein war wirkungslos** — eine Kompanie tritt mit 100 an, der Prüfstand meldete dreimal Sektion 100. Der Nenner ist 60 und nicht 50, weil sonst beide mutigen Wege in den Boden liefen und gleich viel wert waren.
+
+**Wer weglässt, wettet:** Bei verlorenem Gefecht Kameradschaft −12 und ein Satz am Abend. Bei gewonnenem merkt es niemand.
+
+Zustand in `LAUF.briefing` — wer mitten darin aufhört, steht wieder davor. Kein Fassungswandler nötig (Feld liegt am Lauf, nicht am Mann).
+
+**Gegengeprüft:** sechs Wege auf zwei Rängen, dazu die Gegenprobe, dass vor einem gewöhnlichen Gefecht nichts kommt. **Balance ungemessen** — der Bot nimmt den sicheren Weg (Faktor 0,93) und sieht die Szene kaum.
+
+---
+
 ## 2026-07-31 — Zwei Wege zu einer Auszeichnung, die nicht durch das Gefecht führen
 
 **Alle zehn bisherigen Orden hingen an derselben Achse: gesehen worden zu sein, im Gefecht, im Stehen.** Wer aushält, bekam nichts; wer gut verwaltet, auch nicht.
