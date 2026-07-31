@@ -176,63 +176,33 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
-## 9 · ✓ Erledigt: Es war das Messgerät, nicht das Spiel
+## 9 · ✓✓ Erledigt und entschieden: Italien bleibt das Lehrstück
 
-> **Der Befund lautete „der Erstläufer kommt zu weit" — Weite 60 statt 32 — und er hat sich in Luft aufgelöst.** Gemessen wurde, wie die eigene Regel es verlangt: Worktree auf `289fa9f`, **derselbe** Prüfstand hineinkopiert, beide Stände über je 80 Läufe.
->
-> | | alt (`289fa9f`) | neu | Vormittag |
-> |---|---|---|---|
-> | **Weite (Median)** | **32** | **32** | **60** |
-> | Ägypten überstanden | 45 % | 49 % | 54 % |
-> | **Mittel der Sterbestation** | **55,3** | **54,2** | — |
-> | Caporal | 68 % | 68 % | 57 % |
-> | Sergent | 53 % | 51 % | 50 % |
-> | Punkte-Median | 492 | 502 | 502 |
->
-> **Der heutige Stand ist nicht leichter als der vom 30.07.2026.** Keine der sieben Verwaltungssitzungen, nicht der Schreibtisch, nicht die Verschlankung des Lagers hat den Einstieg verändert.
->
-> **Warum die Zahl trotzdem sprang:** Die Weite ist ein **Median über eine zweigipflige Verteilung.** Wer in Ägypten fällt, kommt bis rund 32; wer durchkommt, bis rund 120. Der Median greift den Lauf in der Mitte heraus, und die Mitte liegt im **Tal** zwischen den Gipfeln. Kreuzt die Ägypten-Quote die 50 %, kippt er hinüber: 45 % → 32, 49 % → 32, **54 % → 60**. Fünf Punkte Ägypten sind bei achtzig Läufen Rauschen; achtundzwanzig Stationen Weite sehen nach einem Befund aus.
->
-> **Es ist derselbe Fehler, der für den Punkte-Median seit Langem dokumentiert ist — und die Weite ist als dessen Nachfolgerin eingeführt worden, ohne auf dieselbe Schwäche geprüft zu werden.** Behoben im Prüfstand, nicht nur auf dem Papier: `balance.js` druckt jetzt **Mittelwert und Viertel** neben dem Median und meldet `⚠ MEDIAN INSTABIL`, sobald eine Kapitelquote nahe genug an 50 % liegt, um zu kippen.
+**Zwei Fragen steckten in diesem Punkt, und beide sind beantwortet.**
 
-**Was von Punkt 9 stehen bleibt, ist der ältere und härtere Befund: Ägypten ist ein Sieb.** Knapp die Hälfte stirbt dort, und wer durchkommt, kommt weit — das Spiel sortiert an einer Stelle und danach kaum noch. Der empfohlene Hebel ist unverändert die **Härtekurve** (Italien +0, Ägypten +4), nicht der Fertigkeiten-Sockel. **Der Prüfpunkt ist nicht die Weite, sondern die Form der Verteilung:** Sie soll flacher werden — kein Kapitel unter 60 %, keines über 95 %. Verglichen wird ab jetzt über den **Mittelwert**, weil der Median genau an dieser Stelle unbrauchbar ist.
+**a) „Der Erstläufer kommt zu weit" war das Messgerät.** Gegenprobe wie die eigene Regel sie verlangt — Worktree auf `289fa9f`, **derselbe** Prüfstand hineinkopiert, je 80 Läufe:
 
-**Der ursprüngliche Befund vom 30.07.2026, für die Einordnung:**
+| | alt (`289fa9f`) | neu | Vormittag |
+|---|---|---|---|
+| **Weite (Median)** | **32** | **32** | **60** |
+| Ägypten überstanden | 45 % | 49 % | 54 % |
+| **Mittel der Sterbestation** | **55,3** | **54,2** | — |
+| Caporal | 68 % | 68 % | 57 % |
 
-| | |
-|---|---|
-| **Weite** | **32 von 163** |
-| sterben in Ägypten | **47 von 80** |
-| bleiben zeitlebens Fusilier | **33** |
-| erreichen ein Offizierspatent (Rang 7+) | **21 (26 %)** |
-| erreichen den Colonel | **1** — denselben Rang wie der Maximalveteran |
-| Punkte | Median 462 · **Bereich 0–4 348** |
+Der heutige Stand ist nicht leichter. Die Weite ist ein **Median über eine zweigipflige Verteilung**: Wer in Ägypten fällt, kommt bis rund 32, wer durchkommt bis rund 120, und der Median greift das Tal dazwischen heraus. Kreuzt die Ägypten-Quote die 50 %, kippt er. Behoben im Prüfstand — `balance.js` druckt Mittelwert und Viertel und meldet `⚠ MEDIAN INSTABIL`.
 
-**Zwei Zahlen, die sich zu widersprechen scheinen: Caporal 59 % bei einer Weite von 32.** Beide stimmen — sie beschreiben zwei verschiedene Männer. Der mittlere Lauf stirbt in Ägypten; wer Ägypten übersteht, wird Offizier.
+**b) Die Einstiegshürde bleibt, wo sie ist** *(Ansage des Entwicklers, 31.07.2026: „Dann lassen wir es so, dass Italien einfach einfacher ist.")*. Gemessen wurde der Tastversuch `schwierigkeit` Italien **0 → 1**:
 
-**Denn dazwischen liegt fast nichts:**
-
-| Kapitel | überstanden *(von denen, die es erreichen)* |
-|---|---|
-| Italien | 95 % |
-| **Ägypten** | **38 %** |
-| Garnison | 100 % |
-| Austerlitz | 86 % |
-| Jena | 80 % |
-| Eylau | 70 % |
-
-**Ägypten ist keine Stufe, sondern ein Sieb.** Es entscheidet den Lauf, und danach entscheidet kaum noch etwas. Die Spitze eines Erstlaufs liegt bei **4 348 Punkten** — 92 % dessen, was ein Maximalveteran mit 5 800 VP holt. **Ein Erstläufer, der Ägypten übersteht, ist kein Anfänger mehr, sondern ein zweiter Veteran.**
-
-> **Das ist die schärfere Fassung des früheren Befundes.** Er lautete „der Erstläufer klettert zu schnell" und stimmte, war aber die halbe Wahrheit: Er klettert nicht durchgehend zu schnell, sondern **er wird an genau einer Stelle sortiert**, und danach ist alles entschieden. Eine Progression, die aus einem einzigen Wurf besteht, ist keine.
-
-| Hebel | Wo | Was er kostet |
+| | Grundlinie (+0) | **+1** |
 |---|---|---|
-| **Die Härtekurve früher ansetzen** *(empfohlen)* | `schwierigkeit:` je Kampagne in `grundwerte.js` — Italien **+0**, Ägypten **+4** | Sie greift genau dort am schwächsten, wo der Erstläufer lebt und stirbt. Wer sie über die ersten drei Kapitel verteilt, verteilt auch die Sterblichkeit — **und ein Trichter, der verteilt ist, hat eine Mitte** |
-| **Ägypten entschärfen** | `anmarschKosten`, Hitzschlag, Ruhr, Fieber aus Jaffa | Nimmt dem Kapitel seine eigene Regel („Krankheit ist gefährlicher als Kugeln"). **Der falsche Hebel** — das Kapitel ist nicht zu hart, die anderen sind zu weich |
-| **Die Ruf-Schwellen unten anheben** | `LEITER`, Rang 3 steht bei 30 | Trifft den Aufstieg, nicht die Sortierung. Behandelt das Symptom |
-| ~~Den Fertigkeiten-Sockel senken~~ | `FERT_SOCKEL` | **Nicht der Hebel.** Er ist gesetzt und gehört zur Skala |
+| Weite im Mittel | 51 | 62 |
+| Ägypten | 40 % | 56 % |
+| Italien | 96 % | 99 % |
+| Caporal | 65 % | 66 % |
 
-> **Der Prüfpunkt ist nicht die Weite, sondern die Form der Verteilung.** Wer die Härtekurve anhebt, misst die Zeile „Überstanden je Kapitel": Sie soll flacher werden — kein Kapitel unter 60 %, keines über 95 %. **Bleibt ein einzelnes Kapitel bei 38 %, während die anderen bei 80 stehen, hat sich nur der Ort des Siebs verschoben.**
+**Der Lauf fiel nach der Änderung leichter aus als davor** — was ein Punkt mehr Schwierigkeit nicht bewirkt haben kann. Über vier Messungen steht Ägypten bei 45, 49, 40 und 56 %: sechzehn Punkte Spannweite, alles Rauschen. Ein Punkt verschiebt eine Probe um rund einen Prozentpunkt und ist zehnmal kleiner als die Streuung. Die +1 bleibt stehen, weil sie in die richtige Richtung zeigt; wirksam ist sie nicht.
+
+> **Was als Regel bleibt: Italien ist das Lehrstück und darf fast jeden durchlassen. Das Sieb ist Ägypten, und das ist so gewollt.** Wer die Verteilung doch einmal glätten will, braucht eine Größenordnung mehr als einen Punkt (+4 wäre der Ansatz gewesen) und misst dann die **Form** der Verteilung — kein Kapitel unter 60 %, keines über 95 % —, nicht die Weite.
 
 ## 10 · Was „Generalskampagne" heißt — zwei Entwürfe sagen Verschiedenes
 

@@ -2545,9 +2545,17 @@ function ausfuehrungsProbe(schw){
 
 ## Was als Nächstes ansteht
 
-1. **Die Einstiegshürde höher legen.** Der Erstläufer klettert mit Fertigkeiten-Sockel 20 zu schnell — Caporal 65 %, Sergent 53 %, neunmal ein Patent bei einer Weite von 31. Gefordert ist das Gegenteil: *„relativ nutzlos, bzw. ziemlich sicher sterben"*, **nie über den Colonel hinaus**. Der Hebel ist die Härtekurve (Italien +0), nicht der Sockel.
-2. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
+1. **Die höheren Ordensgrade** — der Commandeur ab 1809 und der zweite fremde Orden. In KONZEPT §6 entworfen, nicht gebaut.
+2. **Die Generalskampagnen als Szenarien** — Wagram, Leipzig, Waterloo. Die Freischaltung ab Rang 12 läuft; es fehlen die Szenarien.
 3. **Alles, was in `OFFEN.md` steht.**
+
+> ### ✓ Entschieden am 31.07.2026: Italien bleibt das Lehrstück
+>
+> Punkt 1 dieser Liste lautete jahrelang „die Einstiegshürde höher legen". Gemessen und beantwortet: **Der Erstläufer klettert nicht zu schnell** — die Weite steht über vier Messungen bei 51 bis 62 im Mittel, die Ägypten-Quote bei 40 bis 56 %, der Caporal-Anteil bei 65 bis 68 %. Was nach einem Aufwärtstrend aussah, war der kippende Median (siehe „Die Weite ist ein Median über eine zweigipflige Verteilung").
+>
+> **Der Tastversuch Italien +0 → +1 ist gemessen und bleibt stehen, obwohl er nichts bewirkt:** Ein Punkt verschiebt eine Probe um rund einen Prozentpunkt und ist damit zehnmal kleiner als die Streuung bei achtzig Läufen. *„Dann lassen wir es so, dass Italien einfach einfacher ist"* (Ansage des Entwicklers).
+>
+> **Was daraus als Regel bleibt:** Italien ist das Lehrstück und darf fast jeden durchlassen; das Sieb ist Ägypten, und das ist so gewollt. Wer die Verteilung trotzdem einmal glätten will, braucht **eine Größenordnung mehr als einen Punkt** — +4 wäre der Ansatz gewesen — und misst dann die Form der Verteilung, nicht die Weite.
 
 > **Erledigt am 30.07.2026, in einem Zug** — zwölf zusammenhängende Änderungen, weil keine für sich allein stehen konnte:
 >
