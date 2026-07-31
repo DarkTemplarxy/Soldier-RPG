@@ -1417,18 +1417,33 @@ bessere Werte → kürzere Gefechte → mehr Ruf → schnellere Beförderung
 >
 > **Damit sind alle Zahlen vor dem 29.07.2026 nicht mehr unmittelbar vergleichbar.** Sie bleiben in der Verlaufstabelle stehen und sind dort als Sergent-major-Zahlen zu lesen.
 
-### Gemessen bei 163 Stationen, nach dem Umbau vom 30.07.2026
+### Gemessen bei 163 Stationen, Stand 31.07.2026 — und **drei** Bots statt zwei
 
-**Das ist der gültige Vergleichsmaßstab.** Der Veteran wird seit dem Umbau mit **`VP=5800`** gemessen, nicht mehr mit 400 — ein perfekter Lauf bringt jetzt rund 5 000, und ein Bot mit 400 ist nicht mehr der Veteran, den das Spiel hervorbringt, sondern der aus dem zweiten Lauf.
+**Das ist der gültige Vergleichsmaßstab.** Der Veteran wird mit **`VP=5800`** gemessen, weil ein perfekter Lauf rund 6 000 bringt. Neu dazu: ein **mittlerer Bot mit 1 500 VP** — er ist die einzige der drei Zahlen, die nicht an einem Ende klebt.
 
 | | **Weite** (von 163) | **höchster Rang (Cpt)** | Italien | Caporal | Ägypten | Punkte-Median |
 |---|---|---|---|---|---|---|
-| **Erstlauf ohne Vorrat** *(80 Läufe)* | **32** | **3 %** | 95 % | 59 % | 38 % | 462 |
-| **Veteran 5800 VP** *(40)* | **163** | **100 %** | 100 % | 100 % | 100 % | 4 728 |
+| **Erstlauf ohne Vorrat** *(80 Läufe)* | **60** | **6 %** | 95 % | 57 % | 54 % | 502 |
+| **Veteran 1500 VP** *(40)* | **93** | **55 %** | 100 % | 100 % | 90 % | 1 849 |
+| **Veteran 5800 VP** *(40)* | **163** | **100 %** | 100 % | 100 % | 100 % | 6 046 |
 
-**Beide Berichte melden null Abbrüche** — das ist seit dem 30.07.2026 die erste Zeile, die man liest (siehe „Zwei Fehler im Prüfstand"). Rangverteilung: Erstlauf 1 Fus 33 · 3 Cap 9 · 4 Four 1 · 5 Serg 15 · 6 S-maj 1 · 7 S-Lt 16 · 8 Lt 3 · 9 Cpt 1 · 11 Col 1 · Veteran **11 Col 40**.
+**Alle drei Berichte melden null Abbrüche** — das ist seit dem 30.07.2026 die erste Zeile, die man liest (siehe „Zwei Fehler im Prüfstand").
 
-**Der Abstand ist so groß wie nie** — 132 Stationen und 94 Punkte beim Rang. Die eigene Regel („unter 25 Punkten beim Rang trägt die Leiter nicht") ist mit Abstand erfüllt; die Frage lautet inzwischen umgekehrt, ob der Erstläufer noch genug sieht.
+| Bot | Rangverteilung |
+|---|---|
+| Erstlauf | 1 Fus 33 · 2 Elite 1 · 3 Cap 6 · 5 Serg 8 · **7 S-Lt 19** · 8 Lt 8 · 9 Cpt 5 |
+| **Mitte** | 5 Serg 4 · 7 S-Lt 10 · 8 Lt 4 · **9 Cpt 19** · 11 Col 3 |
+| Maximum | 11 Col 7 · 12 GdB 8 · 13 GdD 4 · **14 Mar 21** |
+
+> **Der Marschallstab ist zum ersten Mal erreicht** — 21 von 40 beim Maximalveteranen, nachdem vorher 40 von 40 beim Colonel standen. Damit schließt sich auch die Ökonomie: „Alles auf 70+" kostet 4 950 VP, ein Spitzenlauf liefert 6 046. Die Kostenkurve war gegen eine Decke geeicht, die bis dahin niemand gesehen hat.
+
+> **Und der Veteran stirbt wieder** — 78 % ganz durch statt 98 %, Russland lässt ihn zu 85 % durch, 27 % seiner Wahlen sind riskante.
+
+**Die drei Stufen trennen sauber, ohne Überholen und ohne Umkehrung** — 60 / 93 / 163 Stationen, 9 Cpt / 11 Col / 14 Mar. Das ist die Progression, auf der das Spiel beruht, und sie stand zuletzt nicht so da.
+
+> **⚠ Der Erstläufer ist zu weit gekommen: Weite 60 statt 32, Ägypten 54 statt 38 %, 40 % mit Patent.** Das läuft Punkt 1 der Liste „Was als Nächstes ansteht" zuwider. **Die 32 sind aber eine Zahl von vorgestern, kein gleichzeitig gemessener Vergleich** — dazwischen liegen sieben Verwaltungssitzungen, der Schreibtisch, die Feuille d'enrôlement, die reifenden Unterstellten und die Verschlankung des Lagers. Wer daran dreht, misst zuerst denselben Stand neu (Worktree auf `289fa9f`, **derselbe** Prüfstand hinein). Steht als Punkt 9 in `OFFEN.md`.
+
+*(Der Stand vom 30.07.2026, zur Einordnung: Erstlauf 32 / 3 % / Median 462, Veteran 5800 163 / 100 % / Median 4 728 bei Rangverteilung 11 Col 40.)*
 
 > ### ⚠ Der eigentliche Befund: Das Spiel hat keine Mitte mehr
 >

@@ -176,9 +176,23 @@ Aus dem Entwurfspaket, Bündel 5. **Keines davon ist ein Fehler** — sie brauch
 
 ---
 
-## 9 · Das Spiel hat keine Mitte — Ägypten ist ein Sieb *(gemessen, größte offene Frage)*
+## 9 · Das Sieb ist schwächer geworden, und der Erstläufer kommt zu weit *(neu gemessen 31.07.2026)*
 
-**80 Läufe, Erstlauf ohne Vorrat, vorsichtig, reparierter Prüfstand, null Abbrüche:**
+> **⚠ Die Zahlen dieses Punktes haben sich bewegt, und zwar in die falsche Richtung.** Gemessen mit demselben Prüfstand, 80 Läufe, null Abbrüche:
+>
+> | | 30.07. | **31.07.** |
+> |---|---|---|
+> | **Weite** | 32 von 163 | **60 von 163** |
+> | Ägypten überstanden | 38 % | **54 %** |
+> | sterben in Ägypten | 47 von 80 | **35 von 80** |
+> | Patent erreicht (Rang 7+) | 26 % | **40 %** |
+> | Punkte-Median | 462 | 502 |
+>
+> **Das Sieb ist breiter geworden — Ägypten 35, Spanien 9, Eylau 9, Russland 8, Jena 8, Austerlitz 7 —, aber es siebt insgesamt zu wenig.** Der Trichter hat jetzt die Form, die Punkt 9 verlangt hat, und liegt dabei zu tief: Jeder Zweite wird Sergent, zwei von fünf bekommen ein Patent. Das widerspricht der Ansage *„relativ nutzlos, bzw. ziemlich sicher sterben"*.
+>
+> **Woran es liegt, ist ungemessen und darf nicht geraten werden.** Zwischen beiden Messungen liegen die sieben Verwaltungssitzungen, der Schreibtisch, die Feuille d'enrôlement, die reifenden Unterstellten und die Verschlankung des Lagers. Erster Verdacht ist die Verschlankung — weniger Lagerknöpfe heißt für einen Bot, der nach Abstand rechnet, seltener eine schlechte Wahl. **Der Messweg steht in der eigenen Regel:** Worktree auf `289fa9f`, **denselben** Prüfstand hinein, 80 Läufe, dann vergleichen. Gegen eine Zahl von vorgestern zu vergleichen ist bei einem Projekt, das gleichzeitig Inhalt und Regeln ändert, wertlos.
+
+**Der ursprüngliche Befund vom 30.07.2026, für die Einordnung:**
 
 | | |
 |---|---|
@@ -249,47 +263,56 @@ Das Ziel *„alles auf 70+"* kostet 4 950 VP.
 
 ---
 
-## 11 · Der Veteran steht bei Colonel und hat keinen Widerstand mehr
+## 11 · ✓ Erledigt: Die Decke bei Colonel ist gefallen
 
-**Gemessen mit repariertem Prüfstand, `VP=5800`, 40 Läufe, vorsichtig:**
+**Gemessen am 31.07.2026, `VP=5800`, 40 Läufe, vorsichtig — gegen die Zahlen, die hier vorher standen:**
 
-| | |
-|---|---|
-| Weite | **163 von 163** |
-| Rangverteilung | **11 Col 40** — alle vierzig, keiner darüber, keiner darunter |
-| Ganz durch | **39 (98 %)** |
-| Gestorben | **1**, in Russland |
-| Punkte | Median 4 728 · Bereich 3 258–4 808 |
+| | vorher | **jetzt** |
+|---|---|---|
+| Rangverteilung | **11 Col 40** — alle vierzig | **11 Col 7 · 12 GdB 8 · 13 GdD 4 · 14 Mar 21** |
+| Ganz durch | 98 % | **78 %** |
+| Weite | 163 | 163 |
+| Punkte | Median 4 728 | **Median 6 046** |
 
-**Zwei Befunde, und sie ziehen in verschiedene Richtungen.**
+**Beide Teilbefunde sind erledigt, und zwar von verschiedenen Änderungen.**
 
-**a) Die Decke sitzt bei Rang 11.** Der Auftrag-Fix hat sie von 9 auf 11 gehoben — das war sein Zweck und er hat gewirkt. Aber die Ansage lautet *„dass man als Veteran mit vielen VP General werden kann"*, und Général de brigade ist **Rang 12**. Vierzig von vierzig bleiben Colonel.
+**a) Die Decke** lag nicht an einer zu hohen Schwelle, sondern an vier Sperren in Reihe (siehe `CLAUDE.md`, „Vier Sperren hintereinander") — zuletzt daran, dass Rang 14 ein Feld verlangte, das nirgends gesetzt wird. Die **Protektion eines Marschalls** hat es ersetzt: Der Marschallstab hängt jetzt an einem Mann, den man sich mit Colonel aussucht. **Der Maximalveteran erreicht ihn in 21 von 40 Läufen.**
 
-| Was Rang 12 verlangt | Wo es klemmt |
-|---|---|
-| Ruf 480 | erreicht ein Maximalveteran mühelos (er kommt mit ~690 an) |
-| Grandmaison ≥ 5 | **der Verdächtige.** Er ist Patron für 10–13; die Fürsprache muss über vier Stufen reichen |
-| 3 Bulletins | ungeprüft — `S.bulletins` wird nur von der obersten Sichtbarkeitsstufe gefüttert |
+**b) „Kein Widerstand mehr"** ist mit 78 % statt 98 % erledigt. Er stirbt jetzt — Russland lässt ihn zu 85 % durch, Frankreich zu 94 % —, und 27 % seiner Wahlen sind riskante.
 
-> **Wer das anfasst, liest zuerst den Hebel aus, nicht das Ergebnis.** Gebraucht wird eine Zeile, die je Lauf `S.ruf`, `gunst('grandmaison')` und `S.bulletins` am Ende ausgibt — dann steht dort, welche der drei Schranken bindet. Dieselbe Lektion wie beim stummen Güte-Leck und beim Auftrag, der den falschen Mann fütterte: **Dreimal hintereinander war die vermutete Ursache nicht die wirkliche.**
-
-**b) 98 % ganz durch ist kein Erfolg, sondern eine Warnung.** Ein Mann, der elf Feldzüge und einundvierzig Gefechte übersteht, ohne dass ihn irgendetwas ernsthaft bedroht, hat keine Entscheidungen mehr — und **die eigene Regel sagt, dass eine Quote nahe 100 % zuerst verdächtig ist.** Hier ist sie echt (der Prüfstand ist repariert, der Bericht ist in sich stimmig), aber sie heißt: Der Maximalveteran hat den Trichter verlassen.
-
-Das ist die Kehrseite von Punkt 9. **Beide Enden der Progression sind zu flach** — der Erstläufer klettert zu schnell, der Veteran stirbt gar nicht mehr —, und beide hängen an derselben Stelle: Die Härtekurve endet bei +20, die Werte gehen bis 100. **Wer eines von beiden anfasst, misst das andere mit.**
+> **Was daran offen bleibt, ist eine Entwurfsfrage und keine Messung:** Ob **53 % Marschall** für den Maximalveteranen richtig sitzt. Historisch waren es sechsundzwanzig in zwölf Jahren; im Spiel ist es der Vorrat eines vollkommenen Laufs. Der Hebel wäre `patronMacht` oder die Bulletin-Schwelle von Rang 14 — **nicht die Ruf-Schwelle**, die ist zu 100 % erfüllt und trennt nichts.
 
 ---
 
-## 12 · Rang 12 ist die nächste Wand — welche der drei Schranken bindet, ist ungemessen
+## 12 · ✓ Erledigt: Welche Schranke bindet — jetzt lesbar statt geraten
 
-**Gemessen: 40 von 40 Maximalveteranen enden als Colonel (Rang 11).** Der Auftrag-Fix hat die Decke von 9 auf 11 gehoben; die Ansage lautet aber *„dass man als Veteran mit vielen VP General werden kann"*, und Général de brigade ist Rang 12.
+**Die verlangte Zeile ist gebaut** und liest inzwischen das Richtige. Die erste Fassung fragte `gunst('grandmaison')` — **ein Name statt einer Rolle**, und damit den Falschen: Grandmaison beurteilt bis Rang 11, seit der Protektion entscheidet ab 12 der gewählte Marschall. Gemeldet wurde `Grandmaison 3 · 20 % erfüllt`, während 33 von 40 Läufen Rang 12 überschritten hatten.
 
-| Was Rang 12 verlangt | Stand |
-|---|---|
-| Ruf 480 | erreicht er mühelos — er kommt mit rund 690 an |
-| Grandmaison ≥ 5 | **der Verdächtige.** Er ist Patron für 10 bis 13; dieselbe Fürsprache muss über vier Stufen reichen |
-| 3 Bulletins | ungeprüft — `S.bulletins` füttert nur die oberste Sichtbarkeitsstufe |
+Beurteiler, Sprosse und Schwellen kommen jetzt aus der `LEITER`; gezählt werden nur Läufe, die noch eine Sprosse vor sich hatten. Damit trägt die Zeile jeden Ausbaustand:
 
-> **Der Messweg steht fest und ist billig:** eine Zeile in `balance.js`, die je Lauf `S.ruf`, `gunst('grandmaison')` und `S.bulletins` am Ende ausgibt. Dann steht dort, welche der drei bindet. **Erst auslesen, dann drehen** — an einem Tag war dreimal hintereinander die vermutete Ursache nicht die wirkliche (Güte-Leck, Grandmaisons eigene Rangvoraussetzung, der Auftrag an Vernet).
+```
+Erstläufer      Rang  3 · Ruf 10/30 33 % · Martel 4/4 50 %
+Maximalveteran  Rang 14 · Ruf 859/680 100 % · Davout 5/5 50 % · Bulletins 6/5 100 %
+```
+
+> **Die Antwort auf die ursprüngliche Frage:** Es war **nie der Ruf** — der ist an jeder gemessenen Sprosse zu 100 % erfüllt. Es ist immer die **Fürsprache**. Das gilt unten wie oben, vom Caporal bis zum Marschall, und es ist genau das, was Invariante 5 verlangt.
+
+---
+
+## 13 · Die Mitte ist da — und sie ist die belastbarste Zahl des Projekts
+
+**Zum ersten Mal ist ein *dritter* Bot gemessen worden** (`VP=1500`, 40 Läufe), und er füllt genau die Lücke, um die es in Punkt 9 und 11 ging:
+
+| | Erstlauf (80) | **Mitte 1 500 VP (40)** | Maximum 5 800 VP (40) |
+|---|---|---|---|
+| **Weite von 163** | 60 | **93** | 163 |
+| **Capitaine** | 6 % | **55 %** | 100 % |
+| höchster Rang | 9 Cpt | **11 Col** | 14 Mar |
+| Punkte-Median | 502 | **1 849** | 6 046 |
+
+Seine Rangverteilung ist die einzige im Projekt, die sich wirklich verteilt: **5 Serg 4 · 7 S-Lt 10 · 8 Lt 4 · 9 Cpt 19 · 11 Col 3.** Er stirbt über sechs Kapitel verstreut, seine Punkte spannen von 482 bis 2 908, und Spanien (47 %) wie Russland (0 von 7) sind für ihn echte Wände.
+
+> **Was daraus folgt: Der mittlere Bot gehört in die Regelmessung.** Zwei Bots messen die Enden, und beide Enden sind flach — der eine kommt fast immer durch, der andere fast nie weit. **Die Mitte ist die Zahl, an der man eine Änderung überhaupt sieht.** Kostet 40 Läufe zusätzlich.
 
 ---
 

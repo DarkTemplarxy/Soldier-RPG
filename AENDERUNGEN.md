@@ -35,6 +35,16 @@ Der `HEBEL=1`-Zähler hatte denselben Fehler und zählte gerade die Fürsprache 
 
 ---
 
+## 2026-07-31 — Der Bericht des Prüfstands passt jetzt in ein Fenster
+
+Mit elf Kapiteln stand „Überstanden je Kapitel" bei über 280 Zeichen und der Fürsprache-Hebel bei 340 — beides genau die Zeilen, für die man den Bericht liest. Eine Zeile, die das Fenster umbricht, ist keine Zeile mehr, sondern ein Absatz ohne Ausrichtung.
+
+`zeileUmbrechen(kopf, teile)` setzt die Teile untereinander, **sobald** sie nicht mehr nebeneinander passen; passt alles, bleibt es einzeilig. Deckel 104 Zeichen. Umgestellt: Rangverteilung, erreichte Ränge, Schranken, Kapitelquoten, beide Sterbezeilen. Der Fürsprache-Hebel steht jetzt senkrecht — je Empfänger eine Zeile mit Bilanz, dahinter so viele Quellen, wie hineingehen (nicht vier feste; `kapitelauftragAbrechnen` sprengt sonst die Zeile, in der es steht).
+
+Zwei Kleinigkeiten: `+${padStart(3)}` schiebt Leerzeichen zwischen Vorzeichen und Zahl („+  9") — ausgerichtet wird `('+'+n).padStart(4)`, weil beides ein Wort ist. Und eine Quelle mit Bilanz null steht als „−0" da und sagt nichts; sie fällt weg, die Summe zählt sie weiter. **Die erste Prüfung auf Überlänge war selbst falsch:** `awk` zählt Bytes, `ä` braucht zwei, `⚔` drei — gezählt wird mit `[...zeile].length`.
+
+---
+
 ## 2026-07-31 — Drei Dinge aus dem Spiel heraus gemeldet
 
 **1 · Der erste Schuss zählte scheinbar doppelt.** `kampfAktion()` legt den Rundentext mit `K.protokoll.push(text)` ab; fiel danach ein Ereignis, schob derselbe Durchlauf noch `push(text + treffer)` hinterher. Weil `treffer` oft leer ist, standen dort **zwei Zeilen, die sich nicht unterschieden** — samt „gesehen · Ruf +1 · Berthaud schreibt deinen Namen auf". Gebucht wurde nie doppelt (`RUHM_JE_GEFECHT` deckelt den Ruf, `K.offizierGesehen` die Fürsprache); es war die Anzeige. Trotzdem falsch: Ein Protokoll, das eine Runde zweimal führt, behauptet etwas über die Buchung, das der Spieler nicht nachprüfen kann. Der Index wird jetzt gemerkt und die Zeile **ergänzt statt angehängt**. Keine Balance-Zahl berührt.
