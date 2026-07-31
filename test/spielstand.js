@@ -58,7 +58,19 @@ const pruef = (b, t) => { console.log((b?'  ok   ':'  FEHL ') + t); if(!b) fehle
      nicht, wenn jemand einen Zähler umformuliert. */
   pruef((await text()).includes('Womit verbringst du den Abend'), 'Depot Savona ist die erste Station');
   pruef(await p.evaluate(()=>!!Ablage.lies('marschallstab.lauf')), 'Spielstand liegt beim Betreten des Lagers vor');
-  pruef((await text()).includes('FELDZUG GESICHERT'), 'Das Lager sagt, dass gesichert wurde');
+  /* ⚠ **Hier stand `includes('FELDZUG GESICHERT')`** — der Kasten im Lager,
+     der am 31.07.2026 ersatzlos gestrichen wurde, weil er in zwei Zeilen
+     wiederholte, was der Fuß jeder anderen Seite ohnehin sagt. Der Prüfstand
+     fiel daraufhin um, obwohl die Sicherung selbst tadellos lief.
+
+     **Vierter Fall derselben Familie: Ein Fließtext ist kein Zustand.**
+     Geprüft wird jetzt, was die Zeile eigentlich behaupten sollte — dass der
+     Spielstand wirklich auf diese Station zeigt. Das steht in der Ablage und
+     überlebt jede Umformulierung. */
+  pruef(await p.evaluate(()=>{
+    const d = laufVorhanden();          // liest durch Umschlag, Prüfsumme und Wandler
+    return !!d && d.node === LAUF.node && d.lager && d.lager.id === LAUF.lager.id;
+  }), 'Der gesicherte Spielstand zeigt auf dieses Lager');
 
   console.log('\n2 — weiterspielen, dann "abstürzen" (neu laden)');
   await weiterBis('Sichtfeld|RUNDE ', 30);

@@ -358,9 +358,15 @@ function einheitZehren(){
   return '';
 }
 
-/* Das Lager ist der angesagte Halt: Hier wird der Feldzug gesichert und
-   gesagt, dass er gesichert ist. Danach läuft die Sicherung still weiter, damit
-   Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
+/* Das Lager ist der Halt, an dem der Feldzug gesichert wird; danach läuft die
+   Sicherung still weiter, damit Aufhören zurückbringt, wo man war, und nicht,
+   wo man zuletzt gerastet hat.
+
+   **Angesagt wird er nicht mehr.** Bis zum 31.07.2026 stand hier ein Kasten
+   „Feldzug gesichert · Du kannst hier aufhören und später weitermachen" — zwei
+   Zeilen für das, was der Fuß jeder anderen Seite in vieren sagt, und im
+   Lager, wo der Bogen ohnehin am vollsten ist. Ersatzlos gestrichen; `L.gesichert`
+   und `W.gesichert` sind damit weggefallen, sie hatten keinen zweiten Leser. */
 /* ── Die Urkunde wird im Lager nachgereicht ──
    **Sie steht vor dem Lager und nicht darin.** Ein Bescheid ist ein Blatt, das
    man ansieht, und kein Absatz in einer Abendplanung; im selben Bogen wie die
@@ -892,7 +898,7 @@ function schreibtischTun(i){
 function zeigeLager(n){
   if(S && S.bescheidOffen){ zeigeFeldbescheid(n); return; }
   const L = LAUF.lager;
-  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
+  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = [];
     L.sold = soldAuszahlen();
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
     /* Davout sieht sich den Zustand an, wenn er vorbeikommt, und er kommt
@@ -934,8 +940,7 @@ function zeigeLager(n){
        ${/* Der stehende Auftrag gehört ins Lager, nicht nur ins Gefecht: Hier
             ist der einzige Ort, an dem man etwas dafür tun kann. Er sagt,
             wofür die Abende zu verwenden wären — und ob es noch reicht. */
-         kapitelauftragZeile()}
-       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+         kapitelauftragZeile()}`,
       ['Womit verbringst du den Abend?',
        /* ── Zwei Fehler in einer Zeile ──
           **`rangName(S.rang)` schrieb den eigenen Rang hin** — bei einem
@@ -1164,7 +1169,7 @@ function wochenFuer(n){ return n.wochen || 3; }
 function zeigeWinter(n){
   const W = LAUF.winter;
   if(W.ort !== n.id){                       // neue Saison: Wochen frisch setzen
-    W.ort = n.id; W.wochen = wochenFuer(n); W.log = []; W.gesichert = Ablage.dauerhaft;
+    W.ort = n.id; W.wochen = wochenFuer(n); W.log = [];
     /* Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem ist
        danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
        Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
@@ -1192,8 +1197,7 @@ function zeigeWinter(n){
       `<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
        ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
        ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
-       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${francs(W.sold, true)} F</b></div>`:''}
-       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${francs(W.sold, true)} F</b></div>`:''}`,
       [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
       opt+schluss,
       'Drei Wochen unter einem Dach')}

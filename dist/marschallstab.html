@@ -94,9 +94,17 @@
 
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
+  /* ── `-webkit-font-smoothing:antialiased` ist mit dem Papier weggefallen ──
+     Die Anweisung stammt aus der dunklen Fassung, und dort war sie richtig:
+     Helle Schrift auf dunklem Grund wirkt mit Graustufen-Glättung ruhiger.
+     **Auf Papier kehrt sich das um.** Dunkle Tinte auf hellem Grund verliert
+     durch `antialiased` die Subpixel-Glättung, wird dünner und franst an den
+     Rundungen aus — genau das „verwischt", das an den Kartenköpfen und
+     Probenzeilen auffiel. Ohne die Zeile glättet der Browser wieder mit
+     Subpixeln, und die Serifen stehen. */
   body{background:var(--bg);color:var(--text);
     font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.65;
-    -webkit-font-smoothing:antialiased}
+    text-rendering:optimizeLegibility}
   .wrap{max-width:1460px;margin:0 auto;padding:24px 20px 70px}
 
   /* ── Der Seitenkopf liegt auf dem Tisch, nicht auf einem Bogen ──
@@ -793,10 +801,20 @@ aside.card .zust-name{ font-weight:600 }
   padding:4px 10px; cursor:pointer; border-radius:2px }
 .zurueck:hover{ border-color:var(--brass); color:#e4d7ba }
 
-/* Knöpfe wie geprägt statt flach — ein Hauch Tiefe, kein Skeuomorphismus. */
-.ord, button.plain{ text-shadow:0 1px 0 rgba(0,0,0,.55);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.35) }
-.papier button.plain{ text-shadow:0 1px 0 rgba(255,255,255,.5);
+/* Knöpfe wie geprägt statt flach — ein Hauch Tiefe, kein Skeuomorphismus.
+
+   ⚠ **Der Schlagschatten auf der Schrift ist weg, und das war der zweite
+   Grund für die verwischten Buchstaben.** `text-shadow:0 1px 0 rgba(0,0,0,.55)`
+   ist aus der dunklen Fassung: Ein dunkler Schatten unter *heller* Schrift
+   hebt sie ab. Unter **dunkler Tinte auf Papier** legt er einen zweiten,
+   verschobenen Buchstaben unter den ersten — bei 16 px Georgia ist das kein
+   Relief, sondern Unschärfe.
+
+   Die Prägung bleibt, wo sie hingehört: im `box-shadow` des Knopfes. Ein
+   Knopf darf geprägt aussehen, seine Schrift nicht. */
+.ord, button.plain{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.14) }
+.papier button.plain{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.12) }
 
 /* Das Appell-Bild des Sergenten: zwanzig Silhouetten, die Gefallenen liegend. */
@@ -807,8 +825,7 @@ aside.card .zust-name{ font-weight:600 }
    dem Spiel heraus und soll das auch dürfen (target=_blank). */
 a.plain{ font-family:inherit; font-size:14px; padding:8px 16px; line-height:1.45;
   color:var(--text); text-decoration:none;
-  text-shadow:0 1px 0 rgba(0,0,0,.55);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.35) }
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.14) }
 a.plain:hover{ color:var(--brass) }
 
 /* Die Kokarde im Kartenkopf sitzt **in** der Zeile, nicht darüber. `.emblem`
@@ -12117,7 +12134,19 @@ function kampfAktion(id){
   }
   if(geschlossen) K.geschlossen--;
 
-  K.protokoll.push(text);
+  /* ⚠ **Die Runde bekommt genau eine Zeile im Protokoll, und zwar diese.**
+     Der Ereignis-Zweig weiter unten schrieb denselben Text ein zweites Mal
+     hinein (`push(text + treffer)`), damit die Wirkung des Beschusses noch
+     mit hineinkommt — und weil `treffer` oft leer ist, standen dort zwei
+     Zeilen, die sich nicht unterschieden: Der erste Schuss zählte scheinbar
+     doppelt. Gezählt hat er nie doppelt (`anerkennung()` gibt seinen Ruf
+     einmal je Gefecht, `K.offizierGesehen` sperrt die Fürsprache), aber ein
+     Protokoll, das eine Runde zweimal führt, behauptet etwas anderes.
+
+     Deshalb wird die Zeile gemerkt und später **ergänzt statt angehängt**.
+     Die Zwischeneinträge („Du wirst getroffen.") ändern die Länge, nicht den
+     Index — nachträglich zu schreiben ist hier also sicher. */
+  const protokollZeile = K.protokoll.push(text) - 1;
 
   // Feindliche Wirkung
   atemKlemmen();
@@ -12320,7 +12349,7 @@ function kampfAktion(id){
   const e = K.nahkampf>0 ? null : ereignisWuerfeln(n);
   if(e){
     K.ereignis = e.id; K.ereignisZahl++; K.gesehen.push(e.id);
-    K.protokoll.push(text + treffer);
+    K.protokoll[protokollZeile] = text + treffer;
     laufSichern();
     zeigeEreignis(e);
     return;
@@ -13974,9 +14003,15 @@ function einheitZehren(){
   return '';
 }
 
-/* Das Lager ist der angesagte Halt: Hier wird der Feldzug gesichert und
-   gesagt, dass er gesichert ist. Danach läuft die Sicherung still weiter, damit
-   Aufhören zurückbringt, wo man war, und nicht, wo man zuletzt gerastet hat. */
+/* Das Lager ist der Halt, an dem der Feldzug gesichert wird; danach läuft die
+   Sicherung still weiter, damit Aufhören zurückbringt, wo man war, und nicht,
+   wo man zuletzt gerastet hat.
+
+   **Angesagt wird er nicht mehr.** Bis zum 31.07.2026 stand hier ein Kasten
+   „Feldzug gesichert · Du kannst hier aufhören und später weitermachen" — zwei
+   Zeilen für das, was der Fuß jeder anderen Seite in vieren sagt, und im
+   Lager, wo der Bogen ohnehin am vollsten ist. Ersatzlos gestrichen; `L.gesichert`
+   und `W.gesichert` sind damit weggefallen, sie hatten keinen zweiten Leser. */
 /* ── Die Urkunde wird im Lager nachgereicht ──
    **Sie steht vor dem Lager und nicht darin.** Ein Bescheid ist ein Blatt, das
    man ansieht, und kein Absatz in einer Abendplanung; im selben Bogen wie die
@@ -14508,7 +14543,7 @@ function schreibtischTun(i){
 function zeigeLager(n){
   if(S && S.bescheidOffen){ zeigeFeldbescheid(n); return; }
   const L = LAUF.lager;
-  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = []; L.gesichert = Ablage.dauerhaft;
+  if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = [];
     L.sold = soldAuszahlen();
     S.kasseQuartal = false;              // jedes Lager ist ein neues Quartal
     /* Davout sieht sich den Zustand an, wenn er vorbeikommt, und er kommt
@@ -14550,8 +14585,7 @@ function zeigeLager(n){
        ${/* Der stehende Auftrag gehört ins Lager, nicht nur ins Gefecht: Hier
             ist der einzige Ort, an dem man etwas dafür tun kann. Er sagt,
             wofür die Abende zu verwenden wären — und ob es noch reicht. */
-         kapitelauftragZeile()}
-       ${L.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+         kapitelauftragZeile()}`,
       ['Womit verbringst du den Abend?',
        /* ── Zwei Fehler in einer Zeile ──
           **`rangName(S.rang)` schrieb den eigenen Rang hin** — bei einem
@@ -14780,7 +14814,7 @@ function wochenFuer(n){ return n.wochen || 3; }
 function zeigeWinter(n){
   const W = LAUF.winter;
   if(W.ort !== n.id){                       // neue Saison: Wochen frisch setzen
-    W.ort = n.id; W.wochen = wochenFuer(n); W.log = []; W.gesichert = Ablage.dauerhaft;
+    W.ort = n.id; W.wochen = wochenFuer(n); W.log = [];
     /* Wochen unter einem Dach, mit Sold und zweimal Essen am Tag: Der Atem ist
        danach voll, ohne dass man dafür eine Woche opfern müsste. Belastung und
        Wunden bleiben Sache der Wochenverteilung — die sitzen tiefer. */
@@ -14808,8 +14842,7 @@ function zeigeWinter(n){
       `<div class="prose">${(n.text||[]).map(t=>`<p>${t}</p>`).join('')}</div>
        ${W.log.length?`<div class="ergebnis">${W.log.join('<br><br>')}</div>`:''}
        ${W.atemVoll?`<div class="wirkung"><span>Wieder bei Atem</span>${n.atemText||'Drei Wochen unter einem Dach, Sold und zweimal Essen am Tag.'} ${S.atem<100?'So ausgeruht, wie es dein Zustand zulässt — mehr Luft gibt der Körper nicht her, solange er nicht heil ist.':'Du bist ausgeruht, wie du es seit April nicht warst.'} <b>Atem ${S.atem}</b></div>`:''}
-       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${francs(W.sold, true)} F</b></div>`:''}
-       ${W.gesichert?'<div class="wirkung"><span>Feldzug gesichert</span>Du kannst hier aufhören und später weitermachen. Wer fällt, verliert den Spielstand im selben Augenblick.</div>':''}`,
+       ${W.sold?`<div class="wirkung"><span>Sold</span>${soldText(W.sold)} <b>+${francs(W.sold, true)} F</b></div>`:''}`,
       [esc(n.frage||'Womit verbringst du die Woche?'), `Verbleibend ${W.wochen} von ${wochenFuer(n)}`],
       opt+schluss,
       'Drei Wochen unter einem Dach')}

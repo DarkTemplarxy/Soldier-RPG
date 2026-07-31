@@ -556,6 +556,12 @@ Die Rundenaktionen sind Handwerk: laden, feuern, knien. Sie stellen keine Frage,
 - **Wer mitten in der Frage aufhört, steht wieder vor ihr.** `fortsetzen()` prüft `K.ereignis` — sonst ließe sich eine Mutprobe durch Beenden und Fortsetzen umgehen, und das wäre dieselbe Lücke wie ein Rücksetzpunkt im Lager.
 - **Mut kauft die Wertung, nicht den Rang.** Zum Caporal fehlt fast nie der Ruf, sondern die Gunst — und die holt man am Feuer, nicht vor der Linie.
 
+> **⚠ Der Ereignis-Zweig schrieb die Runde ein zweites Mal ins Protokoll** (bis 31.07.2026). `kampfAktion()` legt den Rundentext mit `K.protokoll.push(text)` ab; wenn danach ein Ereignis fiel, schob derselbe Durchlauf noch `push(text + treffer)` hinterher, damit die Wirkung des Beschusses mit hineinkommt. **Und weil `treffer` oft leer ist, standen dort zwei Zeilen, die sich nicht unterschieden** — samt „gesehen · Ruf +1 · Berthaud schreibt deinen Namen auf". Der erste Schuss sah aus, als zählte er doppelt.
+>
+> **Gezählt hat er nie doppelt** — `anerkennung()` gibt seinen Ruf einmal je Gefecht (`RUHM_JE_GEFECHT`), die Fürsprache sperrt `K.offizierGesehen`. Es war die Anzeige, nicht die Buchung. Das macht es nicht harmlos: Ein Protokoll, das eine Runde zweimal führt, behauptet etwas über die Buchung, und der Spieler hat keinen Weg, das Gegenteil zu prüfen.
+>
+> Der Index der Zeile wird jetzt gemerkt und später **ergänzt statt angehängt**. Die Zwischeneinträge („Du wirst getroffen.") ändern die Länge, nicht den Index.
+
 **Vier Gefechte haben eine Sondermission** (`nur:` trägt die Stations-ID) — der Moment, für den das Gefecht berühmt ist, aus der Höhe eines Mannes im zweiten Glied: die **Brücke von Lodi** (Spitze der Kolonne oder Furt), der **General im Sumpf von Arcole**, der **Riss im Karree von Embabeh**, die **Sturmkolonne von Akkon**. Beim Würfeln haben sie Vorrang und 60 % je Runde statt 45 — eine Sondermission, die fast nie stattfindet, wäre keine. Akkon fällt trotzdem nicht (Invariante 8): Auch wer die Bresche überlebt, sieht nur die zweite Mauer.
 
 **Der riskante Weg einer Sondermission ist eine Kette** (`kette:` statt `probe:`): zwei bis drei Proben hintereinander — Akkon: die Rampe (Geschick 40), die Bresche (Bajonett 45), der Rückweg (Kaltblütigkeit 45) —, und **jeder Fehlschlag kostet sofort 12–20 Leben**. Wer unterwegs auf null fällt, fällt dort, mit dem Todestext der Mission („Gefallen in der Bresche von Akkon"). Zurück gibt es ab der ersten Stufe nicht; genau das unterscheidet den Gang vom Rundengeschäft, aus dem man sich jede Runde neu entscheiden kann. Die Wirkung am Ende braucht die **Mehrheit der Stufen**; auch der Misserfolg gibt Ruf +2 und eine Tat — hingegangen ist hingegangen. Auf dem Knopf stehen alle Stufen mit Wert und Schwierigkeit, damit die Entscheidung eine ist. **Das ist die Stelle, an der das Spiel einen kundigen Spieler töten kann:** Worst Case Akkon sind rund 50 Punkte in einem einzigen Zug — wer angeschlagen vortritt, kann liegen bleiben.
@@ -2068,6 +2074,25 @@ Die Oberfläche soll nach 1796 aussehen, nicht nach „dunkles UI". Vier Mittel,
 Dazu **Mündungsblitze** nach einer Salve und ein Schleier, der ab Runde 5 das hintere Feindglied verdeckt — die Unsicherheit, von der die Texte reden, wird sichtbar.
 
 > **Die alte Regel gilt weiter und ist jetzt wichtiger denn je: In `sichtfeld()` wird nichts gewürfelt.** Das Bild wird bei jedem Zug neu gezeichnet; ein `Math.random()` darin ließe Gelände, Blitze und Aufstellung bei jedem Klick springen. Blitze hängen an `K.blitz` (gesetzt in `kampfAktion`), Streuung an `streu(i,a)`.
+
+### Zwei Reste der dunklen Fassung machten die Schrift unscharf (31.07.2026)
+
+**Beides sah aus wie ein Schriftproblem und war ein Rest aus der Zeit, als die Oberfläche dunkel war.** Auf hellem Papier kehrt sich bei beiden die Wirkung um:
+
+| Was | Warum es auf Papier falsch ist |
+|---|---|
+| `-webkit-font-smoothing:antialiased` am `body` | Für **helle Schrift auf dunklem Grund** ist Graustufen-Glättung ruhiger. Dunkle Tinte auf hellem Grund verliert dadurch die Subpixel-Glättung, wird dünner und franst an den Rundungen aus. Ersetzt durch `text-rendering:optimizeLegibility` |
+| `text-shadow:0 1px 0 rgba(0,0,0,.55)` auf `.ord`, `button.plain`, `a.plain` | Ein **dunkler** Schatten unter **heller** Schrift hebt sie ab. Unter dunkler Tinte legt er einen zweiten, verschobenen Buchstaben unter den ersten — bei 16 px Georgia ist das kein Relief, sondern Unschärfe |
+
+**Die Prägung bleibt, wo sie hingehört: im `box-shadow` des Knopfes.** Ein Knopf darf geprägt aussehen, seine Schrift nicht. Die drei verbliebenen `text-shadow` sitzen alle auf dem Lacksiegel — helle Prägung auf dunkelrotem Wachs, und dort ist der dunkle Schatten richtig.
+
+> **Regel: Wer die Grundfarbe umdreht, dreht die Schriftglättung mit um.** Beim Umbau auf Pergament sind vierundvierzig Zeichenfarben in `STICH` zusammengezogen worden — die zwei Zeilen, die *wie* Text gerendert wird, sind dabei stehen geblieben, weil sie in keiner Farbtabelle stehen.
+
+### Der Kasten „Feldzug gesichert" ist weg (31.07.2026)
+
+Er stand im Lager und im Winterquartier und sagte in zwei Zeilen, was der Fuß jeder anderen Seite in vieren sagt — auf dem Bogen, der ohnehin am vollsten ist. Ersatzlos gestrichen; `L.gesichert` und `W.gesichert` hatten keinen zweiten Leser und sind mit weggefallen. **Die Sicherung selbst ist unverändert** (`laufSichern()` bei jedem Schritt); nur angesagt wird sie nicht mehr.
+
+> **⚠ Und `test/spielstand.js` hing daran — mit `includes('FELDZUG GESICHERT')`.** Vierter Fall derselben Familie: *Ein Fließtext ist kein Zustand.* Der Prüfstand fiel um, obwohl die Sicherung tadellos lief. Er prüft jetzt, was die Zeile eigentlich behauptet hat — `laufVorhanden()` liefert dieselbe Station und dasselbe Lager wie `LAUF`. Das überlebt jede Umformulierung.
 
 ## Lesbarkeit
 

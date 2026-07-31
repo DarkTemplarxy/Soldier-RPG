@@ -2527,7 +2527,19 @@ function kampfAktion(id){
   }
   if(geschlossen) K.geschlossen--;
 
-  K.protokoll.push(text);
+  /* ⚠ **Die Runde bekommt genau eine Zeile im Protokoll, und zwar diese.**
+     Der Ereignis-Zweig weiter unten schrieb denselben Text ein zweites Mal
+     hinein (`push(text + treffer)`), damit die Wirkung des Beschusses noch
+     mit hineinkommt — und weil `treffer` oft leer ist, standen dort zwei
+     Zeilen, die sich nicht unterschieden: Der erste Schuss zählte scheinbar
+     doppelt. Gezählt hat er nie doppelt (`anerkennung()` gibt seinen Ruf
+     einmal je Gefecht, `K.offizierGesehen` sperrt die Fürsprache), aber ein
+     Protokoll, das eine Runde zweimal führt, behauptet etwas anderes.
+
+     Deshalb wird die Zeile gemerkt und später **ergänzt statt angehängt**.
+     Die Zwischeneinträge („Du wirst getroffen.") ändern die Länge, nicht den
+     Index — nachträglich zu schreiben ist hier also sicher. */
+  const protokollZeile = K.protokoll.push(text) - 1;
 
   // Feindliche Wirkung
   atemKlemmen();
@@ -2730,7 +2742,7 @@ function kampfAktion(id){
   const e = K.nahkampf>0 ? null : ereignisWuerfeln(n);
   if(e){
     K.ereignis = e.id; K.ereignisZahl++; K.gesehen.push(e.id);
-    K.protokoll.push(text + treffer);
+    K.protokoll[protokollZeile] = text + treffer;
     laufSichern();
     zeigeEreignis(e);
     return;

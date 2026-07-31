@@ -5,6 +5,16 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Drei Dinge aus dem Spiel heraus gemeldet
+
+**1 · Der erste Schuss zählte scheinbar doppelt.** `kampfAktion()` legt den Rundentext mit `K.protokoll.push(text)` ab; fiel danach ein Ereignis, schob derselbe Durchlauf noch `push(text + treffer)` hinterher. Weil `treffer` oft leer ist, standen dort **zwei Zeilen, die sich nicht unterschieden** — samt „gesehen · Ruf +1 · Berthaud schreibt deinen Namen auf". Gebucht wurde nie doppelt (`RUHM_JE_GEFECHT` deckelt den Ruf, `K.offizierGesehen` die Fürsprache); es war die Anzeige. Trotzdem falsch: Ein Protokoll, das eine Runde zweimal führt, behauptet etwas über die Buchung, das der Spieler nicht nachprüfen kann. Der Index wird jetzt gemerkt und die Zeile **ergänzt statt angehängt**. Keine Balance-Zahl berührt.
+
+**2 · Der Kasten „Feldzug gesichert" ist ersatzlos gestrichen** — Lager und Winterquartier. Er sagte in zwei Zeilen, was der Fuß jeder anderen Seite in vieren sagt, auf dem vollsten Bogen des Spiels. `L.gesichert` und `W.gesichert` hatten keinen zweiten Leser und sind mit weggefallen; die Sicherung selbst (`laufSichern()` bei jedem Schritt) ist unverändert. **`test/spielstand.js` hing am Wortlaut** (`includes('FELDZUG GESICHERT')`) und fiel um, obwohl nichts kaputt war — vierter Fall von „ein Fließtext ist kein Zustand". Er prüft jetzt über `laufVorhanden()`, dass der Spielstand auf dieselbe Station und dasselbe Lager zeigt.
+
+**3 · Die Schrift wirkte verwischt — zwei Reste der dunklen Fassung.** `-webkit-font-smoothing:antialiased` am `body` (richtig für helle Schrift auf dunklem Grund, auf Papier nimmt es der dunklen Tinte die Subpixel-Glättung) und `text-shadow:0 1px 0 rgba(0,0,0,.55)` auf `.ord`, `button.plain`, `a.plain` (ein dunkler Schatten unter dunkler Tinte ist kein Relief, sondern ein zweiter, verschobener Buchstabe). Beides entfernt, die Prägung bleibt im `box-shadow` des Knopfes. Die drei verbliebenen `text-shadow` sitzen auf dem Lacksiegel, wo helle Prägung auf dunklem Wachs steht — dort richtig.
+
+---
+
 ## 2026-07-30 — Die erste Kompanie zählte nicht als gewählt
 
 **`stabAktionen()` fragte `if(!K.vorhut)`, und `K.vorhut` ist ein Index.** Wer bei Rang 10 oder 11 die **erste** Kompanie nach vorn schickte, bekam die fünf Befehle des Bataillonschefs nie — Staffeln, Schwerpunkt, Sammeln, Verstärkung, Adler —, sondern in jeder Runde noch einmal dieselbe Frage. `staffeln` konnte es über `best = 0` mitten im Gefecht wiederholen. Ein Viertel aller Wahlen schaltete damit den Rang ab, für den Phase D gebaut wurde.

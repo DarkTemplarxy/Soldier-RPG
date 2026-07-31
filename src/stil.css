@@ -87,9 +87,17 @@
 
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
+  /* ── `-webkit-font-smoothing:antialiased` ist mit dem Papier weggefallen ──
+     Die Anweisung stammt aus der dunklen Fassung, und dort war sie richtig:
+     Helle Schrift auf dunklem Grund wirkt mit Graustufen-Glättung ruhiger.
+     **Auf Papier kehrt sich das um.** Dunkle Tinte auf hellem Grund verliert
+     durch `antialiased` die Subpixel-Glättung, wird dünner und franst an den
+     Rundungen aus — genau das „verwischt", das an den Kartenköpfen und
+     Probenzeilen auffiel. Ohne die Zeile glättet der Browser wieder mit
+     Subpixeln, und die Serifen stehen. */
   body{background:var(--bg);color:var(--text);
     font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.65;
-    -webkit-font-smoothing:antialiased}
+    text-rendering:optimizeLegibility}
   .wrap{max-width:1460px;margin:0 auto;padding:24px 20px 70px}
 
   /* ── Der Seitenkopf liegt auf dem Tisch, nicht auf einem Bogen ──
@@ -786,10 +794,20 @@ aside.card .zust-name{ font-weight:600 }
   padding:4px 10px; cursor:pointer; border-radius:2px }
 .zurueck:hover{ border-color:var(--brass); color:#e4d7ba }
 
-/* Knöpfe wie geprägt statt flach — ein Hauch Tiefe, kein Skeuomorphismus. */
-.ord, button.plain{ text-shadow:0 1px 0 rgba(0,0,0,.55);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.35) }
-.papier button.plain{ text-shadow:0 1px 0 rgba(255,255,255,.5);
+/* Knöpfe wie geprägt statt flach — ein Hauch Tiefe, kein Skeuomorphismus.
+
+   ⚠ **Der Schlagschatten auf der Schrift ist weg, und das war der zweite
+   Grund für die verwischten Buchstaben.** `text-shadow:0 1px 0 rgba(0,0,0,.55)`
+   ist aus der dunklen Fassung: Ein dunkler Schatten unter *heller* Schrift
+   hebt sie ab. Unter **dunkler Tinte auf Papier** legt er einen zweiten,
+   verschobenen Buchstaben unter den ersten — bei 16 px Georgia ist das kein
+   Relief, sondern Unschärfe.
+
+   Die Prägung bleibt, wo sie hingehört: im `box-shadow` des Knopfes. Ein
+   Knopf darf geprägt aussehen, seine Schrift nicht. */
+.ord, button.plain{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.14) }
+.papier button.plain{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.12) }
 
 /* Das Appell-Bild des Sergenten: zwanzig Silhouetten, die Gefallenen liegend. */
@@ -800,8 +818,7 @@ aside.card .zust-name{ font-weight:600 }
    dem Spiel heraus und soll das auch dürfen (target=_blank). */
 a.plain{ font-family:inherit; font-size:14px; padding:8px 16px; line-height:1.45;
   color:var(--text); text-decoration:none;
-  text-shadow:0 1px 0 rgba(0,0,0,.55);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.35) }
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.14) }
 a.plain:hover{ color:var(--brass) }
 
 /* Die Kokarde im Kartenkopf sitzt **in** der Zeile, nicht darüber. `.emblem`
