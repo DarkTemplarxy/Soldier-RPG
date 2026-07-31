@@ -367,25 +367,34 @@ function einheitZehren(){
    Zeilen für das, was der Fuß jeder anderen Seite in vieren sagt, und im
    Lager, wo der Bogen ohnehin am vollsten ist. Ersatzlos gestrichen; `L.gesichert`
    und `W.gesichert` sind damit weggefallen, sie hatten keinen zweiten Leser. */
-/* ── Die Urkunde wird im Lager nachgereicht ──
-   **Sie steht vor dem Lager und nicht darin.** Ein Bescheid ist ein Blatt, das
-   man ansieht, und kein Absatz in einer Abendplanung; im selben Bogen wie die
-   Frage „Womit verbringst du den Abend?" ginge er unter. Dieselbe Bauweise wie
-   die Ordensverleihung: eigener Bildschirm, ein Knopf, dann weiter.
+/* ── Die Urkunde wird nachgereicht, wo eine Kanzlei sitzt ──
+   **Sie steht vor der Station und nicht darin.** Ein Bescheid ist ein Blatt,
+   das man ansieht, und kein Absatz in einer Abendplanung; im selben Bogen wie
+   die Frage „Womit verbringst du den Abend?" ginge er unter. Dieselbe Bauweise
+   wie die Ordensverleihung: eigener Bildschirm, ein Knopf, dann weiter.
 
-   Abgeräumt wird beim Anzeigen, nicht beim Wegklicken — ein Papier ist keine
-   Entscheidung, die man offen lassen könnte. */
+   **Ausgelöst wird sie in `naechster()`, neben dem Orden** — dort steht die
+   Liste der Orte, an denen ein Fourrier einen Tisch hat. Vorher hing sie an
+   `zeigeLager()` allein und blieb nach zwei Dritteln aller Gefechte liegen.
+
+   ⚠ **Abgeräumt wird beim Wegklicken, nicht beim Anzeigen.** Die erste Fassung
+   löschte `S.bescheidOffen` schon beim Zeichnen, mit der Begründung, ein Papier
+   sei keine Entscheidung, die man offen lassen könne. Das stimmt — nur heißt
+   es, dass ein Beenden mitten im Blatt die Urkunde verschluckt. Der Orden
+   macht es seit jeher richtig (`LAUF.orden` hält bis „Wegtreten"), und jetzt
+   auch der Bescheid. */
 function zeigeFeldbescheid(n){
   const blatt = bescheidNachreichen();
-  if(!blatt){ zeigeLager(n); return; }
+  if(!blatt){ S.bescheidOffen = null; naechster(); return; }
   laufSichern();
   app.innerHTML = `<div class="stage">${verlauf()}<div>${wegband(n)}${blatt}
     <div class="orders"><div class="ordbody">
-      <button class="ord weiter" onclick="zeigeLager(KAPITEL[LAUF.node])">Einstecken</button>
+      <button class="ord weiter" onclick="bescheidWeiter()">Einstecken</button>
     </div></div>
     </div>${seitenleiste()}</div>`;
   kopfzeile();
 }
+function bescheidWeiter(){ S.bescheidOffen = null; laufSichern(); naechster(); }
 
 /* ══════════════════ DER SCHREIBTISCH ══════════════════
 
@@ -896,7 +905,6 @@ function schreibtischTun(i){
 }
 
 function zeigeLager(n){
-  if(S && S.bescheidOffen){ zeigeFeldbescheid(n); return; }
   const L = LAUF.lager;
   if(L.id !== n.id){ L.id = n.id; L.abende = abendeFuer(n); L.log = [];
     L.sold = soldAuszahlen();

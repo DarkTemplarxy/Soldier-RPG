@@ -1495,6 +1495,27 @@ function naechster(){
     LAUF.orden = null;
   }
 
+  /* ── Der nachgereichte Bescheid steht neben dem Orden, nicht im Lager ──
+     **Bis zum 31.07.2026 hing er an einer einzigen Zeile in `zeigeLager()`.**
+     Ausgezählt über alle elf Kapitel: **28 von 42 Gefechten haben kein Lager
+     danach im selben Kapitel** — wer nach einem davon im Feld befördert wurde,
+     bekam sein Papier frühestens im ersten Lager des nächsten Kapitels. Und
+     nach Waterloo, nach dem letzten Sieg der Hundert Tage und an der Beresina
+     gar nicht mehr: Dort kommt kein Lager und kein Kapitel mehr.
+
+     Das Winterquartier hat einen Fourrier und einen Tisch wie jedes Lager und
+     hat ihn trotzdem nie ausgestellt, weil `zeigeWinter()` nicht danach fragte.
+
+     Jetzt steht die Prüfung an **einer** Stelle, direkt neben dem Orden, und
+     die Liste sagt, wo eine Kanzlei sitzt: Lager, Winterquartier, Musterung —
+     dazu der Kapitelübergang, die Rangschranke und das Ende, damit kein Papier
+     mehr verfällt. **Auf dem Marsch wird nichts ausgestellt**; die Fiktion
+     „im Feld ernannt, im Lager ausgestellt" bleibt. */
+  if(S.bescheidOffen && (['lager','winter','befoerderung','uebergang','ende'].indexOf(n.typ) >= 0
+                         || n.schranke)){
+    zeigeFeldbescheid(n); return;
+  }
+
   /* Der Lieutenant hat deinen Namen nach oben gegeben. Das steht vor der
      nächsten Station, weil es zu dem gehört, was gerade passiert ist. */
   if(LAUF.vorschlag){

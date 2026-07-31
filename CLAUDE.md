@@ -2149,6 +2149,26 @@ Dazu **Mündungsblitze** nach einer Salve und ein Schleier, der ab Runde 5 das h
 
 > **Regel: Wer die Grundfarbe umdreht, dreht die Schriftglättung mit um.** Beim Umbau auf Pergament sind vierundvierzig Zeichenfarben in `STICH` zusammengezogen worden — die zwei Zeilen, die *wie* Text gerendert wird, sind dabei stehen geblieben, weil sie in keiner Farbtabelle stehen.
 
+### Die Beförderungsurkunde kam nach zwei Dritteln aller Gefechte nicht (31.07.2026)
+
+**`feldBefoerderung()` merkt den Bescheid in `S.bescheidOffen`, und ausgestellt hat ihn eine einzige Zeile — die in `zeigeLager()`.** Ausgezählt über alle elf Kapitel:
+
+| | |
+|---|---|
+| Gefechte insgesamt | **42** |
+| davon **ohne Lager danach im selben Kapitel** | **28** |
+| davon mit Winterquartier dazwischen, das nichts ausgab | 6 |
+
+Wer nach einem dieser Gefechte im Feld befördert wurde, bekam sein Papier **frühestens im ersten Lager des nächsten Kapitels** — Wochen später, aus dem Zusammenhang gerissen. Nach **Waterloo**, nach dem **letzten Sieg der Hundert Tage** und an der **Beresina** gar nicht: Dort kommt kein Lager und kein Kapitel mehr.
+
+**Das Winterquartier hat einen Fourrier und einen Tisch wie jedes Lager** und stellte trotzdem nie etwas aus, weil `zeigeWinter()` nicht danach fragte.
+
+> **Die Prüfung steht jetzt in `naechster()`, direkt neben dem Orden** — an *einer* Stelle, und die Liste sagt, wo eine Kanzlei sitzt: `lager`, `winter`, `befoerderung`, dazu `uebergang`, `schranke` und `ende`, damit kein Papier mehr verfällt. **Auf dem Marsch wird nichts ausgestellt;** die Fiktion „im Feld ernannt, im Lager ausgestellt" bleibt.
+
+**Dazu ein zweiter, kleinerer Fehler in derselben Funktion:** `bescheidNachreichen()` löschte `S.bescheidOffen` schon **beim Zeichnen**, mit der ausdrücklichen Begründung, ein Papier sei keine Entscheidung, die man offen lassen könne. Das stimmt — nur heißt es, dass ein Beenden mitten im Blatt die Urkunde verschluckt. Der Orden macht es seit jeher richtig (`LAUF.orden` hält bis „Wegtreten"); jetzt räumt `bescheidWeiter()` ab.
+
+**Gegengeprüft, wie es die Regel verlangt:** Fünf Stationen von Hand angesprungen, `S.bescheidOffen` gesetzt, durchgeklickt. Vorher **vier von fünf: NIE ERSCHIENEN** — „Die Brücke" kam nur durch, weil ein Kapitel später ein Lager stand. Jetzt alle fünf, und zwar am nächstgelegenen Tisch: Abukir am Übergang, der Pratzeberg und der Fluss im Rücken bei der Musterung, Waterloo am Ende.
+
 ### Der Hebel fragte den Falschen (`test/balance.js`, 31.07.2026)
 
 **Die Zeile „Rang 12 — die drei Schranken" las `gunst('grandmaison')`** — ein Name statt einer Rolle, zum sechsten Mal in diesem Projekt und zum ersten Mal im Messgerät statt im Spiel. Grandmaison hört bei Rang 11 auf; seit der Protektion beurteilt ab Rang 12 der gewählte Marschall.

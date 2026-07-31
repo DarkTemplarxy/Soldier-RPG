@@ -3706,11 +3706,12 @@ function feldBefoerderung(){
     Eingetragen wird es später, von jemand anderem. <b>${esc(ziel.name)}</b></div>`;
 }
 
-/* Der Bescheid, den das Lager nachreicht. Gibt den fertigen Bogen zurück oder
-   '' — und räumt die Vormerkung ab, damit er nur einmal ausgestellt wird. */
+/* Der Bescheid, den die Kanzlei nachreicht. Gibt den fertigen Bogen zurück
+   oder ''. **Die Vormerkung räumt `bescheidWeiter()` ab, nicht diese
+   Funktion** — sonst verschluckt ein Beenden mitten im Blatt die Urkunde. */
 function bescheidNachreichen(){
   if(!S || !S.bescheidOffen) return '';
-  const r = S.bescheidOffen; S.bescheidOffen = null;
+  const r = S.bescheidOffen;
   const ziel = LEITER.find(e => e.rang === r);
   if(!ziel) return '';
   const text = `Der Fourrier hat den Bogen schon ausgefüllt, als du hereinkommst; er wartet nur noch auf den Namen. `

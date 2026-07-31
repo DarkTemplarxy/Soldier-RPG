@@ -5,6 +5,18 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Die Beförderungsurkunde kam nach zwei Dritteln aller Gefechte nicht
+
+**Ausgestellt hat sie eine einzige Zeile, die in `zeigeLager()`.** Über alle elf Kapitel gezählt: **28 von 42 Gefechten haben kein Lager danach im selben Kapitel.** Wer nach einem davon im Feld befördert wurde, bekam sein Papier frühestens im ersten Lager des nächsten Kapitels — nach Waterloo, nach dem letzten Sieg der Hundert Tage und an der Beresina gar nicht mehr. Das Winterquartier hat einen Fourrier und einen Tisch wie jedes Lager und gab trotzdem nichts aus, weil `zeigeWinter()` nicht danach fragte.
+
+Die Prüfung steht jetzt in `naechster()`, neben dem Orden — an einer Stelle, mit der Liste der Orte, an denen eine Kanzlei sitzt: `lager`, `winter`, `befoerderung`, `uebergang`, `schranke`, `ende`. Auf dem Marsch wird nichts ausgestellt.
+
+Zweiter Fehler derselben Funktion: `bescheidNachreichen()` räumte `S.bescheidOffen` beim **Zeichnen** ab, nicht beim Wegklicken — ein Beenden mitten im Blatt verschluckte die Urkunde. Jetzt hält sie bis „Einstecken", wie der Orden bis „Wegtreten".
+
+**Gegengeprüft:** fünf Stationen von Hand angesprungen. Vorher vier von fünf `NIE ERSCHIENEN`, jetzt alle fünf. Keine Balance-Zahl berührt.
+
+---
+
 ## 2026-07-31 — Italien von +0 auf +1
 
 **Die Härtekurve griff dort am schwächsten, wo der Erstläufer lebt und stirbt.** Gemessen über 80 Läufe: Italien 96 % überstanden, Ägypten 40 % — ein Sprung von sechsundfünfzig Punkten zwischen dem ersten und dem zweiten Kapitel. Von achtzig Läufen sterben 46 in Ägypten und 3 in Italien; das Spiel sortiert an einer Stelle, und wer sie übersteht, hat den Lauf im Wesentlichen gewonnen.
