@@ -219,7 +219,7 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                 risk: 0, wahlen: 0,
                 /* Die drei Schranken von Rang 12, je Lauf am Ende ausgelesen —
                    Ruf, Grandmaisons Fürsprache, Bulletins. OFFEN.md Punkt 12. */
-                schranke: {ruf: [], gm: [], bul: []},
+                schranke: {ruf: [], gm: [], bul: [], ziel: [], wer: []},
                 /* ── Wo gestorben wird ──
                    Die Leitzahlen sagen, **wie viele** sterben; sie sagen nicht,
                    **wo**. Für jede Frage der Art „warum stirbt dieser Mann so
@@ -342,13 +342,20 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
       const oFolge = folgeAnwenden;
       folgeAnwenden = function(st, sa){ window.__z.folge++;
         window.__z.stufen[st] = (window.__z.stufen[st]||0)+1; return oFolge(st, sa); };
+      /* ⚠ **Hier stand `if (id === 'grandmaison')`** — wieder ein Name statt
+         einer Rolle. Seit der Protektion beurteilt ab Rang 12 der gewählte
+         Marschall; jede Fürsprache, die an ihn ging, fiel damit aus der
+         Zählung, und genau die entscheidet die letzten drei Sprossen.
+
+         Gezählt wird jetzt **jede** Fürsprache, mit Empfänger und Quelle.
+         Das ist mehr Ausgabe und dafür keine Annahme darüber, wer gerade
+         wichtig ist — die Frage „wer füttert wen" beantwortet sich damit für
+         die ganze Kette statt nur für einen Mann. */
       const oGunst = gunstGeben;
       gunstGeben = function(id, n){
-        if (id === 'grandmaison') {
-          const z = String((new Error()).stack||'').split('\n')[2] || '?';
-          const wer = (z.match(/at (\w+)/) || [0,'?'])[1] + (n>0 ? ' +' : ' −');
-          window.__z.gm[wer] = (window.__z.gm[wer]||0) + Math.abs(n);
-        }
+        const z = String((new Error()).stack||'').split('\n')[2] || '?';
+        const wer = id + '/' + (z.match(/at (\w+)/) || [0,'?'])[1] + (n>0 ? ' +' : ' −');
+        window.__z.gm[wer] = (window.__z.gm[wer]||0) + Math.abs(n);
         return oGunst(id, n);
       };
       const oAuf = auftragFuer;
@@ -658,22 +665,56 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
                     Dreimal an einem Tag war die vermutete Ursache nicht die
                     wirkliche; eine Zeile, die die Zahlen ausgibt, ist billiger
                     als die vierte Vermutung. */
+                 /* ⚠ **Hier stand `gunst('grandmaison')` — ein Name statt einer
+                    Rolle**, und damit las der Hebel seit der Protektion des
+                    Marschalls die falsche Zahl. Grandmaison hört bei Rang 11
+                    auf; ab 12 beurteilt der gewählte Marschall. Gemeldet wurde
+                    daraufhin „20 % erfüllt", während 33 von 40 Läufen Rang 12
+                    tatsächlich überschritten hatten.
+
+                    Es ist dieselbe Fehlerfamilie, die im Spiel schon fünfmal
+                    zugeschlagen hat, nur diesmal im Messgerät — und ein
+                    Messgerät, das den Falschen fragt, ist die teuerste Sorte
+                    Fehler, weil seine Zahl trotzdem plausibel aussieht.
+                    `beurteiler()` liefert die Rolle. */
                  ruf: S ? (S.ruf|0) : 0,
-                 gm: S ? (typeof gunst === 'function' ? (gunst('grandmaison')|0) : 0) : 0,
+                 gm: S ? (typeof gunst === 'function' && typeof beurteiler === 'function'
+                          ? (gunst(beurteiler() || '')|0) : 0) : 0,
+                 /* Und wer das ist, steht dazu — sonst rät man beim Lesen des
+                    Berichts, gegen wen die Zahl gerechnet wurde. Ebenso die
+                    Sprosse selbst mit ihren eigenen Schwellen, statt die
+                    Zahlen von Rang 12 fest einzutragen: Die LEITER darf sich
+                    ändern, ohne dass der Prüfstand still danebenliegt. */
+                 wer: S ? (typeof beurteiler === 'function' && typeof personKurz === 'function'
+                           ? (personKurz(beurteiler() || '') || '') : '') : '',
+                 ziel: (S && typeof LEITER !== 'undefined') ? (()=>{
+                   const p = LEITER.filter(e => e.von.indexOf(S.rang) >= 0);
+                   if(!p.length) return null;
+                   const z = p.reduce((a,b)=> b.rang < a.rang ? b : a);
+                   return {rang:z.rang, ruf:z.ruf|0, gunst:z.gunst|0, bul:z.bulletins|0};
+                 })() : null,
                  bul: S ? (S.bulletins|0) : 0 };
       }, MUT);
       if (zug.rang > hoechster) hoechster = zug.rang;
       if (zug.zweig) zweig = zug.zweig;
       if (zug.risk) res.risk++;
       // Der letzte lebende Stand: nach dem Tod ist `S` null.
-      if (zug.rang) { schluss.ruf = zug.ruf; schluss.gm = zug.gm; schluss.bul = zug.bul; }
+      if (zug.rang) { schluss.ruf = zug.ruf; schluss.gm = zug.gm; schluss.bul = zug.bul;
+                      schluss.wer = zug.wer; schluss.ziel = zug.ziel; }
       res.wahlen++;
       if (!zug.ok) break;
     }
-    if (schluss.ruf || schluss.bul) {
+    /* **Nur Läufe, die noch eine Sprosse vor sich hatten.** Wer den Marschall
+       trägt, hat keinen Beurteiler mehr — `beurteiler()` gibt dort null, und
+       eine Schranke, die es nicht gibt, gehört in keine Quote. Die erste
+       Fassung nahm ihn mit und meldete daraufhin für einen Bogen aus lauter
+       Marschällen „Grandmaison 25 % erfüllt". */
+    if (schluss.ziel) {
       res.schranke.ruf.push(schluss.ruf);
       res.schranke.gm.push(schluss.gm);
       res.schranke.bul.push(schluss.bul);
+      res.schranke.ziel.push(schluss.ziel);
+      res.schranke.wer.push(schluss.wer || '—');
     }
     if (zweig) res.elite++;
     if (hoechster >= 3) res.caporal++;
@@ -775,26 +816,40 @@ const VERTEILUNG = { konstitution: 60, geschick: 30 };
      riskante Wahl auch nach dem Abschlag jede sichere) oder ob dieselbe Zahl
      Wahlen härter bestraft wird (dann ist es das Spiel). */
   console.log(`Riskante Wahlen: ${res.risk} von ${res.wahlen} (${res.wahlen ? Math.round(res.risk/res.wahlen*100) : 0} %)`);
-  /* ── Die drei Schranken von Rang 12 ──
-     **OFFEN.md Punkt 12: erst den Hebel auslesen, dann drehen.** Vierzig von
-     vierzig Veteranen bleiben Colonel; ob sie der Ruf hält (480), Grandmaisons
-     Fürsprache (5) oder die Bulletins (3), war bis hierher eine Vermutung.
-     Gedruckt wird der Median, weil ein Mittelwert von den frühen Toten
-     nach unten gezogen wird. */
+  /* ── Die drei Schranken der nächsten Sprosse ──
+     **OFFEN.md Punkt 12: erst den Hebel auslesen, dann drehen.** Was einen
+     Lauf hält — der Ruf, die Fürsprache oder die Bulletins —, war bis hierher
+     eine Vermutung. Gedruckt wird der Median, weil ein Mittelwert von den
+     frühen Toten nach unten gezogen wird.
+
+     **Sprosse, Schwellen und Beurteiler kommen aus dem Spiel, nicht aus dieser
+     Datei.** Vorher standen hier „Rang 12", „480", „5", „3" und
+     „Grandmaison" als feste Zeichenketten — und der Name war schon falsch,
+     ehe jemand die Zahlen ändern konnte. */
   if (res.schranke.ruf.length) {
     const med = a => { const b = a.slice().sort((x,y)=>x-y); return b[Math.floor(b.length/2)]; };
-    const anteil = (a,s) => Math.round(a.filter(x=>x>=s).length / a.length * 100);
-    console.log(`Rang 12 — die drei Schranken (Median · erfüllt): `
-      + `Ruf ${med(res.schranke.ruf)} ${anteil(res.schranke.ruf,480)} % · `
-      + `Grandmaison ${med(res.schranke.gm)} ${anteil(res.schranke.gm,5)} % · `
-      + `Bulletins ${med(res.schranke.bul)} ${anteil(res.schranke.bul,3)} %`);
+    const anteil = (a,s) => s ? Math.round(a.filter(x=>x>=s).length / a.length * 100) : 100;
+    const haeufigst = a => { const z = {}; a.forEach(x=>{ const k = JSON.stringify(x); z[k]=(z[k]||0)+1; });
+      const k = Object.keys(z).sort((x,y)=>z[y]-z[x])[0]; return k ? JSON.parse(k) : null; };
+    const ziel = haeufigst(res.schranke.ziel) || {rang:'?', ruf:0, gunst:0, bul:0};
+    const wer  = haeufigst(res.schranke.wer) || 'der Beurteiler';
+    /* Eine Schwelle von 0 ist keine — sie wird gar nicht erst gedruckt,
+       statt als „100 % erfüllt (0)" nach einer erledigten Hürde auszusehen. */
+    const teil = (name, werte, schwelle) => schwelle
+      ? `${name} ${med(werte)} ${anteil(werte,schwelle)} % (${schwelle})` : '';
+    console.log(`Rang ${ziel.rang} — die Schranken davor `
+      + `(Median · erfüllt · nötig, ${res.schranke.ruf.length} Läufe): `
+      + [teil('Ruf', res.schranke.ruf, ziel.ruf),
+         teil(wer, res.schranke.gm, ziel.gunst),
+         teil('Bulletins', res.schranke.bul, ziel.bul)].filter(Boolean).join(' · '));
   }
   if (HEBEL && res.hebel) {
     const z = res.hebel;
     console.log(`Hebel · Folgen aus dem Verzeichnis: ${z.folge} (Stufen ${
       Object.keys(z.stufen||{}).sort().map(k=>k+': '+z.stufen[k]).join(' · ') || '—'})`);
-    console.log(`Hebel · Wer an Grandmaisons Fürsprache dreht: ${
-      Object.keys(z.gm||{}).sort((a,b)=>z.gm[b]-z.gm[a]).map(k=>k+' '+z.gm[k]).join(' · ') || '—'}`);
+    console.log(`Hebel · Wer welche Fürsprache bewegt (Empfänger/Quelle, die zwölf stärksten): ${
+      Object.keys(z.gm||{}).sort((a,b)=>z.gm[b]-z.gm[a]).slice(0,12)
+        .map(k=>k+' '+z.gm[k]).join(' · ') || '—'}`);
   }
   /* Die Quote je Kapitel — die Zahl, die nicht mit dem Ausbaustand schrumpft. */
   const jeKapitel = KAPITEL_FOLGE.filter(k => res.erreicht[k])

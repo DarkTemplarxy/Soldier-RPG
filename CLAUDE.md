@@ -2088,6 +2088,24 @@ Dazu **Mündungsblitze** nach einer Salve und ein Schleier, der ab Runde 5 das h
 
 > **Regel: Wer die Grundfarbe umdreht, dreht die Schriftglättung mit um.** Beim Umbau auf Pergament sind vierundvierzig Zeichenfarben in `STICH` zusammengezogen worden — die zwei Zeilen, die *wie* Text gerendert wird, sind dabei stehen geblieben, weil sie in keiner Farbtabelle stehen.
 
+### Der Hebel fragte den Falschen (`test/balance.js`, 31.07.2026)
+
+**Die Zeile „Rang 12 — die drei Schranken" las `gunst('grandmaison')`** — ein Name statt einer Rolle, zum sechsten Mal in diesem Projekt und zum ersten Mal im Messgerät statt im Spiel. Grandmaison hört bei Rang 11 auf; seit der Protektion beurteilt ab Rang 12 der gewählte Marschall.
+
+> **Gemeldet wurde daraufhin `Grandmaison 3 · 20 % erfüllt`, während 33 von 40 Läufen Rang 12 tatsächlich überschritten hatten.** Kein Widerspruch im Spiel, sondern eine Zahl, die den Falschen fragt — und das ist die teuerste Sorte Fehler in einem Prüfstand, weil das Ergebnis trotzdem plausibel aussieht.
+
+**Drei Dinge kommen jetzt aus dem Spiel statt aus der Datei:**
+
+| | vorher | jetzt |
+|---|---|---|
+| Wer beurteilt | fest `'grandmaison'` | `beurteiler()`, und **der Name steht in der Ausgabe** |
+| Welche Sprosse | fest „Rang 12" | die nächste aus der `LEITER`, von dort auch die Schwellen |
+| Wer gezählt wird | alle Läufe | nur die, die **noch eine Sprosse vor sich hatten** — ein Marschall hat keinen Beurteiler mehr, und eine Schranke, die es nicht gibt, gehört in keine Quote |
+
+Damit trägt die Zeile jeden Ausbaustand: Für den Erstläufer meldet sie **Rang 3 · Ruf 10 (30) · Martel 4 (4)**, für den Maximalveteranen **Rang 14 · Ruf 859 (680) · Davout 5 (5) · Bulletins 6 (5)**. Schwellen von 0 werden weggelassen, statt als „100 % erfüllt (0)" nach einer genommenen Hürde auszusehen.
+
+**Und der `HEBEL=1`-Zähler hatte denselben Fehler.** Er zählte nur Fürsprache an Grandmaison, also gerade nicht die, die über die letzten drei Sprossen entscheidet. Er zählt jetzt **jede**, mit Empfänger und Quelle (`davout/kampfEnde +13`, `berthaud/anerkennung +36`) — mehr Ausgabe, dafür keine Annahme darüber, wer gerade wichtig ist.
+
 ### Der Kasten „Feldzug gesichert" ist weg (31.07.2026)
 
 Er stand im Lager und im Winterquartier und sagte in zwei Zeilen, was der Fuß jeder anderen Seite in vieren sagt — auf dem Bogen, der ohnehin am vollsten ist. Ersatzlos gestrichen; `L.gesichert` und `W.gesichert` hatten keinen zweiten Leser und sind mit weggefallen. **Die Sicherung selbst ist unverändert** (`laufSichern()` bei jedem Schritt); nur angesagt wird sie nicht mehr.

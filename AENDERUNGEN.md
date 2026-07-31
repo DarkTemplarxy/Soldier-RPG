@@ -5,6 +5,16 @@ Format: `Datum · Bereich · was · warum · gemessen`
 
 ---
 
+## 2026-07-31 — Der Hebel fragte den Falschen
+
+**`test/balance.js` las `gunst('grandmaison')`** — ein Name statt einer Rolle, sechster Fall dieser Familie und der erste im Messgerät statt im Spiel. Grandmaison beurteilt bis Rang 11; seit der Protektion entscheidet ab 12 der gewählte Marschall. Gemeldet wurde `Grandmaison 3 · 20 % erfüllt`, während 33 von 40 Läufen Rang 12 überschritten hatten.
+
+Beurteiler (`beurteiler()`), Sprosse und Schwellen kommen jetzt aus der `LEITER`, der Name steht in der Ausgabe, und gezählt werden nur Läufe, die überhaupt noch eine Sprosse vor sich hatten — ein Marschall hat keinen Beurteiler mehr. Schwellen von 0 werden weggelassen. Erstläufer: `Rang 3 · Ruf 10 (30) · Martel 4 (4)`. Maximalveteran: `Rang 14 · Ruf 859 (680) · Davout 5 (5) · Bulletins 6 (5)`.
+
+Der `HEBEL=1`-Zähler hatte denselben Fehler und zählte gerade die Fürsprache nicht, die über die letzten drei Sprossen entscheidet. Er zählt jetzt jede, mit Empfänger und Quelle. Keine Balance-Zahl berührt, keine Spielregel.
+
+---
+
 ## 2026-07-31 — Drei Dinge aus dem Spiel heraus gemeldet
 
 **1 · Der erste Schuss zählte scheinbar doppelt.** `kampfAktion()` legt den Rundentext mit `K.protokoll.push(text)` ab; fiel danach ein Ereignis, schob derselbe Durchlauf noch `push(text + treffer)` hinterher. Weil `treffer` oft leer ist, standen dort **zwei Zeilen, die sich nicht unterschieden** — samt „gesehen · Ruf +1 · Berthaud schreibt deinen Namen auf". Gebucht wurde nie doppelt (`RUHM_JE_GEFECHT` deckelt den Ruf, `K.offizierGesehen` die Fürsprache); es war die Anzeige. Trotzdem falsch: Ein Protokoll, das eine Runde zweimal führt, behauptet etwas über die Buchung, das der Spieler nicht nachprüfen kann. Der Index wird jetzt gemerkt und die Zeile **ergänzt statt angehängt**. Keine Balance-Zahl berührt.
